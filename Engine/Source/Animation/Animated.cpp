@@ -101,8 +101,7 @@ namespace Animation {
 			animated->animationsLength[animName] = static_cast<FLOAT>(aiModel->mAnimations[animationIndex]->mDuration);
 		}
 
-		XMVECTOR det;
-		animated->rootNodeInverseTransform = XMMatrixInverse(&det, XMMATRIX(&aiModel->mRootNode->mTransformation.a1));
+		animated->rootNodeInverseTransform = XMMatrixInverse(nullptr, XMMATRIX(&aiModel->mRootNode->mTransformation.a1));
 
 		//first build the bone table, so the bone indexes can be calculated when loading the vertexes
 		BuildBonesOffsets(aiModel, animated->bonesOffsets);

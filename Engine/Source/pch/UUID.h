@@ -38,6 +38,10 @@ struct TUUID {
 	{
 		return F(uuid);
 	}
+	std::unique_ptr<T>& operator->() const
+	{
+		return F(uuid);
+	}
 	std::unique_ptr<T>& operator*()
 	{
 		return F(uuid);
