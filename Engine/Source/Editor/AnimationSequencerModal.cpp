@@ -46,7 +46,7 @@ void AnimationSequencerModal::LoadSceneObjects()
 		{ "name", "cam-preview" },
 		{ "perspective",
 			{
-				{ "farZ", 1000.0 },
+				{ "farZ", 100.0 },
 				{ "fovAngleY", 20.0 },
 				{ "nearZ", 0.01 },
 				{ "width", 1778 },
@@ -78,13 +78,11 @@ void AnimationSequencerModal::LoadSceneObjects()
 	nlohmann::json directionalLightJson =
 	{
 		{ "color", { 1.0, 1.0, 1.0} },
-		{ "farZ" , 1000.0},
+		{ "farZ" , 100.0},
 		{ "nearZ", 0.01},
 		{ "hasShadowMaps", true },
 		{ "shadowMapHeight", 4096},
 		{ "shadowMapWidth", 4096},
-		{ "viewHeight", 1.0},
-		{ "viewWidth", 1.0},
 		{ "rotation", {40.31087875366211, -10.30000039935112, 0.0} },
 		{ "lightType", "Directional"},
 		{ "name", "light.1.dir-preview"},
