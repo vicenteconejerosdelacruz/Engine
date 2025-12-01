@@ -18,6 +18,17 @@ namespace Scene::CameraProjections {
 		float height = defaultHeight;
 		XMMATRIX projectionMatrix;
 
+		Perspective() {}
+		Perspective(float nearZ, float farZ, float fovAngleY, float width, float height)
+		{
+			this->nearZ = nearZ;
+			this->farZ = farZ;
+			this->fovAngleY = fovAngleY;
+			this->width = width;
+			this->height = height;
+			updateProjectionMatrix();
+		}
+
 		void Copy(Perspective& other) {
 			nearZ = other.nearZ;
 			farZ = other.farZ;

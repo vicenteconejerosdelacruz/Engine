@@ -126,6 +126,8 @@ namespace Scene {
 		XMMATRIX projection();
 
 		float projectionWidth();
+		float projectionRight();
+		float projectionBottom();
 		float projectionHeight();
 		float projectionNearZ();
 		float projectionFarZ();

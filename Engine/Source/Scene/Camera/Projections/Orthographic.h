@@ -9,30 +9,50 @@ namespace Scene::CameraProjections {
 	struct Orthographic {
 		static constexpr float defaultNearZ = 0.01f;
 		static constexpr float defaultFarZ = 1000.0f;
-		static constexpr float defaultWidth = 1000.0f;
-		static constexpr float defaultHeight = 1000.0f;
+		static constexpr float defaultViewLeft = 1000.0f;
+		static constexpr float defaultViewRight = 0.0f;
+		static constexpr float defaultViewTop = 1000.0f;
+		static constexpr float defaultViewBottom = 0.0f;
 
 		float nearZ = defaultNearZ;
 		float farZ = defaultFarZ;
-		float width = defaultWidth;
-		float height = defaultHeight;
+		float viewLeft = defaultViewLeft;
+		float viewRight = defaultViewRight;
+		float viewTop = defaultViewTop;
+		float viewBottom = defaultViewBottom;
 		XMMATRIX projectionMatrix;
+
+		Orthographic() {}
+		Orthographic(float nearZ, float farZ, float viewLeft, float viewRight, float viewTop, float viewBottom)
+		{
+			this->nearZ = nearZ;
+			this->farZ = farZ;
+			this->viewLeft = viewLeft;
+			this->viewRight = viewRight;
+			this->viewTop = viewTop;
+			this->viewBottom = viewBottom;
+			updateProjectionMatrix();
+		}
 
 		void Copy(Orthographic& other) {
 			nearZ = other.nearZ;
 			farZ = other.farZ;
-			width = other.width;
-			height = other.height;
+			viewLeft = other.viewLeft;
+			viewRight = other.viewRight;
+			viewTop = other.viewTop;
+			viewBottom = other.viewBottom;
 			projectionMatrix = other.projectionMatrix;
 		}
 
 		inline void updateProjectionMatrix() {
-			projectionMatrix = XMMatrixOrthographicLH(width, height, nearZ, farZ);
+			projectionMatrix = XMMatrixOrthographicOffCenterLH(viewLeft, viewRight, viewBottom, viewTop, nearZ, farZ);
 		}
 
-		inline void updateProjectionMatrix(float width, float height) {
-			this->width = width;
-			this->height = height;
+		inline void updateProjectionMatrix(float viewLeft, float viewRight, float viewBottom, float viewTop) {
+			this->viewLeft = viewLeft;
+			this->viewRight = viewRight;
+			this->viewBottom = viewBottom;
+			this->viewTop = viewTop;
 			updateProjectionMatrix();
 		};
 
@@ -47,8 +67,10 @@ namespace Scene::CameraProjections {
 		}
 
 		inline void expandView(float diff) {
-			width = std::clamp(width + diff, 4.0f, 200.0f);
-			height = std::clamp(height + diff, 4.0f, 200.0f);
+			viewLeft = std::clamp(viewLeft + diff, 4.0f, 200.0f);
+			viewRight = std::clamp(viewRight + diff, 4.0f, 200.0f);
+			viewBottom = std::clamp(viewBottom + diff, 4.0f, 200.0f);
+			viewTop = std::clamp(viewTop + diff, 4.0f, 200.0f);
 			updateProjectionMatrix();
 		}
 
@@ -59,8 +81,10 @@ namespace Scene::CameraProjections {
 		Orthographic p;
 		p.nearZ = static_cast<float>(j.at("nearZ"));
 		p.farZ = static_cast<float>(j.at("farZ"));
-		p.width = static_cast<float>(j.at("width"));
-		p.height = static_cast<float>(j.at("height"));
+		p.viewLeft = static_cast<float>(j.at("viewLeft"));
+		p.viewRight = static_cast<float>(j.at("viewRight"));
+		p.viewBottom = static_cast<float>(j.at("viewBottom"));
+		p.viewTop = static_cast<float>(j.at("viewTop"));
 		return p;
 	}
 
@@ -69,8 +93,10 @@ namespace Scene::CameraProjections {
 		return {
 			{ "nearZ", p.nearZ },
 			{ "farZ", p.farZ },
-			{ "width", p.width },
-			{ "height", p.height },
+			{ "viewLeft", p.viewLeft },
+			{ "viewRight", p.viewRight },
+			{ "viewBottom", p.viewBottom },
+			{ "viewTop", p.viewTop },
 		};
 	}
 };

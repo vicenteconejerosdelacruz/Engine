@@ -2,6 +2,15 @@
 #include <DirectXMath.h>
 #include <DirectXCollision.h>
 
+namespace DirectX
+{
+	static const XMVECTORF32 g_vFLTMAX = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
+	static const XMVECTORF32 g_vFLTMIN = { -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	static const XMVECTORF32 g_vHalfVector = { 0.5f, 0.5f, 0.5f, 0.5f };
+	static const XMVECTORF32 g_vMultiplySetzwToZero = { 1.0f, 1.0f, 0.0f, 0.0f };
+	static const XMVECTORF32 g_vZero = { 0.0f, 0.0f, 0.0f, 0.0f };
+}
+
 inline bool IsPowerOfTwo(unsigned int n) { return (n > 0) && ((n & (n - 1)) == 0); }
 inline unsigned int PrevPowerOfTwo(unsigned int x) { x = x | (x >> 1); x = x | (x >> 2); x = x | (x >> 4); x = x | (x >> 8); x = x | (x >> 16); return x - (x >> 1); }
 inline unsigned int GetMipMaps(unsigned int width, unsigned int height)
@@ -53,56 +62,56 @@ inline XMFLOAT4X4 GetBoundindBoxesCentroid(auto& objects)
 	return w;
 }
 
-inline void MatrixDump(DirectX::XMMATRIX& wvp)
+inline void MatrixDump(DirectX::XMMATRIX m)
 {
 	std::string row1 = "[" +
-		std::to_string(wvp.r[0].m128_f32[0]) + "," +
-		std::to_string(wvp.r[0].m128_f32[1]) + "," +
-		std::to_string(wvp.r[0].m128_f32[2]) + "," +
-		std::to_string(wvp.r[0].m128_f32[3]) + "]";
+		std::to_string(m.r[0].m128_f32[0]) + "," +
+		std::to_string(m.r[0].m128_f32[1]) + "," +
+		std::to_string(m.r[0].m128_f32[2]) + "," +
+		std::to_string(m.r[0].m128_f32[3]) + "]";
 	std::string row2 = "[" +
-		std::to_string(wvp.r[1].m128_f32[0]) + "," +
-		std::to_string(wvp.r[1].m128_f32[1]) + "," +
-		std::to_string(wvp.r[1].m128_f32[2]) + "," +
-		std::to_string(wvp.r[1].m128_f32[3]) + "]";
+		std::to_string(m.r[1].m128_f32[0]) + "," +
+		std::to_string(m.r[1].m128_f32[1]) + "," +
+		std::to_string(m.r[1].m128_f32[2]) + "," +
+		std::to_string(m.r[1].m128_f32[3]) + "]";
 	std::string row3 = "[" +
-		std::to_string(wvp.r[2].m128_f32[0]) + "," +
-		std::to_string(wvp.r[2].m128_f32[1]) + "," +
-		std::to_string(wvp.r[2].m128_f32[2]) + "," +
-		std::to_string(wvp.r[2].m128_f32[3]) + "]";
+		std::to_string(m.r[2].m128_f32[0]) + "," +
+		std::to_string(m.r[2].m128_f32[1]) + "," +
+		std::to_string(m.r[2].m128_f32[2]) + "," +
+		std::to_string(m.r[2].m128_f32[3]) + "]";
 	std::string row4 = "[" +
-		std::to_string(wvp.r[3].m128_f32[0]) + "," +
-		std::to_string(wvp.r[3].m128_f32[1]) + "," +
-		std::to_string(wvp.r[3].m128_f32[2]) + "," +
-		std::to_string(wvp.r[3].m128_f32[3]) + "]";
+		std::to_string(m.r[3].m128_f32[0]) + "," +
+		std::to_string(m.r[3].m128_f32[1]) + "," +
+		std::to_string(m.r[3].m128_f32[2]) + "," +
+		std::to_string(m.r[3].m128_f32[3]) + "]";
 	std::string matrixDump = row1 + "\n" + row2 + "\n" + row3 + "\n" + row4 + "\n";
 
 	OutputDebugStringA("Matrix\n");
 	OutputDebugStringA(matrixDump.c_str());
 }
 
-inline void MatrixDump(DirectX::XMFLOAT4X4& wvp)
+inline void MatrixDump(DirectX::XMFLOAT4X4 m)
 {
 	std::string row1 = "[" +
-		std::to_string(wvp._11) + "," +
-		std::to_string(wvp._12) + "," +
-		std::to_string(wvp._13) + "," +
-		std::to_string(wvp._14) + "]";
+		std::to_string(m._11) + "," +
+		std::to_string(m._12) + "," +
+		std::to_string(m._13) + "," +
+		std::to_string(m._14) + "]";
 	std::string row2 = "[" +
-		std::to_string(wvp._21) + "," +
-		std::to_string(wvp._22) + "," +
-		std::to_string(wvp._23) + "," +
-		std::to_string(wvp._24) + "]";
+		std::to_string(m._21) + "," +
+		std::to_string(m._22) + "," +
+		std::to_string(m._23) + "," +
+		std::to_string(m._24) + "]";
 	std::string row3 = "[" +
-		std::to_string(wvp._31) + "," +
-		std::to_string(wvp._32) + "," +
-		std::to_string(wvp._33) + "," +
-		std::to_string(wvp._34) + "]";
+		std::to_string(m._31) + "," +
+		std::to_string(m._32) + "," +
+		std::to_string(m._33) + "," +
+		std::to_string(m._34) + "]";
 	std::string row4 = "[" +
-		std::to_string(wvp._41) + "," +
-		std::to_string(wvp._42) + "," +
-		std::to_string(wvp._43) + "," +
-		std::to_string(wvp._44) + "]";
+		std::to_string(m._41) + "," +
+		std::to_string(m._42) + "," +
+		std::to_string(m._43) + "," +
+		std::to_string(m._44) + "]";
 	std::string matrixDump = row1 + "\n" + row2 + "\n" + row3 + "\n" + row4 + "\n";
 
 	OutputDebugStringA("Matrix\n");
@@ -121,4 +130,9 @@ inline XMFLOAT3 GetPitchYawRoll(XMFLOAT4X4 transform)
 	float yaw = XMVectorGetY(res);
 
 	return XMFLOAT3(XMConvertToDegrees(pitch), XMConvertToDegrees(yaw), XMConvertToDegrees(roll));
+}
+
+inline std::string OUTPUTV3(XMVECTOR V3)
+{
+	return std::string(std::to_string(V3.m128_f32[0]) + "," + std::to_string(V3.m128_f32[1]) + "," + std::to_string(V3.m128_f32[2]));
 }

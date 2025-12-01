@@ -10,6 +10,8 @@
 #include <RenderPass/Override/MinMaxChainPass.h>
 #include <RenderPass/Override/MinMaxChainResultPass.h>
 #endif
+#include <DirectXCollision.h>
+#include <NoMath.h>
 
 extern std::unique_ptr<Renderer> renderer;
 
@@ -96,22 +98,26 @@ namespace Scene
 		CreateShadowMapDepthStencilResource();
 	}
 
-	nlohmann::json Light::CreateDirectionalShadowMapCameraJson()
+	nlohmann::json Light::CreateDirectionalShadowMapCameraJson(unsigned camIndex)
 	{
+		XMFLOAT3 pos = position();
 		XMFLOAT3 rot = rotation();
 		nlohmann::json j = {
-			{ "uuid", uuid() + "-cam"},
+			{ "uuid", uuid() + "-cam-" + std::to_string(camIndex)},
 			{ "hidden", true },
+			{ "name", name() + ".cam." + std::to_string(camIndex)},
 			{ "fitWindow", false },
-			{ "name", name() + ".cam" },
 			{ "projectionType", ProjectionsTypesToString.at(PROJ_Orthographic) },
 			{ "orthographic", {
 				{ "nearZ", nearZ() },
 				{ "farZ", farZ() },
-				{ "width", viewWidth() },
-				{ "height", viewHeight() },
+				{ "viewLeft", viewWidth() },
+				{ "viewRight", viewRight() },
+				{ "viewBottom", viewBottom() },
+				{ "viewTop", viewHeight() },
 			}},
-			{ "rotation", { rot.x, rot.y, rot.z}},
+			{ "position", { pos.x, pos.y, pos.z }},
+			{ "rotation", { rot.x, rot.y, rot.z }},
 			{ "shadowMapLight", uuid()},
 			{ "renderPasses", { GetRenderPassUUIDByName("ShadowMap") }}
 		};
@@ -123,14 +129,15 @@ namespace Scene
 		shadowMapScissorRect.clear();
 		shadowMapViewport.clear();
 
-		nlohmann::json camJ = CreateDirectionalShadowMapCameraJson();
-		JUUID uuid = camJ.at("uuid");
-		CreateCamera(camJ);
-		auto& cam = GetCameraSceneObject(uuid);
-		cam->BindToScene();
-		XMVECTOR camPos = XMVectorScale(XMVector3Normalize(cam->forward()), -dirDist());
-		cam->position(*(XMFLOAT3*)camPos.m128_f32);
-		shadowMapCameras.push_back(uuid);
+		for (unsigned int i = 0; i < (ARRAYSIZE(cascadePartitionsZeroToOne) - 1ULL); i++)
+		{
+			nlohmann::json camJ = CreateDirectionalShadowMapCameraJson(i);
+			JUUID uuid = camJ.at("uuid");
+			CreateCamera(camJ);
+			auto& cam = GetCameraSceneObject(uuid);
+			cam->BindToScene();
+			shadowMapCameras.push_back(uuid);
+		}
 		UpdateShadowMapCameraProperties();
 	}
 
@@ -178,7 +185,7 @@ namespace Scene
 
 	nlohmann::json Light::CreatePointShadowMapCameraJson(unsigned camIndex)
 	{
-		float fDim = static_cast<float>(shadowMapWidth());;
+		float fDim = static_cast<float>(shadowMapWidth());
 		XMFLOAT3 pos = position();
 
 		nlohmann::json j = {
@@ -251,11 +258,76 @@ namespace Scene
 
 	void Light::UpdateDirectionalShadowMapCameraProperties()
 	{
-		shadowMapScissorRect.push_back({ 0, 0, static_cast<long>(shadowMapWidth()), static_cast<long>(shadowMapHeight()) });
-		shadowMapViewport.push_back({ 0.0f , 0.0f, static_cast<float>(shadowMapWidth()), static_cast<float>(shadowMapHeight()), 0.0f, 1.0f });
-		shadowMapTexelInvSize = { 1.0f / static_cast<float>(shadowMapWidth()), 1.0f / static_cast<float>(shadowMapHeight()) };
-		auto& cam = shadowMapCameras.at(0);
-		cam->orthographicProjection.updateProjectionMatrix(viewWidth(), viewHeight());
+		float fDim = static_cast<float>(shadowMapWidth());
+		long lDim = static_cast<long>(shadowMapWidth());
+
+		shadowMapScissorRect.clear();
+		shadowMapViewport.clear();
+		for (unsigned int i = 0U; i < (ARRAYSIZE(cascadePartitionsZeroToOne) - 1ULL); i++)
+		{
+			shadowMapScissorRect.push_back({ 0, static_cast<long>(i) * lDim, lDim, static_cast<long>(i + 1U) * lDim });
+			shadowMapViewport.push_back({ 0.0f, static_cast<float>(i) * fDim, fDim, fDim, 0.0f, 1.0f });
+		}
+	}
+
+
+	BoundingFrustum GetCascadeViewCameraBoundingFrustum(std::unique_ptr<Camera>& cam, unsigned int cascadeId, std::vector<std::tuple<float, float>>& shadowMapNearFarPlanes)
+	{
+		XMMATRIX camWorld = cam->world();
+		float nearFarRange = cam->projectionFarZ() - cam->projectionNearZ();
+
+		float nearPlane = cam->projectionNearZ();
+		if (cascadeId > 0)
+			nearPlane += (nearFarRange * cascadePartitionsZeroToOne[cascadeId - 1]);
+		float farPlane = cam->projectionFarZ() * cascadePartitionsZeroToOne[cascadeId];
+
+		Perspective cascadePerspectiveProjection = cam->perspectiveProjection;
+		cascadePerspectiveProjection.nearZ = nearPlane;
+		cascadePerspectiveProjection.farZ = farPlane;
+		cascadePerspectiveProjection.updateProjectionMatrix();
+		BoundingFrustum boundingFrustum;
+		BoundingFrustum(cascadePerspectiveProjection.projectionMatrix).Transform(boundingFrustum, camWorld);
+
+		//store the near and far plane in the vector
+		shadowMapNearFarPlanes.push_back(std::make_tuple(nearPlane, farPlane));
+
+		//the boundingFrustum is in world space
+		return boundingFrustum;
+	}
+
+	void Light::CreateDirectionalCascadeShadowMapViewProjectionMatrices()
+	{
+		using namespace Scene::CameraProjections;
+
+		shadowMapNearFarPlanes.clear();
+
+		auto& viewCamera = GetCameraSceneObject(*cameras().begin());
+		auto& lightCamera = GetCameraSceneObject(shadowMapCameras.at(0)());
+		XMMATRIX lightViewMatrix = lightCamera->view();
+
+		for (unsigned int i = 0U; i < (ARRAYSIZE(cascadePartitionsZeroToOne) - 1ULL); i++)
+		{
+			BoundingFrustum worldSpaceBoundingFrustum = GetCascadeViewCameraBoundingFrustum(viewCamera, i, shadowMapNearFarPlanes);
+			BoundingFrustum lightViewSpaceBoundingFrustum;
+			worldSpaceBoundingFrustum.Transform(lightViewSpaceBoundingFrustum, lightViewMatrix);
+
+			XMFLOAT3 cornersLightViewSpace[8];
+			lightViewSpaceBoundingFrustum.GetCorners(cornersLightViewSpace);
+
+			BoundingBox lightSpaceCascadeAABB;
+			BoundingBox::CreateFromPoints(lightSpaceCascadeAABB, ARRAYSIZE(cornersLightViewSpace), cornersLightViewSpace, sizeof(cornersLightViewSpace[0]));
+
+			auto& cascadeLightCamera = GetCameraSceneObject(shadowMapCameras.at(i)());
+			auto& csmProj = cascadeLightCamera->orthographicProjection;
+
+			csmProj.viewLeft = lightSpaceCascadeAABB.Center.x - lightSpaceCascadeAABB.Extents.x;
+			csmProj.viewRight = lightSpaceCascadeAABB.Center.x + lightSpaceCascadeAABB.Extents.x;
+			csmProj.viewBottom = lightSpaceCascadeAABB.Center.y - lightSpaceCascadeAABB.Extents.y;
+			csmProj.viewTop = lightSpaceCascadeAABB.Center.y + lightSpaceCascadeAABB.Extents.y;
+			csmProj.nearZ = lightSpaceCascadeAABB.Center.z - lightSpaceCascadeAABB.Extents.z;
+			csmProj.farZ = lightSpaceCascadeAABB.Center.z + lightSpaceCascadeAABB.Extents.z;
+			csmProj.updateProjectionMatrix();
+		}
 	}
 
 	void Light::UpdateSpotShadowMapCameraProperties()
@@ -271,9 +343,8 @@ namespace Scene
 
 	void Light::UpdatePointShadowMapCameraProperties()
 	{
-		float fDim = static_cast<float>(shadowMapWidth());;
-		long lDim = static_cast<long>(shadowMapWidth());;
-		XMFLOAT3 pos = position();
+		float fDim = static_cast<float>(shadowMapWidth());
+		long lDim = static_cast<long>(shadowMapWidth());
 
 		shadowMapScissorRect.clear();
 		shadowMapViewport.clear();
@@ -322,8 +393,7 @@ namespace Scene
 	void Light::UpdateDirectionalShadowMapCameraTransformation()
 	{
 		auto& cam = shadowMapCameras.at(0);
-		XMVECTOR camPos = XMVectorScale(XMVector3Normalize(cam->forward()), -dirDist());
-		cam->position(*(XMFLOAT3*)camPos.m128_f32);
+		cam->position(position());
 		cam->rotation(rotation());
 	}
 
@@ -347,7 +417,25 @@ namespace Scene
 	void Light::CreateShadowMapDepthStencilResource()
 	{
 		unsigned int w = shadowMapWidth();
-		unsigned int h = ((lightType() == LT_Point) ? 6U * shadowMapWidth() : shadowMapHeight());
+		unsigned int h = 0U;
+		switch (lightType())
+		{
+		case LT_Directional:
+		{
+			h = (ARRAYSIZE(cascadePartitionsZeroToOne) - 1ULL) * shadowMapHeight();
+		}
+		break;
+		case LT_Spot:
+		{
+			h = shadowMapHeight();
+		}
+		break;
+		case LT_Point:
+		{
+			h = 6U * shadowMapWidth();
+		}
+		break;
+		}
 		shadowMapRenderPass = CreateRenderToTexturePass(name() + "->shadowMap", {}, DXGI_FORMAT_D32_FLOAT, w, h);
 
 		shadowMapIndex = GetNextAvailableShadowMapSlot();
@@ -513,7 +601,6 @@ namespace Scene
 		}
 	}
 
-
 	void Light::WriteConstantsBufferShadowMapAttributes(ShadowMapAttributes& atts)
 	{
 		ZeroMemory(&atts, sizeof(atts));
@@ -521,11 +608,19 @@ namespace Scene
 		switch (lightType()) {
 		case LT_Directional:
 		{
-			auto& cam = shadowMapCameras[0];
-			XMMATRIX view = cam->view();
-			XMMATRIX projection = cam->orthographicProjection.projectionMatrix;
-			atts.atts0 = XMMatrixMultiply(view, projection);
-			atts.atts6 = { zBias(), shadowMapTexelInvSize.x, shadowMapTexelInvSize.y, 0.0f }; //ZBias, TexelInvSize
+			XMMATRIX* attsN = &atts.atts0;
+			int i = 0;
+			for (auto& cam : shadowMapCameras) {
+				XMMATRIX view = cam->view();
+				XMMATRIX projection = cam->projection();
+				*attsN = XMMatrixMultiply(view, projection);
+
+				atts.atts3.r[0].m128_f32[i] = shadowMapNearFarPlanes.size() > i ? std::get<1>(shadowMapNearFarPlanes.at(i)) : 0.0f;
+
+				attsN++;
+				i++;
+			}
+			atts.atts7 = { zBias(), shadowMapTexelInvSize.x, shadowMapTexelInvSize.y, 0.0f }; //ZBias, TexelInvSize
 		}
 		break;
 		case LT_Spot:
@@ -534,7 +629,7 @@ namespace Scene
 			XMMATRIX view = cam->view();
 			XMMATRIX projection = cam->perspectiveProjection.projectionMatrix;
 			atts.atts0 = XMMatrixMultiply(view, projection);
-			atts.atts6 = { zBias(), shadowMapTexelInvSize.x, shadowMapTexelInvSize.y, 0.0f }; //ZBias, TexelInvSize
+			atts.atts7 = { zBias(), shadowMapTexelInvSize.x, shadowMapTexelInvSize.y, 0.0f }; //ZBias, TexelInvSize
 		}
 		break;
 		case LT_Point:
@@ -547,7 +642,7 @@ namespace Scene
 				*attsN = XMMatrixMultiply(view, projection);
 				attsN++;
 			}
-			atts.atts6 = { zBias(), 3.0f, 0.0f, 0.0f }; //ZBias, PartialDerivativeScale
+			atts.atts7 = { zBias(), 3.0f, 0.0f, 0.0f }; //ZBias, PartialDerivativeScale
 		}
 		break;
 		default:
@@ -615,27 +710,48 @@ namespace Scene
 	}
 
 	//RENDER
-	std::set<LightType> onePassTypes = { LT_Directional, LT_Spot };
 	void Light::RenderShadowMap(std::function<void(unsigned int)> renderScene)
 	{
 		auto& commandList = renderer->commandList;
 		auto& smPass = shadowMapRenderPass;
 
-		smPass->Pass([this, renderScene, &commandList]
+		if (lightType() == LT_Directional)
+		{
+			CreateDirectionalCascadeShadowMapViewProjectionMatrices();
+		}
+
+		smPass->Pass([&]
 			{
-				if (onePassTypes.contains(lightType()))
+				std::unordered_map<LightType, std::function<void()>> LightTypePass =
 				{
-					renderScene(0);
-				}
-				else
-				{
-					for (unsigned int i = 0; i < 6; i++)
+					{ LT_Directional, [&]()
 					{
-						commandList->RSSetViewports(1, &shadowMapViewport.at(i));
-						commandList->RSSetScissorRects(1, &shadowMapScissorRect.at(i));
-						renderScene(i);
+						for (unsigned int i = 0; i < (ARRAYSIZE(cascadePartitionsZeroToOne) - 1ULL); i++)
+						{
+							commandList->RSSetViewports(1, &shadowMapViewport.at(i));
+							commandList->RSSetScissorRects(1, &shadowMapScissorRect.at(i));
+							renderScene(i);
+						}
 					}
-				}
+					},
+					{ LT_Spot, [&]()
+					{
+						renderScene(0);
+					}
+					},
+					{ LT_Point, [&]()
+					{
+						for (unsigned int i = 0; i < 6; i++)
+						{
+							commandList->RSSetViewports(1, &shadowMapViewport.at(i));
+							commandList->RSSetScissorRects(1, &shadowMapScissorRect.at(i));
+							renderScene(i);
+						}
+					}
+					}
+				};
+
+				LightTypePass.at(lightType())();
 			}
 		);
 	}

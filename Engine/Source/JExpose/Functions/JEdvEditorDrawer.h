@@ -761,7 +761,7 @@ inline JEdvEditorDrawerFunction DrawEnum<LightType, jedv_t_lighttype>(
 						drawLightName(l);
 						drawLightType(l);
 						LightType type = l->lightType();
-						if (type != LT_Directional && type != LT_Ambient) drawPosition(l);
+						if (/*type != LT_Directional && */type != LT_Ambient) drawPosition(l);
 						if (type != LT_Point && type != LT_Ambient) drawRotation(l);
 						drawColor(l);
 						drawBrightness(l);
@@ -4550,8 +4550,8 @@ inline JEdvEditorDrawerFunction DrawValue<Orthographic, jedv_t_object>()
 			std::vector<std::tuple<std::string, std::string, float>> perspAtts = {
 				std::make_tuple("nearZ", "%0.5f", Orthographic::defaultNearZ),
 				std::make_tuple("farZ", "%.2f", Orthographic::defaultFarZ),
-				std::make_tuple("width", "%.0f", Orthographic::defaultWidth),
-				std::make_tuple("height", "%.0f", Orthographic::defaultHeight),
+				std::make_tuple("width", "%.0f", Orthographic::defaultViewLeft),
+				std::make_tuple("height", "%.0f", Orthographic::defaultViewTop),
 			};
 
 			auto updateValue = [attribute, &json](std::string att, float value)

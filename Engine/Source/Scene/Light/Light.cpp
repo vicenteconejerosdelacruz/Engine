@@ -177,7 +177,6 @@ namespace Scene
 
 	//READ&GET
 
-
 	//UPDATE
 	void Light::WriteConstantsBufferLightAttributes(LightAttributes& atts)
 	{
@@ -227,8 +226,6 @@ namespace Scene
 		break;
 		}
 	}
-
-
 
 	void LightsStep()
 	{

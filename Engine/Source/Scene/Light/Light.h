@@ -30,6 +30,7 @@ namespace Scene {
 	inline static const std::string ShadowMapConstantBufferName = "shadowMaps";
 	inline static const std::string ShadowMapLightsShaderResourceViewName = TextureShaderUsageToString.at(TextureShaderUsage_ShadowMaps);
 	inline static const unsigned int MaxLights = 100U;
+	inline static const float cascadePartitionsZeroToOne[] = { 0.05f, 0.15f, 0.6f, 1.0f };
 
 	enum LightType {
 		LT_Ambient,
@@ -182,6 +183,7 @@ namespace Scene {
 
 		std::vector<D3D12_RECT> shadowMapScissorRect;
 		std::vector<D3D12_VIEWPORT> shadowMapViewport;
+		std::vector<std::tuple<float, float>> shadowMapNearFarPlanes;
 		XMFLOAT2 shadowMapTexelInvSize;
 
 		RenderToTexturePassUUID shadowMapRenderPass;
@@ -201,7 +203,7 @@ namespace Scene {
 		void CreateShadowMap();
 		void BindRenderablesToShadowMapCamera();
 		void UnbindRenderablesFromShadowMapCameras();
-		nlohmann::json CreateDirectionalShadowMapCameraJson();
+		nlohmann::json CreateDirectionalShadowMapCameraJson(unsigned camIndex);
 		void CreateDirectionalLightShadowMap();
 		nlohmann::json CreateSpotShadowMapCameraJson();
 		void CreateSpotLightShadowMap();
@@ -231,6 +233,7 @@ namespace Scene {
 		//UPDATE
 		void UpdateShadowMapCameraProperties();
 		void UpdateDirectionalShadowMapCameraProperties();
+		void CreateDirectionalCascadeShadowMapViewProjectionMatrices();
 		void UpdateSpotShadowMapCameraProperties();
 		void UpdatePointShadowMapCameraProperties();
 		void UpdateShadowMapCameraTransformation();

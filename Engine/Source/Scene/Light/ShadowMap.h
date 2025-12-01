@@ -15,7 +15,8 @@ namespace Scene {
 		XMMATRIX atts3;
 		XMMATRIX atts4;
 		XMMATRIX atts5;
-		XMFLOAT4 atts6;
+		XMMATRIX atts6;
+		XMFLOAT4 atts7;
 	};
 
 	void CreateShadowMapResources();

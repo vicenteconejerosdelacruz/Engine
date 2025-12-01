@@ -394,9 +394,19 @@ namespace Scene
 		}
 		break;
 		default:
-			return fitWindow() ? HWNDWIDTHF : orthographic().width;
+			return fitWindow() ? HWNDWIDTHF : orthographic().viewLeft;
 			break;
 		}
+	}
+
+	float Camera::projectionRight()
+	{
+		return orthographic().viewRight;
+	}
+
+	float Camera::projectionBottom()
+	{
+		return orthographic().viewBottom;
 	}
 
 	float Camera::projectionHeight()
@@ -407,7 +417,7 @@ namespace Scene
 			return  fitWindow() ? HWNDHEIGHTF : perspective().height;
 			break;
 		default:
-			return  fitWindow() ? HWNDHEIGHTF : orthographic().height;
+			return  fitWindow() ? HWNDHEIGHTF : orthographic().viewTop;
 			break;
 		}
 	}
@@ -484,7 +494,7 @@ namespace Scene
 		break;
 		case PROJ_Orthographic:
 		{
-			orthographicProjection.updateProjectionMatrix(static_cast<float>(width), static_cast<float>(height));
+			orthographicProjection.updateProjectionMatrix(static_cast<float>(width), 0.0f, 0.0f, static_cast<float>(height));
 		}
 		break;
 		}
@@ -496,19 +506,13 @@ namespace Scene
 		{
 		case PROJ_Perspective:
 		{
-			perspectiveProjection = {
-				.nearZ = projectionNearZ(), .farZ = projectionFarZ(),
-				.fovAngleY = projectionfovAngleY(), .width = projectionWidth(), .height = projectionHeight()
-			};
+			perspectiveProjection = Perspective(projectionNearZ(), projectionFarZ(), projectionfovAngleY(), projectionWidth(), projectionHeight());
 			perspectiveProjection.updateProjectionMatrix();
 		}
 		break;
 		case PROJ_Orthographic:
 		{
-			orthographicProjection = {
-				.nearZ = projectionNearZ(), .farZ = projectionFarZ(),
-				.width = projectionWidth(), .height = projectionHeight()
-			};
+			orthographicProjection = Orthographic(projectionNearZ(), projectionFarZ(), projectionWidth(), projectionRight(), projectionHeight(), projectionBottom());
 			orthographicProjection.updateProjectionMatrix();
 		}
 		break;

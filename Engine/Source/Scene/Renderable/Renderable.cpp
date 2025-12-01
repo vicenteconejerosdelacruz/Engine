@@ -759,6 +759,8 @@ namespace Scene
 
 	void Renderable::RebuildMeshMaterials()
 	{
+		using namespace ComputeShader;
+
 		renderException = false;
 #if defined(_EDITOR)
 		Editor::UnbindRenderableFromPickingPass(uuid());
@@ -767,6 +769,10 @@ namespace Scene
 		try
 		{
 			CreateMeshInstances();
+			if (animable.empty())
+			{
+				boundingBoxCompute = CreateRenderableBoundingBox(uuid());
+			}
 			for (auto& cam : bindedCameras)
 			{
 				CreateMaterialsInstances(cam);
