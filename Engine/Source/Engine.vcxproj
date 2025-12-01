@@ -336,7 +336,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Animation\Animated.h" />
-    <ClInclude Include="Animation\AnimationSequences.h" />
+    <ClInclude Include="Animation\Sequence\AnimationSequences.h" />
+    <ClInclude Include="Animation\Sequence\Channels\ChannelElement.h" />
+    <ClInclude Include="Animation\Sequence\Channels\Elements\SequenceChannelElement.h" />
+    <ClInclude Include="Animation\Sequence\Channels\Elements\SequenceChannelElementAnimation.h" />
+    <ClInclude Include="Animation\Sequence\Channels\Elements\SequenceChannelElementScript.h" />
+    <ClInclude Include="Animation\Sequence\Channels\Elements\SequenceChannelElementSoundFX.h" />
+    <ClInclude Include="Animation\Sequence\Channels\Elements\SequenceChannelElementTransformation.h" />
+    <ClInclude Include="Animation\Sequence\Sequence.h" />
+    <ClInclude Include="Animation\Sequence\SequenceChannel.h" />
+    <ClInclude Include="Animation\Sequence\SequencePlayer.h" />
     <ClInclude Include="Audio\AudioSystem.h" />
     <ClInclude Include="Controllers\Controller.h" />
     <ClInclude Include="Editor\AnimationSequencerModal.h">
@@ -562,7 +571,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Animation\Animated.cpp" />
-    <ClCompile Include="Animation\AnimationSequences.cpp" />
+    <ClCompile Include="Animation\Sequence\AnimationSequences.cpp" />
+    <ClCompile Include="Animation\Sequence\Channels\ChannelElement.cpp" />
+    <ClCompile Include="Animation\Sequence\Channels\Elements\SequenceChannelElement.cpp" />
+    <ClCompile Include="Animation\Sequence\Channels\Elements\SequenceChannelElementAnimation.cpp" />
+    <ClCompile Include="Animation\Sequence\Channels\Elements\SequenceChannelElementScript.cpp" />
+    <ClCompile Include="Animation\Sequence\Channels\Elements\SequenceChannelElementSoundFX.cpp" />
+    <ClCompile Include="Animation\Sequence\Channels\Elements\SequenceChannelElementTransformation.cpp" />
+    <ClCompile Include="Animation\Sequence\Sequence.cpp" />
+    <ClCompile Include="Animation\Sequence\SequenceChannel.cpp" />
+    <ClCompile Include="Animation\Sequence\SequencePlayer.cpp" />
     <ClCompile Include="Audio\AudioSystem.cpp" />
     <ClCompile Include="Controllers\Controller.cpp" />
     <ClCompile Include="Editor\AnimationSequencerModal.cpp">

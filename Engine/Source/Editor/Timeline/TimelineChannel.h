@@ -1,6 +1,6 @@
 #pragma once
 #include <imgui.h>
-#include <AnimationSequences.h>
+#include <Sequence/AnimationSequences.h>
 
 struct TimelineChannel
 {

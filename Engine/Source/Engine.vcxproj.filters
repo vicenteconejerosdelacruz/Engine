@@ -522,7 +522,7 @@
     <ClInclude Include="Editor\RightPanelComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Animation\AnimationSequences.h">
+    <ClInclude Include="Animation\Sequence\AnimationSequences.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Editor\Timeline\TimelineEditor.h">
@@ -535,6 +535,33 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scripting\Scripting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Sequence\SequencePlayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Sequence\Sequence.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Sequence\SequenceChannel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Sequence\Channels\ChannelElement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Sequence\Channels\Elements\SequenceChannelElementScript.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Sequence\Channels\Elements\SequenceChannelElementSoundFX.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Sequence\Channels\Elements\SequenceChannelElementTransformation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Sequence\Channels\Elements\SequenceChannelElementAnimation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Sequence\Channels\Elements\SequenceChannelElement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -746,7 +773,7 @@
     <ClCompile Include="Editor\RightPanelComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Animation\AnimationSequences.cpp">
+    <ClCompile Include="Animation\Sequence\AnimationSequences.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Editor\Timeline\TimelineEditor.cpp">
@@ -759,6 +786,33 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Scripting\Scripting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Sequence\SequencePlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Sequence\Sequence.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Sequence\SequenceChannel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Sequence\Channels\ChannelElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Sequence\Channels\Elements\SequenceChannelElementScript.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Sequence\Channels\Elements\SequenceChannelElementSoundFX.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Sequence\Channels\Elements\SequenceChannelElementTransformation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Sequence\Channels\Elements\SequenceChannelElementAnimation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Sequence\Channels\Elements\SequenceChannelElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

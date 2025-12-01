@@ -11,7 +11,7 @@
 #include <DirectXCollision.h>
 #include <JTemplate.h>
 #include <JTypes.h>
-#include <AnimationSequences.h>
+#include <Sequence/AnimationSequences.h>
 
 namespace Animation { struct Animated; };
 namespace Templates { struct TextureJson; struct MaterialJson; };

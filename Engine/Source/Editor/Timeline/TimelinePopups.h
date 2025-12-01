@@ -1,7 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <string>
-#include <AnimationSequences.h>
+#include <Sequence/AnimationSequences.h>
 #include <UUID.h>
 
 enum TimelinePopups

@@ -6,7 +6,8 @@
 #include <RenderPass/PassMaterialOverride.h>
 #include <SceneObjectDecl.h>
 #include <SceneObject.h>
-#include <AnimationSequences.h>
+#include <Sequence/AnimationSequences.h>
+#include <Sequence/SequencePlayer.h>
 
 typedef std::vector<MeshInstanceUUID> RenderableMeshes;
 typedef std::unordered_map<RenderPassInstanceUUID, std::vector<MaterialInstanceUUID>> RenderableMaterials; //RenderPassInstanceUUID -> MaterialInstanceUUID

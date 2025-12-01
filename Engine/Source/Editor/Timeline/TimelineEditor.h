@@ -1,7 +1,7 @@
 #pragma once
 #include <imgui.h>
 #include <ImEditor.h>
-#include <AnimationSequences.h>
+#include <Sequence/AnimationSequences.h>
 #include "TimelineChannel.h"
 #include "TimelinePopups.h"
 
