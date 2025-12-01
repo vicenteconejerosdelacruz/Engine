@@ -319,6 +319,7 @@ void DestroyEditorModeBindings()
 	MarkTemplatesPanelAssetsAsDirty();
 }
 
+static const float cameraEditorDistance = -10.0f;
 void CreateEditorIndependentCamera()
 {
 	if (GetCountFromMouseCameras() > 0ULL)
@@ -343,7 +344,7 @@ void CreateEditorIndependentCamera()
 		CloneSceneObject(levelCameraUUID(), parameters);
 
 		//step out a little bit of the scene, we can came up with a better number eventually
-		editorCameraUUID->MoveForward(-10.0f);
+		editorCameraUUID->MoveForward(cameraEditorDistance);
 		editorCameraUUID->WriteConstantsBuffer(renderer->backBufferIndex);
 
 		//restore cameras mapping
