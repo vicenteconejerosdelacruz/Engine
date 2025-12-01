@@ -50,5 +50,5 @@ float SequenceChannelElementAnimation::GetTimeAtFrame(int frame)
 {
 	frame = std::clamp(frame, frameStart, frameEnd);
 	float t = static_cast<float>(frame - frameStart) / static_cast<float>(frameEnd - frameStart);
-	return startTime + t * (endTime - startTime);
+	return std::clamp(startTime + t * (endTime - startTime), startTime, endTime);
 }

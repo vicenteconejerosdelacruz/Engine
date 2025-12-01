@@ -679,7 +679,8 @@ void AnimationSequencerModal::DrawTimelineController(ImVec2 curPos, ImVec2 size,
 		;
 
 	float window_width = ImGui::GetContentRegionAvail().x;
-	ImVec2 start(curPos.x + (window_width - total_width) * 0.5f, curPos.y);
+	//ImVec2 start(curPos.x + (window_width - total_width) * 0.5f, curPos.y);
+	ImVec2 start(curPos.x +  200, curPos.y);
 
 	ImGui::SetCursorScreenPos(start);
 

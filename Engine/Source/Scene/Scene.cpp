@@ -144,8 +144,8 @@ namespace Scene
 		if (!Editor::IsPlaying() || Editor::IsPaused())
 			dt = 0.0f;
 #endif
-		AnimableStep(dt);
 		RenderablesStep();
+		AnimableStep(dt);
 		LightsStep();
 		AudioStep(dt);
 		CamerasStep();

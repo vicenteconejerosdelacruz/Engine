@@ -21,7 +21,6 @@ struct Sequence
 
 	int framesPerSecond;
 	int totalFrames;
-	//bool loop;
 	std::vector<SequenceChannel> sequenceChannels;
 };
 
