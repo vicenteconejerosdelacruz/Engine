@@ -769,9 +769,10 @@ namespace Scene
 		try
 		{
 			CreateMeshInstances();
-			if (animable.empty())
+			if (!animable.empty())
 			{
 				boundingBoxCompute = CreateRenderableBoundingBox(uuid());
+				WriteAnimationConstantsBuffer(renderer->backBufferIndex);
 			}
 			for (auto& cam : bindedCameras)
 			{
