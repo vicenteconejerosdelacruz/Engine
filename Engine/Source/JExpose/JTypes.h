@@ -45,6 +45,7 @@ enum JsonToEditorValueType
 	jedv_t_color_float4,
 	jedv_t_string,
 	jedv_t_boolean,
+	jedv_t_animation_sequence,
 	jdev_t_animation,
 	jedv_t_tex_dimension,
 	jedv_t_lighttype,

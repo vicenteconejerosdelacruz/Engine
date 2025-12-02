@@ -56,7 +56,7 @@ void SequencePlayer::Step(float dt)
 	}
 
 	int targetFrame = currentFrame;
-	if (runningFrame < sequence->totalFrames && currentFrame == 0)
+	if (runningFrame < sequence->totalFrames && currentFrame == 0 && newSequence)
 		targetFrame = sequence->totalFrames;
 
 	while (runningFrame <= targetFrame && !newSequence)

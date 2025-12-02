@@ -132,7 +132,7 @@ inline XMFLOAT3 GetPitchYawRoll(XMFLOAT4X4 transform)
 	return XMFLOAT3(XMConvertToDegrees(pitch), XMConvertToDegrees(yaw), XMConvertToDegrees(roll));
 }
 
-inline std::string OUTPUTV3(XMVECTOR V3)
+inline std::string OutputV3(XMVECTOR V3)
 {
 	return std::string(std::to_string(V3.m128_f32[0]) + "," + std::to_string(V3.m128_f32[1]) + "," + std::to_string(V3.m128_f32[2]));
 }

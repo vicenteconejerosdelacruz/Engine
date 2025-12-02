@@ -1847,7 +1847,7 @@ inline JEdvEditorDrawerFunction DrawValue<bool, jedv_t_boolean>()
 }
 
 template<>
-inline JEdvEditorDrawerFunction DrawValue<std::string, jdev_t_animation>()
+inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_animation_sequence>()
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
@@ -1878,7 +1878,6 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jdev_t_animation>()
 						animable->animationLoop()
 					);
 				};
-
 			auto gotoPrevAnim = [setAnim](auto animable)
 				{
 					/*
@@ -1959,44 +1958,30 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jdev_t_animation>()
 
 					ImGui::TableSetColumnIndex(1);
 
-					std::string curSeq = animable->animation();
-					std::vector<std::string> sequences;
+					std::string curSeq = animable->animationSequence();
+					std::vector<std::string> seqs;
 					std::transform(
 						animable->animationsSequences.sequences.begin(),
 						animable->animationsSequences.sequences.end(),
-						std::back_inserter(sequences), [](auto& pair)
+						std::back_inserter(seqs), [](auto& pair)
 						{
 							return pair.first;
 						}
 					);
+					std::vector<std::string> sequences;
+					std::copy_if(seqs.begin(), seqs.end(), std::back_inserter(sequences), [](auto& s) { return s != ""; });
+					sequences.insert(sequences.begin(), "");
+
 					ImGui::DrawComboSelection(curSeq, sequences, [animable](std::string newSequence)
 						{
+							animable->animationSequence(newSequence);
 							animable->SetCurrentAnimation(newSequence);
 							animable->animationTime(0.0f);
 							animable->StepAnimation(0.0f);
-						}
-					);
+							animable->sequencePlayer.ApplyFrameValues(animable->uuid());
 
-					/*
-					Sequence* currentSequence = animable->currentSequence;
-					Sequence& sequence = (currentSequence != nullptr) ? *currentSequence : animable->animationsSequences.sequences.at("");
-					ImGui::DrawComboSelection<Sequence>(
-						sequence,
-						animable->animationsSequences.sequences,
-						[animable](std::string value)
-						{
-							auto it = animable->animationsSequences.sequences.find(value);
-							bool isAnim = it != animable->animationsSequences.sequences.end();
-							animable->SetCurrentAnimation(
-								isAnim ? &(it->second) : nullptr,
-								0.0f,
-								animable->animationTimeFactor(),
-								animable->animationPlay(),
-								animable->animationLoop()
-							);
 						}
 					);
-					*/
 
 					ImGui::EndTable();
 				}

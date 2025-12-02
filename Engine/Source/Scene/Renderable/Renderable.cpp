@@ -299,6 +299,8 @@ namespace Scene
 		if (!animable.empty())
 		{
 			AttachAnimation(uuid(), model3D->animations);
+			animationTime(0.0f);
+			SetCurrentAnimation(animationSequence());
 			StepAnimation(0.0f); //take an empty T-Pose step so the skinning can be performed
 			boundingBoxCompute = CreateRenderableBoundingBox(uuid());
 			WriteAnimationConstantsBuffer(renderer->backBufferIndex);
@@ -921,6 +923,7 @@ namespace Scene
 		if (!animationPlayers.contains(uuid()) || animationPlayers.at(uuid()) != &sequencePlayer)
 			SetCurrentAnimation(&sequencePlayer);
 
+		animationSequence(anim);
 		sequencePlayer.sequence = &animationsSequences.sequences.at(anim);
 		sequencePlayer.loop = loop;
 		sequencePlayer.newSequence = true;
@@ -934,7 +937,6 @@ namespace Scene
 		using namespace Animation;
 		auto& animations = animable->animations;
 
-		//OutputDebugStringA(std::string(std::string("anim:") + animation() + "\n").c_str());
 		TraverseMultiplycationQueue(animationTime(), animation(), animations, bonesTransformation);
 	}
 
