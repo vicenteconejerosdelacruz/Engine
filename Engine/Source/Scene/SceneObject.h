@@ -92,7 +92,7 @@ namespace Scene
 		virtual void BindControllers();
 		virtual void UnbindControllers();
 
-		virtual void CreateV8Bindings(Scripting::V8ObjectsBindings& bindings);
+		virtual void BindToV8Context(v8pp::context& context);
 
 #if defined(_EDITOR)
 		virtual JUUID CreateBillboard(CameraUUID camera) { return ""; }

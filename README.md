@@ -1,6 +1,6 @@
 # Culpeo Game Engine
 
-<img src="https://media.githubusercontent.com/media/vicenteconejerosdelacruz/Engine/refs/heads/main/Engine/Target/Assets/ui/icon.png" 
+<img src="https://media.githubusercontent.com/media/vicenteconejerosdelacruz/Engine/refs/heads/main/TestGame/Target/Assets/ui/logo.png" 
         alt="Picture" 
         width="800" 
         height="600" 
@@ -12,15 +12,21 @@
   - [nlohmann::json](#deps-nlohmann-json)
   - [imgui](#deps-imgui)
   - [ImGuizmo](#deps-imguizmo)
+  - [v8](#deps-v8)
+  - [v8pp](#deps-v8pp)
+  - [DirectXTK12](#deps-directxtk12)
+  - [DirectXTex](#deps-directxtex)
 - [Architecture](#arch)
   - [JSON](#arch-json)
     - [nlohmann::json integration](#arch-json-integration)
     - [Macros magic](#arch-json-macros)
     - [JObject as base object](#arch-json-jobject)
+      - [JObject lifecycle](#arch-json-jobject-lifecycle)
   - [Templates](#arch-templates)
     - [Location](#arch-templates-location)
     - [List of available templates](#arch-templates-list)
       - [Model3D](#arch-templates-list-model3d)
+        - [Animations](#model3d-animations)
       - [Material](#arch-templates-list-material)
       - [Texture](#arch-templates-list-textures)
       - [RenderPass](#arch-templates-list-renderpass)
@@ -42,3 +48,4 @@
   - [Audio/Sound](#arch-audio)
     - [2D Sounds](#arch-audio-2d)
     - [3D Sounds](#arch-audio-3d)
+  - [Animation Sequencer](#arch-animation-sequencer)

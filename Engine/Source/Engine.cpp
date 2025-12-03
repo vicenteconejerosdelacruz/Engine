@@ -142,6 +142,13 @@ int APIENTRY EngineWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevIns
 		return FALSE;
 	}
 
+	//Get the Scripting's v8::Isolate*
+	v8::Isolate* isolate = Scripting::GetIsolate();
+
+	//create an isolate and a handle scope for the application lifetime
+	v8::Isolate::Scope isolate_scope(isolate);
+	v8::HandleScope handle_scope(isolate);
+
 	// Main loop
 	while (!appDone)
 	{

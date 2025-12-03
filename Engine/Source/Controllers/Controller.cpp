@@ -84,18 +84,13 @@ namespace Game
 		)->first;
 	}
 
-	void CreateV8Bindings(Scripting::V8ObjectsBindings& bindings, JUUID uuid)
+
+	void BindToV8Context(v8pp::context& context, JUUID uuid)
 	{
 		using namespace Scripting;
 		JUUID controllerUUID = sceneObjectUUIDToControllerUUID.at(uuid);
 		std::string name = GetControllerNameByUUID(controllerUUID);
 		std::unique_ptr<Controller>& controller = controllersUUIDs.at(controllerUUID);
-
-		V8ObjectPointer v8ptr = std::make_tuple(name, controller.get());
-		V8MethodsBindings v8methods;
-
-		controller->CreateV8MethodsBindings(v8methods);
-
-		bindings.insert_or_assign(std::move(v8ptr), v8methods);
+		controller->BindToV8Context(context);
 	}
 }

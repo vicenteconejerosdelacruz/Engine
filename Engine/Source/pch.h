@@ -110,21 +110,11 @@
 //tween
 #include <tween.hpp>
 //v8
+#include <v8.h>
 #include <libplatform/libplatform.h>
-#include <v8-context.h>
-#include <v8-initialization.h>
-#include <v8-isolate.h>
-#include <v8-local-handle.h>
-#include <v8-function.h>
-#include <v8-primitive.h>
-#include <v8-script.h>
-#include <v8-object.h>
-#include <v8-template.h>
-#include <v8-handle-base.h>
-#include <v8-local-handle.h>
-#include <v8-locker.h>
-#include <v8-external.h>
-#include <v8-value.h>
+//v8pp
+#include "v8pp/context.hpp"
+#include "v8pp/module.hpp"
 
 template<typename... Args> void whatis();
 template<typename T> void whatis(T);

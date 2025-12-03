@@ -13,6 +13,7 @@
 #include "Scene/Level.h"
 #include "Scene/Camera/Camera.h"
 #include "Scene/Light/Light.h"
+#include "Scripting/Scripting.h"
 #include "Controllers/Controller.h"
 #if defined(_EDITOR)
 #include "Editor/Editor.h"

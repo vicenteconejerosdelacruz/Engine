@@ -60,8 +60,8 @@ namespace Scene
 		controllers.clear();
 	}
 
-	void SceneObject::CreateV8Bindings(Scripting::V8ObjectsBindings& bindings)
+	void SceneObject::BindToV8Context(v8pp::context& context)
 	{
-		Game::CreateV8Bindings(bindings, Juuid());
+		Game::BindToV8Context(context, Juuid());
 	}
 }
