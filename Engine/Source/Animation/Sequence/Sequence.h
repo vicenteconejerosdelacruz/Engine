@@ -10,6 +10,7 @@ struct Sequence
 	Sequence();
 
 	Sequence(nlohmann::json j);
+	Sequence(const Sequence& seq);
 	nlohmann::json json();
 	bool operator==(const Sequence& other) const;
 
@@ -18,6 +19,7 @@ struct Sequence
 	XMMATRIX GetTransformationAtFrame(int frame);
 	void CreateSoundFXsAtFrame(int frame);
 	void RunScriptAtFrame(int frame, RenderableUUID renderable);
+	bool Runnable() const;
 
 	int framesPerSecond;
 	int totalFrames;

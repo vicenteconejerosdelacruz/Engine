@@ -9,10 +9,9 @@
 struct SequenceChannel
 {
 	SequenceChannel();
-
 	SequenceChannel(std::string name);
-
 	SequenceChannel(const nlohmann::json& j);
+	SequenceChannel(const SequenceChannel& seqChannel);
 
 	bool ChannelHasElementAtFrame(int frame);
 	int GetAvailableFramesToLeft(int elementIndex);

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Sequence.h"
 #include <Sound/Sound.h>
+#include <Scripting.h>
 
 Sequence::Sequence()
 {
@@ -16,6 +17,13 @@ Sequence::Sequence(nlohmann::json j)
 	{
 		sequenceChannels.push_back(j.at("sequenceChannels").at(i));
 	}
+}
+
+Sequence::Sequence(const Sequence& seq)
+{
+	framesPerSecond = seq.framesPerSecond;
+	totalFrames = seq.totalFrames;
+	sequenceChannels = seq.sequenceChannels;
 }
 
 nlohmann::json Sequence::json()
@@ -143,4 +151,9 @@ void Sequence::RunScriptAtFrame(int frame, RenderableUUID renderable)
 		if (script == nullptr) continue;
 		RunScript(script->script, renderable);
 	}
+}
+
+bool Sequence::Runnable() const
+{
+	return !sequenceChannels.empty();
 }

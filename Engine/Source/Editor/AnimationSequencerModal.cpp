@@ -268,7 +268,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			{
 				Sequence& seq = animationsSequences.sequences.at(sequence);
 				timelineEditor.Init(renderable, seq);
-				sequencePlayer.SetSequence(&seq, renderable());
+				sequencePlayer.SetSequence(seq, renderable());
 				renderable->SetCurrentAnimation(&sequencePlayer);
 			}
 			playingSequence = false;
@@ -288,7 +288,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			playingSequence = false;
 			playingSequenceTime = 0.0f;
 			timelineEditor.Reset();
-			sequencePlayer.SetSequence(nullptr, "");
+			sequencePlayer.SetSequence(Sequence(), "");
 			renderable->SetCurrentAnimation(nullptr);
 		};
 	auto onAddNewSequenceClicked = [this](std::string seqName)
@@ -300,7 +300,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			playingSequenceTime = 0.0f;
 			Sequence& seq = animationsSequences.sequences.at(seqName);
 			timelineEditor.Init(renderable, seq);
-			sequencePlayer.SetSequence(&seq, renderable());
+			sequencePlayer.SetSequence(seq, renderable());
 			renderable->SetCurrentAnimation(&sequencePlayer);
 		};
 	auto onCancelAddNewSequenceClick = [this]()

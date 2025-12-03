@@ -924,7 +924,7 @@ namespace Scene
 			SetCurrentAnimation(&sequencePlayer);
 
 		animationSequence(anim);
-		sequencePlayer.sequence = &animationsSequences.sequences.at(anim);
+		sequencePlayer.sequence = animationsSequences.sequences.at(anim);
 		sequencePlayer.loop = loop;
 		sequencePlayer.newSequence = true;
 		sequencePlayer.ResetFrames();

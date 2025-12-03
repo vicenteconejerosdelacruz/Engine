@@ -38,6 +38,12 @@ SequenceChannel::SequenceChannel(const nlohmann::json& j)
 	}
 }
 
+SequenceChannel::SequenceChannel(const SequenceChannel& seqChannel)
+{
+	name = seqChannel.name;
+	elements = seqChannel.elements;
+}
+
 bool SequenceChannel::ChannelHasElementAtFrame(int frame)
 {
 	for (auto& element : elements)

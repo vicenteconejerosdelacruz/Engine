@@ -3,7 +3,7 @@
 
 struct SequencePlayer
 {
-	Sequence* sequence;
+	Sequence sequence;
 	float time;
 	int runningFrame;
 	int currentFrame;
@@ -13,8 +13,8 @@ struct SequencePlayer
 	RenderableUUID renderable;
 
 	SequencePlayer();
-	SequencePlayer(Sequence* seq, JUUID uuid);
-	void SetSequence(Sequence* seq, JUUID uuid);
+	SequencePlayer(const Sequence& seq, JUUID uuid);
+	void SetSequence(const Sequence& seq, JUUID uuid);
 	void Step(float dt);
 	void SetTime(float t);
 	void StepFrame(int df);
