@@ -24,7 +24,7 @@ static inline std::unordered_map<std::string, SequencerModalPopup> StringToSeque
 	{ "Interact with Element", SMP_InteractWithElement }
 };
 
-struct AnimationSequencerModal// : public ExImSequencer::SequenceInterface
+struct AnimationSequencerModal
 {
 	void Initialize(JUUID uuid);
 	void LoadSceneObjects();

@@ -25,6 +25,7 @@ void AnimationSequencerModal::Initialize(JUUID uuid)
 	model3dUUID = uuid;
 	model3D = uuid;
 	animationsSequences = model3D->animationSequences();
+	selectedTransformationKeyframe = nullptr;
 }
 
 void AnimationSequencerModal::LoadSceneObjects()
@@ -390,6 +391,10 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 					[&](TransformationKeyFrame* tkeyframe)
 					{
 						selectedTransformationKeyframe = tkeyframe;
+					},
+					[&]()
+					{
+						selectedTransformationKeyframe = nullptr;
 					},
 					[&](int channel, int frame, SequenceChannelElementScript* scriptToEdit)
 					{

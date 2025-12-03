@@ -481,6 +481,7 @@ void TimelineEditor::DrawSelectedFrameVerticalLine(ImVec2 timelinePos, ImVec2 ti
 
 void TimelineEditor::DrawActionPopup(Sequence& sequence,
 	std::function<void(TransformationKeyFrame*)> setTransformationKeyFrame,
+	std::function<void()> deleteTransformationKeyFrame,
 	std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit
 )
 {
@@ -546,10 +547,11 @@ void TimelineEditor::DrawActionPopup(Sequence& sequence,
 				popup = TP_None;
 			}
 			},
-			{ IP_Transformation_RemoveKeyframe, [this, &sequence, channel, frame,setTransformationKeyFrame]()
+			{ IP_Transformation_RemoveKeyframe, [this, &sequence, channel, frame,deleteTransformationKeyFrame,setTransformationKeyFrame]()
 			{
 				setTransformationKeyFrame(nullptr);
 				RemoveKeyframeFromTransformationElementInFrameAtChannel(sequence, channel, frame);
+				deleteTransformationKeyFrame();
 				popup = TP_None;
 			}
 			},
@@ -567,6 +569,7 @@ void TimelineEditor::DrawActionPopup(Sequence& sequence,
 
 void TimelineEditor::Draw(Sequence& sequence, ImVec2 pos, ImVec2 size,
 	std::function<void(TransformationKeyFrame*)> setTransformationKeyFrame,
+	std::function<void()> deleteTransformationKeyFrame,
 	std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit
 )
 {
@@ -587,7 +590,7 @@ void TimelineEditor::Draw(Sequence& sequence, ImVec2 pos, ImVec2 size,
 	DrawSelectedFrameVerticalLine(timelinePos, timelineSize);
 	DrawVerticalScrollbar(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging);
 	DrawHorizontalScrollbar(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging);
-	DrawActionPopup(sequence, setTransformationKeyFrame, setScriptToEdit);
+	DrawActionPopup(sequence, setTransformationKeyFrame, deleteTransformationKeyFrame, setScriptToEdit);
 	HandleElementDrag(sequence);
 	HandleElementDragLeftBoundary(sequence);
 	HandleElementDragRightBoundary(sequence);
