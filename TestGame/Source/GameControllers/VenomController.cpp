@@ -59,6 +59,11 @@ namespace Game
 		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
 		venom->vsm.ChangeState(stringToVenomStates.at(state));
 	}
+	static void VenomRunJumpLanding()
+	{
+		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
+		venom->VenomRunJumpLanding();
+	}
 	static void BindV8Module()
 	{
 		if (v8ppModule == nullptr)
@@ -70,7 +75,8 @@ namespace Game
 					v8ppModule->function("PlayerReady", &Game::VenomReady).
 						function("StartNextPunchWindow", &Game::StartVenomNextPunchWindow).
 						function("EvaluateNextPunch", &Game::EvaluateVenomNextPunch).
-						function("SwitchToState", &Game::SwitchVenomToState);
+						function("SwitchToState", &Game::SwitchVenomToState).
+						function("RunJumpLanding", &Game::VenomRunJumpLanding);
 				}
 			);
 		}
@@ -87,6 +93,7 @@ namespace Game
 				{ VS_Walking, [this](VenomStates prevState) { EnterWalking(); }},
 				{ VS_Running, [this](VenomStates prevState) { EnterRunning(); }},
 				{ VS_Jumping, [this](VenomStates prevState) { EnterJumping(); }},
+				{ VS_RunningJump, [this](VenomStates prevState) { EnterRunningJump(); }},
 				{ VS_Attack_1,[this](VenomStates prevState) { EnterAttack1(); }}
 			},
 			.onLeave = {
@@ -98,6 +105,7 @@ namespace Game
 				{ VS_Walking, [this]() { Walking(); }},
 				{ VS_Running, [this]() { Running(); }},
 				{ VS_Jumping, [this]() { Jumping(); }},
+				{ VS_RunningJump, [this]() { RunningJump(); }},
 				{ VS_Attack_1, [this]() { Attacking1(); }}
 			}
 		};
@@ -219,6 +227,11 @@ namespace Game
 		attack1Window = false;
 	}
 
+	void VenomController::VenomRunJumpLanding()
+	{
+		vsm.ChangeState(VS_Running);
+	}
+
 	//Scene Object
 	void VenomController::MoveForward(float step)
 	{
@@ -259,9 +272,28 @@ namespace Game
 		venom->position(p);
 	}
 
+	void VenomController::RunningJumpMoveForward(float step)
+	{
+		float delta = static_cast<float>(timer.GetElapsedSeconds() * step);
+
+		XMFLOAT3 scale = venom->scale();
+		XMVECTOR move = XMVector3Normalize(runningJumpLeftStick);
+		move = XMVectorScale(move, delta);
+		XMFLOAT3 p = venom->position();
+		XMVECTOR pos = XMLoadFloat3(&p);
+		pos = XMVectorAdd(pos, move);
+		XMStoreFloat3(&p, pos);
+		p.z = std::clamp(p.z, zBounds.x, zBounds.y);
+		venom->position(p);
+	}
+
 	//Joystick
 	void VenomController::UpdateLeftStickVector()
 	{
+		std::set<VenomStates> noUpdateStates = { VS_RunningJump };
+
+		if (noUpdateStates.contains(vsm.currentState)) return; //maybe Vec0?
+
 		auto pad = gamePad->GetState(0);
 		if (pad.IsConnected())
 		{
@@ -362,6 +394,13 @@ namespace Game
 		venom->SetCurrentAnimation("Jump");
 	}
 
+	void VenomController::EnterRunningJump()
+	{
+		runningJumpLeftStick = leftStick;
+		venom->animationUseTransformation(false);
+		venom->SetCurrentAnimation("RunJump");
+	}
+
 	void VenomController::EnterAttack1()
 	{
 		auto animation = Attack1Animations.at(currentAttack1Animation);
@@ -425,6 +464,10 @@ namespace Game
 		{
 			vsm.ChangeState(VS_Walking);
 		}
+		else if (ShouldJump())
+		{
+			vsm.ChangeState(VS_RunningJump);
+		}
 	}
 
 	void VenomController::Jumping()
@@ -432,6 +475,11 @@ namespace Game
 		XMVECTOR len = XMVector3Length(leftStick);
 		float l = XMVectorGetX(len);
 		JumpingMoveForward(walkSpeed * l);
+	}
+
+	void VenomController::RunningJump()
+	{
+		RunningJumpMoveForward(runSpeed);
 	}
 
 	void VenomController::Attacking1()

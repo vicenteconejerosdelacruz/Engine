@@ -54,8 +54,11 @@ void AnimationSequencerModal::LoadSceneObjects()
 			}
 		},
 		{ "position", FromXMFLOAT3(cameraInitialPos) },
+		{ "freeposition", FromXMFLOAT3(cameraInitialPos) },
 		{ "projectionType", "Perspective" },
 		{ "rotation", FromXMFLOAT3(cameraInitialRot) },
+		{ "bboxlookrotation", FromXMFLOAT3(cameraInitialRot) },
+		{ "freerotation", FromXMFLOAT3(cameraInitialRot) },
 		{ "speed", 0.05000000074505806 },
 		{ "uuid", camera() },
 		{
@@ -143,6 +146,11 @@ void AnimationSequencerModal::LoadSceneObjects()
 
 	selectedSequence = "";
 	initializing = false;
+
+	Step();
+	camera->at("freeposition") = FromXMFLOAT3(camera->position());
+	camera->at("freerotation") = FromXMFLOAT3(camera->rotation());
+	camera->at("bboxlookrotation") = FromXMFLOAT3(camera->rotation());
 }
 
 void AnimationSequencerModal::DestroySceneObjects()
@@ -176,17 +184,17 @@ void AnimationSequencerModal::Step()
 	XMFLOAT3 baseColor = ToXMFLOAT3(floor->at("floorColor"));
 	floor->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, renderer->backBufferIndex);
 
-	//https://stackoverflow.com/a/32836605
-	BoundingBox modelBB = renderable->GetBoundingBox();
-	BoundingSphere modelBBS;
-	BoundingSphere::CreateFromBoundingBox(modelBBS, modelBB);
-
-	float modelDistanceScale = camera->at("modelDistanceScale");
-	float fov = XMConvertToRadians(camera->perspective().fovAngleY);
-	float distance = modelDistanceScale * (adjustToBoundingBox ? (modelBBS.Radius * 2.0f) / (XMScalarSin(fov) / XMScalarCos(fov)) : 1.0f);
-
 	if (adjustToBoundingBox)
 	{
+		//https://stackoverflow.com/a/32836605
+		BoundingBox modelBB = renderable->GetBoundingBox();
+		BoundingSphere modelBBS;
+		BoundingSphere::CreateFromBoundingBox(modelBBS, modelBB);
+
+		float modelDistanceScale = camera->at("modelDistanceScale");
+		float fov = XMConvertToRadians(camera->perspective().fovAngleY);
+		float distance = modelDistanceScale * (adjustToBoundingBox ? (modelBBS.Radius * 2.0f) / (XMScalarSin(fov) / XMScalarCos(fov)) : 1.0f);
+
 		XMVECTOR camFwV = camera->forward();
 		XMFLOAT3 BBPos = modelBB.Center;
 		XMVECTOR BBPosV = XMLoadFloat3(&BBPos);
@@ -194,16 +202,12 @@ void AnimationSequencerModal::Step()
 		XMFLOAT3 camPos;
 		XMStoreFloat3(&camPos, camPosV);
 		camera->position(camPos);
+		camera->at("rotation") = camera->at("bboxlookrotation");
 	}
 	else
 	{
-		camera->rotation(cameraInitialRot);
-		XMVECTOR camFwV = camera->forward();
-		XMVECTOR camInitialPosV = XMLoadFloat3(&cameraInitialPos);
-		XMVECTOR camPosV = XMVectorSubtract(camInitialPosV, XMVectorScale(camFwV, distance));
-		XMFLOAT3 camPos;
-		XMStoreFloat3(&camPos, camPosV);
-		camera->position(camPos);
+		camera->at("position") = camera->at("freeposition");
+		camera->at("rotation") = camera->at("freerotation");
 	}
 
 	if (selectedSequence != "")
@@ -548,15 +552,23 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 	ImGui::BeginChild("camera-atts", attsSize, 0);
 	{
 		ImGui::Text("camera");
-		std::vector<JObject*> camV({ GetSceneObjectPointer(camera()) });
-		DrawValue<XMFLOAT3, jedv_t_float3_angle>()("rotation", camV);
-		DrawValue<float, jedv_t_float>()("modelDistanceScale", camV);
+		ImGui::Checkbox("Adjust camera", &adjustToBoundingBox);
+		if (adjustToBoundingBox)
+		{
+			std::vector<JObject*> camV({ GetSceneObjectPointer(camera()) });
+			DrawValue<XMFLOAT3, jedv_t_float3_angle>()("bboxlookrotation", camV);
+			DrawValue<float, jedv_t_float>()("modelDistanceScale", camV);
+		}
+		else
+		{
+			std::vector<JObject*> camV({ GetSceneObjectPointer(camera()) });
+			DrawValue<XMFLOAT3, jedv_t_float3>()("freeposition", camV);
+			DrawValue<XMFLOAT3, jedv_t_float3_angle>()("freerotation", camV);
+		}
 
 		ImGui::Text("floor");
 		std::vector<JObject*> floorV({ GetSceneObjectPointer(floor()) });
 		DrawValue<XMFLOAT3, jedv_t_color_float3>()("floorColor", floorV);
-
-		ImGui::Checkbox("Adjust camera", &adjustToBoundingBox);
 	}
 	ImGui::EndChild();
 
@@ -680,7 +692,7 @@ void AnimationSequencerModal::DrawTimelineController(ImVec2 curPos, ImVec2 size,
 
 	float window_width = ImGui::GetContentRegionAvail().x;
 	//ImVec2 start(curPos.x + (window_width - total_width) * 0.5f, curPos.y);
-	ImVec2 start(curPos.x +  200, curPos.y);
+	ImVec2 start(curPos.x + 200, curPos.y);
 
 	ImGui::SetCursorScreenPos(start);
 

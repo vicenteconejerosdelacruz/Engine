@@ -16,6 +16,7 @@ enum VenomStates
 	VS_Walking,
 	VS_Running,
 	VS_Jumping,
+	VS_RunningJump,
 	VS_Attack_1
 };
 
@@ -60,10 +61,12 @@ namespace Game
 		void VenomReady();
 		void StartVenomNextPunchWindow();
 		void EvaluateVenomNextPunch();
+		void VenomRunJumpLanding();
 
 		//Scene Object
 		void MoveForward(float step);
 		void JumpingMoveForward(float step);
+		void RunningJumpMoveForward(float step);
 
 		//Joystick
 		void UpdateLeftStickVector();
@@ -82,12 +85,14 @@ namespace Game
 		void EnterWalking();
 		void EnterRunning();
 		void EnterJumping();
+		void EnterRunningJump();
 		void EnterAttack1();
 		//Steps
 		void Idle();
 		void Walking();
 		void Running();
 		void Jumping();
+		void RunningJump();
 		void Attacking1();
 		//Leaves
 		void LeaveAttack1();
@@ -105,6 +110,7 @@ namespace Game
 
 		//Joystick
 		XMVECTOR leftStick;
+		XMVECTOR runningJumpLeftStick;
 
 		//Movement encoding
 		XMVECTOR lastAnimPos;
