@@ -22,6 +22,7 @@ namespace Animation
 	using namespace DeviceUtils;
 	using namespace Scene;
 
+	//keep as std::map as the order is very important for the hierarchy structure
 	typedef std::map<std::string, float> AnimationLengthMap;
 	typedef std::map<std::string, XMMATRIX> BonesTransformations;
 

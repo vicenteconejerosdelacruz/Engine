@@ -103,7 +103,7 @@ int SequenceChannel::GetElementIndexBeforeFrame(int frame)
 	return idx;
 }
 
-void SequenceChannel::InsertChannelElement(ChannelElement element, int& totalFrames)
+void SequenceChannel::InsertChannelElement(ChannelElement element, int& totalFrames, int framesPerSecond)
 {
 	int elemStart = element.GetFrameStart();
 	int elemEnd = element.GetFrameEnd();
@@ -134,23 +134,23 @@ void SequenceChannel::InsertChannelElement(ChannelElement element, int& totalFra
 
 		for (int i = curIndex; i < elements.size(); i++)
 		{
-			elements.at(i).Move(rightShift, totalFrames);
+			elements.at(i).Move(rightShift, totalFrames, framesPerSecond);
 		}
 		elements.insert(elements.begin() + curIndex, 1, element);
 	}
 }
 
-void SequenceChannel::MoveElement(int elementIndex, int frames, int totalFrames)
+void SequenceChannel::MoveElement(int elementIndex, int frames, int totalFrames, int framesPerSecond)
 {
 	if (frames < 0)
 	{
 		frames = std::max(frames, -GetAvailableFramesToLeft(elementIndex));
-		elements.at(elementIndex).Move(frames, totalFrames);
+		elements.at(elementIndex).Move(frames, totalFrames, framesPerSecond);
 	}
 	else if (frames > 0)
 	{
 		frames = std::min(frames, GetAvailableFramesToRight(elementIndex, totalFrames));
-		elements.at(elementIndex).Move(frames, totalFrames);
+		elements.at(elementIndex).Move(frames, totalFrames, framesPerSecond);
 	}
 }
 

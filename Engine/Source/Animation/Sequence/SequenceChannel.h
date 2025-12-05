@@ -24,8 +24,8 @@ struct SequenceChannel
 	SequenceChannelElementSoundFX* GetSoundFXToCreateAtFrame(int frame);
 	SequenceChannelElementScript* GetScriptToRunAtFrame(int frame);
 
-	void InsertChannelElement(ChannelElement element, int& totalFrames);
-	void MoveElement(int elementIndex, int frames, int totalFrames);
+	void InsertChannelElement(ChannelElement element, int& totalFrames, int framesPerSecond);
+	void MoveElement(int elementIndex, int frames, int totalFrames, int framesPerSecond);
 	void DragElementLeftBoundary(int elementIndex, int frames, int totalFrames);
 	void DragElementRightBoundary(int elementIndex, int frames, int totalFrames);
 	void EraseElement(int elementIndex);

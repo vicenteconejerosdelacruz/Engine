@@ -82,7 +82,7 @@ struct ShaderConstantsBufferParameter {
 	unsigned int registerId;
 	unsigned int numConstantsBuffers;
 };
-typedef std::map<std::string, ShaderConstantsBufferParameter> ShaderConstantsBufferParametersMap;
+typedef std::unordered_map<std::string, ShaderConstantsBufferParameter> ShaderConstantsBufferParametersMap;
 typedef std::pair<std::string, ShaderConstantsBufferParameter> ShaderConstantsBufferParametersPair;
 
 template <>

@@ -38,7 +38,7 @@ struct ChannelElement
 
 	bool InFrame(int frame);
 	bool ElementInFrame(int frame, bool& elementBoundFromLeft, bool& elementBoundFromRight);
-	void Move(int frames, int totalFrames);
+	void Move(int frames, int totalFrames, int framesPerSecond);
 	std::tuple<ChannelElement, ChannelElement> Split(int frame);
 	void ExpandLeftBorder(int numFrames);
 	void ExpandRightBorder(int numFrames);

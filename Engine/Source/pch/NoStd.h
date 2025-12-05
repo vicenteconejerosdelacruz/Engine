@@ -147,10 +147,18 @@ namespace nostd {
 		return wstr;
 	}
 
-	inline std::vector<std::string> GetKeysFromMap(auto map) {
-		std::vector<std::string> names;
-		std::transform(map.begin(), map.end(), std::back_inserter(names), [](auto pair) { return pair.first; });
-		return names;
+	template<typename K, typename V>
+	inline std::vector<K> GetKeysFromMap(std::unordered_map<K, V>& map) {
+		std::vector<K> keys;
+		std::transform(map.begin(), map.end(), std::back_inserter(keys), [](auto pair) { return pair.first; });
+		return keys;
+	}
+
+	template<typename K, typename V>
+	inline std::vector<K> GetKeysFromMap(std::map<K, V>& map) {
+		std::vector<K> keys;
+		std::transform(map.begin(), map.end(), std::back_inserter(keys), [](auto pair) { return pair.first; });
+		return keys;
 	}
 
 	template<typename T = JUUID>

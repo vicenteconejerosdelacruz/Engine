@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "SequenceChannelElementTransformation.h"
 #include <DirectXMath.h>
+#include <NoStd.h>
 
 XMMATRIX TransformationKeyFrame::ToMatrix()
 {
@@ -64,6 +65,11 @@ nlohmann::json SequenceChannelElementTransformation::json()
 				};
 				arr.push_back(jk);
 			}
+			std::sort(arr.begin(), arr.end(), [](auto& a, auto& b)
+				{
+					return a.at("frame") < b.at("frame");
+				}
+			);
 			return arr;
 		};
 
@@ -167,4 +173,27 @@ XMMATRIX SequenceChannelElementTransformation::InterpolateKeyframes(Transformati
 	XMMATRIX scaleM = XMMatrixScalingFromVector(st);
 	XMMATRIX positionM = XMMatrixTranslationFromVector(pt);
 	return XMMatrixMultiply(XMMatrixMultiply(scaleM, rotationM), positionM);
+}
+
+void SequenceChannelElementTransformation::CreateInterpolatedKeyFrame(int frame)
+{
+	std::vector<int> frames = nostd::GetKeysFromMap(keyFrames);
+	std::sort(frames.begin(), frames.end());
+	auto it_lower = std::lower_bound(frames.begin(), frames.end(), frame) - 1;
+	auto it_upper = std::upper_bound(frames.begin(), frames.end(), frame);
+
+	TransformationKeyFrame k0 = keyFrames.at(*it_lower);
+	TransformationKeyFrame k1 = keyFrames.at(*it_upper);
+
+	XMMATRIX M = InterpolateKeyframes(k0, k1, frame - *it_lower, *it_upper - *it_lower);
+	XMVECTOR P, R, S;
+	XMMatrixDecompose(&S, &R, &P, M);
+
+	TransformationKeyFrame knew;
+	knew.easing = k0.easing;
+	XMStoreFloat3(&knew.position, P);
+	XMStoreFloat3(&knew.scale, S);
+	XMFLOAT3 rot = Quaternion2Euler(R);
+	knew.rotation = rot;
+	keyFrames.insert_or_assign(frame, knew);
 }

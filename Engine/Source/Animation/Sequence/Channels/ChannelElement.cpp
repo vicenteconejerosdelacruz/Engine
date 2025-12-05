@@ -77,7 +77,7 @@ bool ChannelElement::ElementInFrame(int frame, bool& elementBoundFromLeft, bool&
 	return ret;
 }
 
-void ChannelElement::Move(int frames, int totalFrames)
+void ChannelElement::Move(int frames, int totalFrames, int framesPerSecond)
 {
 	SequenceChannelElement* element = GetElementPointer();
 

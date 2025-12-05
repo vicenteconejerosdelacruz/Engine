@@ -136,3 +136,40 @@ inline std::string OutputV3(XMVECTOR V3)
 {
 	return std::string(std::to_string(V3.m128_f32[0]) + "," + std::to_string(V3.m128_f32[1]) + "," + std::to_string(V3.m128_f32[2]));
 }
+
+inline XMFLOAT3 Quaternion2Euler(XMVECTOR Q)
+{
+	XMFLOAT3 angles;
+
+	float x = Q.m128_f32[0];
+	float y = Q.m128_f32[1];
+	float z = Q.m128_f32[2];
+	float w = Q.m128_f32[3];
+
+	float sqw = w * w;
+	float sqx = x * x;
+	float sqy = y * y;
+	float sqz = z * z;
+	float unit = sqx + sqy + sqz + sqw; // if normalized is one, otherwise
+	// is correction factor
+	float test = x * y + z * w;
+	if (test > 0.499 * unit) { // singularity at north pole
+		angles.y = 2 * std::atan2(x, w);
+		angles.z = M_PI_2;
+		angles.x = 0;
+	}
+	else if (test < -0.499 * unit) { // singularity at south pole
+		angles.y = -2 * std::atan2(x, w);
+		angles.z = -M_PI_2;
+		angles.x = 0;
+	}
+	else {
+		angles.y = std::atan2(2 * y * w - 2 * x * z, sqx - sqy - sqz + sqw); // roll or heading 
+		angles.z = std::asin(2 * test / unit); // pitch or attitude
+		angles.x = std::atan2(2 * x * w - 2 * y * z, -sqx + sqy - sqz + sqw); // yaw or bank
+	}
+	angles.x = XMConvertToDegrees(angles.x);
+	angles.y = XMConvertToDegrees(angles.y);
+	angles.z = XMConvertToDegrees(angles.z);
+	return angles;
+}

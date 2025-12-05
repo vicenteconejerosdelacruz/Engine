@@ -131,7 +131,7 @@ void TimelineEditor::DrawAddChannelButton(Sequence& sequence, ImVec2 pos, bool c
 }
 
 void TimelineEditor::DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract,
-	std::function<void(TransformationKeyFrame*)> setTransformationKeyFrame
+	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame
 )
 {
 	ImGuiIO& io = ImGui::GetIO();
@@ -209,7 +209,7 @@ void TimelineEditor::DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2
 	{
 		auto& [channel, frame] = selectedChannelFrame;
 		auto* elem = sequence.sequenceChannels.at(channel).GetTransformationKeyframe(frame);
-		setTransformationKeyFrame(elem);
+		setTransformationKeyFrame(elem, frame);
 		SelectFrameInChannel(channel, frame);
 	}
 	if (std::get<0>(actionChannelFrame) != -1 && std::get<1>(actionChannelFrame) != -1)
@@ -480,7 +480,7 @@ void TimelineEditor::DrawSelectedFrameVerticalLine(ImVec2 timelinePos, ImVec2 ti
 }
 
 void TimelineEditor::DrawActionPopup(Sequence& sequence,
-	std::function<void(TransformationKeyFrame*)> setTransformationKeyFrame,
+	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
 	std::function<void()> deleteTransformationKeyFrame,
 	std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit
 )
@@ -541,15 +541,17 @@ void TimelineEditor::DrawActionPopup(Sequence& sequence,
 				popup = TP_None;
 			}
 			},
-			{ IP_Transformation_AddKeyframe, [this, &sequence, channel, frame]()
+			{ IP_Transformation_AddKeyframe, [this, &sequence, channel, frame, setTransformationKeyFrame]()
 			{
 				AddKeyframeToTransformationElementInFrameAtChannel(sequence, channel, frame);
+				TransformationKeyFrame& keyFrame = sequence.sequenceChannels.at(channel).GetTransformationElementAtFrame(frame)->keyFrames.at(frame);
+				setTransformationKeyFrame(&keyFrame, frame);
 				popup = TP_None;
 			}
 			},
 			{ IP_Transformation_RemoveKeyframe, [this, &sequence, channel, frame,deleteTransformationKeyFrame,setTransformationKeyFrame]()
 			{
-				setTransformationKeyFrame(nullptr);
+				setTransformationKeyFrame(nullptr,-1);
 				RemoveKeyframeFromTransformationElementInFrameAtChannel(sequence, channel, frame);
 				deleteTransformationKeyFrame();
 				popup = TP_None;
@@ -568,7 +570,7 @@ void TimelineEditor::DrawActionPopup(Sequence& sequence,
 }
 
 void TimelineEditor::Draw(Sequence& sequence, ImVec2 pos, ImVec2 size,
-	std::function<void(TransformationKeyFrame*)> setTransformationKeyFrame,
+	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
 	std::function<void()> deleteTransformationKeyFrame,
 	std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit
 )
@@ -619,7 +621,7 @@ void TimelineEditor::HandleElementDrag(Sequence& sequence)
 		{
 			int frames = framesX >= 1.0f ? static_cast<int>(std::floor(framesX)) : static_cast<int>(std::ceil(framesX));
 			auto [channel, element] = selectedChannelElement;
-			sequence.sequenceChannels.at(channel).MoveElement(element, frames, sequence.totalFrames);
+			sequence.sequenceChannels.at(channel).MoveElement(element, frames, sequence.totalFrames, sequence.framesPerSecond);
 			elementDragXSum = std::fmodf(elementDragXSum, TimelineChannel::frameSize.x);
 		}
 	}
@@ -822,7 +824,7 @@ void TimelineEditor::AddAnimationElementToChannel(Sequence& sequence, int channe
 	animation.frameEnd = elem->frameStart + GetAnimationNumFrames(sequence, animation.animation);
 	animation.startTime = elem->startTime;
 	animation.endTime = elem->endTime;
-	seqChannel.InsertChannelElement(chanElem, sequence.totalFrames);
+	seqChannel.InsertChannelElement(chanElem, sequence.totalFrames, sequence.framesPerSecond);
 }
 
 void TimelineEditor::AddTransformationElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementTransformation* elem)
@@ -833,7 +835,7 @@ void TimelineEditor::AddTransformationElementToChannel(Sequence& sequence, int c
 	SequenceChannelElementTransformation& transformation = chanElem.transformation;
 	transformation.frameStart = elem->frameStart;
 	transformation.frameEnd = elem->frameStart;
-	seqChannel.InsertChannelElement(chanElem, sequence.totalFrames);
+	seqChannel.InsertChannelElement(chanElem, sequence.totalFrames, sequence.framesPerSecond);
 }
 
 void TimelineEditor::AddSoundFXElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementSoundFX* elem)
@@ -845,7 +847,7 @@ void TimelineEditor::AddSoundFXElementToChannel(Sequence& sequence, int channelI
 	soundfx.sound = elem->sound;
 	soundfx.frameStart = elem->frameStart;
 	soundfx.frameEnd = elem->frameEnd;
-	seqChannel.InsertChannelElement(chanElem, sequence.totalFrames);
+	seqChannel.InsertChannelElement(chanElem, sequence.totalFrames, sequence.framesPerSecond);
 }
 
 void TimelineEditor::AddScriptElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementScript* elem)
@@ -856,7 +858,7 @@ void TimelineEditor::AddScriptElementToChannel(Sequence& sequence, int channelId
 	SequenceChannelElementScript& script = chanElem.script;
 	script.frameStart = elem->frameStart;
 	script.frameEnd = elem->frameStart;
-	seqChannel.InsertChannelElement(chanElem, sequence.totalFrames);
+	seqChannel.InsertChannelElement(chanElem, sequence.totalFrames, sequence.framesPerSecond);
 }
 
 void TimelineEditor::DeleteElementInFrameAtChannel(Sequence& sequence, int channelId, int frame)
@@ -879,7 +881,14 @@ void TimelineEditor::AddKeyframeToTransformationElementInFrameAtChannel(Sequence
 	if (elementIndex == -1) return;
 	ChannelElement& element = seqChannel.elements.at(elementIndex);
 	TransformationKeyFrame prevKeyframe = element.transformation.GetKeyFrameBeforeFrame(frame);
-	element.transformation.keyFrames.insert_or_assign(frame, prevKeyframe);
+	if (element.transformation.HasKeyframeAfterFrame(frame))
+	{
+		element.transformation.CreateInterpolatedKeyFrame(frame);
+	}
+	else
+	{
+		element.transformation.keyFrames.insert_or_assign(frame, prevKeyframe);
+	}
 }
 
 void TimelineEditor::RemoveKeyframeFromTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame)

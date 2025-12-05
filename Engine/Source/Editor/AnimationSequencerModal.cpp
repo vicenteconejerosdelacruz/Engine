@@ -26,6 +26,9 @@ void AnimationSequencerModal::Initialize(JUUID uuid)
 	model3D = uuid;
 	animationsSequences = model3D->animationSequences();
 	selectedTransformationKeyframe = nullptr;
+	keyFrameFrame = -1;
+	nextSelectedTransformationKeyframe = nullptr;
+	nextSelectedKeyFrameFrame = -1;
 }
 
 void AnimationSequencerModal::LoadSceneObjects()
@@ -58,7 +61,6 @@ void AnimationSequencerModal::LoadSceneObjects()
 		{ "freeposition", FromXMFLOAT3(cameraInitialPos) },
 		{ "projectionType", "Perspective" },
 		{ "rotation", FromXMFLOAT3(cameraInitialRot) },
-		{ "bboxlookrotation", FromXMFLOAT3(cameraInitialRot) },
 		{ "freerotation", FromXMFLOAT3(cameraInitialRot) },
 		{ "speed", 0.05000000074505806 },
 		{ "uuid", camera() },
@@ -151,7 +153,6 @@ void AnimationSequencerModal::LoadSceneObjects()
 	Step();
 	camera->at("freeposition") = FromXMFLOAT3(camera->position());
 	camera->at("freerotation") = FromXMFLOAT3(camera->rotation());
-	camera->at("bboxlookrotation") = FromXMFLOAT3(camera->rotation());
 }
 
 void AnimationSequencerModal::DestroySceneObjects()
@@ -203,7 +204,6 @@ void AnimationSequencerModal::Step()
 		XMFLOAT3 camPos;
 		XMStoreFloat3(&camPos, camPosV);
 		camera->position(camPos);
-		camera->at("rotation") = camera->at("bboxlookrotation");
 	}
 	else
 	{
@@ -213,7 +213,7 @@ void AnimationSequencerModal::Step()
 
 	if (selectedSequence != "")
 	{
-		Sequence& seq = animationsSequences.sequences.at(selectedSequence);
+		Sequence& seq = sequencePlayer.sequence;
 		if (playingSequence)
 		{
 			float totalTime = static_cast<float>(seq.totalFrames) / static_cast<float>(seq.framesPerSecond);
@@ -263,12 +263,16 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 
 	auto onSelectSequence = [this](std::string sequence)
 		{
+			if (selectedSequence != "" && animationsSequences.sequences.contains(selectedSequence))
+			{
+				animationsSequences.sequences.insert_or_assign(selectedSequence, sequencePlayer.sequence);
+			}
 			selectedSequence = sequence;
 			if (sequence != "")
 			{
 				Sequence& seq = animationsSequences.sequences.at(sequence);
-				timelineEditor.Init(renderable, seq);
 				sequencePlayer.SetSequence(seq, renderable());
+				timelineEditor.Init(renderable, sequencePlayer.sequence);
 				renderable->SetCurrentAnimation(&sequencePlayer);
 			}
 			playingSequence = false;
@@ -290,6 +294,10 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			timelineEditor.Reset();
 			sequencePlayer.SetSequence(Sequence(), "");
 			renderable->SetCurrentAnimation(nullptr);
+			selectedTransformationKeyframe = nullptr;
+			keyFrameFrame = -1;
+			nextSelectedTransformationKeyframe = nullptr;
+			nextSelectedKeyFrameFrame = -1;
 		};
 	auto onAddNewSequenceClicked = [this](std::string seqName)
 		{
@@ -299,8 +307,8 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			playingSequence = false;
 			playingSequenceTime = 0.0f;
 			Sequence& seq = animationsSequences.sequences.at(seqName);
-			timelineEditor.Init(renderable, seq);
 			sequencePlayer.SetSequence(seq, renderable());
+			timelineEditor.Init(renderable, sequencePlayer.sequence);
 			renderable->SetCurrentAnimation(&sequencePlayer);
 		};
 	auto onCancelAddNewSequenceClick = [this]()
@@ -383,18 +391,22 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			DrawModelPreview(modelPos, modelSize);
 			if (!selectedSequence.empty())
 			{
-				DrawTimelineController(timeControllerPos, timeControllerSize, animationsSequences.sequences.at(selectedSequence));
+				DrawTimelineController(timeControllerPos, timeControllerSize, sequencePlayer.sequence);
 			}
 			if (!selectedSequence.empty())
 			{
-				timelineEditor.Draw(animationsSequences.sequences.at(selectedSequence), sequencerPos, sequencerSize,
-					[&](TransformationKeyFrame* tkeyframe)
+				timelineEditor.Draw(sequencePlayer.sequence, sequencerPos, sequencerSize,
+					[&](TransformationKeyFrame* tkeyframe, int frame)
 					{
-						selectedTransformationKeyframe = tkeyframe;
+						selectedTransformationKeyframe = nullptr;
+						keyFrameFrame = -1;
+						nextSelectedTransformationKeyframe = tkeyframe;
+						nextSelectedKeyFrameFrame = frame;
 					},
 					[&]()
 					{
 						selectedTransformationKeyframe = nullptr;
+						keyFrameFrame = -1;
 					},
 					[&](int channel, int frame, SequenceChannelElementScript* scriptToEdit)
 					{
@@ -406,7 +418,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			}
 			if (selectedTransformationKeyframe != nullptr)
 			{
-				DrawTransformationKeyFrameAttributes(*selectedTransformationKeyframe, keyframePos, keyframeSize);
+				DrawTransformationKeyFrameAttributes(*selectedTransformationKeyframe, keyFrameFrame, keyframePos, keyframeSize);
 			}
 			DrawSaveAndExitButtons(saveExitBtnPos, saveExitBtnSize, exit, saveexit);
 			if (addNewSequence)
@@ -418,7 +430,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 		{
 			DrawScriptEdition(
 				selectedScriptToEditContent,
-				animationsSequences.sequences.at(selectedSequence),
+				sequencePlayer.sequence,
 				selectedSequence,
 				selectedScriptChannelFrame,
 				scriptEditPos,
@@ -438,6 +450,14 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 		ImGui::EndPopup();
 	}
 	ImGui::PopStyleVar(2);
+
+	if (nextSelectedTransformationKeyframe != nullptr)
+	{
+		selectedTransformationKeyframe = nextSelectedTransformationKeyframe;
+		keyFrameFrame = nextSelectedKeyFrameFrame;
+		nextSelectedTransformationKeyframe = nullptr;
+		nextSelectedKeyFrameFrame = -1;
+	}
 
 	if (exit)
 	{
@@ -561,7 +581,7 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 		if (adjustToBoundingBox)
 		{
 			std::vector<JObject*> camV({ GetSceneObjectPointer(camera()) });
-			DrawValue<XMFLOAT3, jedv_t_float3_angle>()("bboxlookrotation", camV);
+			DrawValue<XMFLOAT3, jedv_t_float3_angle>()("rotation", camV);
 			DrawValue<float, jedv_t_float>()("modelDistanceScale", camV);
 		}
 		else
@@ -581,7 +601,7 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 	ImGui::PopStyleVar();
 }
 
-void AnimationSequencerModal::DrawTransformationKeyFrameAttributes(TransformationKeyFrame& keyframe, ImVec2 pos, ImVec2 size)
+void AnimationSequencerModal::DrawTransformationKeyFrameAttributes(TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size)
 {
 	const int defaultTableFlags = ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_NoPadInnerX;
 
@@ -594,7 +614,7 @@ void AnimationSequencerModal::DrawTransformationKeyFrameAttributes(Transformatio
 	ImGui::SetNextWindowSize(attsSize, 0);
 	ImGui::BeginChild("keyframe-atts", attsSize, 0);
 	{
-		ImGui::Text("keyframe");
+		ImGui::Text(std::string(std::string("keyframe at frame#") + std::to_string(keyFrameFrame)).c_str());;
 
 		ImGui::Text("position");
 		ImGui::PushID("keyframe-position");
@@ -902,6 +922,11 @@ void AnimationSequencerModal::Exit()
 
 void AnimationSequencerModal::SaveAndExit()
 {
+	if (selectedSequence != "" && animationsSequences.sequences.contains(selectedSequence))
+	{
+		animationsSequences.sequences.insert_or_assign(selectedSequence, sequencePlayer.sequence);
+	}
+
 	renderable->SetCurrentAnimation(nullptr);
 	destroying = true;
 	showing = false;

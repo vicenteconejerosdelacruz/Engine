@@ -14,17 +14,17 @@ struct TimelineEditor
 	bool DrawPlusButton(ImVec2 pos, ImVec2 size, bool canInteract);
 	void DrawAddChannelButton(Sequence& sequence, ImVec2 pos, bool canInteract);
 	void DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract,
-		std::function<void(TransformationKeyFrame*)> setTransformationKeyFrame
+		std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame
 	);
 	void DrawVerticalScrollbar(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract);
 	void DrawHorizontalScrollbar(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract);
 	void DrawMarkers(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract);
 	void DrawSelectedFrameVerticalLine(ImVec2 timelinePos, ImVec2 timelineSize);
-	void DrawActionPopup(Sequence& sequence, std::function<void(TransformationKeyFrame*)> setTransformationKeyFrame,
+	void DrawActionPopup(Sequence& sequence, std::function<void(TransformationKeyFrame*, int frame)> setTransformationKeyFrame,
 		std::function<void()> deleteTransformationKeyFrame,
 		std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit);
 	void Draw(Sequence& sequence, ImVec2 pos, ImVec2 size,
-		std::function<void(TransformationKeyFrame*)> setTransformationKeyFrame,
+		std::function<void(TransformationKeyFrame*, int frame)> setTransformationKeyFrame,
 		std::function<void()> deleteTransformationKeyFrame,
 		std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit
 	);

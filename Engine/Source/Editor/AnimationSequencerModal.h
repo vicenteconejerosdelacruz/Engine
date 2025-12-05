@@ -34,7 +34,7 @@ struct AnimationSequencerModal
 	void DrawTitleBar(const char* title, ImVec2 pos, ImVec2 size, bool& exit);
 	void DrawSequenceSelector(ImVec2 curPos, std::function<void(std::string)> onSelectSequence, std::function<void(std::string)> onEraseSequence, std::function<void()> onAddSequence);
 	void DrawModelPreview(ImVec2 curPos, ImVec2 size);
-	void DrawTransformationKeyFrameAttributes(TransformationKeyFrame& keyframe, ImVec2 pos, ImVec2 size);
+	void DrawTransformationKeyFrameAttributes(TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size);
 	void DrawTimelineController(ImVec2 curPos, ImVec2 size, Sequence& sequence);
 	void DrawSaveAndExitButtons(ImVec2 curPos, ImVec2 size, bool& exit, bool& saveexit);
 	void DrawAddNewSequencePopup(ImVec2 pos, ImVec2 size, std::string& newSeqName, std::function<void(std::string)> onAddNewSequenceClicked, std::function<void()> onCancelAddNewSequenceClick);
@@ -80,6 +80,10 @@ struct AnimationSequencerModal
 	//timeline editor
 	TimelineEditor timelineEditor;
 	TransformationKeyFrame* selectedTransformationKeyframe;
+	int keyFrameFrame;
+	//this "next" is because ImGui will change data if we set the pointer directly
+	TransformationKeyFrame* nextSelectedTransformationKeyframe;
+	int nextSelectedKeyFrameFrame;
 	SequencePlayer sequencePlayer;
 
 	//script editor

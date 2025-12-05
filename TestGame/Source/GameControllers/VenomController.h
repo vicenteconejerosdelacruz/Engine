@@ -48,6 +48,11 @@ namespace Game
 			"Punch2",
 		};
 
+		static inline std::vector<std::string> DashAnimations =
+		{
+			"RunJumpAttack1","RunJumpAttack2"
+		};
+
 		//Constructor and Binding
 		VenomController();
 		virtual void Map(JUUID so);
@@ -61,7 +66,11 @@ namespace Game
 		void VenomReady();
 		void StartVenomNextPunchWindow();
 		void EvaluateVenomNextPunch();
+		void VenomBeginRunJump();
 		void VenomRunJumpLanding();
+		void VenomBeginJump();
+		void VenomBeginFall();
+		void VenomEndJumpLanding();
 
 		//Scene Object
 		void MoveForward(float step);
@@ -96,6 +105,8 @@ namespace Game
 		void Attacking1();
 		//Leaves
 		void LeaveAttack1();
+		void LeaveJumping();
+		void LeaveRunningJumping();
 
 		//State machine
 		GameStatesMachine<VenomStates> vsm;
@@ -121,5 +132,22 @@ namespace Game
 		bool attack1Window = false;
 		bool newAttack1 = false;
 		int currentAttack1Animation = 0;
+
+		//jumping
+		struct
+		{
+			bool jumping;
+			bool falling;
+			bool kicking;
+			std::unique_ptr<tween> jumpTween;
+			std::unique_ptr<tween> fallTween;
+		} JumpingStateData;
+
+		//runningJump
+		struct
+		{
+			bool dash;
+			std::unique_ptr<tween> jumpTween;
+		} RunningJumpStateData;
 	};
 }
