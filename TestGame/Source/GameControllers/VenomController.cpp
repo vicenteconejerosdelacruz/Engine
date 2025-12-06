@@ -35,7 +35,7 @@ namespace Game
 	static const float runSpeed = 10.0f;
 
 	//Scene Bounds(for now)
-	static XMFLOAT2 zBounds = { -4.1f ,2.7f };
+	static XMFLOAT2 zBounds = { -6.8f ,0.90f };
 
 	//Jumping
 	static const float jumpHeight = 3.5f;
@@ -43,10 +43,15 @@ namespace Game
 
 	//RunningJump
 	static const int runningJumpTime = 375;
-	static const int runningJumpAttackTime = 400;
+	static const int runningJumpAttackTime = 300;
 
 	//JS Module
 	static std::unique_ptr<v8pp::module> v8ppModule = nullptr;
+	static void animationUseTransformation(bool value)
+	{
+		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
+		venom->venom->animationUseTransformation(value);
+	}
 	static void VenomReady()
 	{
 		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
@@ -95,7 +100,8 @@ namespace Game
 				{
 
 					v8ppModule = std::make_unique<v8pp::module>(isolate);
-					v8ppModule->function("PlayerReady", &Game::VenomReady).
+					v8ppModule->function("animationUseTransformation", &Game::animationUseTransformation).
+						function("PlayerReady", &Game::VenomReady).
 						function("StartNextPunchWindow", &Game::StartVenomNextPunchWindow).
 						function("EvaluateNextPunch", &Game::EvaluateVenomNextPunch).
 						function("SwitchToState", &Game::SwitchVenomToState).
@@ -439,11 +445,13 @@ namespace Game
 
 	void VenomController::EnterWalking()
 	{
+		venom->animationUseTransformation(false);
 		venom->SetCurrentAnimation("Walk", 0.0f, 1.0f, true, true);
 	}
 
 	void VenomController::EnterRunning()
 	{
+		venom->animationUseTransformation(false);
 		venom->SetCurrentAnimation("Run", 0.0f, 1.0f, true, true);
 	}
 
@@ -456,7 +464,7 @@ namespace Game
 	void VenomController::EnterRunningJump()
 	{
 		runningJumpLeftStick = leftStick;
-		venom->animationUseTransformation(false);
+		venom->animationUseTransformation(true);
 		venom->SetCurrentAnimation("RunJumpBegin");
 		RunningJumpStateData.jumpTween = std::make_unique<tween>(tween(0.0f, 1.0f, runningJumpTime, tween::easing::linear));
 		RunningJumpStateData.dash = false;
@@ -584,12 +592,23 @@ namespace Game
 			if (t == 1.0f)
 			{
 				RunningJumpStateData.jumpTween = nullptr;
-				venom->SetCurrentAnimation("RunJumpLanding");
+				if (!RunningJumpStateData.dash)
+				{
+					venom->animationUseTransformation(true);
+					venom->SetCurrentAnimation("RunJumpLanding");
+				}
+				else
+				{
+					std::string dashLandingAnim = DashLandingAnimations.at(RunningJumpStateData.dashAnimationIdx);
+					venom->SetCurrentAnimation(dashLandingAnim);
+				}
 			}
 			else if (!RunningJumpStateData.dash && ShouldAttackX())
 			{
 				std::srand(std::time(0));
-				std::string dashAnim = DashAnimations.at(std::rand() % DashAnimations.size());
+				RunningJumpStateData.dashAnimationIdx = std::rand() % DashAnimations.size();
+				std::string dashAnim = DashAnimations.at(RunningJumpStateData.dashAnimationIdx);
+				venom->animationUseTransformation(true);
 				venom->SetCurrentAnimation(dashAnim);
 				RunningJumpStateData.jumpTween = std::make_unique<tween>(tween(0.0f, 1.0f, runningJumpAttackTime, tween::easing::linear));
 				RunningJumpStateData.dash = true;

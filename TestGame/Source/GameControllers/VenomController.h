@@ -52,6 +52,10 @@ namespace Game
 		{
 			"RunJumpAttack1","RunJumpAttack2"
 		};
+		static inline std::vector<std::string> DashLandingAnimations =
+		{
+			"RunJumpAttack1Landing","RunJumpAttack2Landing"
+		};
 
 		//Constructor and Binding
 		VenomController();
@@ -147,6 +151,7 @@ namespace Game
 		struct
 		{
 			bool dash;
+			int dashAnimationIdx;
 			std::unique_ptr<tween> jumpTween;
 		} RunningJumpStateData;
 	};
