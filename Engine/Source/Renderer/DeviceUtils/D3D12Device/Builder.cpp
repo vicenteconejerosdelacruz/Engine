@@ -69,6 +69,7 @@ namespace DeviceUtils {
 				D3D12_MESSAGE_ID_CREATEBLENDSTATE_BLENDOP_WARNING,
 				D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,				// I'm really not sure how to avoid this message.
 				D3D12_MESSAGE_ID_DRAW_EMPTY_SCISSOR_RECTANGLE,
+				D3D12_MESSAGE_ID_DRAW_POTENTIALLY_OUTSIDE_OF_VALID_RENDER_AREA,
 				//D3D12_MESSAGE_ID_MAP_INVALID_NULLRANGE,										// This warning occurs when using capture frame while graphics debugging.
 				//D3D12_MESSAGE_ID_UNMAP_INVALID_NULLRANGE,									// This warning occurs when using capture frame while graphics debugging.
 				//D3D12_MESSAGE_ID_INVALID_DESCRIPTOR_HANDLE,									// This occurs when there are uninitialized descriptors in a descriptor table, even when a shader does not access the missing descriptors.
