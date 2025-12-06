@@ -39,6 +39,7 @@ struct TimelineChannel
 	static inline ImU32 channelToolbarNameAreaColor = rgba(180, 180, 180, 1);
 	static inline ImVec2 deleteChannelBtnSize = ImVec2(10.0f, 10.0f);
 	static inline ImU32 deleteChannelButtonGlyphColor = rgba(32, 32, 32, 1);
+	static inline ImU32 animationLineColor = rgba(10, 10, 10, 1);
 
 	ImVec2 pos;
 	ImVec2 size;

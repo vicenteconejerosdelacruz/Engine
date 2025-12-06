@@ -47,8 +47,10 @@ struct TimelineEditor
 	void AddScriptElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementScript* elem);
 	void DeleteElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
 	void SplitElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
+	void ToggleAnimationElementDirectionInChannelAtFrame(Sequence& sequence, int channelId, int frame);
 	void AddKeyframeToTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
 	void RemoveKeyframeFromTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
+	void FlipTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
 	void OpenScriptEditionForElementInFrameAtChannel(Sequence& sequence, int channelId, int frame,
 		std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit);
 	void SetFrameAtMouseXCoord(Sequence& sequence, ImVec2 markerPos, ImVec2 mousePos);

@@ -53,6 +53,7 @@ struct SequenceChannelElementTransformation : SequenceChannelElement
 	std::tuple<int, TransformationKeyFrame, int, TransformationKeyFrame> GetKeyframesBetweenFrame(int frame);
 	XMMATRIX InterpolateKeyframes(TransformationKeyFrame keyA, TransformationKeyFrame keyB, int frameAfterA, int framesBetweenKeyframes);
 	void CreateInterpolatedKeyFrame(int frame);
+	void FlipKeyFrames();
 
 	std::unordered_map<int, TransformationKeyFrame> keyFrames;
 };

@@ -32,12 +32,14 @@ struct AnimationSequencerModal
 	void Step();
 	void DrawSequencer(const char* title, ImVec2 pos, ImVec2 size);
 	void DrawTitleBar(const char* title, ImVec2 pos, ImVec2 size, bool& exit);
-	void DrawSequenceSelector(ImVec2 curPos, std::function<void(std::string)> onSelectSequence, std::function<void(std::string)> onEraseSequence, std::function<void()> onAddSequence);
+	void DrawSequenceSelector(ImVec2 curPos, std::function<void(std::string)> onSelectSequence, std::function<void(std::string)> onEraseSequence, std::function<void(std::string)> onRenameSequence, std::function<void(std::string)> onCloneSequence, std::function<void()> onAddSequence);
 	void DrawModelPreview(ImVec2 curPos, ImVec2 size);
 	void DrawTransformationKeyFrameAttributes(TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size);
 	void DrawTimelineController(ImVec2 curPos, ImVec2 size, Sequence& sequence);
 	void DrawSaveAndExitButtons(ImVec2 curPos, ImVec2 size, bool& exit, bool& saveexit);
-	void DrawAddNewSequencePopup(ImVec2 pos, ImVec2 size, std::string& newSeqName, std::function<void(std::string)> onAddNewSequenceClicked, std::function<void()> onCancelAddNewSequenceClick);
+	void DrawAddNewSequencePopup(ImVec2 pos, ImVec2 size, std::string& newSeqName, std::function<void(std::string)> onAddNewSequenceClicked, std::function<void()> onCancelAddNewSequenceClicked);
+	void DrawSequenceRenamePopup(ImVec2 pos, ImVec2 size, std::string& newSeqName, std::function<void(std::string)> onRenameSequenceClicked, std::function<void()> onCancelRenameSequenceClicked);
+	void DrawSequenceCloningPopup(ImVec2 pos, ImVec2 size, std::string& newSeqName, std::function<void(std::string)> onCloneSequenceClicked, std::function<void()> onCancelCloneSequenceClicked);
 	void DrawScriptEdition(std::string& content, Sequence& sequence, std::string sequenceName, std::tuple<int, int> channelFrame, ImVec2 pos, ImVec2 size, std::function<void()> onSave, std::function<void()> onCancel);
 
 	void Exit();
@@ -70,6 +72,12 @@ struct AnimationSequencerModal
 	std::string newSequenceName;
 	AnimationSequences animationsSequences;
 	std::string selectedSequence;
+	//Sequence renaming
+	bool selectedSequenceRenaming;
+	std::string selectedSequenceNewName;
+	//Sequence cloning
+	bool selectedSequenceCloning;
+	std::string selectedSequenceCloneName;
 
 	//player
 	bool playingSequence = false;
@@ -90,4 +98,9 @@ struct AnimationSequencerModal
 	std::tuple<int, int> selectedScriptChannelFrame = std::make_tuple(-1, -1);
 	SequenceChannelElementScript* selectedScriptToEdit;
 	std::string selectedScriptToEditContent;
+
+	//preview model
+	bool mousePreviewLeftClickPressed;
+	ImVec2 mousePreviewLeftClickLastCoords;
+	bool wheelCapture;
 };

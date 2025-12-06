@@ -399,28 +399,28 @@ namespace Scene
 			{ SO_Renderables, [str2JUUIDName](JUUID uuid)
 				{
 					RenderableUUID o = uuid;
-					if (o->hidden()) return JUUIDName();
+					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Renderables), o->uuid(),o->name());
 				}
 			},
 			{ SO_Cameras, [str2JUUIDName](JUUID uuid)
 				{
 					CameraUUID o = uuid;
-					if (o->hidden()) return JUUIDName();
+					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Cameras), o->uuid(),o->name());
 				}
 			},
 			{ SO_Lights, [str2JUUIDName](JUUID uuid)
 				{
 					LightUUID o = uuid;
-					if (o->hidden()) return JUUIDName();
+					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Lights), o->uuid(),o->name());
 				}
 			},
 			{ SO_SoundEffects, [str2JUUIDName](JUUID uuid)
 				{
 					SoundFXUUID o = uuid;
-					if (o->hidden()) return JUUIDName();
+					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_SoundEffects), o->uuid(),o->name());
 				}
 			}

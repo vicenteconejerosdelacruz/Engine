@@ -1939,6 +1939,7 @@ namespace Editor
 			if (!it->second.empty()) continue;
 
 			auto so = GetSceneObjectPointer(it->first);
+			if (so->contains("hidden") && so->at("hidden") == true) continue;
 
 			it->second = so->CreateBillboard(camera);
 			if (!it->second.empty())
@@ -1992,9 +1993,12 @@ namespace Editor
 	{
 		for (auto it = billboardRegistry.begin(); it != billboardRegistry.end(); )
 		{
-			Editor::UnbindRenderableFromPickingPass(it->second);
-			EraseRenderableFromRenderables(it->second());
-			DeleteRenderableSceneObject(it->second());
+			if (it->second() != "")
+			{
+				Editor::UnbindRenderableFromPickingPass(it->second);
+				EraseRenderableFromRenderables(it->second());
+				DeleteRenderableSceneObject(it->second());
+			}
 			it = billboardRegistry.erase(it);
 		}
 		billboardsToDestroy.clear();

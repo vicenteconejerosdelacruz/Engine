@@ -197,3 +197,16 @@ void SequenceChannelElementTransformation::CreateInterpolatedKeyFrame(int frame)
 	knew.rotation = rot;
 	keyFrames.insert_or_assign(frame, knew);
 }
+
+void SequenceChannelElementTransformation::FlipKeyFrames()
+{
+	std::unordered_map<int, TransformationKeyFrame> newKeyFrames;
+
+	for (auto& [frame, keyframe] : keyFrames)
+	{
+		int newFrame = frameEnd - frame - frameStart;
+		newKeyFrames.insert_or_assign(newFrame, keyframe);
+	}
+
+	keyFrames = newKeyFrames;
+}

@@ -22,13 +22,31 @@ void AnimationSequencerModal::Initialize(JUUID uuid)
 {
 	showing = true;
 	initializing = true;
+	destroying = false;
 	model3dUUID = uuid;
 	model3D = uuid;
+	cameraInitialPos = XMFLOAT3({ 0.0, 5.21317195892334, -17.224170684814453 });
+	cameraInitialRot = XMFLOAT3({ 12.898999214172363, 0.0, 0.0 });
+	addNewSequence = false;
+	newSequenceName = "";
 	animationsSequences = model3D->animationSequences();
+	selectedSequence = "";
+	playingSequence = false;
+	playingSequenceTime = 0.0f;
+	playingSequenceLoop = false;
+	adjustToBoundingBox = true;
 	selectedTransformationKeyframe = nullptr;
 	keyFrameFrame = -1;
 	nextSelectedTransformationKeyframe = nullptr;
 	nextSelectedKeyFrameFrame = -1;
+	selectedSequenceRenaming = false;
+	selectedSequenceNewName = "";
+	selectedSequenceCloning = false;
+	selectedSequenceCloneName = "";
+	//preview model
+	mousePreviewLeftClickPressed = false;
+	mousePreviewLeftClickLastCoords = ImVec2();
+	wheelCapture = false;
 }
 
 void AnimationSequencerModal::LoadSceneObjects()
@@ -40,9 +58,6 @@ void AnimationSequencerModal::LoadSceneObjects()
 	directionalLight = getUUID();
 	renderable = getUUID();
 	floor = getUUID();
-
-	cameraInitialPos = XMFLOAT3({ 0.0, 5.21317195892334, -17.224170684814453 });
-	cameraInitialRot = XMFLOAT3({ 12.898999214172363, 0.0, 0.0 });
 
 	nlohmann::json cameraJson =
 	{
@@ -69,6 +84,7 @@ void AnimationSequencerModal::LoadSceneObjects()
 		},
 		{ "mouseController", false },
 		{ "useSwapChain", false },
+		{ "hidden", true },
 		{ "modelDistanceScale", 1.0f } //dynamic magic
 	};
 
@@ -263,6 +279,11 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 
 	auto onSelectSequence = [this](std::string sequence)
 		{
+			selectedTransformationKeyframe = nullptr;
+			keyFrameFrame = -1;
+			nextSelectedTransformationKeyframe = nullptr;
+			nextSelectedKeyFrameFrame = -1;
+
 			if (selectedSequence != "" && animationsSequences.sequences.contains(selectedSequence))
 			{
 				animationsSequences.sequences.insert_or_assign(selectedSequence, sequencePlayer.sequence);
@@ -299,6 +320,16 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			nextSelectedTransformationKeyframe = nullptr;
 			nextSelectedKeyFrameFrame = -1;
 		};
+	auto onRenameSequence = [&](std::string sequence)
+		{
+			selectedSequenceRenaming = true;
+			selectedSequenceNewName = sequence;
+		};
+	auto onCloneSequence = [&](std::string sequence)
+		{
+			selectedSequenceCloning = true;
+			selectedSequenceCloneName = sequence;
+		};
 	auto onAddNewSequenceClicked = [this](std::string seqName)
 		{
 			addNewSequence = false;
@@ -311,9 +342,34 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			timelineEditor.Init(renderable, sequencePlayer.sequence);
 			renderable->SetCurrentAnimation(&sequencePlayer);
 		};
-	auto onCancelAddNewSequenceClick = [this]()
+	auto onCancelAddNewSequenceClicked = [this]()
 		{
 			addNewSequence = false;
+		};
+	auto onRenameSequenceClicked = [&](std::string newName)
+		{
+			animationsSequences.sequences.insert_or_assign(newName, animationsSequences.sequences.at(selectedSequence));
+			animationsSequences.sequences.erase(selectedSequence);
+			selectedSequence = newName;
+			selectedSequenceRenaming = false;
+			selectedSequenceNewName = "";
+		};
+	auto onCancelRenameSequenceClicked = [&]
+		{
+			selectedSequenceRenaming = false;
+			selectedSequenceNewName = "";
+		};
+	auto onCloneSequenceClicked = [&](std::string newName)
+		{
+			animationsSequences.sequences.insert_or_assign(newName, animationsSequences.sequences.at(selectedSequence));
+			selectedSequence = newName;
+			selectedSequenceCloning = false;
+			selectedSequenceCloneName = "";
+		};
+	auto onCancelCloneSequenceClicked = [&]
+		{
+			selectedSequenceCloning = false;
+			selectedSequenceCloneName = "";
 		};
 	auto getTitleValues = [pos, size]()
 		{
@@ -387,7 +443,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 		DrawTitleBar(title, titlePos, titleSize, exit);
 		if (selectedScriptToEdit == nullptr)
 		{
-			DrawSequenceSelector(seqSelPos, onSelectSequence, onEraseSequence, onAddNewSequence);
+			DrawSequenceSelector(seqSelPos, onSelectSequence, onEraseSequence, onRenameSequence, onCloneSequence, onAddNewSequence);
 			DrawModelPreview(modelPos, modelSize);
 			if (!selectedSequence.empty())
 			{
@@ -423,7 +479,15 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			DrawSaveAndExitButtons(saveExitBtnPos, saveExitBtnSize, exit, saveexit);
 			if (addNewSequence)
 			{
-				DrawAddNewSequencePopup(newSeqPos, newSeqSize, newSequenceName, onAddNewSequenceClicked, onCancelAddNewSequenceClick);
+				DrawAddNewSequencePopup(newSeqPos, newSeqSize, newSequenceName, onAddNewSequenceClicked, onCancelAddNewSequenceClicked);
+			}
+			if (selectedSequenceRenaming)
+			{
+				DrawSequenceRenamePopup(newSeqPos, newSeqSize, selectedSequenceNewName, onRenameSequenceClicked, onCancelRenameSequenceClicked);
+			}
+			if (selectedSequenceCloning)
+			{
+				DrawSequenceCloningPopup(newSeqPos, newSeqSize, selectedSequenceCloneName, onCloneSequenceClicked, onCancelCloneSequenceClicked);
 			}
 		}
 		else
@@ -504,13 +568,15 @@ void AnimationSequencerModal::DrawSequenceSelector(
 	ImVec2 screenPos,
 	std::function<void(std::string)> onSelectSequence,
 	std::function<void(std::string)> onEraseSequence,
+	std::function<void(std::string)> onRenameSequence,
+	std::function<void(std::string)> onCloneSequence,
 	std::function<void()> onAddSequence
 )
 {
 	std::string title = "Sequence";
 
 	ImVec2 textSize = ImGui::CalcTextSize(title.c_str());
-	ImVec2 selectorSize(200, 50);
+	ImVec2 selectorSize(270, 60);
 	ImVec2 windowSize(textSize.x + selectorSize.x + 6, selectorSize.y);
 	ImVec2 windowPos(screenPos.x + 4, screenPos.y + 2);
 
@@ -541,8 +607,34 @@ void AnimationSequencerModal::DrawSequenceSelector(
 			onAddSequence();
 		}
 		ImGui::SameLine();
-		ImGui::SetNextItemWidth(selectorSize.x);
+		ImVec2 comboSize(selectorSize.x - 50, selectorSize.y);
+		ImGui::SetNextItemWidth(comboSize.x);
 		ImGui::DrawComboSelection(selectedSequence, sequences, onSelectSequence);
+		ImGui::SameLine();
+		ImGui::BeginChild("right-buttons");
+		{
+			ImGui::PushID("rename-button");
+			ImGui::DrawItemWithEnabledState([&]
+				{
+					if (ImGui::Button("Rename"))
+					{
+						onRenameSequence(selectedSequence);
+					}
+				}
+			, selectedSequence != "");
+			ImGui::PopID();
+			ImGui::PushID("clone-button");
+			ImGui::DrawItemWithEnabledState([&]
+				{
+					if (ImGui::Button("Clone"))
+					{
+						onCloneSequence(selectedSequence);
+					}
+				}
+			, selectedSequence != "");
+			ImGui::PopID();
+		}
+		ImGui::EndChild();
 	}
 	ImGui::EndChild();
 	ImGui::PopStyleVar();
@@ -556,11 +648,64 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
 
+	ImGuiIO& io = ImGui::GetIO();
+	ImVec2 mouse = io.MousePos;
+
 	ImGui::SetNextWindowSize(size, 0);
 	ImGui::SetNextWindowPos(curPos, 0);
+
+	ImRect previewRect(curPos, ImVec2(curPos.x + size.x, curPos.y + size.y));
+
 	ImGui::BeginChild("model-preview", size, 0);
 	{
 		auto& pass = camera->renderPassesUUID.at(0);
+		bool mouseInPreviewArea = previewRect.Contains(mouse);
+		if (mouseInPreviewArea)
+		{
+			if (!wheelCapture)
+			{
+				wheelCapture = true;
+			}
+			else
+			{
+				if (adjustToBoundingBox)
+				{
+					float modelDistanceScale = camera->at("modelDistanceScale");
+					modelDistanceScale += io.MouseWheel;
+					camera->at("modelDistanceScale") = modelDistanceScale;
+				}
+			}
+			if (ImGui::IsMouseDown(0) && !mousePreviewLeftClickPressed)
+			{
+				mousePreviewLeftClickPressed = true;
+				mousePreviewLeftClickLastCoords = mouse;
+			}
+		}
+		else
+		{
+			wheelCapture = false;
+		}
+
+		if (mousePreviewLeftClickPressed)
+		{
+			if (!ImGui::IsMouseDown(0))
+			{
+				mousePreviewLeftClickPressed = false;
+			}
+			else
+			{
+				ImVec2 delta(mouse.x - mousePreviewLeftClickLastCoords.x, mouse.y - mousePreviewLeftClickLastCoords.y);
+				mousePreviewLeftClickLastCoords = mouse;
+				if (adjustToBoundingBox)
+				{
+					XMFLOAT3 camRot = camera->rotation();
+					camRot.y += delta.x;
+					camRot.x += delta.y;
+					camera->rotation(camRot);
+				}
+			}
+		}
+
 		ImGui::DrawTextureImage(
 			(ImTextureID)
 			pass->renderToTexturePass->renderToTexture[0]->gpuTextureHandle.ptr,
@@ -828,7 +973,7 @@ void AnimationSequencerModal::DrawSaveAndExitButtons(ImVec2 curPos, ImVec2 size,
 	ImGui::PopStyleVar();
 }
 
-void AnimationSequencerModal::DrawAddNewSequencePopup(ImVec2 curPos, ImVec2 size, std::string& newSeqName, std::function<void(std::string)> onAddNewSequenceClicked, std::function<void()> onCancelAddNewSequenceClick)
+void AnimationSequencerModal::DrawAddNewSequencePopup(ImVec2 pos, ImVec2 size, std::string& newSeqName, std::function<void(std::string)> onAddNewSequenceClicked, std::function<void()> onCancelAddNewSequenceClick)
 {
 	std::set<std::string> existingSequences = { "" };
 	for (auto& [seqName, _] : animationsSequences.sequences)
@@ -839,7 +984,7 @@ void AnimationSequencerModal::DrawAddNewSequencePopup(ImVec2 curPos, ImVec2 size
 	const char* title = "Add new sequence";
 	ImGui::OpenPopup(title);
 
-	ImGui::SetNextWindowPos(curPos);
+	ImGui::SetNextWindowPos(pos);
 	ImGui::SetNextWindowSize(size);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
@@ -857,7 +1002,7 @@ void AnimationSequencerModal::DrawAddNewSequencePopup(ImVec2 curPos, ImVec2 size
 
 		ImGui::SetCursorPosX(start_x);
 
-		ImGui::DrawItemWithEnabledState([this, newSeqName, onAddNewSequenceClicked]
+		ImGui::DrawItemWithEnabledState([&]
 			{
 				if (ImGui::Button("Add"))
 				{
@@ -871,6 +1016,108 @@ void AnimationSequencerModal::DrawAddNewSequencePopup(ImVec2 curPos, ImVec2 size
 		{
 			onCancelAddNewSequenceClick();
 			addNewSequence = false;
+		}
+
+		ImGui::EndPopup();
+	}
+	ImGui::PopStyleVar();
+	ImGui::PopStyleVar();
+}
+
+void AnimationSequencerModal::DrawSequenceRenamePopup(ImVec2 pos, ImVec2 size, std::string& newSeqName, std::function<void(std::string)> onRenameSequenceClicked, std::function<void()> onCancelRenameSequenceClicked)
+{
+	std::set<std::string> existingSequences = { "" };
+	for (auto& [seqName, _] : animationsSequences.sequences)
+	{
+		existingSequences.insert(seqName);
+	}
+
+	const char* title = "Rename sequence";
+	ImGui::OpenPopup(title);
+
+	ImGui::SetNextWindowPos(pos);
+	ImGui::SetNextWindowSize(size);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
+	if (ImGui::BeginPopupModal(title, nullptr, popupChildFlag))
+	{
+		ImGui::SetNextItemWidth(size.x);
+		ImGui::InputText("##", &newSeqName);
+
+		float button1_width = ImGui::CalcTextSize("Rename").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+		float button2_width = ImGui::CalcTextSize("Cancel").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+		float total_width = button1_width + button2_width + ImGui::GetStyle().ItemSpacing.x;
+
+		float window_width = ImGui::GetContentRegionAvail().x;
+		float start_x = (window_width - total_width) * 0.5f;
+
+		ImGui::SetCursorPosX(start_x);
+
+		ImGui::DrawItemWithEnabledState([&]
+			{
+				if (ImGui::Button("Rename"))
+				{
+					onRenameSequenceClicked(newSeqName);
+				}
+			}
+		, !existingSequences.contains(newSeqName));
+
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel"))
+		{
+			onCancelRenameSequenceClicked();
+			selectedSequenceRenaming = false;
+		}
+
+		ImGui::EndPopup();
+	}
+	ImGui::PopStyleVar();
+	ImGui::PopStyleVar();
+}
+
+void AnimationSequencerModal::DrawSequenceCloningPopup(ImVec2 pos, ImVec2 size, std::string& newSeqName, std::function<void(std::string)> onCloneSequenceClicked, std::function<void()> onCancelCloneSequenceClicked)
+{
+	std::set<std::string> existingSequences = { "" };
+	for (auto& [seqName, _] : animationsSequences.sequences)
+	{
+		existingSequences.insert(seqName);
+	}
+
+	const char* title = "Clone sequence";
+	ImGui::OpenPopup(title);
+
+	ImGui::SetNextWindowPos(pos);
+	ImGui::SetNextWindowSize(size);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
+	if (ImGui::BeginPopupModal(title, nullptr, popupChildFlag))
+	{
+		ImGui::SetNextItemWidth(size.x);
+		ImGui::InputText("##", &newSeqName);
+
+		float button1_width = ImGui::CalcTextSize("Clone").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+		float button2_width = ImGui::CalcTextSize("Cancel").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+		float total_width = button1_width + button2_width + ImGui::GetStyle().ItemSpacing.x;
+
+		float window_width = ImGui::GetContentRegionAvail().x;
+		float start_x = (window_width - total_width) * 0.5f;
+
+		ImGui::SetCursorPosX(start_x);
+
+		ImGui::DrawItemWithEnabledState([&]
+			{
+				if (ImGui::Button("Clone"))
+				{
+					onCloneSequenceClicked(newSeqName);
+				}
+			}
+		, !existingSequences.contains(newSeqName));
+
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel"))
+		{
+			onCancelCloneSequenceClicked();
+			selectedSequenceCloning = false;
 		}
 
 		ImGui::EndPopup();

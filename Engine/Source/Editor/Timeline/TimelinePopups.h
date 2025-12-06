@@ -44,8 +44,11 @@ enum InteractPopups
 {
 	IP_Delete,
 	IP_Split,
+	IP_Animation_Forward,
+	IP_Animation_Backward,
 	IP_Transformation_AddKeyframe,
 	IP_Transformation_RemoveKeyframe,
+	IP_Transformation_Flip,
 	IP_Script_Edit
 };
 

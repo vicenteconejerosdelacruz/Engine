@@ -468,8 +468,8 @@ void AppStep() {
 		{
 			GameInputStep();
 			TemplatesStep(timer);
-			SceneObjectsStep(timer);
 			GameStep();
+			SceneObjectsStep(timer);
 		}
 	);
 	Render();

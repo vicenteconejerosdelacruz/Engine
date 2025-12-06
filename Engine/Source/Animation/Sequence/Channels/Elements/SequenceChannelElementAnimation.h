@@ -14,4 +14,5 @@ struct SequenceChannelElementAnimation : SequenceChannelElement
 	std::string animation;
 	float startTime;
 	float endTime;
+	bool forward;
 };

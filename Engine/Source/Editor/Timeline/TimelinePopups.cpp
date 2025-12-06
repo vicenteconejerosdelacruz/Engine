@@ -141,7 +141,19 @@ void InteractElementPopup::Draw(ImVec2 pos, ChannelElement& element, int frame, 
 		std::make_tuple("Split",IP_Split,element.GetFrameStart() != element.GetFrameEnd())
 	};
 
-	if (element.type == SCET_Transformation)
+	if (element.type == SCET_Animation)
+	{
+		if (element.animation.forward)
+		{
+			options.push_back(std::make_tuple("Backward", IP_Animation_Backward, true));
+		}
+		else
+		{
+			options.push_back(std::make_tuple("Forward", IP_Animation_Forward, true));
+		}
+		size.y += 20;
+	}
+	else if (element.type == SCET_Transformation)
 	{
 		if (element.transformation.keyFrames.contains(frame))
 		{
@@ -151,7 +163,8 @@ void InteractElementPopup::Draw(ImVec2 pos, ChannelElement& element, int frame, 
 		{
 			options.push_back(std::make_tuple("Add Keyframe", IP_Transformation_AddKeyframe, true));
 		}
-		size.y += 20;
+		options.push_back(std::make_tuple("Flip", IP_Transformation_Flip, true));
+		size.y += 35;
 	}
 	else if (element.type == SCET_Script)
 	{

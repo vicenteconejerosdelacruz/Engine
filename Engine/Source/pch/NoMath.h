@@ -155,12 +155,12 @@ inline XMFLOAT3 Quaternion2Euler(XMVECTOR Q)
 	float test = x * y + z * w;
 	if (test > 0.499 * unit) { // singularity at north pole
 		angles.y = 2 * std::atan2(x, w);
-		angles.z = M_PI_2;
+		angles.z = static_cast<float>(M_PI_2);
 		angles.x = 0;
 	}
 	else if (test < -0.499 * unit) { // singularity at south pole
 		angles.y = -2 * std::atan2(x, w);
-		angles.z = -M_PI_2;
+		angles.z = -static_cast<float>(M_PI_2);
 		angles.x = 0;
 	}
 	else {

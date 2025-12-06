@@ -203,6 +203,16 @@ std::tuple<bool, bool, bool, bool> TimelineChannel::DrawChannelFrame(SequenceCha
 	bool leftBoundaryDrag = false;
 	bool rightBoundaryDrag = false;
 	bool frameHasElement = seqChannel.FrameHasElement(frame, leftBounded, rightBounded);
+	auto animElement = seqChannel.GetAnimationElementAtFrame(frame);
+	bool forward = true;
+	bool animElementFirstFrame = false;
+	bool animElementLastFrame = false;
+	if (animElement)
+	{
+		forward = animElement->forward;
+		animElementFirstFrame = animElement->GetFrameStart() == frame;
+		animElementLastFrame = animElement->GetFrameEnd() == frame;
+	}
 
 	ImDrawList* draw_list = ImGui::GetWindowDrawList();
 	auto painter = ImGui::GetForegroundDrawList();
@@ -267,16 +277,37 @@ std::tuple<bool, bool, bool, bool> TimelineChannel::DrawChannelFrame(SequenceCha
 			float thickness = rightBoundaryDrag ? frameBorderMouseThickness : 1.0f;
 			draw_list->AddLine(ImVec2(pMax.x + thickAdj, pMin.y), ImVec2(pMax.x + thickAdj, pMax.y), frameWithElementBorderColor, thickness);
 		}
+
+		if (animElement)
+		{
+			float arry = pMin.y + 0.5f * (pMax.y - pMin.y) - 3.0f;
+			if ((!leftBounded && !rightBounded) || (leftBounded && !rightBounded && forward) || (rightBounded && !leftBounded && !forward))
+			{
+				draw_list->AddLine(ImVec2(pMin.x - 1, arry), ImVec2(pMax.x + 1, arry), animationLineColor);
+			}
+			if (rightBounded && forward)
+			{
+				draw_list->AddTriangleFilled(
+					ImVec2(pMin.x + 1, arry - 3),
+					ImVec2(pMin.x + 1, arry + 3),
+					ImVec2(pMin.x + 1 + 4, arry),
+					animationLineColor
+				);
+			}
+			if (leftBounded && !forward)
+			{
+				draw_list->AddTriangleFilled(
+					ImVec2(pMax.x, arry - 3),
+					ImVec2(pMax.x, arry + 3),
+					ImVec2(pMax.x - 5, arry),
+					animationLineColor
+				);
+			}
+		}
 	}
 
 	if (!mouseInFrame)
 		return std::make_tuple(false, false, false, false);
-
-	if (ImGui::IsMouseDown(1))
-	{
-		int i = 0;
-		i++;
-	}
 
 	return std::make_tuple(
 		ImGui::IsMouseDown(0) && !(leftBoundaryDrag || rightBoundaryDrag),

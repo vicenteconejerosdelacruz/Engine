@@ -6,6 +6,7 @@ SequenceChannelElementAnimation::SequenceChannelElementAnimation() :SequenceChan
 	animation = "";
 	startTime = 0.0f;
 	endTime = 0.0f;
+	forward = true;
 }
 
 SequenceChannelElementAnimation::SequenceChannelElementAnimation(const nlohmann::json& j) :SequenceChannelElement(j)
@@ -13,6 +14,7 @@ SequenceChannelElementAnimation::SequenceChannelElementAnimation(const nlohmann:
 	animation = j.at("animation");
 	startTime = j.at("startTime");
 	endTime = j.at("endTime");
+	forward = j.contains("forward") ? static_cast<bool>(j.at("forward")) : true;
 }
 
 bool SequenceChannelElementAnimation::operator==(const SequenceChannelElementAnimation& other) const
@@ -21,7 +23,8 @@ bool SequenceChannelElementAnimation::operator==(const SequenceChannelElementAni
 		frameStart == other.frameStart
 		&& frameEnd == other.frameEnd
 		&& startTime == other.startTime
-		&& endTime == other.endTime;
+		&& endTime == other.endTime
+		&& forward == other.forward;
 }
 
 nlohmann::json SequenceChannelElementAnimation::json()
@@ -33,6 +36,7 @@ nlohmann::json SequenceChannelElementAnimation::json()
 		{ "animation", animation },
 		{ "startTime", startTime },
 		{ "endTime", endTime },
+		{ "forward", forward }
 	};
 	return j;
 }
@@ -51,5 +55,6 @@ float SequenceChannelElementAnimation::GetTimeAtFrame(int frame)
 	if (frameStart == 0 && frameEnd == 0) return 0.0f;
 	frame = std::clamp(frame, frameStart, frameEnd);
 	float t = static_cast<float>(frame - frameStart) / static_cast<float>(frameEnd - frameStart);
+	if (!forward) t = 1 - t;
 	return std::clamp(startTime + t * (endTime - startTime), startTime, endTime);
 }

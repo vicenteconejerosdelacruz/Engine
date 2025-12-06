@@ -541,6 +541,18 @@ void TimelineEditor::DrawActionPopup(Sequence& sequence,
 				popup = TP_None;
 			}
 			},
+			{ IP_Animation_Forward, [this, &sequence, channel, frame]()
+			{
+				popup = TP_None;
+				ToggleAnimationElementDirectionInChannelAtFrame(sequence, channel, frame);
+			}
+			},
+			{ IP_Animation_Backward, [this, &sequence, channel, frame]()
+			{
+				popup = TP_None;
+				ToggleAnimationElementDirectionInChannelAtFrame(sequence, channel, frame);
+			}
+			},
 			{ IP_Transformation_AddKeyframe, [this, &sequence, channel, frame, setTransformationKeyFrame]()
 			{
 				AddKeyframeToTransformationElementInFrameAtChannel(sequence, channel, frame);
@@ -554,6 +566,12 @@ void TimelineEditor::DrawActionPopup(Sequence& sequence,
 				setTransformationKeyFrame(nullptr,-1);
 				RemoveKeyframeFromTransformationElementInFrameAtChannel(sequence, channel, frame);
 				deleteTransformationKeyFrame();
+				popup = TP_None;
+			}
+			},
+			{ IP_Transformation_Flip, [&]
+			{
+				FlipTransformationElementInFrameAtChannel(sequence,channel,frame);
 				popup = TP_None;
 			}
 			},
@@ -874,6 +892,15 @@ void TimelineEditor::SplitElementInFrameAtChannel(Sequence& sequence, int channe
 	seqChannel.SplitElementInFrame(frame);
 }
 
+void TimelineEditor::ToggleAnimationElementDirectionInChannelAtFrame(Sequence& sequence, int channelId, int frame)
+{
+	SequenceChannel& seqChannel = sequence.sequenceChannels.at(channelId);
+	int elementIndex = seqChannel.GetFirstElementIndexBetweenFrames(frame, frame);
+	if (elementIndex == -1) return;
+	ChannelElement& element = seqChannel.elements.at(elementIndex);
+	element.animation.forward = !element.animation.forward;
+}
+
 void TimelineEditor::AddKeyframeToTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame)
 {
 	SequenceChannel& seqChannel = sequence.sequenceChannels.at(channelId);
@@ -899,6 +926,15 @@ void TimelineEditor::RemoveKeyframeFromTransformationElementInFrameAtChannel(Seq
 	ChannelElement& element = seqChannel.elements.at(elementIndex);
 	TransformationKeyFrame prevKeyframe = element.transformation.GetKeyFrameBeforeFrame(frame);
 	element.transformation.keyFrames.erase(frame);
+}
+
+void TimelineEditor::FlipTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame)
+{
+	SequenceChannel& seqChannel = sequence.sequenceChannels.at(channelId);
+	int elementIndex = seqChannel.GetFirstElementIndexBetweenFrames(frame, frame);
+	if (elementIndex == -1) return;
+	ChannelElement& element = seqChannel.elements.at(elementIndex);
+	element.transformation.FlipKeyFrames();
 }
 
 void TimelineEditor::OpenScriptEditionForElementInFrameAtChannel(Sequence& sequence, int channelId, int frame,
