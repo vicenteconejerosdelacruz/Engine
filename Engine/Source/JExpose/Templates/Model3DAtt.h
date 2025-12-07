@@ -1,7 +1,7 @@
 JCLASS(Model3D, _)
 JTYPE(TemplateType, T_Models3D)
 JEXPOSE(std::string, uuid, "", jedv_t_hidden, 0, false)
-JEXPOSE(std::string, name, "", jedv_t_string, 0, true)
+JEXPOSE(std::string, name, "", jedv_t_te_model3d_name, 0, true)
 JEXPOSE(std::string, path, "", jedv_t_model3d_filepath, 1, true)
 JEXPOSE(std::string, shader_vs, "", jedv_t_te_shader, 1, true)
 JEXPOSE(std::string, shader_ps, "", jedv_t_te_shader, 1, true)

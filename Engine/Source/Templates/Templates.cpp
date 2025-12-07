@@ -1183,6 +1183,9 @@ namespace Templates
 
 	void DeleteTemplate(TemplateType t, std::string uuid)
 	{
+		templates.at(t).erase(uuid);
+		templatesTypes.erase(uuid);
+
 		const std::map<TemplateType, std::function<void(std::string)>> DeleteT = {
 			{ T_Materials, [](std::string uuid) { DeleteMaterialTemplate(uuid); }},
 			{ T_Models3D, [](std::string uuid) { DeleteModel3DTemplate(uuid); }},

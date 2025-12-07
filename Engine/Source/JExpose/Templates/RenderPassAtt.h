@@ -1,7 +1,7 @@
 JCLASS(RenderPass, _)
 JTYPE(TemplateType, T_RenderPasses)
 JEXPOSE(std::string, uuid, "", jedv_t_hidden, 0, false)
-JEXPOSE(std::string, name, "", jedv_t_string, 0, true)
+JEXPOSE(std::string, name, "", jedv_t_te_renderpass_name, 0, true)
 JEXPOSE_ENUM(RenderPassType, type, RenderPassType_RenderToTexturePass, jedv_t_enum, 1, true)
 JEXPOSE(bool, fitWindow, false, jedv_t_boolean, 1, true)
 JEXPOSE_VECTOR_TRANSFORM(DXGI_FORMAT, renderTargetFormats, ToDXGIFormat, FromDXGIFormat, { DXGI_FORMAT_R8G8B8A8_UNORM }, jedv_t_dxgi_format_vector, 1, true)

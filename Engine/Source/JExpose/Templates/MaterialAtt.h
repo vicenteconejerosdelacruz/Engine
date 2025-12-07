@@ -1,7 +1,7 @@
 JCLASS(Material, _)
 JTYPE(TemplateType, T_Materials)
 JEXPOSE(std::string, uuid, "", jedv_t_hidden, 0, false)
-JEXPOSE(std::string, name, "", jedv_t_string, 0, true)
+JEXPOSE(std::string, name, "", jedv_t_te_material_name, 0, true)
 JEXPOSE(std::string, shader_vs, "", jedv_t_te_shader, 1, true)
 JEXPOSE(std::string, shader_ps, "", jedv_t_te_shader, 1, true)
 JEXPOSE_VECTOR_TRANSFORM(MaterialSamplerDesc, samplers, ToMaterialSamplerDesc, FromMaterialSamplerDesc, {}, jedv_t_vector, 1, false)
