@@ -22,6 +22,7 @@
 #if defined(_EDITOR)
 #include <Editor.h>
 #endif
+#include <locale>
 
 #include "GameDecl.h"
 
@@ -454,6 +455,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 void AppStep() {
+	std::locale::global(std::locale("C"));
+
 	if (minimized) return;
 
 	if (!inFullScreen)

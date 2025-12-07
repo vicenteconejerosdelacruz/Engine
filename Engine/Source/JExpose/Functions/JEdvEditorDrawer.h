@@ -1,4 +1,5 @@
-#define TEXTFLOATREGEXREPLACE std::regex(".+-*/")
+//#define TEXTFLOATREGEXREPLACE std::regex(".+-*/")
+#define TEXTFLOATREGEXREPLACE std::regex("\\*\\/")
 
 template<typename T, JsonToEditorValueType J>
 JEdvEditorDrawerFunction DrawValue() { return nullptr; }
