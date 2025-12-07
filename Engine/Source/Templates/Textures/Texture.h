@@ -87,6 +87,7 @@ namespace Templates
 
 	TEMPDECL_FULL(Texture);
 
+	DXGI_FORMAT GetTextureFormat(std::filesystem::path path);
 	void Create2DDDSFile(TextureJson& json);
 	void CreateArrayDDSFile(TextureJson& json);
 	void CreateCubeDDSFile(TextureJson& json);

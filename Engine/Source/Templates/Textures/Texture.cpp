@@ -241,6 +241,15 @@ namespace Templates
 	}
 #endif
 
+	DXGI_FORMAT GetTextureFormat(std::filesystem::path path)
+	{
+		using namespace Utils;
+
+		DirectX::TexMetadata info{};
+		GetImageAttributes(path, info);
+		return info.format;
+	}
+
 	void Create2DDDSFile(TextureJson& json)
 	{
 		using namespace Utils;

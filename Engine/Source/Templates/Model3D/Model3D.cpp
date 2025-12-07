@@ -321,6 +321,17 @@ namespace Templates
 			JUUID texUUID = GetTextureUUIDByName(textureJsonPath.string());
 			if (texUUID.empty())
 			{
+				if (std::filesystem::exists(textureJsonPath))
+				{
+					if (std::filesystem::exists(textureJsonPath.replace_extension(".dds")))
+					{
+						textureJsonFormat = GetTextureFormat(textureJsonPath.replace_extension(".dds"));
+					}
+					else
+					{
+						textureJsonFormat = GetTextureFormat(textureJsonPath);
+					}
+				}
 				texUUID = CreateTextureTemplate(textureJsonPath.string(), textureJsonFormat);
 			}
 			//m.textures_insert(textureType, texUUID);
@@ -358,6 +369,17 @@ namespace Templates
 		std::string texUUID = GetTextureUUIDByName(textureJsonPath.string());
 		if (texUUID.empty())
 		{
+			if (std::filesystem::exists(textureJsonPath))
+			{
+				if (std::filesystem::exists(textureJsonPath.replace_extension(".dds")))
+				{
+					textureJsonFormat = GetTextureFormat(textureJsonPath.replace_extension(".dds"));
+				}
+				else
+				{
+					textureJsonFormat = GetTextureFormat(textureJsonPath);
+				}
+			}
 			texUUID = CreateTextureTemplate(textureJsonPath.string(), textureJsonFormat);
 		}
 		//m.textures_insert(textureType, texUUID);
