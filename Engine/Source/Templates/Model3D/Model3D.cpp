@@ -323,9 +323,11 @@ namespace Templates
 			{
 				if (std::filesystem::exists(textureJsonPath))
 				{
-					if (std::filesystem::exists(textureJsonPath.replace_extension(".dds")))
+					std::filesystem::path textureJsonPathDDS(textureJsonPath);
+					textureJsonPathDDS.replace_extension(".dds");
+					if (std::filesystem::exists(textureJsonPathDDS))
 					{
-						textureJsonFormat = GetTextureFormat(textureJsonPath.replace_extension(".dds"));
+						textureJsonFormat = GetTextureFormat(textureJsonPathDDS);
 					}
 					else
 					{
@@ -371,9 +373,11 @@ namespace Templates
 		{
 			if (std::filesystem::exists(textureJsonPath))
 			{
-				if (std::filesystem::exists(textureJsonPath.replace_extension(".dds")))
+				std::filesystem::path textureJsonPathDDS(textureJsonPath);
+				textureJsonPathDDS.replace_extension(".dds");
+				if (std::filesystem::exists(textureJsonPathDDS))
 				{
-					textureJsonFormat = GetTextureFormat(textureJsonPath.replace_extension(".dds"));
+					textureJsonFormat = GetTextureFormat(textureJsonPathDDS);
 				}
 				else
 				{
