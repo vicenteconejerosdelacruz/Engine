@@ -43,7 +43,7 @@ namespace Game
 
 	//RunningJump
 	static const int runningJumpTime = 375;
-	static const int runningJumpAttackTime = 300;
+	static const int runningJumpAttackTime = 275;
 
 	//JS Module
 	static std::unique_ptr<v8pp::module> v8ppModule = nullptr;

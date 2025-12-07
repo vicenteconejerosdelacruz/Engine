@@ -300,7 +300,7 @@ namespace Scene
 		{
 			AttachAnimation(uuid(), model3D->animations);
 			animationTime(0.0f);
-			SetCurrentAnimation(animationSequence());
+			SetCurrentAnimation(animationSequence(), animationTime(), animationTimeFactor(), animationPlay(), animationLoop());
 			StepAnimation(0.0f); //take an empty T-Pose step so the skinning can be performed
 			boundingBoxCompute = CreateRenderableBoundingBox(uuid());
 			WriteAnimationConstantsBuffer(renderer->backBufferIndex);
