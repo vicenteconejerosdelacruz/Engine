@@ -76,6 +76,15 @@ namespace Scene
 #include <JEnd.h>
 	}
 
+#if defined(_EDITOR)
+	void Light::WriteJson(nlohmann::json& j)
+	{
+#include <Editor/JWriteJson.h>
+#include <LightAtt.h>
+#include <JEnd.h>
+	}
+#endif
+
 	void Light::Initialize()
 	{
 #include <TrackUUID/JInsert.h>
@@ -150,6 +159,9 @@ namespace Scene
 	void Light::Destroy()
 	{
 		DestroyEditorPreview();
+#include <Attributes/JDestroy.h>
+#include <LightAtt.h>
+#include <JEnd.h>
 	}
 
 	XMMATRIX Light::world()

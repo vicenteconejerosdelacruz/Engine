@@ -27,10 +27,16 @@
     <ClInclude Include="TestGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameControllers\VenomController.h">
+    <ClInclude Include="GameControllers\SpinYawController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameControllers\SpinYawController.h">
+    <ClInclude Include="JExpose\Controllers\VenomControllerAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Controllers\SpinYawControllerAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameControllers\VenomController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -41,10 +47,10 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameControllers\VenomController.cpp">
+    <ClCompile Include="GameControllers\SpinYawController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameControllers\SpinYawController.cpp">
+    <ClCompile Include="GameControllers\VenomController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

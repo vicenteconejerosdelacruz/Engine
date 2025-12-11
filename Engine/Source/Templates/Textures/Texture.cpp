@@ -14,6 +14,7 @@
 #include <ShaderMaterials.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <algorithm>
+#include <NoMath.h>
 
 extern std::unique_ptr<Renderer> renderer;
 
@@ -64,8 +65,16 @@ namespace Templates
 #include <Attributes/JUpdate.h>
 #include <TextureAtt.h>
 #include <JEnd.h>
-#include <NoMath.h>
 	}
+
+#if defined(_EDITOR)
+	void TextureJson::WriteJson(nlohmann::json& j)
+	{
+#include <Editor/JWriteJson.h>
+#include <TextureAtt.h>
+#include <JEnd.h>
+	}
+#endif
 
 	TEMPDEF_FULL(Texture);
 	TEMPDEF_REFTRACKER(Texture);

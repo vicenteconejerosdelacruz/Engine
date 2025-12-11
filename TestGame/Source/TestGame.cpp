@@ -1,3 +1,4 @@
+#include "Controller.h"
 // TestGame.cpp : Defines the entry point for the application.
 //
 
@@ -290,7 +291,7 @@ void PlayModeLeave(GameStates nextState)
 
 void PlayModeStep()
 {
-	//Game::StepControllers(static_cast<float>(timer.GetElapsedSeconds() / 1000.0f));
+	Game::StepControllers(static_cast<float>(timer.GetElapsedSeconds() / 1000.0f));
 }
 
 void PlayModeRender()
@@ -388,6 +389,7 @@ void ReloadSceneFromPrePlay()
 {
 	using namespace Editor;
 	using namespace Scene::Level;
+	using namespace Game;
 
 	DestroySceneObjects();
 	ClearBillboardsRegistry();
@@ -398,6 +400,8 @@ void ReloadSceneFromPrePlay()
 	LoadSceneObjects(data, SceneObjectTypeJsonContainer.at(SO_Cameras), Scene::CreateCamera);
 	LoadSceneObjects(data, SceneObjectTypeJsonContainer.at(SO_Lights), Scene::CreateLight);
 	LoadSceneObjects(data, SceneObjectTypeJsonContainer.at(SO_SoundEffects), Scene::CreateSoundFX);
+
+	MapControllers();
 }
 
 void EditorModeCreate(GameStates prevState)
@@ -677,19 +681,31 @@ void EditorPlayingModePostRender()
 
 namespace Game
 {
-	std::unordered_map<std::string, std::function<std::unique_ptr<Game::Controller>()>> controllers =
+#if defined(_EDITOR)
+	std::unordered_map<std::string, std::function<std::map<std::string, JEdvEditorDrawerFunction>()>> controllerDrawers =
 	{
-		{ "venom", []() { return std::make_unique<Game::VenomController>(); }},
-		{ "spinyaw", []() { return std::make_unique<Game::SpinYawController>(); }},
+		{ "venom", [] { return Game::GetVenomControllerDrawers(); }},
+		{ "spinyaw", [] { return Game::GetSpinYawControllerDrawers(); }}
+	};
+#endif
+
+	std::unordered_map<std::string, std::function<std::unique_ptr<Game::Controller>(nlohmann::json&)>> controllers =
+	{
+		{ "venom", [](nlohmann::json& json) { return std::make_unique<Game::VenomController>(json); }},
+		{ "spinyaw", [](nlohmann::json& json) { return std::make_unique<Game::SpinYawController>(json); }},
 	};
 
-	std::vector<std::string> GetGameControllers()
+	std::vector<std::string> GetControllers()
 	{
 		return nostd::GetKeysFromMap(controllers);
 	}
 
-	std::unique_ptr<Game::Controller> GetGameController(std::string name)
+	JUUID CreateController(std::string name, JUUID sceneObject, nlohmann::json& json)
 	{
-		return (controllers.contains(name)) ? controllers.at(name)() : nullptr;
+		if (!controllers.contains(name)) return "";
+		std::unique_ptr<Game::Controller> controller = controllers.at(name)(json);
+		JUUID uuid = controller->at("uuid");
+		RegisterController(name, controller, sceneObject);
+		return uuid;
 	}
 };

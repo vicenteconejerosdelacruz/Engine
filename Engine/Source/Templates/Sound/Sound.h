@@ -62,6 +62,10 @@ namespace Templates
 #include <Attributes/JDecl.h>
 #include <SoundAtt.h>
 #include <JEnd.h>
+
+#if defined(_EDITOR)
+		virtual void WriteJson(nlohmann::json& j);
+#endif
 	};
 
 	TEMPDECL_FULL(Sound);

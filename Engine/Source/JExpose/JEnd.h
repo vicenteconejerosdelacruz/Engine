@@ -30,6 +30,10 @@ return created; }
 };
 #endif
 
+#ifdef JEXPOSE_ATT_DESTROY
+#undef JEXPOSE_ATT_DESTROY
+#endif
+
 #ifdef JEXPOSE_EDITOR_DRAWERS_DECL
 #undef JEXPOSE_EDITOR_DRAWERS_DECL
 #endif
@@ -40,7 +44,12 @@ return created; }
 #endif
 
 #ifdef JEXPOSE_EDITOR_SAVE_FILE
+json.push_back(obj); });
 #undef JEXPOSE_EDITOR_SAVE_FILE
+#endif
+
+#ifdef JEXPOSE_EDITOR_WRITE_JSON
+#undef JEXPOSE_EDITOR_WRITE_JSON
 #endif
 
 #ifdef JEXPOSE_EDITOR_PREVIEW_DECL
@@ -104,5 +113,6 @@ return creatorValidator; }
 #undef JEXPOSE_VECTOR_TRANSFORM
 #undef JEXPOSE_SET
 #undef JEXPOSE_MAP_TRANSFORM
+#undef JEXPOSE_MAP_OBJECT
 #undef JPREVIEW
 #undef JTRACKUUID

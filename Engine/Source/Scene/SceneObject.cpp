@@ -35,31 +35,6 @@ namespace Scene
 		JObject::JPatch(p);
 	}
 
-	void SceneObject::BindControllers()
-	{
-		using namespace Game;
-
-		if (!contains("controllers")) return;
-
-		auto& ctrls = at("controllers");
-		for (auto it = ctrls.begin(); it != ctrls.end(); it++)
-		{
-			std::unique_ptr<Controller> controller = GetGameController(*it);
-			if (!controller) continue;
-
-			controllers.insert(Game::RegisterController(controller, *it, Juuid()));
-		}
-	}
-
-	void SceneObject::UnbindControllers()
-	{
-		for (auto c : controllers)
-		{
-			Game::UnregisterController(c);
-		}
-		controllers.clear();
-	}
-
 	void SceneObject::BindToV8Context(v8pp::context& context)
 	{
 		Game::BindToV8Context(context, Juuid());

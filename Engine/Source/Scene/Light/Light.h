@@ -174,7 +174,9 @@ namespace Scene {
 
 		Light(nlohmann::json& json);
 		~Light() { Destroy(); }
-
+#if defined(_EDITOR)
+		virtual void WriteJson(nlohmann::json& j);
+#endif
 		bool markedForDelete = false;
 		void Destroy();
 

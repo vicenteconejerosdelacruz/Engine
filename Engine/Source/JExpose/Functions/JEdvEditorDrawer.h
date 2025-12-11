@@ -70,6 +70,9 @@ JEdvEditorDrawerFunction DrawEnum(
 }
 
 template <JsonToEditorValueType J>
+JEdvEditorDrawerFunction DrawVectorObject() { return nullptr; }
+
+template <JsonToEditorValueType J>
 JEdvEditorDrawerFunction DrawPreview() { return nullptr; }
 
 inline void EditorDrawFloat(std::string attribute, JObject* json, const char* format = "%.3f", std::function<float(float)> cb = [](float v) {return v; })
@@ -922,6 +925,66 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_sounds_filepath>()
 }
 
 template<>
+inline JEdvEditorDrawerFunction DrawValue<int, jedv_t_integer>()
+{
+	return [](std::string attribute, std::vector<JObject*>& json)
+		{
+			auto allSame = [attribute, &json]()
+				{
+					std::set<int> s;
+					for (auto& j : json)
+					{
+						s.insert(static_cast<int>(j->at(attribute)));
+						if (s.size() > 1) return false;
+					}
+					return true;
+				};
+			auto updateValues = [attribute, &json](int value)
+				{
+					for (auto& j : json)
+					{
+						nlohmann::json patch = { { attribute, value } };
+						j->JUpdate(patch);
+					}
+				};
+
+			ImGui::PushID(attribute.c_str());
+			std::string tableName = "tables-" + attribute + "-table";
+			if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+			{
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text(attribute.c_str());
+				ImGui::TableSetColumnIndex(1);
+				ImGui::PushItemWidth(ImGui::GetWindowWidth());
+				if (!allSame())
+				{
+					std::string value = "";
+					if (ImGui::InputText("", &value, ImGuiInputTextFlags_CharsDecimal))
+					{
+						value = std::regex_replace(value, TEXTFLOATREGEXREPLACE, "");
+						if (value.size() > 0ULL)
+						{
+							updateValues((value.size() > 0ULL) ? static_cast<int>(std::stoi(value.c_str())) : 0U);
+						}
+					}
+				}
+				else
+				{
+					int value = static_cast<int>(json.at(0)->at(attribute));
+					if (ImGui::InputInt("", &value))
+					{
+						updateValues(value);
+					}
+				}
+				ImGui::PopItemWidth();
+				ImGui::EndTable();
+			}
+			ImGui::PopID();
+		};
+}
+
+template<>
 inline JEdvEditorDrawerFunction DrawValue<unsigned int, jedv_t_unsigned>()
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
@@ -1692,7 +1755,6 @@ template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_shad
 template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_sound_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
 template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_texture_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
 
-
 inline void DrawResourceSelection(
 	std::string attribute,
 	std::vector<JObject*>& json,
@@ -1770,7 +1832,6 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_renderable>()
 			DrawResourceSelection(attribute, json, Scene::GetNameFromRenderables, SortUUIDNameByName(Scene::GetRenderablesUUIDsNames), ICON_FA_SNOWMAN);
 		};
 }
-
 
 template<>
 inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_shader>()
@@ -2008,7 +2069,6 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_animation_sequence
 			}
 		};
 }
-
 
 template<>
 inline JEdvEditorDrawerFunction DrawValue<unsigned int, jedv_t_tex_dimension>()
@@ -4613,6 +4673,7 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_controller_vector
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
+			/*
 			auto setValue = [attribute, &json](unsigned int index, std::string controller)
 				{
 					for (auto& j : json)
@@ -4820,9 +4881,159 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_controller_vector
 
 			if (removeIndex != -1)
 				remove(removeIndex);
+				*/
+		};
+}
 
-			//if (resetUUID != "")
-			//	reset(resetUUID);
+template <>
+inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_controller_vector>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			std::vector<std::string> controllersNames = Game::GetControllers();
+			controllersNames.insert(controllersNames.begin(), "");
+			std::tuple<int, std::string> removeTuple(-1, "");
+			std::tuple<int, std::string> addTuple(-1, "");
+			std::tuple<int, std::string, std::string> swapTuple(-1, "", "");
+
+			auto getAvailableControllers = [attribute, &controllersNames](JObject* j)
+				{
+					std::set<std::string> names(controllersNames.begin(), controllersNames.end());
+					nlohmann::json& c = j->at(attribute);
+					for (nlohmann::json::iterator it = c.begin(); it != c.end(); it++)
+					{
+						if (names.contains(it.key()))
+							names.erase(it.key());
+					}
+					return std::vector<std::string>(names.begin(), names.end());
+				};
+			auto removeController = [&json, attribute](int objectIndex, std::string controllerName)
+				{
+					std::string controllerUUID = json.at(objectIndex)->at(attribute).at(controllerName);
+					DestroyController(controllerUUID);
+					json.at(objectIndex)->at(attribute).erase(controllerName);
+				};
+			auto addController = [&json, attribute](int objectIndex, std::string controllerName)
+				{
+					nlohmann::json placeholder;
+					JUUID sceneObject = json.at(objectIndex)->at("uuid");
+					JUUID uuid = CreateController(controllerName, sceneObject, placeholder);
+					json.at(objectIndex)->at(attribute)[controllerName] = uuid;
+					GetController(uuid)->Map(sceneObject);
+				};
+			auto swapController = [&](int objectIndex, std::string controllerFrom, std::string controllerTo)
+				{
+					removeController(objectIndex, controllerFrom);
+					addController(objectIndex, controllerTo);
+				};
+			auto drawController = [&attribute, &removeTuple, &swapTuple, &controllersNames, addController, swapController](JObject* j, int objectIndex, nlohmann::json::iterator it, int itIndex)
+				{
+					std::string uuid = j->at("uuid");
+					std::string tableName = "tables-" + uuid + "-" + attribute + "-table-" + std::string(it.key());
+					ImGui::Separator();
+					if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+					{
+						ImGui::TableNextRow();
+						ImGui::TableSetColumnIndex(0);
+						ImGui::Text("controller");
+						ImGui::TableSetColumnIndex(1);
+
+						ImGui::PushID(std::string(std::string("DeleteLeft-") + uuid + "-" + it.key()).c_str());
+						{
+							if (ImGui::Button(ICON_FA_TIMES))
+							{
+								removeTuple = std::make_tuple(objectIndex, it.key());
+							}
+						}
+						ImGui::PopID();
+
+						ImGui::SameLine();
+						ImGui::PushID(std::string(std::string("ControllerSelection-") + uuid + "-" + it.key()).c_str());
+						{
+							ImGui::DrawComboSelection(it.key(), controllersNames, [&it, objectIndex, &swapTuple](std::string newController)
+								{
+									swapTuple = std::make_tuple(objectIndex, it.key(), newController);
+								}
+							);
+						}
+						ImGui::PopID();
+
+						ImGui::EndTable();
+					}
+
+					auto& controller = GetController(it.value());
+					auto controllerPtr = controller.get();
+					std::vector<JObject*> jvec = { controller.get() };
+					auto drawers = controller->GetControllerDrawers();
+
+					auto attributes = controller->GetControllerAttributes();
+					for (auto& [att, _] : attributes)
+					{
+						drawers.at(att)(att, jvec);
+					}
+				};
+			auto drawAddController = [attribute, &addTuple, getAvailableControllers, addController](JObject* j, int objectIndex)
+				{
+					std::vector<std::string> availableNames = getAvailableControllers(j);
+					if (availableNames.size() <= 1) return;
+
+					std::string uuid = j->at("uuid");
+					std::string tableName = "tables-" + uuid + "-add-controller-table";
+					if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+					{
+						ImGui::TableNextRow();
+						ImGui::TableSetColumnIndex(0);
+						ImGui::Text("Add controller");
+						ImGui::TableSetColumnIndex(1);
+
+						ImGui::SameLine();
+						ImGui::PushID(std::string(std::string("AddControllerSelection") + uuid).c_str());
+						{
+							ImGui::DrawComboSelection("", availableNames, [&](std::string newController)
+								{
+									addTuple = std::make_tuple(objectIndex, newController);
+								}
+							);
+						}
+						ImGui::PopID();
+
+						ImGui::EndTable();
+					}
+				};
+
+			ImGui::Text(attribute.c_str());
+
+			for (int i = 0; i < json.size(); i++)
+			{
+				auto& j = json.at(i);
+				if (json.size() > 1)
+				{
+					ImGui::Separator();
+					ImGui::Text(std::string(j->at("name")).c_str());
+				}
+
+				nlohmann::json& c = j->at(attribute);
+				int itIndex = 0;
+				for (nlohmann::json::iterator it = c.begin(); it != c.end(); it++)
+				{
+					drawController(j, i, it, itIndex);
+					itIndex++;
+				}
+				drawAddController(j, i);
+			}
+
+			if (std::get<0>(removeTuple) != -1)
+			{
+				removeController(std::get<0>(removeTuple), std::get<1>(removeTuple));
+			}
+			if (std::get<0>(addTuple) != -1)
+			{
+				addController(std::get<0>(addTuple), std::get<1>(addTuple));
+			}
+			if (std::get<0>(swapTuple) != -1)
+			{
+				swapController(std::get<0>(swapTuple), std::get<1>(swapTuple), std::get<2>(swapTuple));
+			}
 		};
 }
 

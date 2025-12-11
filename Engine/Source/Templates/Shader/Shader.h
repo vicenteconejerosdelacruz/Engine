@@ -68,6 +68,10 @@ namespace Templates
 #include <Attributes/JDecl.h>
 #include <ShaderAtt.h>
 #include <JEnd.h>
+
+#if defined(_EDITOR)
+		virtual void WriteJson(nlohmann::json& j);
+#endif
 	};
 
 	TEMPDECL_FULL(Shader);

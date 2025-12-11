@@ -48,7 +48,11 @@ namespace Editor::DefaultLevel {
 				{ "scale", { 0.009999999776482582, 0.009999999776482582, 0.009999999776482582} },
 				{ "uuid", "4fdb1d72-96c5-4a1a-a81e-f902abba25f5" },
 				{ "cameras" , {"06de4a6c-0393-42b1-91ab-1d2389cb2cbc"} },
-				{ "controllers", { } }
+				{ "controllers",
+					{
+						{ "spinyaw", {} }
+					}
+				}
 			}
 		}
 	}
@@ -62,9 +66,9 @@ namespace Editor::DefaultLevel {
 					{ "name", "cam.0"},
 					{ "perspective",
 						{
-							{"farZ", 1000.0 },
+							{"farZ", 100.0 },
 							{"fovAngleY", 70.0 },
-							{"nearZ", 0.01 }
+							{"nearZ", 0.001 }
 						}
 					},
 					{ "position", { 0.0, 0.0, 0.0 } },

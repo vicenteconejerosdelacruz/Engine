@@ -56,6 +56,9 @@ namespace Scene {
 
 		SoundFX(nlohmann::json& json);
 		~SoundFX() { Destroy(); }
+#if defined(_EDITOR)
+		virtual void WriteJson(nlohmann::json& j);
+#endif
 		virtual void Initialize();
 		virtual void BindToScene();
 		virtual void UnbindFromScene();

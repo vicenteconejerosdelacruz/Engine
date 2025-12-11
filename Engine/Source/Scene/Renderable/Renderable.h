@@ -8,6 +8,7 @@
 #include <SceneObject.h>
 #include <Sequence/AnimationSequences.h>
 #include <Sequence/SequencePlayer.h>
+#include <Controller.h>
 
 typedef std::vector<MeshInstanceUUID> RenderableMeshes;
 typedef std::unordered_map<RenderPassInstanceUUID, std::vector<MaterialInstanceUUID>> RenderableMaterials; //RenderPassInstanceUUID -> MaterialInstanceUUID
@@ -19,6 +20,8 @@ static nlohmann::json defaultShadowMapShaderAttributes = { { "uniqueMaterialInst
 #if defined(_EDITOR)
 static nlohmann::json defaultPickingShaderAttributes = { { "uniqueMaterialInstance", true}, {"castShadows", false}, {"ibl" , false } };
 #endif
+
+using namespace Game;
 
 namespace Scene
 {
@@ -83,6 +86,10 @@ namespace Scene
 
 		Renderable(nlohmann::json& json);
 		~Renderable() { Destroy(); }
+
+#if defined(_EDITOR)
+		virtual void WriteJson(nlohmann::json& j);
+#endif
 
 		XMVECTOR rotationQ();
 		XMMATRIX world();

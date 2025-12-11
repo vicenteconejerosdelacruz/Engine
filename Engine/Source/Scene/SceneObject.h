@@ -88,10 +88,6 @@ namespace Scene
 		virtual void JUpdate(nlohmann::json p);
 		virtual void JPatch(nlohmann::json p);
 
-		std::set<JUUID> controllers;
-		virtual void BindControllers();
-		virtual void UnbindControllers();
-
 		virtual void BindToV8Context(v8pp::context& context);
 
 #if defined(_EDITOR)

@@ -11,6 +11,35 @@ extern DirectX::GamePad::ButtonStateTracker buttons;
 
 namespace Game
 {
+#if defined(_EDITOR)
+
+#include <Editor/JDrawersDef.h>
+#include <SpinYawControllerAtt.h>
+#include <JEnd.h>
+
+#endif
+
+	SpinYawController::SpinYawController(nlohmann::json& json) : Controller(json)
+	{
+#include <Attributes/JInit.h>
+#include <SpinYawControllerAtt.h>
+#include <JEnd.h>
+
+#include <Attributes/JUpdate.h>
+#include <SpinYawControllerAtt.h>
+#include <JEnd.h>
+	}
+
+#if defined(_EDITOR)
+	void SpinYawController::WriteJson(nlohmann::json& j)
+	{
+#include <Editor/JWriteJson.h>
+#include <SpinYawControllerAtt.h>
+#include <JEnd.h>
+		j.erase("uuid");
+	}
+#endif
+
 	void SpinYawController::Step(float delta)
 	{
 		using namespace Scene;
@@ -33,7 +62,7 @@ namespace Game
 			return;
 #endif
 		auto pad = gamePad->GetState(0);
-		float dy = pad.thumbSticks.leftX * 10;
+		float dy = pad.thumbSticks.leftX * speed();
 
 		XMFLOAT3 rot = ToXMFLOAT3(o->at("rotation"));
 		rot.y += dy;

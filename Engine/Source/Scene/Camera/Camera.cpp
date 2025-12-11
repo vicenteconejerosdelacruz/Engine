@@ -8,7 +8,7 @@
 #include <RenderPass/RenderPass.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <SceneObjectDef.h>
-
+#include <Application.h>
 
 extern std::unique_ptr<Renderer> renderer;
 
@@ -276,8 +276,16 @@ namespace Scene
 #include <Attributes/JUpdate.h>
 #include <CameraAtt.h>
 #include <JEnd.h>
-#include <Application.h>
 	}
+
+#if defined(_EDITOR)
+	void Camera::WriteJson(nlohmann::json& j)
+	{
+#include <Editor/JWriteJson.h>
+#include <CameraAtt.h>
+#include <JEnd.h>
+	}
+#endif
 
 	void Camera::Initialize()
 	{
@@ -709,6 +717,9 @@ namespace Scene
 
 	void Camera::Destroy()
 	{
+#include <Attributes/JDestroy.h>
+#include <CameraAtt.h>
+#include <JEnd.h>
 	}
 
 	void Camera::CreateConstantsBuffer()

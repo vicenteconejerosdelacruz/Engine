@@ -60,6 +60,15 @@ namespace Templates
 #include <JEnd.h>
 	}
 
+#if defined(_EDITOR)
+	void Model3DJson::WriteJson(nlohmann::json& j)
+	{
+#include <Editor/JWriteJson.h>
+#include <Model3DAtt.h>
+#include <JEnd.h>
+	}
+#endif
+
 	TEMPDEF_FULL(Model3D);
 	TEMPDEF_REFTRACKER(Model3D);
 

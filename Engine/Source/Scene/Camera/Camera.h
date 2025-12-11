@@ -115,7 +115,9 @@ namespace Scene {
 
 		Camera(nlohmann::json& json);
 		~Camera() { Destroy(); }
-
+#if defined(_EDITOR)
+		virtual void WriteJson(nlohmann::json& j);
+#endif
 		XMVECTOR positionV();
 		XMVECTOR rotationQ();
 		XMVECTOR forward();

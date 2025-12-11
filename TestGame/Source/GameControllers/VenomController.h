@@ -33,8 +33,27 @@ inline static std::unordered_map<std::string, VenomStates> stringToVenomStates =
 
 namespace Game
 {
+#if defined(_EDITOR)
+
+#include <Attributes/JOrder.h>
+#include <VenomControllerAtt.h>
+#include <JEnd.h>
+
+#include <Editor/JDrawersDecl.h>
+#include <VenomControllerAtt.h>
+#include <JEnd.h>
+
+#endif
 	struct VenomController : Controller
 	{
+#include <Attributes/JFlags.h>
+#include <VenomControllerAtt.h>
+#include <JEnd.h>
+
+#include <Attributes/JDecl.h>
+#include <VenomControllerAtt.h>
+#include <JEnd.h>
+
 		enum LookingTo
 		{
 			LT_Right,
@@ -47,7 +66,6 @@ namespace Game
 			"Punch1", "Punch1",
 			"Punch2",
 		};
-
 		static inline std::vector<std::string> DashAnimations =
 		{
 			"RunJumpAttack1","RunJumpAttack2"
@@ -58,7 +76,12 @@ namespace Game
 		};
 
 		//Constructor and Binding
-		VenomController();
+		VenomController(nlohmann::json& json);
+#if defined(_EDITOR)
+		virtual void WriteJson(nlohmann::json& j);
+		virtual std::map<std::string, JEdvEditorDrawerFunction> GetControllerDrawers() { return GetVenomControllerDrawers(); }
+		virtual std::vector<std::pair<std::string, JsonToEditorValueType>> GetControllerAttributes() { return GetVenomControllerAttributes(); }
+#endif
 		virtual void Map(JUUID so);
 		virtual void Unmap();
 

@@ -59,6 +59,7 @@ struct JObject : nlohmann::json
 		}
 		patch_inplace(p);
 	}
+	virtual void WriteJson(nlohmann::json& j) {}
 
 	bool dirty(size_t flag) const
 	{

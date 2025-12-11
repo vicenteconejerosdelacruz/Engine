@@ -3,26 +3,34 @@
 #include <string>
 #include <vector>
 #include <UUID.h>
+#include <JObject.h>
+#include <nlohmann/json.hpp>
 
 namespace Game
 {
-	struct Controller
+	struct Controller : JObject
 	{
+		virtual ~Controller() = default;
+		Controller(nlohmann::json& json) :JObject(json) { (*this)["uuid"] = getUUID(); }
 		JUUID sceneObject;
-		virtual void Step(float delta) {};
 		virtual void Map(JUUID so) { sceneObject = so; }
 		virtual void Unmap() { sceneObject.clear(); }
+		virtual void Step(float delta) {};
 		virtual void BindToV8Context(v8pp::context& context) {}
+		virtual std::map<std::string, JEdvEditorDrawerFunction> GetControllerDrawers() { return {}; }
+		virtual std::vector<std::pair<std::string, JsonToEditorValueType>> GetControllerAttributes() { return {}; }
 	};
 
-	JUUID RegisterController(std::unique_ptr<Controller>& controller, std::string controllerName, JUUID sceneObject);
-	void UnregisterController(JUUID controllerUUID);
+	void RegisterController(std::string controllerName, std::unique_ptr<Controller>& controller, JUUID sceneObject);
+	void MapControllers();
+	std::unique_ptr<Controller>& GetController(JUUID uuid);
+	std::unique_ptr<Controller>& GetControllerBySceneObjectUUID(JUUID uuid);
+	std::unique_ptr<Controller>& GetControllerByName(std::string name);
 	void DestroyControllers();
+	void DestroyController(JUUID uuid);
 	void StepControllers(float delta);
-	std::unique_ptr<Game::Controller>& GetControllerByName(std::string name);
-	std::string GetControllerNameByUUID(JUUID uuid);
 	void BindToV8Context(v8pp::context& context, JUUID uuid);
 
-	extern std::vector<std::string> GetGameControllers();
-	extern std::unique_ptr<Game::Controller> GetGameController(std::string name);
+	extern std::vector<std::string> GetControllers();
+	extern JUUID CreateController(std::string name, JUUID sceneObject, nlohmann::json& json);
 };

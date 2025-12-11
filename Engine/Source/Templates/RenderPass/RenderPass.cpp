@@ -93,6 +93,15 @@ namespace Templates
 #include <JEnd.h>
 	}
 
+#if defined(_EDITOR)
+	void RenderPassJson::WriteJson(nlohmann::json& j)
+	{
+#include <Editor/JWriteJson.h>
+#include <RenderPassAtt.h>
+#include <JEnd.h>
+	}
+#endif
+
 	TEMPDEF_FULL(RenderPass);
 	TEMPDEF_REFTRACKER(RenderPass);
 

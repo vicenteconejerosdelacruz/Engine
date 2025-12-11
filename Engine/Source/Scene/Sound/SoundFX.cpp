@@ -155,6 +155,15 @@ namespace Scene
 #include <JEnd.h>
 	}
 
+#if defined(_EDITOR)
+	void SoundFX::WriteJson(nlohmann::json& j)
+	{
+#include <Editor/JWriteJson.h>
+#include <SoundFXAtt.h>
+#include <JEnd.h>
+	}
+#endif
+
 	void SoundFX::Initialize()
 	{
 #include <TrackUUID/JInsert.h>
@@ -282,6 +291,9 @@ namespace Scene
 
 	void SoundFX::Destroy()
 	{
+#include <Attributes/JDestroy.h>
+#include <SoundFXAtt.h>
+#include <JEnd.h>
 	}
 
 	XMVECTOR SoundFX::rotationQ()

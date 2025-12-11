@@ -113,6 +113,10 @@ namespace Templates
 #include <Attributes/JDecl.h>
 #include <MaterialAtt.h>
 #include <JEnd.h>
+
+#if defined(_EDITOR)
+		virtual void WriteJson(nlohmann::json& j);
+#endif
 	};
 
 	TEMPDECL_FULL(Material);

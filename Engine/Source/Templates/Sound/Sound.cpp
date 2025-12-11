@@ -94,6 +94,15 @@ namespace Templates
 #include <JEnd.h>
 	}
 
+#if defined(_EDITOR)
+	void SoundJson::WriteJson(nlohmann::json& j)
+	{
+#include <Editor/JWriteJson.h>
+#include <SoundAtt.h>
+#include <JEnd.h>
+	}
+#endif
+
 	TEMPDEF_FULL(Sound);
 
 	void SoundJsonStep()

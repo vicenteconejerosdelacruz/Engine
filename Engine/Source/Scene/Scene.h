@@ -53,7 +53,6 @@ namespace Scene
 
 		auto& so = std::get<1>(sceneObjects.at(uuid));
 		so->UnbindFromScene();
-		so->UnbindControllers();
 		uuidSet.erase(uuid);
 		typesMap.erase(uuid);
 		sceneObjects.erase(uuid);

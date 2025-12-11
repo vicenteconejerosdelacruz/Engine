@@ -400,6 +400,7 @@
     <ClInclude Include="Editor\Timeline\TimelineEditor.h" />
     <ClInclude Include="Editor\Timeline\TimelinePopups.h" />
     <ClInclude Include="EngineInc.h" />
+    <ClInclude Include="JExpose\Attributes\JDestroy.h" />
     <ClInclude Include="JExpose\Attributes\JExpose.h" />
     <ClInclude Include="JExpose\Creator\JDrawersDecl.h" />
     <ClInclude Include="JExpose\Creator\JDrawersDef.h" />
@@ -414,6 +415,7 @@
     <ClInclude Include="JExpose\Editor\JPreviewDecl.h" />
     <ClInclude Include="JExpose\Editor\JPreviewDef.h" />
     <ClInclude Include="JExpose\Editor\JSaveFile.h" />
+    <ClInclude Include="JExpose\Editor\JWriteJson.h" />
     <ClInclude Include="JExpose\Functions\JEdvCreatorDrawer.h" />
     <ClInclude Include="JExpose\Functions\JEdvCreatorValidator.h" />
     <ClInclude Include="JExpose\Functions\JEdvEditorDrawer.h" />
@@ -422,6 +424,8 @@
     <ClInclude Include="JExpose\Attributes\JFlags.h" />
     <ClInclude Include="JExpose\Attributes\JDecl.h" />
     <ClInclude Include="JExpose\Creator\JRequired.h" />
+    <ClInclude Include="JExpose\Scripting\JExpose.h" />
+    <ClInclude Include="JExpose\Scripting\JScriptBind.h" />
     <ClInclude Include="JExpose\TrackUUID\JClear.h" />
     <ClInclude Include="JExpose\TrackUUID\JDecl.h" />
     <ClInclude Include="JExpose\TrackUUID\JDef.h" />

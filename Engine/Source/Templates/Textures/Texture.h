@@ -68,6 +68,7 @@ namespace Templates
 #include <JEnd.h>
 
 #if defined(_EDITOR)
+		virtual void WriteJson(nlohmann::json& j);
 		virtual void EditorPreview(size_t flags);
 		virtual void DestroyEditorPreview();
 

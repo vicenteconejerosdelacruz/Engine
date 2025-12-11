@@ -50,28 +50,24 @@ namespace Scene
 				{
 					auto& so = GetRenderableSceneObject(uuid);
 					so->BindToScene();
-					so->BindControllers();
 				}
 			},
 			{ SO_Cameras, [](JUUID uuid)
 				{
 					auto& so = GetCameraSceneObject(uuid);
 					so->BindToScene();
-					so->BindControllers();
 				}
 			},
 			{ SO_Lights, [](JUUID uuid)
 				{
 					auto& so = GetLightSceneObject(uuid);
 					so->BindToScene();
-					so->BindControllers();
 				}
 			},
 			{ SO_SoundEffects, [](JUUID uuid)
 				{
 					auto& so = GetSoundFXSceneObject(uuid);
 					so->BindToScene();
-					so->BindControllers();
 				}
 			}
 		};

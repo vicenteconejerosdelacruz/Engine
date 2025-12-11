@@ -68,6 +68,15 @@ namespace Templates {
 		Shader::fileNameToShaderTemplate.insert({ path(),uuid() });
 	}
 
+#if defined(_EDITOR)
+	void ShaderJson::WriteJson(nlohmann::json& j)
+	{
+#include <Editor/JWriteJson.h>
+#include <ShaderAtt.h>
+#include <JEnd.h>
+	}
+#endif
+
 	TEMPDEF_FULL(Shader);
 	TEMPDEF_REFTRACKER(Shader);
 

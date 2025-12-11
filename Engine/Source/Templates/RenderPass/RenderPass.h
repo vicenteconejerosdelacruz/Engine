@@ -135,6 +135,10 @@ namespace Templates
 #include <Attributes/JDecl.h>
 #include <RenderPassAtt.h>
 #include <JEnd.h>
+
+#if defined(_EDITOR)
+		virtual void WriteJson(nlohmann::json& j);
+#endif
 	};
 
 	struct RenderPassInstance;

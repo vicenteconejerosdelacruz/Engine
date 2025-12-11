@@ -284,6 +284,15 @@ namespace Scene
 #include <JEnd.h>
 	}
 
+#if defined(_EDITOR)
+	void Renderable::WriteJson(nlohmann::json& j)
+	{
+#include <Editor/JWriteJson.h>
+#include <RenderableAtt.h>
+#include <JEnd.h>
+	}
+#endif
+
 	void Renderable::Initialize()
 	{
 		using namespace Animation;
@@ -982,6 +991,9 @@ namespace Scene
 				boundingBoxCompute.clear();
 			}
 		}
+#include <Attributes/JDestroy.h>
+#include <RenderableAtt.h>
+#include <JEnd.h>
 	}
 
 	//RENDER

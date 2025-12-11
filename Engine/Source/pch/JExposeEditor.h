@@ -46,7 +46,7 @@ namespace Editor
 
 namespace Game
 {
-	extern std::vector<std::string> GetGameControllers();
+	extern std::vector<std::string> GetControllers();
 };
 
 const int defaultTableFlags = ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_NoPadInnerX;

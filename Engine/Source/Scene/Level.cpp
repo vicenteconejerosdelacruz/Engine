@@ -98,6 +98,8 @@ namespace Scene::Level {
 		LoadSceneObjects(GetDefaultLevelCameras(), SceneObjectTypeJsonContainer.at(SO_Cameras), Scene::CreateCamera);
 		LoadSceneObjects(GetDefaultLevelLights(), SceneObjectTypeJsonContainer.at(SO_Lights), Scene::CreateLight);
 		LoadSceneObjects(GetDefaultLevelSounds(), SceneObjectTypeJsonContainer.at(SO_SoundEffects), Scene::CreateSoundFX);
+
+		MapControllers();
 	}
 #endif
 
@@ -120,6 +122,8 @@ namespace Scene::Level {
 		LoadSceneObjects(data, SceneObjectTypeJsonContainer.at(SO_Cameras), Scene::CreateCamera);
 		LoadSceneObjects(data, SceneObjectTypeJsonContainer.at(SO_Lights), Scene::CreateLight);
 		LoadSceneObjects(data, SceneObjectTypeJsonContainer.at(SO_SoundEffects), Scene::CreateSoundFX);
+
+		MapControllers();
 
 		file.close();
 #if defined(_EDITOR)

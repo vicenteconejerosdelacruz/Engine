@@ -25,25 +25,15 @@ extern DX::StepTimer timer;
 
 namespace Game
 {
-	//Thresholds
-	static const float lookToThreshold = 0.03f;
-	static const float walkThreshold = 0.05f;
-	static const float runThreshold = 0.4f;
+#if defined(_EDITOR)
 
-	//Speeds
-	static const float walkSpeed = 3.0f;
-	static const float runSpeed = 10.0f;
+#include <Editor/JDrawersDef.h>
+#include <VenomControllerAtt.h>
+#include <JEnd.h>
 
+#endif
 	//Scene Bounds(for now)
 	static XMFLOAT2 zBounds = { -6.8f ,0.90f };
-
-	//Jumping
-	static const float jumpHeight = 3.5f;
-	static const int jumpTime = 375;
-
-	//RunningJump
-	static const int runningJumpTime = 375;
-	static const int runningJumpAttackTime = 275;
 
 	//JS Module
 	static std::unique_ptr<v8pp::module> v8ppModule = nullptr;
@@ -115,8 +105,16 @@ namespace Game
 	}
 
 	//Constructor and Binding
-	VenomController::VenomController()
+	VenomController::VenomController(nlohmann::json& json) : Controller(json)
 	{
+#include <Attributes/JInit.h>
+#include <VenomControllerAtt.h>
+#include <JEnd.h>
+
+#include <Attributes/JUpdate.h>
+#include <VenomControllerAtt.h>
+#include <JEnd.h>
+
 		vsm = {
 			.currentState = VS_None,
 			.onEnter = {
@@ -155,6 +153,16 @@ namespace Game
 		JumpingStateData.falling = false;
 		JumpingStateData.kicking = false;
 	}
+
+#if defined(_EDITOR)
+	void VenomController::WriteJson(nlohmann::json& j)
+	{
+#include <Editor/JWriteJson.h>
+#include <VenomControllerAtt.h>
+#include <JEnd.h>
+		j.erase("uuid");
+	}
+#endif
 
 	void VenomController::Map(JUUID so)
 	{
@@ -281,7 +289,7 @@ namespace Game
 	{
 		JumpingStateData.jumping = true;
 		JumpingStateData.falling = false;
-		JumpingStateData.jumpTween = std::make_unique<tween>(tween(0.0f, jumpHeight, jumpTime, tween::easing::sine_ease_out));
+		JumpingStateData.jumpTween = std::make_unique<tween>(tween(0.0f, jumpHeight(), jumpTime(), tween::easing::sine_ease_out));
 		venom->SetCurrentAnimation("JumpLoop", 0.0f, 1.0f, true, true);
 	}
 
@@ -289,7 +297,7 @@ namespace Game
 	{
 		JumpingStateData.jumping = false;
 		JumpingStateData.falling = true;
-		JumpingStateData.fallTween = std::make_unique<tween>(tween(jumpHeight, 0.0f, jumpTime, tween::easing::sine_ease_in));
+		JumpingStateData.fallTween = std::make_unique<tween>(tween(jumpHeight(), 0.0f, jumpTime(), tween::easing::sine_ease_in));
 	}
 
 	void VenomController::VenomEndJumpLanding()
@@ -376,7 +384,7 @@ namespace Game
 
 		float len = leftStick.m128_f32[0];
 
-		if (fabsf(len) < lookToThreshold) return;
+		if (fabsf(len) < lookToThreshold()) return;
 
 		if (len < 0.0f)
 		{
@@ -404,21 +412,21 @@ namespace Game
 	{
 		XMVECTOR len = XMVector3Length(leftStick);
 		float l = len.m128_f32[0];
-		return l < walkThreshold;
+		return l < walkThreshold();
 	}
 
 	bool VenomController::ShouldWalk()
 	{
 		XMVECTOR len = XMVector3Length(leftStick);
 		float l = len.m128_f32[0];
-		return l > walkThreshold && l < runThreshold;
+		return l > walkThreshold() && l < runThreshold();
 	}
 
 	bool VenomController::ShouldRun()
 	{
 		XMVECTOR len = XMVector3Length(leftStick);
 		float l = len.m128_f32[0];
-		return l > runThreshold;
+		return l > runThreshold();
 	}
 
 	bool VenomController::ShouldJump()
@@ -466,7 +474,7 @@ namespace Game
 		runningJumpLeftStick = leftStick;
 		venom->animationUseTransformation(true);
 		venom->SetCurrentAnimation("RunJumpBegin");
-		RunningJumpStateData.jumpTween = std::make_unique<tween>(tween(0.0f, 1.0f, runningJumpTime, tween::easing::linear));
+		RunningJumpStateData.jumpTween = std::make_unique<tween>(tween(0.0f, 1.0f, runningJumpTime(), tween::easing::linear));
 		RunningJumpStateData.dash = false;
 	}
 
@@ -510,7 +518,7 @@ namespace Game
 			return;
 		}
 
-		MoveForward(walkSpeed);
+		MoveForward(walkSpeed());
 		if (ShouldIdle())
 		{
 			vsm.ChangeState(VS_Idle);
@@ -529,7 +537,7 @@ namespace Game
 			return;
 		}
 
-		MoveForward(runSpeed);
+		MoveForward(runSpeed());
 		if (ShouldIdle())
 		{
 			vsm.ChangeState(VS_Idle);
@@ -549,7 +557,7 @@ namespace Game
 		if (JumpingStateData.jumping)
 		{
 			float height = JumpingStateData.jumpTween->step();
-			if (height == jumpHeight)
+			if (height == jumpHeight())
 			{
 				VenomBeginFall();
 				JumpingStateData.jumping = false;
@@ -581,7 +589,7 @@ namespace Game
 
 		XMVECTOR len = XMVector3Length(leftStick);
 		float l = XMVectorGetX(len);
-		JumpingMoveForward(walkSpeed * l);
+		JumpingMoveForward(walkSpeed() * l);
 	}
 
 	void VenomController::RunningJump()
@@ -605,16 +613,16 @@ namespace Game
 			}
 			else if (!RunningJumpStateData.dash && ShouldAttackX())
 			{
-				std::srand(std::time(0));
+				std::srand(static_cast<int>(std::time(0)));
 				RunningJumpStateData.dashAnimationIdx = std::rand() % DashAnimations.size();
 				std::string dashAnim = DashAnimations.at(RunningJumpStateData.dashAnimationIdx);
 				venom->animationUseTransformation(true);
 				venom->SetCurrentAnimation(dashAnim);
-				RunningJumpStateData.jumpTween = std::make_unique<tween>(tween(0.0f, 1.0f, runningJumpAttackTime, tween::easing::linear));
+				RunningJumpStateData.jumpTween = std::make_unique<tween>(tween(0.0f, 1.0f, runningJumpAttackTime(), tween::easing::linear));
 				RunningJumpStateData.dash = true;
 			}
 		}
-		RunningJumpMoveForward(runSpeed);
+		RunningJumpMoveForward(runSpeed());
 	}
 
 	void VenomController::Attacking1()
