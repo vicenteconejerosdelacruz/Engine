@@ -56,6 +56,7 @@ namespace Editor
 	bool maximized = true;
 	bool mouseClicked = false;
 	bool clickedInDragArea = false;
+	bool menuBarItemClicked = false;
 	int lastMouseX;
 	int lastMouseY;
 
@@ -428,6 +429,7 @@ namespace Editor
 						if (ImGui::MenuItem(ICON_FA_FILE "New"))
 						{
 							Level::SetDefaultLevelToLoad();
+							menuBarItemClicked = true;
 						}
 					},
 					!IsPlaying()
@@ -439,6 +441,7 @@ namespace Editor
 						if (ImGui::MenuItem(ICON_FA_FOLDER_OPEN "Open"))
 						{
 							OpenLevelFile();
+							menuBarItemClicked = true;
 						}
 					},
 					!IsPlaying()
@@ -446,8 +449,10 @@ namespace Editor
 
 				ImGui::DrawItemWithEnabledState([]
 					{
-						if (ImGui::MenuItem(ICON_FA_SAVE "Save")) {
+						if (ImGui::MenuItem(ICON_FA_SAVE "Save"))
+						{
 							SaveLevelToFile(currentLevelName);
+							menuBarItemClicked = true;
 						}
 					},
 					currentLevelName != "" && levelModified && !IsPlaying()
@@ -455,8 +460,10 @@ namespace Editor
 
 				ImGui::DrawItemWithEnabledState([]
 					{
-						if (ImGui::MenuItem(ICON_FA_SAVE "Save As..")) {
+						if (ImGui::MenuItem(ICON_FA_SAVE "Save As.."))
+						{
 							SaveLevelAs();
+							menuBarItemClicked = true;
 						}
 					},
 					!IsPlaying()
@@ -465,8 +472,10 @@ namespace Editor
 				ImGui::Separator();
 				ImGui::DrawItemWithEnabledState([]
 					{
-						if (ImGui::MenuItem(ICON_FA_SAVE "Save Templates")) {
+						if (ImGui::MenuItem(ICON_FA_SAVE "Save Templates"))
+						{
 							SaveTemplates();
+							menuBarItemClicked = true;
 						}
 					}, templatesModified
 				);
@@ -1553,6 +1562,10 @@ namespace Editor
 		if (sceneObjectModal.creating || templateModal.creating || deletePrompt.showing || animationSequencer.showing) return;
 
 		DirectX::Mouse::State state = mouse->GetState();
+
+		if (menuBarItemClicked && state.leftButton)
+			return;
+		menuBarItemClicked = false;
 
 		if (!MouseIsInGameArea(mouse) && state.leftButton)
 		{
