@@ -5,7 +5,7 @@
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-struct Renderer : public std::enable_shared_from_this<Renderer>
+struct Renderer
 {
 	~Renderer() {}
 	static const constexpr unsigned int numFrames = 3;
