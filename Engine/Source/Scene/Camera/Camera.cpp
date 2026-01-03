@@ -1,30 +1,30 @@
 #include "pch.h"
 #include "Camera.h"
-#include <Scene.h>
-#include <Light/Light.h>
-#include <Renderable/Renderable.h>
-#include <Renderer.h>
-#include <Textures/Texture.h>
-#include <RenderPass/RenderPass.h>
-#include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
-#include <SceneObjectDef.h>
 #include <Application.h>
+#include <Templates.h>
+#include <Scene.h>
+//#include <Light/Light.h>
+//#include <Renderable/Renderable.h>
+#include <Renderer.h>
+//#include <Textures/Texture.h>
+//#include <RenderPass/RenderPass.h>
+#include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
+//#include <SceneObjectDef.h>
 
 extern std::unique_ptr<Renderer> renderer;
 
 #if defined(_EDITOR)
 namespace Editor
 {
-	extern void SelectCamera(JUUID camera);
-	extern JUUID CreateBillboardFromMaterials(CameraUUID camera, std::string name, std::string material, std::string pickingMaterial);
-	extern void RegisterBillboard(JUUID sceneObject);
-	extern JUUID GetBillboard(JUUID sceneObject);
-	extern void DestroyBillboard(JUUID sceneObject);
+	extern void SelectCamera(SceneUnitId id, JUUID camera);
+	extern JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraUUID camera, std::string name, std::string material, std::string pickingMaterial);
+	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
+	//extern JUUID GetBillboard(JUUID sceneObject);
+	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 }
 #endif
 namespace Scene
 {
-
 	SODEF_FULL(Camera);
 
 #include <TrackUUID/JDef.h>
@@ -55,218 +55,6 @@ namespace Scene
 
 #endif
 
-	void DestroyCameras()
-	{
-		auto uuids = nostd::GetUUIDS<CameraUUID>(CamerasceneObjects);
-		for (auto cam : uuids)
-		{
-			if (cam->shadowMapLight().empty())
-			{
-				DeleteCameraSceneObject(cam());
-			}
-		}
-#include <TrackUUID/JClear.h>
-#include <CameraAtt.h>
-#include <JEnd.h>
-	}
-
-	void DeleteCamera(std::string uuid)
-	{
-		CameraUUID cam = uuid;
-#if defined(_EDITOR)
-		Editor::DestroyBillboard(uuid);
-#endif
-		cam->markedForDelete = true;
-	}
-
-	void CamerasStep()
-	{
-		auto& Cameras = GetCameras();
-		std::set<CameraUUID> cams;
-		std::transform(Cameras.begin(), Cameras.end(), std::inserter(cams, cams.begin()), [](auto o) { return o; });
-
-		//we construct the set of cameras with dirty render passes
-		std::set<CameraUUID> camsRpi;
-		std::copy_if(cams.begin(), cams.end(), std::inserter(camsRpi, camsRpi.begin()), [](auto cam)
-			{
-				return cam->dirty(Camera::Update_renderPasses);
-			}
-		);
-
-		//build a set of cameras for which ibl settings changed
-		std::set<CameraUUID> camsIBL;
-		std::copy_if(cams.begin(), cams.end(), std::inserter(camsIBL, camsIBL.begin()), [](auto cam)
-			{
-				return cam->dirty(Camera::Update_IBLIrradiance) || cam->dirty(Camera::Update_IBLPreFilteredEnvironment) ||
-					cam->dirty(Camera::Update_IBLBRDFLUT);
-
-			}
-		);
-
-		//go through all cameras checking updates of the swapchain
-		std::set<CameraUUID> allCams(Cameras.begin(), Cameras.end());
-		for (auto cam : allCams)
-		{
-			//as a special case update the billboard
-#if defined(_EDITOR)
-			if (cam() != *GetMouseCameras().begin() && cam->shadowMapLight().empty())
-			{
-				JUUID bbuuid = Editor::GetBillboard(cam());
-				if (!bbuuid.empty())
-				{
-					cam->UpdateBillboard(bbuuid);
-				}
-
-			}
-#endif
-			if (!cam->dirty(Camera::Update_useSwapChain)) continue;
-			cam->clean(Camera::Update_useSwapChain);
-			if (cam->useSwapChain())
-			{
-				InsertCameraIntoSwapChainCameras(cam());
-			}
-			else
-			{
-				EraseCameraFromSwapChainCameras(cam());
-			}
-			//as swapchain changed add this camera to the update renderpass set
-			camsRpi.insert(cam);
-		}
-
-		//do the same for the camera controllers cameras
-		for (auto cam : allCams)
-		{
-			if (!cam->dirty(Camera::Update_mouseController)) continue;
-			cam->clean(Camera::Update_mouseController);
-
-			if (cam->mouseController())
-			{
-				InsertCameraIntoMouseCameras(cam());
-			}
-			else
-			{
-				EraseCameraFromMouseCameras(cam());
-			}
-		}
-
-		//update projection attributes
-		for (auto cam : allCams)
-		{
-			if (
-				!cam->dirty(Camera::Update_projectionType) &&
-				!cam->dirty(Camera::Update_perspective) &&
-				!cam->dirty(Camera::Update_orthographic) &&
-				!cam->dirty(Camera::Update_fitWindow)
-				) continue;
-			cam->clean(Camera::Update_projectionType);
-			cam->clean(Camera::Update_perspective);
-			cam->clean(Camera::Update_orthographic);
-			cam->clean(Camera::Update_fitWindow);
-			cam->UpdateProjection();
-		}
-
-		//rebuild ibl attributes if needed
-		if (camsIBL.size() > 0ULL)
-		{
-			renderer->Flush();
-			renderer->RenderCriticalFrame([&camsIBL]
-				{
-					for (auto cam : camsIBL)
-					{
-						std::set<RenderableUUID> renderables(cam->renderables.begin(), cam->renderables.end());
-
-						for (auto r : renderables)
-						{
-							cam->UnbindRenderable(r());
-						}
-
-						cam->DestroyIBLTextures();
-						cam->DestroyRenderPasses();
-						DestroyConstantsBuffer(cam->cameraCb());
-
-						cam->CreateConstantsBuffer();
-						cam->CreateRenderPasses();
-
-						for (auto r : renderables)
-						{
-							cam->BindRenderable(r());
-						}
-
-						cam->clean(Camera::Update_IBLIrradiance);
-						cam->clean(Camera::Update_IBLPreFilteredEnvironment);
-						cam->clean(Camera::Update_IBLBRDFLUT);
-					}
-				});
-		}
-
-		std::set<CameraUUID> delCams;
-		std::copy_if(cams.begin(), cams.end(), std::inserter(delCams, delCams.begin()), [](auto c) {return c->markedForDelete; });
-
-		if (camsRpi.size() > 0ULL || delCams.size() > 0ULL)
-		{
-			renderer->Flush();
-			renderer->RenderCriticalFrame([&camsRpi, &delCams]
-				{
-					for (auto c : camsRpi)
-					{
-						c->clean(Camera::Update_renderPasses);
-
-						for (auto rpi : c->renderPassesUUID)
-						{
-							if (rpi->renderCallbackOverride == RenderPassRenderCallbackOverride_Resolve)
-							{
-								EraseCameraFromSwapChainCameras(c());
-								break;
-							}
-						}
-
-						std::set<RenderableUUID> renderables(c->renderables.begin(), c->renderables.end());
-
-						for (auto renderable : renderables)
-						{
-							UnbindFromScene(c->Juuid(), renderable->Juuid());
-						}
-						c->DestroyRenderPasses();
-
-						c->CreateRenderPasses();
-						for (auto renderable : renderables)
-						{
-							BindToScene(c->Juuid(), renderable->Juuid());
-						}
-
-						for (auto rpi : c->renderPassesUUID)
-						{
-							if (rpi->renderCallbackOverride == RenderPassRenderCallbackOverride_Resolve)
-							{
-								InsertCameraIntoSwapChainCameras(c());
-								break;
-							}
-						}
-					}
-
-					for (auto c : delCams)
-					{
-						EraseCameraFromCameras(c());
-						EraseCameraFromWindowCameras(c());
-						EraseCameraFromSwapChainCameras(c());
-						EraseCameraFromMouseCameras(c());
-						DeleteCameraSceneObject(c());
-					}
-				}
-			);
-		}
-	}
-
-#if defined(_EDITOR)
-	void WriteCamerasJson(nlohmann::json& json)
-	{
-#include <Editor/JSaveFile.h>
-#include <CameraAtt.h>
-#include <JEnd.h>
-
-	}
-#endif
-
 	Camera::Camera(nlohmann::json& json) :SceneObject(json)
 	{
 #include <Attributes/JInit.h>
@@ -281,14 +69,18 @@ namespace Scene
 #if defined(_EDITOR)
 	void Camera::WriteJson(nlohmann::json& j)
 	{
-#include <Editor/JWriteJson.h>
-#include <CameraAtt.h>
-#include <JEnd.h>
+		//#include <Editor/JWriteJson.h>
+		//#include <CameraAtt.h>
+		//#include <JEnd.h>
 	}
 #endif
 
 	void Camera::Initialize()
 	{
+#if defined(_EDITOR)
+		using namespace Editor;
+#endif
+
 #include <TrackUUID/JInsert.h>
 #include <CameraAtt.h>
 #include <JEnd.h>
@@ -296,10 +88,13 @@ namespace Scene
 		UpdateProjection();
 		CreateConstantsBuffer();
 		CreateRenderPasses();
+
 #if defined(_EDITOR)
-		if (GetCountFromMouseCameras() > 0 && uuid() != *GetMouseCameras().begin() && shadowMapLight().empty())
-			Editor::RegisterBillboard(uuid());
+		//if (GetCountFromMouseCameras(unit) > 0 && uuid() != *GetMouseCameras(unit).begin() && shadowMapLight().empty())
+		if (shadowMapLight().empty())
+			RegisterBillboard(unit, uuid());
 #endif
+
 		if (shadowMapLight().empty())
 		{
 			CreateLightsConstantsBuffer();
@@ -481,15 +276,15 @@ namespace Scene
 
 	void Camera::ResizeReleasePasses()
 	{
-		for (auto& pass : renderPassesUUID)
-		{
-			pass->ResizeRelease();
-		}
+		//for (auto& pass : renderPassesUUID)
+		//{
+		//	pass->ResizeRelease();
+		//}
 	}
 
 	void Camera::ResizePasses(unsigned int width, unsigned int height)
 	{
-		for (auto& pass : renderPassesUUID)
+		/*for (auto& pass : renderPassesUUID)
 		{
 			pass->Resize(width, height);
 		}
@@ -505,7 +300,7 @@ namespace Scene
 			orthographicProjection.updateProjectionMatrix(static_cast<float>(width), 0.0f, 0.0f, static_cast<float>(height));
 		}
 		break;
-		}
+		}*/
 	}
 
 	void Camera::UpdateProjection()
@@ -532,6 +327,16 @@ namespace Scene
 		}
 	}
 
+	void Camera::BindToScene()
+	{
+#include <TrackUUID/JInsert.h>
+#include <CameraAtt.h>
+#include <JEnd.h>
+#if defined(_EDITOR)
+		SceneObject::BindToScene();
+#endif
+	}
+
 	void Camera::Bind(JUUID uuid)
 	{
 		switch (GetSceneObjectType(uuid))
@@ -549,9 +354,45 @@ namespace Scene
 		}
 	}
 
+	void Camera::BindRenderable(RenderableUUID renderable)
+	{
+		if (renderables.contains(renderable)) return;
+		renderables.insert(renderable);
+
+		renderable->CreateMaterialsInstances(uuid());
+		renderable->CreateConstantsBuffersInstances(uuid());
+		renderable->CreateRootSignatures(uuid());
+		renderable->CreatePipelineStates(uuid());
+	}
+
+	void Camera::BindLight(LightUUID light)
+	{
+		lights.push_back(light);
+		if (light->hasShadowMaps())
+		{
+			lightsWithShadowMaps.insert(light);
+		}
+	}
+
+	void Camera::UnbindFromScene()
+	{
+#include <TrackUUID/JErase.h>
+#include <CameraAtt.h>
+#include <JEnd.h>
+
+		Scene::UnbindFromScene(unit, uuid());
+		//DestroyIBLTextures();
+		//DestroyRenderPasses();
+		DestroyConstantsBuffer(cameraCb());
+		if (shadowMapLight().empty())
+		{
+			//DestroyLightsConstantsBuffer();
+		}
+	}
+
 	void Camera::Unbind(JUUID uuid)
 	{
-		if (!SceneObjectExists(uuid)) return;
+		if (!SceneObjectExists(unit, uuid)) return;
 
 		switch (GetSceneObjectType(uuid))
 		{
@@ -569,43 +410,6 @@ namespace Scene
 		//DEBUGEAR USANDO grid.hlsl como punto de partida para debugear el shadowmap del previewer
 	}
 
-	void Camera::BindToScene()
-	{
-#include <TrackUUID/JInsert.h>
-#include <CameraAtt.h>
-#include <JEnd.h>
-#if defined(_EDITOR)
-		SceneObject::BindToScene();
-#endif
-	}
-
-	void Camera::UnbindFromScene()
-	{
-#include <TrackUUID/JErase.h>
-#include <CameraAtt.h>
-#include <JEnd.h>
-
-		Scene::UnbindFromScene(uuid());
-		DestroyIBLTextures();
-		DestroyRenderPasses();
-		DestroyConstantsBuffer(cameraCb());
-		if (shadowMapLight().empty())
-		{
-			DestroyLightsConstantsBuffer();
-		}
-	}
-
-	void Camera::BindRenderable(RenderableUUID renderable)
-	{
-		if (renderables.contains(renderable)) return;
-		renderables.insert(renderable);
-
-		renderable->CreateMaterialsInstances(uuid());
-		renderable->CreateConstantsBuffersInstances(uuid());
-		renderable->CreateRootSignatures(uuid());
-		renderable->CreatePipelineStates(uuid());
-	}
-
 	void Camera::UnbindRenderable(RenderableUUID renderable)
 	{
 		if (!renderables.contains(renderable)) return;
@@ -615,15 +419,6 @@ namespace Scene
 		renderable->DestroyConstantsBuffersInstances(uuid());
 		renderable->DestroyRootSignatures(uuid());
 		renderable->DestroyPipelineStates(uuid());
-	}
-
-	void Camera::BindLight(LightUUID light)
-	{
-		lights.push_back(light);
-		if (light->hasShadowMaps())
-		{
-			lightsWithShadowMaps.insert(light);
-		}
 	}
 
 	void Camera::UnbindLight(LightUUID light)
@@ -652,7 +447,8 @@ namespace Scene
 
 	void Camera::Render()
 	{
-		WriteConstantsBuffer(renderer->backBufferIndex);
+		unsigned int frame = GetSceneUnit(unit)->Frame();
+		WriteConstantsBuffer(frame);
 		CalculateBoundingFrustum();
 
 		//first make a set of objects which are not meant to be rendered first
@@ -662,7 +458,7 @@ namespace Scene
 			std::vector<JUUID> uuids = r->renderNext();
 			for (std::string& uuid : uuids)
 			{
-				if (!SceneObjectExists(uuid)) continue;
+				if (!SceneObjectExists(unit, uuid)) continue;
 				nonRoot.insert(uuid);
 			}
 		}
@@ -670,12 +466,12 @@ namespace Scene
 		//create the renderable set recursivelly
 		nostd::VectorSet<RenderableUUID> renVecSet;
 		std::function<void(RenderableUUID)> addToRenderablesVecSet;
-		addToRenderablesVecSet = [&addToRenderablesVecSet, &renVecSet](RenderableUUID r)
+		addToRenderablesVecSet = [&](RenderableUUID r)
 			{
 				renVecSet.insert(r);
 				for (auto& uuid : r->renderNext())
 				{
-					if (!SceneObjectExists(uuid)) continue;
+					if (!SceneObjectExists(unit, uuid)) continue;
 					addToRenderablesVecSet(uuid);
 				}
 			};
@@ -687,14 +483,20 @@ namespace Scene
 			addToRenderablesVecSet(r());
 		}
 
-		auto draw = [this, &renVecSet](auto& rpi)
+		auto draw = [&](SceneUnitId unit, auto& rpi)
 			{
 				for (auto it = renVecSet.begin(); it != renVecSet.end(); it++)
 				{
 					RenderableUUID renderable = *it;
-					if (boundingFrustum.Contains(renderable->GetBoundingBox()) == ContainmentType::DISJOINT)
+					std::string name = renderable->name();
+					BoundingBox rbb = renderable->GetBoundingBox();
+					bool checkBB = renderable->checkBoundingBox();
+					ContainmentType frustumBBContainment = boundingFrustum.Contains(rbb);
+					bool disjointBB = frustumBBContainment == ContainmentType::DISJOINT;
+					if (checkBB && disjointBB)
+						//if (renderable->checkBoundingBox() && boundingFrustum.Contains(renderable->GetBoundingBox()) == ContainmentType::DISJOINT)
 						continue;
-					renderable->Render(rpi, uuid());
+					renderable->Render(unit, rpi, uuid());
 				}
 			};
 
@@ -706,7 +508,7 @@ namespace Scene
 
 		for (auto& rp : rpiv)
 		{
-			rp->Pass([&rp, draw]() {draw(rp); });
+			rp->Pass(unit, [&rp, draw](SceneUnitId unit) { draw(unit, rp); });
 		}
 	}
 
@@ -724,10 +526,10 @@ namespace Scene
 
 	void Camera::CreateConstantsBuffer()
 	{
-		cameraCb = DeviceUtils::CreateConstantsBuffer(sizeof(CameraAttributes) * renderer->numFrames, name());
+		cameraCb = DeviceUtils::CreateConstantsBuffer(sizeof(CameraAttributes), Renderer::numFrames, name());
 	}
 
-	void Camera::WriteConstantsBuffer(unsigned int backbufferIndex)
+	void Camera::WriteConstantsBuffer(unsigned int frame)
 	{
 		CameraAttributes atts{};
 
@@ -751,10 +553,10 @@ namespace Scene
 			atts.IBLNumEnvLevels = 0.0f;
 		}
 
-		cameraCb->push(atts, backbufferIndex);
+		cameraCb->push(atts, frame);
 	}
 
-	void Camera::ProcessKeyboardInput(DirectX::Keyboard::KeyboardStateTracker& tracker, DirectX::Keyboard::State& state)
+	/*void Camera::ProcessKeyboardInput(DirectX::Keyboard::KeyboardStateTracker& tracker, DirectX::Keyboard::State& state)
 	{
 		if (!SceneObjectExists(shadowMapLight()))
 			return;
@@ -769,7 +571,7 @@ namespace Scene
 			if (state.Left) { MoveLeft(moveSpeed); }
 			if (state.Right) { MoveRight(moveSpeed); }
 		}
-	}
+	}*/
 
 	void Camera::MoveAlongFwAxis(float dz)
 	{
@@ -790,7 +592,7 @@ namespace Scene
 		UdateLightRotation();
 	}
 
-	void Camera::ProcessGamepadInput(DirectX::GamePad::State& gamePadState, DirectX::SimpleMath::Vector2 gamePadCameraRotationSensitivity)
+	/*void Camera::ProcessGamepadInput(DirectX::GamePad::State& gamePadState, DirectX::SimpleMath::Vector2 gamePadCameraRotationSensitivity)
 	{
 		if (!SceneObjectExists(shadowMapLight()))
 			return;
@@ -810,10 +612,10 @@ namespace Scene
 			rotation(rotation() - XMFLOAT3{ stickDiff.x * gamePadCameraRotationSensitivity.x, stickDiff.y * gamePadCameraRotationSensitivity.y, 0.0f });
 			UdateLightRotation();
 		}
-	}
+	}*/
 
 	XMFLOAT2 lastMousePos;
-	XMFLOAT2 GetMouseDiff(DirectX::Mouse::State& mouseState)
+	/*XMFLOAT2 GetMouseDiff(DirectX::Mouse::State& mouseState)
 	{
 		XMFLOAT2 currentMousePos = { static_cast<float>(mouseState.x) , static_cast<float>(mouseState.y) };
 		XMFLOAT2 diff = { 0.0f, 0.0f };
@@ -823,11 +625,11 @@ namespace Scene
 		}
 		lastMousePos = currentMousePos;
 		return diff;
-	}
+	}*/
 
 	int lastWheelValue = 0;
 	float wheelDiffFactor = 0.0001f;
-	void Camera::ProcessCameraMouseRotation(DirectX::Mouse::State& mouseState, DirectX::SimpleMath::Vector2 rotationSensitivity, bool firstStep)
+	/*void Camera::ProcessCameraMouseRotation(DirectX::Mouse::State& mouseState, DirectX::SimpleMath::Vector2 rotationSensitivity, bool firstStep)
 	{
 		if (!SceneObjectExists(shadowMapLight()))
 			return;
@@ -846,13 +648,13 @@ namespace Scene
 			float diff = static_cast<float>(mouseState.scrollWheelValue - lastWheelValue) * wheelDiffFactor;
 			orthographicProjection.expandView(diff);
 		}
-	}
+	}*/
 
 	void Camera::UpdateLightPosition()
 	{
 		using namespace Scene;
 
-		if (!SceneObjectExists(shadowMapLight()))
+		if (!SceneObjectExists(unit, shadowMapLight()))
 			return;
 
 		LightUUID lcam = shadowMapLight();
@@ -880,7 +682,7 @@ namespace Scene
 	{
 		using namespace Scene;
 
-		if (!SceneObjectExists(shadowMapLight()))
+		if (!SceneObjectExists(unit, shadowMapLight()))
 			return;
 
 		LightUUID lcam = shadowMapLight();
@@ -935,7 +737,7 @@ namespace Scene
 	//Lights
 	void Camera::CreateLightsConstantsBuffer()
 	{
-		lightsCB = DeviceUtils::CreateConstantsBuffer(sizeof(LightPool), std::string(name() + "-lightsCbv"));
+		lightsCB = DeviceUtils::CreateConstantsBuffer(sizeof(LightPool), Renderer::numFrames, std::string(name() + "-lightsCbv"));
 	}
 
 	void Camera::DestroyLightsConstantsBuffer()
@@ -944,9 +746,9 @@ namespace Scene
 		lightsCB.clear();
 	}
 
-	void Camera::WriteLightsConstantsBuffer()
+	void Camera::WriteLightsConstantsBuffer(unsigned int frame)
 	{
-		size_t offset = lightsCB->alignedConstantBufferSize * renderer->backBufferIndex;
+		size_t offset = lightsCB->alignedConstantBufferSize * frame;
 		LightPool* lpool = (LightPool*)(lightsCB->mappedConstantBuffer + offset);
 		unsigned int numLights = static_cast<unsigned int>(lights.size());
 		lpool->numLights = numLights;
@@ -959,7 +761,7 @@ namespace Scene
 	//ShadowMaps
 	void Camera::CreateShadowMapsConstantsBuffer()
 	{
-		shadowMapsCB = DeviceUtils::CreateConstantsBuffer(sizeof(ShadowMapAttributes) * MaxLights, std::string(name() + "-shadowMapsCbv"));
+		shadowMapsCB = DeviceUtils::CreateConstantsBuffer(sizeof(ShadowMapAttributes) * MaxLights, Renderer::numFrames, std::string(name() + "-shadowMapsCbv"));
 	}
 
 	void Camera::DestroyShadowMapsConstantsBuffer()
@@ -968,17 +770,17 @@ namespace Scene
 		shadowMapsCB.clear();
 	}
 
-	void Camera::WriteShadowMapsConstantsBuffer()
+	void Camera::WriteShadowMapsConstantsBuffer(unsigned int frame)
 	{
 		for (LightUUID light : lights)
 		{
 			for (CameraUUID cam : light->shadowMapCameras)
 			{
-				cam->WriteConstantsBuffer(renderer->backBufferIndex);
+				cam->WriteConstantsBuffer(frame);
 			}
 		}
 
-		size_t offset = shadowMapsCB->alignedConstantBufferSize * renderer->backBufferIndex;
+		size_t offset = shadowMapsCB->alignedConstantBufferSize * frame;
 		ShadowMapAttributes* atts = (ShadowMapAttributes*)(shadowMapsCB->mappedConstantBuffer + offset);
 		for (LightUUID light : lights)
 		{
@@ -1032,9 +834,9 @@ namespace Scene
 
 	JUUID Camera::CreateBillboard(CameraUUID camera)
 	{
-		JUUID uuid = Editor::CreateBillboardFromMaterials(camera, at("name"), "Camera", "CameraPicking");
+		JUUID uuid = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "Camera", "CameraPicking");
 		RenderableUUID bb = uuid;
-		bb->OnPick = [this] {Editor::SelectCamera(this->uuid()); };
+		bb->OnPick = [this] {Editor::SelectCamera(unit, this->uuid()); };
 		UpdateBillboard(uuid);
 		return uuid;
 	}
@@ -1044,11 +846,13 @@ namespace Scene
 		assert(!uuid.empty());
 		if (uuid.empty()) return;
 
+		auto& scene = GetSceneUnit(unit);
+
 		XMFLOAT3 baseColor = { 1.0f,1.0f,1.0f };
 		RenderableUUID bb = uuid;
 		bb->position(position());
-		bb->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, renderer->backBufferIndex);
-		bb->WriteConstantsBuffer();
+		bb->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
+		bb->WriteConstantsBuffer(scene->Frame());
 	}
 
 	BoundingBox Camera::GetBoundingBox()
@@ -1056,5 +860,237 @@ namespace Scene
 		return BoundingBox(position(), { 0.1f,0.1f,0.1f });
 	}
 
+#endif
+
+	void CamerasStep(SceneUnitId unit)
+	{
+		//auto Cameras = nostd::GetUUIDS(CamerasceneObjects);
+		auto& Cameras = GetCameras(unit);
+		std::set<CameraUUID> cams;
+		std::transform(Cameras.begin(), Cameras.end(), std::inserter(cams, cams.begin()), [](auto o) { return o; });
+
+		/*
+		//we construct the set of cameras with dirty render passes
+		std::set<CameraUUID> camsRpi;
+		std::copy_if(cams.begin(), cams.end(), std::inserter(camsRpi, camsRpi.begin()), [](auto cam)
+			{
+				return cam->dirty(Camera::Update_renderPasses);
+			}
+		);
+		*/
+		/*
+		//build a set of cameras for which ibl settings changed
+		std::set<CameraUUID> camsIBL;
+		std::copy_if(cams.begin(), cams.end(), std::inserter(camsIBL, camsIBL.begin()), [](auto cam)
+			{
+				return cam->dirty(Camera::Update_IBLIrradiance) || cam->dirty(Camera::Update_IBLPreFilteredEnvironment) ||
+					cam->dirty(Camera::Update_IBLBRDFLUT);
+
+			}
+		);
+		*/
+		/*
+		//go through all cameras checking updates of the swapchain
+		std::set<CameraUUID> allCams(Cameras.begin(), Cameras.end());
+		for (auto cam : allCams)
+		{
+			//as a special case update the billboard
+#if defined(_EDITOR)
+			if (cam() != *GetMouseCameras().begin() && cam->shadowMapLight().empty())
+			{
+				JUUID bbuuid = Editor::GetBillboard(cam());
+				if (!bbuuid.empty())
+				{
+					cam->UpdateBillboard(bbuuid);
+				}
+
+			}
+#endif
+			if (!cam->dirty(Camera::Update_useSwapChain)) continue;
+			cam->clean(Camera::Update_useSwapChain);
+			if (cam->useSwapChain())
+			{
+				InsertCameraIntoSwapChainCameras(cam());
+			}
+			else
+			{
+				EraseCameraFromSwapChainCameras(cam());
+			}
+			//as swapchain changed add this camera to the update renderpass set
+			camsRpi.insert(cam);
+		}
+
+		//do the same for the camera controllers cameras
+		for (auto cam : allCams)
+		{
+			if (!cam->dirty(Camera::Update_mouseController)) continue;
+			cam->clean(Camera::Update_mouseController);
+
+			if (cam->mouseController())
+			{
+				InsertCameraIntoMouseCameras(cam());
+			}
+			else
+			{
+				EraseCameraFromMouseCameras(cam());
+			}
+		}
+
+		//update projection attributes
+		for (auto cam : allCams)
+		{
+			if (
+				!cam->dirty(Camera::Update_projectionType) &&
+				!cam->dirty(Camera::Update_perspective) &&
+				!cam->dirty(Camera::Update_orthographic) &&
+				!cam->dirty(Camera::Update_fitWindow)
+				) continue;
+			cam->clean(Camera::Update_projectionType);
+			cam->clean(Camera::Update_perspective);
+			cam->clean(Camera::Update_orthographic);
+			cam->clean(Camera::Update_fitWindow);
+			cam->UpdateProjection();
+		}
+
+		//rebuild ibl attributes if needed
+		if (camsIBL.size() > 0ULL)
+		{
+			renderer->Flush();
+			renderer->RenderCriticalFrame([&camsIBL]
+				{
+					for (auto cam : camsIBL)
+					{
+						std::set<RenderableUUID> renderables(cam->renderables.begin(), cam->renderables.end());
+
+						for (auto r : renderables)
+						{
+							cam->UnbindRenderable(r());
+						}
+
+						cam->DestroyIBLTextures();
+						cam->DestroyRenderPasses();
+						DestroyConstantsBuffer(cam->cameraCb());
+
+						cam->CreateConstantsBuffer();
+						cam->CreateRenderPasses();
+
+						for (auto r : renderables)
+						{
+							cam->BindRenderable(r());
+						}
+
+						cam->clean(Camera::Update_IBLIrradiance);
+						cam->clean(Camera::Update_IBLPreFilteredEnvironment);
+						cam->clean(Camera::Update_IBLBRDFLUT);
+					}
+				});
+		}
+		*/
+
+		std::set<CameraUUID> delCams;
+		std::copy_if(cams.begin(), cams.end(), std::inserter(delCams, delCams.begin()), [](auto c) {return c->markedForDelete; });
+
+		/*
+		if (camsRpi.size() > 0ULL || delCams.size() > 0ULL)
+		{
+			renderer->Flush();
+			renderer->RenderCriticalFrame([&camsRpi, &delCams]
+				{
+					for (auto c : camsRpi)
+					{
+						c->clean(Camera::Update_renderPasses);
+
+						for (auto rpi : c->renderPassesUUID)
+						{
+							if (rpi->renderCallbackOverride == RenderPassRenderCallbackOverride_Resolve)
+							{
+								EraseCameraFromSwapChainCameras(c());
+								break;
+							}
+						}
+
+						std::set<RenderableUUID> renderables(c->renderables.begin(), c->renderables.end());
+
+						for (auto renderable : renderables)
+						{
+							UnbindFromScene(c->Juuid(), renderable->Juuid());
+						}
+						c->DestroyRenderPasses();
+
+						c->CreateRenderPasses();
+						for (auto renderable : renderables)
+						{
+							BindToScene(c->Juuid(), renderable->Juuid());
+						}
+
+						for (auto rpi : c->renderPassesUUID)
+						{
+							if (rpi->renderCallbackOverride == RenderPassRenderCallbackOverride_Resolve)
+							{
+								InsertCameraIntoSwapChainCameras(c());
+								break;
+							}
+						}
+					}
+					*/
+		for (auto c : delCams)
+		{
+			EraseCameraFromCameras(c->unit, c());
+			EraseCameraFromWindowCameras(c->unit, c());
+			EraseCameraFromSwapChainCameras(c->unit, c());
+			EraseCameraFromMouseCameras(c->unit, c());
+			DeleteCameraSceneObject(c());
+		}
+		/*
+	}
+);
+}
+*/
+	}
+
+	void DestroyCameras()
+	{
+		auto uuids = nostd::GetUUIDS<CameraUUID>(CamerasceneObjects);
+		for (auto cam : uuids)
+		{
+			if (cam->shadowMapLight().empty())
+			{
+				DeleteCameraSceneObject(cam());
+			}
+		}
+#include <TrackUUID/JClear.h>
+#include <CameraAtt.h>
+#include <JEnd.h>
+	}
+
+	void DestroyCameras(SceneUnitId unit)
+	{
+		auto uuids = nostd::GetUUIDS(CamerasceneObjects);
+		for (CameraUUID uuid : uuids)
+		{
+			if (uuid->unit != unit || !uuid->shadowMapLight().empty()) continue;
+			DeleteCameraSceneObject(uuid());
+		}
+#include <TrackUUID/JClearUnit.h>
+#include <CameraAtt.h>
+#include <JEnd.h>
+	}
+
+	void DeleteCamera(JUUID uuid)
+	{
+		CameraUUID cam = uuid;
+#if defined(_EDITOR)
+		Editor::DestroyBillboard(cam->unit, uuid);
+#endif
+		cam->markedForDelete = true;
+	}
+
+#if defined(_EDITOR)
+	void WriteCamerasJson(nlohmann::json& json)
+	{
+		//#include <Editor/JSaveFile.h>
+		//#include <CameraAtt.h>
+		//#include <JEnd.h>
+	}
 #endif
 }

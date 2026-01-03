@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "SequencePlayer.h"
+#include <SceneObject.h>
 
 SequencePlayer::SequencePlayer()
 {
@@ -251,7 +252,7 @@ void SequencePlayer::CreateFrameSoundFXs(int frame)
 
 void SequencePlayer::ExecuteFrameScripts(int frame)
 {
-	sequence.RunScriptAtFrame(frame, renderable);
+	//sequence.RunScriptAtFrame(frame, renderable);
 }
 
 void SequencePlayer::ResetFrames()

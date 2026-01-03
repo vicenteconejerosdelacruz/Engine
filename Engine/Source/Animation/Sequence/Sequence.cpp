@@ -114,6 +114,7 @@ XMMATRIX Sequence::GetTransformationAtFrame(int frame)
 
 void Sequence::CreateSoundFXsAtFrame(int frame)
 {
+	/*
 	std::set<SequenceChannelElementSoundFX*> soundfxs;
 	for (SequenceChannel& channel : sequenceChannels)
 	{
@@ -140,8 +141,10 @@ void Sequence::CreateSoundFXsAtFrame(int frame)
 		soundFXUUID->BindToScene();
 		soundFXUUID->Play();
 	}
+	*/
 }
 
+/*
 void Sequence::RunScriptAtFrame(int frame, RenderableUUID renderable)
 {
 	using namespace Scripting;
@@ -152,6 +155,7 @@ void Sequence::RunScriptAtFrame(int frame, RenderableUUID renderable)
 		RunScript(script->script, renderable);
 	}
 }
+*/
 
 bool Sequence::Runnable() const
 {

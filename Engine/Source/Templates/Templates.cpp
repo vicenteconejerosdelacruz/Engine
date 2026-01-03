@@ -1,25 +1,31 @@
 #include "pch.h"
-#include "Templates.h"
 #include <fstream>
-#include <Material/Material.h>
-#include <Model3D/Model3D.h>
-#include <RenderPass/RenderPass.h>
-#include <Shader/Shader.h>
-#include <Sound/Sound.h>
-#include <Textures/Texture.h>
+#include "Templates.h"
+//#include <Shader/Shader.h>
+//#include <Material/Material.h>
+//#include <Model3D/Model3D.h>
+//#include <RenderPass/RenderPass.h>
+//#include <Sound/Sound.h>
+//#include <Textures/Texture.h>
+//#include <Mesh/Mesh.h>
+
 #if defined(_EDITOR)
 namespace Editor
 {
+	/*
 	extern std::string currentLevelName;
 	extern void PromptTemplateDeletion(std::vector<nlohmann::json> references, std::function<void(std::vector<nlohmann::json>)> OnDelete, std::function<void()> OnCancel);
 	extern void CloseDeletionPrompt();
 	extern void MarkTemplatesPanelAssetsAsDirty();
+	*/
 }
 
 namespace Scene
 {
+	/*
 	SceneObject* GetSceneObjectPointer(JUUID uuid);
 	std::function<std::vector<JUUIDName>()> GetSceneObjectsByType(SceneObjectType typeToGet);
+	*/
 }
 #endif
 
@@ -760,34 +766,36 @@ namespace Templates
 		return templatesTypes.contains(uuid);
 	}
 
-
-	nlohmann::json& GetSystemShaders()
+	void CreateSystemTemplates()
 	{
-		return systemShaders;
+		LoadTemplates(systemShaders, CreateShader);
+		LoadTemplates(systemSounds, CreateSound);
+		LoadTemplates(systemMaterials, CreateMaterial);
+		LoadTemplates(systemRenderPasses, CreateRenderPass);
+		LoadTemplates(systemTextures, CreateTexture);
+
+		CreatePrimitiveMeshTemplate("d41e5c29-49bb-4f2c-aa2b-da781fbac512", "floor");
+		CreatePrimitiveMeshTemplate("d8bfdef4-55f9-4f6e-b4a8-20915eb854d6", "utahteapot");
+		CreatePrimitiveMeshTemplate("f7786ac1-e296-4e9a-a7e6-6f1949de75ef", "cube");
+		CreatePrimitiveMeshTemplate("d76b3bd8-0f53-4128-974e-2d6d5062bc00", "pyramid");
+		CreatePrimitiveMeshTemplate("7dec1229-075f-4599-95e1-9ccfad0d48b1", "decal");
+		CreatePrimitiveMeshTemplate("30f15e68-db42-46fa-b846-b2647a0ac9b9", "boxlines");
+		CreatePrimitiveMeshTemplate("4d1174b2-8225-4c09-9db6-ff09718ae0f5", "sphere");
+		CreatePrimitiveMeshTemplate("ad73990a-c59d-45d2-8ec3-807b1f52f5b9", "cone");
 	}
 
-	nlohmann::json& GetSystemSounds()
+	void CreateTemplates()
 	{
-		return systemSounds;
-	}
-
-	nlohmann::json& GetSystemMaterials()
-	{
-		return systemMaterials;
-	}
-
-	nlohmann::json& GetSystemRenderPasses()
-	{
-		return systemRenderPasses;
-	}
-
-	nlohmann::json& GetSystemTextures()
-	{
-		return systemTextures;
+		LoadTemplates(defaultTemplatesFolder, Shader::templateName, CreateShader);
+		LoadTemplates(defaultTemplatesFolder, Material::templateName, CreateMaterial);
+		LoadTemplates(defaultTemplatesFolder, Model3D::templateName, CreateModel3D);
+		LoadTemplates(defaultTemplatesFolder, Sound::templateName, CreateSound);
+		LoadTemplates(defaultTemplatesFolder, Texture::templateName, CreateTexture);
+		LoadTemplates(defaultTemplatesFolder, RenderPass::templateName, CreateRenderPass);
 	}
 
 #if defined(_EDITOR)
-
+	/*
 	void SaveTemplates(const std::string folder, const std::string fileName, std::function<void(nlohmann::json&)> writer)
 	{
 		//first create the directory if needed
@@ -806,7 +814,7 @@ namespace Templates
 		file.write(dataString.c_str(), dataString.size());
 		file.close();
 	}
-
+	*/
 #endif
 
 	void LoadTemplates(nlohmann::json templates, std::function<void(nlohmann::json&)> loader)
@@ -837,26 +845,30 @@ namespace Templates
 
 	void DestroyTemplates()
 	{
-		//ReleaseRenderPassTemplates();
-		//ReleaseTextureTemplates();
-		//ReleaseSoundTemplates();
-		//ReleaseModel3DTemplates();
+		ReleaseRenderPassTemplates();
+		ReleaseTextureTemplates();
+		ReleaseSoundTemplates();
+		ReleaseModel3DTemplates();
 		//ReleaseMeshTemplates();
-		//ReleaseMaterialTemplates();
-		//ReleaseShaderTemplates();
+		ReleaseMaterialTemplates();
+		ReleaseShaderTemplates();
 	}
 
 #if defined(_EDITOR)
+	/*
 	void DestroyTemplatesReferences()
 	{
 		//ReleaseSoundEffectsInstances();
 	}
+	*/
 #endif
 
+	/*
 	void FreeGPUIntermediateResources()
 	{
 		//FreeGPUTexturesUploadIntermediateResources();
 	}
+	*/
 
 	void TemplatesStep(DX::StepTimer& timer)
 	{
@@ -1023,6 +1035,7 @@ namespace Templates
 		return GetTPreviewers.at(t)();
 	}
 
+	/*
 	std::vector<std::string> GetTemplateRequiredAttributes(TemplateType t)
 	{
 		const std::map<TemplateType, std::function<std::vector<std::string>()>> GetTRequiredAtts =
@@ -1036,7 +1049,9 @@ namespace Templates
 		};
 		return GetTRequiredAtts.at(t)();
 	}
+	*/
 
+	/*
 	nlohmann::json GetTemplateJson(TemplateType t)
 	{
 		const std::map<TemplateType, std::function<nlohmann::json()>> GetTJson =
@@ -1050,7 +1065,9 @@ namespace Templates
 		};
 		return GetTJson.at(t)();
 	}
+	*/
 
+	/*
 	nlohmann::json GetTemplateCreationModalProperties(TemplateType t)
 	{
 		const std::map<TemplateType, std::function<nlohmann::json()>> GetTJson =
@@ -1088,7 +1105,9 @@ namespace Templates
 		};
 		return GetTJson.at(t)();
 	}
+	*/
 
+	/*
 	std::map<std::string, JEdvCreatorDrawerFunction> GetTemplateCreatorDrawers(TemplateType t)
 	{
 		const std::map<TemplateType, std::function<std::map<std::string, JEdvCreatorDrawerFunction>()>> GetTDrawers =
@@ -1142,7 +1161,9 @@ namespace Templates
 		};
 		return GetTName.at(t)(uuid);
 	}
+	*/
 
+	/*
 	void CreateTemplateFromJson(nlohmann::json& json, std::function<void(nlohmann::json& json)> creator)
 	{
 		if (!json.contains("uuid") || json.at("uuid") == "")
@@ -1152,7 +1173,9 @@ namespace Templates
 		}
 		creator(json);
 	}
+	*/
 
+	/*
 	void CreateTemplate(TemplateType t, nlohmann::json json)
 	{
 		const std::map<TemplateType, std::function<void(nlohmann::json json)>> CreateT =
@@ -1167,7 +1190,9 @@ namespace Templates
 		CreateT.at(t)(json);
 		Editor::MarkTemplatesPanelAssetsAsDirty();
 	}
+	*/
 
+	/*
 	std::string GetTemplateFile(TemplateType t)
 	{
 		const std::map<TemplateType, std::function<std::string()>> GetF = {
@@ -1180,6 +1205,7 @@ namespace Templates
 		};
 		return defaultTemplatesFolder + GetF.at(t)();
 	}
+	*/
 
 	void DeleteTemplate(TemplateType t, std::string uuid)
 	{
@@ -1199,6 +1225,7 @@ namespace Templates
 
 	void DeleteTemplate(std::string uuid)
 	{
+		/*
 		TemplateType type = GetTemplateType(uuid);
 		std::string name = GetTemplateName(type, uuid);
 		std::set<std::string> skipTemplateFile = { GetTemplateFile(type) };
@@ -1266,8 +1293,10 @@ namespace Templates
 		{
 			deleteTemplate(references);
 		}
+		*/
 	}
 
+	/*
 	void DeleteTemplateReferences(std::vector<nlohmann::json> references)
 	{
 		bool modified = false;
@@ -1291,7 +1320,9 @@ namespace Templates
 		}
 		Editor::templatesModified |= modified;
 	}
+	*/
 
+	/*
 	void DeleteTemplateReferencesInLevels(std::vector<nlohmann::json> references)
 	{
 		std::map<std::string, std::set<std::string>> levelPaths;
@@ -1325,7 +1356,9 @@ namespace Templates
 			ofile.close();
 		}
 	}
+	*/
 
+	/*
 	void DeleteTemplateReferencesInCurrentLevel(std::vector<nlohmann::json> references)
 	{
 		for (auto& ref : references)
@@ -1366,7 +1399,9 @@ namespace Templates
 			}
 		}
 	}
+	*/
 
+	/*
 	void FindTemplatesReferencesInTemplates(std::string uuid, std::set<std::string> skipTemplateFile, std::function<void(nlohmann::json)> addReference)
 	{
 		for (auto& entry : std::filesystem::directory_iterator(defaultTemplatesFolder))
@@ -1400,7 +1435,9 @@ namespace Templates
 			}
 		}
 	}
+	*/
 
+	/*
 	void FindTemplatesReferencesInLevels(std::string uuid, std::set<std::string> skipLevelFiles, std::function<void(nlohmann::json)> addReference)
 	{
 		for (auto& entry : std::filesystem::directory_iterator(defaultLevelsFolder))
@@ -1438,7 +1475,9 @@ namespace Templates
 			}
 		}
 	}
+	*/
 
+	/*
 	void FindTemplatesReferencesInCurrentLevel(std::string uuid, std::function<void(nlohmann::json)> addReference)
 	{
 		using namespace Scene;
@@ -1467,7 +1506,9 @@ namespace Templates
 			}
 		}
 	}
+	*/
 
+	/*
 	void FindRecursiveJsonReference(nlohmann::json json, std::string uuid, std::string path, std::function<void(std::string path)> addReference)
 	{
 		if (json.is_object())
@@ -1495,6 +1536,7 @@ namespace Templates
 			}
 		}
 	}
+	*/
 
 #endif
 }

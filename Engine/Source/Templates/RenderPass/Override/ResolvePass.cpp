@@ -1,13 +1,17 @@
 #include "pch.h"
 #include "ResolvePass.h"
-#include <Renderer.h>
-#include <Material/Material.h>
-#include <Shader/Shader.h>
-#include <Camera/Camera.h>
-#include <Mesh/Mesh.h>
-#include <RenderPass/RenderPass.h>
+#include <Scene.h>
+#include <SceneObject.h>
+//#include <Renderer.h>
+//#include <Material/Material.h>
+//#include <Shader/Shader.h>
+//#include <Camera/Camera.h>
+//#include <Mesh/Mesh.h>
+//#include <RenderPass/RenderPass.h>
+#include <DeviceUtils/RenderToTexture/RenderToTexture.h>
+#include <DeviceUtils/RenderPass/SwapChainPass.h>
 
-extern std::unique_ptr<Renderer> renderer;
+//extern std::unique_ptr<Renderer> renderer;
 
 ResolvePass::ResolvePass(JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(cam, rpI, rp)
 {
@@ -24,11 +28,11 @@ ResolvePass::ResolvePass(JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(c
 
 	if (mode == ResolveMode_CopyFromRenderToTexture)
 	{
-		CreateFsQuadResources("FullScreenQuad", camSO->renderPasses().at(rpI), [this](std::string name, ShaderConstantsBufferVariable& var)
+		CreateFsQuadResources(camSO->unit, "FullScreenQuad", camSO->renderPasses().at(rpI), [this](std::string name, ShaderConstantsBufferVariable& var)
 			{
 				auto& fsCB = fsQuadConstantsBuffer;
 
-				for (unsigned int n = 0; n < renderer->numFrames; n++)
+				for (unsigned int n = 0; n < Renderer::numFrames; n++)
 				{
 					if (name == "alpha")
 					{
@@ -41,24 +45,27 @@ ResolvePass::ResolvePass(JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(c
 	}
 }
 
-void ResolvePass::Pass()
+void ResolvePass::Pass(SceneUnitId unit)
 {
 	auto& swapChain = renderPassInstance->swapChainPass;
-	swapChain->BeginRenderPass(swapChain->depthStencilViewDescriptorHeap);
+	swapChain->BeginRenderPass(unit, swapChain->depthStencilViewDescriptorHeap);
 	if (mode == ResolveMode_FullScreenQuad)
 	{
-		swapChain->CopyFromRenderToTexture(GetPrevPassRenderToTexture());
+		swapChain->CopyFromRenderToTexture(unit, GetPrevPassRenderToTexture());
 	}
 	else
 	{
-		Render();
+		Render(unit);
 	}
-	swapChain->EndRenderPass();
+	swapChain->EndRenderPass(unit);
 }
 
-void ResolvePass::Render()
+void ResolvePass::Render(SceneUnitId unit)
 {
-	auto& commandList = renderer->commandList;
+	using namespace Scene;
+	//auto& commandList = renderer->commandList;
+	auto& scene = GetSceneUnit(unit);
+	auto& commandList = scene->GetCommandList();
 	auto& fsCB = fsQuadConstantsBuffer;
 	auto& fsQuadMesh = GetMeshInstance(fsQuad);
 	auto& prevPassRTT = GetRenderToTexture(GetPrevPassRenderToTexture());
@@ -71,7 +78,7 @@ void ResolvePass::Render()
 	commandList->SetGraphicsRootSignature(rootSignature);
 	commandList->SetPipelineState(pipelineState);
 
-	commandList->SetGraphicsRootDescriptorTable(0, fsCB->gpu_xhandle.at(renderer->backBufferIndex));
+	commandList->SetGraphicsRootDescriptorTable(0, fsCB->gpu_xhandle.at(scene->Frame()));
 	commandList->SetGraphicsRootDescriptorTable(1, prevPassRTT->gpuTextureHandle);
 
 	commandList->IASetVertexBuffers(0, 1, &fsQuadMesh->vbvData.vertexBufferView);

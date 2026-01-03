@@ -20,7 +20,7 @@ namespace ComputeShader
 			DeleteShaderInstance(shader);
 		}
 		void Init(std::string shaderName, std::vector<MaterialSamplerDesc> samplers = {}, std::wstring target = ShaderCompiler::shaderTarget.at(COMPUTE_SHADER));
-		void SetComputeState();
+		void SetComputeState(SceneUnitId unit);
 	};
 }
 

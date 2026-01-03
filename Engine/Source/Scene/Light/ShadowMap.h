@@ -1,6 +1,6 @@
 #pragma once
 #include <DirectXMath.h>
-#include "../../Common/d3dx12.h"
+#include <d3dx12.h>
 
 namespace Scene { struct Light; }
 
@@ -19,13 +19,12 @@ namespace Scene {
 		XMFLOAT4 atts7;
 	};
 
-	void CreateShadowMapResources();
-	void DestroyShadowMapResources();
-	void AllocShadowMapSlot(unsigned int slot);
-	void FreeShadowMapSlot(unsigned int slot);
-	unsigned int GetNextAvailableShadowMapSlot();
-	CD3DX12_GPU_DESCRIPTOR_HANDLE GetShadowMapGpuDescriptorHandleStart();
-	CD3DX12_GPU_DESCRIPTOR_HANDLE GetShadowMapGpuDescriptorHandle(unsigned int index);
-
+	void CreateShadowMapResources(SceneUnitId unit);
+	void DestroyShadowMapResources(SceneUnitId unit);
+	void AllocShadowMapSlot(SceneUnitId unit, unsigned int slot);
+	void FreeShadowMapSlot(SceneUnitId unit, unsigned int slot);
+	unsigned int GetNextAvailableShadowMapSlot(SceneUnitId unit);
+	CD3DX12_GPU_DESCRIPTOR_HANDLE GetShadowMapGpuDescriptorHandleStart(SceneUnitId unit);
+	CD3DX12_GPU_DESCRIPTOR_HANDLE GetShadowMapGpuDescriptorHandle(SceneUnitId unit, unsigned int index);
 };
 

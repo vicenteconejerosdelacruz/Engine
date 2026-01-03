@@ -74,7 +74,6 @@
 #include <array>
 #include <thread>
 #include <chrono>
-#include <filesystem>
 #include <ranges>
 #include <any>
 #include <ios>
@@ -91,10 +90,9 @@
 #include <iterator>
 #include <cctype>
 #include <locale>
-#include <regex>
 
 #if defined(_EDITOR)
-#include <ShlObj.h>
+//#include <ShlObj.h>
 #include <imgui.h>
 #include "misc/cpp/imgui_stdlib.h"
 #include "imgui_internal.h"
@@ -113,8 +111,8 @@
 #include <v8.h>
 #include <libplatform/libplatform.h>
 //v8pp
-#include "v8pp/context.hpp"
-#include "v8pp/module.hpp"
+#include <v8pp/context.hpp>
+#include <v8pp/module.hpp>
 
 template<typename... Args> void whatis();
 template<typename T> void whatis(T);
@@ -122,7 +120,16 @@ template<typename T> void whatis(T);
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
-using namespace Concurrency;
+//using namespace Concurrency;
+
+enum SceneObjectType {
+	SO_None,
+	SO_Renderables,
+	SO_Lights,
+	SO_Cameras,
+	SO_SoundEffects
+};
+typedef size_t SceneUnitId;
 
 #include "pch/TemplateFlags.h"
 #include "pch/Application.h"
@@ -142,3 +149,4 @@ using namespace Concurrency;
 #include "pch/JExposeEditor.h"
 #endif
 #include "pch/GameStateMachine.h"
+#include "pch/GameEngineState.h"

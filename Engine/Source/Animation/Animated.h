@@ -14,7 +14,6 @@ using namespace DirectX;
 
 namespace Animation
 {
-	static const std::string AnimationConstantBufferName = "animation";
 	static const unsigned int MAX_BONES = 1024U;
 	typedef XMMATRIX BonesMatrices[MAX_BONES];
 
@@ -71,6 +70,7 @@ namespace Animation
 	std::unique_ptr<Animated> CreateAnimatedFromAssimp(const aiScene* aiModel);
 
 	void DestroyAnimated();
+	void DestroyAnimated(SceneUnitId unit);
 
 	void AttachAnimation(JUUID renderableUUID, std::unique_ptr<Animated>& animated);
 	ConstantsBufferUUID GetAnimatedConstantsBuffer(JUUID renderableUUID);

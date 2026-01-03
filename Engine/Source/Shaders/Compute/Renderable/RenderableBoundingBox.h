@@ -3,13 +3,12 @@
 #include <vector>
 #include <atlbase.h>
 #include <wrl/client.h>
+#include <d3dx12.h>
+#include <DirectXHelper.h>
 #include "../ComputeInterface.h"
-#include "../../../Common/d3dx12.h"
-#include "../../../Common/DirectXHelper.h"
 
 namespace ComputeShader
 {
-
 	struct RenderableBoundingBox : public ComputeInterface
 	{
 		ConstantsBufferUUID bonesCbv;
@@ -27,8 +26,8 @@ namespace ComputeShader
 		RenderableBoundingBox(JUUID renderableUUID);
 		~RenderableBoundingBox();
 
-		virtual void Compute();
-		virtual void Solution();
+		virtual void Compute(SceneUnitId unit);
+		virtual void Solution(SceneUnitId unit);
 	};
 
 	JUUID CreateRenderableBoundingBox(RenderableUUID renderable);

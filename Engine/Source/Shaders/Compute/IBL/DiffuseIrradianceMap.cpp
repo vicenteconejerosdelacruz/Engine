@@ -8,6 +8,7 @@
 #include <DirectXTex.h>
 #include "../Shaders/Compiler/ShaderCompiler.h"
 #include <DXTypes.h>
+#include <Scene.h>
 
 extern std::unique_ptr<Renderer> renderer;
 
@@ -91,15 +92,16 @@ namespace ComputeShader
 		readBackResource = nullptr;
 	}
 
-	void DiffuseIrradianceMap::Compute()
+	void DiffuseIrradianceMap::Compute(SceneUnitId unit)
 	{
-		CComPtr<ID3D12GraphicsCommandList2>& commandList = renderer->commandList;
+		auto& scene = GetSceneUnit(unit);
+		CComPtr<ID3D12GraphicsCommandList2>& commandList = scene->GetComputeCommandList();
 
 #if defined(_DEVELOPMENT)
 		PIXBeginEvent(commandList.p, 0, L"DiffuseIrradianceMap Compute");
 #endif
 
-		shader.SetComputeState();
+		shader.SetComputeState(unit);
 
 		commandList->SetComputeRootDescriptorTable(0, resultGpuHandle);
 		commandList->SetComputeRootDescriptorTable(1, envMapCubeGpuHandle);
@@ -110,7 +112,7 @@ namespace ComputeShader
 #endif
 	}
 
-	void DiffuseIrradianceMap::Solution()
+	void DiffuseIrradianceMap::Solution(SceneUnitId unit)
 	{
 		DeviceUtils::CaptureTexture3D(
 			renderer->d3dDevice,

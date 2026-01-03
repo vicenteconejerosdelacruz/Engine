@@ -81,7 +81,7 @@ namespace Game
 
 	void BindToV8Context(v8pp::context& context, JUUID uuid)
 	{
-		using namespace Scripting;
+		//using namespace Scripting;
 		JUUID controllerUUID = sceneObjectUUIDToControllerUUID.at(uuid);
 		std::unique_ptr<Controller>& controller = controllersUUIDs.at(controllerUUID);
 		controller->BindToV8Context(context);

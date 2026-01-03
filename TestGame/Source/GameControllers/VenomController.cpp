@@ -173,9 +173,9 @@ namespace Game
 		{
 			venom = so;
 		}
-		if (GetCountFromMouseCameras() > 0ULL)
+		if (GetCountFromMouseCameras(venom->unit) > 0ULL)
 		{
-			camera = *GetMouseCameras().begin();
+			camera = *GetMouseCameras(venom->unit).begin();
 		}
 		BindV8Module();
 	}

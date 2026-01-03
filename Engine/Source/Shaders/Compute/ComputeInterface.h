@@ -5,8 +5,6 @@ namespace Scene { struct Renderable; };
 
 namespace ComputeShader
 {
-	//using namespace DeviceUtils;
-
 	struct ComputeInterface
 	{
 		ComputeShader shader;
@@ -16,7 +14,7 @@ namespace ComputeShader
 			shader.Init(shaderName, samplers, target);
 		}
 
-		virtual void Compute() = 0;
-		virtual void Solution() = 0;
+		virtual void Compute(SceneUnitId unit) = 0;
+		virtual void Solution(SceneUnitId unit) = 0;
 	};
 };

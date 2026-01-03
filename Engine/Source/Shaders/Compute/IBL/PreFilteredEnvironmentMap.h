@@ -36,8 +36,8 @@ namespace ComputeShader
 		PreFilteredEnvironmentMap(JUUID envMapUUID, std::filesystem::path iblPreFilteredEnvironmentMapFile);
 		~PreFilteredEnvironmentMap();
 
-		virtual void Compute();
-		virtual void Solution();
+		virtual void Compute(SceneUnitId unit);
+		virtual void Solution(SceneUnitId unit);
 		void WriteFile(std::vector<Image>& imgs) const;
 	};
 };

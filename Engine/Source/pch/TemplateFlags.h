@@ -1,5 +1,6 @@
 #pragma once
 
+/*
 enum TemplateFlags {
 	None,
 	Loading = 0x1,
@@ -7,3 +8,4 @@ enum TemplateFlags {
 };
 
 
+*/

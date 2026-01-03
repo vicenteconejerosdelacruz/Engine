@@ -37,8 +37,8 @@ namespace ComputeShader
 		DiffuseIrradianceMap(JUUID envMapTemplateUUID, std::filesystem::path iblDiffuseFile);
 		~DiffuseIrradianceMap();
 
-		virtual void Compute();
-		virtual void Solution();
+		virtual void Compute(SceneUnitId unit);
+		virtual void Solution(SceneUnitId unit);
 		void WriteFile(XMFLOAT4* data) const;
 	};
 };

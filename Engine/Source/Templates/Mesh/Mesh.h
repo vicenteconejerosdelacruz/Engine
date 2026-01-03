@@ -4,7 +4,7 @@
 #include <DeviceUtils/VertexBuffer/VertexBuffer.h>
 #include <DeviceUtils/IndexBuffer/IndexBuffer.h>
 #include <DirectXCollision.h>
-#include <Application.h>
+//#include <Application.h>
 
 namespace Templates {
 
@@ -23,8 +23,9 @@ namespace Templates {
 
 	//CREATE
 	void CreatePrimitiveMeshTemplate(JUUID uuid, JNAME name);
+	std::unique_ptr<MeshInstance>& GetMeshInstance(SceneUnitId id, JUUID uuid);
 	std::unique_ptr<MeshInstance>& GetMeshInstance(JUUID uuid);
-	std::unique_ptr<MeshInstance>& GetMeshInstance(JUUID uuid, VertexClass vertexClass, void* vertexData, unsigned int vertexSize, unsigned int verticesCount, const void* indices, unsigned int indicesCount);
+	std::unique_ptr<MeshInstance>& GetMeshInstance(SceneUnitId id, JUUID uuid, VertexClass vertexClass, void* vertexData, unsigned int vertexSize, unsigned int verticesCount, const void* indices, unsigned int indicesCount);
 
 	//READ&GET
 	JNAME GetMeshName(JUUID uuid);

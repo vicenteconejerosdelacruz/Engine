@@ -1,20 +1,22 @@
 #pragma once
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <assimp/GltfMaterial.h>
-#include <VertexFormats.h>
-#include <Mesh/Mesh.h>
-#include <Material/Material.h>
-#include <Animated.h>
-#include <DirectXCollision.h>
+//#include <assimp/Importer.hpp>
+//#include <assimp/scene.h>
+//#include <assimp/postprocess.h>
+//#include <assimp/GltfMaterial.h>
+//#include <VertexFormats.h>
+//#include <Mesh/Mesh.h>
+//#include <Material/Material.h>
+//#include <Animated.h>
+//#include <DirectXCollision.h>
+#include <Templates.h>
 #include <JTemplate.h>
-#include <JTypes.h>
+//#include <JTypes.h>
+//#include <TemplateDecl.h>
 #include <Sequence/AnimationSequences.h>
 
-namespace Animation { struct Animated; };
-namespace Templates { struct TextureJson; struct MaterialJson; };
+//namespace Animation { struct Animated; };
+//namespace Templates { struct TextureJson; struct MaterialJson; };
 
 namespace Templates
 {
@@ -90,12 +92,13 @@ namespace Templates
 
 		Model3DInstance(JUUID uuid) { assert(!!!"do not use"); }
 		explicit Model3DInstance(
+			SceneUnitId id,
 			JUUID uuid,
 			JUUID objectUUID,
 			JObjectChangeCallback cb = [](JUUID) {},
 			JObjectChangePostCallback postCb = [](unsigned int, unsigned int) {});
 		~Model3DInstance();
-		void LoadModel3DInstance();
+		void LoadModel3DInstance(SceneUnitId id);
 		void CreateModel3DMaterialsTemplates(const aiScene* aiModel);
 		void CreateBoundingBox(BoundingBox& boundingBox, aiMesh* aMesh);
 		nlohmann::json GetAssimpTexturesMaterialJson(std::filesystem::path relativePath, const aiScene* aiModel, aiMaterial* material);

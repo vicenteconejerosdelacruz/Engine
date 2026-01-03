@@ -39,7 +39,7 @@ namespace ComputeShader
 
 		void UpdateLuminanceHistogramAverageParams(unsigned int  pixelCount, float minLogLuminance, float maxLogLuminance, float timeDelta, float tau) const;
 
-		virtual void Compute();
-		virtual void Solution() {};
+		virtual void Compute(SceneUnitId unit);
+		virtual void Solution(SceneUnitId unit) {};
 	};
 }

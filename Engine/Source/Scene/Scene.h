@@ -6,44 +6,82 @@
 #include <set>
 #include <memory>
 #include <nlohmann/json.hpp>
+#include <Renderer.h>
+#include <Templates.h>
+#include <SceneUnit.h>
 #include <SceneObject.h>
 
 namespace DX { class StepTimer; }
 
+using namespace DeviceUtils;
+
 namespace Scene
 {
-	std::set<JUUID>& GetSceneObjects(SceneObjectType type);
-	std::unordered_map<JUUID, SceneObjectType>& GetSceneObjectsTypes();
+	void CreateSceneLevelAsync(std::string filename, nlohmann::json level, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress = [](std::string, unsigned int, unsigned int) {});
+	void AttachLevelIntoScene(SceneUnitId parentUnit, std::string filename, nlohmann::json level, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress = [](std::string, unsigned int, unsigned int) {});
+
+	std::unique_ptr<SceneUnit>& CreateScene(SceneUnitId unit = nostd::threadIdHash(), std::string unitName = std::to_string(nostd::threadIdHash()), unsigned int numProcessors = Renderer::numFrames);
+	std::unique_ptr<SceneUnit>& CreateAttachableScene(SceneUnitId parentUnit, SceneUnitId unit = nostd::threadIdHash(), std::string unitName = std::to_string(nostd::threadIdHash()));
+	void DestroyScene(SceneUnitId unit);
+	void DestroyScenes(bool inmediate = false);
+	bool SceneUnitExits(SceneUnitId unit);
+	std::unique_ptr<SceneUnit>& GetSceneUnit(SceneUnitId unit = nostd::threadIdHash());
+	size_t GetSceneUnitsCount();
+	void MergeAttachedSceneUnits();
+
+	std::set<JUUID>& GetSceneObjects(SceneUnitId unit, SceneObjectType type);
+	std::set<JUUID> GetSceneObjects(SceneObjectType type);
+
+	std::unordered_map<JUUID, SceneObjectType>& GetSceneObjectsTypes(SceneUnitId unit = nostd::threadIdHash());
+	std::unordered_map<JUUID, SceneObjectType>& GetGlobalSceneObjectsTypes();
+
+	std::set<JUUID>& GetUnboundedSceneObjects(SceneUnitId unit = nostd::threadIdHash());
+
 	SceneObjectType GetSceneObjectType(JUUID uuid);
-	bool SceneObjectExists(JUUID uuid);
+
+	bool SceneObjectExists(SceneUnitId unit, JUUID uuid);
+
+	SceneUnitId GetSceneObjectSceneUnitId(JUUID uuid);
 
 	template<SceneObjectType T, typename J>
-	inline void CreateJsonSceneObject(nlohmann::json& json, auto getTypesSceneObjects)
+	inline void CreateJsonSceneObject(nlohmann::json& json, auto getTypesSceneObjects, SceneUnitId unit = nostd::threadIdHash())
 	{
 		JUUID uuid = json.at("uuid");
 		JNAME name = json.at("name");
 
-		auto& uuidSet = GetSceneObjects(T);
-		auto& typesMap = GetSceneObjectsTypes();
+		//these are trackers
+		auto& uuidSet = GetSceneObjects(unit, T);
+		auto& unitTypesMap = GetSceneObjectsTypes(unit);
+		auto& typesMap = GetGlobalSceneObjectsTypes();
+
+		//this one is where the object will exits
 		auto& sceneObjects = getTypesSceneObjects();
 
-		if (sceneObjects.contains(uuid) || uuidSet.contains(uuid) || typesMap.contains(uuid))
+		//collide
+		if (sceneObjects.contains(uuid) || uuidSet.contains(uuid) || unitTypesMap.contains(uuid) || typesMap.contains(uuid))
 		{
 			assert(!!!"creation collision");
 		}
 
+		//build
 		std::unique_ptr<J> jT = std::make_unique<J>(json);
-		sceneObjects.insert_or_assign(uuid, std::make_tuple(name, std::move(jT)));
+		jT->unit = unit;
+		//track
 		uuidSet.insert(uuid);
+		unitTypesMap.insert_or_assign(uuid, T);
 		typesMap.insert_or_assign(uuid, T);
+
+		//store and initialize
+		sceneObjects.insert_or_assign(uuid, std::make_tuple(name, std::move(jT)));
 		std::get<1>(sceneObjects.at(uuid))->Initialize();
 	}
 
 	template<SceneObjectType T, typename J>
 	inline void DeleteJsonSceneObject(JUUID uuid, auto getTypesSceneObjects)
 	{
-		auto& uuidSet = GetSceneObjects(T);
-		auto& typesMap = GetSceneObjectsTypes();
+		SceneUnitId unit = GetSceneObjectSceneUnitId(uuid);
+		auto& uuidSet = GetSceneObjects(unit, T);
+		auto& typesMap = GetSceneObjectsTypes(unit);
 		auto& sceneObjects = getTypesSceneObjects();
 
 		if (!sceneObjects.contains(uuid) || !uuidSet.contains(uuid) || !typesMap.contains(uuid))
@@ -63,31 +101,42 @@ namespace Scene
 
 	}
 
-	void BindSceneObjects();
-	JUUID CloneSceneObject(JUUID, nlohmann::json parameters = {});
+	void ResetRenderableScenes();
+	void EnableSceneUnitRendering(SceneUnitId id);
+	void RemoveSceneUnitRendering(SceneUnitId id);
 
-	void BindToScene(JUUID uuidA, JUUID uuidB);
-	void UnbindFromScene(JUUID uuidA);
-	void UnbindFromScene(JUUID uuidA, JUUID uuidB);
+	void BindSceneObjects();
+	JUUID CloneSceneObject(SceneUnitId unit, JUUID, nlohmann::json parameters = {});
+	void BindToScene(SceneUnitId unit, JUUID uuidA, JUUID uuidB);
+	void UnbindFromScene(SceneUnitId unit, JUUID uuidA);
+	void UnbindFromScene(SceneUnitId unit, JUUID uuidA, JUUID uuidB);
 	void SceneObjectsStep(DX::StepTimer& timer);
-	void WriteConstantsBuffers();
-	void RenderSceneShadowMaps();
-	void RenderSceneCameras();
+	void WriteConstantsBuffers(SceneUnitId unit);
+	void RenderSceneShadowMaps(SceneUnitId unit);
+	void RenderSceneCameras(SceneUnitId unit);
+
+	void AnimableStep(SceneUnitId unit, double elapsedSeconds);
+	void SceneRender();
+	void ScenePostRender();
+	void RunComputeShaders();
+	void SolveComputeShaders();
+	void DeletedScenes();
 
 	SceneObject* GetSceneObjectPointer(JUUID uuid);
 
 #if defined(_EDITOR)
+	//for drawing the panel
 	std::function<std::vector<JUUIDName>()> GetSceneObjectsByType(SceneObjectType typeToGet);
 	std::vector<JUUIDName> GetSceneObjectsTypesList();
 	std::vector<std::pair<std::string, JsonToEditorValueType>> GetSceneObjectAttributes(SceneObjectType so);
 	std::map<std::string, JEdvEditorDrawerFunction> GetSceneObjectDrawers(SceneObjectType so);
 	std::map<std::string, JEdvEditorDrawerFunction> GetSceneObjectPreviewers(SceneObjectType so);
-	std::vector<std::string> GetSceneObjectRequiredAttributes(SceneObjectType so);
+	//for creating the scene objects
 	nlohmann::json GetSceneObjectJson(SceneObjectType so);
+	std::vector<std::string> GetSceneObjectRequiredAttributes(SceneObjectType so);
 	std::map<std::string, JEdvCreatorDrawerFunction> GetSceneObjectCreatorDrawers(SceneObjectType so);
 	std::map<std::string, JEdvCreatorValidatorFunction> GetSceneObjectValidators(SceneObjectType so);
-
-	void CreateSceneObject(SceneObjectType so, nlohmann::json json);
 	void DeleteSceneObjectFromEditor(JUUID uuid);
 #endif
+	void CreateSceneObject(SceneUnitId unit, SceneObjectType so, nlohmann::json json);
 }

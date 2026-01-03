@@ -3,6 +3,7 @@
 #include <set>
 #include <regex>
 #include <fstream>
+#include <thread>
 
 namespace nostd {
 
@@ -297,8 +298,21 @@ namespace nostd {
 		return { v.data(), v.size() };
 	}
 
-	int findElementIndex(auto element, auto options)
+	inline int findElementIndex(auto element, auto options)
 	{
 		return static_cast<int>(std::find(options.begin(), options.end(), element) - options.begin());
+	}
+
+	inline size_t threadIdHash()
+	{
+		std::thread::id current_id = std::this_thread::get_id();
+		std::hash<std::thread::id> hasher;
+		return hasher(current_id);
+	}
+
+	inline size_t threadIdHash(std::thread::id current_id)
+	{
+		std::hash<std::thread::id> hasher;
+		return hasher(current_id);
 	}
 }

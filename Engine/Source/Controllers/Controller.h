@@ -4,6 +4,7 @@
 #include <vector>
 #include <UUID.h>
 #include <JObject.h>
+#include <JTypes.h>
 #include <nlohmann/json.hpp>
 
 namespace Game

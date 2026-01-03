@@ -3,20 +3,20 @@
 //#include <HDR/LuminanceHistogram.h>
 //#include <HDR/LuminanceHistogramAverage.h>
 
-namespace ComputeShader
-{
-	struct LuminanceHistogram;
-	struct LuminanceHistogramAverage;
-};
+//namespace ComputeShader
+//{
+//	struct LuminanceHistogram;
+//	struct LuminanceHistogramAverage;
+//};
 
 struct ToneMappingPass : public OverridePass
 {
-	std::unique_ptr<ComputeShader::LuminanceHistogram> hdrHistogram;
-	std::unique_ptr<ComputeShader::LuminanceHistogramAverage> luminanceHistogramAverage;
+	//std::unique_ptr<ComputeShader::LuminanceHistogram> hdrHistogram;
+	//std::unique_ptr<ComputeShader::LuminanceHistogramAverage> luminanceHistogramAverage;
 
 	ToneMappingPass(JUUID cam, unsigned int rpI, JUUID rp);
 	virtual ~ToneMappingPass();
-	virtual void Pass();
+	virtual void Pass(SceneUnitId unit);
 	void Render();
 };
 

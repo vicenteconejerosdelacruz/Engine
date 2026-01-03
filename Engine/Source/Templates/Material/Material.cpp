@@ -1,9 +1,9 @@
 #include "pch.h"
-#include <Templates.h>
-#include <TemplateDef.h>
 #include "Material.h"
 #include "Variables.h"
 #include <ShaderCompiler.h>
+//#include <Templates.h>
+//#include <TemplateDef.h>
 
 namespace Templates
 {
@@ -93,6 +93,7 @@ namespace Templates
 	}
 
 	MaterialInstance::MaterialInstance(
+		SceneUnitId id,
 		JUUID instance_uuid,
 		JUUID uuid,
 		VertexClass vClass,
@@ -113,15 +114,23 @@ namespace Templates
 		}
 
 		auto matTextures = material->textures();
-		std::transform(matTextures.begin(), matTextures.end(), std::inserter(textures, textures.end()), [](auto& pair)
+		std::transform(matTextures.begin(), matTextures.end(), std::inserter(textures, textures.end()), [&](auto& pair)
 			{
-				CreateTextureInstance(pair.second);
+				CreateTextureInstance(pair.second, [&]
+					{
+						return std::make_unique<TextureInstance>(id, pair.second);
+					}
+				);
 				return TextureUsageInstancePair(pair.first, pair.second);
 			}
 		);
-		std::transform(overrideTextures.begin(), overrideTextures.end(), std::inserter(textures, textures.end()), [](auto& pair)
+		std::transform(overrideTextures.begin(), overrideTextures.end(), std::inserter(textures, textures.end()), [&](auto& pair)
 			{
-				CreateTextureInstance(pair.second);
+				CreateTextureInstance(pair.second, [&]
+					{
+						return std::make_unique<TextureInstance>(id, pair.second);
+					}
+				);
 				return TextureUsageInstancePair(pair.first, pair.second);
 			}
 		);

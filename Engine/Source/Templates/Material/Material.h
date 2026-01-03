@@ -13,8 +13,9 @@
 #include <NoStd.h>
 #include <Textures/Texture.h>
 #include <ShaderMaterials.h>
+#include <Templates.h>
 #include <JTemplate.h>
-#include <JTypes.h>
+//#include <JTypes.h>
 #include <Shader/Shader.h>
 
 namespace Templates
@@ -128,6 +129,7 @@ namespace Templates
 	{
 		MaterialInstance(JUUID uuid) { assert(!!!"do not use"); }
 		explicit MaterialInstance(
+			SceneUnitId id,
 			JUUID Instance_uuid,
 			JUUID Template_uuid,
 			VertexClass vClass,

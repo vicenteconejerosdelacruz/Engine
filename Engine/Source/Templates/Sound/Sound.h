@@ -2,12 +2,12 @@
 #include <memory>
 #include <string>
 #include <Audio.h>
-#include <Application.h>
+//#include <Application.h>
 #include <nlohmann/json.hpp>
-#include <JTypes.h>
+//#include <JTypes.h>
+#include <Templates.h>
 #include <JTemplate.h>
-#include <TemplateDecl.h>
-
+//#include <TemplateDecl.h>
 
 using namespace DirectX;
 

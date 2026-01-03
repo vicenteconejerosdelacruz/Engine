@@ -1,30 +1,30 @@
 #include "pch.h"
-#include <vector>
+//#include <vector>
 #include "Renderable.h"
 #include <Scene.h>
-#include <Camera/Camera.h>
-#include <Light/Light.h>
-#include <Model3D/Model3D.h>
-#include <Mesh/Mesh.h>
-#include <Material/MeshMaterial.h>
+//#include <Camera/Camera.h>
+//#include <Light/Light.h>
+//#include <Model3D/Model3D.h>
+//#include <Mesh/Mesh.h>
+//#include <Material/MeshMaterial.h>
 #include <Renderer.h>
-#include <RenderPass/RenderPass.h>
+//#include <RenderPass/RenderPass.h>
 #include <DeviceUtils/RootSignature/RootSignature.h>
 #include <DeviceUtils/PipelineState/PipelineState.h>
 #include <Renderable/RenderableBoundingBox.h>
-#include <SceneObjectDef.h>
+//#include <SceneObjectDef.h>
 
 extern std::unique_ptr<Renderer> renderer;
-extern DX::StepTimer timer;
+//extern DX::StepTimer timer;
 
 #if defined(_EDITOR)
 namespace Editor
 {
-	extern void SelectRenderable(JUUID ruuid);
-	extern void BindRenderableToPickingPass(RenderableUUID r);
-	extern void UnbindRenderableFromPickingPass(RenderableUUID r);
-	extern bool IsPlaying();
-	extern bool IsPaused();
+	extern void SelectRenderable(SceneUnitId unit, JUUID ruuid);
+	//extern void BindRenderableToPickingPass(RenderableUUID r);
+	//extern void UnbindRenderableFromPickingPass(RenderableUUID r);
+	extern bool IsPlaying(SceneUnitId unit);
+	extern bool IsPaused(SceneUnitId unit);
 };
 #endif
 
@@ -62,217 +62,6 @@ namespace Scene
 
 	std::unordered_map<RenderableUUID, SequencePlayer*> animationPlayers;
 
-	void RenderablesStep()
-	{
-#if defined(_EDITOR)
-		using namespace ComputeShader;
-
-		auto& Renderables = GetRenderables();
-		std::set<RenderableUUID> r;
-		std::transform(Renderables.begin(), Renderables.end(), std::inserter(r, r.begin()), [](auto o) { return o; });
-
-		std::set<RenderableUUID> meshes;
-		std::copy_if(r.begin(), r.end(), std::inserter(meshes, meshes.begin()), [](auto r)
-			{
-				return (r->dirty(Renderable::Update_meshMaterials));
-			}
-		);
-
-		std::set<RenderableUUID> models;
-		std::copy_if(r.begin(), r.end(), std::inserter(models, models.begin()), [](auto r)
-			{
-				return (r->dirty(Renderable::Update_model));
-			}
-		);
-
-		std::set<RenderableUUID> bindToCam;
-		std::copy_if(r.begin(), r.end(), std::inserter(bindToCam, bindToCam.end()), [](auto r)
-			{
-				if (r->dirty(Renderable::Update_cameras))
-				{
-					if (r->UpdatePrevValues.contains("cameras"))
-					{
-						nlohmann::json prevCams = r->UpdatePrevValues.at("cameras");
-						std::set<std::string> prevCamUUIDs;
-						for (auto& cam : prevCams) {
-							if (cam != "") prevCamUUIDs.insert(cam);
-						}
-						std::vector<std::string> currCams = r->cameras();
-						std::set<std::string> currCamUUIDs;
-						for (auto& cam : currCams) {
-							if (cam != "") currCamUUIDs.insert(cam);
-						}
-						bool isDifferent = prevCamUUIDs != currCamUUIDs;
-						if (!isDifferent)
-							r->clean(Renderable::Update_cameras);
-						return isDifferent;
-					}
-					return true;
-				}
-				return false;
-			}
-		);
-
-		std::set<RenderableUUID> todelete;
-		std::copy_if(r.begin(), r.end(), std::inserter(todelete, todelete.begin()), [](auto r)
-			{
-				return r->markedForDelete;
-			}
-		);
-
-		bool criticalFrame = meshes.size() > 0ULL || models.size() > 0ULL || bindToCam.size() > 0ULL || todelete.size() > 0ULL;
-
-		if (criticalFrame)
-		{
-			renderer->Flush();
-			renderer->RenderCriticalFrame([&meshes, &models, &bindToCam, &todelete]
-				{
-					for (auto r : meshes)
-					{
-						nlohmann::json patch = { {"model",""} };
-						r->merge_patch(patch);
-						r->RebuildMeshMaterials();
-						r->BindToScene();
-						r->clean(Renderable::Update_meshMaterials);
-					}
-					for (auto r : models)
-					{
-						EraseRenderableFromAnimables(r());
-						nlohmann::json patch = { {"meshMaterials", nlohmann::json::array({})} };
-						r->merge_patch(patch);
-						r->RebuildMeshMaterials();
-						if (!r->animable.empty())
-						{
-							AttachAnimation(r(), r->model3D->animations);
-							r->StepAnimation(0.0f);
-							r->boundingBoxCompute = CreateRenderableBoundingBox(r());
-						}
-						r->BindToScene();
-						r->clean(Renderable::Update_model);
-					}
-
-					for (auto r : bindToCam)
-					{
-						std::set<std::string> currCamsUUIDs;
-						std::vector<std::string> cameras = r->cameras();
-						for (auto& cam : cameras) {
-							if (cam != "") currCamsUUIDs.insert(cam);
-						}
-
-						std::set<std::string> prevCamsUUIDs;
-						if (r->UpdatePrevValues.contains("cameras"))
-						{
-							nlohmann::json prevCams = r->UpdatePrevValues.at("cameras");
-							for (auto& cam : prevCams) {
-								if (cam != "") prevCamsUUIDs.insert(cam);
-							}
-						}
-
-						//get cams present in the current set, but not present in the last set(this means adding cams)
-						std::set<std::string> addCams;
-						std::set_difference(
-							currCamsUUIDs.begin(), currCamsUUIDs.end(),
-							prevCamsUUIDs.begin(), prevCamsUUIDs.end(),
-							std::inserter(addCams, addCams.begin())
-						);
-
-						//get cams present in the previous set, but not present in the current set(this means deleting cams)
-						std::set<std::string> delCams;
-						std::set_difference(
-							prevCamsUUIDs.begin(), prevCamsUUIDs.end(),
-							currCamsUUIDs.begin(), currCamsUUIDs.end(),
-							std::inserter(delCams, delCams.begin())
-						);
-
-						//remove the camera from the renderable's binded camera set
-						for (auto& uuid : delCams)
-						{
-							Scene::UnbindFromScene(r->Juuid(), uuid);
-						}
-						//add the camera to the renderable's binded camera set
-						for (auto& uuid : addCams)
-						{
-							Scene::BindToScene(r->Juuid(), uuid);
-						}
-
-						r->clean(Renderable::Update_cameras);
-					}
-
-					for (auto r : todelete)
-					{
-						EraseRenderableFromRenderables(r());
-						EraseRenderableFromAnimables(r());
-						EraseRenderableFromShadowCasts(r());
-						DeleteRenderableSceneObject(r());
-					}
-				}
-			);
-		}
-#endif
-		float dt = static_cast<float>(timer.GetElapsedSeconds());
-		for (auto& [renderable, player] : animationPlayers)
-		{
-#if defined(_EDITOR)
-			if (Editor::IsPlaying() && !Editor::IsPaused())
-#endif
-			{
-				player->Step(dt * 1000.0f);
-			}
-			player->ApplyFrameValues(renderable);
-		}
-	}
-
-	void RunBoundingBoxComputeShaders()
-	{
-		for (RenderableUUID renderable : Renderables)
-		{
-			if (!renderable->boundingBoxCompute.empty())
-			{
-				renderable->boundingBoxCompute->Compute();
-			}
-		}
-	}
-
-	void RunBoundingBoxComputeShadersSolution()
-	{
-		for (RenderableUUID renderable : Renderables)
-		{
-			if (!renderable->boundingBoxCompute.empty())
-			{
-				renderable->boundingBoxCompute->Solution();
-			}
-		}
-	}
-
-	void DestroyRenderables()
-	{
-		auto uuids = nostd::GetUUIDS(RenderablesceneObjects);
-		for (auto& uuid : uuids)
-		{
-			DeleteRenderableSceneObject(uuid);
-		}
-
-#include <TrackUUID/JClear.h>
-#include <RenderableAtt.h>
-#include <JEnd.h>
-	}
-
-	void DeleteRenderable(std::string uuid)
-	{
-		RenderableUUID r = uuid;
-		r->markedForDelete = true;
-	}
-
-	//EDITOR
-#if defined(_EDITOR)
-	void WriteRenderablesJson(nlohmann::json& json)
-	{
-#include <Editor/JSaveFile.h>
-#include <RenderableAtt.h>
-#include <JEnd.h>
-	}
-#endif
-
 	Renderable::Renderable(nlohmann::json& json) :SceneObject(json)
 	{
 #include <Attributes/JInit.h>
@@ -287,9 +76,9 @@ namespace Scene
 #if defined(_EDITOR)
 	void Renderable::WriteJson(nlohmann::json& j)
 	{
-#include <Editor/JWriteJson.h>
-#include <RenderableAtt.h>
-#include <JEnd.h>
+		//#include <Editor/JWriteJson.h>
+		//#include <RenderableAtt.h>
+		//#include <JEnd.h>
 	}
 #endif
 
@@ -297,6 +86,7 @@ namespace Scene
 	{
 		using namespace Animation;
 		using namespace ComputeShader;
+
 		CreateMeshInstances(); //why here, this is a special case, as Animables depends of animables which is created in this function
 
 #include <TrackUUID/JInsert.h>
@@ -312,12 +102,21 @@ namespace Scene
 			SetCurrentAnimation(animationSequence(), animationTime(), animationTimeFactor(), animationPlay(), animationLoop());
 			StepAnimation(0.0f); //take an empty T-Pose step so the skinning can be performed
 			boundingBoxCompute = CreateRenderableBoundingBox(uuid());
-			WriteAnimationConstantsBuffer(renderer->backBufferIndex);
+			//WriteAnimationConstantsBuffer(renderer->backBufferIndex);
 			sequencePlayer.renderable = Juuid();
 		}
 #if defined(_EDITOR)
-		OnPick = [this] { Editor::SelectRenderable(uuid()); };
+		OnPick = [this] { Editor::SelectRenderable(unit, uuid()); };
 #endif
+	}
+
+	void Renderable::BindToScene()
+	{
+#include <TrackUUID/JInsert.h>
+#include <RenderableAtt.h>
+#include <JEnd.h>
+
+		BindCameras();
 	}
 
 	void Renderable::Bind(JUUID uuid)
@@ -332,20 +131,6 @@ namespace Scene
 		}
 	}
 
-	void Renderable::Unbind(JUUID uuid)
-	{
-		bindedCameras.erase(uuid);
-	}
-
-	void Renderable::BindToScene()
-	{
-#include <TrackUUID/JInsert.h>
-#include <RenderableAtt.h>
-#include <JEnd.h>
-
-		BindCameras();
-	}
-
 	void Renderable::BindCameras()
 	{
 		auto cams = cameras();
@@ -358,7 +143,20 @@ namespace Scene
 
 	void Renderable::BindCamera(JUUID cuuid)
 	{
-		Scene::BindToScene(uuid(), cuuid);
+		Scene::BindToScene(unit, uuid(), cuuid);
+	}
+
+	void Renderable::BindShadowMapCameras()
+	{
+		if (!castShadows()) return;
+
+		auto lights = GetShadowMapLights(unit);
+		for (LightUUID light : lights) {
+			for (CameraUUID cam : light->shadowMapCameras)
+			{
+				BindCamera(cam());
+			}
+		}
 	}
 
 	void Renderable::UnbindFromScene()
@@ -371,7 +169,7 @@ namespace Scene
 
 		UnbindMaterialsChangesCallback();
 		UnbindModelChangesCallback();
-		Scene::UnbindFromScene(uuid());
+		Scene::UnbindFromScene(unit, uuid());
 		if (!boundingBoxCompute.empty())
 		{
 			DeleteRenderableBoundingBox(boundingBoxCompute());
@@ -381,6 +179,11 @@ namespace Scene
 		{
 			animationPlayers.erase(uuid());
 		}
+	}
+
+	void Renderable::Unbind(JUUID uuid)
+	{
+		bindedCameras.erase(uuid);
 	}
 
 	void Renderable::UnbindCameras()
@@ -395,20 +198,7 @@ namespace Scene
 
 	void Renderable::UnbindCamera(JUUID cuuid)
 	{
-		Scene::UnbindFromScene(uuid(), cuuid);
-	}
-
-	void Renderable::BindShadowMapCameras()
-	{
-		if (!castShadows()) return;
-
-		auto lights = GetShadowMapLights();
-		for (LightUUID light : lights) {
-			for (CameraUUID cam : light->shadowMapCameras)
-			{
-				BindCamera(cam());
-			}
-		}
+		Scene::UnbindFromScene(unit, uuid(), cuuid);
 	}
 
 	void Renderable::UnbindMaterialsChangesCallback()
@@ -464,9 +254,9 @@ namespace Scene
 				}
 			);
 
-			std::transform(mm.begin(), mm.end(), std::back_inserter(meshes), [](const MeshMaterial& m)
+			std::transform(mm.begin(), mm.end(), std::back_inserter(meshes), [&](const MeshMaterial& m)
 				{
-					return GetMeshInstance(m.mesh)->uuid;
+					return GetMeshInstance(unit, m.mesh)->uuid;
 				}
 			);
 			CreateBoundingBox();
@@ -475,7 +265,7 @@ namespace Scene
 		{
 			CreateModel3DInstance(model(), [this]
 				{
-					return std::make_unique<Model3DInstance>(model(), uuid(), [this](JUUID model3DTemplateUUID)
+					return std::make_unique<Model3DInstance>(unit, model(), uuid(), [this](JUUID model3DTemplateUUID)
 						{
 							auto& model = GetModel3DTemplate(model3DTemplateUUID);
 							if (model->dirty(Model3DJson::Update_animationSequences))
@@ -519,19 +309,11 @@ namespace Scene
 		}
 	}
 
-	void Renderable::DestroyMaterialsInstances(CameraUUID cam)
-	{
-		for (auto& rp : GetCameraRenderPasses(cam))
-		{
-			DestroyRenderPassMaterialsInstances(rp);
-		}
-	}
-
 	void Renderable::CreateRenderPassMaterialsInstances(RenderPassInstanceUUID pass)
 	{
 		auto onPostMaterialChange = [this](unsigned int index, unsigned int total)
 			{
-				if (index == 0U)
+				/*if (index == 0U)
 				{
 					renderer->Flush();
 					renderer->ResetCommands();
@@ -543,7 +325,7 @@ namespace Scene
 				if (index >= (total - 1))
 				{
 					renderer->CloseCommandsAndFlush();
-				}
+				}*/
 			};
 
 		std::vector<PassMaterialOverride> pmo = passMaterialOverrides();
@@ -578,6 +360,7 @@ namespace Scene
 					matUUID = GetMaterialUUIDByName(fallbackMaterialName); //fallback
 				}
 				materials[pass].push_back(pass->GetRenderPassMaterialInstance(
+					unit,
 					matUUID, mesh, shadowed(),
 					mpmo, uuid(), nullptr, onPostMaterialChange));
 			}
@@ -594,9 +377,19 @@ namespace Scene
 				);
 				auto& mesh = meshes.at(i);
 				JUUID matUUID = model3D->materialUUIDs.at(i);
-				materials[pass].push_back(pass->GetRenderPassMaterialInstance(matUUID, mesh, shadowed(),
+				materials[pass].push_back(pass->GetRenderPassMaterialInstance(
+					unit,
+					matUUID, mesh, shadowed(),
 					mpmo, uuid(), nullptr, onPostMaterialChange));
 			}
+		}
+	}
+
+	void Renderable::DestroyMaterialsInstances(CameraUUID cam)
+	{
+		for (auto& rp : GetCameraRenderPasses(cam))
+		{
+			DestroyRenderPassMaterialsInstances(rp);
 		}
 	}
 
@@ -621,14 +414,6 @@ namespace Scene
 		}
 	}
 
-	void Renderable::DestroyConstantsBuffersInstances(CameraUUID cam)
-	{
-		for (auto& rp : GetCameraRenderPasses(cam))
-		{
-			DestroyRenderPassConstantsBuffersInstances(rp);
-		}
-	}
-
 	void Renderable::CreateRenderPassConstantsBuffersInstances(RenderPassInstanceUUID pass)
 	{
 		if (constantsBuffers.contains(pass))
@@ -642,13 +427,21 @@ namespace Scene
 			for (unsigned int j = 0; j < mi->variablesBufferSize.size(); j++)
 			{
 				size_t size = mi->variablesBufferSize[j];
-				ConstantsBufferUUID cbuffer = CreateConstantsBuffer(size, name() + "." + std::to_string(j) + "." + mesh->uuid);
-				for (unsigned int n = 0; n < renderer->numFrames; n++)
+				ConstantsBufferUUID cbuffer = CreateConstantsBuffer(size, Renderer::numFrames, name() + "." + std::to_string(j) + "." + mesh->uuid);
+				for (unsigned int n = 0; n < Renderer::numFrames; n++)
 				{
 					WriteMaterialVariablesToConstantsBufferSpace(mi, cbuffer, n);
 				}
 				constantsBuffers[pass][i].push_back(cbuffer);
 			}
+		}
+	}
+
+	void Renderable::DestroyConstantsBuffersInstances(CameraUUID cam)
+	{
+		for (auto& rp : GetCameraRenderPasses(cam))
+		{
+			DestroyRenderPassConstantsBuffersInstances(rp);
 		}
 	}
 
@@ -675,15 +468,6 @@ namespace Scene
 		}
 	}
 
-	void Renderable::DestroyRootSignatures(CameraUUID cam)
-	{
-		if (cam.empty()) return;
-		for (auto& rp : GetCameraRenderPasses(cam))
-		{
-			DestroyRenderPassRootSignatures(rp);
-		}
-	}
-
 	void Renderable::CreateRenderPassRootSignatures(RenderPassInstanceUUID rp)
 	{
 		for (unsigned int i = 0; i < meshes.size(); i++)
@@ -705,6 +489,15 @@ namespace Scene
 		}
 	}
 
+	void Renderable::DestroyRootSignatures(CameraUUID cam)
+	{
+		if (cam.empty()) return;
+		for (auto& rp : GetCameraRenderPasses(cam))
+		{
+			DestroyRenderPassRootSignatures(rp);
+		}
+	}
+
 	void Renderable::DestroyRenderPassRootSignatures(RenderPassInstanceUUID rp)
 	{
 		if (rootSignatures.contains(rp))
@@ -717,15 +510,6 @@ namespace Scene
 		{
 			if (pipelineStates.contains(rp)) pipelineStates.erase(rp);
 			CreateRenderPassPipelineStates(rp);
-		}
-	}
-
-	void Renderable::DestroyPipelineStates(CameraUUID cam)
-	{
-		if (cam.empty()) return;
-		for (auto& rp : GetCameraRenderPasses(cam))
-		{
-			DestroyRenderPassPipelineStates(rp);
 		}
 	}
 
@@ -756,6 +540,15 @@ namespace Scene
 		}
 	}
 
+	void Renderable::DestroyPipelineStates(CameraUUID cam)
+	{
+		if (cam.empty()) return;
+		for (auto& rp : GetCameraRenderPasses(cam))
+		{
+			DestroyRenderPassPipelineStates(rp);
+		}
+	}
+
 	void Renderable::DestroyRenderPassPipelineStates(RenderPassInstanceUUID rp)
 	{
 		if (pipelineStates.contains(rp))
@@ -768,7 +561,7 @@ namespace Scene
 		}
 	}
 
-	void Renderable::RebuildMeshMaterials()
+	/*void Renderable::RebuildMeshMaterials()
 	{
 		using namespace ComputeShader;
 
@@ -800,7 +593,7 @@ namespace Scene
 		{
 			renderException = true;
 		}
-	}
+	}*/
 
 	void Renderable::CreateBoundingBox()
 	{
@@ -832,28 +625,18 @@ namespace Scene
 		}
 	}
 
-	void Renderable::WriteAnimationConstantsBuffer()
-	{
-		WriteAnimationConstantsBuffer(renderer->backBufferIndex);
-	}
-
-	void Renderable::WriteAnimationConstantsBuffer(unsigned int backbufferIndex)
+	void Renderable::WriteAnimationConstantsBuffer(unsigned int frame)
 	{
 		if (animable.empty()) return;
 
 		using namespace Animation;
-		WriteBoneTransformationsToConstantsBuffer(uuid(), bonesTransformation, backbufferIndex);
+		WriteBoneTransformationsToConstantsBuffer(uuid(), bonesTransformation, frame);
 	}
 
-	void Renderable::WriteConstantsBuffer()
-	{
-		WriteConstantsBuffer(renderer->backBufferIndex);
-	}
-
-	void Renderable::WriteConstantsBuffer(unsigned int backbufferIndex)
+	void Renderable::WriteConstantsBuffer(unsigned int frame)
 	{
 		XMMATRIX w = world();
-		WriteConstantsBuffer("world", w, backbufferIndex);
+		WriteConstantsBuffer("world", w, frame);
 	}
 
 	void Renderable::CreateAnimationSequences()
@@ -886,30 +669,6 @@ namespace Scene
 	void Renderable::RebuildAnimationSequences()
 	{
 		CreateAnimationSequences();
-		/*
-		if (currentSequence == nullptr)
-			return CreateAnimationSequences();
-
-		std::string currentSequenceStr;
-		for (auto it = animationsSequences.sequences.begin(); it != animationsSequences.sequences.end(); it++)
-		{
-			if (currentSequence == &(it->second))
-			{
-				currentSequenceStr = it->first;
-				break;
-			}
-		}
-
-		CreateAnimationSequences();
-		if (currentSequenceStr.empty()) return;
-
-		for (auto it = animationsSequences.sequences.begin(); it != animationsSequences.sequences.end(); it++)
-		{
-			if (currentSequenceStr != it->first) continue;
-			currentSequence = &(it->second);
-			return;
-		}
-		*/
 	}
 
 	void Renderable::SetCurrentAnimation(SequencePlayer* seqPlayer)
@@ -997,13 +756,17 @@ namespace Scene
 	}
 
 	//RENDER
-	void Renderable::Render(RenderPassInstanceUUID renderPass, CameraUUID camera)
+	void Renderable::Render(SceneUnitId unit, RenderPassInstanceUUID renderPass, CameraUUID camera)
 	{
 		using namespace Animation;
+		using namespace Scene;
 
-		if (!visible() || !materials.contains(renderPass) || renderException) return;
+		if (!renderReady || markedForDelete || !visible() || !materials.contains(renderPass) || renderException) return;
 
-		auto& commandList = renderer->commandList;
+		//auto& commandList = renderer->commandList;
+		auto& scene = GetSceneUnit(unit);
+		unsigned int frame = scene->Frame();
+		auto& commandList = scene->GetCommandList();
 
 #if defined(_DEVELOPMENT)
 		PIXBeginEvent(commandList.p, 0, name().c_str());
@@ -1012,45 +775,45 @@ namespace Scene
 		auto& meshesRootSignatures = rootSignatures.at(renderPass);
 		auto& meshesPipelineStates = pipelineStates.at(renderPass);
 
-		auto setConstantsBuffersDescriptorTables = [&commandList](auto& cbuffers, unsigned int& slot)
+		auto setConstantsBuffersDescriptorTables = [&](auto& cbuffers, unsigned int& slot)
 			{
 				for (auto& cbuffer : cbuffers) {
-					cbuffer->SetRootDescriptorTable(commandList, slot, renderer->backBufferIndex);
+					cbuffer->SetRootDescriptorTable(commandList, slot, frame);
 				}
 			};
-		auto setCameraConstantsBufferDescriptorTable = [&commandList, &camera](auto& material, unsigned int& slot)
+		auto setCameraConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
 			{
 				if (!camera.empty() && material->ShaderInstanceHasRegister([](ShaderInstanceUUID binary) { return binary->CBV.camera; })) {
-					camera->cameraCb->SetRootDescriptorTable(commandList, slot, renderer->backBufferIndex);
+					camera->cameraCb->SetRootDescriptorTable(commandList, slot, frame);
 				}
 			};
-		auto setLightsConstantsBufferDescriptorTable = [&commandList, &camera](MaterialInstanceUUID material, unsigned int& slot)
+		auto setLightsConstantsBufferDescriptorTable = [&](MaterialInstanceUUID material, unsigned int& slot)
 			{
 				if (material->ShaderInstanceHasRegister([](ShaderInstanceUUID binary) { return binary->CBV.light; })) {
-					camera->GetLightsConstantsBuffer()->SetRootDescriptorTable(commandList, slot, renderer->backBufferIndex);
+					camera->GetLightsConstantsBuffer()->SetRootDescriptorTable(commandList, slot, frame);
 				}
 			};
-		auto setShadowMapsConstantsBufferDescriptorTable = [&commandList, &camera](auto& material, unsigned int& slot)
+		auto setShadowMapsConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
 			{
 				if (material->ShaderInstanceHasRegister([](ShaderInstanceUUID binary) { return binary->CBV.lightsShadowMap; })) {
 					if (camera->SceneHasShadowMaps())
-						return camera->GetShadowMapsConstantsBuffer()->SetRootDescriptorTable(commandList, slot, renderer->backBufferIndex);
+						return camera->GetShadowMapsConstantsBuffer()->SetRootDescriptorTable(commandList, slot, frame);
 					slot++;
 				}
 			};
-		auto setSkinningConstantsBufferDescriptorTable = [&commandList, this](auto& material, unsigned int& slot)
+		auto setSkinningConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
 			{
 				if (material->ShaderInstanceHasRegister([this](ShaderInstanceUUID binary) { return binary->CBV.animation; })) {
 					if (!animable.empty())
-						return GetAnimatedConstantsBuffer(uuid())->SetRootDescriptorTable(commandList, slot, renderer->backBufferIndex);
+						return GetAnimatedConstantsBuffer(uuid())->SetRootDescriptorTable(commandList, slot, frame);
 					slot++;
 				}
 			};
-		auto setUAVRootDescriptorTable = [&commandList](auto& material, unsigned int& slot)
+		auto setUAVRootDescriptorTable = [&](auto& material, unsigned int& slot)
 			{
 				material->SetUAVRootDescriptorTable(commandList, slot);
 			};
-		auto setIBLRootDescriptorTable = [&commandList, &camera](auto& material, unsigned int& slot)
+		auto setIBLRootDescriptorTable = [&](auto& material, unsigned int& slot)
 			{
 				if (material->ShaderInstanceHasRegister([](ShaderInstanceUUID binary) { return
 					(binary->SRV.iblIrradiance == -1 || binary->SRV.iblPrefiteredEnv == -1 || binary->SRV.iblBRDFLUT == -1) ? -1 : 1; })
@@ -1059,15 +822,15 @@ namespace Scene
 					camera->SetIBLRootDescriptorTables(commandList, slot);
 				}
 			};
-		auto setSRVRootDescriptorTable = [&commandList](auto& material, unsigned int& slot)
+		auto setSRVRootDescriptorTable = [&](auto& material, unsigned int& slot)
 			{
 				material->SetSRVRootDescriptorTable(commandList, slot);
 			};
-		auto setShadowMapsSRVDescriptorTable = [&commandList, &camera](auto& material, unsigned int& slot)
+		auto setShadowMapsSRVDescriptorTable = [&](auto& material, unsigned int& slot)
 			{
 				if (material->ShaderInstanceHasRegister([](ShaderInstanceUUID binary) { return binary->SRV.lightsShadowMap; })) {
 					if (camera->SceneHasShadowMaps())
-						return commandList->SetGraphicsRootDescriptorTable(slot, GetShadowMapGpuDescriptorHandleStart());
+						return commandList->SetGraphicsRootDescriptorTable(slot, GetShadowMapGpuDescriptorHandleStart(unit));
 					slot++;
 				}
 			};
@@ -1103,4 +866,230 @@ namespace Scene
 		PIXEndEvent(commandList.p);
 #endif
 	}
+
+	void RenderablesStep(SceneUnitId unit, float dt)
+	{
+		//#if defined(_EDITOR)
+		//		using namespace ComputeShader;
+
+		auto& Renderables = GetRenderables(unit);
+		//auto Renderables = nostd::GetUUIDS(RenderablesceneObjects);
+		std::set<RenderableUUID> r;
+		std::transform(Renderables.begin(), Renderables.end(), std::inserter(r, r.begin()), [](auto o) { return o; });
+		//std::transform(Renderables.begin(), Renderables.end(), std::inserter(r, r.begin()), [](auto o) { return o; });
+		//
+		//std::set<RenderableUUID> meshes;
+		//std::copy_if(r.begin(), r.end(), std::inserter(meshes, meshes.begin()), [](auto r)
+		//	{
+		//		return (r->dirty(Renderable::Update_meshMaterials));
+		//	}
+		//);
+		//
+		//std::set<RenderableUUID> models;
+		//std::copy_if(r.begin(), r.end(), std::inserter(models, models.begin()), [](auto r)
+		//	{
+		//		return (r->dirty(Renderable::Update_model));
+		//	}
+		//);
+		//
+		//std::set<RenderableUUID> bindToCam;
+		//std::copy_if(r.begin(), r.end(), std::inserter(bindToCam, bindToCam.end()), [](auto r)
+		//	{
+		//		if (r->dirty(Renderable::Update_cameras))
+		//		{
+		//			if (r->UpdatePrevValues.contains("cameras"))
+		//			{
+		//				nlohmann::json prevCams = r->UpdatePrevValues.at("cameras");
+		//				std::set<std::string> prevCamUUIDs;
+		//				for (auto& cam : prevCams) {
+		//					if (cam != "") prevCamUUIDs.insert(cam);
+		//				}
+		//				std::vector<std::string> currCams = r->cameras();
+		//				std::set<std::string> currCamUUIDs;
+		//				for (auto& cam : currCams) {
+		//					if (cam != "") currCamUUIDs.insert(cam);
+		//				}
+		//				bool isDifferent = prevCamUUIDs != currCamUUIDs;
+		//				if (!isDifferent)
+		//					r->clean(Renderable::Update_cameras);
+		//				return isDifferent;
+		//			}
+		//			return true;
+		//		}
+		//		return false;
+		//	}
+		//);
+
+		std::set<RenderableUUID> todelete;
+		std::copy_if(r.begin(), r.end(), std::inserter(todelete, todelete.begin()), [](auto r)
+			{
+				return r->markedForDelete;
+			}
+		);
+
+		//bool criticalFrame = meshes.size() > 0ULL || models.size() > 0ULL || bindToCam.size() > 0ULL || todelete.size() > 0ULL;
+		//
+		//if (criticalFrame)
+		//{
+		//	renderer->Flush();
+		//	renderer->RenderCriticalFrame([&meshes, &models, &bindToCam, &todelete]
+		//		{
+		//			for (auto r : meshes)
+		//			{
+		//				nlohmann::json patch = { {"model",""} };
+		//				r->merge_patch(patch);
+		//				r->RebuildMeshMaterials();
+		//				r->BindToScene();
+		//				r->clean(Renderable::Update_meshMaterials);
+		//			}
+		//			for (auto r : models)
+		//			{
+		//				EraseRenderableFromAnimables(r());
+		//				nlohmann::json patch = { {"meshMaterials", nlohmann::json::array({})} };
+		//				r->merge_patch(patch);
+		//				r->RebuildMeshMaterials();
+		//				if (!r->animable.empty())
+		//				{
+		//					AttachAnimation(r(), r->model3D->animations);
+		//					r->StepAnimation(0.0f);
+		//					r->boundingBoxCompute = CreateRenderableBoundingBox(r());
+		//				}
+		//				r->BindToScene();
+		//				r->clean(Renderable::Update_model);
+		//			}
+		//
+		//			for (auto r : bindToCam)
+		//			{
+		//				std::set<std::string> currCamsUUIDs;
+		//				std::vector<std::string> cameras = r->cameras();
+		//				for (auto& cam : cameras) {
+		//					if (cam != "") currCamsUUIDs.insert(cam);
+		//				}
+		//
+		//				std::set<std::string> prevCamsUUIDs;
+		//				if (r->UpdatePrevValues.contains("cameras"))
+		//				{
+		//					nlohmann::json prevCams = r->UpdatePrevValues.at("cameras");
+		//					for (auto& cam : prevCams) {
+		//						if (cam != "") prevCamsUUIDs.insert(cam);
+		//					}
+		//				}
+		//
+		//				//get cams present in the current set, but not present in the last set(this means adding cams)
+		//				std::set<std::string> addCams;
+		//				std::set_difference(
+		//					currCamsUUIDs.begin(), currCamsUUIDs.end(),
+		//					prevCamsUUIDs.begin(), prevCamsUUIDs.end(),
+		//					std::inserter(addCams, addCams.begin())
+		//				);
+		//
+		//				//get cams present in the previous set, but not present in the current set(this means deleting cams)
+		//				std::set<std::string> delCams;
+		//				std::set_difference(
+		//					prevCamsUUIDs.begin(), prevCamsUUIDs.end(),
+		//					currCamsUUIDs.begin(), currCamsUUIDs.end(),
+		//					std::inserter(delCams, delCams.begin())
+		//				);
+		//
+		//				//remove the camera from the renderable's binded camera set
+		//				for (auto& uuid : delCams)
+		//				{
+		//					Scene::UnbindFromScene(r->Juuid(), uuid);
+		//				}
+		//				//add the camera to the renderable's binded camera set
+		//				for (auto& uuid : addCams)
+		//				{
+		//					Scene::BindToScene(r->Juuid(), uuid);
+		//				}
+		//
+		//				r->clean(Renderable::Update_cameras);
+		//			}
+		//
+		for (auto renderable : todelete)
+		{
+			EraseRenderableFromRenderables(renderable->unit, renderable());
+			EraseRenderableFromAnimables(renderable->unit, renderable());
+			EraseRenderableFromShadowCasts(renderable->unit, renderable());
+			DeleteRenderableSceneObject(renderable());
+		}
+		//		}
+		//	);
+		//}
+		//#endif
+		for (auto& [renderable, player] : animationPlayers)
+		{
+			if (renderable->markedForDelete || !renderable->renderReady)
+				continue;
+
+#if defined(_EDITOR)
+			if (Editor::IsPlaying(renderable->unit) && !Editor::IsPaused(renderable->unit))
+#endif
+			{
+				player->Step(dt * 1000.0f);
+			}
+			player->ApplyFrameValues(renderable);
+		}
+	}
+
+	void DestroyRenderables()
+	{
+		auto uuids = nostd::GetUUIDS(RenderablesceneObjects);
+		for (RenderableUUID uuid : uuids)
+		{
+			DeleteRenderableSceneObject(uuid());
+		}
+#include <TrackUUID/JClear.h>
+#include <RenderableAtt.h>
+#include <JEnd.h>
+	}
+
+	void DestroyRenderables(SceneUnitId unit)
+	{
+		auto uuids = nostd::GetUUIDS(RenderablesceneObjects);
+		for (RenderableUUID uuid : uuids)
+		{
+			if (uuid->unit != unit) continue;
+			DeleteRenderableSceneObject(uuid());
+		}
+#include <TrackUUID/JClearUnit.h>
+#include <RenderableAtt.h>
+#include <JEnd.h>
+	}
+
+	void DeleteRenderable(JUUID uuid)
+	{
+		RenderableUUID r = uuid;
+		r->markedForDelete = true;
+	}
+
+	void RunBoundingBoxComputeShaders(SceneUnitId unit)
+	{
+		for (RenderableUUID renderable : Renderables.at(unit))
+		{
+			if (renderable->boundingBoxCompute.empty())
+				continue;
+
+			renderable->boundingBoxCompute->Compute(unit);
+		}
+	}
+
+	void RunBoundingBoxComputeShadersSolution(SceneUnitId unit)
+	{
+		for (RenderableUUID renderable : Renderables.at(unit))
+		{
+			if (renderable->boundingBoxCompute.empty())
+				continue;
+
+			renderable->boundingBoxCompute->Solution(unit);
+		}
+	}
+
+#if defined(_EDITOR)
+	void WriteRenderablesJson(nlohmann::json& json)
+	{
+		//#include <Editor/JSaveFile.h>
+		//#include <RenderableAtt.h>
+		//#include <JEnd.h>
+	}
+#endif
 }

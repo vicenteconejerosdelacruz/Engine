@@ -4,8 +4,8 @@
 #include <set>
 #include <Audio.h>
 #include <AudioSystem.h>
-#include <Templates.h>
-#include <TemplateDef.h>
+//#include <Templates.h>
+//#include <TemplateDef.h>
 
 using namespace AudioSystem;
 using namespace DirectX;

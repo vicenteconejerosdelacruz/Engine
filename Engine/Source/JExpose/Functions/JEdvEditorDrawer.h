@@ -1,6 +1,11 @@
 //#define TEXTFLOATREGEXREPLACE std::regex(".+-*/")
 #define TEXTFLOATREGEXREPLACE std::regex("\\*\\/")
 
+namespace Editor
+{
+	extern SceneUnitId currentSceneUnitId;
+};
+
 template<typename T, JsonToEditorValueType J>
 JEdvEditorDrawerFunction DrawValue() { return nullptr; }
 
@@ -1829,7 +1834,8 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_renderable>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
-			DrawResourceSelection(attribute, json, Scene::GetNameFromRenderables, SortUUIDNameByName(Scene::GetRenderablesUUIDsNames), ICON_FA_SNOWMAN);
+			auto getName = [](JUUID uuid) { return Scene::GetNameFromCameras(Editor::currentSceneUnitId, uuid); };
+			DrawResourceSelection(attribute, json, getName, SortUUIDNameByName(Scene::GetRenderablesUUIDsNames), ICON_FA_SNOWMAN);
 		};
 }
 
@@ -1942,32 +1948,30 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_animation_sequence
 				};
 			auto gotoPrevAnim = [setAnim](auto animable)
 				{
-					/*
-					if (animable->currentSequence == nullptr)
-					{
-						auto it = animable->animationsSequences.sequences.end();
-						it--;
-						setAnim(animable, it);
-						return;
-					}
-
-					for (auto it = animable->animationsSequences.sequences.begin(); it != animable->animationsSequences.sequences.end(); it++)
-					{
-						if (animable->currentSequence == &(it->second))
-						{
-							if (it == animable->animationsSequences.sequences.begin())
-							{
-								it = animable->animationsSequences.sequences.end();
-							}
-							it--;
-							setAnim(animable, it);
-							return;
-						}
-					}
-					auto it = animable->animationsSequences.sequences.end();
-					it--;
-					setAnim(animable, it);
-					*/
+					//if (animable->currentSequence == nullptr)
+					//{
+					//	auto it = animable->animationsSequences.sequences.end();
+					//	it--;
+					//	setAnim(animable, it);
+					//	return;
+					//}
+					//
+					//for (auto it = animable->animationsSequences.sequences.begin(); it != animable->animationsSequences.sequences.end(); it++)
+					//{
+					//	if (animable->currentSequence == &(it->second))
+					//	{
+					//		if (it == animable->animationsSequences.sequences.begin())
+					//		{
+					//			it = animable->animationsSequences.sequences.end();
+					//		}
+					//		it--;
+					//		setAnim(animable, it);
+					//		return;
+					//	}
+					//}
+					//auto it = animable->animationsSequences.sequences.end();
+					//it--;
+					//setAnim(animable, it);
 				};
 			auto gotoNextAnim = [setAnim](auto animable)
 				{
@@ -2178,7 +2182,6 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_te_renderpass_vec
 						std::string uuid = std::get<0>(item1);
 						if (uuid != "")
 						{
-							//std::shared_ptr<RenderPassJson> rp = GetRenderPassTemplate(uuid);
 							RenderPassJsonUUID rp = uuid;
 							if (rp->renderCallbackOverride() == RenderPassRenderCallbackOverride_Resolve) return false;
 						}
@@ -2188,7 +2191,6 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_te_renderpass_vec
 						std::string uuid = std::get<0>(item2);
 						if (uuid != "")
 						{
-							//std::shared_ptr<RenderPassJson> rp = GetRenderPassTemplate(uuid);
 							RenderPassJsonUUID rp = uuid;
 							if (rp->renderCallbackOverride() == RenderPassRenderCallbackOverride_Resolve) return false;
 						}
@@ -2231,7 +2233,8 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_camera_vector>
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
-			EditorDrawVector(attribute, json, ICON_FA_CAMERA, Scene::GetSceneObjectsByType(SO_Cameras), Scene::GetNameFromCameras, ImGui::OpenSceneObject, [&json, attribute](unsigned int index, JUUIDName item) //filtering
+			auto getName = [](JUUID uuid) { return Scene::GetNameFromCameras(Editor::currentSceneUnitId, uuid); };
+			EditorDrawVector(attribute, json, ICON_FA_CAMERA, Scene::GetSceneObjectsByType(SO_Cameras), getName, ImGui::OpenSceneObject, [&json, attribute](unsigned int index, JUUIDName item) //filtering
 				{
 					std::string uuid = std::get<0>(item);
 					JObject* j0 = json.at(0);
@@ -2251,7 +2254,8 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_light_vector>(
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
-			EditorDrawVector(attribute, json, ICON_FA_LIGHTBULB, Scene::GetSceneObjectsByType(SO_Lights), Scene::GetNameFromLights, ImGui::OpenSceneObject);
+			auto getName = [](JUUID uuid) { return Scene::GetNameFromLights(Editor::currentSceneUnitId, uuid); };
+			EditorDrawVector(attribute, json, ICON_FA_LIGHTBULB, Scene::GetSceneObjectsByType(SO_Lights), getName, ImGui::OpenSceneObject);
 		};
 }
 
@@ -2260,7 +2264,8 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_renderable_vec
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
-			EditorDrawVector(attribute, json, ICON_FA_SNOWMAN, Scene::GetSceneObjectsByType(SO_Renderables), Scene::GetNameFromRenderables, ImGui::OpenSceneObject);
+			auto getName = [](JUUID uuid) { return Scene::GetNameFromRenderables(Editor::currentSceneUnitId, uuid); };
+			EditorDrawVector(attribute, json, ICON_FA_SNOWMAN, Scene::GetSceneObjectsByType(SO_Renderables), getName, ImGui::OpenSceneObject);
 		};
 }
 
@@ -2269,7 +2274,8 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_soundeffect_ve
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
-			EditorDrawVector(attribute, json, ICON_FA_MUSIC, Scene::GetSceneObjectsByType(SO_SoundEffects), Scene::GetNameFromSoundEffects, ImGui::OpenSceneObject);
+			auto getName = [](JUUID uuid) { return Scene::GetNameFromSoundEffects(Editor::currentSceneUnitId, uuid); };
+			EditorDrawVector(attribute, json, ICON_FA_MUSIC, Scene::GetSceneObjectsByType(SO_SoundEffects), getName, ImGui::OpenSceneObject);
 		};
 }
 
@@ -4673,6 +4679,7 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_controller_vector
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
+			//this was commented
 			/*
 			auto setValue = [attribute, &json](unsigned int index, std::string controller)
 				{

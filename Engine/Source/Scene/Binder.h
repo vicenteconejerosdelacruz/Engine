@@ -1,6 +1,5 @@
 #pragma once
 #include <functional>
-#include <SceneObject.h>
 #include <map>
 
 //#define _DEBUG_UUID_NAMES

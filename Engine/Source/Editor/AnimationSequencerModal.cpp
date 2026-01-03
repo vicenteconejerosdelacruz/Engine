@@ -199,66 +199,66 @@ void AnimationSequencerModal::DestroySceneObjects()
 
 void AnimationSequencerModal::Step()
 {
-	XMFLOAT3 baseColor = ToXMFLOAT3(floor->at("floorColor"));
-	floor->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, renderer->backBufferIndex);
+	//XMFLOAT3 baseColor = ToXMFLOAT3(floor->at("floorColor"));
+	//floor->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, renderer->backBufferIndex);
 
-	if (adjustToBoundingBox)
-	{
-		//https://stackoverflow.com/a/32836605
-		BoundingBox modelBB = renderable->GetBoundingBox();
-		BoundingSphere modelBBS;
-		BoundingSphere::CreateFromBoundingBox(modelBBS, modelBB);
+	//if (adjustToBoundingBox)
+	//{
+	//	//https://stackoverflow.com/a/32836605
+	//	BoundingBox modelBB = renderable->GetBoundingBox();
+	//	BoundingSphere modelBBS;
+	//	BoundingSphere::CreateFromBoundingBox(modelBBS, modelBB);
 
-		float modelDistanceScale = camera->at("modelDistanceScale");
-		float fov = XMConvertToRadians(camera->perspective().fovAngleY);
-		float distance = modelDistanceScale * (adjustToBoundingBox ? (modelBBS.Radius * 2.0f) / (XMScalarSin(fov) / XMScalarCos(fov)) : 1.0f);
+	//	float modelDistanceScale = camera->at("modelDistanceScale");
+	//	float fov = XMConvertToRadians(camera->perspective().fovAngleY);
+	//	float distance = modelDistanceScale * (adjustToBoundingBox ? (modelBBS.Radius * 2.0f) / (XMScalarSin(fov) / XMScalarCos(fov)) : 1.0f);
 
-		XMVECTOR camFwV = camera->forward();
-		XMFLOAT3 BBPos = modelBB.Center;
-		XMVECTOR BBPosV = XMLoadFloat3(&BBPos);
-		XMVECTOR camPosV = XMVectorSubtract(BBPosV, XMVectorScale(camFwV, distance));
-		XMFLOAT3 camPos;
-		XMStoreFloat3(&camPos, camPosV);
-		camera->position(camPos);
-	}
-	else
-	{
-		camera->at("position") = camera->at("freeposition");
-		camera->at("rotation") = camera->at("freerotation");
-	}
+	//	XMVECTOR camFwV = camera->forward();
+	//	XMFLOAT3 BBPos = modelBB.Center;
+	//	XMVECTOR BBPosV = XMLoadFloat3(&BBPos);
+	//	XMVECTOR camPosV = XMVectorSubtract(BBPosV, XMVectorScale(camFwV, distance));
+	//	XMFLOAT3 camPos;
+	//	XMStoreFloat3(&camPos, camPosV);
+	//	camera->position(camPos);
+	//}
+	//else
+	//{
+	//	camera->at("position") = camera->at("freeposition");
+	//	camera->at("rotation") = camera->at("freerotation");
+	//}
 
-	if (selectedSequence != "")
-	{
-		Sequence& seq = sequencePlayer.sequence;
-		if (playingSequence)
-		{
-			float totalTime = static_cast<float>(seq.totalFrames) / static_cast<float>(seq.framesPerSecond);
-			playingSequenceTime += static_cast<float>(timer.GetElapsedSeconds());
-			bool stopPlayer = false;
+	//if (selectedSequence != "")
+	//{
+	//	Sequence& seq = sequencePlayer.sequence;
+	//	if (playingSequence)
+	//	{
+	//		float totalTime = static_cast<float>(seq.totalFrames) / static_cast<float>(seq.framesPerSecond);
+	//		playingSequenceTime += static_cast<float>(timer.GetElapsedSeconds());
+	//		bool stopPlayer = false;
 
-			if (playingSequenceLoop)
-			{
-				playingSequenceTime = std::fmodf(playingSequenceTime, totalTime);
-			}
-			else
-			{
-				playingSequenceTime = std::min(playingSequenceTime, totalTime);
-				stopPlayer = playingSequenceTime == totalTime;
-			}
-			int frame = static_cast<int>(static_cast<float>(seq.totalFrames) * (playingSequenceTime / totalTime));
-			frame = std::clamp(frame, 0, seq.totalFrames);
-			timelineEditor.selectedFrameInTimeline = frame;
-			sequencePlayer.SetFrame(timelineEditor.GetFrame(seq));
-			if (stopPlayer)
-			{
-				playingSequence = false;
-			}
-		}
-		else
-		{
-			sequencePlayer.SetFrame(timelineEditor.GetFrame(seq), false);
-		}
-	}
+	//		if (playingSequenceLoop)
+	//		{
+	//			playingSequenceTime = std::fmodf(playingSequenceTime, totalTime);
+	//		}
+	//		else
+	//		{
+	//			playingSequenceTime = std::min(playingSequenceTime, totalTime);
+	//			stopPlayer = playingSequenceTime == totalTime;
+	//		}
+	//		int frame = static_cast<int>(static_cast<float>(seq.totalFrames) * (playingSequenceTime / totalTime));
+	//		frame = std::clamp(frame, 0, seq.totalFrames);
+	//		timelineEditor.selectedFrameInTimeline = frame;
+	//		sequencePlayer.SetFrame(timelineEditor.GetFrame(seq));
+	//		if (stopPlayer)
+	//		{
+	//			playingSequence = false;
+	//		}
+	//	}
+	//	else
+	//	{
+	//		sequencePlayer.SetFrame(timelineEditor.GetFrame(seq), false);
+	//	}
+	//}
 }
 
 static ImVec2 modelPosAdj(0.0f, 21.0f);

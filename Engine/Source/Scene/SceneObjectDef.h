@@ -7,9 +7,9 @@
 	return SOClass##sceneObjects;\
 }
 
-#define SODEF_CREATE(SOClass) void Create##SOClass(nlohmann::json& json)\
+#define SODEF_CREATE(SOClass) void Create##SOClass(nlohmann::json& json, SceneUnitId id)\
 {\
-	CreateJsonSceneObject<SOClass::sceneObjectType, SOClass>(json, Get##SOClass##sSceneObjects);\
+	CreateJsonSceneObject<SOClass::sceneObjectType, SOClass>(json, Get##SOClass##sSceneObjects, id);\
 }
 
 #define SODEF_GET(SOClass) std::unique_ptr<SOClass>& Get##SOClass##SceneObject(JUUID uuid)\
@@ -29,7 +29,7 @@
 	return GetNames(SOClass##sceneObjects);\
 }
 
-#define SODEF_GETNAME(SOClass) JNAME Get##SOClass##Name(JUUID uuid)\
+#define SODEF_GETNAME(SOClass) JNAME Get##SOClass##Name(SceneUnitId id, JUUID uuid)\
 {\
 	return GetName(uuid, Get##SOClass##sSceneObjects);\
 }

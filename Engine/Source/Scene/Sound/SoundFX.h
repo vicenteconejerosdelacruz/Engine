@@ -1,9 +1,11 @@
 #pragma once
 
-#include <SceneObjectDecl.h>
+//#include <SceneObjectDecl.h>
+#include <Scene.h>
 #include <SceneObject.h>
-namespace Scene {
 
+namespace Scene
+{
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
@@ -36,12 +38,6 @@ namespace Scene {
 
 #endif
 
-	void DestroySoundEffects();
-	void PlaySounds();
-	void PauseSounds();
-	void ResumeSounds();
-	void StopSounds();
-
 	struct SoundFX : SceneObject
 	{
 		inline static const SceneObjectType sceneObjectType = SO_SoundEffects;
@@ -63,14 +59,11 @@ namespace Scene {
 		virtual void BindToScene();
 		virtual void UnbindFromScene();
 
-		bool markedForDelete = false;
 		void Destroy();
 
 		XMVECTOR rotationQ();
 		XMMATRIX world();
 		XMVECTOR fw();
-
-		std::tuple<std::unique_ptr<DirectX::SoundEffect>, std::unique_ptr<DirectX::SoundEffectInstance>> soundEffectInstance;
 
 		std::unique_ptr<DirectX::SoundEffect>& GetEffect() { return std::get<0>(soundEffectInstance); }
 		std::unique_ptr<DirectX::SoundEffectInstance>& GetInstance() { return std::get<1>(soundEffectInstance); }
@@ -81,14 +74,10 @@ namespace Scene {
 		bool IsPlaying() { return GetInstance() != nullptr && GetInstance()->GetState() == DirectX::SoundState::PLAYING; }
 		bool IsPaused() { return GetInstance() == nullptr || GetInstance()->GetState() == DirectX::SoundState::PAUSED; }
 		float Duration() { return (GetEffect()->GetSampleDurationMS() / 1000.0f); }
-		float time = 0.0f;
-		bool hasStarted = false;
 		void Step(float step);
 		float Time() const { return time; }
 		bool HasStarted() { return hasStarted; }
 
-		//3D
-		AudioEmitter audioEmitter;
 		void UpdateEmmiter();
 
 #if defined(_EDITOR)
@@ -99,8 +88,13 @@ namespace Scene {
 		//Gizmo
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation);
 #endif
+		bool markedForDelete = false;
+		float time = 0.0f;
+		bool hasStarted = false;
+		//3D
+		AudioEmitter audioEmitter;
+		std::tuple<std::unique_ptr<DirectX::SoundEffect>, std::unique_ptr<DirectX::SoundEffectInstance>> soundEffectInstance;
 	};
-
 
 	SODECL_FULL(SoundFX);
 
@@ -108,11 +102,15 @@ namespace Scene {
 #include <SoundFXAtt.h>
 #include <JEnd.h>
 
-	//DESTROY
-	void DeleteSoundFX(std::string uuid);
-
+	void SoundFXsStep(float step);
+	void DestroySoundEffects();
+	void DestroySoundEffects(SceneUnitId unit);
+	void DeleteSoundFX(JUUID uuid);
+	void PlaySounds();
+	void PauseSounds();
+	void ResumeSounds();
+	void StopSounds();
 #if defined(_EDITOR)
 	void WriteSoundFXsJson(nlohmann::json& json);
 #endif
-	void SoundFXsStep(float step);
 }

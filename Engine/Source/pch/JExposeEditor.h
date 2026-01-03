@@ -7,12 +7,16 @@
 #include <ImEditor.h>
 #include <Shader/ShaderInstance.h>
 #include <NoStd.h>
-#include <Renderable/Renderable.h>
-#include <Camera/Camera.h>
-#include <Light/Light.h>
-#include <Light/ShadowMap.h>
-#include <Sound/SoundFX.h>
-#include <RenderPass/RenderPass.h>
+//#include <Renderable/Renderable.h>
+//#include <Camera/Camera.h>
+//#include <Light/Light.h>
+//#include <Light/ShadowMap.h>
+//#include <Sound/SoundFX.h>
+//#include <RenderPass/RenderPass.h>
+#include <SceneObject.h>
+#include <JTemplate.h>
+//#include <DeviceUtils/RenderPass/SwapChainPass.h>
+#include <DeviceUtils/RenderPass/RenderToTexturePass.h>
 
 namespace Templates
 {

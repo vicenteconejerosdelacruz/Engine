@@ -5,10 +5,11 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 #include <imgui.h>
+#include <Templates.h>
 #include <JTemplate.h>
-#include <TemplateDecl.h>
-#include <Json.h>
-#include <JTypes.h>
+//#include <TemplateDecl.h>
+//#include <Json.h>
+//#include <JTypes.h>
 
 enum TextureType;
 
@@ -105,8 +106,9 @@ namespace Templates
 
 	struct TextureInstance
 	{
-		TextureInstance(std::string uuid);
-		TextureInstance(std::string uuid, unsigned int startFrame);
+		TextureInstance(JUUID uuid) { assert(!!!"do not use"); }
+		TextureInstance(SceneUnitId id, JUUID uuid);
+		TextureInstance(SceneUnitId id, JUUID uuid, unsigned int startFrame);
 		~TextureInstance() {}
 		JUUID materialTexture;
 
@@ -117,7 +119,7 @@ namespace Templates
 		CComPtr<ID3D12Resource> texture;
 		CComPtr<ID3D12Resource> upload;
 		size_t bufferSize;
-		void CreateTextureResource(std::string& path, DXGI_FORMAT format, TextureType type, unsigned int numFrames, unsigned int nMipMaps, unsigned int startFrame = 0U);
+		void CreateTextureResource(SceneUnitId id, std::string& path, DXGI_FORMAT format, TextureType type, unsigned int numFrames, unsigned int nMipMaps, unsigned int startFrame = 0U);
 		void ReleaseResources();
 	};
 	TEMPDECL_REFTRACKER(Texture);

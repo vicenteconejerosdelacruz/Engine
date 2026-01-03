@@ -1,34 +1,43 @@
 #include "pch.h"
 
-#include <functional>
-#include <atlbase.h>
-#include <Editor.h>
+//#include <functional>
+//#include <atlbase.h>
+
 #include <imgui.h>
-#include <ImGuizmo.h>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx12.h>
 #include <IconsFontAwesome5.h>
+#include <ImGuizmo.h>
+#include <Editor.h>
 
-#include <Application.h>
+//#include <Application.h>
 #include <Renderer.h>
-#include <RenderPass/RenderPass.h>
-#include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
-#include <DeviceUtils/Resources/Resources.h>
-#include <Renderable/Renderable.h>
-#include <Camera/Camera.h>
-#include <Light/Light.h>
-#include <Sound/SoundFX.h>
-#include <Templates.h>
-#include <Sound/Sound.h>
-#include <Textures/Texture.h>
-#include <Shader/Shader.h>
+#include <DeviceUtils/CommandsProcessor/CommandsProcessor.h>
+#include <DeviceUtils/RenderPass/SwapChainPass.h>
 
+#include <Game.h>
+#include <Scene.h>
 #include <Level.h>
-#include <Mouse.h>
-#include <Keyboard.h>
+//#include <SceneUnit.h>
+//#include <RenderPass/RenderPass.h>
+//#include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
+#include <DeviceUtils/Resources/Resources.h>
+//#include <Renderable/Renderable.h>
+//#include <Camera/Camera.h>
+//#include <Light/Light.h>
+//#include <Sound/SoundFX.h>
+//#include <Templates.h>
+//#include <Sound/Sound.h>
+//#include <Textures/Texture.h>
+//#include <Shader/Shader.h>
+
+//#include <Level.h>
+//#include <Mouse.h>
+//#include <Keyboard.h>
 #include <MousePicking.h>
 #include <EditorMouseCamera.h>
 #include <RightPanelComponent.h>
+//Modals
 #include <CreatorModal.h>
 #include <DeletePrompt.h>
 #include <AnimationSequencerModal.h>
@@ -45,12 +54,81 @@ extern RECT GetMaximizedAreaSize();
 // Forward declare message handler from imgui_impl_win32.cpp
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+ImGuiWindowFlags panFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings |
+ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+
+using namespace DeviceUtils;
+
+struct LoadingProgress
+{
+	LoadingProgress() { Reset(); }
+	void Reset() {
+		loadSceneUnitModal = false;
+		bool defaultLevel = false;
+		bool loading = false;
+		levelName = "";
+		asset = "";
+		count = 0U;
+		total = 0U;
+	}
+	bool loadSceneUnitModal = true;
+	bool defaultLevel = false;
+	bool loading = false;
+	std::string levelName;
+	std::string asset;
+	unsigned int count = 0U;
+	unsigned int total = 0U;
+};
+
+struct BillboardRegistry
+{
+	std::map<JUUID, RenderableUUID> billboardRegistry; //scene object -> renderable billboard
+	std::set<RenderableUUID> billboardsToDestroy;
+};
+
+struct GizmoInteraction
+{
+	GizmoInteraction()
+	{
+		gizmoOperation = ImGuizmo::TRANSLATE;
+		gizmoMode = ImGuizmo::WORLD;
+		gizmoCentroidMx = XMFLOAT4X4();
+		gizmoApplyOp = false;
+		soRotation = std::map<SceneObject*, XMFLOAT3>();
+		soScale = std::map<SceneObject*, XMFLOAT3>();
+		so2bb = std::map<SceneObject*, XMFLOAT3>();
+		bb2gizmo = std::map<SceneObject*, XMFLOAT3>();
+		gizmoRotation = XMFLOAT3();
+		gizmoPosition = XMFLOAT3();
+		gizmoScale = XMFLOAT3();
+	}
+
+	ImGuizmo::OPERATION gizmoOperation;//(ImGuizmo::TRANSLATE);
+	ImGuizmo::MODE gizmoMode;// (ImGuizmo::WORLD);
+	XMFLOAT4X4 gizmoCentroidMx;
+	bool gizmoApplyOp;// = false;
+	std::map<SceneObject*, XMFLOAT3> soRotation;
+	std::map<SceneObject*, XMFLOAT3> soScale;
+	std::map<SceneObject*, XMFLOAT3> so2bb;
+	std::map<SceneObject*, XMFLOAT3> bb2gizmo;
+	XMFLOAT3 gizmoRotation;
+	XMFLOAT3 gizmoPosition;
+	XMFLOAT3 gizmoScale;
+};
+
 namespace Editor
 {
-	std::string currentLevelName = defaultLevelName;
-	bool levelModified = false;
+	ImGui_ImplDX12_InitInfo init_info = {};
+	CommandsProcessor commandListProcessor;
+	CommandsProcessor commandListPickingPassProcessor;
+
+	//workbench & loading
+	nlohmann::json workbench;
+	std::string workbenchSelectedLevel;
+	LoadingProgress loadingProgress;
+
 	bool templatesModified = false;
-	bool defaultLevel = true;
 
 	bool initialized = false;
 	bool maximized = true;
@@ -60,45 +138,39 @@ namespace Editor
 	int lastMouseX;
 	int lastMouseY;
 
-	RenderableUUID boundingBox;
-	std::map<JUUID, RenderableUUID> billboardRegistry; //scene object -> renderable billboard
-	std::set<RenderableUUID> billboardsToDestroy;
-
 	float titleBH = static_cast<float>(ApplicationBarBottom);
 	float panW = static_cast<float>(RightPanelWidth);
-	ImGuiWindowFlags panFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 	bool NonGameMode = false;
 	bool lockedGameAreaInput = false;
 
-	RightPanelComponent sceneObjectEdition("sceneObjects", { "hidden", "uuid" }, { "Scene Objects", "Details" }, { "Scene Objects" });
-	RightPanelComponent templateEdition("templates", { "hidden", "uuid" }, { "Templates", "Details" }, { "Templates" });
-
-	ImGui_ImplDX12_InitInfo init_info = {};
-
-	enum MouseGameAreaMode
-	{
-		MOUSE_GAMEAREA_MODE_NONE,
-		MOUSE_GAMEAREA_MODE_PICKING,
-		MOUSE_GAMEAREA_MODE_GIZMO,
-		MOUSE_GAMEAREA_MODE_CAMERA
-	};
 	MouseGameAreaMode currentMouseMode = MOUSE_GAMEAREA_MODE_NONE;
 	MousePicking mousePicking;
 	EditorMouseCamera mouseCamera;
 
+	//SceneUnits/levels
+	SceneUnitId currentSceneUnitId;
+	std::vector<std::tuple<SceneUnitId, std::string>> currentLevelName;
+	std::unordered_map<SceneUnitId, bool> levelModified;
+	std::unordered_map<SceneUnitId, bool> defaultLevel;
+	//SceneObjects panel
+	std::unordered_map<SceneUnitId, RightPanelComponent> sceneObjectEdition;
 	//Gizmos
-	ImGuizmo::OPERATION gizmoOperation(ImGuizmo::TRANSLATE);
-	ImGuizmo::MODE gizmoMode(ImGuizmo::WORLD);
-	XMFLOAT4X4 gizmoCentroidMx;
-	bool gizmoApplyOp = false;
-	std::map<SceneObject*, XMFLOAT3> soRotation;
-	std::map<SceneObject*, XMFLOAT3> soScale;
-	std::map<SceneObject*, XMFLOAT3> so2bb;
-	std::map<SceneObject*, XMFLOAT3> bb2gizmo;
-	XMFLOAT3 gizmoRotation;
-	XMFLOAT3 gizmoPosition;
-	XMFLOAT3 gizmoScale;
+	std::unordered_map<SceneUnitId, GizmoInteraction> gizmos;
+	//SceneObject selection
+	std::unordered_map<SceneUnitId, std::set<JUUID>> selectedSceneObjects;
+	//Game Interaction
+	//bool showGameController = false;
+	std::unordered_map<SceneUnitId, bool> isPlaying;// = false;
+	std::unordered_map<SceneUnitId, bool> isPaused;// = false;
+	//BoundingBox
+	std::unordered_map<SceneUnitId, RenderableUUID> boundingBox;
+	//Editor Camera
+	std::unordered_map<SceneUnitId, CameraUUID> levelCameraUUID;
+	std::unordered_map<SceneUnitId, CameraUUID> editorCameraUUID;
+	//Billboards
+	std::unordered_map<SceneUnitId, BillboardRegistry> billboards;
+
+	RightPanelComponent templateEdition("templates", { "hidden", "uuid" }, { "Templates", "Details" }, { "Templates" });
 
 	//Modals
 	CreatorModal<SceneObjectType> sceneObjectModal;
@@ -106,17 +178,135 @@ namespace Editor
 	DeletePrompt deletePrompt;
 	AnimationSequencerModal animationSequencer;
 
-	//SceneObject selection
-	std::set<JUUID> selectedSceneObjects;
+	void CreateSceneUnitGizmos(SceneUnitId unit)
+	{
+		gizmos.insert_or_assign(unit, GizmoInteraction());
+		//gizmoReady.insert(unit);
+		//gizmoOperation.insert_or_assign(unit, ImGuizmo::TRANSLATE);
+		//gizmoMode.insert_or_assign(unit, ImGuizmo::WORLD);
+		//gizmoCentroidMx.insert_or_assign(unit, XMFLOAT4X4());
+		//gizmoApplyOp.insert_or_assign(unit, false);
+		//soRotation.insert_or_assign(unit, std::map<SceneObject*, XMFLOAT3>());
+		//soScale.insert_or_assign(unit, std::map<SceneObject*, XMFLOAT3>());
+		//so2bb.insert_or_assign(unit, std::map<SceneObject*, XMFLOAT3>());
+		//bb2gizmo.insert_or_assign(unit, std::map<SceneObject*, XMFLOAT3>());
+		//gizmoRotation.insert_or_assign(unit, XMFLOAT3());
+		//gizmoPosition.insert_or_assign(unit, XMFLOAT3());
+		//gizmoScale.insert_or_assign(unit, XMFLOAT3());
+	}
 
-	//Game Interaction
-	bool isPlaying = false;
-	bool isPaused = false;
+	void CreateSceneUnitSelection(SceneUnitId unit)
+	{
+		selectedSceneObjects.insert_or_assign(unit, std::set<JUUID>());
+	}
+
+	void CreateSceneUnitGameController(SceneUnitId unit)
+	{
+		isPlaying.insert_or_assign(unit, false);
+		isPaused.insert_or_assign(unit, false);
+	}
+
+	void CreateSceneUnitBoundingBox(SceneUnitId unit)
+	{
+#if !defined(_EDITOR_BOUNDINGBOX)
+		return;
+#endif
+		JUUID uuid = getUUID();
+		boundingBox[unit] = uuid;
+		JUUID camera = *GetSwapChainCameras(unit).begin();
+		nlohmann::json jbox = nlohmann::json(
+			{
+				{ "meshMaterials",
+					{
+						{
+							{ "material", GetMaterialUUIDByName("BoundingBox") },
+							{ "mesh", GetMeshUUIDByName("boxlines") }
+						}
+					}
+				},
+				{ "castShadows", false },
+				{ "shadowed", false },
+				{ "name" , "EditorBoundingBox" },
+				{ "uuid" , uuid },
+				{ "position" , { 0.0f, 0.0f, 0.0f} },
+				{ "topology", "LINELIST"},
+				{ "rotation" , { 0.0, 0.0, 0.0 } },
+				{ "scale" , { 1.0f, 1.0f, 1.0f } },
+				{ "skipMeshes" , {}},
+				{ "visible" , false},
+				{ "hidden" , true},
+				{ "cameras", { camera }},
+				{ "checkBoundingBox", false },
+			}
+		);
+		CreateRenderable(jbox, unit);
+		boundingBox[unit]->BindToScene();
+		auto& scene = GetSceneUnit(unit);
+		scene->renderablesInLoadingPool.insert(uuid);
+	}
+
+	void CreateSceneUnitBillboards(SceneUnitId id)
+	{
+		billboards.insert_or_assign(id, BillboardRegistry());
+	}
+
+	void CreateSceneUnitEditorIndependentCamera(SceneUnitId id)
+	{
+		auto& scene = GetSceneUnit(id);
+
+		if (GetCountFromMouseCameras(id) > 0ULL)
+		{
+			//no more than a single swapchain camera or mouse controller is allowed
+			//todo handle RTT cameras that does resolving
+			levelCameraUUID[id] = *GetMouseCameras(id).begin();
+			editorCameraUUID[id] = getUUID();
+
+			//this should be done and reversed later in the same function.
+			//the purpose is to allow to create the editor camera
+			//switching will be performed by switching functions later so we undo this in a few lines below
+			EraseCameraFromMouseCameras(id, levelCameraUUID[id]());
+			EraseCameraFromSwapChainCameras(id, levelCameraUUID[id]());
+
+			//make a patch for the uuid and clone the camera
+			nlohmann::json parameters = {
+				{ "uuid", editorCameraUUID[id]()},
+				{ "name", "editorCamera" },
+				{ "hidden", true },
+				{ "systemCreated", true },
+				{ "mouseController", true },
+				{ "useSwapChain", true },
+			};
+			CloneSceneObject(id, levelCameraUUID[id](), parameters);
+
+			//step out a little bit of the scene, we can came up with a better number eventually
+			editorCameraUUID[id]->MoveForward(cameraEditorDistance);
+			editorCameraUUID[id]->WriteConstantsBuffer(scene->Frame());
+
+			//restore cameras mapping
+			EraseCameraFromMouseCameras(id, editorCameraUUID[id]());
+			EraseCameraFromSwapChainCameras(id, editorCameraUUID[id]());
+			InsertCameraIntoMouseCameras(id, levelCameraUUID[id]());
+			InsertCameraIntoSwapChainCameras(id, levelCameraUUID[id]());
+			BindLightsToEditorCamera(id, editorCameraUUID[id]());
+
+			//Editor::RegisterBillboard(levelCameraUUID());
+		}
+		else
+		{
+
+		}
+	}
 
 	//Editor LifeCycle
 	void InitEditor()
 	{
 		initialized = true;
+		loadingProgress.loadSceneUnitModal = true;
+		LoadWorkbench();
+
+		commandListProcessor.Init(renderer->d3dDevice, 0xed1704, Renderer::numFrames);
+		commandListPickingPassProcessor.Init(renderer->d3dDevice, 0x91c39455, Renderer::numFrames);
+
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -171,6 +361,98 @@ namespace Editor
 			};
 		ImGuiImplRenderInit();
 		SetupImGuiStyle();
+
+		CreatePickingPass();
+	}
+
+	void LoadWorkbench()
+	{
+		if (!std::filesystem::exists("workbench.json"))
+		{
+			workbench = { "levels", {} };
+			return;
+		}
+
+		std::ifstream file("workbench.json");
+		bool isOpen = file.is_open();
+		workbench = nlohmann::json::parse(file);
+	}
+
+	void LevelLoadingProgress(std::string asset, unsigned int count, unsigned int total)
+	{
+		loadingProgress.asset = asset;
+		loadingProgress.count = count;
+		loadingProgress.total = total;
+	}
+
+	void OnLevelLoaded(SceneUnitId id)
+	{
+		using namespace Scene;
+		currentSceneUnitId = id;
+		currentLevelName.push_back(std::make_tuple(id, loadingProgress.levelName));
+		levelModified.insert_or_assign(id, false);
+		defaultLevel.insert_or_assign(id, loadingProgress.defaultLevel);
+		AddSceneUnitToEditor(id);
+		MarkScenePanelAssetsAsDirty();
+		BindPickingRenderables(id);
+		ResetRenderableScenes();
+		EnableSceneUnitRendering(id);
+		CreateSceneUnitGizmos(id);
+		CreateSceneUnitSelection(id);
+		CreateSceneUnitGameController(id);
+		loadingProgress.Reset();
+	}
+
+	void QuitEditor()
+	{
+		/*
+		if ((Editor::levelModified && !Editor::defaultLevel) || Editor::templatesModified)
+		{
+			bool quitLevel = true;
+			bool quitTemplate = true;
+			if (Editor::levelModified)
+			{
+				int response = MessageBoxA(hWnd, "The level has been modified, do you wish to Save your work before leaving?", "Save before leaving?", MB_ICONWARNING | MB_YESNOCANCEL);
+				switch (response) {
+				case IDYES:
+				{
+					//Editor::SaveLevelToFile(Editor::currentLevelName);
+				}
+				break;
+				case IDCANCEL:
+				{
+					quitLevel = false;
+				}
+				break;
+				}
+			}
+			if (Editor::templatesModified)
+			{
+				int response = MessageBoxA(hWnd, "The templates has been modified, do you wish to Save your work before leaving?", "Save before leaving?", MB_ICONWARNING | MB_YESNOCANCEL);
+				switch (response) {
+				case IDYES:
+				{
+					//Editor::SaveTemplates();
+				}
+				break;
+				case IDCANCEL:
+				{
+					quitTemplate = false;
+				}
+				break;
+				}
+			}
+
+			if (quitLevel && quitTemplate)
+			{
+				PostMessageA(hWnd, WM_QUIT, 0, 0);
+			}
+		}
+		else
+		*/
+		{
+			PostMessageA(hWnd, WM_QUIT, 0, 0);
+		}
 	}
 
 	void ImGuiImplRenderInit()
@@ -269,8 +551,10 @@ namespace Editor
 		style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.800000011920929f, 0.800000011920929f, 0.800000011920929f, 0.3499999940395355f);
 	}
 
-	void DestroyEditor() {
+	void DestroyEditor()
+	{
 		initialized = false;
+		/*
 		for (auto& uuid : sceneObjectEdition.editables)
 		{
 			SendEditorDestroyPreview(uuid, GetSceneObjectPointer);
@@ -287,6 +571,7 @@ namespace Editor
 		DestroyBillboards();
 		DestroyPickingPass();
 		DestroyRenderableBoundingBox();
+		*/
 		// Cleanup
 		ImGui_ImplDX12_Shutdown();
 		ImGui_ImplWin32_Shutdown();
@@ -297,17 +582,64 @@ namespace Editor
 		return ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);
 	}
 
+	void EditorStep()
+	{
+		BuildAssetsTree();
+	}
+
+	void HandleEditorMouseMovements(SceneUnitId id)
+	{
+		if (currentSceneUnitId != id) return;
+
+		if (GetCountFromMouseCameras(id) > 0ULL)
+		{
+			GameAreaMouseProcessing(mouse, *GetMouseCameras(id).begin());
+		}
+	}
+
+	void AddSceneUnitToEditor(SceneUnitId unit)
+	{
+		auto& scene = GetSceneUnit(unit);
+		sceneObjectEdition.insert_or_assign(unit,
+			RightPanelComponent(
+				"sceneObjects",
+				{ "hidden", "uuid" },
+				{ "Scene Objects", "Details" },
+				{ "Scene Objects" }
+			)
+		);
+	}
+
+	void SetCurrentSceneUnit(SceneUnitId unit)
+	{
+		currentSceneUnitId = unit;
+	}
+
 	//Editor Drawing
-	void DrawEditor(CameraUUID camera) {
+	void DrawEditor()
+	{
+		using namespace Scene;
 
 		if (inSizeMove) return;
 
-		unsigned int backBufferIndex = renderer->backBufferIndex;
+		unsigned int backBufferIndex = renderer->GetBackBufferIndex();
 		RenderPassInstanceUUID renderPass = renderer->swapChainPass;
 		SwapChainPassUUID pass = renderPass->swapChainPass;
 		auto backBuffer = pass->renderTargets[backBufferIndex];
-		auto commandList = renderer->commandList;
+		commandListProcessor.ResetCommandList();
+		auto commandList = commandListProcessor.GetCommandList();
 		TransitionResource(commandList, backBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+		commandList->RSSetViewports(1, &renderer->screenViewport);
+		commandList->RSSetScissorRects(1, &renderer->scissorRect);
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(pass->rtvDescriptorHeap->descriptorHeap->GetCPUDescriptorHandleForHeapStart(), backBufferIndex, pass->rtvDescriptorHeap->descriptorSize);
+		commandList->OMSetRenderTargets(1, &rtv, false, nullptr);
+		if (GetSceneUnitsCount() == 0ULL)
+		{
+			XMVECTORF32 clearColor = DirectX::Colors::Black;
+			commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+		}
 
 		// Start the Dear ImGui frame
 		ImGui_ImplDX12_NewFrame();
@@ -317,10 +649,10 @@ namespace Editor
 
 		Editor::NonGameMode = false;
 
-		if (sceneObjectEdition.selectedNextFrame != "")
+		if (currentSceneUnitId != 0 && sceneObjectEdition.at(currentSceneUnitId).selectedNextFrame != "")
 		{
-			OpenTemplate(sceneObjectEdition.selectedNextFrame);
-			sceneObjectEdition.selectedNextFrame = "";
+			OpenTemplate(sceneObjectEdition.at(currentSceneUnitId).selectedNextFrame);
+			sceneObjectEdition.at(currentSceneUnitId).selectedNextFrame = "";
 		}
 
 		if (templateEdition.selectedNextFrame != "")
@@ -330,17 +662,21 @@ namespace Editor
 		}
 
 		DrawApplicationBar();
+		DrawLevelSelectorModal();
 		DrawGameController();
+		DrawLevelsTabs();
 
-		if (!IsPlaying())
+		if (!!currentSceneUnitId && !IsPlaying(currentSceneUnitId))
 		{
 			DrawRightPanel();
 
-			if (!camera.empty())
-				DrawPickedObjectsGizmo(camera);
+			SwitchToSceneUnitEditorCamera(currentSceneUnitId);
+			DrawPickedObjectsGizmo(currentSceneUnitId, *GetSwapChainCameras(currentSceneUnitId).begin());
+			SwitchToSceneUnitEditorPlayCamera(currentSceneUnitId);
 
 			if (sceneObjectModal.creating)
 				sceneObjectModal.DrawCreationPopup(SceneObjectsTypePanelMenuItems.at(sceneObjectModal.type));
+			/*
 			if (templateModal.creating)
 				templateModal.DrawCreationPopup(TemplateTypePanelMenuItems.at(templateModal.type));
 			if (deletePrompt.showing)
@@ -354,14 +690,47 @@ namespace Editor
 				ImVec2 seqSize = ImVec2(viewport->WorkSize.x * (1.0f - (2.0f / seqAdj)), viewport->WorkSize.y * (1.0f - (2.0f / seqAdj)));
 				animationSequencer.DrawSequencer("Animation Sequencer", seqPos, seqSize);
 			}
+			*/
 		}
+
 		// Rendering
 		ImGui::Render();
 
 		// Render Dear ImGui graphics
-		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), renderer->commandList);
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
 
 		TransitionResource(commandList, backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+
+		commandListProcessor.CloseCommandList();
+		renderer->ExecuteCommands(commandList);
+		commandListProcessor.Next();
+	}
+
+	void SwitchToSceneUnitEditorCamera(SceneUnitId id)
+	{
+		editorCameraUUID[id]->renderables = levelCameraUUID[id]->renderables;
+		EraseCameraFromMouseCameras(id, levelCameraUUID[id]());
+		EraseCameraFromSwapChainCameras(id, levelCameraUUID[id]());
+		InsertCameraIntoMouseCameras(id, editorCameraUUID[id]());
+		InsertCameraIntoSwapChainCameras(id, editorCameraUUID[id]());
+	}
+
+	void SwitchToSceneUnitEditorPlayCamera(SceneUnitId id)
+	{
+		EraseCameraFromMouseCameras(id, editorCameraUUID[id]());
+		EraseCameraFromSwapChainCameras(id, editorCameraUUID[id]());
+		InsertCameraIntoMouseCameras(id, levelCameraUUID[id]());
+		InsertCameraIntoSwapChainCameras(id, levelCameraUUID[id]());
+	}
+
+	void BindLightsToEditorCamera(SceneUnitId id, CameraUUID cam)
+	{
+		for (LightUUID l : GetLights(id))
+		{
+			auto cams = l->cameras();
+			cams.push_back(cam());
+			l->cameras(cams);
+		}
 	}
 
 	void DrawApplicationBar()
@@ -369,56 +738,6 @@ namespace Editor
 		RECT dragRect;
 		ZeroMemory(&dragRect, sizeof(dragRect));
 		dragRect.bottom = ApplicationBarBottom;
-
-		auto quitEditor = []()
-			{
-				if ((Editor::levelModified && !Editor::defaultLevel) || Editor::templatesModified)
-				{
-					bool quitLevel = true;
-					bool quitTemplate = true;
-					if (Editor::levelModified)
-					{
-						int response = MessageBoxA(hWnd, "The level has been modified, do you wish to Save your work before leaving?", "Save before leaving?", MB_ICONWARNING | MB_YESNOCANCEL);
-						switch (response) {
-						case IDYES:
-						{
-							Editor::SaveLevelToFile(Editor::currentLevelName);
-						}
-						break;
-						case IDCANCEL:
-						{
-							quitLevel = false;
-						}
-						break;
-						}
-					}
-					if (Editor::templatesModified)
-					{
-						int response = MessageBoxA(hWnd, "The templates has been modified, do you wish to Save your work before leaving?", "Save before leaving?", MB_ICONWARNING | MB_YESNOCANCEL);
-						switch (response) {
-						case IDYES:
-						{
-							Editor::SaveTemplates();
-						}
-						break;
-						case IDCANCEL:
-						{
-							quitTemplate = false;
-						}
-						break;
-						}
-					}
-
-					if (quitLevel && quitTemplate)
-					{
-						PostMessageA(hWnd, WM_QUIT, 0, 0);
-					}
-				}
-				else
-				{
-					PostMessageA(hWnd, WM_QUIT, 0, 0);
-				}
-			};
 
 		if (ImGui::BeginMainMenuBar())
 		{
@@ -428,11 +747,11 @@ namespace Editor
 					{
 						if (ImGui::MenuItem(ICON_FA_FILE "New"))
 						{
-							Level::SetDefaultLevelToLoad();
-							menuBarItemClicked = true;
+							//Level::SetDefaultLevelToLoad();
+							//menuBarItemClicked = true;
 						}
 					},
-					!IsPlaying()
+					!IsPlaying(currentSceneUnitId)
 				);
 
 				ImGui::Separator();
@@ -440,33 +759,34 @@ namespace Editor
 					{
 						if (ImGui::MenuItem(ICON_FA_FOLDER_OPEN "Open"))
 						{
-							OpenLevelFile();
-							menuBarItemClicked = true;
+							loadingProgress.loadSceneUnitModal = true;
+							//OpenLevelFile();
+							//menuBarItemClicked = true;
 						}
 					},
-					!IsPlaying()
+					!IsPlaying(currentSceneUnitId)
 				);
 
 				ImGui::DrawItemWithEnabledState([]
 					{
 						if (ImGui::MenuItem(ICON_FA_SAVE "Save"))
 						{
-							SaveLevelToFile(currentLevelName);
-							menuBarItemClicked = true;
+							//SaveLevelToFile(currentLevelName);
+							//menuBarItemClicked = true;
 						}
 					},
-					currentLevelName != "" && levelModified && !IsPlaying()
+					/*currentLevelName != "" && levelModified &&*/ !IsPlaying(currentSceneUnitId)
 				);
 
 				ImGui::DrawItemWithEnabledState([]
 					{
 						if (ImGui::MenuItem(ICON_FA_SAVE "Save As.."))
 						{
-							SaveLevelAs();
-							menuBarItemClicked = true;
+							//SaveLevelAs();
+							//menuBarItemClicked = true;
 						}
 					},
-					!IsPlaying()
+					!IsPlaying(currentSceneUnitId)
 				);
 
 				ImGui::Separator();
@@ -474,15 +794,15 @@ namespace Editor
 					{
 						if (ImGui::MenuItem(ICON_FA_SAVE "Save Templates"))
 						{
-							SaveTemplates();
-							menuBarItemClicked = true;
+							//SaveTemplates();
+							//menuBarItemClicked = true;
 						}
 					}, templatesModified
 				);
 				ImGui::Separator();
 				if (ImGui::MenuItem(ICON_FA_TIMES "Exit")) // It would be nice if this was a "X" like in the windows title bar set off to the far right
 				{
-					quitEditor();
+					QuitEditor();
 				}
 				ImGui::EndMenu();
 
@@ -494,9 +814,14 @@ namespace Editor
 			const ImGuiViewport* viewport = ImGui::GetMainViewport();
 
 			std::string titleBar = gameAppTitle;
-			if (currentLevelName != "")
+			if (currentSceneUnitId != 0)
 			{
-				titleBar += " - " + currentLevelName;
+				auto [_, name] = *std::find_if(currentLevelName.begin(), currentLevelName.end(), [&](auto unitLevel)
+					{
+						return currentSceneUnitId == std::get<0>(unitLevel);
+					}
+				);
+				titleBar += " - " + name;
 			}
 
 			auto windowWidth = ImGui::GetWindowSize().x;
@@ -516,7 +841,7 @@ namespace Editor
 				{
 					.label = ICON_FA_TIMES,
 					.x = viewport->WorkSize.x - 1.0f * 19.0f,
-					.onClick = quitEditor
+					.onClick = QuitEditor
 				},
 				{
 					.label = ICON_FA_WINDOW_MAXIMIZE,
@@ -554,6 +879,90 @@ namespace Editor
 			ImGui::EndMainMenuBar();
 		}
 		HandleApplicationDragTitleBar(dragRect);
+	}
+
+	void DrawLevelSelectorModal()
+	{
+		using namespace Game;
+		using namespace Scene::Level;
+
+		if (!loadingProgress.loadSceneUnitModal) return;
+
+		std::string title = "Open Level";
+
+		ImGui::OpenPopup(title.c_str());
+
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImVec2 modalSize = ImVec2(300.0f, 200.0f);
+		ImVec2 modalPos = ImVec2(viewport->WorkSize.x * 0.5f - modalSize.x * 0.5f, viewport->WorkSize.y * 0.5f - modalSize.y * 0.5f);
+		ImGui::SetNextWindowPos(modalPos);
+		ImGui::SetNextWindowSize(modalSize);
+
+		if (ImGui::BeginPopupModal(title.c_str(), nullptr,
+			ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
+		))
+		{
+			ImVec2 listBoxSize = ImVec2(modalSize.x - 15, modalSize.y - (loadingProgress.loading ? 100 : 60));
+			ImGui::BeginListBox("##", listBoxSize);
+			{
+				nlohmann::json& levels = workbench.at("levels");
+				for (unsigned int i = 0; i < levels.size(); i++)
+				{
+					std::string option = levels.at(i);
+					bool selected = option == workbenchSelectedLevel;
+					if (ImGui::Selectable(option.c_str(), &selected))
+					{
+						workbenchSelectedLevel = option;
+					}
+				}
+				ImGui::EndListBox();
+			}
+
+			if (loadingProgress.loading)
+			{
+				ImGui::Text(loadingProgress.asset.c_str());
+				float progress = static_cast<float>(loadingProgress.count) / static_cast<float>(loadingProgress.total);
+				ImGui::ProgressBar(progress, ImVec2(-1.0f, 0.0f), "");
+			}
+
+			ImVec2 cursorPos = ImGui::GetCursorPos();
+			if (ImGui::Button("Exit"))
+			{
+				QuitEditor();
+			}
+
+			cursorPos.x += 100.0f;
+			ImGui::SetCursorPos(cursorPos);
+			ImGui::DrawItemWithEnabledState([&]
+				{
+					if (ImGui::Button("Default Level"))
+					{
+						loadingProgress.Reset();
+						loadingProgress.defaultLevel = true;
+						loadingProgress.levelName = "default";
+						LoadLevelIntoSceneUnit("default", GetDefaultLevel, OnLevelLoaded, LevelLoadingProgress);
+					}
+				},
+				!loadingProgress.loading
+			);
+
+			ImGui::SameLine();
+			ImGui::DrawItemWithEnabledState([&]
+				{
+					if (ImGui::Button("Load Level"))
+					{
+						loadingProgress.Reset();
+						loadingProgress.defaultLevel = true;
+						loadingProgress.levelName = workbenchSelectedLevel;
+						LoadLevelIntoSceneUnit(workbenchSelectedLevel, [&]() { return GetLevelFromFile(workbenchSelectedLevel); }, OnLevelLoaded, LevelLoadingProgress);
+					}
+				},
+				!workbenchSelectedLevel.empty() && !loadingProgress.loading
+			);
+
+			ImGui::EndPopup();
+		}
 	}
 
 	void HandleApplicationDragTitleBar(RECT& dragRect)
@@ -618,6 +1027,9 @@ namespace Editor
 
 	void DrawGameController()
 	{
+		//if (!showGameController) return;
+		if (!currentSceneUnitId) return;
+
 		RECT r = GetGameControllerRect();
 		ImVec2 controllerPos(static_cast<float>(r.left), static_cast<float>(r.top));
 		ImVec2 controllerSize(static_cast<float>(r.right - r.left), static_cast<float>(r.bottom - r.top));
@@ -642,25 +1054,25 @@ namespace Editor
 			float buttons_width = play_width + stop_width;
 			float cursorX = 0.5f * (controllerSize.x - buttons_width);
 			ImGui::SetCursorPosX(cursorX);
-			if (!IsPlaying() || IsPaused())
+			if (!IsPlaying(currentSceneUnitId) || IsPaused(currentSceneUnitId))
 			{
 				if (ImGui::Button(ICON_FA_PLAY))
 				{
-					if (!IsPlaying())
+					if (!IsPlaying(currentSceneUnitId))
 					{
-						SwitchToPlayMode();
+						//SwitchToPlayMode();
 					}
 					else
 					{
-						SwitchToUnPausedMode();
+						//SwitchToUnPausedMode();
 					}
 				}
 			}
-			else if (IsPlaying() && !IsPaused())
+			else if (IsPlaying(currentSceneUnitId) && !IsPaused(currentSceneUnitId))
 			{
 				if (ImGui::Button(ICON_FA_PAUSE))
 				{
-					SwitchToPauseMode();
+					//SwitchToPauseMode();
 				}
 			}
 			ImGui::SameLine();
@@ -668,20 +1080,63 @@ namespace Editor
 				{
 					if (ImGui::Button(ICON_FA_STOP))
 					{
-						SwitchToNonPlayMode();
+						//SwitchToNonPlayMode();
 					}
 				},
-				IsPlaying()
+				IsPlaying(currentSceneUnitId)
 			);
 		}
 		ImGui::End();
-		ImGui::PopStyleColor();
-		ImGui::PopStyleColor();
-		ImGui::PopStyleVar();
-		ImGui::PopStyleVar();
-		ImGui::PopStyleVar();
+		ImGui::PopStyleColor(2);
+		ImGui::PopStyleVar(3);
 	}
 
+	void DrawLevelsTabs()
+	{
+		if (currentLevelName.empty()) return;
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground;
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImVec2 tabsPos = ImVec2(0, viewport->Size.y - 12);
+		ImVec2 tabsSize = ImVec2(viewport->Size.x - panW, 20);
+
+		ImGui::SetNextWindowPos(tabsPos);
+		ImGui::SetNextWindowSize(tabsSize);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("tabsBarWindow", nullptr, window_flags);
+
+		std::string tabBarName = "levelsTabBar";
+		if (ImGui::BeginTabBar(tabBarName.c_str(), ImGuiTabBarFlags_DrawSelectedOverline | ImGuiTabBarFlags_FittingPolicyMask_))
+		{
+			for (auto& [unit, name] : currentLevelName)
+			{
+				ImGuiTabItemFlags_ flag = (unit == currentSceneUnitId) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
+				if (flag == ImGuiTabItemFlags_SetSelected)
+				{
+					ImGui::PushStyleColor(ImGuiCol_Tab, ImVec4(0.230f, 0.230f, 0.230f, 1.0f));
+					ImGui::PushStyleColor(ImGuiCol_TabHovered, ImVec4(0.230f, 0.230f, 0.230f, 1.0f));
+				}
+				ImGui::PushID(std::to_string(unit).c_str());
+				if (ImGui::TabItemButton(name.c_str(), flag))
+				{
+					//onChangeTab(tabTitle);
+				}
+				ImGui::PopID();
+				if (flag == ImGuiTabItemFlags_SetSelected)
+				{
+					ImGui::PopStyleColor();
+					ImGui::PopStyleColor();
+				}
+			}
+			ImGui::EndTabBar();
+		}
+		ImGui::End();
+		ImGui::PopStyleVar(3); // Pop both style variables
+	}
+
+	/*
 	void OpenLevelFile()
 	{
 		using namespace Scene::Level;
@@ -694,7 +1149,9 @@ namespace Editor
 			},
 			defaultLevelsFolder);
 	}
+	*/
 
+	/*
 	void SaveLevelAs()
 	{
 		std::thread saveAs([]()
@@ -717,7 +1174,9 @@ namespace Editor
 		);
 		saveAs.detach();
 	}
+	*/
 
+	/*
 	bool SaveFileDialog(std::wstring& path, std::wstring defaultDirectory, std::wstring defaultFileName, std::pair<COMDLG_FILTERSPEC*, int>* pFilterInfo)
 	{
 		IFileSaveDialog* p_file_save = nullptr;
@@ -796,7 +1255,9 @@ namespace Editor
 			p_file_save->Release();
 		return are_all_operation_success;
 	}
+	*/
 
+	/*
 	std::string GetLevelString()
 	{
 		using namespace nlohmann;
@@ -817,7 +1278,9 @@ namespace Editor
 		std::string levelString = level.dump(4);
 		return levelString;
 	}
+	*/
 
+	/*
 	void SaveLevelToFile(std::string levelFileName)
 	{
 		using namespace nlohmann;
@@ -844,7 +1307,9 @@ namespace Editor
 		defaultLevel = false;
 		levelModified = false;
 	}
+	*/
 
+	/*
 	void SaveTemplates()
 	{
 		using namespace Templates;
@@ -856,14 +1321,18 @@ namespace Editor
 		Templates::SaveTemplates(defaultTemplatesFolder, RenderPass::templateName, WriteRenderPasssJson);
 		templatesModified = false;
 	}
+	*/
 
 	float separatorFactor = 0.0f;
 	const float panelMinHeight = 47.0f;
-	void DrawRightPanel() {
+	void DrawRightPanel()
+	{
+		//if (!showPanel) return;
+		if (!currentSceneUnitId) return;
 
 		auto matchSceneObjectsAttributes = []()
 			{
-				sceneObjectEdition.CreateEditableAttributesToMatch<SceneObjectType>(
+				sceneObjectEdition.at(currentSceneUnitId).CreateEditableAttributesToMatch<SceneObjectType>(
 					GetSceneObjectType,
 					GetSceneObjectPointer,
 					GetSceneObjectAttributes,
@@ -871,6 +1340,7 @@ namespace Editor
 					GetSceneObjectPreviewers
 				);
 			};
+
 		auto matchTemplatesAttributes = []()
 			{
 				templateEdition.CreateEditableAttributesToMatch<TemplateType>(
@@ -897,16 +1367,19 @@ namespace Editor
 			ImVec2 soPos = ImVec2(panPos.x, panPos.y);
 			ImVec2 soSize = ImVec2(panSize.x, soPanelH);
 
-			sceneObjectEdition.DrawPanel(soPos, soSize, SceneObjectsTypePanelMenuItems,
-				GetSceneObjectsTypesList,
-				[](JUUID uuid) { return GetSceneObjectPointer(uuid); },
-				OnChangeSceneObjectTab,
-				matchSceneObjectsAttributes,
-				[](std::string uuid, bool selected) { SetSceneObjectSelection(uuid, selected); },
-				[](std::string uuid) { SendEditorPreview(uuid, GetSceneObjectPointer, sceneObjectEdition.drawers); },
-				[](SceneObjectType type) { StartSceneObjectCreation(type); },
-				[](std::string uuid) { DeleteSceneObjectFromEditor(uuid); }
-			);
+			if (currentSceneUnitId != 0)
+			{
+				sceneObjectEdition.at(currentSceneUnitId).DrawPanel(soPos, soSize, SceneObjectsTypePanelMenuItems,
+					GetSceneObjectsTypesList,
+					[](JUUID uuid) { return GetSceneObjectPointer(uuid); },
+					OnChangeSceneObjectTab,
+					matchSceneObjectsAttributes,
+					[](JUUID uuid, bool selected) { SetSceneObjectSelection(currentSceneUnitId, uuid, selected); },
+					[](JUUID uuid) { SendEditorPreview(uuid, GetSceneObjectPointer, sceneObjectEdition.at(currentSceneUnitId).drawers); },
+					[](SceneObjectType type) { StartSceneObjectCreation(type); },
+					[](JUUID uuid) { DeleteSceneObjectFromEditor(uuid); }
+				);
+			}
 
 			ImGui::Button("DragableSeparator", ImVec2(-1, 5));
 			if (ImGui::IsItemActive())
@@ -939,6 +1412,7 @@ namespace Editor
 		ImGui::PopStyleVar();
 	}
 
+	/*
 	void PromptTemplateDeletion(std::vector<nlohmann::json> references, std::function<void(std::vector<nlohmann::json>)> OnDelete, std::function<void()> OnCancel)
 	{
 		deletePrompt.showing = true;
@@ -946,65 +1420,75 @@ namespace Editor
 		deletePrompt.OnDelete = OnDelete;
 		deletePrompt.OnCancel = OnCancel;
 	}
+	*/
 
+	/*
 	void CloseDeletionPrompt()
 	{
 		deletePrompt.showing = false;
 	}
+	*/
 
 	void BuildAssetsTree()
 	{
 		using namespace Scene;
-		sceneObjectEdition.BuildAssetsTree(GetSceneObjectsTypesList, GetSceneObjectPointer);
+		for (auto& [_, panel] : sceneObjectEdition)
+		{
+			panel.BuildAssetsTree(GetSceneObjectsTypesList, GetSceneObjectPointer);
+		}
 		templateEdition.BuildAssetsTree(GetTemplatesTypesList, GetJTemplatePointer);
 	}
 
 	//SceneObjects Panel
 	void OnChangeSceneObjectTab(std::string newTab)
 	{
-		sceneObjectEdition.selectedTab = newTab;
-		sceneObjectEdition.editables = sceneObjectEdition.selected;
+		sceneObjectEdition.at(currentSceneUnitId).selectedTab = newTab;
+		sceneObjectEdition.at(currentSceneUnitId).editables = sceneObjectEdition.at(currentSceneUnitId).selected;
 
-		if (newTab == sceneObjectEdition.detailAbleTabs.at(1))
+		if (newTab == sceneObjectEdition.at(currentSceneUnitId).detailAbleTabs.at(1))
 		{
-			sceneObjectEdition.CreateEditableAttributesToMatch<SceneObjectType>(
+			sceneObjectEdition.at(currentSceneUnitId).CreateEditableAttributesToMatch<SceneObjectType>(
 				GetSceneObjectType,
 				GetSceneObjectPointer,
 				GetSceneObjectAttributes,
 				GetSceneObjectDrawers,
 				GetSceneObjectPreviewers
 			);
-			for (auto& uuid : sceneObjectEdition.editables)
+			for (auto& uuid : sceneObjectEdition.at(currentSceneUnitId).editables)
 			{
-				SendEditorPreview(uuid, GetSceneObjectPointer, sceneObjectEdition.drawers);
+				SendEditorPreview(uuid, GetSceneObjectPointer, sceneObjectEdition.at(currentSceneUnitId).drawers);
 			}
 		}
 		else
 		{
-			for (auto& uuid : sceneObjectEdition.editables)
+			for (auto& uuid : sceneObjectEdition.at(currentSceneUnitId).editables)
 			{
 				SendEditorDestroyPreview(uuid, GetSceneObjectPointer);
 			}
 		}
 	}
 
-	void OpenSceneObject(std::string uuid)
+	void OpenSceneObject(JUUID uuid)
 	{
-		sceneObjectEdition.selected = { uuid };
+		if (currentSceneUnitId == 0) return;
+		sceneObjectEdition.at(currentSceneUnitId).selected = { uuid };
 		OnChangeSceneObjectTab(templateEdition.detailAbleTabs.at(1));
 	}
 
-	void OpenSceneObjectOnNextFrame(std::string uuid)
+	void OpenSceneObjectOnNextFrame(JUUID uuid)
 	{
-		sceneObjectEdition.selectedNextFrame = uuid;
+		if (currentSceneUnitId == 0) return;
+		sceneObjectEdition.at(currentSceneUnitId).selectedNextFrame = uuid;
 	}
 
 	void MarkScenePanelAssetsAsDirty()
 	{
-		sceneObjectEdition.dirtyAssetsTree = true;
-		levelModified = true;
+		if (currentSceneUnitId == 0) return;
+		sceneObjectEdition.at(currentSceneUnitId).dirtyAssetsTree = true;
+		//levelModified = true;
 	}
 
+	/*
 	void DestroyEditorSceneObjectsReferences()
 	{
 		ClearSceneObjectsSelection();
@@ -1018,15 +1502,16 @@ namespace Editor
 		sceneObjectEdition.drawersOrder.clear();
 		sceneObjectEdition.drawers.clear();
 	}
+	*/
 
 	void DeleteFromScenePanelSelection(JUUID sceneObject)
 	{
-		if (sceneObjectEdition.selected.contains(sceneObject))
-		{
-			sceneObjectEdition.selected.erase(sceneObject);
-			sceneObjectEdition.dirtyAssetsTree = true;
-			sceneObjectEdition.selectedTab = sceneObjectEdition.detailAbleTabs.at(0);
-		}
+		//if (sceneObjectEdition.selected.contains(sceneObject))
+		//{
+		//	sceneObjectEdition.selected.erase(sceneObject);
+		//	sceneObjectEdition.dirtyAssetsTree = true;
+		//	sceneObjectEdition.selectedTab = sceneObjectEdition.detailAbleTabs.at(0);
+		//}
 	}
 
 	//Templates Panel
@@ -1037,6 +1522,7 @@ namespace Editor
 
 		if (newTab == templateEdition.detailAbleTabs.at(1))
 		{
+			/*
 			templateEdition.CreateEditableAttributesToMatch<TemplateType>(
 				GetTemplateType,
 				GetJTemplatePointer,
@@ -1048,6 +1534,7 @@ namespace Editor
 			{
 				SendEditorPreview(uuid, GetJTemplatePointer, templateEdition.drawers);
 			}
+			*/
 		}
 		else
 		{
@@ -1058,13 +1545,13 @@ namespace Editor
 		}
 	}
 
-	void OpenTemplate(std::string uuid)
+	void OpenTemplate(JUUID uuid)
 	{
 		templateEdition.selected = { uuid };
 		OnChangeTemplateTab(templateEdition.detailAbleTabs.at(1));
 	}
 
-	void OpenTemplateOnNextFrame(std::string uuid)
+	void OpenTemplateOnNextFrame(JUUID uuid)
 	{
 		templateEdition.selectedNextFrame = uuid;
 	}
@@ -1097,7 +1584,7 @@ namespace Editor
 	}
 
 	//Model3D Animation Sequencer
-	void OpenAnimationSequencer(std::string uuid)
+	void OpenAnimationSequencer(JUUID uuid)
 	{
 		animationSequencer.Initialize(uuid);
 	}
@@ -1132,68 +1619,70 @@ namespace Editor
 	}
 
 	//Gizmos
-	void ResetGizmoVariableWorkers()
+	void ResetGizmoVariableWorkers(SceneUnitId unit)
 	{
-		gizmoApplyOp = false;
-		soRotation.clear();
-		soScale.clear();
-		so2bb.clear();
-		bb2gizmo.clear();
-		gizmoRotation = XMFLOAT3();
-		gizmoPosition = XMFLOAT3();
-		gizmoScale = XMFLOAT3(1.0f, 1.0f, 1.0f);
+		gizmos.at(unit).gizmoApplyOp = false;
+		gizmos.at(unit).soRotation.clear();
+		gizmos.at(unit).soScale.clear();
+		gizmos.at(unit).so2bb.clear();
+		gizmos.at(unit).bb2gizmo.clear();
+		gizmos.at(unit).gizmoRotation = XMFLOAT3();
+		gizmos.at(unit).gizmoPosition = XMFLOAT3();
+		gizmos.at(unit).gizmoScale = XMFLOAT3(1.0f, 1.0f, 1.0f);
 	}
 
-	bool InteractWithGizmos(std::set<SceneObject*>& objects2Gizmo)
+	bool InteractWithGizmos(SceneUnitId unit, std::set<SceneObject*>& objects2Gizmo)
 	{
 		std::set<SceneObject*> objects;
-		std::transform(selectedSceneObjects.begin(), selectedSceneObjects.end(), std::inserter(objects, objects.begin()), [](JUUID uuid)
+		std::transform(selectedSceneObjects.at(unit).begin(), selectedSceneObjects.at(unit).end(), std::inserter(objects, objects.begin()), [](JUUID uuid)
 			{
 				return GetSceneObjectPointer(uuid);
 			}
 		);
 
-		std::copy_if(objects.begin(), objects.end(), std::inserter(objects2Gizmo, objects2Gizmo.begin()), [](auto so)
+		std::copy_if(objects.begin(), objects.end(), std::inserter(objects2Gizmo, objects2Gizmo.begin()), [&](auto so)
 			{
-				return so->CanInteractWithGizmo(gizmoOperation);
+				return so->CanInteractWithGizmo(gizmos.at(unit).gizmoOperation);
 			}
 		);
 		return !objects2Gizmo.empty();
 	}
 
-	void DrawPickedObjectsGizmo(CameraUUID camera)
+	void DrawPickedObjectsGizmo(SceneUnitId unit, CameraUUID camera)
 	{
+		if (!gizmos.contains(unit)) return;
+
 		if (ImGui::IsKeyPressed(ImGuiKey_T)) // t ky
 		{
-			gizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
-			gizmoMode = ImGuizmo::MODE::WORLD;
-			ResetGizmoVariableWorkers();
+			gizmos.at(unit).gizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
+			gizmos.at(unit).gizmoMode = ImGuizmo::MODE::WORLD;
+			ResetGizmoVariableWorkers(unit);
 		}
 		if (ImGui::IsKeyPressed(ImGuiKey_R)) // r key
 		{
-			gizmoOperation = ImGuizmo::OPERATION::ROTATE;
-			gizmoMode = ImGuizmo::MODE::WORLD;
-			ResetGizmoVariableWorkers();
+			gizmos.at(unit).gizmoOperation = ImGuizmo::OPERATION::ROTATE;
+			gizmos.at(unit).gizmoMode = ImGuizmo::MODE::WORLD;
+			ResetGizmoVariableWorkers(unit);
 		}
 		if (ImGui::IsKeyPressed(ImGuiKey_S)) // s Key
 		{
-			gizmoOperation = ImGuizmo::OPERATION::SCALE;
-			gizmoMode = ImGuizmo::MODE::LOCAL;
-			ResetGizmoVariableWorkers();
+			gizmos.at(unit).gizmoOperation = ImGuizmo::OPERATION::SCALE;
+			gizmos.at(unit).gizmoMode = ImGuizmo::MODE::LOCAL;
+			ResetGizmoVariableWorkers(unit);
 		}
 
 		std::set<SceneObject*> objects2Gizmo;
-		if (!InteractWithGizmos(objects2Gizmo))
+		if (!InteractWithGizmos(unit, objects2Gizmo))
 			return;
 
-		auto translateObjects = [&objects2Gizmo](XMFLOAT4X4 view, XMFLOAT4X4 proj)
+		auto translateObjects = [&](XMFLOAT4X4 view, XMFLOAT4X4 proj)
 			{
-				if (!gizmoApplyOp)
+				if (!gizmos.at(unit).gizmoApplyOp)
 				{
-					gizmoCentroidMx = GetBoundindBoxesCentroid(objects2Gizmo);
+					gizmos.at(unit).gizmoCentroidMx = GetBoundindBoxesCentroid(objects2Gizmo);
 				}
 				XMFLOAT4X4 delta;
-				ImGuizmo::Manipulate(*view.m, *proj.m, gizmoOperation, gizmoMode, *gizmoCentroidMx.m, *delta.m, NULL, NULL, NULL);
+				ImGuizmo::Manipulate(*view.m, *proj.m, gizmos.at(unit).gizmoOperation, gizmos.at(unit).gizmoMode, *gizmos.at(unit).gizmoCentroidMx.m, *delta.m, NULL, NULL, NULL);
 				XMMATRIX XMdelta = XMLoadFloat4x4(&delta);
 				XMVECTOR XMtranslation, XMrotation, XMscale;
 				XMMatrixDecompose(&XMscale, &XMrotation, &XMtranslation, XMdelta);
@@ -1202,7 +1691,7 @@ namespace Editor
 				if (len.m128_f32[0] < g_XMEpsilon.f[0])
 					return;
 
-				gizmoApplyOp = true;
+				gizmos.at(unit).gizmoApplyOp = true;
 				for (auto& o : objects2Gizmo)
 				{
 					if (!o->contains("position")) continue;
@@ -1214,16 +1703,16 @@ namespace Editor
 					o->JUpdate(patch);
 				}
 			};
-		auto rotateObjects = [&objects2Gizmo](XMFLOAT4X4 view, XMFLOAT4X4 proj)
+		auto rotateObjects = [&](XMFLOAT4X4 view, XMFLOAT4X4 proj)
 			{
 				//if the rotation gizmo has not been initialized, create a map of the initial rotations
 				//vector from the bounding box to the object's position
 				//and vector from the bounding box to the gizmo position
-				if (!gizmoApplyOp)
+				if (!gizmos.at(unit).gizmoApplyOp)
 				{
-					gizmoCentroidMx = GetBoundindBoxesCentroid(objects2Gizmo);
-					gizmoPosition = { gizmoCentroidMx._41, gizmoCentroidMx._42, gizmoCentroidMx._43 };
-					gizmoApplyOp = true;
+					gizmos.at(unit).gizmoCentroidMx = GetBoundindBoxesCentroid(objects2Gizmo);
+					gizmos.at(unit).gizmoPosition = { gizmos.at(unit).gizmoCentroidMx._41, gizmos.at(unit).gizmoCentroidMx._42, gizmos.at(unit).gizmoCentroidMx._43 };
+					gizmos.at(unit).gizmoApplyOp = true;
 
 					for (auto& o : objects2Gizmo)
 					{
@@ -1231,26 +1720,26 @@ namespace Editor
 						XMFLOAT3 r = o->contains("rotation") ? ToXMFLOAT3(o->at("rotation")) : XMFLOAT3();
 						BoundingBox bb = o->GetBoundingBox();
 
-						soRotation.insert_or_assign(o, r);
-						so2bb.insert_or_assign(o, p - bb.Center);
-						bb2gizmo.insert_or_assign(o, bb.Center - gizmoPosition);
+						gizmos.at(unit).soRotation.insert_or_assign(o, r);
+						gizmos.at(unit).so2bb.insert_or_assign(o, p - bb.Center);
+						gizmos.at(unit).bb2gizmo.insert_or_assign(o, bb.Center - gizmos.at(unit).gizmoPosition);
 					}
 				}
 
 				XMFLOAT4X4 delta;
-				ImGuizmo::Manipulate(*view.m, *proj.m, gizmoOperation, gizmoMode, *gizmoCentroidMx.m, *delta.m, NULL, NULL, NULL);
+				ImGuizmo::Manipulate(*view.m, *proj.m, gizmos.at(unit).gizmoOperation, gizmos.at(unit).gizmoMode, *gizmos.at(unit).gizmoCentroidMx.m, *delta.m, NULL, NULL, NULL);
 				XMMATRIX XMdelta = XMLoadFloat4x4(&delta);
 				XMVECTOR XMtranslation, XMrotation, XMscale;
 				XMMatrixDecompose(&XMscale, &XMrotation, &XMtranslation, XMdelta);
 
-				gizmoRotation.x += XMConvertToDegrees(2.0f * XMrotation.m128_f32[0]);
-				gizmoRotation.y += XMConvertToDegrees(2.0f * XMrotation.m128_f32[1]);
-				gizmoRotation.z += XMConvertToDegrees(2.0f * XMrotation.m128_f32[2]);
+				gizmos.at(unit).gizmoRotation.x += XMConvertToDegrees(2.0f * XMrotation.m128_f32[0]);
+				gizmos.at(unit).gizmoRotation.y += XMConvertToDegrees(2.0f * XMrotation.m128_f32[1]);
+				gizmos.at(unit).gizmoRotation.z += XMConvertToDegrees(2.0f * XMrotation.m128_f32[2]);
 
 				XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(
-					XMConvertToRadians(gizmoRotation.x),
-					XMConvertToRadians(gizmoRotation.y),
-					XMConvertToRadians(gizmoRotation.z)
+					XMConvertToRadians(gizmos.at(unit).gizmoRotation.x),
+					XMConvertToRadians(gizmos.at(unit).gizmoRotation.y),
+					XMConvertToRadians(gizmos.at(unit).gizmoRotation.z)
 				);
 
 				auto rotateXM3 = [](XMFLOAT3 v, XMVECTOR q)
@@ -1267,14 +1756,14 @@ namespace Editor
 
 				for (auto& o : objects2Gizmo)
 				{
-					XMFLOAT3 s2b = so2bb.at(o);
-					XMFLOAT3 b2g = bb2gizmo.at(o);
+					XMFLOAT3 s2b = gizmos.at(unit).so2bb.at(o);
+					XMFLOAT3 b2g = gizmos.at(unit).bb2gizmo.at(o);
 
 					XMFLOAT3 ds2b = rotateXM3(s2b, rotQ);
 					XMFLOAT3 db2g = rotateXM3(b2g, rotQ);
 
-					XMFLOAT3 p = gizmoPosition + ds2b + db2g;
-					XMFLOAT3 r = soRotation.at(o) + gizmoRotation;
+					XMFLOAT3 p = gizmos.at(unit).gizmoPosition + ds2b + db2g;
+					XMFLOAT3 r = gizmos.at(unit).soRotation.at(o) + gizmos.at(unit).gizmoRotation;
 
 					nlohmann::json patch = { { "position", FromXMFLOAT3(p) } };
 					if (o->contains("rotation"))
@@ -1283,14 +1772,14 @@ namespace Editor
 					o->JUpdate(patch);
 				}
 			};
-		auto scaleObjects = [&objects2Gizmo](XMFLOAT4X4 view, XMFLOAT4X4 proj)
+		auto scaleObjects = [&](XMFLOAT4X4 view, XMFLOAT4X4 proj)
 			{
-				if (!gizmoApplyOp)
+				if (!gizmos.at(unit).gizmoApplyOp)
 				{
-					gizmoCentroidMx = GetBoundindBoxesCentroid(objects2Gizmo);
+					gizmos.at(unit).gizmoCentroidMx = GetBoundindBoxesCentroid(objects2Gizmo);
 				}
 				XMFLOAT4X4 delta;
-				ImGuizmo::Manipulate(*view.m, *proj.m, gizmoOperation, gizmoMode, *gizmoCentroidMx.m, *delta.m, NULL, NULL, NULL);
+				ImGuizmo::Manipulate(*view.m, *proj.m, gizmos.at(unit).gizmoOperation, gizmos.at(unit).gizmoMode, *gizmos.at(unit).gizmoCentroidMx.m, *delta.m, NULL, NULL, NULL);
 				XMMATRIX XMdelta = XMLoadFloat4x4(&delta);
 				XMVECTOR XMtranslation, XMrotation, XMscale;
 				XMMatrixDecompose(&XMscale, &XMrotation, &XMtranslation, XMdelta);
@@ -1299,10 +1788,10 @@ namespace Editor
 				if (len.m128_f32[0] < g_XMEpsilon.f[0])
 					return;
 
-				if (!gizmoApplyOp)
+				if (!gizmos.at(unit).gizmoApplyOp)
 				{
-					gizmoApplyOp = true;
-					gizmoPosition = { gizmoCentroidMx._41, gizmoCentroidMx._42, gizmoCentroidMx._43 };
+					gizmos.at(unit).gizmoApplyOp = true;
+					gizmos.at(unit).gizmoPosition = { gizmos.at(unit).gizmoCentroidMx._41, gizmos.at(unit).gizmoCentroidMx._42, gizmos.at(unit).gizmoCentroidMx._43 };
 
 					for (auto& o : objects2Gizmo)
 					{
@@ -1310,15 +1799,15 @@ namespace Editor
 						XMFLOAT3 s = o->contains("scale") ? ToXMFLOAT3(o->at("scale")) : XMFLOAT3(1.0f, 1.0f, 1.0f);
 						BoundingBox bb = o->GetBoundingBox();
 
-						soScale.insert_or_assign(o, s);
-						so2bb.insert_or_assign(o, p - bb.Center);
-						bb2gizmo.insert_or_assign(o, bb.Center - gizmoPosition);
+						gizmos.at(unit).soScale.insert_or_assign(o, s);
+						gizmos.at(unit).so2bb.insert_or_assign(o, p - bb.Center);
+						gizmos.at(unit).bb2gizmo.insert_or_assign(o, bb.Center - gizmos.at(unit).gizmoPosition);
 					}
 				}
 
-				gizmoScale.x *= XMscale.m128_f32[0];
-				gizmoScale.y *= XMscale.m128_f32[1];
-				gizmoScale.z *= XMscale.m128_f32[2];
+				gizmos.at(unit).gizmoScale.x *= XMscale.m128_f32[0];
+				gizmos.at(unit).gizmoScale.y *= XMscale.m128_f32[1];
+				gizmos.at(unit).gizmoScale.z *= XMscale.m128_f32[2];
 
 				auto scaleXM3 = [](XMFLOAT3 v, XMFLOAT3 s)
 					{
@@ -1334,14 +1823,14 @@ namespace Editor
 
 				for (auto& o : objects2Gizmo)
 				{
-					XMFLOAT3 s2b = so2bb.at(o);
-					XMFLOAT3 b2g = bb2gizmo.at(o);
+					XMFLOAT3 s2b = gizmos.at(unit).so2bb.at(o);
+					XMFLOAT3 b2g = gizmos.at(unit).bb2gizmo.at(o);
 
-					XMFLOAT3 ds2b = scaleXM3(s2b, gizmoScale);
-					XMFLOAT3 db2g = scaleXM3(b2g, gizmoScale);
+					XMFLOAT3 ds2b = scaleXM3(s2b, gizmos.at(unit).gizmoScale);
+					XMFLOAT3 db2g = scaleXM3(b2g, gizmos.at(unit).gizmoScale);
 
-					XMFLOAT3 p = gizmoPosition + ds2b + db2g;
-					XMFLOAT3 s = soScale.at(o) * gizmoScale;
+					XMFLOAT3 p = gizmos.at(unit).gizmoPosition + ds2b + db2g;
+					XMFLOAT3 s = gizmos.at(unit).soScale.at(o) * gizmos.at(unit).gizmoScale;
 
 					nlohmann::json patch = { { "position", FromXMFLOAT3(p) } };
 					if (o->contains("scale"))
@@ -1358,9 +1847,9 @@ namespace Editor
 			{ ImGuizmo::OPERATION::SCALE, scaleObjects }
 		};
 
-		BeginGizmoInteraction(camera, [&operators](XMFLOAT4X4 view, XMFLOAT4X4 proj)
+		BeginGizmoInteraction(camera, [&](XMFLOAT4X4 view, XMFLOAT4X4 proj)
 			{
-				operators.at(gizmoOperation)(view, proj);
+				operators.at(gizmos.at(unit).gizmoOperation)(view, proj);
 			}
 		);
 	}
@@ -1385,9 +1874,10 @@ namespace Editor
 	}
 
 	//SceneObject Selection
-	void SelectSceneObject(JUUID uuid)
+	void SelectSceneObject(SceneUnitId unit, JUUID uuid)
 	{
-		if (uuid == "" || (!boundingBox.empty() && boundingBox == uuid))
+		//OutputDebugStringA(std::string(std::string("selected ") + uuid + "\n").c_str());
+		if (uuid == "" || (!boundingBox.at(unit).empty() && boundingBox.at(unit) == uuid))
 		{
 			return;
 		}
@@ -1396,111 +1886,80 @@ namespace Editor
 		r->OnPick();
 	}
 
-	void SelectRenderable(JUUID ruuid)
+	void SelectRenderable(SceneUnitId unit, JUUID ruuid)
 	{
-		ToggleSceneObjectFromSelection(ruuid);
+		ToggleSceneObjectFromSelection(unit, ruuid);
 	}
 
-	void SelectLight(JUUID luuid)
+	void SelectLight(SceneUnitId unit, JUUID luuid)
 	{
-		ToggleSceneObjectFromSelection(luuid);
+		ToggleSceneObjectFromSelection(unit, luuid);
 	}
 
-	void SelectCamera(JUUID cuuid)
+	void SelectCamera(SceneUnitId unit, JUUID cuuid)
 	{
-		ToggleSceneObjectFromSelection(cuuid);
+		ToggleSceneObjectFromSelection(unit, cuuid);
 	}
 
-	void SelectSoundEffect(JUUID suuid)
+	void SelectSoundEffect(SceneUnitId unit, JUUID suuid)
 	{
-		ToggleSceneObjectFromSelection(suuid);
+		ToggleSceneObjectFromSelection(unit, suuid);
 	}
 
-	void ToggleSceneObjectFromSelection(JUUID uuid)
+	void ToggleSceneObjectFromSelection(SceneUnitId unit, JUUID uuid)
 	{
-		if (!sceneObjectEdition.selected.contains(uuid))
+		if (!sceneObjectEdition.at(unit).selected.contains(uuid))
 		{
-			InsertSceneObjectToSelection(uuid);
+			InsertSceneObjectToSelection(unit, uuid);
 		}
 		else
 		{
-			EraseSceneObjectFromSelection(uuid);
+			EraseSceneObjectFromSelection(unit, uuid);
 		}
-		ResetGizmoVariableWorkers();
+		ResetGizmoVariableWorkers(unit);
 	}
 
-	void SetSceneObjectSelection(JUUID uuid, bool selected)
+	void SetSceneObjectSelection(SceneUnitId unit, JUUID uuid, bool selected)
 	{
 		if (selected)
 		{
-			selectedSceneObjects.insert(uuid);
+			selectedSceneObjects.at(unit).insert(uuid);
 		}
 		else
 		{
-			selectedSceneObjects.erase(uuid);
+			selectedSceneObjects.at(unit).erase(uuid);
 
 		}
-		gizmoApplyOp = false;
+		gizmos.at(unit).gizmoApplyOp = false;
 	}
 
-	void InsertSceneObjectToSelection(JUUID uuid)
+	void InsertSceneObjectToSelection(SceneUnitId unit, JUUID uuid)
 	{
-		sceneObjectEdition.selected.insert(uuid);
-		SetSceneObjectSelection(uuid, true);
+		sceneObjectEdition.at(unit).selected.insert(uuid);
+		SetSceneObjectSelection(unit, uuid, true);
 	}
 
-	void EraseSceneObjectFromSelection(JUUID uuid)
+	void EraseSceneObjectFromSelection(SceneUnitId unit, JUUID uuid)
 	{
-		sceneObjectEdition.selected.erase(uuid);
-		SetSceneObjectSelection(uuid, false);
+		sceneObjectEdition.at(unit).selected.erase(uuid);
+		SetSceneObjectSelection(unit, uuid, false);
 	}
 
-	void ClearSceneObjectsSelection()
+	void ClearSceneObjectsSelection(SceneUnitId unit)
 	{
-		selectedSceneObjects.clear();
-		ResetGizmoVariableWorkers();
+		selectedSceneObjects.at(unit).clear();
+		ResetGizmoVariableWorkers(unit);
 	}
 
 	//BoundingBox
+	/*
 	bool RenderableBoundingBoxExists()
 	{
 		return !boundingBox.empty();
 	}
+	*/
 
-	void CreateRenderableBoundingBox(CameraUUID camera)
-	{
-#if !defined(_EDITOR_BOUNDINGBOX)
-		return;
-#endif
-		boundingBox = getUUID();
-		nlohmann::json jbox = nlohmann::json(
-			{
-				{ "meshMaterials",
-					{
-						{
-							{ "material", GetMaterialUUIDByName("BoundingBox") },
-							{ "mesh", GetMeshUUIDByName("boxlines") }
-						}
-					}
-				},
-				{ "castShadows", false },
-				{ "shadowed", false },
-				{ "name" , "EditorBoundingBox" },
-				{ "uuid" , boundingBox() },
-				{ "position" , { 0.0f, 0.0f, 0.0f} },
-				{ "topology", "LINELIST"},
-				{ "rotation" , { 0.0, 0.0, 0.0 } },
-				{ "scale" , { 1.0f, 1.0f, 1.0f } },
-				{ "skipMeshes" , {}},
-				{ "visible" , false},
-				{ "hidden" , true},
-				{ "cameras", { camera() }}
-			}
-		);
-		CreateRenderable(jbox);
-		boundingBox->BindToScene();
-	}
-
+	/*
 	void DestroyRenderableBoundingBox()
 	{
 		if (!boundingBox.empty())
@@ -1509,28 +1968,32 @@ namespace Editor
 		}
 		boundingBox.clear();
 	}
+	*/
 
-	void UpdateBoundingBox()
+	void UpdateBoundingBox(SceneUnitId unit)
 	{
-		if (selectedSceneObjects.size() == 0ULL)
+		if (!selectedSceneObjects.contains(unit)) return;
+
+		if (selectedSceneObjects.at(unit).size() == 0ULL)
 		{
-			if (!boundingBox.empty())
+			if (!boundingBox.at(unit).empty())
 			{
-				boundingBox->visible(false);
+				boundingBox.at(unit)->visible(false);
 			}
 			return;
 		}
 
 		std::set<SceneObject*> objects;
-		std::transform(selectedSceneObjects.begin(), selectedSceneObjects.end(), std::inserter(objects, objects.begin()), GetSceneObjectPointer);
+		std::transform(selectedSceneObjects.at(unit).begin(), selectedSceneObjects.at(unit).end(), std::inserter(objects, objects.begin()), GetSceneObjectPointer);
 
 		BoundingBox bb = GetContainedBoundingBox(objects);
 		if (!boundingBox.empty())
 		{
-			boundingBox->visible(true);
-			boundingBox->scale(bb.Extents);
-			boundingBox->position(bb.Center);
-			boundingBox->WriteConstantsBuffer();
+			boundingBox.at(unit)->visible(true);
+			boundingBox.at(unit)->scale(bb.Extents);
+			boundingBox.at(unit)->position(bb.Center);
+			auto& scene = GetSceneUnit(unit);
+			boundingBox.at(unit)->WriteConstantsBuffer(scene->Frame());
 		}
 	}
 
@@ -1719,6 +2182,7 @@ namespace Editor
 		mousePicking.pickingPass = CreateRenderPassInstance("", GetRenderPassUUIDByName("PickingPass"), 0, HWNDWIDTH, HWNDHEIGHT);
 	}
 
+	/*
 	void DestroyPickingPass()
 	{
 		if (!mousePicking.pickingPass.empty()) {
@@ -1731,10 +2195,11 @@ namespace Editor
 			mousePicking.pickingCpuBuffer = nullptr;
 		}
 	}
+	*/
 
-	void BindPickingRenderables()
+	void BindPickingRenderables(SceneUnitId id)
 	{
-		for (auto uuid : GetRenderables())
+		for (auto uuid : GetRenderables(id))
 		{
 			BindRenderableToPickingPass(uuid);
 		}
@@ -1749,6 +2214,7 @@ namespace Editor
 		r->CreateRenderPassPipelineStates(pass);
 	}
 
+	/*
 	void UnbindPickingRenderables()
 	{
 		for (auto uuid : GetRenderables())
@@ -1756,7 +2222,7 @@ namespace Editor
 			UnbindRenderableFromPickingPass(uuid);
 		}
 	}
-
+	*//*
 	void UnbindRenderableFromPickingPass(RenderableUUID r)
 	{
 		auto pass = mousePicking.pickingPass;
@@ -1765,43 +2231,52 @@ namespace Editor
 		r->DestroyRenderPassRootSignatures(pass);
 		r->DestroyRenderPassPipelineStates(pass);
 	}
+	*/
 
-	void RenderPickingPass(CameraUUID camera)
+	void RenderPickingPass(SceneUnitId id, CameraUUID camera)
 	{
-		if (camera.empty() || !mousePicking.doPicking || mousePicking.pickingPass.empty()) return;
+		if (camera.empty() || !mousePicking.doPicking || mousePicking.pickingPass.empty() || currentSceneUnitId != id) return;
+
+		unsigned int backBufferIndex = renderer->GetBackBufferIndex();
+		commandListPickingPassProcessor.frame = backBufferIndex;
+
+		commandListPickingPassProcessor.ResetCommandList();
+		auto& commandList = commandListPickingPassProcessor.GetCommandList();
 
 #if defined(_DEVELOPMENT)
-		PIXBeginEvent(renderer->commandList.p, 0, L"Scene Picker");
+		PIXBeginEvent(commandList.p, 0, L"Scene Picker");
 #endif
 
-		mousePicking.pickingPass->renderToTexturePass->Pass([camera]()
+		mousePicking.pickingPass->renderToTexturePass->Pass(id, [&](SceneUnitId unit)
 			{
-				unsigned int backBufferIndex = renderer->backBufferIndex;
 				unsigned int objectId = 1U;
-				for (RenderableUUID r : GetRenderables())
+				for (RenderableUUID r : GetRenderables(id))
 				{
 					//OutputDebugStringA(("RenderPickingPass:" + r->name() + ":" + std::to_string(objectId) + "\n").c_str());
-					if (!r->visible() || boundingBox == r->uuid()) continue;
+					if (!r->visible() || boundingBox.at(id) == r->uuid()) continue;
 
 					r->WriteConstantsBuffer("objectId", objectId, backBufferIndex);
-					r->Render(mousePicking.pickingPass, camera);
+					r->Render(id, mousePicking.pickingPass, camera);
 					objectId++;
 				}
 			}
 		);
 
 #if defined(_DEVELOPMENT)
-		PIXEndEvent(renderer->commandList.p);
+		PIXEndEvent(commandList.p);
 #endif
+		commandListPickingPassProcessor.CloseCommandList();
+		renderer->ExecuteCommands(commandList);
+		commandListPickingPassProcessor.Next();
 	}
 
-	void PickFromScene()
+	void PickFromScene(SceneUnitId id)
 	{
 		if (!mousePicking.doPicking) return;
 		mousePicking.doPicking = false;
 		currentMouseMode = MOUSE_GAMEAREA_MODE_NONE;
 
-		if (mousePicking.pickingPass.empty()) return;
+		if (mousePicking.pickingPass.empty() || currentSceneUnitId != id) return;
 
 		unsigned int value = DeviceUtils::CapturePickingPixelValue(
 			renderer->d3dDevice,
@@ -1816,71 +2291,78 @@ namespace Editor
 			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
 		);
 
-		PickSceneObject(value);
+		PickSceneObject(id, value);
 	}
 
-	void PickSceneObject(unsigned int pickedObjectId)
+	void PickSceneObject(SceneUnitId id, unsigned int pickedObjectId)
 	{
+		/*
 		if (ImGuizmo::IsUsing())
 		{
 			return;
 		}
-
+		*/
 		if (pickedObjectId == 0U)
 		{
-			SelectSceneObject("");
+			SelectSceneObject(id, "");
 			return;
 		}
 
 		unsigned int objectId = 1U;
-		for (RenderableUUID r : GetRenderables())
+		for (RenderableUUID r : GetRenderables(id))
 		{
-			if (!r->visible() || r() == boundingBox) continue;
+			if (!r->visible() || r() == boundingBox.at(id)) continue;
 
 			if (pickedObjectId == objectId)
 			{
-				SelectSceneObject(r());
+				SelectSceneObject(id, r());
 				break;
 			}
 			objectId++;
 		}
 	}
 
+	/*
 	void ReleasePickingPassResources()
 	{
 		if (!mousePicking.pickingPass.empty()) mousePicking.pickingPass->renderToTexturePass->ReleaseResources();
 	}
-
+	*/
+	/*
 	void ResizePickingPass(unsigned int width, unsigned int height)
 	{
 		if (!mousePicking.pickingPass.empty()) mousePicking.pickingPass->renderToTexturePass->Resize(width, height);
 	}
-
+	*/
 	//JObjects Creation
+
 	void StartSceneObjectCreation(SceneObjectType type)
 	{
+		using namespace Scene;
 		sceneObjectModal.json = GetSceneObjectJson(type);
 		sceneObjectModal.atts = GetSceneObjectRequiredAttributes(type);
 		sceneObjectModal.drawers = GetSceneObjectCreatorDrawers(type);
 		sceneObjectModal.validators = GetSceneObjectValidators(type);
 		sceneObjectModal.type = type;
+		sceneObjectModal.unit = currentSceneUnitId;
 		sceneObjectModal.creating = true;
 		sceneObjectModal.onCreate = CreateSceneObject;
 	}
 
 	void StartTemplateCreation(TemplateType type)
 	{
-		templateModal.json = GetTemplateJson(type);
-		templateModal.modalProperties = GetTemplateCreationModalProperties(type);
-		templateModal.atts = GetTemplateRequiredAttributes(type);
-		templateModal.drawers = GetTemplateCreatorDrawers(type);
-		templateModal.validators = GetTemplateValidators(type);
-		templateModal.type = type;
-		templateModal.creating = true;
-		templateModal.onCreate = CreateTemplate;
+		//templateModal.json = GetTemplateJson(type);
+		//templateModal.modalProperties = GetTemplateCreationModalProperties(type);
+		//templateModal.atts = GetTemplateRequiredAttributes(type);
+		//templateModal.drawers = GetTemplateCreatorDrawers(type);
+		//templateModal.validators = GetTemplateValidators(type);
+		//templateModal.type = type;
+		//templateModal.creating = true;
+		//templateModal.onCreate = CreateTemplate;
 	}
 
-	JUUID CreateBillboardFromMaterials(CameraUUID camera, std::string name, std::string material, std::string pickingMaterial)
+	//Billboards
+	JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraUUID camera, std::string name, std::string material, std::string pickingMaterial)
 	{
 		std::string jname = name;
 		jname += "-billboard";
@@ -1918,36 +2400,52 @@ namespace Editor
 				}
 			}
 		);
-		CreateRenderable(jbillboard);
+		CreateRenderable(jbillboard, id);
+		auto& scene = GetSceneUnit(id);
+		scene->renderablesInLoadingPool.insert(uuid);
 		return uuid;
 	}
 
-	void RegisterBillboard(JUUID sceneObject)
+	void RegisterBillboard(SceneUnitId id, JUUID sceneObject)
 	{
 #if !defined(_EDITOR_BILLBOARD)
 		return;
 #endif
-		billboardRegistry.insert_or_assign(sceneObject, "");
+		billboards.at(id).billboardRegistry.insert_or_assign(sceneObject, "");
 	}
 
+	/*
 	JUUID GetBillboard(JUUID sceneObject)
 	{
 		return billboardRegistry.contains(sceneObject) ? billboardRegistry.at(sceneObject)() : "";
 	}
+	*/
 
-	void DestroyBillboard(JUUID sceneObject)
+	void DestroyBillboard(SceneUnitId id, JUUID sceneObject)
 	{
+		/*
 		JUUID billboard = GetBillboard(sceneObject);
 		if (billboard.empty())
 			return;
 
 		billboardsToDestroy.insert(billboard);
 		billboardRegistry.erase(sceneObject);
+		*/
 	}
 
-	void CreateRegisteredBillboards(CameraUUID camera)
+	void CreateRegisteredBillboards(SceneUnitId id)
 	{
-		for (auto it = billboardRegistry.begin(); it != billboardRegistry.end(); it++)
+		if (!PendingBillboards(id)) return;
+
+		//auto& scene = GetSceneUnit(currentSceneUnitId);
+		//if (scene->loading->load()) return;
+		//
+		//scene->ResetLoadingCommandList();
+		auto& reg = billboards.at(id).billboardRegistry;
+
+		CameraUUID camera = *GetSwapChainCameras(id).begin();
+
+		for (auto it = reg.begin(); it != reg.end(); it++)
 		{
 			if (!it->second.empty()) continue;
 
@@ -1959,30 +2457,40 @@ namespace Editor
 			{
 				auto& bb = it->second;
 				bb->BindToScene();
-				Editor::BindRenderableToPickingPass(bb);
+				BindRenderableToPickingPass(bb);
 			}
 		}
 	}
 
-	bool PendingBillboards()
+	bool PendingBillboards(SceneUnitId id)
 	{
-		for (auto it = billboardRegistry.begin(); it != billboardRegistry.end(); it++)
-		{
-			if (it->second.empty()) return true;
-		}
-		return false;
+		if (!billboards.contains(id)) return false;
+
+		auto& reg = billboards.at(id).billboardRegistry;
+
+		return std::any_of(reg.begin(), reg.end(), [](auto& pair) { return pair.second.empty(); });
+
+		//for (auto it = billboards.at(currentSceneUnitId).billboardRegistry.begin(); it != billboards.at(currentSceneUnitId).billboardRegistry.end(); it++)
+		//{
+		//	if (it->second.empty()) return true;
+		//}
+		//return false;
 	}
 
+	/*
 	bool PendingBillboardsDestruction()
 	{
 		return billboardsToDestroy.size() > 0ULL;
 	}
+	*/
 
 	void UpdateBillboards()
 	{
-		if (GetCountFromMouseCameras() == 0ULL) return;
+		if (!currentSceneUnitId || GetCountFromMouseCameras(currentSceneUnitId) == 0ULL) return;
 
-		for (auto it = billboardRegistry.begin(); it != billboardRegistry.end(); it++)
+		auto& reg = billboards.at(currentSceneUnitId).billboardRegistry;
+
+		for (auto it = reg.begin(); it != reg.end(); it++)
 		{
 			if (it->second.empty()) continue;
 
@@ -1991,6 +2499,7 @@ namespace Editor
 		}
 	}
 
+	/*
 	void Editor::DestroyPendingBillboards()
 	{
 		for (auto b : billboardsToDestroy)
@@ -2001,7 +2510,7 @@ namespace Editor
 		}
 		billboardsToDestroy.clear();
 	}
-
+	*//*
 	void DestroyBillboards()
 	{
 		for (auto it = billboardRegistry.begin(); it != billboardRegistry.end(); )
@@ -2016,46 +2525,52 @@ namespace Editor
 		}
 		billboardsToDestroy.clear();
 	}
-
+	*//*
 	void ClearBillboardsRegistry()
 	{
 		billboardRegistry.clear();
 		billboardsToDestroy.clear();
 	}
+	*/
 
-	bool IsPlaying()
+	bool IsPlaying(SceneUnitId unit)
 	{
-		return isPlaying;
+		return isPlaying.contains(unit) && isPlaying.at(unit);
 	}
 
-	bool IsPaused()
+	bool IsPaused(SceneUnitId unit)
 	{
-		return isPaused;
+		return isPaused.contains(unit) && isPaused.at(unit);
 	}
 
+	/*
 	void SwitchToPlayMode()
 	{
 		isPlaying = true;
 		Scene::PlaySounds();
 	}
-
+	*/
+	/*
 	void SwitchToPauseMode()
 	{
 		isPaused = true;
 		Scene::PauseSounds();
 	}
-
+	*/
+	/*
 	void SwitchToUnPausedMode()
 	{
 		isPaused = false;
 		Scene::ResumeSounds();
 	}
-
+	*/
+	/*
 	void SwitchToNonPlayMode()
 	{
 		isPlaying = false;
 		isPaused = false;
 		Scene::StopSounds();
 	}
+	*/
 };
 

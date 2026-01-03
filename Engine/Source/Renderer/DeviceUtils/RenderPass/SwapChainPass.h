@@ -1,6 +1,6 @@
 #pragma once
-#include "../DeviceUtils/RenderToTexture/RenderToTexture.h"
-#include "../DeviceUtils/DescriptorHeap/DescriptorHeap.h"
+//#include <DeviceUtils/RenderToTexture/RenderToTexture.h>
+#include <DeviceUtils/DescriptorHeap/DescriptorHeap.h>
 #include <DirectXColors.h>
 #include <functional>
 
@@ -20,10 +20,10 @@ namespace DeviceUtils
 		CComPtr<ID3D12DescriptorHeap> depthStencilViewDescriptorHeap;
 		CComPtr<ID3D12Resource> depthStencilTexture;
 
-		void Pass(std::function<void()> renderCallback, bool clearRTV = true, XMVECTORF32 clearColor = DirectX::Colors::Black);
-		void BeginRenderPass(CComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap, bool clearRTV = true, XMVECTORF32 clearColor = DirectX::Colors::Black);
-		void CopyFromRenderToTexture(JUUID renderToTextureUUID);
-		void EndRenderPass();
+		void Pass(SceneUnitId unit, std::function<void(SceneUnitId)> renderCallback, bool clearRTV = true, XMVECTORF32 clearColor = DirectX::Colors::Black);
+		void BeginRenderPass(SceneUnitId unit, CComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap, bool clearRTV = true, XMVECTORF32 clearColor = DirectX::Colors::Black);
+		void CopyFromRenderToTexture(SceneUnitId unit, JUUID renderToTextureUUID);
+		void EndRenderPass(SceneUnitId unit);
 		void ReleaseResources();
 		void Resize(unsigned int width, unsigned int height);
 	};

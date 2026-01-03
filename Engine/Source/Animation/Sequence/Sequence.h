@@ -18,7 +18,7 @@ struct Sequence
 	SequenceChannelElementAnimation* GetAnimationElementAtFrame(int frame);
 	XMMATRIX GetTransformationAtFrame(int frame);
 	void CreateSoundFXsAtFrame(int frame);
-	void RunScriptAtFrame(int frame, RenderableUUID renderable);
+	//void RunScriptAtFrame(int frame, RenderableUUID renderable);
 	bool Runnable() const;
 
 	int framesPerSecond;

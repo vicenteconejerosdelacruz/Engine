@@ -91,7 +91,7 @@ namespace ComputeShader
 
 		auto createNumVerticesConstantsBuffer = [this, &shaderInstance](auto mesh)
 			{
-				JUUID cbvUUID = CreateConstantsBuffer(shaderInstance->cbufferSize[0], "bboxCS." + mesh->uuid);
+				JUUID cbvUUID = CreateConstantsBuffer(shaderInstance->cbufferSize[0], 1U, "bboxCS." + mesh->uuid);
 				unsigned int numVertices = mesh->vbvData.vertexBufferView.SizeInBytes / mesh->vbvData.vertexBufferView.StrideInBytes;
 				auto& cbv = GetConstantsBuffer(cbvUUID);
 				cbv->push<unsigned int>(numVertices, 0);
@@ -134,23 +134,25 @@ namespace ComputeShader
 		}
 	}
 
-	void RenderableBoundingBox::Compute()
+	void RenderableBoundingBox::Compute(SceneUnitId unit)
 	{
 		using namespace DeviceUtils;
+		using namespace Scene;
 
-		CComPtr<ID3D12GraphicsCommandList2>& commandList = renderer->commandList;
+		auto& scene = GetSceneUnit(unit);
+		CComPtr<ID3D12GraphicsCommandList2>& commandList = scene->GetComputeCommandList();
 
 #if defined(_DEVELOPMENT)
 		PIXBeginEvent(commandList.p, 0, L"RenderableBoundingBox Compute");
 #endif
 
-		shader.SetComputeState();
+		shader.SetComputeState(unit);
 
 		//0 : the number of vertices
 		//1 : UAV for the bones transformation <- as all the meshes shares the same matrices we can just set once
 		//2 : bounding box center and extents <- this is the output UAV
 		//3 : UAV for the vertices of the mesh
-		unsigned int backBufferIndex = renderer->backBufferIndex;
+		unsigned int backBufferIndex = scene->Frame();
 		commandList->SetComputeRootDescriptorTable(1, bonesCbv->gpu_xhandle[backBufferIndex]);
 
 		for (unsigned int i = 0; i < verticesCpuHandles.size(); i++)
@@ -167,14 +169,16 @@ namespace ComputeShader
 #endif
 	}
 
-	void RenderableBoundingBox::Solution()
+	void RenderableBoundingBox::Solution(SceneUnitId unit)
 	{
+		using namespace Scene;
+
 		XMFLOAT4* mem{};
 		D3D12_RANGE range{};
 		range.Begin = 0;
 		range.End = sizeof(XMFLOAT4) * 2ULL;
 
-		auto& commandList = renderer->commandList;
+		CComPtr<ID3D12GraphicsCommandList2>& commandList = GetSceneUnit(unit)->GetComputeCommandList();
 
 #if defined(_DEVELOPMENT)
 		PIXBeginEvent(commandList.p, 0, L"RenderableBoundingBox Solution");

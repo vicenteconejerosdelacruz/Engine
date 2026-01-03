@@ -1,13 +1,13 @@
 #include "pch.h"
 #include "MinMaxChainResultPass.h"
-#include <Renderer.h>
-#include <Material/Material.h>
-#include <Shader/Shader.h>
-#include <Mesh/Mesh.h>
-#include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
-#include <RenderPass/RenderPass.h>
+//#include <Renderer.h>
+//#include <Material/Material.h>
+//#include <Shader/Shader.h>
+//#include <Mesh/Mesh.h>
+//#include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
+//#include <RenderPass/RenderPass.h>
 
-extern std::unique_ptr<Renderer> renderer;
+//extern std::unique_ptr<Renderer> renderer;
 
 MinMaxChainResultPass::MinMaxChainResultPass(JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(cam, rpI, rp)
 {
@@ -15,25 +15,25 @@ MinMaxChainResultPass::MinMaxChainResultPass(JUUID cam, unsigned int rpI, JUUID 
 
 void MinMaxChainResultPass::CreateFSQuad(std::string materialName)
 {
-	using namespace DeviceUtils;
+	/*using namespace DeviceUtils;
 
 	auto& renderPassI = renderPassInstance;
 	JUUID renderPassTemplateUUID = renderPassI->renderPassJson();
-	CreateFsQuadResources(materialName, renderPassTemplateUUID);
+	CreateFsQuadResources(materialName, renderPassTemplateUUID);*/
 }
 
-void MinMaxChainResultPass::Pass()
+void MinMaxChainResultPass::Pass(SceneUnitId unit)
 {
-	auto& renderPass = renderPassInstance;
+	/*auto& renderPass = renderPassInstance;
 	RenderToTexturePassUUID rttPass = renderPass->renderToTexturePass;
 	rttPass->BeginRenderPass();
 	Render();
-	rttPass->EndRenderPass();
+	rttPass->EndRenderPass();*/
 }
 
 void MinMaxChainResultPass::Render()
 {
-	auto& commandList = renderer->commandList;
+	/*auto& commandList = renderer->commandList;
 	auto& fsQuadMesh = GetMeshInstance(fsQuad);
 
 #if defined(_DEVELOPMENT)
@@ -55,5 +55,5 @@ void MinMaxChainResultPass::Render()
 
 #if defined(_DEVELOPMENT)
 	PIXEndEvent(commandList.p);
-#endif
+#endif*/
 }

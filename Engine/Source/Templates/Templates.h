@@ -17,24 +17,23 @@ namespace Templates {
 	TemplateType GetTemplateType(JUUID uuid);
 	bool TemplateExists(JUUID uuid);
 
-	nlohmann::json& GetSystemShaders();
-	nlohmann::json& GetSystemSounds();
-	nlohmann::json& GetSystemMaterials();
-	nlohmann::json& GetSystemRenderPasses();
-	nlohmann::json& GetSystemTextures();
+	void CreateSystemTemplates();
+	void CreateTemplates();
 
+	/*
 #if defined(_EDITOR)
 	void SaveTemplates(const std::string folder, const std::string fileName, std::function<void(nlohmann::json&)> writer);
 #endif
-
+	*/
 	void LoadTemplates(nlohmann::json templates, std::function<void(nlohmann::json&)> loader);
 	void LoadTemplates(const std::string folder, const std::string fileName, std::function<void(nlohmann::json&)> loader);
-
 	void DestroyTemplates();
+	/*
 #if defined(_EDITOR)
 	void DestroyTemplatesReferences();
 #endif
 	void FreeGPUIntermediateResources();
+	*/
 
 	template<TemplateType T, typename J>
 	inline void CreateJsonTemplate(nlohmann::json& json, auto getTypesTemplates)
@@ -83,6 +82,7 @@ namespace Templates {
 	std::vector<std::pair<std::string, JsonToEditorValueType>> GetTemplateAttributes(TemplateType t);
 	std::map<std::string, JEdvEditorDrawerFunction> GetTemplateDrawers(TemplateType t);
 	std::map<std::string, JEdvEditorDrawerFunction> GetTemplatePreviewers(TemplateType t);
+	/*
 	std::vector<std::string> GetTemplateRequiredAttributes(TemplateType t);
 	nlohmann::json GetTemplateJson(TemplateType t);
 	nlohmann::json GetTemplateCreationModalProperties(TemplateType t);
@@ -93,8 +93,10 @@ namespace Templates {
 	std::string GetTemplateName(TemplateType t, std::string uuid);
 	void CreateTemplate(TemplateType t, nlohmann::json json);
 	std::string GetTemplateFile(TemplateType t);
+	*/
 	void DeleteTemplate(TemplateType t, std::string uuid);
 	void DeleteTemplate(std::string uuid);
+	/*
 	void DeleteTemplateReferences(std::vector<nlohmann::json> references);
 	void DeleteTemplateReferencesInLevels(std::vector<nlohmann::json> references);
 	void DeleteTemplateReferencesInCurrentLevel(std::vector<nlohmann::json> references);
@@ -103,6 +105,6 @@ namespace Templates {
 	void FindTemplatesReferencesInLevels(std::string uuid, std::set<std::string> skipLevelFiles, std::function<void(nlohmann::json)> addReference);
 	void FindTemplatesReferencesInCurrentLevel(std::string uuid, std::function<void(nlohmann::json)> addReference);
 	void FindRecursiveJsonReference(nlohmann::json json, std::string uuid, std::string path, std::function<void(std::string path)> addReference);
+	*/
 #endif
-
 }

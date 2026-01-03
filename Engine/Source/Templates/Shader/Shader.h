@@ -8,13 +8,16 @@
 #include <wrl/client.h>
 #include <dxcapi.h>
 #include <string>
-#include <JTypes.h>
+//#include <JTypes.h>
+#include <Templates.h>
 #include <JTemplate.h>
-#include <TemplateDecl.h>
+//#include <TemplateDecl.h>
 #include "ShaderInstance.h"
 
 namespace Templates
 {
+	inline static const std::string ShadowMapLightsShaderResourceViewName = TextureShaderUsageToString.at(TextureShaderUsage_ShadowMaps);
+
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
@@ -44,6 +47,7 @@ namespace Templates
 #include <Creator/JValidatorDecl.h>
 #include <ShaderAtt.h>
 #include <JEnd.h>
+
 #endif
 
 #if defined(_DEVELOPMENT)

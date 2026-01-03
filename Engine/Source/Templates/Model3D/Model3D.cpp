@@ -1,21 +1,26 @@
 #include "pch.h"
 #include "Model3D.h"
-#include <Templates.h>
-#include <TemplateDef.h>
-#include <Mesh/Mesh.h>
-#include <VertexFormats.h>
-#include <Animated.h>
+//#include <Templates.h>
+//#include <TemplateDef.h>
+//#include <Mesh/Mesh.h>
+//#include <VertexFormats.h>
+//#include <Animated.h>
 #include <d3d12.h>
 #include <nlohmann/json.hpp>
 #include <Application.h>
 #include <NoStd.h>
-#include <Textures/Texture.h>
-#include <Material/Material.h>
-#include <DDSTextures.h>
+//#include <Textures/Texture.h>
+//#include <Material/Material.h>
+//#include <DDSTextures.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/GltfMaterial.h>
+#include <Animated.h>
 
 using namespace Animation;
-using namespace DeviceUtils;
-using namespace Templates;
+//using namespace DeviceUtils;
+//using namespace Templates;
 
 #if defined(_EDITOR)
 namespace Editor
@@ -114,12 +119,12 @@ namespace Templates
 		return "mat-" + mdl->name() + "-" + std::to_string(index);
 	}
 
-	Model3DInstance::Model3DInstance(JUUID uuid, JUUID objectUUID, JObjectChangeCallback cb, JObjectChangePostCallback postCb)
+	Model3DInstance::Model3DInstance(SceneUnitId id, JUUID uuid, JUUID objectUUID, JObjectChangeCallback cb, JObjectChangePostCallback postCb)
 	{
 		model3DUUID = uuid;
 		auto& mdl = GetModel3DTemplate(model3DUUID);
 		mdl->BindChangeCallback(objectUUID, cb, postCb);
-		LoadModel3DInstance();
+		LoadModel3DInstance(id);
 	}
 
 	Model3DInstance::~Model3DInstance()
@@ -131,7 +136,7 @@ namespace Templates
 		meshes.clear();
 	}
 
-	void Model3DInstance::LoadModel3DInstance()
+	void Model3DInstance::LoadModel3DInstance(SceneUnitId id)
 	{
 		auto& mdl = GetModel3DTemplate(model3DUUID);
 
@@ -178,7 +183,7 @@ namespace Templates
 			}
 
 			unsigned int indicesCount = aMesh->mNumFaces * aMesh->mFaces[0].mNumIndices;
-			std::unique_ptr<MeshInstance>& mesh = GetMeshInstance(GetModel3DMeshInstanceUUID(model3DUUID, meshIndex), vertexClass, vertexData.data(), static_cast<unsigned int>(vertexSize), aMesh->mNumVertices, indicesData.data(), indicesCount);
+			std::unique_ptr<MeshInstance>& mesh = GetMeshInstance(id, GetModel3DMeshInstanceUUID(model3DUUID, meshIndex), vertexClass, vertexData.data(), static_cast<unsigned int>(vertexSize), aMesh->mNumVertices, indicesData.data(), indicesCount);
 
 			CreateBoundingBox(mesh->boundingBox, aMesh);
 

@@ -438,8 +438,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="GameControllers\SpinYawController.h" />
-    <ClInclude Include="GameControllers\VenomController.h" />
+    <ClInclude Include="GameStates\GameStates.h" />
+    <ClInclude Include="GameStates\Game\BootScreen.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GameStates\Game\Loading.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GameStates\Game\PlayMode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="JExpose\Controllers\SpinYawControllerAtt.h" />
     <ClInclude Include="JExpose\Controllers\VenomControllerAtt.h" />
     <ClInclude Include="pch.h" />
@@ -448,8 +456,16 @@
     <ClInclude Include="TestGame.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GameControllers\SpinYawController.cpp" />
-    <ClCompile Include="GameControllers\VenomController.cpp" />
+    <ClCompile Include="GameControllers\GameControllers.cpp" />
+    <ClCompile Include="GameStates\Game\BootScreen.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GameStates\Game\Loading.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GameStates\Game\PlayMode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">pch.h</PrecompiledHeaderFile>
