@@ -31,13 +31,12 @@ namespace Editor
 	extern void HandleEditorMouseMovements(SceneUnitId id);
 	extern void CreateRegisteredBillboards(SceneUnitId id);
 	extern void UpdateBillboards();
-	extern void BindRenderableToPickingPass(RenderableUUID uuid);
+	extern void BindRenderableToPickingPass(RenderableSUUUID uuid);
 };
 #endif
 
 namespace Scene
 {
-	std::unordered_map<JUUID, SceneObjectType> sceneObjectsTypes;
 	std::map<SceneUnitId, std::unique_ptr<SceneUnit>> scenesUnits;
 	std::map<SceneUnitId, SceneUnitId> attachedUnits; //<Attached, Destination>
 	std::set<SceneUnitId> renderableSceneUnits;
@@ -107,9 +106,9 @@ namespace Scene
 		return scene;
 	}
 
-	void DestroyScene(SceneUnitId unit)
+	void DestroyScene(SceneUnitId id)
 	{
-		const std::map<SceneObjectType, std::function<void(JUUID)>> DeleteSO =
+		const std::map<SceneObjectType, std::function<void(SceneUnitId, JUUID)>> DeleteSO =
 		{
 			{ SO_Renderables, DeleteRenderable },
 			{ SO_Lights, DeleteLight },
@@ -117,13 +116,13 @@ namespace Scene
 			{ SO_SoundEffects, DeleteSoundFX }
 		};
 
-		auto& scene = GetSceneUnit(unit);
+		auto& scene = GetSceneUnit(id);
 		for (auto& [uuid, type] : scene->sceneObjectsTypes)
 		{
 #if defined(_EDITOR)
-			Editor::EraseSceneObjectFromSelection(unit, uuid);
+			Editor::EraseSceneObjectFromSelection(id, uuid);
 #endif
-			DeleteSO.at(type)(uuid);
+			DeleteSO.at(type)(id, uuid);
 #if defined(_EDITOR)
 			Editor::MarkScenePanelAssetsAsDirty();
 #endif
@@ -179,6 +178,32 @@ namespace Scene
 		}
 	}
 
+	void ResizeReleaseScenePasses()
+	{
+		for (auto& [id, _] : scenesUnits)
+		{
+			auto& cameras = GetWindowCameras(id);
+			for (auto& uuid : cameras)
+			{
+				CameraSUUUID cam = MAKESUUUID(id, uuid);
+				cam->ResizeReleasePasses();
+			}
+		}
+	}
+
+	void ResizeScenePasses(unsigned int width, unsigned int height)
+	{
+		for (auto& [id, _] : scenesUnits)
+		{
+			auto& cameras = GetWindowCameras(id);
+			for (auto& uuid : cameras)
+			{
+				CameraSUUUID cam = MAKESUUUID(id, uuid);
+				cam->ResizePasses(width, height);
+			}
+		}
+	}
+
 	std::set<JUUID>& GetSceneObjects(SceneUnitId unit, SceneObjectType type)
 	{
 		if (!scenesUnits.at(unit)->sceneObjects.contains(type))
@@ -186,42 +211,38 @@ namespace Scene
 		return scenesUnits.at(unit)->sceneObjects.at(type);
 	}
 
-	std::set<JUUID> GetSceneObjects(SceneObjectType type)
-	{
-		std::set<JUUID> objects;
-		for (auto& [_, scene] : scenesUnits)
-		{
-			auto& typeobjs = scene->sceneObjects.at(type);
-			objects.insert(typeobjs.begin(), typeobjs.end());
-		}
-		return objects;
-	}
+	//std::set<JUUID> GetSceneObjects(SceneObjectType type)
+	//{
+	//	std::set<JUUID> objects;
+	//	for (auto& [_, scene] : scenesUnits)
+	//	{
+	//		auto& typeobjs = scene->sceneObjects.at(type);
+	//		objects.insert(typeobjs.begin(), typeobjs.end());
+	//	}
+	//	return objects;
+	//}
 
 	std::unordered_map<JUUID, SceneObjectType>& GetSceneObjectsTypes(SceneUnitId unit)
 	{
 		return scenesUnits.at(unit)->sceneObjectsTypes;
 	}
 
-	std::unordered_map<JUUID, SceneObjectType>& GetGlobalSceneObjectsTypes()
+	std::set<JUUID>& GetUnboundedSceneObjects(SceneUnitId id)
 	{
-		return sceneObjectsTypes;
+		return scenesUnits.at(id)->unboundedSceneObjects;
 	}
 
-	std::set<JUUID>& GetUnboundedSceneObjects(SceneUnitId unit)
+	SceneObjectType GetSceneObjectType(SceneUnitId id, JUUID uuid)
 	{
-		return scenesUnits.at(unit)->unboundedSceneObjects;
+		return scenesUnits.at(id)->sceneObjectsTypes.at(uuid);
 	}
 
-	SceneObjectType GetSceneObjectType(JUUID uuid)
+	bool SceneObjectExists(SceneUnitId id, JUUID uuid)
 	{
-		return sceneObjectsTypes.at(uuid);
+		return scenesUnits.at(id)->sceneObjectsTypes.contains(uuid);
 	}
 
-	bool SceneObjectExists(SceneUnitId unit, JUUID uuid)
-	{
-		return scenesUnits.at(unit)->sceneObjectsTypes.contains(uuid);
-	}
-
+	/*
 	SceneUnitId GetSceneObjectSceneUnitId(JUUID uuid)
 	{
 		std::unordered_map<SceneObjectType, std::function<SceneUnitId(JUUID)>> getUnitId =
@@ -235,6 +256,7 @@ namespace Scene
 		SceneUnitId unit = getUnitId.at(GetSceneObjectType(uuid))(uuid);
 		return unit;
 	}
+	*/
 
 	void ResetRenderableScenes()
 	{
@@ -251,48 +273,48 @@ namespace Scene
 		renderableSceneUnits.erase(id);
 	}
 
-	void BindSceneObjects()
+	void BindSceneObjects(SceneUnitId id)
 	{
-		std::unordered_map<SceneObjectType, std::function<void(JUUID)>> typeBinder =
+		std::unordered_map<SceneObjectType, std::function<void(SceneUnitId, JUUID)>> typeBinder =
 		{
 			{
-				SO_Renderables, [](JUUID uuid)
+				SO_Renderables, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& so = GetRenderableSceneObject(uuid);
+					auto& so = GetRenderableSUSceneObject(id, uuid);
 					so->BindToScene();
 				}
 			},
 			{
-				SO_Cameras, [](JUUID uuid)
+				SO_Cameras, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& so = GetCameraSceneObject(uuid);
+					auto& so = GetCameraSUSceneObject(id, uuid);
 					so->BindToScene();
 				}
 			},
-			{ SO_Lights, [](JUUID uuid)
+			{ SO_Lights, [](SceneUnitId id, JUUID uuid)
 				{
-				auto& so = GetLightSceneObject(uuid);
-				so->BindToScene();
-			}
+					auto& so = GetLightSUSceneObject(id, uuid);
+					so->BindToScene();
+				}
 			},
 			{
-				SO_SoundEffects, [](JUUID uuid)
+				SO_SoundEffects, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& so = GetSoundFXSceneObject(uuid);
+					auto& so = GetSoundFXSUSceneObject(id, uuid);
 					so->BindToScene();
 				}
 			}
 		};
-		for (auto& uuid : GetUnboundedSceneObjects())
+		for (auto& uuid : GetUnboundedSceneObjects(id))
 		{
-			typeBinder.at(sceneObjectsTypes.at(uuid))(uuid);
+			typeBinder.at(GetSceneObjectType(id, uuid))(id, uuid);
 		}
-		GetUnboundedSceneObjects().clear();
+		GetUnboundedSceneObjects(id).clear();
 	}
 
-	JUUID CloneSceneObject(SceneUnitId unit, JUUID sceneObject, nlohmann::json parameters)
+	JUUID CloneSceneObject(SceneUnitId id, JUUID sceneObject, nlohmann::json parameters)
 	{
-		SceneObject* sceneObjectO = GetSceneObjectPointer(sceneObject);
+		SceneObject* sceneObjectO = GetSceneObjectPointer(id, sceneObject);
 		SceneObjectType type = sceneObjectO->JType();
 		std::string dump = sceneObjectO->dump();
 		nlohmann::json data = nlohmann::json::parse(dump);
@@ -309,31 +331,31 @@ namespace Scene
 		{
 		case SO_Cameras:
 		{
-			CreateCamera(data, unit);
+			CreateSUCamera(id, data);
 		}
 		break;
 		case SO_Lights:
 		{
-			CreateLight(data, unit);
+			CreateSULight(id, data);
 		}
 		break;
 		case SO_Renderables:
 		{
-			CreateRenderable(data, unit);
+			CreateSURenderable(id, data);
 		}
 		break;
 		case SO_SoundEffects:
 		{
-			CreateSoundFX(data, unit);
+			CreateSUSoundFX(id, data);
 		}
 		break;
 		}
 		return uuid;
 	}
 
-	void BindToScene(SceneUnitId unit, JUUID uuidA, JUUID uuidB)
+	void BindToScene(SceneUnitId id, JUUID uuidA, JUUID uuidB)
 	{
-		scenesUnits.at(unit)->binder.insert(uuidA, uuidB);
+		scenesUnits.at(id)->binder.insert(uuidA, uuidB);
 	}
 
 	void UnbindFromScene(SceneUnitId unit, JUUID uuidA)
@@ -365,12 +387,13 @@ namespace Scene
 		}
 	}
 
-	void WriteConstantsBuffers(SceneUnitId unit)
+	void WriteConstantsBuffers(SceneUnitId id)
 	{
-		auto& scene = GetSceneUnit(unit);
+		auto& scene = GetSceneUnit(id);
 
-		for (RenderableUUID r : GetRenderables(unit))
+		for (JUUID uuid : GetRenderables(id))
 		{
+			RenderableSUUUID r = MAKESUUUID(id, uuid);
 			if (!r->renderReady) continue;
 
 			r->WriteAnimationConstantsBuffer(scene->Frame());
@@ -378,31 +401,35 @@ namespace Scene
 		}
 
 		//write the constants buffers of the cameras which renders shadow maps
-		for (CameraUUID c : GetCameras(unit))
+		for (JUUID uuid : GetCameras(id))
 		{
+			CameraSUUUID c = MAKESUUUID(id, uuid);
 			if (!c->shadowMapLight().empty()) continue;
+
 			c->WriteLightsConstantsBuffer(scene->Frame());
 			c->WriteShadowMapsConstantsBuffer(scene->Frame());
 		}
 	}
 
-	void RenderSceneShadowMaps(SceneUnitId unit)
+	void RenderSceneShadowMaps(SceneUnitId id)
 	{
-		auto& commandList = GetSceneUnit(unit)->GetCommandList();
+		auto& commandList = GetSceneUnit(id)->GetCommandList();
 
-		for (LightUUID l : GetLights(unit))
+		for (JUUID uuid : GetLights(id))
 		{
+			LightSUUUID l = MAKESUUUID(id, uuid);
+
 			if (!l->hasShadowMaps()) continue;
 
 			auto renderSceneShadowMap = [&](unsigned int cameraIndex)
 				{
 					auto& camera = l->shadowMapCameras.at(cameraIndex);
 					auto& rp = camera->renderPassesUUID.at(0);
-					for (RenderableUUID r : camera->renderables)
+					for (RenderableSUUUID r : camera->renderables)
 					{
 						if (r->castShadows())
 						{
-							r->Render(unit, rp, camera);
+							r->Render(id, rp, camera);
 						}
 					}
 				};
@@ -417,25 +444,41 @@ namespace Scene
 #if defined(_DEVELOPMENT)
 			PIXEndEvent(commandList.p);
 #endif
+
+#if defined(_EDITOR)
+			if (l->shadowMapMinMaxChainRenderPass.empty() || l->destroySMChain) continue;
+
+#if defined(_DEVELOPMENT)
+			std::string shadowMapMinMaxEvent = "ShadowMapMinMaxChain:" + l->name();
+			PIXBeginEvent(commandList.p, 0, nostd::StringToWString(shadowMapMinMaxEvent).c_str());
+#endif
+
+			l->RenderShadowMapMinMaxChain();
+
+#if defined(_DEVELOPMENT)
+			PIXEndEvent(commandList.p);
+#endif
+
+#endif
 		}
 	}
 
-	void RenderSceneCameras(SceneUnitId unit)
+	void RenderSceneCameras(SceneUnitId id)
 	{
-		auto cameras(GetCameras(unit));
+		auto cameras(GetCameras(id));
 		//get all the available cameras and start filtering thing we don't want to render
 		for (auto it = cameras.begin(); it != cameras.end();)
 		{
 			JUUID uuid = *it;
 			//filter out cameras which doesn't exists
-			if (!SceneObjectExists(unit, uuid))
+			if (!SceneObjectExists(id, uuid))
 			{
 				it = cameras.erase(it);
 				continue;
 			}
 
 			//filter out cameras used to render shadow maps
-			auto& cam = GetCameraSceneObject(uuid);
+			auto& cam = GetCameraSUSceneObject(id, uuid);
 			if (!cam->shadowMapLight().empty())
 			{
 				it = cameras.erase(it);
@@ -446,9 +489,9 @@ namespace Scene
 
 		//create a vector of cameras rendering to rtt's
 		std::vector<JUUID> nonSwapChainCams;
-		std::copy_if(cameras.begin(), cameras.end(), std::back_inserter(nonSwapChainCams), [unit](JUUID uuid)
+		std::copy_if(cameras.begin(), cameras.end(), std::back_inserter(nonSwapChainCams), [&](JUUID uuid)
 			{
-				auto& cam = GetCameraSceneObject(uuid);
+				auto& cam = GetCameraSUSceneObject(id, uuid);
 				//we skip swap chain cams
 				if (cam->useSwapChain()) return false;
 				//we skip cameras which resolves to the swapchain
@@ -457,12 +500,12 @@ namespace Scene
 			}
 		);
 
-		auto& commandList = GetSceneUnit(unit)->GetCommandList();
+		auto& commandList = GetSceneUnit(id)->GetCommandList();
 
 		//render non swapchain buffer cameras(rtt stuff)
 		for (auto& uuid : nonSwapChainCams)
 		{
-			auto& cam = GetCameraSceneObject(uuid);
+			auto& cam = GetCameraSUSceneObject(id, uuid);
 #if defined(_DEVELOPMENT)
 			PIXBeginEvent(commandList.p, 0, std::string("nonSwapChain:" + cam->name()).c_str());
 #endif
@@ -473,9 +516,9 @@ namespace Scene
 		}
 
 		//check if there is any camera with any render pass resolving to the swapchain
-		bool resolvedToSwapchain = std::any_of(nonSwapChainCams.begin(), nonSwapChainCams.end(), [unit](JUUID camUUID)
+		bool resolvedToSwapchain = std::any_of(nonSwapChainCams.begin(), nonSwapChainCams.end(), [&](JUUID camUUID)
 			{
-				auto& cam = GetCameraSceneObject(camUUID);
+				auto& cam = GetCameraSUSceneObject(id, camUUID);
 				return std::any_of(cam->renderPassesUUID.begin(), cam->renderPassesUUID.end(), [](RenderPassInstanceUUID& pass)
 					{
 						return pass->renderCallbackOverride == RenderPassRenderCallbackOverride_Resolve;
@@ -485,10 +528,10 @@ namespace Scene
 		);
 
 		//if there are cameras resolving to swapchain but there was nothing already resolving to one. we render with the swapchain cameras
-		if (GetCountFromSwapChainCameras(unit) > 0ULL && !resolvedToSwapchain)
+		if (GetCountFromSwapChainCameras(id) > 0ULL && !resolvedToSwapchain)
 		{
-			JUUID camUUID = *GetSwapChainCameras(unit).begin();
-			auto& cam = GetFromSwapChainCameras(unit, camUUID);
+			JUUID camUUID = *GetSwapChainCameras(id).begin();
+			auto& cam = GetFromSwapChainCameras(id, camUUID);
 #if defined(_DEVELOPMENT)
 			PIXBeginEvent(commandList.p, 0, std::string("SwapChain:" + cam->name()).c_str());
 #endif
@@ -499,10 +542,11 @@ namespace Scene
 		}
 	}
 
-	void AnimableStep(SceneUnitId unit, double elapsedSeconds)
+	void AnimableStep(SceneUnitId id, double elapsedSeconds)
 	{
-		for (RenderableUUID r : GetAnimables(unit))
+		for (JUUID uuid : GetAnimables(id))
 		{
+			RenderableSUUUID r = MAKESUUUID(id, uuid);
 			r->StepAnimation(elapsedSeconds);
 		}
 	}
@@ -522,14 +566,14 @@ namespace Scene
 			if (!renderableSceneUnits.contains(unit) && !scene->attached) continue;
 
 #if defined(_EDITOR)
-			if (!scene->attached)
+			if (!scene->attached && !Editor::IsPlaying(unit))
 			{
 				SwitchToSceneUnitEditorCamera(unit);
 			}
 #endif
 			scene->Render();
 #if defined(_EDITOR)
-			if (!scene->attached)
+			if (!scene->attached && !Editor::IsPlaying(unit))
 			{
 				SwitchToSceneUnitEditorPlayCamera(unit);
 			}
@@ -596,44 +640,44 @@ namespace Scene
 		}
 	}
 
-	SceneObject* GetSceneObjectPointer(JUUID uuid)
+	SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid)
 	{
-		std::map<SceneObjectType, std::function<SceneObject* (JUUID uuid)>> getP =
+		std::map<SceneObjectType, std::function<SceneObject* (SceneUnitId id, JUUID uuid)>> getP =
 		{
-			{ SO_Renderables, [](JUUID uuid)
+			{ SO_Renderables, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& o = GetRenderableSceneObject(uuid);
+					auto& o = GetRenderableSUSceneObject(id, uuid);
 					return static_cast<SceneObject*>(o.get());
 				}
 			},
-			{ SO_Cameras, [](JUUID uuid)
+			{ SO_Cameras, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& o = GetCameraSceneObject(uuid);
+					auto& o = GetCameraSUSceneObject(id, uuid);
 					return static_cast<SceneObject*>(o.get());
 				}
 			},
-			{ SO_Lights, [](JUUID uuid)
+			{ SO_Lights, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& o = GetLightSceneObject(uuid);
+					auto& o = GetLightSUSceneObject(id, uuid);
 					return static_cast<SceneObject*>(o.get());
 				}
 			},
-			{ SO_SoundEffects, [](JUUID uuid)
+			{ SO_SoundEffects, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& o = GetSoundFXSceneObject(uuid);
+					auto& o = GetSoundFXSUSceneObject(id, uuid);
 					return static_cast<SceneObject*>(o.get());
 				}
 			}
 		};
 
-		SceneObjectType type = GetSceneObjectType(uuid);
-		return getP.at(type)(uuid);
+		SceneObjectType type = GetSceneObjectType(id, uuid);
+		return getP.at(type)(id, uuid);
 	}
 
 #if defined(_EDITOR)
-	std::function<std::vector<JUUIDName>()> GetSceneObjectsByType(SceneObjectType typeToGet)
+	std::function<std::vector<JUUIDName>()> GetSceneObjectsByType(SceneUnitId id, SceneObjectType typeToGet)
 	{
-		return [typeToGet]
+		return [&]
 			{
 				auto str2JUUIDName = [](std::string type, std::string uuid, std::string name)
 					{
@@ -645,43 +689,43 @@ namespace Scene
 						return uuidname;
 					};
 
-				std::unordered_map<SceneObjectType, std::function<JUUIDName(JUUID)>> getJUUIDName =
+				std::unordered_map<SceneObjectType, std::function<JUUIDName(SceneUnitId, JUUID)>> getJUUIDName =
 				{
-					{ SO_Renderables, [str2JUUIDName](JUUID uuid)
+					{ SO_Renderables, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 						{
-							RenderableUUID o = uuid;
+							RenderableSUUUID o = MAKESUUUID(id,uuid);
 							if (o->hidden()) return JUUIDName();
 							return str2JUUIDName(SceneObjectTypeToString.at(SO_Renderables), o->uuid(),o->name());
 						}
 					},
-					{ SO_Cameras, [str2JUUIDName](JUUID uuid)
+					{ SO_Cameras, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 						{
-							CameraUUID o = uuid;
+							CameraSUUUID o = MAKESUUUID(id,uuid);
 							if (o->hidden()) return JUUIDName();
 							return str2JUUIDName(SceneObjectTypeToString.at(SO_Cameras), o->uuid(),o->name());
 						}
 					},
-					{ SO_Lights, [str2JUUIDName](JUUID uuid)
+					{ SO_Lights, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 						{
-							LightUUID o = uuid;
+							LightSUUUID o = MAKESUUUID(id,uuid);
 							if (o->hidden()) return JUUIDName();
 							return str2JUUIDName(SceneObjectTypeToString.at(SO_Lights), o->uuid(),o->name());
 						}
 					},
-					{ SO_SoundEffects, [str2JUUIDName](JUUID uuid)
+					{ SO_SoundEffects, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 						{
-							SoundFXUUID o = uuid;
+							SoundFXSUUUID o = MAKESUUUID(id,uuid);
 							if (o->hidden()) return JUUIDName();
 							return str2JUUIDName(SceneObjectTypeToString.at(SO_SoundEffects), o->uuid(),o->name());
 						}
 					}
 				};
 
-				auto uuids = GetSceneObjects(typeToGet);
+				auto uuids = GetSceneObjects(id, typeToGet);
 				std::vector<JUUIDName> sceneObjectsTypeList;
 				for (auto& uuid : uuids)
 				{
-					JUUIDName uuidName = getJUUIDName.at(typeToGet)(uuid);
+					JUUIDName uuidName = getJUUIDName.at(typeToGet)(id, uuid);
 					if (!std::get<0>(uuidName).empty())
 						sceneObjectsTypeList.push_back(uuidName);
 				}
@@ -701,7 +745,7 @@ namespace Scene
 			};
 	}
 
-	std::vector<JUUIDName> GetSceneObjectsTypesList()
+	std::vector<JUUIDName> GetSUSceneObjectsByType(SceneUnitId id, SceneObjectType typeToGet)
 	{
 		auto str2JUUIDName = [](std::string type, std::string uuid, std::string name)
 			{
@@ -713,32 +757,87 @@ namespace Scene
 				return uuidname;
 			};
 
-		std::unordered_map<SceneObjectType, std::function<JUUIDName(JUUID)>> getJUUIDName =
+		std::unordered_map<SceneObjectType, std::function<JUUIDName(SceneUnitId, JUUID)>> getJUUIDName =
 		{
-			{ SO_Renderables, [str2JUUIDName](JUUID uuid)
+			{ SO_Renderables, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					RenderableUUID o = uuid;
+					RenderableSUUUID o = MAKESUUUID(id,uuid);
+					if (o->hidden()) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_Renderables), o->uuid(),o->name());
+				}
+			},
+			{ SO_Cameras, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					CameraSUUUID o = MAKESUUUID(id,uuid);
+					if (o->hidden()) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_Cameras), o->uuid(),o->name());
+				}
+			},
+			{ SO_Lights, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					LightSUUUID o = MAKESUUUID(id,uuid);
+					if (o->hidden()) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_Lights), o->uuid(),o->name());
+				}
+			},
+			{ SO_SoundEffects, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					SoundFXSUUUID o = MAKESUUUID(id,uuid);
+					if (o->hidden()) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_SoundEffects), o->uuid(),o->name());
+				}
+			}
+		};
+
+		auto uuids = GetSceneObjects(id, typeToGet);
+		std::vector<JUUIDName> sceneObjectsTypeList;
+		for (auto& uuid : uuids)
+		{
+			JUUIDName uuidName = getJUUIDName.at(typeToGet)(id, uuid);
+			if (!std::get<0>(uuidName).empty())
+				sceneObjectsTypeList.push_back(uuidName);
+		}
+		return sceneObjectsTypeList;
+	}
+
+	std::vector<JUUIDName> GetSceneObjectsTypesList(SceneUnitId id)
+	{
+		auto str2JUUIDName = [](std::string type, std::string uuid, std::string name)
+			{
+				JUUIDName uuidname;
+				std::string& u = std::get<0>(uuidname);
+				std::string& n = std::get<1>(uuidname);
+				u = uuid;
+				n = type + "/" + name;
+				return uuidname;
+			};
+
+		std::unordered_map<SceneObjectType, std::function<JUUIDName(SceneUnitId, JUUID)>> getJUUIDName =
+		{
+			{ SO_Renderables, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					RenderableSUUUID o = MAKESUUUID(id,uuid);
 					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Renderables), o->uuid(),o->name());
 				}
 			},
-			{ SO_Cameras, [str2JUUIDName](JUUID uuid)
+			{ SO_Cameras, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					CameraUUID o = uuid;
+					CameraSUUUID o = MAKESUUUID(id,uuid);
 					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Cameras), o->uuid(),o->name());
 				}
 			},
-			{ SO_Lights, [str2JUUIDName](JUUID uuid)
+			{ SO_Lights, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					LightUUID o = uuid;
+					LightSUUUID o = MAKESUUUID(id,uuid);
 					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Lights), o->uuid(),o->name());
 				}
 			},
-			{ SO_SoundEffects, [str2JUUIDName](JUUID uuid)
+			{ SO_SoundEffects, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					SoundFXUUID o = uuid;
+					SoundFXSUUUID o = MAKESUUUID(id,uuid);
 					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_SoundEffects), o->uuid(),o->name());
 				}
@@ -746,18 +845,15 @@ namespace Scene
 		};
 
 		std::vector<JUUIDName> sceneObjectsTypeList;
-		for (auto& [unit, scene] : scenesUnits)
-		{
-			if (scenesUnits.at(unit)->loading->load()) continue;
+		if (scenesUnits.at(id)->loading->load()) return sceneObjectsTypeList;
 
-			for (auto& [type, uuids] : scenesUnits.at(unit)->sceneObjects)
+		for (auto& [type, uuids] : scenesUnits.at(id)->sceneObjects)
+		{
+			for (auto& uuid : uuids)
 			{
-				for (auto& uuid : uuids)
-				{
-					JUUIDName uuidName = getJUUIDName.at(type)(uuid);
-					if (!std::get<0>(uuidName).empty())
-						sceneObjectsTypeList.push_back(uuidName);
-				}
+				JUUIDName uuidName = getJUUIDName.at(type)(id, uuid);
+				if (!std::get<0>(uuidName).empty())
+					sceneObjectsTypeList.push_back(uuidName);
 			}
 		}
 		return sceneObjectsTypeList;
@@ -847,48 +943,25 @@ namespace Scene
 		return GetSOValidators.at(so)();
 	}
 
-	void DeleteSceneObjectFromEditor(JUUID uuid)
+	void DeleteSceneObjectFromEditor(SceneUnitId id, JUUID uuid)
 	{
 		using namespace Editor;
 
-		SceneObjectType type = GetSceneObjectType(uuid);
-		const std::map<SceneObjectType, std::function<void(JUUID)>> DeleteSO =
+		SceneObjectType type = GetSceneObjectType(id, uuid);
+		const std::map<SceneObjectType, std::function<void(SceneUnitId, JUUID)>> DeleteSO =
 		{
-			{ SO_Renderables, [](JUUID uuid)
-			{
-				RenderableUUID r = uuid;
-				EraseSceneObjectFromSelection(r->unit, uuid);
-				DeleteRenderable(uuid);
-			}
-			},
-			{ SO_Lights, [](JUUID uuid)
-			{
-				LightUUID l = uuid;
-				EraseSceneObjectFromSelection(l->unit, uuid);
-				DeleteLight(uuid);
-			}
-			},
-			{ SO_Cameras, [](JUUID uuid)
-			{
-				CameraUUID c = uuid;
-				EraseSceneObjectFromSelection(c->unit, uuid);
-				DeleteCamera(uuid);
-			}
-			},
-			{ SO_SoundEffects, [](JUUID uuid)
-			{
-				SoundFXUUID s = uuid;
-				EraseSceneObjectFromSelection(s->unit, uuid);
-				DeleteSoundFX(uuid);
-			}
-			}
+			{ SO_Renderables, DeleteRenderable },
+			{ SO_Lights, DeleteLight },
+			{ SO_Cameras, DeleteCamera },
+			{ SO_SoundEffects, DeleteSoundFX }
 		};
-		DeleteSO.at(type)(uuid);
+		EraseSceneObjectFromSelection(id, uuid);
+		DeleteSO.at(type)(id, uuid);
 		MarkScenePanelAssetsAsDirty();
 	}
 #endif
 
-	void CreateSceneObject(SceneUnitId unit, SceneObjectType so, nlohmann::json json)
+	void CreateSceneObject(SceneUnitId id, SceneObjectType so, nlohmann::json json)
 	{
 #if defined(_EDITOR)
 		using namespace Editor;
@@ -901,14 +974,16 @@ namespace Scene
 			{ SceneObjectTypeJsonContainer.at(so), { json } }
 		};
 
-		AttachLevelIntoScene(unit, "new-scene-object", data, [so, uuid](SceneUnitId)
+		AttachLevelIntoScene(id, "new-scene-object", data, [&](SceneUnitId)
 			{
 #if defined(_EDITOR)
 				if (so == SO_Renderables)
 				{
-					BindRenderableToPickingPass(uuid);
+					BindRenderableToPickingPass(MAKESUUUID(id, uuid));
 				}
 #endif
-			}, [](std::string, unsigned int, unsigned int) {});
+			},
+			[](std::string, unsigned int, unsigned int) {}
+		);
 	}
 }

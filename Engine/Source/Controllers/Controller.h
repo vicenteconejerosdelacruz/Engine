@@ -6,6 +6,7 @@
 #include <JObject.h>
 #include <JTypes.h>
 #include <nlohmann/json.hpp>
+#include <StepTimer.h>
 
 namespace Game
 {
@@ -13,25 +14,28 @@ namespace Game
 	{
 		virtual ~Controller() = default;
 		Controller(nlohmann::json& json) :JObject(json) { (*this)["uuid"] = getUUID(); }
-		JUUID sceneObject;
-		virtual void Map(JUUID so) { sceneObject = so; }
-		virtual void Unmap() { sceneObject.clear(); }
+		SUUUID sceneObject;
+		virtual void Map(SUUUID so) { sceneObject = so; }
+		virtual void Unmap() {
+			std::get<0>(sceneObject) = 0;
+			std::get<1>(sceneObject).clear();
+		}
 		virtual void Step(float delta) {};
 		virtual void BindToV8Context(v8pp::context& context) {}
 		virtual std::map<std::string, JEdvEditorDrawerFunction> GetControllerDrawers() { return {}; }
 		virtual std::vector<std::pair<std::string, JsonToEditorValueType>> GetControllerAttributes() { return {}; }
 	};
 
-	void RegisterController(std::string controllerName, std::unique_ptr<Controller>& controller, JUUID sceneObject);
-	void MapControllers();
+	JUUID RegisterController(std::string controllerName, SUUUID sceneObject, std::unique_ptr<Controller>& controller);
+	void MapControllers(SceneUnitId id);
 	std::unique_ptr<Controller>& GetController(JUUID uuid);
-	std::unique_ptr<Controller>& GetControllerBySceneObjectUUID(JUUID uuid);
+	std::unique_ptr<Controller>& GetControllerBySceneObjectUUID(SUUUID uuid);
 	std::unique_ptr<Controller>& GetControllerByName(std::string name);
-	void DestroyControllers();
+	//void DestroyControllers();
 	void DestroyController(JUUID uuid);
-	void StepControllers(float delta);
-	void BindToV8Context(v8pp::context& context, JUUID uuid);
+	void StepControllers(DX::StepTimer& timer);
+	void BindToV8Context(v8pp::context& context, SUUUID uuid);
 
 	extern std::vector<std::string> GetControllers();
-	extern JUUID CreateController(std::string name, JUUID sceneObject, nlohmann::json& json);
+	extern JUUID CreateController(std::string name, SUUUID sceneObject, nlohmann::json& json);
 };

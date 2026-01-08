@@ -438,6 +438,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="GameControllers\SpinYawController.h" />
     <ClInclude Include="GameStates\GameStates.h" />
     <ClInclude Include="GameStates\Game\BootScreen.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>
@@ -457,6 +458,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameControllers\GameControllers.cpp" />
+    <ClCompile Include="GameControllers\SpinYawController.cpp" />
     <ClCompile Include="GameStates\Game\BootScreen.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>

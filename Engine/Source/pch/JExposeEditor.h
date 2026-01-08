@@ -38,7 +38,8 @@ namespace Templates
 
 namespace Scene
 {
-	extern std::function<std::vector<JUUIDName>()> GetSceneObjectsByType(SceneObjectType typeToGet);
+	extern std::function<std::vector<JUUIDName>()> GetSceneObjectsByType(SceneUnitId id, SceneObjectType typeToGet);
+	extern std::vector<JUUIDName> GetSUSceneObjectsByType(SceneUnitId id, SceneObjectType typeToGet);
 };
 
 namespace Editor

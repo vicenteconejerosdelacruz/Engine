@@ -1835,7 +1835,7 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_renderable>()
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
 			auto getName = [](JUUID uuid) { return Scene::GetNameFromCameras(Editor::currentSceneUnitId, uuid); };
-			DrawResourceSelection(attribute, json, getName, SortUUIDNameByName(Scene::GetRenderablesUUIDsNames), ICON_FA_SNOWMAN);
+			DrawResourceSelection(attribute, json, getName, SortUUIDSUNameByName(Editor::currentSceneUnitId, Scene::GetRenderablesSUUUIDsNames), ICON_FA_SNOWMAN);
 		};
 }
 
@@ -2044,7 +2044,7 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_animation_sequence
 							animable->SetCurrentAnimation(newSequence);
 							animable->animationTime(0.0f);
 							animable->StepAnimation(0.0f);
-							animable->sequencePlayer.ApplyFrameValues(animable->uuid());
+							animable->sequencePlayer.ApplyFrameValues(MAKESUUUID(Editor::currentSceneUnitId, animable->uuid()));
 
 						}
 					);
@@ -2234,7 +2234,8 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_camera_vector>
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
 			auto getName = [](JUUID uuid) { return Scene::GetNameFromCameras(Editor::currentSceneUnitId, uuid); };
-			EditorDrawVector(attribute, json, ICON_FA_CAMERA, Scene::GetSceneObjectsByType(SO_Cameras), getName, ImGui::OpenSceneObject, [&json, attribute](unsigned int index, JUUIDName item) //filtering
+			auto getObjects = [&] {return Scene::GetSUSceneObjectsByType(Editor::currentSceneUnitId, SO_Cameras); };
+			EditorDrawVector(attribute, json, ICON_FA_CAMERA, getObjects, getName, ImGui::OpenSceneObject, [&json, attribute](unsigned int index, JUUIDName item) //filtering
 				{
 					std::string uuid = std::get<0>(item);
 					JObject* j0 = json.at(0);
@@ -2255,7 +2256,8 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_light_vector>(
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
 			auto getName = [](JUUID uuid) { return Scene::GetNameFromLights(Editor::currentSceneUnitId, uuid); };
-			EditorDrawVector(attribute, json, ICON_FA_LIGHTBULB, Scene::GetSceneObjectsByType(SO_Lights), getName, ImGui::OpenSceneObject);
+			auto getObjects = [&] {return Scene::GetSUSceneObjectsByType(Editor::currentSceneUnitId, SO_Lights); };
+			EditorDrawVector(attribute, json, ICON_FA_LIGHTBULB, getObjects, getName, ImGui::OpenSceneObject);
 		};
 }
 
@@ -2265,7 +2267,8 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_renderable_vec
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
 			auto getName = [](JUUID uuid) { return Scene::GetNameFromRenderables(Editor::currentSceneUnitId, uuid); };
-			EditorDrawVector(attribute, json, ICON_FA_SNOWMAN, Scene::GetSceneObjectsByType(SO_Renderables), getName, ImGui::OpenSceneObject);
+			auto getObjects = [&] {return Scene::GetSUSceneObjectsByType(Editor::currentSceneUnitId, SO_Renderables); };
+			EditorDrawVector(attribute, json, ICON_FA_SNOWMAN, getObjects, getName, ImGui::OpenSceneObject);
 		};
 }
 
@@ -2275,7 +2278,8 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_soundeffect_ve
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
 			auto getName = [](JUUID uuid) { return Scene::GetNameFromSoundEffects(Editor::currentSceneUnitId, uuid); };
-			EditorDrawVector(attribute, json, ICON_FA_MUSIC, Scene::GetSceneObjectsByType(SO_SoundEffects), getName, ImGui::OpenSceneObject);
+			auto getObjects = [&] {return Scene::GetSUSceneObjectsByType(Editor::currentSceneUnitId, SO_SoundEffects); };
+			EditorDrawVector(attribute, json, ICON_FA_MUSIC, getObjects, getName, ImGui::OpenSceneObject);
 		};
 }
 
@@ -4924,9 +4928,9 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_controller_vector>()
 				{
 					nlohmann::json placeholder;
 					JUUID sceneObject = json.at(objectIndex)->at("uuid");
-					JUUID uuid = CreateController(controllerName, sceneObject, placeholder);
+					JUUID uuid = CreateController(controllerName, MAKESUUUID(Editor::currentSceneUnitId, sceneObject), placeholder);
 					json.at(objectIndex)->at(attribute)[controllerName] = uuid;
-					GetController(uuid)->Map(sceneObject);
+					GetController(uuid)->Map(MAKESUUUID(Editor::currentSceneUnitId, sceneObject));
 				};
 			auto swapController = [&](int objectIndex, std::string controllerFrom, std::string controllerTo)
 				{
@@ -5056,7 +5060,7 @@ inline JEdvEditorDrawerFunction DrawPreview<jedv_draw_renderpass_vector>()
 					ImGui::Text(std::string(j->at("name")).c_str());
 				}
 
-				CameraUUID cam = std::string(json[0]->at("uuid"));
+				CameraSUUUID cam = MAKESUUUID(Editor::currentSceneUnitId, std::string(json[0]->at("uuid")));
 				unsigned int numPasses = static_cast<unsigned int>(cam->renderPassesUUID.size());
 
 				std::set<unsigned int> previewAble;

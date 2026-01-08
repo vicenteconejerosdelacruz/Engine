@@ -1,18 +1,21 @@
 #include "pch.h"
 #include "TimelineEditor.h"
 
-void TimelineEditor::Init(RenderableUUID renderable, Sequence& sequence)
+void TimelineEditor::Init(RenderableSUUUID renderable, Sequence& sequence)
 {
+	/*
 	this->renderable = renderable;
 	channels.clear();
 	for (int i = 0; i < sequence.sequenceChannels.size(); i++)
 	{
 		channels.push_back(TimelineChannel(i));
 	}
+	*/
 }
 
 void TimelineEditor::Reset()
 {
+	/*
 	renderable = "";
 
 	scroll = ImVec2(0.0f, 0.0f);
@@ -43,6 +46,7 @@ void TimelineEditor::Reset()
 	elementDragRightBoundaryMousePos = ImVec2(0.0f, 0.0f);
 	selectedDragRightBoundaryChannelElement = std::make_tuple(-1, -1);
 	elementDragRightBoundaryXSum = 0.0f;
+	*/
 }
 
 void TimelineEditor::DrawRect(ImVec2 pos, ImVec2 size, ImU32 color)
@@ -798,13 +802,13 @@ void TimelineEditor::SelectElementToDragFromRight(int channelId, int elementId)
 
 void TimelineEditor::CreatePopupForItemAt(Sequence& sequence, int channelId, int frame, ImVec2 popupPosition)
 {
-	popupCoords = popupPosition;
+	/*popupCoords = popupPosition;
 	popup = (!sequence.sequenceChannels.at(channelId).ChannelHasElementAtFrame(frame)) ? TP_AddElement : TP_InteractWithElement;
 	popupChannelFrame = std::make_tuple(channelId, frame);
 	if (popup == TP_AddElement)
 	{
 		addElementPopup.Init(renderable(), frame);
-	}
+	}*/
 }
 
 void TimelineEditor::ScrollHorizontal(Sequence& sequence, ImVec2 timelineSize, float quantity)

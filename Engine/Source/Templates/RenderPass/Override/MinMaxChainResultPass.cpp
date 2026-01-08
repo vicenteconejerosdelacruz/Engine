@@ -9,31 +9,33 @@
 
 //extern std::unique_ptr<Renderer> renderer;
 
-MinMaxChainResultPass::MinMaxChainResultPass(JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(cam, rpI, rp)
+MinMaxChainResultPass::MinMaxChainResultPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(id, cam, rpI, rp)
 {
 }
 
 void MinMaxChainResultPass::CreateFSQuad(std::string materialName)
 {
-	/*using namespace DeviceUtils;
+	using namespace DeviceUtils;
 
 	auto& renderPassI = renderPassInstance;
 	JUUID renderPassTemplateUUID = renderPassI->renderPassJson();
-	CreateFsQuadResources(materialName, renderPassTemplateUUID);*/
+	SceneUnitId unit = camera.unit();
+	CreateFsQuadResources(unit, materialName, renderPassTemplateUUID);
 }
 
 void MinMaxChainResultPass::Pass(SceneUnitId unit)
 {
-	/*auto& renderPass = renderPassInstance;
+	auto& renderPass = renderPassInstance;
 	RenderToTexturePassUUID rttPass = renderPass->renderToTexturePass;
-	rttPass->BeginRenderPass();
-	Render();
-	rttPass->EndRenderPass();*/
+	rttPass->BeginRenderPass(unit);
+	Render(unit);
+	rttPass->EndRenderPass(unit);
 }
 
-void MinMaxChainResultPass::Render()
+void MinMaxChainResultPass::Render(SceneUnitId id)
 {
-	/*auto& commandList = renderer->commandList;
+	auto& scene = GetSceneUnit(id);
+	auto& commandList = scene->GetCommandList();
 	auto& fsQuadMesh = GetMeshInstance(fsQuad);
 
 #if defined(_DEVELOPMENT)
@@ -48,12 +50,11 @@ void MinMaxChainResultPass::Render()
 	commandList->SetGraphicsRootDescriptorTable(1, shadowMapChainGpuHandle1);
 	commandList->SetGraphicsRootDescriptorTable(2, shadowMapChainGpuHandle2);
 
-
 	commandList->IASetVertexBuffers(0, 1, &fsQuadMesh->vbvData.vertexBufferView);
 	commandList->IASetIndexBuffer(&fsQuadMesh->ibvData.indexBufferView);
 	commandList->DrawIndexedInstanced(fsQuadMesh->ibvData.indexBufferView.SizeInBytes / sizeof(unsigned int), 1, 0, 0, 0);
 
 #if defined(_DEVELOPMENT)
 	PIXEndEvent(commandList.p);
-#endif*/
+#endif
 }

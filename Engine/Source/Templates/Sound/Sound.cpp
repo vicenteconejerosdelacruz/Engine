@@ -38,13 +38,13 @@ namespace Templates
 
 	namespace Sound
 	{
-		std::map<JUUID, std::unique_ptr<DirectX::SoundEffect>> uuidToSoundEffects;
-		std::map<JUUID, unsigned int> uuidInstanceCount;
+		std::unordered_map<JUUID, std::unique_ptr<DirectX::SoundEffect>> uuidToSoundEffects;
+		std::unordered_map<JUUID, unsigned int> uuidInstanceCount;
 	};
 
-	std::tuple<std::unique_ptr<DirectX::SoundEffect>, std::unique_ptr<DirectX::SoundEffectInstance>>
-		GetSoundEffectInstance(JUUID uuid, unsigned int flags,
-			std::string objectUUID, JObjectChangeCallback cb, JObjectChangePostCallback postCb)
+	SoundInstance GetSoundEffectInstance(JUUID uuid, unsigned int flags,
+		std::string objectUUID, JObjectChangeCallback cb, JObjectChangePostCallback postCb
+	)
 	{
 		if (objectUUID != "" && (cb != nullptr || postCb != nullptr))
 		{
@@ -63,13 +63,19 @@ namespace Templates
 			uuidToSoundEffects[uuid] = std::make_unique<DirectX::SoundEffect>(GetAudioEngine().get(), path.c_str());
 			uuidInstanceCount[uuid] = 1;
 		}
-		return std::make_tuple(std::move(uuidToSoundEffects[uuid]), std::move(uuidToSoundEffects[uuid]->CreateInstance(SOUND_EFFECT_INSTANCE_FLAGS(flags))));
+		return std::make_tuple(
+			uuid,
+			std::move(uuidToSoundEffects[uuid]->CreateInstance(SOUND_EFFECT_INSTANCE_FLAGS(flags)))
+		);
 	}
 
-	void DestroySoundEffectInstance(JUUID uuid, std::tuple<
-		std::unique_ptr<DirectX::SoundEffect>,
-		std::unique_ptr<DirectX::SoundEffectInstance>
-	>& soundEffectInstance)
+	std::unique_ptr<DirectX::SoundEffect>& GetSoundEffect(JUUID uuid)
+	{
+		using namespace Sound;
+		return uuidToSoundEffects[uuid];
+	}
+
+	void DestroySoundEffectInstance(JUUID uuid, SoundInstance& soundEffectInstance)
 	{
 		using namespace Sound;
 		uuidInstanceCount[uuid]--;

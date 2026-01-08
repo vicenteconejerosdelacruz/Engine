@@ -39,29 +39,29 @@ using namespace Scene;
 //};
 #endif
 
-std::map<SceneObjectType, std::function<void(JUUID, JUUID)>> BindFnc =
+std::map<SceneObjectType, std::function<void(SceneUnitId, JUUID, JUUID)>> BindFnc =
 {
-	{ SO_Renderables, [](JUUID uuid, JUUID uuidB)
+	{ SO_Renderables, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
 		{
-			auto& so = GetRenderableSceneObject(uuid);
+			auto& so = GetRenderableSUSceneObject(id, uuid);
 			so->Bind(uuidB);
 		}
 	},
-	{ SO_Cameras, [](JUUID uuid, JUUID uuidB)
+	{ SO_Cameras, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
 		{
-			auto& so = GetCameraSceneObject(uuid);
+			auto& so = GetCameraSUSceneObject(id, uuid);
 			so->Bind(uuidB);
 		}
 	},
-	{ SO_Lights, [](JUUID uuid, JUUID uuidB)
+	{ SO_Lights, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
 		{
-			auto& so = GetLightSceneObject(uuid);
+			auto& so = GetLightSUSceneObject(id, uuid);
 			so->Bind(uuidB);
 		}
 	},
-	{ SO_SoundEffects, [](JUUID uuid, JUUID uuidB)
+	{ SO_SoundEffects, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
 		{
-			auto& so = GetSoundFXSceneObject(uuid);
+			auto& so = GetSoundFXSUSceneObject(id, uuid);
 			so->Bind(uuidB);
 		}
 	}
@@ -126,7 +126,7 @@ void Binder::insert(JUUID soA, JUUID soB)
 		OutputDebugStringA(std::string(std::string("insert:") + name(soA) + " -> " + name(soB) + "\n").c_str());
 #endif
 		binding.insert({ soA,soB });
-		BindFnc.at(GetSceneObjectType(soA))(soA, soB);
+		BindFnc.at(GetSceneObjectType(unit, soA))(unit, soA, soB);
 	}
 
 	bool BtoA = false;
@@ -145,7 +145,7 @@ void Binder::insert(JUUID soA, JUUID soB)
 		OutputDebugStringA(std::string(std::string("insert:") + name(soB) + " -> " + name(soA) + "\n").c_str());
 #endif
 		binding.insert({ soB,soA });
-		BindFnc.at(GetSceneObjectType(soB))(soB, soA);
+		BindFnc.at(GetSceneObjectType(unit, soB))(unit, soB, soA);
 	}
 }
 

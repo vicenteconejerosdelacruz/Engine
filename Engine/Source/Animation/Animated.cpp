@@ -124,15 +124,16 @@ namespace Animation {
 		animationsCbv.clear();
 	}
 
-	void DestroyAnimated(SceneUnitId unit)
+	void DestroyAnimated(SceneUnitId id)
 	{
 	}
 
-	void AttachAnimation(JUUID renderableUUID, std::unique_ptr<Animated>& animated)
+	void AttachAnimation(SceneUnitId id, JUUID renderableUUID, std::unique_ptr<Animated>& animated)
 	{
 		using namespace Scene;
 		using namespace DeviceUtils;
-		auto& renderable = GetRenderableSceneObject(renderableUUID);
+		//auto& renderable = GetRenderableSceneObject(renderableUUID);
+		RenderableSUUUID renderable = MAKESUUUID(id, renderableUUID);
 		animationsCbv[renderableUUID] = CreateConstantsBuffer(sizeof(BonesMatrices), Renderer::numFrames, renderable->name());
 		renderable->bonesTransformation = animated->bonesOffsets;
 	}

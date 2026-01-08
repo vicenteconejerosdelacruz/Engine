@@ -11,8 +11,8 @@ extern std::unique_ptr<Renderer> renderer;
 
 namespace Scene
 {
-	extern void RenderSceneCameras(SceneUnitId unit);
-	extern SceneObject* GetSceneObjectPointer(JUUID uuid);
+	extern void RenderSceneCameras(SceneUnitId id);
+	extern SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid);
 
 	SceneUnit::SceneUnit(SceneUnitId unit, std::string name)
 	{
@@ -27,6 +27,7 @@ namespace Scene
 		sceneUnitLoaded = std::make_unique<std::atomic_bool>(false);
 		loading = std::make_unique<std::atomic_bool>(false);
 		loadingSubmit = std::make_unique<std::atomic_bool>(false);
+		binder.unit = unit;
 		CreateShadowMapResources(id);
 	}
 
@@ -41,7 +42,7 @@ namespace Scene
 		{
 			for (auto& uuid : juuids)
 			{
-				auto* so = GetSceneObjectPointer(uuid);
+				auto* so = GetSceneObjectPointer(id, uuid);
 				so->unit = id;
 				so->BindToScene();
 				sceneObjects[type].insert(uuid);
@@ -145,7 +146,8 @@ namespace Scene
 		{
 
 #if defined(_EDITOR)
-			HandleEditorMouseMovements(id);
+			if (!IsPlaying(id))
+				HandleEditorMouseMovements(id);
 #endif
 			WriteConstantsBuffers(id);
 			ResetCommandList();
@@ -153,7 +155,7 @@ namespace Scene
 #if defined(_EDITOR)
 				if (GetCountFromSwapChainCameras(id) > 0)
 				{
-					CameraUUID camera = (*GetSwapChainCameras(id).begin());
+					CameraSUUUID camera = MAKESUUUID(id, (*GetSwapChainCameras(id).begin()));
 					RenderPickingPass(id, camera);
 				}
 #endif
@@ -176,9 +178,10 @@ namespace Scene
 		if (loadingSubmit->load())
 		{
 			loadingSubmit->store(false);
-			for (RenderableUUID r : renderablesInLoadingPool)
+			for (auto& uuid : renderablesInLoadingPool)
 			{
-				if (r->renderReady || !IsBound(r()))
+				RenderableSUUUID r = MAKESUUUID(id, uuid);
+				if (r->renderReady || !IsBound(uuid))
 					continue;
 				r->renderReady = true;
 			}

@@ -14,7 +14,7 @@ struct ToneMappingPass : public OverridePass
 	//std::unique_ptr<ComputeShader::LuminanceHistogram> hdrHistogram;
 	//std::unique_ptr<ComputeShader::LuminanceHistogramAverage> luminanceHistogramAverage;
 
-	ToneMappingPass(JUUID cam, unsigned int rpI, JUUID rp);
+	ToneMappingPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rp);
 	virtual ~ToneMappingPass();
 	virtual void Pass(SceneUnitId unit);
 	void Render();

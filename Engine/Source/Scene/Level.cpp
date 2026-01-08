@@ -27,6 +27,7 @@ namespace Editor {
 	extern void CreateSceneUnitBillboards(SceneUnitId id);
 	extern void CreateRegisteredBillboards(SceneUnitId id);
 	extern void CreateSceneUnitEditorIndependentCamera(SceneUnitId id);
+	extern void CreatePickingPass(SceneUnitId id);
 	extern void SwitchToSceneUnitEditorCamera(SceneUnitId id);
 }
 #endif
@@ -156,6 +157,11 @@ namespace Scene::Level {
 
 		scene->ResetLoadingCommandList();
 
+		CreateRenderableSUSceneObjects(scene->id);
+		CreateCameraSUSceneObjects(scene->id);
+		CreateLightSUSceneObjects(scene->id);
+		CreateSoundFXSUSceneObjects(scene->id);
+
 		std::vector<std::string> types =
 		{
 			SceneObjectTypeJsonContainer.at(SO_Renderables),
@@ -173,7 +179,7 @@ namespace Scene::Level {
 
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Renderables), [&](nlohmann::json& json)
 			{
-				CreateRenderable(json);
+				CreateSURenderable(scene->id, json);
 				scene->renderablesInLoadingPool.insert(json.at("uuid"));
 				count++;
 				progress(json.at("name"), count, total);
@@ -181,21 +187,21 @@ namespace Scene::Level {
 		);
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Cameras), [&](nlohmann::json& json)
 			{
-				CreateCamera(json);
+				CreateSUCamera(scene->id, json);
 				count++;
 				progress(json.at("name"), count, total);
 			}
 		);
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Lights), [&](nlohmann::json& json)
 			{
-				CreateLight(json);
+				CreateSULight(scene->id, json);
 				count++;
 				progress(json.at("name"), count, total);
 			}
 		);
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_SoundEffects), [&](nlohmann::json& json)
 			{
-				CreateSoundFX(json);
+				CreateSUSoundFX(scene->id, json);
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -204,6 +210,7 @@ namespace Scene::Level {
 #if defined(_EDITOR)
 		if (!scene->attached)
 		{
+			CreatePickingPass(scene->id);
 			CreateSceneUnitBoundingBox(scene->id);
 			CreateSceneUnitEditorIndependentCamera(scene->id);
 			CreateRegisteredBillboards(scene->id);
@@ -212,9 +219,9 @@ namespace Scene::Level {
 
 		if (scene->abortLoading->load())
 			return;
-		//MapControllers();
 
-		BindSceneObjects();
+		MapControllers(scene->id);
+		BindSceneObjects(scene->id);
 #if defined(_EDITOR)
 		//Editor::currentLevelName = filename;
 		//Editor::MarkScenePanelAssetsAsDirty();

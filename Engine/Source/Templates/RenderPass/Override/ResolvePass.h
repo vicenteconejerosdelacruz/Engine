@@ -12,7 +12,7 @@ struct ResolvePass : public OverridePass
 
 	ResolveMode mode;
 
-	ResolvePass(JUUID cam, unsigned int rpI, JUUID rp);
+	ResolvePass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rp);
 	virtual void Pass(SceneUnitId unit);
 	void Render(SceneUnitId unit);
 };

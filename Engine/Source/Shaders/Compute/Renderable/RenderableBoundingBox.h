@@ -23,14 +23,14 @@ namespace ComputeShader
 		std::vector<::CD3DX12_CPU_DESCRIPTOR_HANDLE> resultCpuHandle;	//UAV, 2
 		std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> resultGpuHandle; //UAV, 2
 
-		RenderableBoundingBox(JUUID renderableUUID);
+		RenderableBoundingBox(SceneUnitId id, JUUID renderableUUID);
 		~RenderableBoundingBox();
 
 		virtual void Compute(SceneUnitId unit);
 		virtual void Solution(SceneUnitId unit);
 	};
 
-	JUUID CreateRenderableBoundingBox(RenderableUUID renderable);
+	JUUID CreateRenderableBoundingBox(RenderableSUUUID renderable);
 	std::unique_ptr<RenderableBoundingBox>& GetRenderableBoundingBox(JUUID compUUID);
 	void DeleteRenderableBoundingBox(JUUID compUUID);
 }

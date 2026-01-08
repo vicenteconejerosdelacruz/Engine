@@ -86,7 +86,7 @@ void Renderer::CreateComputeEngine()
 void Renderer::CreateSwapChainPass()
 {
 	using namespace Templates;
-	swapChainPass = CreateRenderPassInstance("", GetRenderPassUUIDByName("simplePass"), 0);
+	swapChainPass = CreateRenderPassInstance(0, "", GetRenderPassUUIDByName("simplePass"), 0);
 }
 
 unsigned int Renderer::GetBackBufferIndex()
@@ -157,7 +157,6 @@ void Renderer::UpdateViewportPerspective() {
 	screenViewport = { 0.0f, 0.0f, static_cast<FLOAT>(width), static_cast<FLOAT>(height), 0.0f, 1.0f };
 }
 
-/*
 void Renderer::Resize(unsigned int width, unsigned int height) {
 	using namespace DeviceUtils;
 
@@ -178,7 +177,6 @@ void Renderer::Resize(unsigned int width, unsigned int height) {
 
 	backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 }
-*/
 
 /*
 void Renderer::ResetCommands() const {

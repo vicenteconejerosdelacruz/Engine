@@ -58,11 +58,11 @@ struct AnimationSequencerModal
 	bool initializing = false;
 	bool destroying = false;
 	Model3DInstanceUUID model3dUUID;
-	RenderableUUID renderable;
-	RenderableUUID floor;
-	CameraUUID camera;
-	LightUUID ambientLight;
-	LightUUID directionalLight;
+	RenderableSUUUID renderable;
+	RenderableSUUUID floor;
+	CameraSUUUID camera;
+	LightSUUUID ambientLight;
+	LightSUUUID directionalLight;
 	Model3DJsonUUID model3D;
 	XMFLOAT3 cameraInitialPos;
 	XMFLOAT3 cameraInitialRot;

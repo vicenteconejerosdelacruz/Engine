@@ -105,11 +105,8 @@ namespace Scene {
 			CameraProjections::Orthographic orthographicProjection;
 		};
 
-		Camera(nlohmann::json& json);
+		Camera(SceneUnitId id, nlohmann::json& json);
 		~Camera() { Destroy(); }
-#if defined(_EDITOR)
-		virtual void WriteJson(nlohmann::json& j);
-#endif
 		XMVECTOR positionV();
 		XMVECTOR rotationQ();
 		XMVECTOR forward();
@@ -136,12 +133,12 @@ namespace Scene {
 		virtual void Initialize();
 		virtual void BindToScene();
 		virtual void Bind(JUUID uuid);
-		void BindRenderable(RenderableUUID renderable);
-		void BindLight(LightUUID light);
+		void BindRenderable(RenderableSUUUID renderable);
+		void BindLight(LightSUUUID light);
 		virtual void UnbindFromScene();
 		virtual void Unbind(JUUID uuid);
-		void UnbindRenderable(RenderableUUID renderable);
-		void UnbindLight(LightUUID light);
+		void UnbindRenderable(RenderableSUUUID renderable);
+		void UnbindLight(LightSUUUID light);
 
 		bool ResolvesToSwapChain();
 		void Render();
@@ -189,12 +186,13 @@ namespace Scene {
 #if defined(_EDITOR)
 		virtual void EditorPreview(size_t flags);
 		virtual void DestroyEditorPreview();
-		virtual JUUID CreateBillboard(CameraUUID camera);
+		virtual JUUID CreateBillboard(CameraSUUUID camera);
 		virtual void UpdateBillboard(JUUID uuid);
 		BoundingBox GetBoundingBox();
 
 		//Gizmo
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
+		virtual void WriteJson(nlohmann::json& j);
 #endif
 
 		bool markedForDelete = false;
@@ -203,13 +201,13 @@ namespace Scene {
 		//this camera attributes
 		ConstantsBufferUUID cameraCb;
 		//renderables
-		std::set<RenderableUUID> renderables;
+		std::set<RenderableSUUUID> renderables;
 		//lights
 		ConstantsBufferUUID lightsCB;
-		std::vector<LightUUID> lights;
+		std::vector<LightSUUUID> lights;
 		//lights shadowmaps
 		ConstantsBufferUUID shadowMapsCB;
-		std::set<LightUUID> lightsWithShadowMaps;
+		std::set<LightSUUUID> lightsWithShadowMaps;
 #if defined(_EDITOR)
 		unsigned int previewRenderPassIndex = 0U;
 		unsigned int previewRenderToTextureIndex = 0U;
@@ -222,11 +220,11 @@ namespace Scene {
 #include <CameraAtt.h>
 #include <JEnd.h>
 
-	void CamerasStep(SceneUnitId unit);
+	void CamerasStep(SceneUnitId id);
 	void DestroyCameras();
-	void DestroyCameras(SceneUnitId unit);
-	void DeleteCamera(JUUID uuid);
+	void DestroyCameras(SceneUnitId id);
+	void DeleteCamera(SceneUnitId id, JUUID uuid);
 #if defined(_EDITOR)
-	void WriteCamerasJson(nlohmann::json& json);
+	void WriteCamerasJson(SceneUnitId id, nlohmann::json& json);
 #endif
 };

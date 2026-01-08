@@ -143,8 +143,8 @@ namespace Game
 		LookingTo lookingTo = LT_Right;
 
 		//SceneObjects
-		RenderableUUID venom;
-		CameraUUID camera;
+		RenderableSUUUID venom;
+		CameraSUUUID camera;
 
 		//Joystick
 		XMVECTOR leftStick;

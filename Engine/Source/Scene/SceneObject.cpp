@@ -10,11 +10,13 @@ namespace Editor
 
 namespace Game
 {
-	extern void BindToV8Context(v8pp::context& context, JUUID uuid);
+	extern void BindToV8Context(v8pp::context& context, SUUUID uuid);
 };
 
 namespace Scene
 {
+
+
 	void SceneObject::JUpdate(nlohmann::json p)
 	{
 #if defined(_EDITOR)
@@ -33,6 +35,6 @@ namespace Scene
 
 	void SceneObject::BindToV8Context(v8pp::context& context)
 	{
-		Game::BindToV8Context(context, Juuid());
+		Game::BindToV8Context(context, SUuuid());
 	}
 }

@@ -31,12 +31,12 @@ struct AddElementPopup
 	SequenceChannelElementSoundFX soundfx;
 	SequenceChannelElementScript script;
 
-	RenderableUUID renderable;
+	RenderableSUUUID renderable;
 	std::vector<std::string> animations;
 	JUUIDName selectedSoundEffect;
 	std::vector<JUUIDName> soundEffects;
 
-	void Init(JUUID uuid, int frame);
+	void Init(SceneUnitId id, JUUID uuid, int frame);
 	void Draw(ImVec2 pos, std::unordered_map<SequenceChannelElementType, std::function<void(SequenceChannelElement*)>> elementBuilders, std::function<void()> closePopup);
 };
 

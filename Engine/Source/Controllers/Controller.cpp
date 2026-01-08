@@ -3,24 +3,48 @@
 #include <map>
 #include <NoStd.h>
 
+namespace Editor
+{
+	extern bool IsPlaying(SceneUnitId id);
+};
+
 namespace Game
 {
 	std::unordered_map<JUUID, std::unique_ptr<Controller>> controllersUUIDs;
 	std::unordered_map<std::string, JUUID> controllerUUIDsByName;
-	std::unordered_map<JUUID, JUUID> sceneObjectUUIDToControllerUUID;
+	std::unordered_map<SUUUID, JUUID> controllerUUIDBySUUUID;
 
-	void RegisterController(std::string controllerName, std::unique_ptr<Controller>& controller, JUUID sceneObject)
+	/*
+	std::unordered_map<SUUUID, std::unique_ptr<Controller>> controllersUUIDs;
+	std::unordered_map<std::string, JUUID> controllerUUIDsByName;
+	std::unordered_map<SUUUID, JUUID> sceneObjectUUIDToControllerUUID;
+	*/
+
+	JUUID RegisterController(std::string controllerName, SUUUID sceneObject, std::unique_ptr<Controller>& controller)
+	{
+		JUUID uuid = getUUID();
+		controllersUUIDs.insert_or_assign(uuid, std::move(controller));
+		controllerUUIDsByName.insert_or_assign(controllerName, uuid);
+		controllerUUIDBySUUUID.insert_or_assign(sceneObject, uuid);
+		return uuid;
+	}
+
+	/*
+	void RegisterController(std::string controllerName, std::unique_ptr<Controller>& controller, SUUUID sceneObject)
 	{
 		controllerUUIDsByName.insert_or_assign(controllerName, controller->at("uuid"));
 		sceneObjectUUIDToControllerUUID.insert_or_assign(sceneObject, controller->at("uuid"));
 		controllersUUIDs.insert_or_assign(controller->at("uuid"), std::move(controller));
 	}
-
-	void MapControllers()
+	*/
+	void MapControllers(SceneUnitId id)
 	{
-		for (auto& [so, uuid] : sceneObjectUUIDToControllerUUID)
+		for (auto& [suuuid, uuid] : controllerUUIDBySUUUID)
 		{
-			controllersUUIDs.at(uuid)->Map(so);
+			SceneUnitId unit = std::get<0>(suuuid);
+			if (unit != id) continue;
+
+			controllersUUIDs.at(uuid)->Map(suuuid);
 		}
 	}
 
@@ -29,16 +53,16 @@ namespace Game
 		return controllersUUIDs.at(uuid);
 	}
 
-	std::unique_ptr<Controller>& GetControllerBySceneObjectUUID(JUUID sceneObject)
+	std::unique_ptr<Controller>& GetControllerBySceneObjectUUID(SUUUID sceneObject)
 	{
-		return controllersUUIDs.at(sceneObjectUUIDToControllerUUID.at(sceneObject));
+		return controllersUUIDs.at(controllerUUIDBySUUUID.at(sceneObject));
 	}
 
 	std::unique_ptr<Controller>& GetControllerByName(std::string name)
 	{
 		return controllersUUIDs.at(controllerUUIDsByName.at(name));
 	}
-
+	/*
 	void DestroyControllers()
 	{
 		for (auto it = controllersUUIDs.begin(); it != controllersUUIDs.end();)
@@ -49,7 +73,7 @@ namespace Game
 		controllerUUIDsByName.clear();
 		sceneObjectUUIDToControllerUUID.clear();
 	}
-
+	*/
 	void DestroyController(JUUID uuid)
 	{
 		if (!controllersUUIDs.contains(uuid)) return;
@@ -62,28 +86,42 @@ namespace Game
 			else
 				it++;
 		}
-		for (auto it = sceneObjectUUIDToControllerUUID.begin(); it != sceneObjectUUIDToControllerUUID.end();)
+		for (auto it = controllerUUIDBySUUUID.begin(); it != controllerUUIDBySUUUID.end();)
 		{
 			if (it->second == uuid)
-				it = sceneObjectUUIDToControllerUUID.erase(it);
+				it = controllerUUIDBySUUUID.erase(it);
 			else
 				it++;
 		}
 	}
 
-	void StepControllers(float delta)
+	void StepControllers(DX::StepTimer& timer)
 	{
+		float dt = static_cast<FLOAT>(timer.GetElapsedSeconds());
+		for (auto& [suuuid, uuid] : controllerUUIDBySUUUID)
+		{
+#if defined(_EDITOR)
+			if (!Editor::IsPlaying(std::get<0>(suuuid))) continue;
+			controllersUUIDs.at(uuid)->Step(dt);
+#endif
+		}
+		/*
 		for (auto& [_, c] : controllersUUIDs)
 		{
-			c->Step(delta);
+#if defined(_EDITOR)
+			if(Editor::IsPlaying())
+#endif
+			c->Step(dt);
 		}
+		*/
 	}
 
-	void BindToV8Context(v8pp::context& context, JUUID uuid)
+	void BindToV8Context(v8pp::context& context, SUUUID uuid)
 	{
+		GetControllerBySceneObjectUUID(uuid)->BindToV8Context(context);
 		//using namespace Scripting;
-		JUUID controllerUUID = sceneObjectUUIDToControllerUUID.at(uuid);
-		std::unique_ptr<Controller>& controller = controllersUUIDs.at(controllerUUID);
-		controller->BindToV8Context(context);
+		//JUUID controllerUUID = controllerUUIDBySUUUID.at(uuid);
+		//std::unique_ptr<Controller>& controller = controllersUUIDs.at(controllerUUID);
+		//controller->BindToV8Context(context);
 	}
 }

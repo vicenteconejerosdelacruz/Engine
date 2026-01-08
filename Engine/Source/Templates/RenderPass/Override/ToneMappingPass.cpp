@@ -16,7 +16,7 @@
 
 //extern std::unique_ptr<Renderer> renderer;
 
-ToneMappingPass::ToneMappingPass(JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(cam, rpI, rp)
+ToneMappingPass::ToneMappingPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(id, cam, rpI, rp)
 {
 	//using namespace Scene;
 

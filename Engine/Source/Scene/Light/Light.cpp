@@ -11,7 +11,7 @@
 namespace Editor
 {
 	extern void SelectLight(SceneUnitId id, JUUID luuid);
-	extern JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraUUID camera, std::string name, std::string material, std::string pickingMaterial);
+	extern JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraSUUUID camera, std::string name, std::string material, std::string pickingMaterial);
 	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
 	//extern JUUID GetBillboard(JUUID sceneObject);
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
@@ -52,7 +52,7 @@ namespace Scene
 
 	using namespace DeviceUtils;
 
-	Light::Light(nlohmann::json& json) : SceneObject(json)
+	Light::Light(SceneUnitId id, nlohmann::json& json) : SceneObject(id, json)
 	{
 #include <Attributes/JInit.h>
 #include <LightAtt.h>
@@ -64,12 +64,12 @@ namespace Scene
 	}
 
 #if defined(_EDITOR)
-	//void Light::WriteJson(nlohmann::json& j)
-	//{
-	//	//#include <Editor/JWriteJson.h>
-	//	//#include <LightAtt.h>
-	//	//#include <JEnd.h>
-	//}
+	void Light::WriteJson(nlohmann::json& j)
+	{
+#include <Editor/JWriteJson.h>
+#include <LightAtt.h>
+#include <JEnd.h>
+	}
 #endif
 
 	void Light::Initialize()
@@ -131,7 +131,7 @@ namespace Scene
 		UnbindCameras();
 
 #if defined(_EDITOR)
-		//DestroyShadowMapMinMaxChain();
+		DestroyShadowMapMinMaxChain();
 #endif
 		DestroyShadowMap();
 	}
@@ -151,7 +151,7 @@ namespace Scene
 
 	void Light::Destroy()
 	{
-		//DestroyEditorPreview();
+		DestroyEditorPreview();
 #include <Attributes/JDestroy.h>
 #include <LightAtt.h>
 #include <JEnd.h>
@@ -240,55 +240,56 @@ namespace Scene
 		"shadowMapWidth", "shadowMapHeight", "viewWidth", "viewHeight", "nearZ", "farZ",
 	};
 
-	void WriteLightsJson(nlohmann::json& json)
+	void WriteLightsJson(SceneUnitId id, nlohmann::json& json)
 	{
-		//#include <Editor/JSaveFile.h>
-		//#include <LightAtt.h>
-		//#include <JEnd.h>
+#include <Editor/JSaveFile.h>
+#include <LightAtt.h>
+#include <JEnd.h>
 	}
 
-	//void Light::EditorPreview(size_t flags)
-	//{
-	//	if (flags & (1 << Light::Update_hasShadowMaps))
-	//	{
-	//		if (hasShadowMaps())
-	//			CreateShadowMapMinMaxChain();
-	//	}
-	//	switch (lightType())
-	//	{
-	//	case LT_Directional:
-	//	case LT_Spot:
-	//	case LT_Point:
-	//	{
-	//		//leave commented until i know why this was here initialy, not actual part of the convertion comments
-	//		//Editor::SelectSceneObject(uuid());
-	//	}
-	//	break;
-	//	}
-	//}
+	void Light::EditorPreview(size_t flags)
+	{
+		if (flags & (1 << Light::Update_hasShadowMaps))
+		{
+			if (hasShadowMaps())
+				CreateShadowMapMinMaxChain();
+		}
+		switch (lightType())
+		{
+		case LT_Directional:
+		case LT_Spot:
+		case LT_Point:
+		{
+			//leave commented until i know why this was here initialy, not actual part of the convertion comments
+			//Editor::SelectSceneObject(uuid());
+		}
+		break;
+		}
+	}
 
-	//void Light::DestroyEditorPreview()
-	//{
-	//	destroySMChain = true;
-	//	switch (lightType())
-	//	{
-	//	case LT_Directional:
-	//	{
-	//		//leave commented until i know why this was here initialy, not actual part of the convertion comments
-	//		//Editor::DeselectSceneObject(uuid());
-	//	}
-	//	break;
-	//	}
-	//}
+	void Light::DestroyEditorPreview()
+	{
+		destroySMChain = true;
+		destroySteps = destroyStepsCount;
+		switch (lightType())
+		{
+		case LT_Directional:
+		{
+			//leave commented until i know why this was here initialy, not actual part of the convertion comments
+			//Editor::DeselectSceneObject(uuid());
+		}
+		break;
+		}
+	}
 
-	JUUID Light::CreateBillboard(CameraUUID camera)
+	JUUID Light::CreateBillboard(CameraSUUUID camera)
 	{
 		using namespace Editor;
 
 		if (lightType() == LT_Ambient) return "";
 
 		JUUID uuid = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "LightBulb", "LightBulbPicking");
-		RenderableUUID bb = uuid;
+		RenderableSUUUID bb = MAKESUUUID(unit, uuid);
 		bb->OnPick = [&] { SelectLight(unit, this->uuid()); };
 		UpdateBillboard(uuid);
 		return uuid;
@@ -302,7 +303,7 @@ namespace Scene
 		auto& scene = GetSceneUnit(unit);
 
 		XMFLOAT3 baseColor = color();
-		RenderableUUID bb = uuid;
+		RenderableSUUUID bb = MAKESUUUID(unit, uuid);
 		bb->position(position());
 		bb->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
 		bb->WriteConstantsBuffer(scene->Frame());
@@ -319,15 +320,15 @@ namespace Scene
 	}
 #endif
 
-	void LightsStep(SceneUnitId unit)
+	void LightsStep(SceneUnitId id)
 	{
 		//#if defined(_EDITOR)
-		std::set<LightUUID> lightsToDestroyShadowMaps;
+		std::set<LightSUUUID> lightsToDestroyShadowMaps;
 		//		std::set<LightUUID> lightsToCreateShadowMaps;
 		//		std::set<LightUUID> lightsToUpdateCamAttributes;
 		//		std::set<LightUUID> lightsToUpdateTransformation;
-		//		std::set<LightUUID> lightsToDestroySMChain;
-		std::set<LightUUID> lightsToDelete;
+		//std::set<LightSUUUID> lightsToDestroySMChain;
+		std::set<LightSUUUID> lightsToDelete;
 		//
 		//		std::set<Light::Light_UpdateFlags> smCamAttributes =
 		//		{
@@ -339,11 +340,12 @@ namespace Scene
 		//			Light::Update_position, Light::Update_rotation, Light::Update_dirDist
 		//		};
 		//
-		auto& lights = GetLights(unit);
+		auto& lights = GetLights(id);
 		//auto lights = nostd::GetUUIDS(LightsceneObjects);
 
-		for (LightUUID l : lights)
+		for (auto& uuid : lights)
 		{
+			LightSUUUID l = MAKESUUUID(id, uuid);
 			if (l->lightType() != LT_Ambient)
 			{
 				//JUUID bbuuid = Editor::GetBillboard(l());
@@ -381,14 +383,19 @@ namespace Scene
 			//				}
 			//				l->clean(Light::Update_hasShadowMaps);
 			//			}
-			//
-			//			//if destroying SMChain
-			//			if (l->destroySMChain)
-			//			{
-			//				lightsToDestroySMChain.insert(l);
-			//				l->destroySMChain = false;
-			//			}
-			//
+
+			//if destroying SMChain
+			if (l->destroySMChain)
+			{
+				l->destroySteps--;
+				if (l->destroySteps == 0)
+				{
+					//lightsToDestroySMChain.insert(l);
+					l->destroySMChain = false;
+					l->DestroyShadowMapMinMaxChain();
+				}
+			}
+
 			//			//if resizing
 			//			if (l->dirty(Light::Update_shadowMapWidth) || l->dirty(Light::Update_shadowMapHeight))
 			//			{
@@ -453,9 +460,9 @@ namespace Scene
 			//					}
 			for (auto l : lightsToDelete)
 			{
-				EraseLightFromLights(l->unit, l());
-				EraseLightFromShadowMapLights(l->unit, l());
-				DeleteLightSceneObject(l());
+				EraseLightFromLights(l->unit, l.uuid());
+				EraseLightFromShadowMapLights(l->unit, l.uuid());
+				DeleteLightSUSceneObject(l->unit, l.uuid());
 			}
 			//				}
 			//			);
@@ -475,35 +482,43 @@ namespace Scene
 
 	void DestroyLights()
 	{
-		auto uuids = nostd::GetUUIDS(LightsceneObjects);
-		for (LightUUID uuid : uuids)
+		for (auto& [id, container] : LightSUsceneObjects)
 		{
-			DeleteLightSceneObject(uuid());
+			for (auto& [uuid, _] : container)
+			{
+				LightSUUUID l = MAKESUUUID(id, uuid);
+				DeleteLightSUSceneObject(l->unit, l->uuid());
+			}
 		}
 #include <TrackUUID/JClear.h>
 #include <LightAtt.h>
 #include <JEnd.h>
 	}
 
-	void DestroyLights(SceneUnitId unit)
+	void DestroyLights(SceneUnitId id)
 	{
-		auto uuids = nostd::GetUUIDS(LightsceneObjects);
-		for (LightUUID uuid : uuids)
+		for (auto& [uuid, _] : LightSUsceneObjects.at(id))
 		{
-			if (uuid->unit != unit) continue;
-			DeleteLightSceneObject(uuid());
+			LightSUUUID l = MAKESUUUID(id, uuid);
+			DeleteLightSUSceneObject(l->unit, l->uuid());
 		}
+		//auto uuids = nostd::GetUUIDS(LightsceneObjects);
+		//for (LightUUID uuid : uuids)
+		//{
+		//	if (uuid->unit != unit) continue;
+		//	DeleteLightSUSceneObject(uuid->unit, uuid());
+		//}
 #include <TrackUUID/JClearUnit.h>
 #include <LightAtt.h>
 #include <JEnd.h>
 	}
 
-	void DeleteLight(JUUID uuid)
+	void DeleteLight(SceneUnitId id, JUUID uuid)
 	{
 #if defined(_EDITOR)
 		using namespace Editor;
 #endif
-		LightUUID  l = uuid;
+		LightSUUUID l = MAKESUUUID(id, uuid);
 #if defined(_EDITOR)
 		DestroyBillboard(l->unit, uuid);
 #endif

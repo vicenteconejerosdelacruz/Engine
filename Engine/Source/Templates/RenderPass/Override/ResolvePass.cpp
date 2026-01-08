@@ -13,11 +13,12 @@
 
 //extern std::unique_ptr<Renderer> renderer;
 
-ResolvePass::ResolvePass(JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(cam, rpI, rp)
+ResolvePass::ResolvePass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(id, cam, rpI, rp)
 {
 	using namespace Scene;
 
-	auto& camSO = GetCameraSceneObject(cam);
+	//auto& camSO = GetCameraSUSceneObject(id, cam);
+	CameraSUUUID camSO = MAKESUUUID(id, cam);
 	auto& prevPassJ = GetRenderPassTemplate(camSO->renderPasses().at(rpI - 1));
 	mode = ResolveMode_CopyFromRenderToTexture;
 

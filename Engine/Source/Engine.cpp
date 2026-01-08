@@ -457,6 +457,7 @@ void AppStep()
 	timer.Tick([&]()
 		{
 			TemplatesStep(timer);
+			StepControllers(timer);
 			GameStep();
 			SceneObjectsStep(timer);
 #if defined(_EDITOR)
@@ -517,11 +518,16 @@ void Render()
 
 void ResizeWindow()
 {
-	/*
+	using namespace Scene;
+
 	resizeWindow = false;
 	renderer->Flush();
 
+	/*
 	Templates::RenderPass::ResizeRelease();
+	*/
+
+	ResizeReleaseScenePasses();
 
 	GetWindowRect(hWnd, &hWndRect);
 
@@ -533,8 +539,11 @@ void ResizeWindow()
 		renderer->swapChainPass->Resize(HWNDWIDTH, HWNDHEIGHT);
 	}
 
+	/*
 	Templates::RenderPass::Resize(HWNDWIDTH, HWNDHEIGHT);
 	*/
+
+	ResizeScenePasses(HWNDWIDTH, HWNDHEIGHT);
 }
 
 //DESTROY

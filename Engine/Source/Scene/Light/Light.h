@@ -169,11 +169,9 @@ namespace Scene {
 #include <JEnd.h>
 
 		//lifecycle
-		Light(nlohmann::json& json);
+		Light(SceneUnitId id, nlohmann::json& json);
 		~Light() { Destroy(); }
-#if defined(_EDITOR)
-		//virtual void WriteJson(nlohmann::json& j);
-#endif
+
 		void Destroy();
 
 		XMMATRIX world();
@@ -217,32 +215,35 @@ namespace Scene {
 		void RenderShadowMap(std::function<void(unsigned int)> renderScene);
 
 #if defined(_EDITOR)
-		//virtual void EditorPreview(size_t flags);
-		//virtual void DestroyEditorPreview();
-		//void CreateShadowMapMinMaxChain();
-		//void DestroyShadowMapMinMaxChain();
-		//void RenderShadowMapMinMaxChain();
+		virtual void EditorPreview(size_t flags);
+		virtual void DestroyEditorPreview();
+		void CreateShadowMapMinMaxChain();
+		void DestroyShadowMapMinMaxChain();
+		void RenderShadowMapMinMaxChain();
 
 		//virtual std::function<bool(JObject*)> GetAssetsConditioner();
 
 		//Billboard
-		virtual JUUID CreateBillboard(CameraUUID camera);
+		virtual JUUID CreateBillboard(CameraSUUUID camera);
 		virtual void UpdateBillboard(JUUID uuid);
 		BoundingBox GetBoundingBox();
 		//Gizmo
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation);
+		virtual void WriteJson(nlohmann::json& j);
 #endif
 
 		bool markedForDelete = false;
 		//Camera
 		unsigned int shadowMapIndex = 0xFFFFFFFF;
-		std::vector<CameraUUID> shadowMapCameras;
+		std::vector<CameraSUUUID> shadowMapCameras;
 		std::vector<D3D12_RECT> shadowMapScissorRect;
 		std::vector<D3D12_VIEWPORT> shadowMapViewport;
 		RenderToTexturePassUUID shadowMapRenderPass;
 		std::vector<std::tuple<float, float>> shadowMapNearFarPlanes;
 		XMFLOAT2 shadowMapTexelInvSize;
 #if defined(_EDITOR)
+		unsigned int const destroyStepsCount = 2U;
+		unsigned int destroySteps;
 		bool destroySMChain = false;
 		std::vector<RenderPassInstanceUUID> shadowMapMinMaxChainRenderPass;
 		RenderPassInstanceUUID shadowMapMinMaxChainResultRenderPass;
@@ -258,10 +259,10 @@ namespace Scene {
 	void LightsStep(SceneUnitId unit);
 	void DestroyLights();
 	void DestroyLights(SceneUnitId unit);
-	void DeleteLight(JUUID uuid);
+	void DeleteLight(SceneUnitId unit, JUUID uuid);
 #if defined(_EDITOR)
-	void WriteLightsJson(nlohmann::json& json);
-	void RenderShadowMapMinMaxChain();
+	void WriteLightsJson(SceneUnitId id, nlohmann::json& json);
+	//void RenderShadowMapMinMaxChain();
 #endif
 };
 

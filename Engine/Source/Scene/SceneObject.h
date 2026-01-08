@@ -76,7 +76,7 @@ namespace Scene
 	struct SceneObject : JObject
 	{
 		//lifecycle
-		SceneObject(nlohmann::json& json) :JObject(json) {}
+		SceneObject(SceneUnitId id, nlohmann::json& json) :JObject(json) { unit = id; }
 		virtual void Initialize() {};
 		virtual void BindToScene() {};
 		virtual void Bind(JUUID uuid) {}
@@ -93,6 +93,7 @@ namespace Scene
 		//datatypes
 		virtual SceneObjectType JType() { return SO_None; }
 		JUUID Juuid() { return JUUID(at("uuid")); }
+		SUUUID SUuuid() { return std::make_tuple(unit, Juuid()); }
 
 		//json patching
 		virtual void JUpdate(nlohmann::json p);
@@ -103,13 +104,13 @@ namespace Scene
 
 #if defined(_EDITOR)
 		//Billboard
-		virtual JUUID CreateBillboard(CameraUUID camera) { return ""; }
+		virtual JUUID CreateBillboard(CameraSUUUID camera) { return ""; }
 		virtual void UpdateBillboard(JUUID billboard) {}
 
 		//Gizmos
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return false; }
 #endif
-		//scene unit for which this sceneobject belongs
+		//scene unit for which this scene object belongs
 		SceneUnitId unit;
 	};
 };

@@ -11,6 +11,13 @@
 
 using namespace DirectX;
 
+typedef std::tuple<
+	//std::reference_wrapper<std::unique_ptr<DirectX::SoundEffect>>,
+	//std::unique_ptr<DirectX::SoundEffect>,
+	JUUID,
+	std::unique_ptr<DirectX::SoundEffectInstance>
+> SoundInstance;
+
 namespace Templates
 {
 #if defined(_EDITOR)
@@ -73,10 +80,7 @@ namespace Templates
 	void SoundJsonStep();
 	void ReleaseSoundEffectsInstances();
 
-	std::tuple<
-		std::unique_ptr<DirectX::SoundEffect>,
-		std::unique_ptr<DirectX::SoundEffectInstance>
-	> GetSoundEffectInstance(
+	SoundInstance GetSoundEffectInstance(
 		JUUID uuid,
 		unsigned int flags,
 		std::string objectUUID = "",
@@ -84,8 +88,7 @@ namespace Templates
 		JObjectChangePostCallback postCb = nullptr
 	);
 
-	void DestroySoundEffectInstance(JUUID uuid, std::tuple<
-		std::unique_ptr<DirectX::SoundEffect>,
-		std::unique_ptr<DirectX::SoundEffectInstance>
-	>& soundEffectInstance);
+	std::unique_ptr<DirectX::SoundEffect>& GetSoundEffect(JUUID uuid);
+
+	void DestroySoundEffectInstance(JUUID uuid, SoundInstance& soundEffectInstance);
 };

@@ -50,11 +50,8 @@ namespace Scene
 #include <SoundFXAtt.h>
 #include <JEnd.h>
 
-		SoundFX(nlohmann::json& json);
+		SoundFX(SceneUnitId id, nlohmann::json& json);
 		~SoundFX() { Destroy(); }
-#if defined(_EDITOR)
-		virtual void WriteJson(nlohmann::json& j);
-#endif
 		virtual void Initialize();
 		virtual void BindToScene();
 		virtual void UnbindFromScene();
@@ -65,8 +62,8 @@ namespace Scene
 		XMMATRIX world();
 		XMVECTOR fw();
 
-		std::unique_ptr<DirectX::SoundEffect>& GetEffect() { return std::get<0>(soundEffectInstance); }
-		std::unique_ptr<DirectX::SoundEffectInstance>& GetInstance() { return std::get<1>(soundEffectInstance); }
+		std::unique_ptr<DirectX::SoundEffect>& GetEffect();
+		std::unique_ptr<DirectX::SoundEffectInstance>& GetInstance();
 		bool Play();
 		bool Stop();
 		bool Pause();
@@ -81,19 +78,20 @@ namespace Scene
 		void UpdateEmmiter();
 
 #if defined(_EDITOR)
-		virtual JUUID CreateBillboard(CameraUUID camera);
+		virtual JUUID CreateBillboard(CameraSUUUID camera);
 		virtual void UpdateBillboard(JUUID billboard);
 		BoundingBox GetBoundingBox();
 
 		//Gizmo
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation);
+		virtual void WriteJson(nlohmann::json& j);
 #endif
 		bool markedForDelete = false;
 		float time = 0.0f;
 		bool hasStarted = false;
 		//3D
 		AudioEmitter audioEmitter;
-		std::tuple<std::unique_ptr<DirectX::SoundEffect>, std::unique_ptr<DirectX::SoundEffectInstance>> soundEffectInstance;
+		SoundInstance soundEffectInstance;
 	};
 
 	SODECL_FULL(SoundFX);
@@ -102,15 +100,15 @@ namespace Scene
 #include <SoundFXAtt.h>
 #include <JEnd.h>
 
-	void SoundFXsStep(float step);
+	void SoundFXsStep(SceneUnitId id, float step);
 	void DestroySoundEffects();
-	void DestroySoundEffects(SceneUnitId unit);
-	void DeleteSoundFX(JUUID uuid);
-	void PlaySounds();
-	void PauseSounds();
-	void ResumeSounds();
-	void StopSounds();
+	void DestroySoundEffects(SceneUnitId id);
+	void DeleteSoundFX(SceneUnitId id, JUUID uuid);
+	void PlaySounds(SceneUnitId id);
+	void PauseSounds(SceneUnitId id);
+	void ResumeSounds(SceneUnitId id);
+	void StopSounds(SceneUnitId id);
 #if defined(_EDITOR)
-	void WriteSoundFXsJson(nlohmann::json& json);
+	void WriteSoundFXsJson(SceneUnitId id, nlohmann::json& json);
 #endif
 }

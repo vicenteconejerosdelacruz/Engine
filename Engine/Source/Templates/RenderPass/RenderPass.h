@@ -147,13 +147,13 @@ namespace Templates
 	TEMPDECL_FULL(RenderPass);
 	TEMPDECL_REFTRACKER(RenderPass);
 
-	JUUID CreateRenderPassInstance(JUUID cameraUUID, JUUID renderPassTemplateUUID, unsigned int renderPassIndex, unsigned int width = 0U, unsigned int height = 0U);
+	JUUID CreateRenderPassInstance(SceneUnitId id, JUUID cameraUUID, JUUID renderPassTemplateUUID, unsigned int renderPassIndex, unsigned int width = 0U, unsigned int height = 0U);
 	void DestroyRenderPassInstance(JUUID renderPassInstanceUUID);
 
 	struct RenderPassInstance
 	{
 		RenderPassInstance(JUUID uuid) { assert(!!!"do not use"); }
-		explicit RenderPassInstance(JUUID cameraUUID, JUUID renderPassTemplateUUID, JUUID renderPassInstanceUUID, unsigned int renderPassIndex, unsigned int width, unsigned int height);
+		explicit RenderPassInstance(SceneUnitId id, JUUID cameraUUID, JUUID renderPassTemplateUUID, JUUID renderPassInstanceUUID, unsigned int renderPassIndex, unsigned int width, unsigned int height);
 		~RenderPassInstance();
 		void Pass(SceneUnitId unit, std::function<void(SceneUnitId)> renderCallback = [](SceneUnitId) {}, bool clearRTV = true, XMVECTORF32 clearColor = DirectX::Colors::Black);
 		JUUID GetRenderPassMaterialInstance(
@@ -167,12 +167,12 @@ namespace Templates
 			JObjectChangePostCallback postCb = nullptr
 		);
 		void InitRenderPass();
-		//void ResizeRelease();
-		//void Resize(unsigned int width, unsigned int height);
+		void ResizeRelease();
+		void Resize(unsigned int width, unsigned int height);
 		std::vector<DXGI_FORMAT> GetRenderTargetsFormats();
 		DXGI_FORMAT GetDepthStencilFormat();
 
-		CameraUUID camera;
+		CameraSUUUID camera;
 		RenderPassJsonUUID renderPassJson;
 		RenderPassType type = RenderPassType_SwapChainPass;
 		RenderPassMaterialOverride materialOverride;

@@ -34,7 +34,7 @@ void OverridePass::CreateFsQuadResources(SceneUnitId id, std::string materialNam
 {
 	using namespace Scene;
 
-	auto& fsQuadMesh = GetMeshInstance(GetMeshUUIDByName("decal"));
+	auto& fsQuadMesh = GetMeshInstance(id, GetMeshUUIDByName("decal"));
 	fsQuad = fsQuadMesh->uuid;
 	fsQuadMaterial = GetMaterialUUIDByName(materialName);
 	VertexClass vertexClass = fsQuadMesh->vertexClass;

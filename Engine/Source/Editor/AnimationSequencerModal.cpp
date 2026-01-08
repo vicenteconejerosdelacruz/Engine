@@ -51,6 +51,7 @@ void AnimationSequencerModal::Initialize(JUUID uuid)
 
 void AnimationSequencerModal::LoadSceneObjects()
 {
+	/*
 	using namespace Scene;
 
 	camera = getUUID();
@@ -58,6 +59,7 @@ void AnimationSequencerModal::LoadSceneObjects()
 	directionalLight = getUUID();
 	renderable = getUUID();
 	floor = getUUID();
+	sfx->Juuid();
 
 	nlohmann::json cameraJson =
 	{
@@ -169,6 +171,7 @@ void AnimationSequencerModal::LoadSceneObjects()
 	Step();
 	camera->at("freeposition") = FromXMFLOAT3(camera->position());
 	camera->at("freerotation") = FromXMFLOAT3(camera->rotation());
+	*/
 }
 
 void AnimationSequencerModal::DestroySceneObjects()
@@ -181,11 +184,11 @@ void AnimationSequencerModal::DestroySceneObjects()
 	ambientLight->UnbindFromScene();
 	camera->UnbindFromScene();
 
-	DeleteRenderable(renderable());
-	DeleteRenderable(floor());
-	DeleteLight(directionalLight());
-	DeleteLight(ambientLight());
-	DeleteCamera(camera());
+	DeleteRenderable(renderable->unit, renderable.uuid());
+	DeleteRenderable(floor->unit, floor.uuid());
+	DeleteLight(directionalLight->unit, directionalLight.uuid());
+	DeleteLight(ambientLight->unit, ambientLight.uuid());
+	DeleteCamera(camera->unit, camera.uuid());
 
 	renderable.clear();
 	floor.clear();
@@ -267,6 +270,7 @@ static ImVec2 sequencerPosAdj(0.0f, 4.0f);
 static float titleBarH = 19.0f;
 void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec2 size)
 {
+	/*
 	ImGui::OpenPopup(title);
 
 	ImVec2 modalSize(size.x, size.y + titleBarH);
@@ -531,6 +535,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 	{
 		SaveAndExit();
 	}
+	*/
 }
 
 void AnimationSequencerModal::DrawTitleBar(const char* title, ImVec2 pos, ImVec2 size, bool& exit)
@@ -643,7 +648,7 @@ void AnimationSequencerModal::DrawSequenceSelector(
 
 void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 {
-	if (camera.empty()) return;
+	/*if (camera.empty()) return;
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
@@ -743,7 +748,7 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 	ImGui::EndChild();
 
 	ImGui::PopStyleVar();
-	ImGui::PopStyleVar();
+	ImGui::PopStyleVar();*/
 }
 
 void AnimationSequencerModal::DrawTransformationKeyFrameAttributes(TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size)
@@ -1181,6 +1186,3 @@ void AnimationSequencerModal::SaveAndExit()
 	model3D->flag(Model3DJson::Update_animationSequences);
 	Editor::templatesModified = true;
 }
-
-
-

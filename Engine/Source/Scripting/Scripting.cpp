@@ -44,7 +44,7 @@ namespace Scripting
 		binder(isolate);
 	}
 
-	void RunScript(std::string script, RenderableUUID renderable)
+	void RunScript(std::string script, RenderableSUUUID renderable)
 	{
 #if defined(_EDITOR)
 		//if (!Editor::IsPlaying() || Editor::IsPaused())

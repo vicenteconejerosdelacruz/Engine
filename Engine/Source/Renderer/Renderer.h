@@ -36,7 +36,7 @@ struct Renderer
 
 	//UPDATE
 	void UpdateViewportPerspective();
-	//void Resize(unsigned int width, unsigned int height);
+	void Resize(unsigned int width, unsigned int height);
 	//void ResetCommands() const;
 	//void SetCSUDescriptorHeap() const;
 	//void CloseCommandsAndFlush();

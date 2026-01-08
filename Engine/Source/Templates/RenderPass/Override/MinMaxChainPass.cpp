@@ -9,13 +9,13 @@
 
 //extern std::unique_ptr<Renderer> renderer;
 
-MinMaxChainPass::MinMaxChainPass(JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(cam, rpI, rp)
+MinMaxChainPass::MinMaxChainPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(id, cam, rpI, rp)
 {
 }
 
 void MinMaxChainPass::Initialize()
 {
-	/*using namespace DeviceUtils;
+	using namespace DeviceUtils;
 
 	JUUID renderPassTemplateUUID = renderPassInstance->renderPassJson();
 	RenderToTexturePassUUID rttPass = renderPassInstance->renderToTexturePass;
@@ -24,12 +24,12 @@ void MinMaxChainPass::Initialize()
 		1.0f / rttPass->screenViewport.Height
 	};
 
-	CreateFsQuadResources("DepthMinMax", renderPassTemplateUUID,
+	CreateFsQuadResources(camera.unit(), "DepthMinMax", renderPassTemplateUUID,
 		[this, texelInvSize](std::string name, ShaderConstantsBufferVariable& var)
 		{
 			auto& fsCB = fsQuadConstantsBuffer;
 
-			for (unsigned int n = 0; n < renderer->numFrames; n++)
+			for (unsigned int n = 0; n < Renderer::numFrames; n++)
 			{
 				if (name == "texelInvSize")
 				{
@@ -37,21 +37,22 @@ void MinMaxChainPass::Initialize()
 				}
 			}
 		}
-	);*/
+	);
 }
 
 void MinMaxChainPass::Pass(SceneUnitId unit)
 {
-	/*RenderPassInstanceUUID renderPass = renderPassInstance;
+	RenderPassInstanceUUID renderPass = renderPassInstance;
 	RenderToTexturePassUUID rttPass = renderPass->renderToTexturePass;
-	rttPass->BeginRenderPass();
-	Render();
-	rttPass->EndRenderPass();*/
+	rttPass->BeginRenderPass(unit);
+	Render(unit);
+	rttPass->EndRenderPass(unit);
 }
 
-void MinMaxChainPass::Render()
+void MinMaxChainPass::Render(SceneUnitId id)
 {
-	/*auto& commandList = renderer->commandList;
+	auto& scene = GetSceneUnit(id);
+	auto& commandList = scene->GetCommandList();
 	auto& fsCB = fsQuadConstantsBuffer;
 	auto& fsQuadMesh = GetMeshInstance(fsQuad);
 
@@ -63,7 +64,7 @@ void MinMaxChainPass::Render()
 	commandList->SetGraphicsRootSignature(rootSignature);
 	commandList->SetPipelineState(pipelineState);
 
-	commandList->SetGraphicsRootDescriptorTable(0, fsCB->gpu_xhandle.at(renderer->backBufferIndex));
+	commandList->SetGraphicsRootDescriptorTable(0, fsCB->gpu_xhandle.at(scene->Frame()));
 	commandList->SetGraphicsRootDescriptorTable(1, shadowMapChainGpuHandle1);
 	commandList->SetGraphicsRootDescriptorTable(2, shadowMapChainGpuHandle2);
 
@@ -73,5 +74,5 @@ void MinMaxChainPass::Render()
 
 #if defined(_DEVELOPMENT)
 	PIXEndEvent(commandList.p);
-#endif*/
+#endif
 }

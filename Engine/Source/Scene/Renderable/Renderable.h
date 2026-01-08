@@ -73,12 +73,8 @@ namespace Scene
 #include <RenderableAtt.h>
 #include <JEnd.h>
 
-		Renderable(nlohmann::json& json);
+		Renderable(SceneUnitId id, nlohmann::json& json);
 		~Renderable() { Destroy(); }
-
-#if defined(_EDITOR)
-		virtual void WriteJson(nlohmann::json& j);
-#endif
 
 		XMVECTOR rotationQ();
 		XMMATRIX world();
@@ -99,30 +95,30 @@ namespace Scene
 		void UnbindModelChangesCallback();
 
 		//Render Passes
-		std::vector<RenderPassInstanceUUID> GetCameraRenderPasses(CameraUUID cam);
+		std::vector<RenderPassInstanceUUID> GetCameraRenderPasses(CameraSUUUID cam);
 
 		//Meshes
 		void CreateMeshInstances();
 
 		//Materials
-		void CreateMaterialsInstances(CameraUUID cam);
+		void CreateMaterialsInstances(CameraSUUUID cam);
 		void CreateRenderPassMaterialsInstances(RenderPassInstanceUUID pass);
-		void DestroyMaterialsInstances(CameraUUID cam);
+		void DestroyMaterialsInstances(CameraSUUUID cam);
 		void DestroyRenderPassMaterialsInstances(RenderPassInstanceUUID pass);
 		//Constants Buffers
-		void CreateConstantsBuffersInstances(CameraUUID cam);
+		void CreateConstantsBuffersInstances(CameraSUUUID cam);
 		void CreateRenderPassConstantsBuffersInstances(RenderPassInstanceUUID pass);
-		void DestroyConstantsBuffersInstances(CameraUUID cam);
+		void DestroyConstantsBuffersInstances(CameraSUUUID cam);
 		void DestroyRenderPassConstantsBuffersInstances(RenderPassInstanceUUID pass);
 		//Root Signatures
-		void CreateRootSignatures(CameraUUID cam);
+		void CreateRootSignatures(CameraSUUUID cam);
 		void CreateRenderPassRootSignatures(RenderPassInstanceUUID rp);
-		void DestroyRootSignatures(CameraUUID cam);
+		void DestroyRootSignatures(CameraSUUUID cam);
 		void DestroyRenderPassRootSignatures(RenderPassInstanceUUID rp);
 		//Pipeline States
-		void CreatePipelineStates(CameraUUID cam);
+		void CreatePipelineStates(CameraSUUUID cam);
 		void CreateRenderPassPipelineStates(RenderPassInstanceUUID rp);
-		void DestroyPipelineStates(CameraUUID cam);
+		void DestroyPipelineStates(CameraSUUUID cam);
 		void DestroyRenderPassPipelineStates(RenderPassInstanceUUID rp);
 
 		//void RebuildMeshMaterials();
@@ -172,12 +168,13 @@ namespace Scene
 		//DESTROY
 		void Destroy();
 
-		void Render(SceneUnitId unit, RenderPassInstanceUUID renderPass, CameraUUID camera);
+		void Render(SceneUnitId unit, RenderPassInstanceUUID renderPass, CameraSUUUID camera);
 
 #if defined(_EDITOR)
 		std::function<void()> OnPick;
 		//Gizmo
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
+		virtual void WriteJson(nlohmann::json& j);
 #endif
 
 		//Destroy
@@ -200,7 +197,7 @@ namespace Scene
 		AnimationSequences animationsSequences;
 		SequencePlayer sequencePlayer;
 		//Cameras
-		std::set<CameraUUID> bindedCameras;
+		std::set<CameraSUUUID> bindedCameras;
 
 		BoundingBox boundingBox;
 		RenderableBoundingBoxUUID boundingBoxCompute; //used for animables
@@ -212,13 +209,13 @@ namespace Scene
 #include <RenderableAtt.h>
 #include <JEnd.h>
 
-	void RenderablesStep(SceneUnitId unit, float dt);
+	void RenderablesStep(SceneUnitId id, float dt);
 	void DestroyRenderables();
-	void DestroyRenderables(SceneUnitId unit);
-	void DeleteRenderable(JUUID uuid);
-	void RunBoundingBoxComputeShaders(SceneUnitId unit);
-	void RunBoundingBoxComputeShadersSolution(SceneUnitId unit);
+	void DestroyRenderables(SceneUnitId id);
+	void DeleteRenderable(SceneUnitId id, JUUID uuid);
+	void RunBoundingBoxComputeShaders(SceneUnitId id);
+	void RunBoundingBoxComputeShadersSolution(SceneUnitId id);
 #if defined(_EDITOR)
-	void WriteRenderablesJson(nlohmann::json& json);
+	void WriteRenderablesJson(SceneUnitId id, nlohmann::json& json);
 #endif
 }

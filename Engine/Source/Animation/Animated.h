@@ -70,9 +70,9 @@ namespace Animation
 	std::unique_ptr<Animated> CreateAnimatedFromAssimp(const aiScene* aiModel);
 
 	void DestroyAnimated();
-	void DestroyAnimated(SceneUnitId unit);
+	void DestroyAnimated(SceneUnitId id);
 
-	void AttachAnimation(JUUID renderableUUID, std::unique_ptr<Animated>& animated);
+	void AttachAnimation(SceneUnitId id, JUUID renderableUUID, std::unique_ptr<Animated>& animated);
 	ConstantsBufferUUID GetAnimatedConstantsBuffer(JUUID renderableUUID);
 	void WriteBoneTransformationsToConstantsBuffer(JUUID renderableUUID, BonesTransformations& bonesTransformation, unsigned int backbufferIndex);
 

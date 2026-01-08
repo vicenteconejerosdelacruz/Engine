@@ -37,10 +37,10 @@
 #if defined(JEXPOSE_EDITOR_SAVE_FILE)
 
 #define JCLASS(CLASS,GETJOBJECTS) \
-auto objs = GETJOBJECTS();\
-std::for_each(objs.begin(), objs.end(), [&json](auto o)\
+auto objs = GETJOBJECTS(id);\
+std::for_each(objs.begin(), objs.end(), [&](auto o)\
 	{\
-		CLASS##UUID uuid = o;\
+		CLASS##SUUUID uuid = MAKESUUUID(id,o);\
 		if (uuid->hidden() || (uuid->contains("systemCreated") && uuid->at("systemCreated")==true))\
 			return;\
 		nlohmann::json obj;\

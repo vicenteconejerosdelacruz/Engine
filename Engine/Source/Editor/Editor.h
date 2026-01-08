@@ -68,7 +68,7 @@ namespace Editor {
 	void DrawEditor();
 	void SwitchToSceneUnitEditorCamera(SceneUnitId id);
 	void SwitchToSceneUnitEditorPlayCamera(SceneUnitId id);
-	void BindLightsToEditorCamera(SceneUnitId id, CameraUUID cam);
+	void BindLightsToEditorCamera(SceneUnitId id, CameraSUUUID cam);
 	void DrawApplicationBar();
 	void DrawLevelSelectorModal();
 	void HandleApplicationDragTitleBar(RECT& dragRect);
@@ -78,7 +78,7 @@ namespace Editor {
 	//void OpenLevelFile();
 	//void SaveLevelAs();
 	//bool SaveFileDialog(std::wstring& path, std::wstring defaultDirectory = L"", std::wstring defaultFileName = L"", std::pair<COMDLG_FILTERSPEC*, int>* pFilterInfo = nullptr);
-	//std::string GetLevelString();
+	std::string GetLevelString(SceneUnitId id);
 	//void SaveLevelToFile(std::string levelFileName);
 	//void SaveTemplates();
 	void DrawRightPanel();
@@ -92,7 +92,7 @@ namespace Editor {
 	void OpenSceneObjectOnNextFrame(JUUID uuid);
 	void MarkScenePanelAssetsAsDirty();
 	//void DestroyEditorSceneObjectsReferences();
-	void DeleteFromScenePanelSelection(JUUID sceneObject);
+	void DeleteFromScenePanelSelection(SceneUnitId id, JUUID sceneObject);
 
 	//Templates Panel
 	void OnChangeTemplateTab(std::string newTab);
@@ -115,8 +115,8 @@ namespace Editor {
 	//Gizmos
 	void ResetGizmoVariableWorkers(SceneUnitId unit);
 	bool InteractWithGizmos(SceneUnitId unit, std::set<SceneObject*>& objects2Gizmo);
-	void DrawPickedObjectsGizmo(SceneUnitId unit, CameraUUID camera);
-	void BeginGizmoInteraction(CameraUUID camera, std::function<void(DirectX::XMFLOAT4X4, DirectX::XMFLOAT4X4)> interaction = [](DirectX::XMFLOAT4X4, DirectX::XMFLOAT4X4) {});
+	void DrawPickedObjectsGizmo(SceneUnitId unit, CameraSUUUID camera);
+	void BeginGizmoInteraction(CameraSUUUID camera, std::function<void(DirectX::XMFLOAT4X4, DirectX::XMFLOAT4X4)> interaction = [](DirectX::XMFLOAT4X4, DirectX::XMFLOAT4X4) {});
 
 	//SceneObject Selection
 	void SelectSceneObject(SceneUnitId unit, JUUID uuid);
@@ -137,17 +137,17 @@ namespace Editor {
 
 	//Mouse Processing
 	bool MouseIsInGameArea(std::unique_ptr<DirectX::Mouse>& mouse);
-	void GameAreaMouseProcessing(std::unique_ptr<DirectX::Mouse>& mouse, CameraUUID camera);
+	void GameAreaMouseProcessing(std::unique_ptr<DirectX::Mouse>& mouse, CameraSUUUID camera);
 
 	//SceneObject Picking
-	bool PickingPassExists();
-	void CreatePickingPass();
+	bool PickingPassExists(SceneUnitId id);
+	void CreatePickingPass(SceneUnitId id);
 	//void DestroyPickingPass();
 	void BindPickingRenderables(SceneUnitId id);
-	void BindRenderableToPickingPass(RenderableUUID r);
+	void BindRenderableToPickingPass(RenderableSUUUID r);
 	//void UnbindPickingRenderables();
 	//void UnbindRenderableFromPickingPass(RenderableUUID r);
-	void RenderPickingPass(SceneUnitId id, CameraUUID camera);
+	void RenderPickingPass(SceneUnitId id, CameraSUUUID camera);
 	void PickFromScene(SceneUnitId id);
 	void PickSceneObject(SceneUnitId id, unsigned int pickedObjectId);
 	//void ReleasePickingPassResources();
@@ -158,7 +158,7 @@ namespace Editor {
 	void StartTemplateCreation(TemplateType type);
 
 	//Billboards
-	JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraUUID camera, std::string name, std::string material, std::string pickingMaterial);
+	JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraSUUUID camera, std::string name, std::string material, std::string pickingMaterial);
 	void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
 	//JUUID GetBillboard(JUUID sceneObject);
 	void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
@@ -171,11 +171,11 @@ namespace Editor {
 	//void ClearBillboardsRegistry();
 
 	//Game Mode Activation
-	bool IsPlaying(SceneUnitId unit);
-	bool IsPaused(SceneUnitId unit);
-	//void SwitchToPlayMode(SceneUnitId unit);
-	//void SwitchToPauseMode(SceneUnitId unit);
-	//void SwitchToUnPausedMode(SceneUnitId unit);
-	//void SwitchToNonPlayMode(SceneUnitId unit);
+	bool IsPlaying(SceneUnitId id);
+	bool IsPaused(SceneUnitId id);
+	void SwitchToPlayMode(SceneUnitId id);
+	void SwitchToPauseMode(SceneUnitId id);
+	void SwitchToUnPausedMode(SceneUnitId id);
+	void SwitchToNonPlayMode(SceneUnitId id);
 
 }
