@@ -27,6 +27,7 @@ namespace Editor {
 	extern void CreateSceneUnitBillboards(SceneUnitId id);
 	extern void CreateRegisteredBillboards(SceneUnitId id);
 	extern void CreateSceneUnitEditorIndependentCamera(SceneUnitId id);
+	extern void CopySceneUnitEditorCameraRenderPasses(SceneUnitId id);
 	extern void CreatePickingPass(SceneUnitId id);
 	extern void SwitchToSceneUnitEditorCamera(SceneUnitId id);
 }
@@ -223,6 +224,10 @@ namespace Scene::Level {
 		MapControllers(scene->id);
 		BindSceneObjects(scene->id);
 #if defined(_EDITOR)
+		if (!scene->attached)
+		{
+			CopySceneUnitEditorCameraRenderPasses(scene->id);
+		}
 		//Editor::currentLevelName = filename;
 		//Editor::MarkScenePanelAssetsAsDirty();
 #endif

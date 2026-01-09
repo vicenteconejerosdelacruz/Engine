@@ -50,6 +50,7 @@ namespace Editor {
 	void CreateSceneUnitBoundingBox(SceneUnitId id);
 	void CreateSceneUnitBillboards(SceneUnitId id);
 	void CreateSceneUnitEditorIndependentCamera(SceneUnitId id);
+	void CopySceneUnitEditorCameraRenderPasses(SceneUnitId id);
 	void InitEditor();
 	void LoadWorkbench();
 	void LevelLoadingProgress(std::string asset, unsigned int count, unsigned int total);
@@ -66,6 +67,7 @@ namespace Editor {
 	void AddSceneUnitToEditor(SceneUnitId id);
 	void SetCurrentSceneUnit(SceneUnitId id);
 	void DrawEditor();
+	void WriteSceneUnitEditorPlayCameraConstantsBuffer(SceneUnitId unit);
 	void SwitchToSceneUnitEditorCamera(SceneUnitId id);
 	void SwitchToSceneUnitEditorPlayCamera(SceneUnitId id);
 	void BindLightsToEditorCamera(SceneUnitId id, CameraSUUUID cam);

@@ -26,6 +26,7 @@ namespace Editor
 	extern void EraseSceneObjectFromSelection(SceneUnitId unit, JUUID uuid);
 	extern void MarkScenePanelAssetsAsDirty();
 	extern void UpdateBoundingBox(SceneUnitId unit);
+	extern void WriteSceneUnitEditorPlayCameraConstantsBuffer(SceneUnitId unit);
 	extern void SwitchToSceneUnitEditorCamera(SceneUnitId unit);
 	extern void SwitchToSceneUnitEditorPlayCamera(SceneUnitId unit);
 	extern void HandleEditorMouseMovements(SceneUnitId id);
@@ -568,6 +569,7 @@ namespace Scene
 #if defined(_EDITOR)
 			if (!scene->attached && !Editor::IsPlaying(unit))
 			{
+				WriteSceneUnitEditorPlayCameraConstantsBuffer(unit);
 				SwitchToSceneUnitEditorCamera(unit);
 			}
 #endif

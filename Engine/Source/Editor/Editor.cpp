@@ -273,7 +273,8 @@ namespace Editor
 				{ "hidden", true },
 				{ "systemCreated", true },
 				{ "mouseController", true },
-				{ "useSwapChain", true },
+				{ "renderPasses", {} }
+				//{ "useSwapChain", true },
 			};
 			CloneSceneObject(id, levelCameraUUID[id].uuid(), parameters);
 
@@ -294,6 +295,12 @@ namespace Editor
 		{
 
 		}
+	}
+
+	void CopySceneUnitEditorCameraRenderPasses(SceneUnitId id)
+	{
+		editorCameraUUID[id]->renderPasses(levelCameraUUID[id]->renderPasses());
+		editorCameraUUID[id]->renderPassesUUID = levelCameraUUID[id]->renderPassesUUID;
 	}
 
 	//Editor LifeCycle
@@ -701,6 +708,12 @@ namespace Editor
 		commandListProcessor.CloseCommandList();
 		renderer->ExecuteCommands(commandList);
 		commandListProcessor.Next();
+	}
+
+	void WriteSceneUnitEditorPlayCameraConstantsBuffer(SceneUnitId unit)
+	{
+		auto& scene = GetSceneUnit(unit);
+		levelCameraUUID[unit]->WriteConstantsBuffer(scene->Frame());
 	}
 
 	void SwitchToSceneUnitEditorCamera(SceneUnitId id)
@@ -1973,6 +1986,9 @@ namespace Editor
 
 	void UpdateBoundingBox(SceneUnitId id)
 	{
+#if !defined(_EDITOR_BOUNDINGBOX)
+		return;
+#endif
 		if (!selectedSceneObjects.contains(id)) return;
 
 		if (selectedSceneObjects.at(id).size() == 0ULL)
@@ -2208,6 +2224,9 @@ namespace Editor
 
 	void BindRenderableToPickingPass(RenderableSUUUID r)
 	{
+#if !defined(_EDITOR_PICKINGPASS)
+		return;
+#endif
 		auto pass = mousePicking.pickingPass.at(r.unit());
 		r->CreateRenderPassMaterialsInstances(pass);
 		r->CreateRenderPassConstantsBuffersInstances(pass);
@@ -2236,6 +2255,9 @@ namespace Editor
 
 	void RenderPickingPass(SceneUnitId id, CameraSUUUID camera)
 	{
+#if !defined(_EDITOR_PICKINGPASS)
+		return;
+#endif
 		if (camera.empty() ||
 			!mousePicking.doPicking ||
 			!mousePicking.pickingPass.contains(id) ||
@@ -2279,6 +2301,9 @@ namespace Editor
 
 	void PickFromScene(SceneUnitId id)
 	{
+#if !defined(_EDITOR_PICKINGPASS)
+		return;
+#endif
 		if (!mousePicking.doPicking) return;
 		mousePicking.doPicking = false;
 		currentMouseMode = MOUSE_GAMEAREA_MODE_NONE;
