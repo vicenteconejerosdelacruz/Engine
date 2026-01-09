@@ -202,10 +202,11 @@ void Renderer::ExecuteCommands() const
 }
 */
 
-void Renderer::ExecuteCommands(CComPtr<ID3D12GraphicsCommandList2>& commandList)
+void Renderer::ExecuteCommands(CComPtr<ID3D12GraphicsCommandList2>& commandList, std::function<void()> callback)
 {
 	ID3D12CommandList* const commandLists[] = { commandList };
 	commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+	if (callback) { executionCallback.push_back(callback); }
 }
 
 void Renderer::Present() {
@@ -218,6 +219,8 @@ void Renderer::Present() {
 
 	//make the CPU to wait for the GPU to finish the current processing
 	WaitForFenceValue(fence, frameFenceValues[backBufferIndex], fenceEvent);
+	std::for_each(executionCallback.begin(), executionCallback.end(), [](auto x) {x(); });
+	executionCallback.clear();
 }
 
 void Renderer::Flush()

@@ -42,7 +42,7 @@ struct Renderer
 	//void CloseCommandsAndFlush();
 	//void RenderCriticalFrame(std::function<void()> callback = []() {}, bool flush = true);
 	//void ExecuteCommands() const;
-	void ExecuteCommands(CComPtr<ID3D12GraphicsCommandList2>& commandList);
+	void ExecuteCommands(CComPtr<ID3D12GraphicsCommandList2>& commandList, std::function<void()> callback = nullptr);
 	void Present();
 	void Flush();
 
@@ -68,6 +68,7 @@ struct Renderer
 	unsigned long long fenceValue = 0;
 	unsigned long long frameFenceValues[numFrames] = {};
 	HANDLE fenceEvent;
+	std::vector<std::function<void()>> executionCallback;
 
 	//window based values
 	D3D12_VIEWPORT screenViewport;

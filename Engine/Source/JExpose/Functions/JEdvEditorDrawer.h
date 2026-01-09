@@ -1225,46 +1225,44 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_filepath_vector_i
 						return;
 					}
 
-					ImGui::DrawTextureImage((ImTextureID)texture->preview->gpuHandle.ptr, texture->width(), texture->height());
+					ImGui::DrawTextureImage((ImTextureID)texture->preview.textures.at(texture->preview.frame)->gpuHandle.ptr, texture->width(), texture->height());
 					if (texture->type() == TextureType_Array)
 					{
 						ImGui::PushID(std::string(texture->uuid() + "-controller").c_str());
 						ImGui::DrawAnimationController(
-							[&texture] { return texture->previewIsPlaying; },
-							[&texture](auto play) { texture->previewIsPlaying = play; },
-							[&texture](float time) { texture->previewTime = time; },
-							[&texture] { return texture->previewTimeFactor; },
-							[&texture](float timeFactor) { texture->previewTimeFactor = timeFactor; },
-							[&texture] {
-								texture->previewTime = 0.0f;
-								texture->previewIsLooping = false;
-								texture->previewFrame = 0;
-								texture->reloadPreview = true;
+							[&] { return texture->preview.playing; },
+							[&](auto play) { texture->preview.playing = play; },
+							[&](float time) { texture->preview.time = time; },
+							[&] { return texture->preview.timeFactor; },
+							[&](float timeFactor) { texture->preview.timeFactor = timeFactor; },
+							[&] {
+								texture->preview.time = 0.0f;
+								texture->preview.looping = false;
+								texture->preview.frame = 0;
 							},
-							[&texture] {
-								texture->previewTime = 1.0f;
-								texture->previewIsLooping = false;
-								texture->previewFrame = texture->numFrames() - 1;
-								texture->reloadPreview = true;
+							[&] {
+								texture->preview.time = 1.0f;
+								texture->preview.looping = false;
+								texture->preview.frame = texture->numFrames() - 1;
 							},
-							[&texture] { return texture->previewIsLooping; },
-							[&texture](bool looping) { texture->previewIsLooping = looping; }
+							[&] { return texture->preview.looping; },
+							[&](bool looping) { texture->preview.looping = looping; }
 						);
 						ImGui::PopID();
 
 						ImGui::SameLine();
 						ImGui::PushID(std::string(texture->uuid() + "-timeFactor").c_str());
 						ImGui::PushItemWidth(100.0f);
-						ImGui::InputFloat("timeFactor", &texture->previewTimeFactor, 0.001f, 0.001f, "%.3f");
+						ImGui::InputFloat("timeFactor", &texture->preview.timeFactor, 0.001f, 0.001f, "%.3f");
 						ImGui::PopItemWidth();
 						ImGui::PopID();
 
 						ImGui::Text("frame");
 						ImGui::SameLine();
 						ImGui::PushID((std::string(texture->uuid()) + "-frame-slider").c_str());
-						if (ImGui::SliderInt("##", &texture->previewFrame, 0, texture->numFrames() - 1))
+						if (ImGui::SliderInt("##", &texture->preview.frame, 0, texture->numFrames() - 1))
 						{
-							texture->reloadPreview = true;
+							//texture->reloadPreview = true;
 						}
 						ImGui::PopID();
 					}
@@ -1298,6 +1296,7 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_filepath_vector_i
 
 			for (auto& t : textures)
 			{
+				if (!t->preview.previewLoaded->load()) continue;
 				drawTexture(t);
 				drawTexturePreview(t);
 				if (t != *(textures.end() - 1))

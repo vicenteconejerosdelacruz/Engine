@@ -40,9 +40,11 @@ namespace ComputeShader
 		envMap = envMapUUID;
 
 		//create a srv desc/view for reading the envmap but as a cube texture
+		commandsProcessor.Init(renderer->d3dDevice, 0x000fff, 1);
+		commandsProcessor.ResetCommandList();
 		CreateTextureInstance(envMap, [this]
 			{
-				return std::make_unique<TextureInstance>(envMap);
+				return std::make_unique<TextureInstance>(commandsProcessor.GetCommandList(), envMap);
 			}
 		);
 		auto& json = GetTextureTemplate(envMap);

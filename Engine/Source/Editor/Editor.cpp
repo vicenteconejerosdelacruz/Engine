@@ -1525,7 +1525,6 @@ namespace Editor
 
 		if (newTab == templateEdition.detailAbleTabs.at(1))
 		{
-			/*
 			templateEdition.CreateEditableAttributesToMatch<TemplateType>(
 				GetTemplateType,
 				GetJTemplatePointer,
@@ -1537,7 +1536,6 @@ namespace Editor
 			{
 				SendEditorPreview(uuid, GetJTemplatePointer, templateEdition.drawers);
 			}
-			*/
 		}
 		else
 		{

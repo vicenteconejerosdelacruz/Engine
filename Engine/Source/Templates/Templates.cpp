@@ -875,8 +875,8 @@ namespace Templates
 		ShaderJsonStep();
 #if defined(_EDITOR)
 		TextureJsonsStep();
-		PreviewTexturesStep(static_cast<FLOAT>(timer.GetElapsedSeconds()));
-		ReloadPreviewTextures();
+		PreviewTexturesStep(timer);
+		//ReloadPreviewTextures();
 		Model3DJsonStep();
 #endif
 		MaterialJsonStep();
