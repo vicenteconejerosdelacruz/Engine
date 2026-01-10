@@ -29,6 +29,8 @@ namespace Editor
 	extern void WriteSceneUnitEditorPlayCameraConstantsBuffer(SceneUnitId unit);
 	extern void SwitchToSceneUnitEditorCamera(SceneUnitId unit);
 	extern void SwitchToSceneUnitEditorPlayCamera(SceneUnitId unit);
+	extern void RemoveSceneUnitEditorCameraFromWindowCameras(SceneUnitId id);
+	extern void AddSceneUnitEditorCameraToWindowCameras(SceneUnitId id);
 	extern void HandleEditorMouseMovements(SceneUnitId id);
 	extern void CreateRegisteredBillboards(SceneUnitId id);
 	extern void UpdateBillboards();
@@ -181,27 +183,45 @@ namespace Scene
 
 	void ResizeReleaseScenePasses()
 	{
+#if defined(_EDITOR)
+		using namespace Editor;
+#endif
 		for (auto& [id, _] : scenesUnits)
 		{
+#if defined(_EDITOR)
+			RemoveSceneUnitEditorCameraFromWindowCameras(id);
+#endif
 			auto& cameras = GetWindowCameras(id);
 			for (auto& uuid : cameras)
 			{
 				CameraSUUUID cam = MAKESUUUID(id, uuid);
 				cam->ResizeReleasePasses();
 			}
+#if defined(_EDITOR)
+			AddSceneUnitEditorCameraToWindowCameras(id);
+#endif
 		}
 	}
 
 	void ResizeScenePasses(unsigned int width, unsigned int height)
 	{
+#if defined(_EDITOR)
+		using namespace Editor;
+#endif
 		for (auto& [id, _] : scenesUnits)
 		{
+#if defined(_EDITOR)
+			RemoveSceneUnitEditorCameraFromWindowCameras(id);
+#endif
 			auto& cameras = GetWindowCameras(id);
 			for (auto& uuid : cameras)
 			{
 				CameraSUUUID cam = MAKESUUUID(id, uuid);
 				cam->ResizePasses(width, height);
 			}
+#if defined(_EDITOR)
+			AddSceneUnitEditorCameraToWindowCameras(id);
+#endif
 		}
 	}
 

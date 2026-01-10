@@ -733,6 +733,16 @@ namespace Editor
 		InsertCameraIntoSwapChainCameras(id, levelCameraUUID[id].uuid());
 	}
 
+	void RemoveSceneUnitEditorCameraFromWindowCameras(SceneUnitId id)
+	{
+		EraseCameraFromWindowCameras(id, editorCameraUUID[id].uuid());
+	}
+
+	void AddSceneUnitEditorCameraToWindowCameras(SceneUnitId id)
+	{
+		InsertCameraIntoWindowCameras(id, editorCameraUUID[id].uuid());
+	}
+
 	void BindLightsToEditorCamera(SceneUnitId id, CameraSUUUID cam)
 	{
 		for (JUUID uuid : GetLights(id))
@@ -2001,7 +2011,7 @@ namespace Editor
 		}
 
 		std::set<SceneObject*> objects;
-		std::transform(selectedSceneObjects.at(id).begin(), selectedSceneObjects.at(id).end(), std::inserter(objects, objects.begin()), [](JUUID uuid) { return GetSceneObjectPointer(currentSceneUnitId, uuid); });
+		std::transform(selectedSceneObjects.at(id).begin(), selectedSceneObjects.at(id).end(), std::inserter(objects, objects.begin()), [&](JUUID uuid) { return GetSceneObjectPointer(id, uuid); });
 
 		BoundingBox bb = GetContainedBoundingBox(objects);
 		if (!boundingBox.empty())

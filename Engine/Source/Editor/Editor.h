@@ -70,6 +70,8 @@ namespace Editor {
 	void WriteSceneUnitEditorPlayCameraConstantsBuffer(SceneUnitId unit);
 	void SwitchToSceneUnitEditorCamera(SceneUnitId id);
 	void SwitchToSceneUnitEditorPlayCamera(SceneUnitId id);
+	void RemoveSceneUnitEditorCameraFromWindowCameras(SceneUnitId id);
+	void AddSceneUnitEditorCameraToWindowCameras(SceneUnitId id);
 	void BindLightsToEditorCamera(SceneUnitId id, CameraSUUUID cam);
 	void DrawApplicationBar();
 	void DrawLevelSelectorModal();
