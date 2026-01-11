@@ -9,6 +9,7 @@
 #include <Renderer.h>
 #include <Scene.h>
 #include <NoMath.h>
+#include <Game.h>
 
 extern std::unique_ptr<Renderer> renderer;
 extern DX::StepTimer timer;
@@ -20,7 +21,10 @@ namespace Editor
 
 void AnimationSequencerModal::Initialize(JUUID uuid)
 {
-	showing = true;
+	using namespace Scene;
+
+	unit = 0;
+	showing = false;
 	initializing = true;
 	destroying = false;
 	model3dUUID = uuid;
@@ -47,148 +51,133 @@ void AnimationSequencerModal::Initialize(JUUID uuid)
 	mousePreviewLeftClickPressed = false;
 	mousePreviewLeftClickLastCoords = ImVec2();
 	wheelCapture = false;
+
+	cameraUUID = getUUID();
+	ambientLightUUID = getUUID();
+	directionalLightUUID = getUUID();
+	renderableUUID = getUUID();
+	floorUUID = getUUID();
+
+	CreateIsolatedSceneLevelAsync("modal", GetModalLevelJson(), [&](SceneUnitId id)
+		{
+			unit = id;
+			renderable = MAKESUUUID(id, renderableUUID);
+			floor = MAKESUUUID(id, floorUUID);
+			camera = MAKESUUUID(id, cameraUUID);
+			ambientLight = MAKESUUUID(id, ambientLightUUID);
+			directionalLight = MAKESUUUID(id, directionalLightUUID);
+			EnableSceneUnitRendering(id);
+			showing = true;
+		}
+	);
 }
 
-void AnimationSequencerModal::LoadSceneObjects()
+nlohmann::json AnimationSequencerModal::GetModalLevelJson()
 {
-	/*
-	using namespace Scene;
-
-	camera = getUUID();
-	ambientLight = getUUID();
-	directionalLight = getUUID();
-	renderable = getUUID();
-	floor = getUUID();
-	sfx->Juuid();
-
-	nlohmann::json cameraJson =
-	{
-		{ "fitWindow", false },
-		{ "name", "cam-preview" },
-		{ "perspective",
+	nlohmann::json modal = {
+		{ "cameras",
 			{
-				{ "farZ", 100.0 },
-				{ "fovAngleY", 20.0 },
-				{ "nearZ", 0.01 },
-				{ "width", 1778 },
-				{ "height", 1000 }
+				{
+					{ "fitWindow", false },
+					{ "name", "cam-preview" },
+					{ "perspective",
+						{
+							{ "farZ", 100.0 },
+							{ "fovAngleY", 20.0 },
+							{ "nearZ", 0.01 },
+							{ "width", 1778 },
+							{ "height", 1000 }
+						}
+					},
+					{ "position", FromXMFLOAT3(cameraInitialPos) },
+					{ "freeposition", FromXMFLOAT3(cameraInitialPos) },
+					{ "projectionType", "Perspective" },
+					{ "rotation", FromXMFLOAT3(cameraInitialRot) },
+					{ "freerotation", FromXMFLOAT3(cameraInitialRot) },
+					{ "speed", 0.05000000074505806 },
+					{ "uuid", cameraUUID },
+					{
+						"renderPasses", { GetRenderPassUUIDByName("ModelPreviewPass")}
+					},
+					{ "mouseController", false },
+					{ "useSwapChain", false },
+					{ "hidden", true },
+					{ "modelDistanceScale", 1.0f } //dynamic magic
+				}
 			}
 		},
-		{ "position", FromXMFLOAT3(cameraInitialPos) },
-		{ "freeposition", FromXMFLOAT3(cameraInitialPos) },
-		{ "projectionType", "Perspective" },
-		{ "rotation", FromXMFLOAT3(cameraInitialRot) },
-		{ "freerotation", FromXMFLOAT3(cameraInitialRot) },
-		{ "speed", 0.05000000074505806 },
-		{ "uuid", camera() },
-		{
-			"renderPasses", { GetRenderPassUUIDByName("ModelPreviewPass")}
-		},
-		{ "mouseController", false },
-		{ "useSwapChain", false },
-		{ "hidden", true },
-		{ "modelDistanceScale", 1.0f } //dynamic magic
-	};
-
-	nlohmann::json ambientLightJson =
-	{
-		{ "color", { 0.25000000074505806, 0.25000000074505806, 0.25000000074505806 } },
-		{ "lightType", "Ambient" },
-		{ "name", "light.0.amb-preview" },
-		{ "uuid", ambientLight()},
-		{ "cameras", { camera() }}
-	};
-
-	nlohmann::json directionalLightJson =
-	{
-		{ "color", { 1.0, 1.0, 1.0} },
-		{ "farZ" , 100.0},
-		{ "nearZ", 0.01},
-		{ "hasShadowMaps", true },
-		{ "shadowMapHeight", 4096},
-		{ "shadowMapWidth", 4096},
-		{ "rotation", {40.31087875366211, -10.30000039935112, 0.0} },
-		{ "lightType", "Directional"},
-		{ "name", "light.1.dir-preview"},
-		{ "uuid", directionalLight() },
-		{ "zBias", 0.000002 },
-		{ "cameras", { camera() } }
-	};
-
-	nlohmann::json animableJson =
-	{
-		{ "castShadows", true },
-		{ "shadowed", false },
-		{ "model", model3dUUID()},
-		{ "name", "preview-model" },
-		{ "position", { 0.0, 0.0, 0.0} },
-		{ "rotation", { 0.0, -90.0, 0.0 }},
-		{ "scale", { 0.1, 0.1, 0.1} },
-		{ "uuid", renderable() },
-		{ "cameras", { camera() } },
-		{ "animationUseTransformation", true }
-	};
-
-	nlohmann::json floorJson =
-	{
-		{ "castShadows", false },
-		{ "shadowed", true },
+		{ "lights",
+			{
 				{
-					"meshMaterials",
-					{
-						{
-							{ "material", "ecd1688c-73d6-49d0-870f-ca916a417c49"},
-							{ "mesh", "d41e5c29-49bb-4f2c-aa2b-da781fbac512" }
-						}
-					}
+					{ "color", { 0.25000000074505806, 0.25000000074505806, 0.25000000074505806 } },
+					{ "lightType", "Ambient" },
+					{ "name", "light.0.amb-preview" },
+					{ "uuid", ambientLightUUID},
+					{ "cameras", { cameraUUID }}
 				},
-		{ "name", "preview-floor" },
-		{ "position", { 0.0, 0.0, 0.0} },
-		{ "scale", { 100.0, 100.0, 100.0} },
-		{ "uuid", floor() },
-		{ "cameras", { camera() } },
-		{ "floorColor", { 0.5f, 0.5f, 0.5f } }
+				{
+					{ "color", { 1.0, 1.0, 1.0} },
+					{ "farZ" , 100.0},
+					{ "nearZ", 0.01},
+					{ "hasShadowMaps", true },
+					{ "shadowMapHeight", 4096},
+					{ "shadowMapWidth", 4096},
+					{ "rotation", {40.31087875366211, -10.30000039935112, 0.0} },
+					{ "lightType", "Directional"},
+					{ "name", "light.1.dir-preview"},
+					{ "uuid", directionalLightUUID },
+					{ "zBias", 0.000002 },
+					{ "cameras", { cameraUUID } }
+				}
+			}
+		},
+		{ "renderables",
+			{
+				{
+					{ "castShadows", true },
+					{ "shadowed", false },
+					{ "model", model3dUUID()},
+					{ "name", "preview-model" },
+					{ "position", { 0.0, 0.0, 0.0} },
+					{ "rotation", { 0.0, -90.0, 0.0 }},
+					{ "scale", { 0.1, 0.1, 0.1} },
+					{ "uuid", renderableUUID },
+					{ "cameras", { cameraUUID } },
+					{ "animationUseTransformation", true }
+				},
+				{
+					{ "castShadows", false },
+					{ "shadowed", true },
+					{
+						"meshMaterials",
+						{
+							{
+								{ "material", "ecd1688c-73d6-49d0-870f-ca916a417c49"},
+								{ "mesh", "d41e5c29-49bb-4f2c-aa2b-da781fbac512" }
+							}
+						}
+					},
+					{ "name", "preview-floor" },
+					{ "position", { 0.0, 0.0, 0.0} },
+					{ "scale", { 100.0, 100.0, 100.0} },
+					{ "uuid", floorUUID },
+					{ "cameras", { cameraUUID } },
+					{ "floorColor", { 0.5f, 0.5f, 0.5f } }
+				}
+			}
+		}
 	};
 
-	CreateCamera(cameraJson);
-	CreateLight(ambientLightJson);
-	CreateLight(directionalLightJson);
-	CreateRenderable(animableJson);
-	CreateRenderable(floorJson);
-
-	camera->BindToScene();
-	renderable->BindToScene();
-	floor->BindToScene();
-	ambientLight->BindToScene();
-	directionalLight->BindToScene();
-
-	camera->UpdateProjection();
-	directionalLight->shadowMapCameras[0]->UpdateProjection();
-
-	selectedSequence = "";
-	initializing = false;
-
-	Step();
-	camera->at("freeposition") = FromXMFLOAT3(camera->position());
-	camera->at("freerotation") = FromXMFLOAT3(camera->rotation());
-	*/
+	return modal;
 }
 
 void AnimationSequencerModal::DestroySceneObjects()
 {
 	using namespace Scene;
 
-	renderable->UnbindFromScene();
-	floor->UnbindFromScene();
-	directionalLight->UnbindFromScene();
-	ambientLight->UnbindFromScene();
-	camera->UnbindFromScene();
-
-	DeleteRenderable(renderable->unit, renderable.uuid());
-	DeleteRenderable(floor->unit, floor.uuid());
-	DeleteLight(directionalLight->unit, directionalLight.uuid());
-	DeleteLight(ambientLight->unit, ambientLight.uuid());
-	DeleteCamera(camera->unit, camera.uuid());
+	DestroyScene(unit);
+	unit = 0;
+	showing = false;
 
 	renderable.clear();
 	floor.clear();
@@ -202,66 +191,75 @@ void AnimationSequencerModal::DestroySceneObjects()
 
 void AnimationSequencerModal::Step()
 {
-	//XMFLOAT3 baseColor = ToXMFLOAT3(floor->at("floorColor"));
-	//floor->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, renderer->backBufferIndex);
+	using namespace Scene;
 
-	//if (adjustToBoundingBox)
-	//{
-	//	//https://stackoverflow.com/a/32836605
-	//	BoundingBox modelBB = renderable->GetBoundingBox();
-	//	BoundingSphere modelBBS;
-	//	BoundingSphere::CreateFromBoundingBox(modelBBS, modelBB);
+	auto& scene = GetSceneUnit(unit);
+	XMFLOAT3 baseColor = ToXMFLOAT3(floor->at("floorColor"));
+	floor->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
+	floor->WriteConstantsBuffer(scene->Frame());
 
-	//	float modelDistanceScale = camera->at("modelDistanceScale");
-	//	float fov = XMConvertToRadians(camera->perspective().fovAngleY);
-	//	float distance = modelDistanceScale * (adjustToBoundingBox ? (modelBBS.Radius * 2.0f) / (XMScalarSin(fov) / XMScalarCos(fov)) : 1.0f);
+	if (selectedSequence != "")
+	{
+		Sequence& seq = sequencePlayer.sequence;
+		if (playingSequence)
+		{
+			float totalTime = static_cast<float>(seq.totalFrames) / static_cast<float>(seq.framesPerSecond);
+			playingSequenceTime += static_cast<float>(timer.GetElapsedSeconds());
+			bool stopPlayer = false;
 
-	//	XMVECTOR camFwV = camera->forward();
-	//	XMFLOAT3 BBPos = modelBB.Center;
-	//	XMVECTOR BBPosV = XMLoadFloat3(&BBPos);
-	//	XMVECTOR camPosV = XMVectorSubtract(BBPosV, XMVectorScale(camFwV, distance));
-	//	XMFLOAT3 camPos;
-	//	XMStoreFloat3(&camPos, camPosV);
-	//	camera->position(camPos);
-	//}
-	//else
-	//{
-	//	camera->at("position") = camera->at("freeposition");
-	//	camera->at("rotation") = camera->at("freerotation");
-	//}
+			if (playingSequenceLoop)
+			{
+				playingSequenceTime = std::fmodf(playingSequenceTime, totalTime);
+			}
+			else
+			{
+				playingSequenceTime = std::min(playingSequenceTime, totalTime);
+				stopPlayer = playingSequenceTime == totalTime;
+			}
+			int frame = static_cast<int>(static_cast<float>(seq.totalFrames) * (playingSequenceTime / totalTime));
+			frame = std::clamp(frame, 0, seq.totalFrames);
+			timelineEditor.selectedFrameInTimeline = frame;
+			sequencePlayer.SetFrame(timelineEditor.GetFrame(seq));
+			if (stopPlayer)
+			{
+				playingSequence = false;
+			}
+		}
+		else
+		{
+			sequencePlayer.SetFrame(timelineEditor.GetFrame(seq), false);
+		}
+		sequencePlayer.ApplyFrameValues(renderable);
+	}
 
-	//if (selectedSequence != "")
-	//{
-	//	Sequence& seq = sequencePlayer.sequence;
-	//	if (playingSequence)
-	//	{
-	//		float totalTime = static_cast<float>(seq.totalFrames) / static_cast<float>(seq.framesPerSecond);
-	//		playingSequenceTime += static_cast<float>(timer.GetElapsedSeconds());
-	//		bool stopPlayer = false;
+	if (adjustToBoundingBox)
+	{
+		//https://stackoverflow.com/a/32836605
+		BoundingBox modelBB = renderable->GetBoundingBox();
+		BoundingSphere modelBBS;
+		BoundingSphere::CreateFromBoundingBox(modelBBS, modelBB);
 
-	//		if (playingSequenceLoop)
-	//		{
-	//			playingSequenceTime = std::fmodf(playingSequenceTime, totalTime);
-	//		}
-	//		else
-	//		{
-	//			playingSequenceTime = std::min(playingSequenceTime, totalTime);
-	//			stopPlayer = playingSequenceTime == totalTime;
-	//		}
-	//		int frame = static_cast<int>(static_cast<float>(seq.totalFrames) * (playingSequenceTime / totalTime));
-	//		frame = std::clamp(frame, 0, seq.totalFrames);
-	//		timelineEditor.selectedFrameInTimeline = frame;
-	//		sequencePlayer.SetFrame(timelineEditor.GetFrame(seq));
-	//		if (stopPlayer)
-	//		{
-	//			playingSequence = false;
-	//		}
-	//	}
-	//	else
-	//	{
-	//		sequencePlayer.SetFrame(timelineEditor.GetFrame(seq), false);
-	//	}
-	//}
+		float modelDistanceScale = camera->at("modelDistanceScale");
+		float fov = XMConvertToRadians(camera->perspective().fovAngleY);
+		float distance = modelDistanceScale * (adjustToBoundingBox ? (modelBBS.Radius * 2.0f) / (XMScalarSin(fov) / XMScalarCos(fov)) : 1.0f);
+
+		XMVECTOR camFwV = camera->forward();
+		XMFLOAT3 BBPos = modelBB.Center;
+		XMVECTOR BBPosV = XMLoadFloat3(&BBPos);
+		XMVECTOR camPosV = XMVectorSubtract(BBPosV, XMVectorScale(camFwV, distance));
+		XMFLOAT3 camPos;
+		XMStoreFloat3(&camPos, camPosV);
+		camera->position(camPos);
+	}
+	else
+	{
+		camera->at("position") = camera->at("freeposition");
+		camera->at("rotation") = camera->at("freerotation");
+	}
+
+	camera->WriteConstantsBuffer(scene->Frame());
+	renderable->WriteConstantsBuffer(scene->Frame());
+	WriteConstantsBuffers(unit);
 }
 
 static ImVec2 modelPosAdj(0.0f, 21.0f);
@@ -270,7 +268,8 @@ static ImVec2 sequencerPosAdj(0.0f, 4.0f);
 static float titleBarH = 19.0f;
 void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec2 size)
 {
-	/*
+	Step();
+
 	ImGui::OpenPopup(title);
 
 	ImVec2 modalSize(size.x, size.y + titleBarH);
@@ -296,7 +295,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			if (sequence != "")
 			{
 				Sequence& seq = animationsSequences.sequences.at(sequence);
-				sequencePlayer.SetSequence(seq, renderable());
+				sequencePlayer.SetSequence(seq, unit, renderable.uuid());
 				timelineEditor.Init(renderable, sequencePlayer.sequence);
 				renderable->SetCurrentAnimation(&sequencePlayer);
 			}
@@ -317,7 +316,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			playingSequence = false;
 			playingSequenceTime = 0.0f;
 			timelineEditor.Reset();
-			sequencePlayer.SetSequence(Sequence(), "");
+			sequencePlayer.SetSequence(Sequence(), unit, "");
 			renderable->SetCurrentAnimation(nullptr);
 			selectedTransformationKeyframe = nullptr;
 			keyFrameFrame = -1;
@@ -342,7 +341,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			playingSequence = false;
 			playingSequenceTime = 0.0f;
 			Sequence& seq = animationsSequences.sequences.at(seqName);
-			sequencePlayer.SetSequence(seq, renderable());
+			sequencePlayer.SetSequence(seq, unit, renderable.uuid());
 			timelineEditor.Init(renderable, sequencePlayer.sequence);
 			renderable->SetCurrentAnimation(&sequencePlayer);
 		};
@@ -535,7 +534,6 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 	{
 		SaveAndExit();
 	}
-	*/
 }
 
 void AnimationSequencerModal::DrawTitleBar(const char* title, ImVec2 pos, ImVec2 size, bool& exit)
@@ -648,7 +646,7 @@ void AnimationSequencerModal::DrawSequenceSelector(
 
 void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 {
-	/*if (camera.empty()) return;
+	if (camera.empty()) return;
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
@@ -730,25 +728,25 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 		ImGui::Checkbox("Adjust camera", &adjustToBoundingBox);
 		if (adjustToBoundingBox)
 		{
-			std::vector<JObject*> camV({ GetSceneObjectPointer(camera()) });
+			std::vector<JObject*> camV({ GetSceneObjectPointer(unit,camera.uuid()) });
 			DrawValue<XMFLOAT3, jedv_t_float3_angle>()("rotation", camV);
 			DrawValue<float, jedv_t_float>()("modelDistanceScale", camV);
 		}
 		else
 		{
-			std::vector<JObject*> camV({ GetSceneObjectPointer(camera()) });
+			std::vector<JObject*> camV({ GetSceneObjectPointer(unit,camera.uuid()) });
 			DrawValue<XMFLOAT3, jedv_t_float3>()("freeposition", camV);
 			DrawValue<XMFLOAT3, jedv_t_float3_angle>()("freerotation", camV);
 		}
 
 		ImGui::Text("floor");
-		std::vector<JObject*> floorV({ GetSceneObjectPointer(floor()) });
+		std::vector<JObject*> floorV({ GetSceneObjectPointer(unit,floor.uuid()) });
 		DrawValue<XMFLOAT3, jedv_t_color_float3>()("floorColor", floorV);
 	}
 	ImGui::EndChild();
 
 	ImGui::PopStyleVar();
-	ImGui::PopStyleVar();*/
+	ImGui::PopStyleVar();
 }
 
 void AnimationSequencerModal::DrawTransformationKeyFrameAttributes(TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size)
@@ -1170,6 +1168,7 @@ void AnimationSequencerModal::Exit()
 	renderable->SetCurrentAnimation(nullptr);
 	destroying = true;
 	showing = false;
+	DestroySceneObjects();
 }
 
 void AnimationSequencerModal::SaveAndExit()
@@ -1185,4 +1184,5 @@ void AnimationSequencerModal::SaveAndExit()
 	model3D->animationSequences(animationsSequences);
 	model3D->flag(Model3DJson::Update_animationSequences);
 	Editor::templatesModified = true;
+	DestroySceneObjects();
 }

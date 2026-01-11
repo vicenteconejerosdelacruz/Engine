@@ -110,11 +110,11 @@ namespace Editor {
 
 	//Model3D Animation Sequencer
 	void OpenAnimationSequencer(JUUID uuid);
-	bool PendingAnimationSequencer();
-	bool PendingAnimationSequencerDestruction();
-	void LoadAnimationSequencer();
-	void StepAnimationSequencer();
-	void DestroyAnimationSequencer();
+	//bool PendingAnimationSequencer();
+	//bool PendingAnimationSequencerDestruction();
+	//void LoadAnimationSequencer();
+	//void StepAnimationSequencer();
+	//void DestroyAnimationSequencer();
 
 	//Gizmos
 	void ResetGizmoVariableWorkers(SceneUnitId unit);

@@ -150,7 +150,7 @@ namespace Scene::Level {
 #if defined(_EDITOR)
 		using namespace Editor;
 
-		if (!scene->attached)
+		if (!scene->attached && !scene->isolated)
 		{
 			CreateSceneUnitBillboards(scene->id);
 		}
@@ -209,7 +209,7 @@ namespace Scene::Level {
 		);
 
 #if defined(_EDITOR)
-		if (!scene->attached)
+		if (!scene->attached && !scene->isolated)
 		{
 			CreatePickingPass(scene->id);
 			CreateSceneUnitBoundingBox(scene->id);
@@ -224,7 +224,7 @@ namespace Scene::Level {
 		MapControllers(scene->id);
 		BindSceneObjects(scene->id);
 #if defined(_EDITOR)
-		if (!scene->attached)
+		if (!scene->attached && !scene->isolated)
 		{
 			CopySceneUnitEditorCameraRenderPasses(scene->id);
 		}

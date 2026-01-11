@@ -37,7 +37,18 @@ namespace Game
 	void CreateSceneUnitGame(SceneUnitId id)
 	{
 		GEngineSM gesm = CreateEngineStateMachine(id);
+		RegisterSceneUnitGame(id, gesm);
+	}
+
+	void RegisterSceneUnitGame(SceneUnitId id, GEngineSM& gesm)
+	{
 		gameInstances.insert_or_assign(id, gesm);
+	}
+
+	void DestroySeneUnitGame(SceneUnitId id)
+	{
+		if (gameInstances.contains(id))
+			gameInstances.erase(id);
 	}
 
 	void GameStep()
@@ -46,7 +57,6 @@ namespace Game
 		{
 			gesm.Step();
 		}
-		//ges.Step();
 	}
 
 	void GameRender()

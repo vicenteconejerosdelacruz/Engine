@@ -11,7 +11,10 @@ namespace Game
 		std::function<void(SceneUnitId)> levelLoaded,
 		std::function<void(std::string asset, unsigned int count, unsigned int total)> setProgress
 	);
+	GEngineSM CreateEngineStateMachine(SceneUnitId id);
 	void CreateSceneUnitGame(SceneUnitId id);
+	void RegisterSceneUnitGame(SceneUnitId id, GEngineSM& gesm);
+	void DestroySeneUnitGame(SceneUnitId id);
 	void GameStep();
 	void GameRender();
 	void GamePostRender();

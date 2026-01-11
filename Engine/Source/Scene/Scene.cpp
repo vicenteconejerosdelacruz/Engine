@@ -38,6 +38,11 @@ namespace Editor
 };
 #endif
 
+namespace Game
+{
+	extern void DestroySeneUnitGame(SceneUnitId id);
+};
+
 namespace Scene
 {
 	std::map<SceneUnitId, std::unique_ptr<SceneUnit>> scenesUnits;
@@ -54,6 +59,27 @@ namespace Scene
 			{
 				SceneUnitId unit = nostd::threadIdHash();
 				auto& scene = CreateScene(unit, filename);
+
+				LoadLevel(scene, filename, data, progress);
+
+				scene->sceneUnitLoaded->store(true);
+
+				levelLoaded(unit);
+
+			}, filename, data, levelLoaded, progress
+		);
+		levelThread.detach();
+	}
+
+	void CreateIsolatedSceneLevelAsync(std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
+	{
+		using namespace Scene::Level;
+
+		std::thread levelThread([](std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
+			{
+				SceneUnitId unit = nostd::threadIdHash();
+				auto& scene = CreateScene(unit, filename);
+				scene->isolated = true;
 
 				LoadLevel(scene, filename, data, progress);
 
@@ -119,6 +145,8 @@ namespace Scene
 			{ SO_SoundEffects, DeleteSoundFX }
 		};
 
+		DestroySeneUnitGame(id);
+
 		auto& scene = GetSceneUnit(id);
 		for (auto& [uuid, type] : scene->sceneObjectsTypes)
 		{
@@ -179,6 +207,11 @@ namespace Scene
 			parent->Merge(scene);
 			scene->MarkForDelete();
 		}
+	}
+
+	bool SceneIsIsolated(SceneUnitId id)
+	{
+		return scenesUnits.at(id)->isolated;
 	}
 
 	void ResizeReleaseScenePasses()
@@ -392,8 +425,9 @@ namespace Scene
 	void SceneObjectsStep(DX::StepTimer& timer)
 	{
 		AudioStep(static_cast<FLOAT>(timer.GetElapsedSeconds()));
-		for (auto& [unit, _] : scenesUnits)
+		for (auto& [unit, scene] : scenesUnits)
 		{
+			if (scene->markedForDelete) continue;
 			float dt = static_cast<FLOAT>(timer.GetElapsedSeconds());
 #if defined(_EDITOR)
 			Editor::UpdateBoundingBox(unit);
@@ -587,7 +621,7 @@ namespace Scene
 			if (!renderableSceneUnits.contains(unit) && !scene->attached) continue;
 
 #if defined(_EDITOR)
-			if (!scene->attached && !Editor::IsPlaying(unit))
+			if (!scene->attached && !Editor::IsPlaying(unit) && !SceneIsIsolated(unit))
 			{
 				WriteSceneUnitEditorPlayCameraConstantsBuffer(unit);
 				SwitchToSceneUnitEditorCamera(unit);
@@ -595,7 +629,7 @@ namespace Scene
 #endif
 			scene->Render();
 #if defined(_EDITOR)
-			if (!scene->attached && !Editor::IsPlaying(unit))
+			if (!scene->attached && !Editor::IsPlaying(unit) && !SceneIsIsolated(unit))
 			{
 				SwitchToSceneUnitEditorPlayCamera(unit);
 			}
@@ -613,7 +647,7 @@ namespace Scene
 #endif
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->markedForDelete || (!renderableSceneUnits.contains(unit) && !scene->attached)) continue;
+			if (scene->markedForDelete || (!renderableSceneUnits.contains(unit) && !scene->attached && !SceneIsIsolated(unit))) continue;
 
 			scene->PostRender();
 		}

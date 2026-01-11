@@ -72,6 +72,7 @@ namespace Scene
 		unsigned int deletionFrames;
 		bool attached;
 		bool mergeable;
+		bool isolated;
 		SceneUnitId parentUnit;
 		//scene objects
 		std::unique_ptr<std::atomic_bool> sceneUnitLoaded;

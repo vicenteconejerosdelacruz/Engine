@@ -26,8 +26,17 @@ static inline std::unordered_map<std::string, SequencerModalPopup> StringToSeque
 
 struct AnimationSequencerModal
 {
+	static inline ImGuiWindowFlags defaultChildFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar |
+		ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar |
+		ImGuiWindowFlags_NoMove;
+	static inline ImGuiWindowFlags popupChildFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar |
+		ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoMove;
+	static inline ImGuiWindowFlags timelineWindowFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar;
+
 	void Initialize(JUUID uuid);
-	void LoadSceneObjects();
+	nlohmann::json GetModalLevelJson();
 	void DestroySceneObjects();
 	void Step();
 	void DrawSequencer(const char* title, ImVec2 pos, ImVec2 size);
@@ -45,23 +54,20 @@ struct AnimationSequencerModal
 	void Exit();
 	void SaveAndExit();
 
-	static inline ImGuiWindowFlags defaultChildFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar |
-		ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar |
-		ImGuiWindowFlags_NoMove;
-	static inline ImGuiWindowFlags popupChildFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar |
-		ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove;
-	static inline ImGuiWindowFlags timelineWindowFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar;
-
+	SceneUnitId unit;
 	bool showing = false;
 	bool initializing = false;
 	bool destroying = false;
 	Model3DInstanceUUID model3dUUID;
+	JUUID renderableUUID;
 	RenderableSUUUID renderable;
+	JUUID floorUUID;
 	RenderableSUUUID floor;
+	JUUID cameraUUID;
 	CameraSUUUID camera;
+	JUUID ambientLightUUID;
 	LightSUUUID ambientLight;
+	JUUID directionalLightUUID;
 	LightSUUUID directionalLight;
 	Model3DJsonUUID model3D;
 	XMFLOAT3 cameraInitialPos;

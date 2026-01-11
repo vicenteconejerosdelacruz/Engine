@@ -685,6 +685,7 @@ namespace Editor
 				templateModal.DrawCreationPopup(TemplateTypePanelMenuItems.at(templateModal.type));
 			if (deletePrompt.showing)
 				deletePrompt.DrawPrompt("Delete Template");
+			*/
 			if (animationSequencer.showing)
 			{
 				static const float seqAdj = 8.0f;
@@ -694,7 +695,6 @@ namespace Editor
 				ImVec2 seqSize = ImVec2(viewport->WorkSize.x * (1.0f - (2.0f / seqAdj)), viewport->WorkSize.y * (1.0f - (2.0f / seqAdj)));
 				animationSequencer.DrawSequencer("Animation Sequencer", seqPos, seqSize);
 			}
-			*/
 		}
 
 		// Rendering
@@ -1613,34 +1613,44 @@ namespace Editor
 		animationSequencer.Initialize(uuid);
 	}
 
+	/*
 	bool PendingAnimationSequencer()
 	{
 		return animationSequencer.initializing;
 	}
+	*/
 
+	/*
 	bool PendingAnimationSequencerDestruction()
 	{
 		return animationSequencer.destroying;
 	}
+	*/
 
+	/*
 	void LoadAnimationSequencer()
 	{
 		animationSequencer.LoadSceneObjects();
 		animationSequencer.initializing = false;
 	}
+	*/
 
+	/*
 	void StepAnimationSequencer()
 	{
 		if (!animationSequencer.showing || animationSequencer.initializing || animationSequencer.destroying) return;
 
 		animationSequencer.Step();
 	}
+	*/
 
+	/*
 	void DestroyAnimationSequencer()
 	{
 		animationSequencer.DestroySceneObjects();
 		animationSequencer.destroying = false;
 	}
+	*/
 
 	//Gizmos
 	void ResetGizmoVariableWorkers(SceneUnitId id)
@@ -1965,6 +1975,7 @@ namespace Editor
 
 	void EraseSceneObjectFromSelection(SceneUnitId unit, JUUID uuid)
 	{
+		if (!sceneObjectEdition.contains(unit)) return;
 		sceneObjectEdition.at(unit).selected.erase(uuid);
 		SetSceneObjectSelection(unit, uuid, false);
 	}

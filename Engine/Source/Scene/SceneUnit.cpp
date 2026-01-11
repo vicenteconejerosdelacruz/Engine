@@ -22,6 +22,7 @@ namespace Scene
 		deletionFrames = framesUntilDeletion;
 		attached = false;
 		mergeable = false;
+		isolated = false;
 		runningCompute = false;
 		abortLoading = std::make_unique<std::atomic_bool>(false);
 		sceneUnitLoaded = std::make_unique<std::atomic_bool>(false);
@@ -139,14 +140,14 @@ namespace Scene
 #if defined(_EDITOR)
 		using namespace Editor;
 #endif
-		if (!sceneUnitLoaded->load())
+		if (!sceneUnitLoaded->load() || markedForDelete)
 			return;
 
 		if (renderer->GetBackBufferIndex() == Frame() && !attached)
 		{
 
 #if defined(_EDITOR)
-			if (!IsPlaying(id))
+			if (!IsPlaying(id) && !SceneIsIsolated(id))
 				HandleEditorMouseMovements(id);
 #endif
 			WriteConstantsBuffers(id);
