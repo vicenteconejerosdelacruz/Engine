@@ -39,6 +39,7 @@ struct AnimationSequencerModal
 	nlohmann::json GetModalLevelJson();
 	void DestroySceneObjects();
 	void Step();
+	void DrawLoading();
 	void DrawSequencer(const char* title, ImVec2 pos, ImVec2 size);
 	void DrawTitleBar(const char* title, ImVec2 pos, ImVec2 size, bool& exit);
 	void DrawSequenceSelector(ImVec2 curPos, std::function<void(std::string)> onSelectSequence, std::function<void(std::string)> onEraseSequence, std::function<void(std::string)> onRenameSequence, std::function<void(std::string)> onCloneSequence, std::function<void()> onAddSequence);
@@ -55,6 +56,9 @@ struct AnimationSequencerModal
 	void SaveAndExit();
 
 	SceneUnitId unit;
+	std::string asset;
+	unsigned int count;
+	unsigned int total;
 	bool showing = false;
 	bool initializing = false;
 	bool destroying = false;

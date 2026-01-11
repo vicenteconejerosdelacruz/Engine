@@ -695,6 +695,10 @@ namespace Editor
 				ImVec2 seqSize = ImVec2(viewport->WorkSize.x * (1.0f - (2.0f / seqAdj)), viewport->WorkSize.y * (1.0f - (2.0f / seqAdj)));
 				animationSequencer.DrawSequencer("Animation Sequencer", seqPos, seqSize);
 			}
+			else if (animationSequencer.initializing)
+			{
+				animationSequencer.DrawLoading();
+			}
 		}
 
 		// Rendering

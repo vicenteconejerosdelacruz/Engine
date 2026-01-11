@@ -24,6 +24,9 @@ void AnimationSequencerModal::Initialize(JUUID uuid)
 	using namespace Scene;
 
 	unit = 0;
+	asset = "";
+	count = 0U;
+	total = 0U;
 	showing = false;
 	initializing = true;
 	destroying = false;
@@ -68,6 +71,13 @@ void AnimationSequencerModal::Initialize(JUUID uuid)
 			directionalLight = MAKESUUUID(id, directionalLightUUID);
 			EnableSceneUnitRendering(id);
 			showing = true;
+			initializing = false;
+		},
+		[&](std::string asset, unsigned int count, unsigned int total)
+		{
+			this->asset = asset;
+			this->count = count;
+			this->total = total;
 		}
 	);
 }
@@ -260,6 +270,31 @@ void AnimationSequencerModal::Step()
 	camera->WriteConstantsBuffer(scene->Frame());
 	renderable->WriteConstantsBuffer(scene->Frame());
 	WriteConstantsBuffers(unit);
+}
+
+void AnimationSequencerModal::DrawLoading()
+{
+	std::string title = "Loading";
+
+	ImGui::OpenPopup(title.c_str());
+
+	const ImGuiViewport* viewport = ImGui::GetMainViewport();
+	ImVec2 modalSize = ImVec2(300.0f, 70.0f);
+	ImVec2 modalPos = ImVec2(viewport->WorkSize.x * 0.5f - modalSize.x * 0.5f, viewport->WorkSize.y * 0.5f - modalSize.y * 0.5f);
+	ImGui::SetNextWindowPos(modalPos);
+	ImGui::SetNextWindowSize(modalSize);
+
+	if (ImGui::BeginPopupModal(title.c_str(), nullptr,
+		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
+	))
+	{
+		ImGui::Text(asset.c_str());
+		float progress = static_cast<float>(count) / static_cast<float>(total);
+		ImGui::ProgressBar(progress, ImVec2(-1.0f, 0.0f), "");
+
+		ImGui::EndPopup();
+	}
 }
 
 static ImVec2 modelPosAdj(0.0f, 21.0f);
@@ -676,6 +711,7 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 					float modelDistanceScale = camera->at("modelDistanceScale");
 					modelDistanceScale += io.MouseWheel;
 					camera->at("modelDistanceScale") = modelDistanceScale;
+					Step();
 				}
 			}
 			if (ImGui::IsMouseDown(0) && !mousePreviewLeftClickPressed)
@@ -705,6 +741,7 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 					camRot.y += delta.x;
 					camRot.x += delta.y;
 					camera->rotation(camRot);
+					Step();
 				}
 			}
 		}

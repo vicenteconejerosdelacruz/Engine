@@ -180,6 +180,7 @@ namespace Scene::Level {
 
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Renderables), [&](nlohmann::json& json)
 			{
+				progress(json.at("name"), count, total);
 				CreateSURenderable(scene->id, json);
 				scene->renderablesInLoadingPool.insert(json.at("uuid"));
 				count++;
@@ -188,6 +189,7 @@ namespace Scene::Level {
 		);
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Cameras), [&](nlohmann::json& json)
 			{
+				progress(json.at("name"), count, total);
 				CreateSUCamera(scene->id, json);
 				count++;
 				progress(json.at("name"), count, total);
@@ -195,6 +197,7 @@ namespace Scene::Level {
 		);
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Lights), [&](nlohmann::json& json)
 			{
+				progress(json.at("name"), count, total);
 				CreateSULight(scene->id, json);
 				count++;
 				progress(json.at("name"), count, total);
@@ -202,6 +205,7 @@ namespace Scene::Level {
 		);
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_SoundEffects), [&](nlohmann::json& json)
 			{
+				progress(json.at("name"), count, total);
 				CreateSUSoundFX(scene->id, json);
 				count++;
 				progress(json.at("name"), count, total);
