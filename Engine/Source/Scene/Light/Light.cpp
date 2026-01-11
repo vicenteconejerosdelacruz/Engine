@@ -126,9 +126,9 @@ namespace Scene
 #include <LightAtt.h>
 #include <JEnd.h>
 
-		if (!hasShadowMaps()) return;
-
 		UnbindCameras();
+
+		if (!hasShadowMaps()) return;
 
 #if defined(_EDITOR)
 		DestroyShadowMapMinMaxChain();
@@ -146,6 +146,8 @@ namespace Scene
 
 	void Light::UnbindCamera(JUUID cuuid)
 	{
+		CameraSUUUID cam = MAKESUUUID(unit, cuuid);
+		cam->UnbindLight(MAKESUUUID(unit, uuid()));
 		Scene::UnbindFromScene(unit, uuid(), cuuid);
 	}
 
@@ -340,7 +342,7 @@ namespace Scene
 		//			Light::Update_position, Light::Update_rotation, Light::Update_dirDist
 		//		};
 		//
-		auto& lights = GetLights(id);
+		auto lights = GetLights(id);
 		//auto lights = nostd::GetUUIDS(LightsceneObjects);
 
 		for (auto& uuid : lights)
@@ -458,12 +460,12 @@ namespace Scene
 			//					{
 			//						l->DestroyShadowMapMinMaxChain();
 			//					}
-			for (auto l : lightsToDelete)
-			{
-				EraseLightFromLights(l->unit, l.uuid());
-				EraseLightFromShadowMapLights(l->unit, l.uuid());
-				DeleteLightSUSceneObject(l->unit, l.uuid());
-			}
+			//for (auto l : lightsToDelete)
+			//{
+			//	EraseLightFromLights(l->unit, l.uuid());
+			//	EraseLightFromShadowMapLights(l->unit, l.uuid());
+			//	DeleteLightSUSceneObject(l->unit, l.uuid());
+			//}
 			//				}
 			//			);
 			//		}
@@ -477,6 +479,13 @@ namespace Scene
 			//			l->UpdateShadowMapCameraTransformation();
 			//		}
 			//#endif
+		}
+
+		for (auto l : lightsToDelete)
+		{
+			EraseLightFromLights(l->unit, l.uuid());
+			EraseLightFromShadowMapLights(l->unit, l.uuid());
+			DeleteLightSUSceneObject(l->unit, l.uuid());
 		}
 	}
 

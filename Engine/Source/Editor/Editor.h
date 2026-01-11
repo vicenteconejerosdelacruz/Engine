@@ -150,7 +150,7 @@ namespace Editor {
 	void BindPickingRenderables(SceneUnitId id);
 	void BindRenderableToPickingPass(RenderableSUUUID r);
 	//void UnbindPickingRenderables();
-	//void UnbindRenderableFromPickingPass(RenderableUUID r);
+	void UnbindRenderableFromPickingPass(RenderableSUUUID r);
 	void RenderPickingPass(SceneUnitId id, CameraSUUUID camera);
 	void PickFromScene(SceneUnitId id);
 	void PickSceneObject(SceneUnitId id, unsigned int pickedObjectId);
@@ -164,13 +164,13 @@ namespace Editor {
 	//Billboards
 	JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraSUUUID camera, std::string name, std::string material, std::string pickingMaterial);
 	void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
-	//JUUID GetBillboard(JUUID sceneObject);
+	JUUID GetBillboard(SceneUnitId id, JUUID sceneObject);
 	void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 	void CreateRegisteredBillboards(SceneUnitId id);
 	bool PendingBillboards(SceneUnitId id);
 	//bool PendingBillboardsDestruction();
 	void UpdateBillboards();
-	//void DestroyPendingBillboards();
+	void DestroyPendingBillboards();
 	//void DestroyBillboards();
 	//void ClearBillboardsRegistry();
 

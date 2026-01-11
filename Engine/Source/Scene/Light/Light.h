@@ -187,6 +187,7 @@ namespace Scene {
 		void UnbindCameras();
 		void UnbindCamera(JUUID cuuid);
 		void UnbindRenderablesFromShadowMapCameras();
+		void UnbindRenderableFromShadowMapCamera(RenderableSUUUID r);
 
 		void CreateShadowMap();
 		nlohmann::json CreateDirectionalShadowMapCameraJson(unsigned camIndex);

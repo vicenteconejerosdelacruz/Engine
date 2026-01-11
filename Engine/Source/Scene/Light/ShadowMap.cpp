@@ -71,6 +71,15 @@ namespace Scene
 		}
 	}
 
+	void Light::UnbindRenderableFromShadowMapCamera(RenderableSUUUID r)
+	{
+		for (auto& cam : shadowMapCameras)
+		{
+			cam->UnbindRenderable(r);
+			Scene::UnbindFromScene(unit, cam.uuid(), r.uuid());
+		}
+	}
+
 	void Light::CreateShadowMap()
 	{
 		switch (lightType())

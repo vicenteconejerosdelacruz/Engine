@@ -589,6 +589,7 @@ namespace Editor
 	void EditorStep()
 	{
 		BuildAssetsTree();
+		DestroyPendingBillboards();
 	}
 
 	void HandleEditorMouseMovements(SceneUnitId id)
@@ -2267,16 +2268,19 @@ namespace Editor
 			UnbindRenderableFromPickingPass(uuid);
 		}
 	}
-	*//*
-	void UnbindRenderableFromPickingPass(RenderableUUID r)
+	*/
+
+	void UnbindRenderableFromPickingPass(RenderableSUUUID r)
 	{
-		auto pass = mousePicking.pickingPass;
+#if !defined(_EDITOR_PICKINGPASS)
+		return;
+#endif
+		auto pass = mousePicking.pickingPass.at(r.unit());
 		r->DestroyRenderPassMaterialsInstances(pass);
 		r->DestroyRenderPassConstantsBuffersInstances(pass);
 		r->DestroyRenderPassRootSignatures(pass);
 		r->DestroyRenderPassPipelineStates(pass);
 	}
-	*/
 
 	void RenderPickingPass(SceneUnitId id, CameraSUUUID camera)
 	{
@@ -2422,6 +2426,9 @@ namespace Editor
 	//Billboards
 	JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraSUUUID camera, std::string name, std::string material, std::string pickingMaterial)
 	{
+#if !defined(_EDITOR_BILLBOARD)
+		return "";
+#endif
 		std::string jname = name;
 		jname += "-billboard";
 		JUUID uuid = getUUID();
@@ -2472,33 +2479,34 @@ namespace Editor
 		billboards.at(id).billboardRegistry.insert_or_assign(sceneObject, MAKESUUUID(id, ""));
 	}
 
-	/*
-	JUUID GetBillboard(JUUID sceneObject)
+	JUUID GetBillboard(SceneUnitId id, JUUID sceneObject)
 	{
-		return billboardRegistry.contains(sceneObject) ? billboardRegistry.at(sceneObject)() : "";
+#if !defined(_EDITOR_BILLBOARD)
+		return "";
+#endif
+		return billboards.at(id).billboardRegistry.contains(sceneObject) ? billboards.at(id).billboardRegistry.at(sceneObject).uuid() : "";
 	}
-	*/
 
 	void DestroyBillboard(SceneUnitId id, JUUID sceneObject)
 	{
-		/*
-		JUUID billboard = GetBillboard(sceneObject);
+#if !defined(_EDITOR_BILLBOARD)
+		return;
+#endif
+		JUUID billboard = GetBillboard(id, sceneObject);
 		if (billboard.empty())
 			return;
 
-		billboardsToDestroy.insert(billboard);
-		billboardRegistry.erase(sceneObject);
-		*/
+		billboards.at(id).billboardsToDestroy.insert(MAKESUUUID(id, billboard));
+		billboards.at(id).billboardRegistry.erase(sceneObject);
 	}
 
 	void CreateRegisteredBillboards(SceneUnitId id)
 	{
+#if !defined(_EDITOR_BILLBOARD)
+		return;
+#endif
 		if (!PendingBillboards(id)) return;
 
-		//auto& scene = GetSceneUnit(currentSceneUnitId);
-		//if (scene->loading->load()) return;
-		//
-		//scene->ResetLoadingCommandList();
 		auto& reg = billboards.at(id).billboardRegistry;
 
 		CameraSUUUID camera = MAKESUUUID(id, *GetSwapChainCameras(id).begin());
@@ -2557,18 +2565,29 @@ namespace Editor
 		}
 	}
 
-	/*
-	void Editor::DestroyPendingBillboards()
+	void DestroyPendingBillboards()
 	{
-		for (auto b : billboardsToDestroy)
+		if (!currentSceneUnitId || GetCountFromMouseCameras(currentSceneUnitId) == 0ULL) return;
+
+		auto& reg = billboards.at(currentSceneUnitId).billboardsToDestroy;
+
+		for (auto b : reg)
 		{
-			Editor::UnbindRenderableFromPickingPass(b);
-			EraseRenderableFromRenderables(b());
-			DeleteRenderableSceneObject(b());
+			UnbindRenderableFromPickingPass(b);
+			EraseRenderableFromRenderables(b.unit(), b.uuid());
+			DeleteRenderableSUSceneObject(b.unit(), b.uuid());
 		}
-		billboardsToDestroy.clear();
+		reg.clear();
+		//for (auto b : billboardsToDestroy)
+		//{
+		//	Editor::UnbindRenderableFromPickingPass(b);
+		//	EraseRenderableFromRenderables(b());
+		//	DeleteRenderableSceneObject(b());
+		//}
+		//billboardsToDestroy.clear();
 	}
-	*//*
+
+	/*
 	void DestroyBillboards()
 	{
 		for (auto it = billboardRegistry.begin(); it != billboardRegistry.end(); )

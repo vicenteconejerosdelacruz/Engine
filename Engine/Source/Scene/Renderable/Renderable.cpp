@@ -170,6 +170,7 @@ namespace Scene
 #include <RenderableAtt.h>
 #include <JEnd.h>
 
+		UnbindCameras();
 		UnbindMaterialsChangesCallback();
 		UnbindModelChangesCallback();
 		Scene::UnbindFromScene(unit, uuid());
@@ -198,10 +199,22 @@ namespace Scene
 				continue;
 			UnbindCamera(uuid);
 		}
+
+		if (castShadows())
+		{
+			auto smlights = GetShadowMapLights(unit);
+			for (auto& uuid : smlights)
+			{
+				LightSUUUID l = MAKESUUUID(unit, uuid);
+				l->UnbindRenderableFromShadowMapCamera(SUuuid());
+			}
+		}
 	}
 
 	void Renderable::UnbindCamera(JUUID cuuid)
 	{
+		CameraSUUUID cam = MAKESUUUID(unit, cuuid);
+		cam->UnbindRenderable(SUuuid());
 		Scene::UnbindFromScene(unit, uuid(), cuuid);
 	}
 
