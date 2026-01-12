@@ -25,6 +25,8 @@ extern DX::StepTimer timer;
 
 namespace Game
 {
+	auto* This() { return ContextController<VenomController>(); };
+
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
@@ -36,73 +38,7 @@ namespace Game
 	static XMFLOAT2 zBounds = { -6.8f ,0.90f };
 
 	//JS Module
-	static std::unique_ptr<v8pp::module> v8ppModule = nullptr;
-	static void animationUseTransformation(bool value)
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->venom->animationUseTransformation(value);
-	}
-	static void VenomReady()
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->VenomReady();
-	}
-	static void StartVenomNextPunchWindow()
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->StartVenomNextPunchWindow();
-	}
-	static void EvaluateVenomNextPunch()
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->EvaluateVenomNextPunch();
-	}
-	static void SwitchVenomToState(std::string state)
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->vsm.ChangeState(stringToVenomStates.at(state));
-	}
-	static void VenomBeginJump()
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->VenomBeginJump();
-	}
-	static void VenomEndJumpLanding()
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->VenomEndJumpLanding();
-	}
-	static void VenomBeginRunJump()
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->VenomBeginRunJump();
-	}
-	static void VenomRunJumpLanding()
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->VenomRunJumpLanding();
-	}
-	static void BindV8Module()
-	{
-		if (v8ppModule == nullptr)
-		{
-			Scripting::BindModule([&](v8::Isolate* isolate)
-				{
-
-					v8ppModule = std::make_unique<v8pp::module>(isolate);
-					v8ppModule->function("animationUseTransformation", &Game::animationUseTransformation).
-						function("PlayerReady", &Game::VenomReady).
-						function("StartNextPunchWindow", &Game::StartVenomNextPunchWindow).
-						function("EvaluateNextPunch", &Game::EvaluateVenomNextPunch).
-						function("SwitchToState", &Game::SwitchVenomToState).
-						function("BeginJump", &Game::VenomBeginJump).
-						function("EndJumpLanding", &Game::VenomEndJumpLanding).
-						function("BeginRunJump", &Game::VenomBeginRunJump).
-						function("RunJumpLanding", &Game::VenomRunJumpLanding);
-				}
-			);
-		}
-	}
+	static std::map<JUUID, std::unique_ptr<v8pp::module>> v8ppModule;
 
 	//Constructor and Binding
 	VenomController::VenomController(nlohmann::json& json) : Controller(json)
@@ -226,57 +162,71 @@ namespace Game
 	}
 
 	//JS binding
-	/*
 	void VenomController::BindV8Module()
 	{
-		Scripting::BindModule([this](v8::Isolate* isolate)
-			{
-				v8ppModule = std::make_unique<v8pp::module>(isolate);
-				v8ppModule->function("animationUseTransformation", [&](bool value)
-					{
-						venom->animationUseTransformation(value);
-					}
-				).function("PlayerReady", [&]
-					{
-						VenomReady();
-					}
-				).function("StartNextPunchWindow", [&]
-					{
-						StartVenomNextPunchWindow();
-					}
-				).function("EvaluateNextPunch", [&]
-					{
-						EvaluateVenomNextPunch();
-					}
-				).function("SwitchToState", [&](std::string state)
-					{
-						vsm.ChangeState(stringToVenomStates.at(state));
-					}
-				).function("BeginJump", [this]
-					{
-						VenomBeginJump();
-					}
-				).function("EndJumpLanding", [&]
-					{
-						VenomEndJumpLanding();
-					}
-				).function("BeginRunJump", [&]
-					{
-						VenomBeginRunJump();
-					}
-				).function("RunJumpLanding", [&]
-					{
-						VenomRunJumpLanding();
-					}
-				);
-			}
-		);
+		JUUID uuid = controller;
+		if (!v8ppModule.contains(uuid))
+		{
+			Scripting::BindModule([&](v8::Isolate* isolate)
+				{
+					v8ppModule.insert_or_assign(uuid, std::make_unique<v8pp::module>(isolate));
+					v8ppModule.at(uuid)->function("animationUseTransformation", [](bool value)
+						{
+							This()->venom->animationUseTransformation(value);
+						}
+					).function("PlayerReady", []
+						{
+							This()->VenomReady();
+						}
+					).function("StartNextPunchWindow", []
+						{
+							This()->StartVenomNextPunchWindow();
+						}
+					).function("EvaluateNextPunch", []
+						{
+							This()->EvaluateVenomNextPunch();
+						}
+					).function("SwitchToState", [](std::string state)
+						{
+							This()->vsm.ChangeState(stringToVenomStates.at(state));
+						}
+					).function("BeginJump", []
+						{
+							This()->VenomBeginJump();
+						}
+					).function("EndJumpLanding", []
+						{
+							This()->VenomEndJumpLanding();
+						}
+					).function("BeginRunJump", []
+						{
+							This()->VenomBeginRunJump();
+						}
+					).function("RunJumpLanding", []
+						{
+							This()->VenomRunJumpLanding();
+						}
+					);
+				}
+			);
+		}
 	}
-	*/
 
 	void VenomController::BindToV8Context(v8pp::context& context)
 	{
-		context.value("venom", v8ppModule->new_instance());
+		context.value("venom", v8ppModule.at(controller)->new_instance());
+
+		auto* isolate = context.isolate();
+
+		v8::HandleScope handle_scope(isolate);
+		v8::MaybeLocal<v8::String> maybe_v8_string = v8::String::NewFromUtf8(
+			isolate,               // The current isolate
+			controller.c_str(),    // The C-style string pointer (const char*)
+			v8::NewStringType::kNormal, // Type of string
+			static_cast<int>(controller.length())    // Optional: length in bytes for performance
+		);
+		v8::Local<v8::String> v8_string = maybe_v8_string.ToLocalChecked();
+		context.value("uuid", v8_string);
 	}
 
 	void VenomController::VenomReady()

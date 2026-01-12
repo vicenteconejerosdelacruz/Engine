@@ -89,7 +89,7 @@ namespace Game
 		virtual void Step(float delta);
 
 		//JS binding
-		//virtual void BindV8Module();
+		virtual void BindV8Module();
 		virtual void BindToV8Context(v8pp::context& context);
 		void VenomReady();
 		void StartVenomNextPunchWindow();
