@@ -47,10 +47,10 @@ namespace Scripting
 	void RunScript(std::string script, RenderableSUUUID renderable)
 	{
 #if defined(_EDITOR)
-		//if (!Editor::IsPlaying() || Editor::IsPaused())
-		//{
-		//	return;
-		//}
+		if (!Editor::IsPlaying(renderable.unit()) || Editor::IsPaused(renderable.unit()))
+		{
+			return;
+		}
 #endif
 		if (script.empty()) return;
 

@@ -247,12 +247,12 @@ void SequencePlayer::ApplyFrameValues(RenderableSUUUID renderable)
 
 void SequencePlayer::CreateFrameSoundFXs(int frame)
 {
-	sequence.CreateSoundFXsAtFrame(frame);
+	sequence.CreateSoundFXsAtFrame(frame, renderable.unit());
 }
 
 void SequencePlayer::ExecuteFrameScripts(int frame)
 {
-	//sequence.RunScriptAtFrame(frame, renderable);
+	sequence.RunScriptAtFrame(frame, renderable);
 }
 
 void SequencePlayer::ResetFrames()

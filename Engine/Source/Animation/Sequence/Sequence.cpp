@@ -112,9 +112,8 @@ XMMATRIX Sequence::GetTransformationAtFrame(int frame)
 	return transformation->GetTransformationInFrame(frame);
 }
 
-void Sequence::CreateSoundFXsAtFrame(int frame)
+void Sequence::CreateSoundFXsAtFrame(int frame, SceneUnitId id)
 {
-	/*
 	std::set<SequenceChannelElementSoundFX*> soundfxs;
 	for (SequenceChannel& channel : sequenceChannels)
 	{
@@ -125,27 +124,42 @@ void Sequence::CreateSoundFXsAtFrame(int frame)
 
 	if (soundfxs.size() == 0ULL) return;
 
+	nlohmann::json sounds = { {"sounds",{}} };
+
+	std::set<JUUID> soundsUUID;
 	for (auto& sfx : soundfxs)
 	{
 		SoundJsonUUID sjson = sfx->sound();
-		SoundFXUUID soundFXUUID = getUUID();
+		//SoundFXUUID soundFXUUID = getUUID();
+		JUUID soundFXUUID = getUUID();
+		soundsUUID.insert(soundFXUUID);
 		nlohmann::json jsound =
 		{
-			{ "uuid", soundFXUUID() },
+			{ "uuid", soundFXUUID },
 			{ "name", sjson->name() },
 			{ "sound", sfx->sound() },
 			{ "autoPlay", true }
 		};
 
+		sounds.at("sounds").push_back(jsound);
+		/*
 		CreateSoundFX(jsound);
 		soundFXUUID->BindToScene();
 		soundFXUUID->Play();
+		*/
 	}
-	*/
+
+	AttachLevelIntoScene(id, "sfx", sounds, [&](SceneUnitId id)
+		{
+			//for (auto& uuid : soundsUUID)
+			//{
+			//	SoundFXUUID sfx = MAKESUUUID(id)
+			//}
+		}
+	);
 }
 
-/*
-void Sequence::RunScriptAtFrame(int frame, RenderableUUID renderable)
+void Sequence::RunScriptAtFrame(int frame, RenderableSUUUID renderable)
 {
 	using namespace Scripting;
 	for (SequenceChannel& channel : sequenceChannels)
@@ -155,7 +169,6 @@ void Sequence::RunScriptAtFrame(int frame, RenderableUUID renderable)
 		RunScript(script->script, renderable);
 	}
 }
-*/
 
 bool Sequence::Runnable() const
 {
