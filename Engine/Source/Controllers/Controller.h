@@ -23,6 +23,7 @@ namespace Game
 		virtual std::vector<std::pair<std::string, JsonToEditorValueType>> GetControllerAttributes() { return {}; }
 #endif
 
+		JUUID controller;
 		SceneUnitId unit;
 		SUUUID sceneObject;
 	};

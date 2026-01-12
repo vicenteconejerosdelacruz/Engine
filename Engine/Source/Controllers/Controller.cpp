@@ -29,6 +29,7 @@ namespace Game
 	JUUID RegisterController(std::string controllerName, SUUUID sceneObject, std::unique_ptr<Controller>& controller)
 	{
 		JUUID uuid = getUUID();
+		controller->controller = uuid;
 		controllersUUIDs.insert_or_assign(uuid, std::move(controller));
 		controllerUUIDsByName.insert_or_assign(controllerName, uuid);
 		controllerUUIDBySUUUID.insert_or_assign(sceneObject, uuid);
