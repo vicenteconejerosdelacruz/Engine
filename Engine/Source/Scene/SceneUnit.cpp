@@ -13,6 +13,7 @@ namespace Scene
 {
 	extern void RenderSceneCameras(SceneUnitId id);
 	extern SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid);
+	extern void MoveSceneObjectUnit(JUUID uuid, SceneUnitId fromId, SceneUnitId toId);
 
 	SceneUnit::SceneUnit(SceneUnitId unit, std::string name)
 	{
@@ -43,9 +44,7 @@ namespace Scene
 		{
 			for (auto& uuid : juuids)
 			{
-				auto* so = GetSceneObjectPointer(id, uuid);
-				so->unit = id;
-				so->BindToScene();
+				MoveSceneObjectUnit(uuid, other->id, id);
 				sceneObjects[type].insert(uuid);
 			}
 		}

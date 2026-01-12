@@ -48,6 +48,8 @@ namespace Scene
 
 	bool SceneObjectExists(SceneUnitId unit, JUUID uuid);
 
+	void MoveSceneObjectUnit(JUUID uuid, SceneUnitId fromId, SceneUnitId toId);
+
 	//SceneUnitId GetSceneObjectSceneUnitId(JUUID uuid);
 
 	//template<SceneObjectType T, typename J>

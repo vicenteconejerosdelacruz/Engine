@@ -9,6 +9,7 @@ typedef std::string JNAME;
 typedef std::tuple<JUUID, JNAME> JUUIDName;
 typedef std::tuple<SceneUnitId, JUUID> SUUUID;
 #define MAKESUUUID(id,juuid) std::make_tuple(id,juuid)
+#define FROMSUUUID(tup) std::get<0>(tup),std::get<1>(tup)
 
 template<typename T, std::unique_ptr<T>& F(JUUID)>
 struct TUUID {

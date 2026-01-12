@@ -225,8 +225,11 @@ namespace Scene::Level {
 		if (scene->abortLoading->load())
 			return;
 
-		MapControllers(scene->id);
-		BindSceneObjects(scene->id);
+		if (!scene->attached)
+		{
+			MapControllers(scene->id);
+			BindSceneObjects(scene->id);
+		}
 #if defined(_EDITOR)
 		if (!scene->attached && !scene->isolated)
 		{

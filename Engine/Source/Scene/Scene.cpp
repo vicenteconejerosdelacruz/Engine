@@ -296,6 +296,45 @@ namespace Scene
 		return scenesUnits.at(id)->sceneObjectsTypes.contains(uuid);
 	}
 
+	void MoveSceneObjectUnit(JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
+	{
+		auto mover = [](auto mvfn, auto uuid, auto fromId, auto toId)
+			{
+				auto* so = GetSceneObjectPointer(fromId, uuid);
+				so->unit = toId;
+				auto& obj = mvfn(fromId).at(uuid);
+				mvfn(toId).insert_or_assign(uuid, std::move(obj));
+				mvfn(fromId).erase(uuid);
+				so->BindToScene();
+			};
+		std::map<SceneObjectType, std::function<void(JUUID, SceneUnitId, SceneUnitId)>> moveObject =
+		{
+			{ SO_Renderables, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
+			{
+				mover(GetRenderablesSUSceneObjects,uuid,fromId,toId);
+			}
+			},
+			{ SO_Cameras, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
+			{
+				mover(GetCamerasSUSceneObjects,uuid,fromId,toId);
+			}
+			},
+			{ SO_Lights, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
+			{
+				mover(GetLightsSUSceneObjects,uuid,fromId,toId);
+			}
+			},
+			{ SO_SoundEffects, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
+			{
+				mover(GetSoundFXsSUSceneObjects,uuid,fromId,toId);
+			}
+			},
+		};
+
+		SceneObjectType type = GetSceneObjectType(fromId, uuid);
+		moveObject.at(type)(uuid, fromId, toId);
+	}
+
 	/*
 	SceneUnitId GetSceneObjectSceneUnitId(JUUID uuid)
 	{
