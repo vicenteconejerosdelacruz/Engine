@@ -20,6 +20,12 @@ namespace Game
 	std::unordered_map<SUUUID, JUUID> sceneObjectUUIDToControllerUUID;
 	*/
 
+	Controller::Controller(nlohmann::json& json) :JObject(json) { (*this)["uuid"] = getUUID(); }
+
+	void Controller::Map(SUUUID so) { unit = std::get<0>(so); sceneObject = so; }
+
+	void Controller::Unmap() { std::get<0>(sceneObject) = 0; std::get<1>(sceneObject).clear(); }
+
 	JUUID RegisterController(std::string controllerName, SUUUID sceneObject, std::unique_ptr<Controller>& controller)
 	{
 		JUUID uuid = getUUID();

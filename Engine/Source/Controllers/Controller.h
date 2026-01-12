@@ -13,17 +13,18 @@ namespace Game
 	struct Controller : JObject
 	{
 		virtual ~Controller() = default;
-		Controller(nlohmann::json& json) :JObject(json) { (*this)["uuid"] = getUUID(); }
-		SUUUID sceneObject;
-		virtual void Map(SUUUID so) { sceneObject = so; }
-		virtual void Unmap() {
-			std::get<0>(sceneObject) = 0;
-			std::get<1>(sceneObject).clear();
-		}
+		Controller(nlohmann::json& json);
+		virtual void Map(SUUUID so);
+		virtual void Unmap();
 		virtual void Step(float delta) {};
 		virtual void BindToV8Context(v8pp::context& context) {}
+#if defined(_EDITOR)
 		virtual std::map<std::string, JEdvEditorDrawerFunction> GetControllerDrawers() { return {}; }
 		virtual std::vector<std::pair<std::string, JsonToEditorValueType>> GetControllerAttributes() { return {}; }
+#endif
+
+		SceneUnitId unit;
+		SUUUID sceneObject;
 	};
 
 	JUUID RegisterController(std::string controllerName, SUUUID sceneObject, std::unique_ptr<Controller>& controller);

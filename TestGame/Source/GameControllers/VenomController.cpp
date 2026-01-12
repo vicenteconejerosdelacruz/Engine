@@ -118,29 +118,30 @@ namespace Game
 		vsm = {
 			.currentState = VS_None,
 			.onEnter = {
-				{ VS_Intro, [this](VenomStates prevState) { EnterIntro(); }},
-				{ VS_Idle, [this](VenomStates prevState) { EnterIdle(); }},
-				{ VS_Walking, [this](VenomStates prevState) { EnterWalking(); }},
-				{ VS_Running, [this](VenomStates prevState) { EnterRunning(); }},
-				{ VS_Jumping, [this](VenomStates prevState) { EnterJumping(); }},
-				{ VS_RunningJump, [this](VenomStates prevState) { EnterRunningJump(); }},
-				{ VS_Attack_1,[this](VenomStates prevState) { EnterAttack1(); }}
+				{ VS_Intro, [&](auto* sm, VenomStates prevState) { EnterIntro(); }},
+				{ VS_Idle, [&](auto* sm, VenomStates prevState) { EnterIdle(); }},
+				{ VS_Walking, [&](auto* sm, VenomStates prevState) { EnterWalking(); }},
+				{ VS_Running, [&](auto* sm, VenomStates prevState) { EnterRunning(); }},
+				{ VS_Jumping, [&](auto* sm, VenomStates prevState) { EnterJumping(); }},
+				{ VS_RunningJump, [&](auto* sm, VenomStates prevState) { EnterRunningJump(); }},
+				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { EnterAttack1(); }}
 			},
 			.onLeave = {
-				{ VS_Attack_1,[this](VenomStates prevState) { LeaveAttack1(); }},
-				{ VS_Jumping, [this](VenomStates prevState) { LeaveJumping(); }},
-				{ VS_Jumping, [this](VenomStates prevState) { LeaveRunningJumping(); }}
+				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { LeaveAttack1(); }},
+				{ VS_Jumping, [&](auto* sm, VenomStates prevState) { LeaveJumping(); }},
+				{ VS_Jumping, [&](auto* sm, VenomStates prevState) { LeaveRunningJumping(); }}
 			},
 			.onStep = {
-				{ VS_None, [this]() { venomScale = venom->scale(); vsm.ChangeState(VS_Intro); }},
-				{ VS_Idle, [this]() { Idle(); }},
-				{ VS_Walking, [this]() { Walking(); }},
-				{ VS_Running, [this]() { Running(); }},
-				{ VS_Jumping, [this]() { Jumping(); }},
-				{ VS_RunningJump, [this]() { RunningJump(); }},
-				{ VS_Attack_1, [this]() { Attacking1(); }}
+				{ VS_None, [&](auto* sm) { venomScale = venom->scale(); vsm.ChangeState(VS_Intro); }},
+				{ VS_Idle, [&](auto* sm) { Idle(); }},
+				{ VS_Walking, [&](auto* sm) { Walking(); }},
+				{ VS_Running, [&](auto* sm) { Running(); }},
+				{ VS_Jumping, [&](auto* sm) { Jumping(); }},
+				{ VS_RunningJump, [&](auto* sm) { RunningJump(); }},
+				{ VS_Attack_1, [&](auto* sm) { Attacking1(); }}
 			}
 		};
+
 		venomScale = { 0.0f,0.0f,0.0f };
 		leftStick = XMVectorZero();
 		runningJumpLeftStick = XMVectorZero();
@@ -164,18 +165,19 @@ namespace Game
 	}
 #endif
 
-	void VenomController::Map(JUUID so)
+	void VenomController::Map(SUUUID so)
 	{
 		using namespace Scene;
 		Controller::Map(so);
-		SceneObjectType type = GetSceneObjectType(so);
+		SceneObjectType type = GetSceneObjectType(FROMSUUUID(so));
+
 		if (type == SO_Renderables)
 		{
 			venom = so;
 		}
-		if (GetCountFromMouseCameras(venom->unit) > 0ULL)
+		if (GetCountFromMouseCameras(unit) > 0ULL)
 		{
-			camera = *GetMouseCameras(venom->unit).begin();
+			camera = MAKESUUUID(unit, *GetMouseCameras(unit).begin());
 		}
 		BindV8Module();
 	}
@@ -191,7 +193,7 @@ namespace Game
 	void VenomController::Step(float delta)
 	{
 #if defined(_EDITOR)
-		if (!Editor::IsPlaying() || Editor::IsPaused())
+		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
 			return;
 #endif
 
@@ -224,6 +226,54 @@ namespace Game
 	}
 
 	//JS binding
+	/*
+	void VenomController::BindV8Module()
+	{
+		Scripting::BindModule([this](v8::Isolate* isolate)
+			{
+				v8ppModule = std::make_unique<v8pp::module>(isolate);
+				v8ppModule->function("animationUseTransformation", [&](bool value)
+					{
+						venom->animationUseTransformation(value);
+					}
+				).function("PlayerReady", [&]
+					{
+						VenomReady();
+					}
+				).function("StartNextPunchWindow", [&]
+					{
+						StartVenomNextPunchWindow();
+					}
+				).function("EvaluateNextPunch", [&]
+					{
+						EvaluateVenomNextPunch();
+					}
+				).function("SwitchToState", [&](std::string state)
+					{
+						vsm.ChangeState(stringToVenomStates.at(state));
+					}
+				).function("BeginJump", [this]
+					{
+						VenomBeginJump();
+					}
+				).function("EndJumpLanding", [&]
+					{
+						VenomEndJumpLanding();
+					}
+				).function("BeginRunJump", [&]
+					{
+						VenomBeginRunJump();
+					}
+				).function("RunJumpLanding", [&]
+					{
+						VenomRunJumpLanding();
+					}
+				);
+			}
+		);
+	}
+	*/
+
 	void VenomController::BindToV8Context(v8pp::context& context)
 	{
 		context.value("venom", v8ppModule->new_instance());
@@ -632,6 +682,7 @@ namespace Game
 			newAttack1 = true;
 		}
 	}
+
 	//Leaves
 	void VenomController::LeaveAttack1()
 	{
@@ -646,6 +697,7 @@ namespace Game
 		JumpingStateData.falling = false;
 		JumpingStateData.kicking = false;
 	}
+
 	void VenomController::LeaveRunningJumping()
 	{
 		RunningJumpStateData.jumpTween = nullptr;
