@@ -73,20 +73,16 @@ namespace Scene
 #include <RenderableAtt.h>
 #include <JEnd.h>
 
+		//lifecycle
 		Renderable(SceneUnitId id, nlohmann::json& json);
 		~Renderable() { Destroy(); }
-
-		XMVECTOR rotationQ();
-		XMMATRIX world();
-
 		virtual void Initialize();
-		//Binding
+		virtual void SetInitialConditions();
 		virtual void BindToScene();
 		virtual void Bind(JUUID uuid);
 		void BindCameras();
 		void BindCamera(JUUID cuuid);
 		void BindShadowMapCameras();
-		//Unbinding
 		virtual void UnbindFromScene();
 		virtual void Unbind(JUUID uuid);
 		void UnbindCameras();
@@ -169,6 +165,9 @@ namespace Scene
 		void Destroy();
 
 		void Render(SceneUnitId unit, RenderPassInstanceUUID renderPass, CameraSUUUID camera);
+
+		XMVECTOR rotationQ();
+		XMMATRIX world();
 
 #if defined(_EDITOR)
 		std::function<void()> OnPick;

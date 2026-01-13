@@ -146,7 +146,7 @@ namespace Scene
 
 		using namespace Templates;
 
-		if (GetEffect() != nullptr)
+		if (EffectExists())
 		{
 			if (dirty(SoundFX::Update_sound))
 			{
@@ -246,6 +246,11 @@ namespace Scene
 		return fw;
 	}
 
+	bool SoundFX::EffectExists()
+	{
+		return SoundEffectExists(sound());
+	}
+
 	std::unique_ptr<DirectX::SoundEffect>& SoundFX::GetEffect()
 	{
 		return GetSoundEffect(sound());
@@ -300,6 +305,8 @@ namespace Scene
 
 	void SoundFXsStep(SceneUnitId id, float step)
 	{
+		if (!SoundEffects.contains(id)) return;
+
 		auto& SoundFxs = SoundEffects.at(id);
 		std::set<SoundFXSUUUID> sfxs;
 		std::transform(SoundFxs.begin(), SoundFxs.end(), std::inserter(sfxs, sfxs.end()), [&](auto o) { return MAKESUUUID(id, o); });
@@ -320,13 +327,13 @@ namespace Scene
 		//}
 		//);
 
-		std::set<SoundFXSUUUID> sfxsDestroyI;
-		//std::set<SoundFXUUID> sfxsCreateI;
-		std::copy_if(sfxs.begin(), sfxs.end(), std::inserter(sfxsDestroyI, sfxsDestroyI.end()), [](auto sfx)
-			{
-				return sfx->dirty(SoundFX::Update_sound) || sfx->dirty(SoundFX::Update_loop) || sfx->dirty(SoundFX::Update_instanceFlags) || (!sfx->IsPlaying() && sfx->HasStarted() && sfx->destroyOnCompletion());
-			}
-		);
+		//std::set<SoundFXSUUUID> sfxsDestroyI;
+		////std::set<SoundFXUUID> sfxsCreateI;
+		//std::copy_if(sfxs.begin(), sfxs.end(), std::inserter(sfxsDestroyI, sfxsDestroyI.end()), [](auto sfx)
+		//	{
+		//		return sfx->dirty(SoundFX::Update_sound) || sfx->dirty(SoundFX::Update_loop) || sfx->dirty(SoundFX::Update_instanceFlags) || (!sfx->IsPlaying() && sfx->HasStarted() && sfx->destroyOnCompletion());
+		//	}
+		//);
 
 		//		std::copy_if(sfxs.begin(), sfxs.end(), std::inserter(sfxsCreateI, sfxsCreateI.end()), [](auto sfx)
 		//			{
@@ -337,11 +344,11 @@ namespace Scene
 		//			}
 		//		);
 
-		std::for_each(sfxsDestroyI.begin(), sfxsDestroyI.end(), [](auto sfx)
-			{
-				sfx->UnbindFromScene();
-			}
-		);
+		//std::for_each(sfxsDestroyI.begin(), sfxsDestroyI.end(), [](auto sfx)
+		//	{
+		//		sfx->UnbindFromScene();
+		//	}
+		//);
 
 		//		std::for_each(sfxsCreateI.begin(), sfxsCreateI.end(), [](auto sfx)
 		//			{
@@ -428,6 +435,7 @@ namespace Scene
 		for (auto& [uuid, _] : SoundFXSUsceneObjects.at(id))
 		{
 			SoundFXSUUUID sfx = MAKESUUUID(id, uuid);
+			if (sfx->markedForDelete) continue;
 			sfx->Play();
 		}
 	}
@@ -446,6 +454,7 @@ namespace Scene
 		for (auto& [uuid, _] : SoundFXSUsceneObjects.at(id))
 		{
 			SoundFXSUUUID sfx = MAKESUUUID(id, uuid);
+			if (sfx->markedForDelete) continue;
 			sfx->Resume();
 		}
 	}

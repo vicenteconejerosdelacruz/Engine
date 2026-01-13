@@ -78,6 +78,7 @@ namespace Scene
 		//lifecycle
 		SceneObject(SceneUnitId id, nlohmann::json& json) :JObject(json) { unit = id; }
 		virtual void Initialize() {};
+		virtual void SetInitialConditions() {};
 		virtual void BindToScene() {};
 		virtual void Bind(JUUID uuid) {}
 		virtual void UnbindFromScene() {};

@@ -88,6 +88,7 @@ namespace Templates
 		JObjectChangePostCallback postCb = nullptr
 	);
 
+	bool SoundEffectExists(JUUID uuid);
 	std::unique_ptr<DirectX::SoundEffect>& GetSoundEffect(JUUID uuid);
 
 	void DestroySoundEffectInstance(JUUID uuid, SoundInstance& soundEffectInstance);

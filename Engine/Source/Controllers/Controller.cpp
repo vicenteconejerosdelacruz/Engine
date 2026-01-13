@@ -11,8 +11,8 @@ namespace Editor
 namespace Game
 {
 	std::unordered_map<JUUID, std::unique_ptr<Controller>> controllersUUIDs;
-	std::unordered_map<std::string, JUUID> controllerUUIDsByName;
-	std::unordered_map<SUUUID, JUUID> controllerUUIDBySUUUID;
+	//std::unordered_map<std::string, JUUID> controllerUUIDsByName;
+	std::unordered_map<SUUUID, std::set<JUUID>> controllerUUIDBySUUUID;
 
 	/*
 	std::unordered_map<SUUUID, std::unique_ptr<Controller>> controllersUUIDs;
@@ -31,8 +31,13 @@ namespace Game
 		JUUID uuid = getUUID();
 		controller->controller = uuid;
 		controllersUUIDs.insert_or_assign(uuid, std::move(controller));
-		controllerUUIDsByName.insert_or_assign(controllerName, uuid);
-		controllerUUIDBySUUUID.insert_or_assign(sceneObject, uuid);
+		//controllerUUIDsByName.insert_or_assign(controllerName, uuid);
+		//controllerUUIDBySUUUID.insert_or_assign(sceneObject, uuid);
+		if (!controllerUUIDBySUUUID.contains(sceneObject))
+		{
+			controllerUUIDBySUUUID.insert_or_assign(sceneObject, std::set<JUUID>());
+		}
+		controllerUUIDBySUUUID.at(sceneObject).insert(uuid);
 		return uuid;
 	}
 
@@ -46,12 +51,15 @@ namespace Game
 	*/
 	void MapControllers(SceneUnitId id)
 	{
-		for (auto& [suuuid, uuid] : controllerUUIDBySUUUID)
+		for (auto& [suuuid, uuidset] : controllerUUIDBySUUUID)
 		{
 			SceneUnitId unit = std::get<0>(suuuid);
 			if (unit != id) continue;
 
-			controllersUUIDs.at(uuid)->Map(suuuid);
+			for (auto& uuid : uuidset)
+			{
+				controllersUUIDs.at(uuid)->Map(suuuid);
+			}
 		}
 	}
 
@@ -60,15 +68,16 @@ namespace Game
 		return controllersUUIDs.at(uuid);
 	}
 
-	std::unique_ptr<Controller>& GetControllerBySceneObjectUUID(SUUUID sceneObject)
+	std::set<JUUID> GetControllersBySceneObjectUUID(SUUUID uuid)
 	{
-		return controllersUUIDs.at(controllerUUIDBySUUUID.at(sceneObject));
+		return(controllerUUIDBySUUUID.contains(uuid)) ? controllerUUIDBySUUUID.at(uuid) : std::set<JUUID>();
+		//return controllersUUIDs.at(controllerUUIDBySUUUID.at(sceneObject));
 	}
 
-	std::unique_ptr<Controller>& GetControllerByName(std::string name)
+	/*std::unique_ptr<Controller>& GetControllerByName(std::string name)
 	{
 		return controllersUUIDs.at(controllerUUIDsByName.at(name));
-	}
+	}*/
 	/*
 	void DestroyControllers()
 	{
@@ -86,16 +95,19 @@ namespace Game
 		if (!controllersUUIDs.contains(uuid)) return;
 		controllersUUIDs.at(uuid)->Unmap();
 		controllersUUIDs.erase(uuid);
-		for (auto it = controllerUUIDsByName.begin(); it != controllerUUIDsByName.end();)
-		{
-			if (it->second == uuid)
-				it = controllerUUIDsByName.erase(it);
-			else
-				it++;
-		}
+		//for (auto it = controllerUUIDsByName.begin(); it != controllerUUIDsByName.end();)
+		//{
+		//	if (it->second == uuid)
+		//		it = controllerUUIDsByName.erase(it);
+		//	else
+		//		it++;
+		//}
 		for (auto it = controllerUUIDBySUUUID.begin(); it != controllerUUIDBySUUUID.end();)
 		{
-			if (it->second == uuid)
+			if (it->second.contains(uuid))
+				it->second.erase(uuid);
+
+			if (it->second.size() == 0ULL)
 				it = controllerUUIDBySUUUID.erase(it);
 			else
 				it++;
@@ -105,11 +117,14 @@ namespace Game
 	void StepControllers(DX::StepTimer& timer)
 	{
 		float dt = static_cast<FLOAT>(timer.GetElapsedSeconds());
-		for (auto& [suuuid, uuid] : controllerUUIDBySUUUID)
+		for (auto& [suuuid, uuidset] : controllerUUIDBySUUUID)
 		{
 #if defined(_EDITOR)
 			if (!Editor::IsPlaying(std::get<0>(suuuid))) continue;
-			controllersUUIDs.at(uuid)->Step(dt);
+			for (auto& uuid : uuidset)
+			{
+				controllersUUIDs.at(uuid)->Step(dt);
+			}
 #endif
 		}
 		/*
@@ -125,7 +140,10 @@ namespace Game
 
 	void BindToV8Context(v8pp::context& context, SUUUID uuid)
 	{
-		GetControllerBySceneObjectUUID(uuid)->BindToV8Context(context);
+		for (auto& cuuid : GetControllersBySceneObjectUUID(uuid))
+		{
+			GetController(cuuid)->BindToV8Context(context);
+		}
 		//using namespace Scripting;
 		//JUUID controllerUUID = controllerUUIDBySUUUID.at(uuid);
 		//std::unique_ptr<Controller>& controller = controllersUUIDs.at(controllerUUID);

@@ -63,25 +63,35 @@ namespace Templates
 			uuidToSoundEffects[uuid] = std::make_unique<DirectX::SoundEffect>(GetAudioEngine().get(), path.c_str());
 			uuidInstanceCount[uuid] = 1;
 		}
+		//std::unique_ptr<SoundJson>& json = GetSoundTemplate(uuid);
+		//OutputDebugStringA(std::string(std::string("create") + json->name() + ":" + std::to_string(uuidInstanceCount[uuid]) + "\n").c_str());
 		return std::make_tuple(
 			uuid,
 			std::move(uuidToSoundEffects[uuid]->CreateInstance(SOUND_EFFECT_INSTANCE_FLAGS(flags)))
 		);
 	}
 
+	bool SoundEffectExists(JUUID uuid)
+	{
+		using namespace Sound;
+		return uuidToSoundEffects.contains(uuid);
+	}
+
 	std::unique_ptr<DirectX::SoundEffect>& GetSoundEffect(JUUID uuid)
 	{
 		using namespace Sound;
-		return uuidToSoundEffects[uuid];
+		return uuidToSoundEffects.at(uuid);
 	}
 
 	void DestroySoundEffectInstance(JUUID uuid, SoundInstance& soundEffectInstance)
 	{
 		using namespace Sound;
 		uuidInstanceCount[uuid]--;
-		std::unique_ptr<DirectX::SoundEffectInstance>& sfxI = std::get<1>(soundEffectInstance);
-		sfxI = nullptr;
-		soundEffectInstance = std::make_tuple(nullptr, nullptr);
+		//std::unique_ptr<SoundJson>& json = GetSoundTemplate(uuid);
+		//OutputDebugStringA(std::string(std::string("destroy") + json->name() + ":" + std::to_string(uuidInstanceCount[uuid]) + "\n").c_str());
+		//std::unique_ptr<DirectX::SoundEffectInstance>& sfxI = std::get<1>(soundEffectInstance);
+		//sfxI = nullptr;
+		soundEffectInstance = std::make_tuple("", nullptr);
 		if (uuidInstanceCount[uuid] == 0)
 		{
 			uuidToSoundEffects.erase(uuid);

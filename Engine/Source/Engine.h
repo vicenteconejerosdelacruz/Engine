@@ -22,7 +22,6 @@ void CreateLightingResourcesMapping();
 //UPDATE
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 void AppStep();
-void AudioStep(float step);
 
 //RENDER
 void Render();

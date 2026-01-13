@@ -14,6 +14,7 @@ namespace Game
 	{
 		virtual ~Controller() = default;
 		Controller(nlohmann::json& json);
+		virtual void SetInitialConditions() {};
 		virtual void Map(SUUUID so);
 		virtual void Unmap();
 		virtual void Step(float delta) {};
@@ -31,8 +32,8 @@ namespace Game
 	JUUID RegisterController(std::string controllerName, SUUUID sceneObject, std::unique_ptr<Controller>& controller);
 	void MapControllers(SceneUnitId id);
 	std::unique_ptr<Controller>& GetController(JUUID uuid);
-	std::unique_ptr<Controller>& GetControllerBySceneObjectUUID(SUUUID uuid);
-	std::unique_ptr<Controller>& GetControllerByName(std::string name);
+	std::set<JUUID> GetControllersBySceneObjectUUID(SUUUID uuid);
+	//std::unique_ptr<Controller>& GetControllerByName(std::string name);
 	//void DestroyControllers();
 	void DestroyController(JUUID uuid);
 	void StepControllers(DX::StepTimer& timer);

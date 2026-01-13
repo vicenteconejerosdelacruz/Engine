@@ -77,7 +77,12 @@ namespace Game
 				{ VS_Attack_1, [&](auto* sm) { Attacking1(); }}
 			}
 		};
+		SetInitialConditions();
+	}
 
+	void VenomController::SetInitialConditions()
+	{
+		vsm.currentState = VS_None;
 		venomScale = { 0.0f,0.0f,0.0f };
 		leftStick = XMVectorZero();
 		runningJumpLeftStick = XMVectorZero();

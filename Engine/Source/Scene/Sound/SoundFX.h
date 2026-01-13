@@ -62,6 +62,7 @@ namespace Scene
 		XMMATRIX world();
 		XMVECTOR fw();
 
+		bool EffectExists();
 		std::unique_ptr<DirectX::SoundEffect>& GetEffect();
 		std::unique_ptr<DirectX::SoundEffectInstance>& GetInstance();
 		bool Play();

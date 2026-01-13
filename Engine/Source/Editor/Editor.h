@@ -168,6 +168,10 @@ namespace Editor {
 	void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 	void CreateRegisteredBillboards(SceneUnitId id);
 	bool PendingBillboards(SceneUnitId id);
+	void ShowBillboards(SceneUnitId id);
+	void ShowBillboard(RenderableSUUUID billboard);
+	void HideBillboards(SceneUnitId id);
+	void HideBillboard(RenderableSUUUID billboard);
 	//bool PendingBillboardsDestruction();
 	void UpdateBillboards();
 	void DestroyPendingBillboards();

@@ -16,7 +16,7 @@
 //#endif
 
 extern std::unique_ptr<Renderer> renderer;
-extern void AudioStep(float step);
+//extern void AudioStep(DX::StepTimer& timer, float step);
 #if defined(_EDITOR)
 namespace Editor
 {
@@ -463,7 +463,6 @@ namespace Scene
 
 	void SceneObjectsStep(DX::StepTimer& timer)
 	{
-		AudioStep(static_cast<FLOAT>(timer.GetElapsedSeconds()));
 		for (auto& [unit, scene] : scenesUnits)
 		{
 			if (scene->markedForDelete) continue;
@@ -474,6 +473,7 @@ namespace Scene
 			if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
 				dt = 0.0f;
 #endif
+			SoundFXsStep(unit, dt);
 			RenderablesStep(unit, dt);
 			AnimableStep(unit, dt);
 			LightsStep(unit);

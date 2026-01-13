@@ -941,6 +941,11 @@ namespace Editor
 					{
 						workbenchSelectedLevel = option;
 					}
+					if (!loadingProgress.loading && ImGui::IsItemClicked() && ImGui::IsMouseDoubleClicked(ImGuiPopupFlags_MouseButtonLeft))
+					{
+						loadingProgress.LoadLevel(false, workbenchSelectedLevel);
+						LoadLevelIntoSceneUnit(workbenchSelectedLevel, [&]() { return GetLevelFromFile(workbenchSelectedLevel); }, OnLevelLoaded, LevelLoadingProgress);
+					}
 				}
 				ImGui::EndListBox();
 			}
@@ -2543,6 +2548,40 @@ namespace Editor
 		//return false;
 	}
 
+	void ShowBillboards(SceneUnitId id)
+	{
+		auto& reg = billboards.at(id).billboardRegistry;
+
+		for (auto it = reg.begin(); it != reg.end(); it++)
+		{
+			if (it->second.empty()) continue;
+
+			ShowBillboard(it->second);
+		}
+	}
+
+	void ShowBillboard(RenderableSUUUID billboard)
+	{
+		billboard->visible(true);
+	}
+
+	void HideBillboards(SceneUnitId id)
+	{
+		auto& reg = billboards.at(id).billboardRegistry;
+
+		for (auto it = reg.begin(); it != reg.end(); it++)
+		{
+			if (it->second.empty()) continue;
+
+			HideBillboard(it->second);
+		}
+	}
+
+	void HideBillboard(RenderableSUUUID billboard)
+	{
+		billboard->visible(false);
+	}
+
 	/*
 	bool PendingBillboardsDestruction()
 	{
@@ -2625,6 +2664,7 @@ namespace Editor
 		using namespace Scene;
 		isPlaying.at(id) = true;
 		editorPrePlayDump.at(id) = GetLevelString(id);
+		HideBillboards(id);
 		PlaySounds(id);
 	}
 
@@ -2645,9 +2685,69 @@ namespace Editor
 	void SwitchToNonPlayMode(SceneUnitId id)
 	{
 		using namespace Scene;
+		using namespace nlohmann;
 		isPlaying.at(id) = false;
 		isPaused.at(id) = false;
+		nlohmann::json current = json::parse(GetLevelString(id));
+		nlohmann::json initial = json::parse(editorPrePlayDump.at(id));
+
+		json diff = json::diff(current, initial);
+
+		std::unordered_map<JUUID, nlohmann::json> toReplace;
+		std::set<JUUID> toDelete;
+
+		std::unordered_map<std::string, std::function<void(nlohmann::json&)>> diffOp =
+		{
+			{ "replace", [&](auto& j)
+			{
+				std::vector<std::string> splitParts = nostd::split(j.at("path"), "/");
+				std::string& type = splitParts.at(1);
+				unsigned int index = std::stoi(splitParts.at(2));
+				JUUID uuid = current.at(type).at(index).at("uuid");
+				std::string& attribute = splitParts.at(3);
+				nlohmann::json patch;
+				if (toReplace.contains(uuid))
+				{
+					patch = toReplace.at(uuid);
+				}
+				patch[attribute] = initial.at(type).at(index).at(attribute);
+				toReplace.insert_or_assign(uuid, patch);
+			}
+			},
+			{ "remove", [&](auto& j)
+			{
+				std::vector<std::string> splitParts = nostd::split(j.at("path"), "/");
+				std::string& type = splitParts.at(1);
+				unsigned int index = std::stoi(splitParts.at(2));
+				toDelete.insert(current.at(type).at(index).at("uuid"));
+			}
+			}
+		};
+
+		for (auto i = 0; i < diff.size(); i++)
+		{
+			auto& j = diff.at(i);
+			diffOp.at(j.at("op"))(j);
+		}
+
 		StopSounds(id);
+		ShowBillboards(id);
+
+		for (auto& [uuid, patch] : toReplace)
+		{
+			SceneObject* so = GetSceneObjectPointer(id, uuid);
+			so->merge_patch(patch);
+			so->SetInitialConditions();
+			for (auto& cuuid : GetControllersBySceneObjectUUID(so->SUuuid()))
+			{
+				GetController(cuuid)->SetInitialConditions();
+			}
+		}
+
+		for (auto& uuid : toDelete)
+		{
+			DeleteSceneObjectFromEditor(id, uuid);
+		}
 	}
 };
 

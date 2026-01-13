@@ -93,21 +93,30 @@ namespace Scene
 #include <RenderableAtt.h>
 #include <JEnd.h>
 
+		if (!animable.empty())
+		{
+			AttachAnimation(unit, uuid(), model3D->animations);
+			boundingBoxCompute = CreateRenderableBoundingBox(MAKESUUUID(unit, uuid()));
+			sequencePlayer.renderable = SUuuid();
+		}
+
+		SetInitialConditions();
+
+#if defined(_EDITOR)
+		OnPick = [this] { Editor::SelectRenderable(unit, uuid()); };
+#endif
+	}
+
+	void Renderable::SetInitialConditions()
+	{
 		animationTransformation = XMMatrixIdentity();
 
 		if (!animable.empty())
 		{
-			AttachAnimation(unit, uuid(), model3D->animations);
 			animationTime(0.0f);
 			SetCurrentAnimation(animationSequence(), animationTime(), animationTimeFactor(), animationPlay(), animationLoop());
 			StepAnimation(0.0f); //take an empty T-Pose step so the skinning can be performed
-			boundingBoxCompute = CreateRenderableBoundingBox(MAKESUUUID(unit, uuid()));
-			//WriteAnimationConstantsBuffer(renderer->backBufferIndex);
-			sequencePlayer.renderable = SUuuid();
 		}
-#if defined(_EDITOR)
-		OnPick = [this] { Editor::SelectRenderable(unit, uuid()); };
-#endif
 	}
 
 	void Renderable::BindToScene()

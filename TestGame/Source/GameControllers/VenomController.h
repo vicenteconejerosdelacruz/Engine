@@ -77,6 +77,7 @@ namespace Game
 
 		//Constructor and Binding
 		VenomController(nlohmann::json& json);
+		virtual void SetInitialConditions();
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 		virtual std::map<std::string, JEdvEditorDrawerFunction> GetControllerDrawers() { return GetVenomControllerDrawers(); }

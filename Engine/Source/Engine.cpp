@@ -271,7 +271,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 #endif
 
 	//kick the audio listener update
-	AudioStep(0.0f);
+	//AudioStep(0.0f);
 
 	//execute the commands on the GPU and wait for it's completion
 	//renderer->CloseCommandsAndFlush();
@@ -454,6 +454,7 @@ void AppStep()
 		return ResizeWindow();
 	}
 
+	UpdateAudio();
 	timer.Tick([&]()
 		{
 			TemplatesStep(timer);
@@ -471,17 +472,6 @@ void AppStep()
 	//delete scenes which are marked for deletion
 	DeletedScenes();
 
-}
-
-void AudioStep(float step)
-{
-	GetAudioListenerVectors([](XMFLOAT3 pos, XMVECTOR orientation)
-		{
-			UpdateListener(pos, orientation);
-		}
-	);
-	UpdateAudio();
-	//SoundFXsStep(step);
 }
 
 //RENDER
