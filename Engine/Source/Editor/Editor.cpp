@@ -761,6 +761,8 @@ namespace Editor
 
 	void DrawApplicationBar()
 	{
+		using namespace Scene::Level;
+
 		RECT dragRect;
 		ZeroMemory(&dragRect, sizeof(dragRect));
 		dragRect.bottom = ApplicationBarBottom;
@@ -775,6 +777,9 @@ namespace Editor
 						{
 							//Level::SetDefaultLevelToLoad();
 							//menuBarItemClicked = true;
+							loadingProgress.loadSceneUnitModal = true;
+							loadingProgress.LoadLevel(true, "default");
+							LoadLevelIntoSceneUnit("default", GetDefaultLevel, OnLevelLoaded, LevelLoadingProgress);
 						}
 					},
 					!IsPlaying(currentSceneUnitId)
@@ -2292,6 +2297,9 @@ namespace Editor
 #if !defined(_EDITOR_PICKINGPASS)
 		return;
 #endif
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.WantCaptureMouse) return;
+
 		if (camera.empty() ||
 			!mousePicking.doPicking ||
 			!mousePicking.pickingPass.contains(id) ||
