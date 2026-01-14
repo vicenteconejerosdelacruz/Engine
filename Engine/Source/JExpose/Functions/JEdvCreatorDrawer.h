@@ -369,7 +369,8 @@ inline JEdvCreatorDrawerFunction DrawCreatorVector<std::string, jedv_t_so_camera
 			{
 				currentUUIDs.insert(json.at(attribute).at(i));
 			}
-			std::vector<JUUIDName> camsUUIDNames = GetSceneObjectsByType(Editor::currentSceneUnitId, SO_Cameras)();
+			//std::vector<JUUIDName> camsUUIDNames = GetSceneObjectsByType(Editor::currentSceneUnitId, SO_Cameras)();
+			std::vector<JUUIDName> camsUUIDNames = GetSUSceneObjectsByType(Editor::currentSceneUnitId, SO_Cameras);
 
 			auto setCamera = [&json, attribute](unsigned int index, std::string uuid)
 				{
@@ -618,8 +619,12 @@ inline bool EditorCreatorDrawFilePath(
 		{
 			ImGui::OpenFile([setFilePath, defaultFolder, &modalProperties](std::filesystem::path p)
 				{
-					std::filesystem::path absfilepath = std::filesystem::current_path().append(defaultFolder);
+					p = std::filesystem::canonical(p);
+					std::filesystem::path currpath = std::filesystem::canonical(std::filesystem::current_path());
+					std::filesystem::path absfilepath = std::filesystem::canonical(currpath.append(defaultFolder));
 					std::filesystem::path rel = std::filesystem::relative(p, absfilepath);
+					//std::filesystem::path absfilepath = std::filesystem::current_path().append(defaultFolder);
+					//std::filesystem::path rel = std::filesystem::relative(p, absfilepath);
 					setFilePath(rel.generic_string());
 					modalProperties.at("fileFolder") = rel.parent_path().generic_string();
 				}, fileFolder, filterName, filterPattern);

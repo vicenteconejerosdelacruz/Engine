@@ -30,6 +30,7 @@
 //#include <Sound/Sound.h>
 //#include <Textures/Texture.h>
 //#include <Shader/Shader.h>
+#include <Templates.h>
 
 //#include <Level.h>
 //#include <Mouse.h>
@@ -57,6 +58,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 ImGuiWindowFlags panFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
 ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings |
 ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+
+static std::mutex levelLoadMutex;
 
 using namespace DeviceUtils;
 
@@ -392,6 +395,7 @@ namespace Editor
 	void OnLevelLoaded(SceneUnitId id)
 	{
 		using namespace Scene;
+		std::lock_guard<std::mutex> lock(levelLoadMutex);
 		currentSceneUnitId = id;
 		currentLevelName.push_back(std::make_tuple(id, loadingProgress.levelName));
 		levelModified.insert_or_assign(id, false);
@@ -681,9 +685,9 @@ namespace Editor
 
 			if (sceneObjectModal.creating)
 				sceneObjectModal.DrawCreationPopup(SceneObjectsTypePanelMenuItems.at(sceneObjectModal.type));
-			/*
 			if (templateModal.creating)
 				templateModal.DrawCreationPopup(TemplateTypePanelMenuItems.at(templateModal.type));
+			/*
 			if (deletePrompt.showing)
 				deletePrompt.DrawPrompt("Delete Template");
 			*/
@@ -847,6 +851,7 @@ namespace Editor
 			std::string titleBar = gameAppTitle;
 			if (currentSceneUnitId != 0)
 			{
+				std::lock_guard<std::mutex> lock(levelLoadMutex);
 				auto [_, name] = *std::find_if(currentLevelName.begin(), currentLevelName.end(), [&](auto unitLevel)
 					{
 						return currentSceneUnitId == std::get<0>(unitLevel);
@@ -2426,14 +2431,15 @@ namespace Editor
 
 	void StartTemplateCreation(TemplateType type)
 	{
-		//templateModal.json = GetTemplateJson(type);
-		//templateModal.modalProperties = GetTemplateCreationModalProperties(type);
-		//templateModal.atts = GetTemplateRequiredAttributes(type);
-		//templateModal.drawers = GetTemplateCreatorDrawers(type);
-		//templateModal.validators = GetTemplateValidators(type);
-		//templateModal.type = type;
-		//templateModal.creating = true;
-		//templateModal.onCreate = CreateTemplate;
+		using namespace Templates;
+		templateModal.json = GetTemplateJson(type);
+		templateModal.modalProperties = GetTemplateCreationModalProperties(type);
+		templateModal.atts = GetTemplateRequiredAttributes(type);
+		templateModal.drawers = GetTemplateCreatorDrawers(type);
+		templateModal.validators = GetTemplateValidators(type);
+		templateModal.type = type;
+		templateModal.creating = true;
+		templateModal.onCreate = [](SceneUnitId id, TemplateType t, nlohmann::json json) { CreateTemplate(t, json); };
 	}
 
 	//Billboards

@@ -82,16 +82,17 @@ namespace Templates {
 	std::vector<std::pair<std::string, JsonToEditorValueType>> GetTemplateAttributes(TemplateType t);
 	std::map<std::string, JEdvEditorDrawerFunction> GetTemplateDrawers(TemplateType t);
 	std::map<std::string, JEdvEditorDrawerFunction> GetTemplatePreviewers(TemplateType t);
-	/*
-	std::vector<std::string> GetTemplateRequiredAttributes(TemplateType t);
 	nlohmann::json GetTemplateJson(TemplateType t);
 	nlohmann::json GetTemplateCreationModalProperties(TemplateType t);
+	std::vector<std::string> GetTemplateRequiredAttributes(TemplateType t);
 	std::map<std::string, JEdvCreatorDrawerFunction> GetTemplateCreatorDrawers(TemplateType t);
 	std::map<std::string, JEdvCreatorValidatorFunction> GetTemplateValidators(TemplateType t);
+	void CreateTemplateFromJson(nlohmann::json& json, std::function<void(nlohmann::json& json)> creator);
+	void CreateTemplate(TemplateType t, nlohmann::json json);
 
+	/*
 	TemplateType GetTemplateTypeFromFile(std::string file);
 	std::string GetTemplateName(TemplateType t, std::string uuid);
-	void CreateTemplate(TemplateType t, nlohmann::json json);
 	std::string GetTemplateFile(TemplateType t);
 	*/
 	void DeleteTemplate(TemplateType t, std::string uuid);

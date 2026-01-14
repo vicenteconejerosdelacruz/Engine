@@ -16,8 +16,8 @@ namespace Editor
 	extern std::string currentLevelName;
 	extern void PromptTemplateDeletion(std::vector<nlohmann::json> references, std::function<void(std::vector<nlohmann::json>)> OnDelete, std::function<void()> OnCancel);
 	extern void CloseDeletionPrompt();
-	extern void MarkTemplatesPanelAssetsAsDirty();
 	*/
+	extern void MarkTemplatesPanelAssetsAsDirty();
 }
 
 namespace Scene
@@ -1035,23 +1035,6 @@ namespace Templates
 		return GetTPreviewers.at(t)();
 	}
 
-	/*
-	std::vector<std::string> GetTemplateRequiredAttributes(TemplateType t)
-	{
-		const std::map<TemplateType, std::function<std::vector<std::string>()>> GetTRequiredAtts =
-		{
-			{ T_Materials, GetMaterialRequiredAttributes },
-			{ T_Models3D, GetModel3DRequiredAttributes },
-			{ T_Shaders, GetShaderRequiredAttributes },
-			{ T_Sounds, GetSoundRequiredAttributes },
-			{ T_Textures, GetTextureRequiredAttributes },
-			{ T_RenderPasses, GetRenderPassRequiredAttributes }
-		};
-		return GetTRequiredAtts.at(t)();
-	}
-	*/
-
-	/*
 	nlohmann::json GetTemplateJson(TemplateType t)
 	{
 		const std::map<TemplateType, std::function<nlohmann::json()>> GetTJson =
@@ -1065,9 +1048,7 @@ namespace Templates
 		};
 		return GetTJson.at(t)();
 	}
-	*/
 
-	/*
 	nlohmann::json GetTemplateCreationModalProperties(TemplateType t)
 	{
 		const std::map<TemplateType, std::function<nlohmann::json()>> GetTJson =
@@ -1094,7 +1075,7 @@ namespace Templates
 				}); }},
 			{ T_Textures, [] { return nlohmann::json(
 				{
-					{ "assetsFolder" , "./"},
+					{ "assetsFolder" , "../Target/"},
 					{ "fileFolder" , defaultAssetsFolder }
 				}); }},
 			{ T_RenderPasses, [] { return nlohmann::json(
@@ -1105,9 +1086,21 @@ namespace Templates
 		};
 		return GetTJson.at(t)();
 	}
-	*/
 
-	/*
+	std::vector<std::string> GetTemplateRequiredAttributes(TemplateType t)
+	{
+		const std::map<TemplateType, std::function<std::vector<std::string>()>> GetTRequiredAtts =
+		{
+			{ T_Materials, GetMaterialRequiredAttributes },
+			{ T_Models3D, GetModel3DRequiredAttributes },
+			{ T_Shaders, GetShaderRequiredAttributes },
+			{ T_Sounds, GetSoundRequiredAttributes },
+			{ T_Textures, GetTextureRequiredAttributes },
+			{ T_RenderPasses, GetRenderPassRequiredAttributes }
+		};
+		return GetTRequiredAtts.at(t)();
+	}
+
 	std::map<std::string, JEdvCreatorDrawerFunction> GetTemplateCreatorDrawers(TemplateType t)
 	{
 		const std::map<TemplateType, std::function<std::map<std::string, JEdvCreatorDrawerFunction>()>> GetTDrawers =
@@ -1136,6 +1129,32 @@ namespace Templates
 		return GetTValidator.at(t)();
 	}
 
+	void CreateTemplateFromJson(nlohmann::json& json, std::function<void(nlohmann::json& json)> creator)
+	{
+		if (!json.contains("uuid") || json.at("uuid") == "")
+		{
+			nlohmann::json patch = { {"uuid",getUUID()} };
+			json.merge_patch(patch);
+		}
+		creator(json);
+	}
+
+	void CreateTemplate(TemplateType t, nlohmann::json json)
+	{
+		const std::map<TemplateType, std::function<void(nlohmann::json json)>> CreateT =
+		{
+			{ T_Materials, [](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateMaterial); } },
+			{ T_Models3D,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateModel3D); } },
+			{ T_Shaders,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateShader); } },
+			{ T_Sounds,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateSound); } },
+			{ T_Textures,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateTextureFromJsonDefinition); } },
+			{ T_RenderPasses,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateRenderPass); } },
+		};
+		CreateT.at(t)(json);
+		Editor::MarkTemplatesPanelAssetsAsDirty();
+	}
+
+	/*
 	TemplateType GetTemplateTypeFromFile(std::string file)
 	{
 		const std::map<std::string, TemplateType> GetT4F = {
@@ -1160,35 +1179,6 @@ namespace Templates
 			{ T_RenderPasses, GetRenderPassName },
 		};
 		return GetTName.at(t)(uuid);
-	}
-	*/
-
-	/*
-	void CreateTemplateFromJson(nlohmann::json& json, std::function<void(nlohmann::json& json)> creator)
-	{
-		if (!json.contains("uuid") || json.at("uuid") == "")
-		{
-			nlohmann::json patch = { {"uuid",getUUID()} };
-			json.merge_patch(patch);
-		}
-		creator(json);
-	}
-	*/
-
-	/*
-	void CreateTemplate(TemplateType t, nlohmann::json json)
-	{
-		const std::map<TemplateType, std::function<void(nlohmann::json json)>> CreateT =
-		{
-			{ T_Materials, [](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateMaterial); } },
-			{ T_Models3D,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateModel3D); } },
-			{ T_Shaders,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateShader); } },
-			{ T_Sounds,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateSound); } },
-			{ T_Textures,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateTextureFromJsonDefinition); } },
-			{ T_RenderPasses,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateRenderPass); } },
-		};
-		CreateT.at(t)(json);
-		Editor::MarkTemplatesPanelAssetsAsDirty();
 	}
 	*/
 
