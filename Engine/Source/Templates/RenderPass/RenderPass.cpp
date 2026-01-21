@@ -180,14 +180,14 @@ namespace Templates
 
 	RenderPassInstance::~RenderPassInstance()
 	{
-		/*if (!swapChainPass.empty()) {
+		if (!swapChainPass.empty()) {
 			swapChainPass->ReleaseResources();
 			DeleteSwapChainPass(swapChainPass());
 		}
 		if (!renderToTexturePass.empty()) {
 			renderToTexturePass->ReleaseResources();
 			DeleteRenderToTexturePass(renderToTexturePass());
-		}*/
+		}
 	}
 
 	void RenderPassInstance::Pass(SceneUnitId unit, std::function<void(SceneUnitId)> renderCallback, bool clearRTV, XMVECTORF32 clearColor)
