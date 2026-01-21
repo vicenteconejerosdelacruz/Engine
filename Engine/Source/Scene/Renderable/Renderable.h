@@ -165,6 +165,8 @@ namespace Scene
 		void Destroy();
 
 		void Render(SceneUnitId unit, RenderPassInstanceUUID renderPass, CameraSUUUID camera);
+		bool RenderReady();
+		void RenderReady(bool value);
 
 		XMVECTOR rotationQ();
 		XMMATRIX world();

@@ -189,6 +189,7 @@ namespace Scene {
 		void UnbindRenderablesFromShadowMapCameras();
 		void UnbindRenderableFromShadowMapCamera(RenderableSUUUID r);
 
+		void LoadShadowMap();
 		void CreateShadowMap();
 		nlohmann::json CreateDirectionalShadowMapCameraJson(unsigned camIndex);
 		nlohmann::json CreateSpotShadowMapCameraJson();
@@ -198,6 +199,7 @@ namespace Scene {
 		void CreatePointLightShadowMap();
 		void CreateShadowMapDepthStencilResource();
 		void CreateShadowMapShaderResourceView();
+		void UnloadShadowMap();
 		void DestroyShadowMap();
 		void DestroyShadowMapCameras();
 
@@ -210,6 +212,9 @@ namespace Scene {
 		void UpdateDirectionalShadowMapCameraTransformation();
 		void UpdateSpotShadowMapCameraTransformation();
 		void UpdatePointShadowMapCameraTransformation();
+
+		bool RenderReady();
+		void RenderReady(bool value);
 
 		void WriteConstantsBufferLightAttributes(LightAttributes& atts);
 		void WriteConstantsBufferShadowMapAttributes(ShadowMapAttributes& atts);
@@ -234,6 +239,7 @@ namespace Scene {
 #endif
 
 		bool markedForDelete = false;
+		bool renderReady = false;
 		//Camera
 		unsigned int shadowMapIndex = 0xFFFFFFFF;
 		std::vector<CameraSUUUID> shadowMapCameras;

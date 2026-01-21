@@ -91,7 +91,7 @@ namespace Scene
 
 #if defined(_EDITOR)
 		//if (GetCountFromMouseCameras(unit) > 0 && uuid() != *GetMouseCameras(unit).begin() && shadowMapLight().empty())
-		if (shadowMapLight().empty() && !SceneIsIsolated(unit))
+		if (shadowMapLight().empty()/* && !SceneIsIsolated(unit)*/)
 			RegisterBillboard(unit, uuid());
 #endif
 
@@ -368,6 +368,11 @@ namespace Scene
 	void Camera::BindLight(LightSUUUID light)
 	{
 		lights.push_back(light);
+		BindLightWithShadowMap(light);
+	}
+
+	void Camera::BindLightWithShadowMap(LightSUUUID light)
+	{
 		if (light->hasShadowMaps())
 		{
 			lightsWithShadowMaps.insert(light);
@@ -424,6 +429,11 @@ namespace Scene
 	void Camera::UnbindLight(LightSUUUID light)
 	{
 		nostd::vector_erase(lights, light);
+		UnbindLightWithShadowMap(light);
+	}
+
+	void Camera::UnbindLightWithShadowMap(LightSUUUID light)
+	{
 		if (lightsWithShadowMaps.contains(light))
 		{
 			lightsWithShadowMaps.erase(light);
@@ -443,6 +453,16 @@ namespace Scene
 			if (pass->renderCallbackOverride() == RenderPassRenderCallbackOverride_Resolve) return true;
 		}
 		return false;
+	}
+
+	bool Camera::RenderReady()
+	{
+		return renderReady;
+	}
+
+	void Camera::RenderReady(bool value)
+	{
+		renderReady = value;
 	}
 
 	void Camera::Render()

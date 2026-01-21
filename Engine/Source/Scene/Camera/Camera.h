@@ -135,12 +135,16 @@ namespace Scene {
 		virtual void Bind(JUUID uuid);
 		void BindRenderable(RenderableSUUUID renderable);
 		void BindLight(LightSUUUID light);
+		void BindLightWithShadowMap(LightSUUUID light);
 		virtual void UnbindFromScene();
 		virtual void Unbind(JUUID uuid);
 		void UnbindRenderable(RenderableSUUUID renderable);
 		void UnbindLight(LightSUUUID light);
+		void UnbindLightWithShadowMap(LightSUUUID light);
 
 		bool ResolvesToSwapChain();
+		bool RenderReady();
+		void RenderReady(bool value);
 		void Render();
 
 		//Bounding Frustum
@@ -195,7 +199,10 @@ namespace Scene {
 		virtual void WriteJson(nlohmann::json& j);
 #endif
 
+		//Destroy
 		bool markedForDelete = false;
+		//Render
+		bool renderReady = false;
 		//render passes instances
 		std::vector<RenderPassInstanceUUID> renderPassesUUID;
 		//this camera attributes

@@ -87,7 +87,7 @@ namespace Scene
 			CreateShadowMap();
 		}
 #if defined(_EDITOR)
-		if (lightType() != LT_Ambient && !SceneIsIsolated(unit))
+		if (lightType() != LT_Ambient/* && !SceneIsIsolated(unit)*/)
 		{
 			RegisterBillboard(unit, uuid());
 		}
@@ -180,6 +180,20 @@ namespace Scene
 		XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll));
 		XMVECTOR fw = XMVector3Normalize(XMVector3Rotate(dir, rotQ));
 		return fw;
+	}
+
+	bool Light::RenderReady()
+	{
+		return renderReady;
+	}
+
+	void Light::RenderReady(bool value)
+	{
+		for (auto& c : shadowMapCameras)
+		{
+			c->RenderReady(value);
+		}
+		renderReady = value;
 	}
 
 	void Light::WriteConstantsBufferLightAttributes(LightAttributes& atts)
@@ -325,23 +339,25 @@ namespace Scene
 	void LightsStep(SceneUnitId id)
 	{
 		//#if defined(_EDITOR)
-		std::set<LightSUUUID> lightsToDestroyShadowMaps;
-		//		std::set<LightUUID> lightsToCreateShadowMaps;
-		//		std::set<LightUUID> lightsToUpdateCamAttributes;
-		//		std::set<LightUUID> lightsToUpdateTransformation;
-		//std::set<LightSUUUID> lightsToDestroySMChain;
+		//std::set<LightSUUUID> lightsToDestroyShadowMaps;
+		//std::set<LightSUUUID> lightsToCreateShadowMaps;
+		std::set<LightSUUUID> lightsToUpdateCamAttributes;
+		std::set<LightSUUUID> lightsToUpdateTransformation;
 		std::set<LightSUUUID> lightsToDelete;
-		//
-		//		std::set<Light::Light_UpdateFlags> smCamAttributes =
-		//		{
-		//			Light::Update_coneAngle, Light::Update_shadowMapWidth, Light::Update_shadowMapHeight,
-		//			Light::Update_viewWidth, Light::Update_viewHeight, Light::Update_nearZ, Light::Update_farZ
-		//		};
-		//		std::set<Light::Light_UpdateFlags> smCamTransformations =
-		//		{
-		//			Light::Update_position, Light::Update_rotation, Light::Update_dirDist
-		//		};
-		//
+#if defined(_EDITOR)
+		//std::set<LightSUUUID> lightsToDestroySMChain;
+#endif
+
+		std::set<Light::Light_UpdateFlags> smCamAttributes =
+		{
+			Light::Update_coneAngle, Light::Update_shadowMapWidth, Light::Update_shadowMapHeight,
+			Light::Update_viewWidth, Light::Update_viewHeight, Light::Update_nearZ, Light::Update_farZ
+		};
+		std::set<Light::Light_UpdateFlags> smCamTransformations =
+		{
+			Light::Update_position, Light::Update_rotation, Light::Update_dirDist
+		};
+
 		auto lights = GetLights(id);
 		//auto lights = nostd::GetUUIDS(LightsceneObjects);
 
@@ -356,35 +372,40 @@ namespace Scene
 				//	l->UpdateBillboard(bbuuid);
 				//}
 			}
-			//
-			//			//if the light type changed
-			//			if (l->dirty(Light::Update_lightType))
-			//			{
-			//				//use default attributes depending of the light type
-			//				l->JUpdate(editorDefaultLightProperties.at(l->lightType()));
-			//
-			//				//we deactivate shadowmaps always a light type is converted
-			//				if (l->hasShadowMaps())
-			//				{
-			//					lightsToDestroyShadowMaps.insert(l);
-			//					l->hasShadowMaps(false);
-			//				}
-			//
-			//				l->clean(Light::Update_lightType);
-			//			}
-			//
-			//			if (l->dirty(Light::Update_hasShadowMaps))
-			//			{
-			//				if (l->hasShadowMaps())
-			//				{
-			//					lightsToCreateShadowMaps.insert(l);
-			//				}
-			//				else
-			//				{
-			//					lightsToDestroyShadowMaps.insert(l);
-			//				}
-			//				l->clean(Light::Update_hasShadowMaps);
-			//			}
+
+			//if the light type changed
+			if (l->dirty(Light::Update_lightType))
+			{
+				//use default attributes depending of the light type
+				l->JUpdate(editorDefaultLightProperties.at(l->lightType()));
+
+				//we deactivate shadowmaps always a light type is converted
+				if (l->hasShadowMaps())
+				{
+					//lightsToDestroyShadowMaps.insert(l);
+					l->hasShadowMaps(false);
+				}
+
+				l->clean(Light::Update_lightType);
+			}
+
+			if (l->dirty(Light::Update_hasShadowMaps))
+			{
+				if (l->hasShadowMaps())
+				{
+					//lightsToCreateShadowMaps.insert(l);
+					l->LoadShadowMap();
+				}
+				else
+				{
+					l->UnloadShadowMap();
+				}
+				//else
+				//{
+				//	lightsToDestroyShadowMaps.insert(l);
+				//}
+				l->clean(Light::Update_hasShadowMaps);
+			}
 
 			//if destroying SMChain
 			if (l->destroySMChain)
@@ -410,25 +431,25 @@ namespace Scene
 			//				l->clean(Light::Update_shadowMapWidth);
 			//				l->clean(Light::Update_shadowMapHeight);
 			//			}
-			//
-			//			if (std::any_of(smCamAttributes.begin(), smCamAttributes.end(), [&l](auto flag) { return l->dirty(flag); }))
-			//			{
-			//				lightsToUpdateCamAttributes.insert(l);
-			//				std::for_each(smCamAttributes.begin(), smCamAttributes.end(), [&l](auto flag) { l->clean(flag); });
-			//			}
-			//			if (std::any_of(smCamTransformations.begin(), smCamTransformations.end(), [&l](auto flag) { return l->dirty(flag); }))
-			//			{
-			//				lightsToUpdateTransformation.insert(l);
-			//				std::for_each(smCamTransformations.begin(), smCamTransformations.end(), [&l](auto flag) { l->clean(flag); });
-			//			}
+
+			if (std::any_of(smCamAttributes.begin(), smCamAttributes.end(), [&l](auto flag) { return l->dirty(flag); }))
+			{
+				lightsToUpdateCamAttributes.insert(l);
+				std::for_each(smCamAttributes.begin(), smCamAttributes.end(), [&l](auto flag) { l->clean(flag); });
+			}
+			if (std::any_of(smCamTransformations.begin(), smCamTransformations.end(), [&l](auto flag) { return l->dirty(flag); }))
+			{
+				lightsToUpdateTransformation.insert(l);
+				std::for_each(smCamTransformations.begin(), smCamTransformations.end(), [&l](auto flag) { l->clean(flag); });
+			}
 
 			if (l->markedForDelete)
 			{
 				lightsToDelete.insert(l);
-				if (l->hasShadowMaps())
-				{
-					lightsToDestroyShadowMaps.insert(l);
-				}
+				//if (l->hasShadowMaps())
+				//{
+				//	lightsToDestroyShadowMaps.insert(l);
+				//}
 			}
 			//		}
 			//
@@ -469,15 +490,15 @@ namespace Scene
 			//				}
 			//			);
 			//		}
-			//
-			//		for (auto l : lightsToUpdateCamAttributes)
-			//		{
-			//			l->UpdateShadowMapCameraProperties();
-			//		}
-			//		for (auto l : lightsToUpdateTransformation)
-			//		{
-			//			l->UpdateShadowMapCameraTransformation();
-			//		}
+
+			for (auto l : lightsToUpdateCamAttributes)
+			{
+				l->UpdateShadowMapCameraProperties();
+			}
+			for (auto l : lightsToUpdateTransformation)
+			{
+				l->UpdateShadowMapCameraTransformation();
+			}
 			//#endif
 		}
 

@@ -126,6 +126,7 @@ namespace Scene
 #include <JEnd.h>
 
 		BindCameras();
+		BindShadowMapCameras();
 	}
 
 	void Renderable::Bind(JUUID uuid)
@@ -385,10 +386,24 @@ namespace Scene
 				{
 					matUUID = GetMaterialUUIDByName(fallbackMaterialName); //fallback
 				}
+
+				if (name() == "floor")
+				{
+					int i = 0;
+				}
+
 				materials[pass].push_back(pass->GetRenderPassMaterialInstance(
 					unit,
 					matUUID, mesh, shadowed(),
 					mpmo, uuid(), nullptr, onPostMaterialChange));
+
+				if (name() == "floor")
+				{
+					std::unique_ptr<MaterialInstance>& mat = *materials[pass].back();
+					std::unique_ptr<ShaderInstance>& vs = *mat->vertexShaderInstanceUUID;
+					std::unique_ptr<ShaderInstance>& ps = *mat->pixelShaderInstanceUUID;
+					int i = 0;
+				}
 			}
 		}
 		else if (!model3D.empty())
@@ -787,7 +802,7 @@ namespace Scene
 		using namespace Animation;
 		using namespace Scene;
 
-		if (!renderReady || markedForDelete || !visible() || !materials.contains(renderPass) || renderException) return;
+		if (!RenderReady() || markedForDelete || !visible() || !materials.contains(renderPass) || renderException) return;
 
 		//auto& commandList = renderer->commandList;
 		auto& scene = GetSceneUnit(unit);
@@ -821,6 +836,15 @@ namespace Scene
 			};
 		auto setShadowMapsConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
 			{
+				if (name() == "floor")
+				{
+					//std::unique_ptr<MaterialInstance>& mat = *materials[pass].back();
+					std::unique_ptr<MaterialInstance>& mat = *material;
+					std::unique_ptr<ShaderInstance>& vs = *mat->vertexShaderInstanceUUID;
+					std::unique_ptr<ShaderInstance>& ps = *mat->pixelShaderInstanceUUID;
+					int i = 0;
+				}
+
 				if (material->ShaderInstanceHasRegister([](ShaderInstanceUUID binary) { return binary->CBV.lightsShadowMap; })) {
 					if (camera->SceneHasShadowMaps())
 						return camera->GetShadowMapsConstantsBuffer()->SetRootDescriptorTable(commandList, slot, frame);
@@ -891,6 +915,16 @@ namespace Scene
 #if defined(_DEVELOPMENT)
 		PIXEndEvent(commandList.p);
 #endif
+	}
+
+	bool Renderable::RenderReady()
+	{
+		return renderReady;
+	}
+
+	void Renderable::RenderReady(bool value)
+	{
+		renderReady = value;
 	}
 
 	void RenderablesStep(SceneUnitId unit, float dt)
@@ -1044,7 +1078,7 @@ namespace Scene
 		//#endif
 		for (auto& [renderable, player] : animationPlayers)
 		{
-			if (renderable->markedForDelete || !renderable->renderReady)
+			if (renderable->markedForDelete || !renderable->RenderReady())
 				continue;
 
 #if defined(_EDITOR)
@@ -1102,8 +1136,14 @@ namespace Scene
 		r->markedForDelete = true;
 	}
 
+	//static std::set<size_t> computeSkips;
 	void RunBoundingBoxComputeShaders(SceneUnitId id)
 	{
+		//if (!RenderableSUsceneObjects.contains(id))
+		//{
+		//	computeSkips.insert(id);
+		//	return;
+		//}
 		for (auto& [uuid, _] : RenderableSUsceneObjects.at(id))
 		{
 			RenderableSUUUID renderable = MAKESUUUID(id, uuid);
@@ -1117,6 +1157,11 @@ namespace Scene
 
 	void RunBoundingBoxComputeShadersSolution(SceneUnitId id)
 	{
+		//if (computeSkips.contains(id))
+		//{
+		//	computeSkips.erase(id);
+		//	return;
+		//}
 		for (auto& [uuid, _] : RenderableSUsceneObjects.at(id))
 		{
 			RenderableSUUUID renderable = MAKESUUUID(id, uuid);

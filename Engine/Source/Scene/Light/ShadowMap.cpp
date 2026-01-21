@@ -14,6 +14,14 @@
 //#include <DirectXCollision.h>
 //#include <NoMath.h>
 
+#if defined(_EDITOR)
+namespace Editor
+{
+	extern bool IsPlaying(SceneUnitId id);
+	extern JUUID GetSceneUnitEditorCamera(SceneUnitId id);
+}
+#endif
+
 extern std::unique_ptr<Renderer> renderer;
 
 namespace Scene
@@ -77,6 +85,45 @@ namespace Scene
 		{
 			cam->UnbindRenderable(r);
 			Scene::UnbindFromScene(unit, cam.uuid(), r.uuid());
+		}
+	}
+
+	void Light::LoadShadowMap()
+	{
+		InsertLightIntoShadowMapLights(unit, uuid());
+		auto& scene = GetSceneUnit(unit);
+		//if (!scene->LoadingCommandListIsOpen())
+		//{
+		scene->ResetLoadingCommandList();
+		scene->SetLoading(true);
+		scene->SetCanSubmitLoading(false);
+		//}
+
+		CreateShadowMap();
+		BindSceneObjects(scene->Id());
+		BindRenderablesToShadowMapCamera();
+		auto cams = cameras();
+		for (auto& uuid : cams)
+		{
+			CameraSUUUID cam = MAKESUUUID(unit, uuid);
+			cam->BindLightWithShadowMap(SUuuid());
+		}
+		scene->SetCanSubmitLoading(true);
+		//scene->CloseSubmitLoadingCommandList();
+
+#if defined(_EDITOR)
+		EditorPreview(1 << Light::Update_hasShadowMaps);
+#endif
+
+		std::set<Light::Light_UpdateFlags> smAttributes =
+		{
+			Light::Update_coneAngle, Light::Update_shadowMapWidth, Light::Update_shadowMapHeight,
+			Light::Update_viewWidth, Light::Update_viewHeight, Light::Update_nearZ, Light::Update_farZ,
+			Light::Update_position, Light::Update_rotation, Light::Update_dirDist
+		};
+		for (auto f : smAttributes)
+		{
+			dirty(1ULL << f);
 		}
 	}
 
@@ -285,6 +332,22 @@ namespace Scene
 		renderer->d3dDevice->CreateShaderResourceView(smPass->depthStencilTexture, &shadowMapSrvDesc, shadowMapSrvCpuDescriptorHandle[unit][shadowMapIndex]);
 	}
 
+	void Light::UnloadShadowMap()
+	{
+		EraseLightFromShadowMapLights(unit, uuid());
+		DestroyShadowMap();
+		UnbindRenderablesFromShadowMapCameras();
+		auto cams = cameras();
+		for (auto& uuid : cams)
+		{
+			CameraSUUUID cam = MAKESUUUID(unit, uuid);
+			cam->UnbindLightWithShadowMap(SUuuid());
+		}
+#if defined(_EDITOR)
+		DestroyEditorPreview();
+#endif
+	}
+
 	void Light::DestroyShadowMap()
 	{
 		DestroyShadowMapCameras();
@@ -414,7 +477,15 @@ namespace Scene
 
 		shadowMapNearFarPlanes.clear();
 
-		auto& viewCamera = GetCameraSUSceneObject(unit, *cameras().begin());
+		JUUID camUUID = *cameras().begin();
+#if defined(_EDITOR)
+		if (!Editor::IsPlaying(unit))
+		{
+			camUUID = Editor::GetSceneUnitEditorCamera(unit);
+		}
+#endif
+
+		auto& viewCamera = GetCameraSUSceneObject(unit, camUUID);
 		auto& lightCamera = GetCameraSUSceneObject(unit, shadowMapCameras.at(0).uuid());
 		XMMATRIX lightViewMatrix = lightCamera->view();
 
@@ -531,13 +602,39 @@ namespace Scene
 
 	void Light::CreateShadowMapMinMaxChain()
 	{
+		auto& scene = GetSceneUnit(unit);
+		bool doSubmit = false;
+		if (!scene->LoadingCommandListIsOpen())
+		{
+			scene->ResetLoadingCommandList();
+			scene->SetLoading(true);
+			scene->SetCanSubmitLoading(false);
+			doSubmit = true;
+		}
+
 		//pick the gpu handles for the final shadowmap and copies for the min/max chain initial calculation
 		CD3DX12_GPU_DESCRIPTOR_HANDLE shadowMapChainGpuHandle = GetShadowMapGpuDescriptorHandle(unit, shadowMapIndex);
 		CD3DX12_GPU_DESCRIPTOR_HANDLE shadowMapChainGpuHandle1 = shadowMapChainGpuHandle;
 		CD3DX12_GPU_DESCRIPTOR_HANDLE shadowMapChainGpuHandle2 = shadowMapChainGpuHandle;
 
 		float texWidth = static_cast<float>(shadowMapWidth());
-		float texHeight = static_cast<float>(((lightType() == LT_Point) ? 6U * shadowMapWidth() : shadowMapHeight()));
+		float texHeight;
+		switch (lightType())
+		{
+		case LT_Directional:
+		{
+			texHeight = static_cast<float>(shadowMapWidth()) * 3.0f;
+		}
+		case LT_Spot:
+		{
+			texHeight = static_cast<float>(shadowMapHeight());
+		}
+		case LT_Point:
+		{
+			texHeight = static_cast<float>(shadowMapWidth()) * 6.0f;
+		}
+		break;
+		}
 
 		//calculate the width/height of the texture and the TexelInvSize of the shadow map texture for the current pass
 		unsigned int width = static_cast<unsigned int>(texWidth) >> 1;
@@ -564,6 +661,8 @@ namespace Scene
 			shadowMapChainGpuHandle1 = rtt0->gpuTextureHandle;
 			shadowMapChainGpuHandle2 = rtt1->gpuTextureHandle;
 
+			//OutputDebugStringA(std::string(std::to_string(chainIndex) + "(" + std::to_string(width) + "," + std::to_string(height) + ")" + "\n").c_str());
+
 			//calculate the next width and height
 			width = std::max(1U, width >> 1);
 			height = std::max(1U, height >> 1);
@@ -582,6 +681,11 @@ namespace Scene
 		resultPass->shadowMapChainGpuHandle1 = last->renderToTexturePass->renderToTexture.at(0)->gpuTextureHandle;
 		resultPass->shadowMapChainGpuHandle2 = last->renderToTexturePass->renderToTexture.at(1)->gpuTextureHandle;
 		resultPass->CreateFSQuad((lightType() != LT_Spot) ? "DepthMinMaxToRGBA" : "DepthMinMaxToRGBASpot");
+
+		if (doSubmit)
+		{
+			scene->SetCanSubmitLoading(true);
+		}
 	}
 
 	void Light::DestroyShadowMapMinMaxChain()
