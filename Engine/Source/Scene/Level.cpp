@@ -134,11 +134,12 @@ namespace Scene::Level {
 		{
 			std::for_each(j.at(type).begin(), j.at(type).end(), [&scene, loader](nlohmann::json& json)
 				{
-					if (scene->abortLoading->load())
-						return;
+					//if (scene->abortLoading->load())
+					//	return;
 
 					loader(json);
-					scene->unboundedSceneObjects.insert(json.at("uuid"));
+					scene->AddSceneObjectToUnboundPool(json.at("uuid"));
+					//scene->unboundedSceneObjects.insert(json.at("uuid"));
 				}
 			);
 		}
@@ -150,18 +151,19 @@ namespace Scene::Level {
 #if defined(_EDITOR)
 		using namespace Editor;
 
-		if (!scene->attached && !scene->isolated)
-		{
-			CreateSceneUnitBillboards(scene->id);
-		}
+		//if (!scene->IsAttached() && !scene->IsIsolated())
+		//{
+		CreateSceneUnitBillboards(scene->Id());
+		//}
 #endif
-
 		scene->ResetLoadingCommandList();
+		scene->SetLoading(true);
+		scene->SetCanSubmitLoading(false);
 
-		CreateRenderableSUSceneObjects(scene->id);
-		CreateCameraSUSceneObjects(scene->id);
-		CreateLightSUSceneObjects(scene->id);
-		CreateSoundFXSUSceneObjects(scene->id);
+		CreateRenderableSUSceneObjects(scene->Id());
+		CreateCameraSUSceneObjects(scene->Id());
+		CreateLightSUSceneObjects(scene->Id());
+		CreateSoundFXSUSceneObjects(scene->Id());
 
 		std::vector<std::string> types =
 		{
@@ -181,8 +183,8 @@ namespace Scene::Level {
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Renderables), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateSURenderable(scene->id, json);
-				scene->renderablesInLoadingPool.insert(json.at("uuid"));
+				CreateSURenderable(scene->Id(), json);
+				scene->InsertRenderableIntoLoadingPool(json.at("uuid"));
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -190,7 +192,8 @@ namespace Scene::Level {
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Cameras), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateSUCamera(scene->id, json);
+				CreateSUCamera(scene->Id(), json);
+				scene->InsertCameraIntoLoadingPool(json.at("uuid"));
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -198,7 +201,8 @@ namespace Scene::Level {
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Lights), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateSULight(scene->id, json);
+				CreateSULight(scene->Id(), json);
+				scene->InsertLightIntoLoadingPool(json.at("uuid"));
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -206,35 +210,35 @@ namespace Scene::Level {
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_SoundEffects), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateSUSoundFX(scene->id, json);
+				CreateSUSoundFX(scene->Id(), json);
 				count++;
 				progress(json.at("name"), count, total);
 			}
 		);
 
 #if defined(_EDITOR)
-		if (!scene->attached && !scene->isolated)
+		//if (!scene->IsAttached() && !scene->IsIsolated())
 		{
-			CreatePickingPass(scene->id);
-			CreateSceneUnitBoundingBox(scene->id);
-			CreateSceneUnitEditorIndependentCamera(scene->id);
-			CreateRegisteredBillboards(scene->id);
+			CreatePickingPass(scene->Id());
+			CreateSceneUnitBoundingBox(scene->Id());
+			CreateSceneUnitEditorIndependentCamera(scene->Id());
+			CreateRegisteredBillboards(scene->Id());
 		}
 #endif
 
-		if (scene->abortLoading->load())
-			return;
+		//if (scene->abortLoading->load())
+		//	return;
 
-		if (!scene->attached)
-		{
-			MapControllers(scene->id);
-			BindSceneObjects(scene->id);
-		}
+		//if (!scene->IsAttached())
+		//{
+		MapControllers(scene->Id());
+		BindSceneObjects(scene->Id());
+		//}
 #if defined(_EDITOR)
-		if (!scene->attached && !scene->isolated)
-		{
-			CopySceneUnitEditorCameraRenderPasses(scene->id);
-		}
+		//if (!scene->IsAttached() && !scene->IsIsolated())
+		//{
+		CopySceneUnitEditorCameraRenderPasses(scene->Id());
+		//}
 		//Editor::currentLevelName = filename;
 		//Editor::MarkScenePanelAssetsAsDirty();
 #endif

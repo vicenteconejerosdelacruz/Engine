@@ -21,16 +21,16 @@ namespace Scene
 	void CreateIsolatedSceneLevelAsync(std::string filename, nlohmann::json level, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress = [](std::string, unsigned int, unsigned int) {});
 	void AttachLevelIntoScene(SceneUnitId parentUnit, std::string filename, nlohmann::json level, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress = [](std::string, unsigned int, unsigned int) {});
 
-	std::unique_ptr<SceneUnit>& CreateScene(SceneUnitId unit = nostd::threadIdHash(), std::string unitName = std::to_string(nostd::threadIdHash()), unsigned int numProcessors = Renderer::numFrames);
-	std::unique_ptr<SceneUnit>& CreateAttachableScene(SceneUnitId parentUnit, SceneUnitId unit = nostd::threadIdHash(), std::string unitName = std::to_string(nostd::threadIdHash()));
+	std::unique_ptr<SceneUnit>& CreateScene(SceneUnitId unit, std::string unitName = std::to_string(nostd::threadIdHash()), unsigned int numProcessors = Renderer::numFrames);
+	//std::unique_ptr<SceneUnit>& CreateAttachableScene(SceneUnitId parentUnit, SceneUnitId unit = nostd::threadIdHash(), std::string unitName = std::to_string(nostd::threadIdHash()));
 	void DestroyScene(SceneUnitId unit);
 	void DestroyScenes(bool inmediate = false);
 	bool SceneUnitExits(SceneUnitId unit);
-	std::unique_ptr<SceneUnit>& GetSceneUnit(SceneUnitId unit = nostd::threadIdHash());
+	std::unique_ptr<SceneUnit>& GetSceneUnit(SceneUnitId unit);
 	size_t GetSceneUnitsCount();
 	void MergeAttachedSceneUnits();
 
-	bool SceneIsIsolated(SceneUnitId id);
+	//bool SceneIsIsolated(SceneUnitId id);
 
 	void ResizeReleaseScenePasses();
 	void ResizeScenePasses(unsigned int width, unsigned int height);

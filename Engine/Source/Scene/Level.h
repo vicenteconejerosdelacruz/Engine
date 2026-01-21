@@ -2,7 +2,7 @@
 
 namespace Scene
 {
-	struct SceneUnit;
+	class SceneUnit;
 };
 
 namespace Scene::Level

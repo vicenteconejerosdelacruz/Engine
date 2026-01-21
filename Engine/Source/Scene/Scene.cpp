@@ -57,14 +57,17 @@ namespace Scene
 
 		std::thread levelThread([](std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 			{
-				SceneUnitId unit = nostd::threadIdHash();
-				auto& scene = CreateScene(unit, filename);
+				std::lock_guard<std::mutex> lock(sceneUnitsMutex);
+
+				SceneUnitId id = nostd::threadIdHash();
+				auto& scene = CreateScene(id, filename, Renderer::numFrames);
 
 				LoadLevel(scene, filename, data, progress);
 
-				scene->sceneUnitLoaded->store(true);
+				scene->SetCanSubmitLoading(true);
+				//		scene->sceneUnitLoaded->store(true);
 
-				levelLoaded(unit);
+				levelLoaded(id);
 
 			}, filename, data, levelLoaded, progress
 		);
@@ -73,7 +76,7 @@ namespace Scene
 
 	void CreateIsolatedSceneLevelAsync(std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 	{
-		using namespace Scene::Level;
+		/*using namespace Scene::Level;
 
 		std::thread levelThread([](std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 			{
@@ -89,7 +92,7 @@ namespace Scene
 
 			}, filename, data, levelLoaded, progress
 		);
-		levelThread.detach();
+		levelThread.detach();*/
 	}
 
 	void AttachLevelIntoScene(SceneUnitId parentUnit, std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
@@ -98,6 +101,16 @@ namespace Scene
 
 		std::thread levelThread([](SceneUnitId parentUnit, std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 			{
+				std::lock_guard<std::mutex> lock(sceneUnitsMutex);
+
+				auto& scene = GetSceneUnit(parentUnit);
+
+				LoadLevel(scene, filename, data, progress);
+
+				scene->SetCanSubmitLoading(true);
+
+				levelLoaded(parentUnit);
+				/*
 				SceneUnitId unit = nostd::threadIdHash();
 				auto& scene = CreateAttachableScene(parentUnit, unit);
 
@@ -108,6 +121,7 @@ namespace Scene
 				levelLoaded(unit);
 
 				attachedUnits.insert_or_assign(unit, parentUnit);
+				*/
 
 			}, parentUnit, filename, data, levelLoaded, progress
 		);
@@ -116,67 +130,68 @@ namespace Scene
 
 	std::unique_ptr<SceneUnit>& CreateScene(SceneUnitId unit, std::string unitName, unsigned int numProcessors)
 	{
-		std::lock_guard<std::mutex> lock(sceneUnitsMutex);
 		scenesUnits.insert_or_assign(unit, std::make_unique<SceneUnit>(unit, unitName));
-		scenesUnits.at(unit)->loadingProcessor.Init(renderer->d3dDevice, unit, 1U);
+		scenesUnits.at(unit)->InitLoadingProcessor(renderer->d3dDevice, unit, 1U);
 		if (numProcessors > 0U)
 		{
-			scenesUnits.at(unit)->commandsProcessor.Init(renderer->d3dDevice, unit, numProcessors);
-			scenesUnits.at(unit)->computeProcessor.Init(renderer->d3dDevice, unit, numProcessors);
+			scenesUnits.at(unit)->InitFrame2FrameProcessor(renderer->d3dDevice, unit, numProcessors);
+			scenesUnits.at(unit)->InitComputeProcessor(renderer->d3dDevice, unit, numProcessors);
+			//scenesUnits.at(unit)->commandsProcessor.Init(renderer->d3dDevice, unit, numProcessors);
+			//scenesUnits.at(unit)->computeProcessor.Init(renderer->d3dDevice, unit, numProcessors);
 		}
 		return scenesUnits.at(unit);
 	}
 
-	std::unique_ptr<SceneUnit>& CreateAttachableScene(SceneUnitId parentUnit, SceneUnitId unit, std::string unitName)
-	{
-		auto& scene = CreateScene(unit, unitName, 0U);
-		scene->attached = true;
-		scene->parentUnit = parentUnit;
-		return scene;
-	}
+	//std::unique_ptr<SceneUnit>& CreateAttachableScene(SceneUnitId parentUnit, SceneUnitId unit, std::string unitName)
+	//{
+		//auto& scene = CreateScene(unit, unitName, 0U);
+		//scene->attached = true;
+		//scene->parentUnit = parentUnit;
+		//return scene;
+	//}
 
 	void DestroyScene(SceneUnitId id)
 	{
-		const std::map<SceneObjectType, std::function<void(SceneUnitId, JUUID)>> DeleteSO =
-		{
-			{ SO_Renderables, DeleteRenderable },
-			{ SO_Lights, DeleteLight },
-			{ SO_Cameras, DeleteCamera },
-			{ SO_SoundEffects, DeleteSoundFX }
-		};
-
-		DestroySeneUnitGame(id);
-
-		auto& scene = GetSceneUnit(id);
-		for (auto& [uuid, type] : scene->sceneObjectsTypes)
-		{
-#if defined(_EDITOR)
-			Editor::EraseSceneObjectFromSelection(id, uuid);
-#endif
-			DeleteSO.at(type)(id, uuid);
-#if defined(_EDITOR)
-			Editor::MarkScenePanelAssetsAsDirty();
-#endif
-		}
-		scene->MarkForDelete();
+		//		const std::map<SceneObjectType, std::function<void(SceneUnitId, JUUID)>> DeleteSO =
+		//		{
+		//			{ SO_Renderables, DeleteRenderable },
+		//			{ SO_Lights, DeleteLight },
+		//			{ SO_Cameras, DeleteCamera },
+		//			{ SO_SoundEffects, DeleteSoundFX }
+		//		};
+		//
+		//		DestroySeneUnitGame(id);
+		//
+		//		auto& scene = GetSceneUnit(id);
+		//		for (auto& [uuid, type] : scene->sceneObjectsTypes)
+		//		{
+		//#if defined(_EDITOR)
+		//			Editor::EraseSceneObjectFromSelection(id, uuid);
+		//#endif
+		//			DeleteSO.at(type)(id, uuid);
+		//#if defined(_EDITOR)
+		//			Editor::MarkScenePanelAssetsAsDirty();
+		//#endif
+		//		}
+		//		scene->MarkForDelete();
 	}
 
 	void DestroyScenes(bool inmediate)
 	{
-		using namespace Scene::Level;
-		for (auto& [unit, _] : scenesUnits)
-		{
-			DestroyScene(unit);
-			DestroySceneObjects(unit);
-		}
-		if (inmediate)
-		{
-			for (auto& [_, scene] : scenesUnits)
-			{
-				scene->deletionFrames = 0;
-			}
-			DeletedScenes();
-		}
+		//using namespace Scene::Level;
+		//for (auto& [unit, _] : scenesUnits)
+		//{
+		//	DestroyScene(unit);
+		//	DestroySceneObjects(unit);
+		//}
+		//if (inmediate)
+		//{
+		//	for (auto& [_, scene] : scenesUnits)
+		//	{
+		//		scene->deletionFrames = 0;
+		//	}
+		//	DeletedScenes();
+		//}
 	}
 
 	bool SceneUnitExits(SceneUnitId unit)
@@ -196,23 +211,23 @@ namespace Scene
 
 	void MergeAttachedSceneUnits()
 	{
-		for (auto& [unit, parentUnit] : attachedUnits)
-		{
-			if (!SceneUnitExits(unit) || !SceneUnitExits(parentUnit)) continue;
+		//for (auto& [unit, parentUnit] : attachedUnits)
+		//{
+		//	if (!SceneUnitExits(unit) || !SceneUnitExits(parentUnit)) continue;
 
-			auto& scene = GetSceneUnit(unit);
-			if (!scene->mergeable || scene->markedForDelete) continue;
+		//	auto& scene = GetSceneUnit(unit);
+		//	if (!scene->mergeable || scene->markedForDelete) continue;
 
-			auto& parent = GetSceneUnit(parentUnit);
-			parent->Merge(scene);
-			scene->MarkForDelete();
-		}
+		//	auto& parent = GetSceneUnit(parentUnit);
+		//	parent->Merge(scene);
+		//	scene->MarkForDelete();
+		//}
 	}
 
-	bool SceneIsIsolated(SceneUnitId id)
+	/*bool SceneIsIsolated(SceneUnitId id)
 	{
-		return scenesUnits.at(id)->isolated;
-	}
+		return scenesUnits.at(id)->IsIsolated();
+	}*/
 
 	void ResizeReleaseScenePasses()
 	{
@@ -260,9 +275,9 @@ namespace Scene
 
 	std::set<JUUID>& GetSceneObjects(SceneUnitId unit, SceneObjectType type)
 	{
-		if (!scenesUnits.at(unit)->sceneObjects.contains(type))
-			scenesUnits.at(unit)->sceneObjects[type].clear();
-		return scenesUnits.at(unit)->sceneObjects.at(type);
+		if (!scenesUnits.at(unit)->GetSceneObjects().contains(type))
+			scenesUnits.at(unit)->GetSceneObjects()[type].clear();
+		return scenesUnits.at(unit)->GetSceneObjects().at(type);
 	}
 
 	//std::set<JUUID> GetSceneObjects(SceneObjectType type)
@@ -278,22 +293,22 @@ namespace Scene
 
 	std::unordered_map<JUUID, SceneObjectType>& GetSceneObjectsTypes(SceneUnitId unit)
 	{
-		return scenesUnits.at(unit)->sceneObjectsTypes;
+		return scenesUnits.at(unit)->GetSceneObjectTypes();
 	}
 
 	std::set<JUUID>& GetUnboundedSceneObjects(SceneUnitId id)
 	{
-		return scenesUnits.at(id)->unboundedSceneObjects;
+		return scenesUnits.at(id)->GetUnboundedSceneObjects();
 	}
 
 	SceneObjectType GetSceneObjectType(SceneUnitId id, JUUID uuid)
 	{
-		return scenesUnits.at(id)->sceneObjectsTypes.at(uuid);
+		return scenesUnits.at(id)->GetSceneObjectTypes().at(uuid);
 	}
 
 	bool SceneObjectExists(SceneUnitId id, JUUID uuid)
 	{
-		return scenesUnits.at(id)->sceneObjectsTypes.contains(uuid);
+		return scenesUnits.at(id)->GetSceneObjectTypes().contains(uuid);
 	}
 
 	void MoveSceneObjectUnit(JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
@@ -448,24 +463,24 @@ namespace Scene
 
 	void BindToScene(SceneUnitId id, JUUID uuidA, JUUID uuidB)
 	{
-		scenesUnits.at(id)->binder.insert(uuidA, uuidB);
+		scenesUnits.at(id)->Bind(uuidA, uuidB);
 	}
 
 	void UnbindFromScene(SceneUnitId unit, JUUID uuidA)
 	{
-		scenesUnits.at(unit)->binder.erase(uuidA);
+		scenesUnits.at(unit)->Unbind(uuidA);
 	}
 
 	void UnbindFromScene(SceneUnitId unit, JUUID uuidA, JUUID uuidB)
 	{
-		scenesUnits.at(unit)->binder.erase(uuidA, uuidB);
+		scenesUnits.at(unit)->Unbind(uuidA, uuidB);
 	}
 
 	void SceneObjectsStep(DX::StepTimer& timer)
 	{
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->markedForDelete) continue;
+			if (scene->MarkedForDelete()) continue;
 			float dt = static_cast<FLOAT>(timer.GetElapsedSeconds());
 #if defined(_EDITOR)
 			Editor::UpdateBoundingBox(unit);
@@ -488,7 +503,7 @@ namespace Scene
 		for (JUUID uuid : GetRenderables(id))
 		{
 			RenderableSUUUID r = MAKESUUUID(id, uuid);
-			if (!r->renderReady) continue;
+			if (!r->RenderReady()) continue;
 
 			r->WriteAnimationConstantsBuffer(scene->Frame());
 			r->WriteConstantsBuffer(scene->Frame());
@@ -498,7 +513,7 @@ namespace Scene
 		for (JUUID uuid : GetCameras(id))
 		{
 			CameraSUUUID c = MAKESUUUID(id, uuid);
-			if (!c->shadowMapLight().empty()) continue;
+			if (!c->RenderReady() || !c->shadowMapLight().empty()) continue;
 
 			c->WriteLightsConstantsBuffer(scene->Frame());
 			c->WriteShadowMapsConstantsBuffer(scene->Frame());
@@ -513,7 +528,7 @@ namespace Scene
 		{
 			LightSUUUID l = MAKESUUUID(id, uuid);
 
-			if (!l->hasShadowMaps()) continue;
+			if (!l->RenderReady() || !l->hasShadowMaps()) continue;
 
 			auto renderSceneShadowMap = [&](unsigned int cameraIndex)
 				{
@@ -572,8 +587,8 @@ namespace Scene
 			}
 
 			//filter out cameras used to render shadow maps
-			auto& cam = GetCameraSUSceneObject(id, uuid);
-			if (!cam->shadowMapLight().empty())
+			CameraSUUUID cam = MAKESUUUID(id, uuid);
+			if (!cam->RenderReady() || !cam->shadowMapLight().empty())
 			{
 				it = cameras.erase(it);
 				continue;
@@ -647,20 +662,21 @@ namespace Scene
 
 	void SceneRender()
 	{
+		std::lock_guard<std::mutex> lock(sceneUnitsMutex);
 #if defined(_EDITOR)
 		using namespace Editor;
 		UpdateBillboards();
 #endif
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->markedForDelete) continue;
+			if (scene->MarkedForDelete()) continue;
 
 			scene->Loading();
 
-			if (!renderableSceneUnits.contains(unit) && !scene->attached) continue;
+			if (!renderableSceneUnits.contains(unit)/* && !scene->IsAttached()*/) continue;
 
 #if defined(_EDITOR)
-			if (!scene->attached && !Editor::IsPlaying(unit) && !SceneIsIsolated(unit))
+			if (/*!scene->IsAttached() && */!Editor::IsPlaying(unit)/* && !scene->IsIsolated()*/)
 			{
 				WriteSceneUnitEditorPlayCameraConstantsBuffer(unit);
 				SwitchToSceneUnitEditorCamera(unit);
@@ -668,7 +684,7 @@ namespace Scene
 #endif
 			scene->Render();
 #if defined(_EDITOR)
-			if (!scene->attached && !Editor::IsPlaying(unit) && !SceneIsIsolated(unit))
+			if (/*!scene->IsAttached() && */!Editor::IsPlaying(unit)/* && !scene->IsIsolated()*/)
 			{
 				SwitchToSceneUnitEditorPlayCamera(unit);
 			}
@@ -681,58 +697,65 @@ namespace Scene
 
 	void ScenePostRender()
 	{
+		std::lock_guard<std::mutex> lock(sceneUnitsMutex);
 #if defined(_EDITOR)
 		using namespace Editor;
 #endif
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->markedForDelete || (!renderableSceneUnits.contains(unit) && !scene->attached && !SceneIsIsolated(unit))) continue;
+			if (scene->MarkedForDelete() || (!renderableSceneUnits.contains(unit)/* && !scene->IsAttached() && !scene->IsIsolated()*/)) continue;
 
 			scene->PostRender();
 		}
 
-		MergeAttachedSceneUnits();
+		//		MergeAttachedSceneUnits();
 	}
 
+	static std::set<size_t> computeRunners;
 	void RunComputeShaders()
 	{
+		std::lock_guard<std::mutex> lock(sceneUnitsMutex);
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->markedForDelete || scene->attached) continue;
+			if (scene->MarkedForDelete()/* || scene->IsAttached()*/) continue;
+			computeRunners.insert(unit);
 			scene->RunComputeShaders();
 		}
 	}
 
 	void SolveComputeShaders()
 	{
+		std::lock_guard<std::mutex> lock(sceneUnitsMutex);
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->markedForDelete || scene->attached) continue;
+			if (scene->MarkedForDelete()/* || scene->IsAttached()*/) continue;
+			if (!computeRunners.contains(unit)) continue;
 			scene->SolveComputeShaders();
 		}
+		computeRunners.clear();
 	}
 
 	void DeletedScenes()
 	{
-		for (auto it = scenesUnits.begin(); it != scenesUnits.end();)
-		{
-			if (it->second->markedForDelete)
-			{
-				if (it->second->deletionFrames > 0)
-				{
-					it->second->deletionFrames--;
-					it++;
-				}
-				else
-				{
-					it = scenesUnits.erase(it);
-				}
-			}
-			else
-			{
-				it++;
-			}
-		}
+		//for (auto it = scenesUnits.begin(); it != scenesUnits.end();)
+		//{
+		//	if (it->second->markedForDelete)
+		//	{
+		//		if (it->second->deletionFrames > 0)
+		//		{
+		//			it->second->deletionFrames--;
+		//			it++;
+		//		}
+		//		else
+		//		{
+		//			it = scenesUnits.erase(it);
+		//		}
+		//	}
+		//	else
+		//	{
+		//		it++;
+		//	}
+		//}
 	}
 
 	SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid)
@@ -940,9 +963,9 @@ namespace Scene
 		};
 
 		std::vector<JUUIDName> sceneObjectsTypeList;
-		if (scenesUnits.at(id)->loading->load()) return sceneObjectsTypeList;
+		//if (scenesUnits.at(id)->loading->load()) return sceneObjectsTypeList;
 
-		for (auto& [type, uuids] : scenesUnits.at(id)->sceneObjects)
+		for (auto& [type, uuids] : scenesUnits.at(id)->GetSceneObjects())
 		{
 			for (auto& uuid : uuids)
 			{
@@ -1069,7 +1092,7 @@ namespace Scene
 			{ SceneObjectTypeJsonContainer.at(so), { json } }
 		};
 
-		AttachLevelIntoScene(id, "new-scene-object", data, [&](SceneUnitId)
+		AttachLevelIntoScene(id, "new-scene-object", data, [=](SceneUnitId)
 			{
 #if defined(_EDITOR)
 				if (so == SO_Renderables)
