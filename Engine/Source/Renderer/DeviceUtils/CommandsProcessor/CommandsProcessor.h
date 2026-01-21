@@ -11,9 +11,11 @@ namespace DeviceUtils
 		std::vector<CComPtr<ID3D12CommandAllocator>> commandAllocators;
 		std::vector<CComPtr<ID3D12GraphicsCommandList2>> commandLists;
 		unsigned int frame;
+		std::vector<bool> open;
 
 		void Init(CComPtr<ID3D12Device2> d3dDevice, size_t id, size_t capacity);
-		CComPtr<ID3D12GraphicsCommandList2>& GetCommandList();
+		bool IsOpen() { return open.at(frame); }
+		CComPtr<ID3D12GraphicsCommandList2>& GetCommandList(bool OpenIfClosed = true);
 		void ResetCommandList();
 		void CloseCommandList();
 		void Next() { frame = (frame + 1) % static_cast<unsigned int>(commandLists.size()); }

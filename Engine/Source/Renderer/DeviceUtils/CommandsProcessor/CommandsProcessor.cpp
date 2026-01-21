@@ -23,13 +23,18 @@ namespace DeviceUtils
 
 			commandAllocators.push_back(allocator);
 			commandLists.push_back(commandList);
+			open.push_back(false);
 		}
 
 		frame = 0U;
 	}
 
-	CComPtr<ID3D12GraphicsCommandList2>& CommandsProcessor::GetCommandList()
+	CComPtr<ID3D12GraphicsCommandList2>& CommandsProcessor::GetCommandList(bool OpenIfClosed)
 	{
+		if (!IsOpen() && OpenIfClosed)
+		{
+			ResetCommandList();
+		}
 		return commandLists.at(frame);
 	}
 
@@ -42,11 +47,13 @@ namespace DeviceUtils
 		ID3D12DescriptorHeap* ppHeaps[] = { GetCSUDescriptorHeap() };
 		commandList->Reset(commandAllocator, nullptr);
 		commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+		open.at(frame) = true;
 	}
 
 	void CommandsProcessor::CloseCommandList()
 	{
 		auto& commandList = commandLists[frame];
 		DX::ThrowIfFailed(commandList->Close());
+		open.at(frame) = false;
 	}
 }
