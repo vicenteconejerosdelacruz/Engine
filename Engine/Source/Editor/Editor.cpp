@@ -213,6 +213,8 @@ namespace Editor
 #if !defined(_EDITOR_BOUNDINGBOX)
 		return;
 #endif
+		if (boundingBox.contains(id)) return;
+
 		JUUID uuid = getUUID();
 		boundingBox[id] = MAKESUUUID(id, uuid);
 		JUUID camera = *GetSwapChainCameras(id).begin();
@@ -243,12 +245,12 @@ namespace Editor
 		);
 		CreateSURenderable(id, jbox);
 		boundingBox[id]->BindToScene();
-		auto& scene = GetSceneUnit(id);
-		scene->renderablesInLoadingPool.insert(uuid);
+		GetSceneUnit(id)->InsertRenderableIntoLoadingPool(uuid);
 	}
 
 	void CreateSceneUnitBillboards(SceneUnitId id)
 	{
+		if (billboards.contains(id)) return;
 		billboards.insert_or_assign(id, BillboardRegistry());
 	}
 
@@ -258,6 +260,8 @@ namespace Editor
 
 		if (GetCountFromMouseCameras(id) > 0ULL)
 		{
+			if (editorCameraUUID.contains(id)) return;
+
 			//no more than a single swapchain camera or mouse controller is allowed
 			//todo handle RTT cameras that does resolving
 			levelCameraUUID[id] = MAKESUUUID(id, *GetMouseCameras(id).begin());
@@ -302,6 +306,8 @@ namespace Editor
 
 	void CopySceneUnitEditorCameraRenderPasses(SceneUnitId id)
 	{
+		if (editorCameraUUID[id]->renderPasses().size() > 0ULL) return;
+
 		editorCameraUUID[id]->renderPasses(levelCameraUUID[id]->renderPasses());
 		editorCameraUUID[id]->renderPassesUUID = levelCameraUUID[id]->renderPassesUUID;
 	}
@@ -725,9 +731,20 @@ namespace Editor
 		levelCameraUUID[unit]->WriteConstantsBuffer(scene->Frame());
 	}
 
+	JUUID GetSceneUnitEditorCamera(SceneUnitId id)
+	{
+		return editorCameraUUID[id].uuid();
+	}
+
 	void SwitchToSceneUnitEditorCamera(SceneUnitId id)
 	{
+		auto& scene = GetSceneUnit(id);
 		editorCameraUUID[id]->renderables = levelCameraUUID[id]->renderables;
+		editorCameraUUID[id]->lights = levelCameraUUID[id]->lights;
+		editorCameraUUID[id]->lightsWithShadowMaps = levelCameraUUID[id]->lightsWithShadowMaps;
+		editorCameraUUID[id]->WriteLightsConstantsBuffer(scene->Frame());
+		editorCameraUUID[id]->WriteShadowMapsConstantsBuffer(scene->Frame());
+		editorCameraUUID[id]->RenderReady(true);
 		EraseCameraFromMouseCameras(id, levelCameraUUID[id].uuid());
 		EraseCameraFromSwapChainCameras(id, levelCameraUUID[id].uuid());
 		InsertCameraIntoMouseCameras(id, editorCameraUUID[id].uuid());
@@ -740,6 +757,7 @@ namespace Editor
 		EraseCameraFromSwapChainCameras(id, editorCameraUUID[id].uuid());
 		InsertCameraIntoMouseCameras(id, levelCameraUUID[id].uuid());
 		InsertCameraIntoSwapChainCameras(id, levelCameraUUID[id].uuid());
+		editorCameraUUID[id]->RenderReady(false);
 	}
 
 	void RemoveSceneUnitEditorCameraFromWindowCameras(SceneUnitId id)
@@ -2237,6 +2255,7 @@ namespace Editor
 #if !defined(_EDITOR_PICKINGPASS)
 		return;
 #endif
+		if (mousePicking.pickingPass.contains(id)) return;
 		mousePicking.pickingPass.insert_or_assign(id, CreateRenderPassInstance(id, "", GetRenderPassUUIDByName("PickingPass"), 0, HWNDWIDTH, HWNDHEIGHT));
 	}
 
@@ -2485,8 +2504,7 @@ namespace Editor
 			}
 		);
 		CreateSURenderable(id, jbillboard);
-		auto& scene = GetSceneUnit(id);
-		scene->renderablesInLoadingPool.insert(uuid);
+		GetSceneUnit(id)->InsertRenderableIntoLoadingPool(uuid);
 		return uuid;
 	}
 

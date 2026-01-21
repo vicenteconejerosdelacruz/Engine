@@ -68,6 +68,7 @@ namespace Editor {
 	void SetCurrentSceneUnit(SceneUnitId id);
 	void DrawEditor();
 	void WriteSceneUnitEditorPlayCameraConstantsBuffer(SceneUnitId unit);
+	JUUID GetSceneUnitEditorCamera(SceneUnitId id);
 	void SwitchToSceneUnitEditorCamera(SceneUnitId id);
 	void SwitchToSceneUnitEditorPlayCamera(SceneUnitId id);
 	void RemoveSceneUnitEditorCameraFromWindowCameras(SceneUnitId id);
