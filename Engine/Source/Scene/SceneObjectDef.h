@@ -7,6 +7,7 @@
 
 #define SODEF_CREATESCENEOBJECTS(SOClass) void Create##SOClass##SUSceneObjects(SceneUnitId id)\
 {\
+	if(SOClass##SUsceneObjects.contains(id)) return;\
 	SOClass##SUsceneObjects.insert_or_assign(id, SOClass##SceneObjects());\
 }
 
