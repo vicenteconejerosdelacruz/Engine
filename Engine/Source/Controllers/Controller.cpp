@@ -58,6 +58,7 @@ namespace Game
 
 			for (auto& uuid : uuidset)
 			{
+				if (controllersUUIDs.contains(uuid)) continue;
 				controllersUUIDs.at(uuid)->Map(suuuid);
 			}
 		}
