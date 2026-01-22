@@ -297,8 +297,18 @@ namespace Scene
 				using namespace Editor;
 				MarkScenePanelAssetsAsDirty();
 #endif
+				for (auto& cb : postLoadingExecutionCallbacks)
+				{
+					cb();
+				}
+				postLoadingExecutionCallbacks.clear();
 			}
 		);
+	}
+
+	void SceneUnit::PushLoadingExecutionCallback(std::function<void()> cb)
+	{
+		postLoadingExecutionCallbacks.push_back(cb);
 	}
 
 	void SceneUnit::Loading()
@@ -308,6 +318,24 @@ namespace Scene
 		if (!IsLoading() || !IsReadyToSubmitLoading()) return;
 
 		CloseSubmitLoadingCommandList();
+	}
+
+	void SceneUnit::SubmitForLoading(std::function<void()> loader)
+	{
+		bool doSubmit = !LoadingCommandListIsOpen();
+		if (doSubmit)
+		{
+			ResetLoadingCommandList();
+			SetLoading(true);
+			SetCanSubmitLoading(false);
+		}
+
+		loader();
+
+		if (doSubmit)
+		{
+			SetCanSubmitLoading(true);
+		}
 	}
 
 	//F2F

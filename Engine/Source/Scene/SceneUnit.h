@@ -63,12 +63,14 @@ namespace Scene
 		void ResetLoadingCommandList();
 		void CloseLoadingCommandList();
 		void SubmitLoadingCommandList();
+		void PushLoadingExecutionCallback(std::function<void()> cb);
 		void CloseSubmitLoadingCommandList()
 		{
 			CloseLoadingCommandList();
 			SubmitLoadingCommandList();
 		}
 		void Loading();
+		void SubmitForLoading(std::function<void()> loader);
 
 		//Frame2Frame
 		CComPtr<ID3D12GraphicsCommandList2>& GetCommandList(bool OpenIfClosed = true);
@@ -126,6 +128,7 @@ namespace Scene
 		std::set<JUUID> renderablesInLoadingPool;
 		std::set<JUUID> camerasInLoadingPool;
 		std::set<JUUID> lightsInLoadingPool;
+		std::vector<std::function<void()>> postLoadingExecutionCallbacks;
 
 		//f2f
 		CommandsProcessor commandsProcessor;
