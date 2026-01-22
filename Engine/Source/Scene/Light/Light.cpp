@@ -87,7 +87,7 @@ namespace Scene
 			CreateShadowMap();
 		}
 #if defined(_EDITOR)
-		if (lightType() != LT_Ambient/* && !SceneIsIsolated(unit)*/)
+		if (lightType() != LT_Ambient && !SceneIsIsolated(unit))
 		{
 			RegisterBillboard(unit, uuid());
 		}

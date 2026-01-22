@@ -30,7 +30,7 @@ namespace Scene
 	size_t GetSceneUnitsCount();
 	void MergeAttachedSceneUnits();
 
-	//bool SceneIsIsolated(SceneUnitId id);
+	bool SceneIsIsolated(SceneUnitId id);
 
 	void ResizeReleaseScenePasses();
 	void ResizeScenePasses(unsigned int width, unsigned int height);

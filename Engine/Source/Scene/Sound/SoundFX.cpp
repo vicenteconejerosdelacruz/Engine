@@ -95,7 +95,7 @@ namespace Scene
 #include <JEnd.h>
 
 #if defined(_EDITOR)
-		if (instanceFlags() & SoundEffectInstance_Use3D/* && !SceneIsIsolated(unit)*/)
+		if (instanceFlags() & SoundEffectInstance_Use3D && !SceneIsIsolated(unit))
 		{
 			RegisterBillboard(unit, uuid());
 		}

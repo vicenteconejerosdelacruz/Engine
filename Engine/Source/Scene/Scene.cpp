@@ -65,7 +65,7 @@ namespace Scene
 				LoadLevel(scene, filename, data, progress);
 
 				scene->SetCanSubmitLoading(true);
-				//		scene->sceneUnitLoaded->store(true);
+				//scene->sceneUnitLoaded->store(true);
 
 				levelLoaded(id);
 
@@ -76,23 +76,25 @@ namespace Scene
 
 	void CreateIsolatedSceneLevelAsync(std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 	{
-		/*using namespace Scene::Level;
+		using namespace Scene::Level;
 
 		std::thread levelThread([](std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 			{
 				SceneUnitId unit = nostd::threadIdHash();
 				auto& scene = CreateScene(unit, filename);
-				scene->isolated = true;
+				scene->SetIsolated(true);
+				//scene->isolated = true;
 
 				LoadLevel(scene, filename, data, progress);
 
-				scene->sceneUnitLoaded->store(true);
+				scene->SetCanSubmitLoading(true);
+				//scene->sceneUnitLoaded->store(true);
 
 				levelLoaded(unit);
 
 			}, filename, data, levelLoaded, progress
 		);
-		levelThread.detach();*/
+		levelThread.detach();
 	}
 
 	void AttachLevelIntoScene(SceneUnitId parentUnit, std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
@@ -224,10 +226,10 @@ namespace Scene
 		//}
 	}
 
-	/*bool SceneIsIsolated(SceneUnitId id)
+	bool SceneIsIsolated(SceneUnitId id)
 	{
 		return scenesUnits.at(id)->IsIsolated();
-	}*/
+	}
 
 	void ResizeReleaseScenePasses()
 	{
@@ -676,7 +678,7 @@ namespace Scene
 			if (!renderableSceneUnits.contains(unit)/* && !scene->IsAttached()*/) continue;
 
 #if defined(_EDITOR)
-			if (/*!scene->IsAttached() && */!Editor::IsPlaying(unit)/* && !scene->IsIsolated()*/)
+			if (/*!scene->IsAttached() && */!Editor::IsPlaying(unit) && !scene->IsIsolated())
 			{
 				WriteSceneUnitEditorPlayCameraConstantsBuffer(unit);
 				SwitchToSceneUnitEditorCamera(unit);
@@ -684,7 +686,7 @@ namespace Scene
 #endif
 			scene->Render();
 #if defined(_EDITOR)
-			if (/*!scene->IsAttached() && */!Editor::IsPlaying(unit)/* && !scene->IsIsolated()*/)
+			if (/*!scene->IsAttached() && */!Editor::IsPlaying(unit) && !scene->IsIsolated())
 			{
 				SwitchToSceneUnitEditorPlayCamera(unit);
 			}

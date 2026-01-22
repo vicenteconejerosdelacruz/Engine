@@ -151,10 +151,10 @@ namespace Scene::Level {
 #if defined(_EDITOR)
 		using namespace Editor;
 
-		//if (!scene->IsAttached() && !scene->IsIsolated())
-		//{
-		CreateSceneUnitBillboards(scene->Id());
-		//}
+		if (/*!scene->IsAttached() && */!scene->IsIsolated())
+		{
+			CreateSceneUnitBillboards(scene->Id());
+		}
 #endif
 		scene->ResetLoadingCommandList();
 		scene->SetLoading(true);
@@ -217,7 +217,7 @@ namespace Scene::Level {
 		);
 
 #if defined(_EDITOR)
-		//if (!scene->IsAttached() && !scene->IsIsolated())
+		if (/*!scene->IsAttached() && */!scene->IsIsolated())
 		{
 			CreatePickingPass(scene->Id());
 			CreateSceneUnitBoundingBox(scene->Id());
@@ -235,10 +235,10 @@ namespace Scene::Level {
 		BindSceneObjects(scene->Id());
 		//}
 #if defined(_EDITOR)
-		//if (!scene->IsAttached() && !scene->IsIsolated())
-		//{
-		CopySceneUnitEditorCameraRenderPasses(scene->Id());
-		//}
+		if (/*!scene->IsAttached() && */!scene->IsIsolated())
+		{
+			CopySceneUnitEditorCameraRenderPasses(scene->Id());
+		}
 		//Editor::currentLevelName = filename;
 		//Editor::MarkScenePanelAssetsAsDirty();
 #endif

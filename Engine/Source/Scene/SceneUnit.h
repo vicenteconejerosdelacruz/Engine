@@ -24,8 +24,8 @@ namespace Scene
 		bool MarkedForDelete();
 		//void SetAttached(bool value);
 		//bool IsAttached();
-		//void SetIsolated(bool value);
-		//bool IsIsolated();
+		void SetIsolated(bool value);
+		bool IsIsolated();
 		std::unordered_map<JUUID, SceneObjectType>& GetSceneObjectTypes();
 		std::unordered_map<SceneObjectType, std::set<JUUID>>& GetSceneObjects();
 		std::set<JUUID>& GetUnboundedSceneObjects();
@@ -108,7 +108,7 @@ namespace Scene
 		std::string unitName;
 		bool markedForDelete;
 		//bool attached;
-		//bool isolated;
+		bool isolated;
 		//bool mergeable;
 		//unsigned int deletionFrames;
 

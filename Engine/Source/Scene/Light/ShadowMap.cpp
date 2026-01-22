@@ -479,7 +479,7 @@ namespace Scene
 
 		JUUID camUUID = *cameras().begin();
 #if defined(_EDITOR)
-		if (!Editor::IsPlaying(unit))
+		if (!Editor::IsPlaying(unit) && !SceneIsIsolated(unit))
 		{
 			camUUID = Editor::GetSceneUnitEditorCamera(unit);
 		}

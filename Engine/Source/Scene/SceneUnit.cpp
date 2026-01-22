@@ -21,7 +21,7 @@ namespace Scene
 		unitName = name;
 		markedForDelete = false;
 		//attached = false;
-		//isolated = false;
+		isolated = false;
 		loading = std::make_unique<std::atomic_bool>(false);
 		canSubmitLoading = std::make_unique<std::atomic_bool>(false);
 		/*
@@ -82,15 +82,15 @@ namespace Scene
 		return attached;
 	}*/
 
-	/*void SceneUnit::SetIsolated(bool value)
+	void SceneUnit::SetIsolated(bool value)
 	{
 		isolated = value;
-	}*/
+	}
 
-	/*bool SceneUnit::IsIsolated()
+	bool SceneUnit::IsIsolated()
 	{
 		return isolated;
-	}*/
+	}
 
 	std::unordered_map<JUUID, SceneObjectType>& SceneUnit::GetSceneObjectTypes()
 	{

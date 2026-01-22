@@ -91,7 +91,7 @@ namespace Scene
 
 #if defined(_EDITOR)
 		//if (GetCountFromMouseCameras(unit) > 0 && uuid() != *GetMouseCameras(unit).begin() && shadowMapLight().empty())
-		if (shadowMapLight().empty()/* && !SceneIsIsolated(unit)*/)
+		if (shadowMapLight().empty() && !SceneIsIsolated(unit))
 			RegisterBillboard(unit, uuid());
 #endif
 
