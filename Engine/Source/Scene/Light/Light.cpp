@@ -344,6 +344,7 @@ namespace Scene
 		std::set<LightSUUUID> lightsToUpdateCamAttributes;
 		std::set<LightSUUUID> lightsToUpdateTransformation;
 		std::set<LightSUUUID> lightsToDelete;
+		std::set<LightSUUUID> lightToRecreateCameras;
 #if defined(_EDITOR)
 		//std::set<LightSUUUID> lightsToDestroySMChain;
 #endif
@@ -371,6 +372,12 @@ namespace Scene
 				//{
 				//	l->UpdateBillboard(bbuuid);
 				//}
+
+				if (l->dirty(Light::Update_cameras))
+				{
+					l->RenderReady(false);
+					lightToRecreateCameras.insert(l);
+				}
 			}
 
 			//if the light type changed
@@ -507,6 +514,36 @@ namespace Scene
 			EraseLightFromLights(l->unit, l.uuid());
 			EraseLightFromShadowMapLights(l->unit, l.uuid());
 			DeleteLightSUSceneObject(l->unit, l.uuid());
+		}
+
+		if (lightToRecreateCameras.size() > 0)
+		{
+			auto& scene = GetSceneUnit(id);
+			scene->PushLoadingExecutionCallback([=]
+				{
+					for (auto& l : lightToRecreateCameras)
+					{
+						l->RenderReady(true);
+#if defined(_EDITOR)
+						l->EditorPreview(1 << Light::Update_hasShadowMaps);
+#endif
+					}
+				}
+			);
+			scene->SubmitForLoading([&]
+				{
+					for (auto& l : lightToRecreateCameras)
+					{
+						l->UnbindFromScene();
+						if (l->hasShadowMaps())
+						{
+							l->CreateShadowMap();
+						}
+						l->BindToScene();
+						l->clean(Light::Update_cameras);
+					}
+				}
+			);
 		}
 	}
 
