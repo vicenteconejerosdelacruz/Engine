@@ -294,7 +294,7 @@ namespace Editor
 			EraseCameraFromSwapChainCameras(id, editorCameraUUID[id].uuid());
 			InsertCameraIntoMouseCameras(id, levelCameraUUID[id].uuid());
 			InsertCameraIntoSwapChainCameras(id, levelCameraUUID[id].uuid());
-			BindLightsToEditorCamera(id, editorCameraUUID[id]);
+			//BindLightsToEditorCamera(id, editorCameraUUID[id]);
 
 			//Editor::RegisterBillboard(levelCameraUUID());
 		}
@@ -770,16 +770,16 @@ namespace Editor
 		InsertCameraIntoWindowCameras(id, editorCameraUUID[id].uuid());
 	}
 
-	void BindLightsToEditorCamera(SceneUnitId id, CameraSUUUID cam)
-	{
-		for (JUUID uuid : GetLights(id))
-		{
-			LightSUUUID l = MAKESUUUID(id, uuid);
-			auto cams = l->cameras();
-			cams.push_back(cam.uuid());
-			l->cameras(cams);
-		}
-	}
+	//void BindLightsToEditorCamera(SceneUnitId id, CameraSUUUID cam)
+	//{
+	//	for (JUUID uuid : GetLights(id))
+	//	{
+	//		LightSUUUID l = MAKESUUUID(id, uuid);
+	//		auto cams = l->cameras();
+	//		cams.push_back(cam.uuid());
+	//		l->cameras(cams);
+	//	}
+	//}
 
 	void DrawApplicationBar()
 	{
@@ -824,7 +824,7 @@ namespace Editor
 					{
 						if (ImGui::MenuItem(ICON_FA_SAVE "Save"))
 						{
-							//SaveLevelToFile(currentLevelName);
+							SaveLevelToFile(GetLevelName(currentSceneUnitId));
 							//menuBarItemClicked = true;
 						}
 					},
@@ -835,7 +835,7 @@ namespace Editor
 					{
 						if (ImGui::MenuItem(ICON_FA_SAVE "Save As.."))
 						{
-							//SaveLevelAs();
+							SaveLevelAs();
 							//menuBarItemClicked = true;
 						}
 					},
@@ -1214,7 +1214,6 @@ namespace Editor
 	}
 	*/
 
-	/*
 	void SaveLevelAs()
 	{
 		std::thread saveAs([]()
@@ -1237,9 +1236,7 @@ namespace Editor
 		);
 		saveAs.detach();
 	}
-	*/
 
-	/*
 	bool SaveFileDialog(std::wstring& path, std::wstring defaultDirectory, std::wstring defaultFileName, std::pair<COMDLG_FILTERSPEC*, int>* pFilterInfo)
 	{
 		IFileSaveDialog* p_file_save = nullptr;
@@ -1318,7 +1315,6 @@ namespace Editor
 			p_file_save->Release();
 		return are_all_operation_success;
 	}
-	*/
 
 	std::string GetLevelString(SceneUnitId id)
 	{
@@ -1341,12 +1337,34 @@ namespace Editor
 		return levelString;
 	}
 
-	/*
+	std::string GetLevelName(SceneUnitId id)
+	{
+		for (auto& v : currentLevelName)
+		{
+			if (std::get<0>(v) == id)
+				return std::get<1>(v);
+		}
+		assert(!!!"level name not found in vector");
+		return "";
+	}
+
+	void ChangeLevelName(SceneUnitId id, std::string levelFileName)
+	{
+		for (auto& v : currentLevelName)
+		{
+			if (std::get<0>(v) == id)
+			{
+				std::get<1>(v) = levelFileName;
+				return;
+			}
+		}
+	}
+
 	void SaveLevelToFile(std::string levelFileName)
 	{
 		using namespace nlohmann;
 
-		std::string levelString = GetLevelString();
+		std::string levelString = GetLevelString(currentSceneUnitId);
 
 		const std::string levelsRootFolder = "Levels/";
 		const std::string filename = levelsRootFolder + levelFileName;
@@ -1364,11 +1382,13 @@ namespace Editor
 		file.write(levelString.c_str(), levelString.size());
 		file.close();
 
-		currentLevelName = levelFileName;
-		defaultLevel = false;
-		levelModified = false;
+		ChangeLevelName(currentSceneUnitId, levelFileName);
+		levelModified.at(currentSceneUnitId) = false;
+
+		//currentLevelName = levelFileName;
+		//defaultLevel = false;
+		//levelModified = false;
 	}
-	*/
 
 	/*
 	void SaveTemplates()
@@ -1949,7 +1969,11 @@ namespace Editor
 	void SelectSceneObject(SceneUnitId id, JUUID uuid)
 	{
 		//OutputDebugStringA(std::string(std::string("selected ") + uuid + "\n").c_str());
-		if (uuid == "" || (!boundingBox.at(id).empty() && boundingBox.at(id).uuid() == uuid))
+		if (uuid == ""
+#if defined(_EDITOR_BOUNDINGBOX)
+			|| (!boundingBox.at(id).empty() && boundingBox.at(id).uuid() == uuid)
+#endif
+			)
 		{
 			return;
 		}
@@ -2348,7 +2372,11 @@ namespace Editor
 				{
 					RenderableSUUUID r = MAKESUUUID(id, uuid);
 					//OutputDebugStringA(("RenderPickingPass:" + r->name() + ":" + std::to_string(objectId) + "\n").c_str());
-					if (!r->visible() || boundingBox.at(id).uuid() == r->uuid()) continue;
+					if (!r->visible()
+#if defined(_EDITOR_BOUNDINGBOX)
+						|| boundingBox.at(id).uuid() == r->uuid()
+#endif
+						) continue;
 
 					r->WriteConstantsBuffer("objectId", objectId, backBufferIndex);
 					r->Render(id, mousePicking.pickingPass.at(id), camera);
@@ -2410,7 +2438,11 @@ namespace Editor
 		for (JUUID uuid : GetRenderables(id))
 		{
 			RenderableSUUUID r = MAKESUUUID(id, uuid);
-			if (!r->visible() || r.uuid() == boundingBox.at(id).uuid()) continue;
+			if (!r->visible()
+#if defined(_EDITOR_BOUNDINGBOX)
+				|| r.uuid() == boundingBox.at(id).uuid()
+#endif
+				) continue;
 
 			if (pickedObjectId == objectId)
 			{

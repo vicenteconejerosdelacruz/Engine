@@ -73,7 +73,7 @@ namespace Editor {
 	void SwitchToSceneUnitEditorPlayCamera(SceneUnitId id);
 	void RemoveSceneUnitEditorCameraFromWindowCameras(SceneUnitId id);
 	void AddSceneUnitEditorCameraToWindowCameras(SceneUnitId id);
-	void BindLightsToEditorCamera(SceneUnitId id, CameraSUUUID cam);
+	//void BindLightsToEditorCamera(SceneUnitId id, CameraSUUUID cam);
 	void DrawApplicationBar();
 	void DrawLevelSelectorModal();
 	void HandleApplicationDragTitleBar(RECT& dragRect);
@@ -81,10 +81,12 @@ namespace Editor {
 	void DrawGameController();
 	void DrawLevelsTabs();
 	//void OpenLevelFile();
-	//void SaveLevelAs();
-	//bool SaveFileDialog(std::wstring& path, std::wstring defaultDirectory = L"", std::wstring defaultFileName = L"", std::pair<COMDLG_FILTERSPEC*, int>* pFilterInfo = nullptr);
+	void SaveLevelAs();
+	bool SaveFileDialog(std::wstring& path, std::wstring defaultDirectory = L"", std::wstring defaultFileName = L"", std::pair<COMDLG_FILTERSPEC*, int>* pFilterInfo = nullptr);
 	std::string GetLevelString(SceneUnitId id);
-	//void SaveLevelToFile(std::string levelFileName);
+	std::string GetLevelName(SceneUnitId id);
+	void ChangeLevelName(SceneUnitId id, std::string levelFileName);
+	void SaveLevelToFile(std::string levelFileName);
 	//void SaveTemplates();
 	void DrawRightPanel();
 	//void PromptTemplateDeletion(std::vector<nlohmann::json> references, std::function<void(std::vector<nlohmann::json>)> OnDelete, std::function<void()> OnCancel);

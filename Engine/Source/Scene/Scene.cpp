@@ -71,10 +71,11 @@ namespace Scene
 
 				LoadLevel(scene, filename, data, progress);
 
+				levelLoaded(id);
+
 				scene->SetCanSubmitLoading(true);
 				//scene->sceneUnitLoaded->store(true);
 
-				levelLoaded(id);
 
 				scene->SetLoadingComplete(true);
 
@@ -104,11 +105,12 @@ namespace Scene
 				);
 				LoadLevel(scene, filename, data, progress);
 
-
 				scene->SetCanSubmitLoading(true);
-				//scene->sceneUnitLoaded->store(true);
 
 				levelLoaded(unit);
+
+				//scene->sceneUnitLoaded->store(true);
+
 
 
 			}, filename, data, levelLoaded, progress
@@ -135,10 +137,9 @@ namespace Scene
 
 				LoadLevel(scene, filename, data, progress);
 
-				scene->SetCanSubmitLoading(true);
-
 				levelLoaded(parentUnit);
 
+				scene->SetCanSubmitLoading(true);
 				/*
 				SceneUnitId unit = nostd::threadIdHash();
 				auto& scene = CreateAttachableScene(parentUnit, unit);
