@@ -53,6 +53,7 @@ namespace Editor {
 	void CopySceneUnitEditorCameraRenderPasses(SceneUnitId id);
 	void InitEditor();
 	void LoadWorkbench();
+	void SaveWorkbench(std::string topItem = "");
 	void LevelLoadingProgress(std::string asset, unsigned int count, unsigned int total);
 	void OnLevelLoaded(SceneUnitId id);
 	void QuitEditor();

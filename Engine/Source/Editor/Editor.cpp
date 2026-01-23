@@ -382,13 +382,34 @@ namespace Editor
 	{
 		if (!std::filesystem::exists("workbench.json"))
 		{
-			workbench = { "levels", {} };
+			workbench = { { "levels", {} } };
 			return;
 		}
 
 		std::ifstream file("workbench.json");
 		bool isOpen = file.is_open();
 		workbench = nlohmann::json::parse(file);
+	}
+
+	void SaveWorkbench(std::string topItem)
+	{
+		nlohmann::json newWorkbench = { { "levels", {} } };
+		if (!topItem.empty())
+		{
+			newWorkbench["levels"].push_back(topItem);
+		}
+		for (int i = 0; i < workbench["levels"].size(); i++)
+		{
+			if (workbench["levels"][i] == topItem) continue;
+			newWorkbench["levels"].push_back(workbench["levels"][i]);
+		}
+		workbench = newWorkbench;
+
+		//then create the json level file
+		std::string workbenchDump = workbench.dump(2);
+		std::ofstream file("workbench.json");
+		file.write(workbenchDump.c_str(), workbenchDump.size());
+		file.close();
 	}
 
 	void LevelLoadingProgress(std::string asset, unsigned int count, unsigned int total)
@@ -825,6 +846,7 @@ namespace Editor
 						if (ImGui::MenuItem(ICON_FA_SAVE "Save"))
 						{
 							SaveLevelToFile(GetLevelName(currentSceneUnitId));
+							SaveWorkbench(GetLevelName(currentSceneUnitId));
 							//menuBarItemClicked = true;
 						}
 					},
@@ -972,6 +994,7 @@ namespace Editor
 					if (!loadingProgress.loading && ImGui::IsItemClicked() && ImGui::IsMouseDoubleClicked(ImGuiPopupFlags_MouseButtonLeft))
 					{
 						loadingProgress.LoadLevel(false, workbenchSelectedLevel);
+						SaveWorkbench(workbenchSelectedLevel);
 						LoadLevelIntoSceneUnit(workbenchSelectedLevel, [&]() { return GetLevelFromFile(workbenchSelectedLevel); }, OnLevelLoaded, LevelLoadingProgress);
 					}
 				}
@@ -1010,6 +1033,7 @@ namespace Editor
 					if (ImGui::Button("Load Level"))
 					{
 						loadingProgress.LoadLevel(false, workbenchSelectedLevel);
+						SaveWorkbench(workbenchSelectedLevel);
 						LoadLevelIntoSceneUnit(workbenchSelectedLevel, [&]() { return GetLevelFromFile(workbenchSelectedLevel); }, OnLevelLoaded, LevelLoadingProgress);
 					}
 				},
@@ -1232,6 +1256,7 @@ namespace Editor
 				jsonFilePath.replace_extension(".json");
 
 				SaveLevelToFile(nostd::WStringToString(jsonFilePath.filename()));
+				SaveWorkbench(nostd::WStringToString(jsonFilePath.filename()));
 			}
 		);
 		saveAs.detach();
@@ -2122,7 +2147,7 @@ namespace Editor
 
 	void GameAreaMouseProcessing(std::unique_ptr<DirectX::Mouse>& mouse, CameraSUUUID camera)
 	{
-		if (sceneObjectModal.creating || templateModal.creating || deletePrompt.showing || animationSequencer.showing) return;
+		if (loadingProgress.loadSceneUnitModal || sceneObjectModal.creating || templateModal.creating || deletePrompt.showing || animationSequencer.showing) return;
 
 		DirectX::Mouse::State state = mouse->GetState();
 
@@ -2223,7 +2248,11 @@ namespace Editor
 				{
 					//do something like settings.at("camera").at("speed").at("fw");
 					float fwMovement = wheelDelta > 0 ? 1.0f : -1.0f;
-					camera->MoveAlongFwAxis(fwMovement);
+					ImGuiIO& io = ImGui::GetIO();
+					if (!io.WantCaptureMouse)
+					{
+						camera->MoveAlongFwAxis(fwMovement);
+					}
 				}
 				if (state.leftButton || state.rightButton)
 				{
