@@ -117,6 +117,7 @@ namespace Scene
 
 	void Light::BindCamera(JUUID cuuid)
 	{
+		if (cuuid.empty()) return;
 		Scene::BindToScene(unit, uuid(), cuuid);
 	}
 
@@ -146,6 +147,7 @@ namespace Scene
 
 	void Light::UnbindCamera(JUUID cuuid)
 	{
+		if (cuuid.empty()) return;
 		CameraSUUUID cam = MAKESUUUID(unit, cuuid);
 		cam->UnbindLight(MAKESUUUID(unit, uuid()));
 		Scene::UnbindFromScene(unit, uuid(), cuuid);

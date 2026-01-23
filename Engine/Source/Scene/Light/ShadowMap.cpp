@@ -801,6 +801,7 @@ namespace Scene
 	//RENDER
 	void Light::RenderShadowMap(std::function<void(unsigned int)> renderScene)
 	{
+		if (cameras().empty()) return;
 		//auto& commandList = renderer->commandList;
 		auto& scene = GetSceneUnit(unit);
 		auto& commandList = scene->GetCommandList();
