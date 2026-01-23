@@ -53,6 +53,8 @@ namespace Scene
 		bool IsLoading();
 		void SetCanSubmitLoading(bool value);
 		bool IsReadyToSubmitLoading();
+		void SetLoadingComplete(bool value);
+		bool IsLoadingComplete();
 		void Bind(JUUID uuidA, JUUID uuidB);
 		void Unbind(JUUID uuid);
 		void Unbind(JUUID uuidA, JUUID uuidB);
@@ -125,6 +127,7 @@ namespace Scene
 		CommandsProcessor loadingProcessor;
 		std::unique_ptr<std::atomic_bool> loading;
 		std::unique_ptr<std::atomic_bool> canSubmitLoading;
+		std::unique_ptr<std::atomic_bool> loadingComplete;
 		std::set<JUUID> renderablesInLoadingPool;
 		std::set<JUUID> camerasInLoadingPool;
 		std::set<JUUID> lightsInLoadingPool;

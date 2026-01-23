@@ -49,7 +49,7 @@ namespace Scene
 	std::map<SceneUnitId, SceneUnitId> attachedUnits; //<Attached, Destination>
 	std::set<SceneUnitId> renderableSceneUnits;
 
-	static std::mutex sceneUnitsMutex;
+	//static std::mutex sceneUnitsMutex;
 
 	void CreateSceneLevelAsync(std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 	{
@@ -57,10 +57,17 @@ namespace Scene
 
 		std::thread levelThread([](std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 			{
-				std::lock_guard<std::mutex> lock(sceneUnitsMutex);
+				//std::lock_guard<std::mutex> lock(sceneUnitsMutex);
 
 				SceneUnitId id = nostd::threadIdHash();
 				auto& scene = CreateScene(id, filename, Renderer::numFrames);
+
+				scene->PushLoadingExecutionCallback([=]
+					{
+						auto& sceneU = GetSceneUnit(id);
+						sceneU->SetLoadingComplete(true);
+					}
+				);
 
 				LoadLevel(scene, filename, data, progress);
 
@@ -68,6 +75,8 @@ namespace Scene
 				//scene->sceneUnitLoaded->store(true);
 
 				levelLoaded(id);
+
+				scene->SetLoadingComplete(true);
 
 			}, filename, data, levelLoaded, progress
 		);
@@ -80,17 +89,27 @@ namespace Scene
 
 		std::thread levelThread([](std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 			{
+				//std::lock_guard<std::mutex> lock(sceneUnitsMutex);
+
 				SceneUnitId unit = nostd::threadIdHash();
 				auto& scene = CreateScene(unit, filename);
 				scene->SetIsolated(true);
 				//scene->isolated = true;
 
+				scene->PushLoadingExecutionCallback([=]
+					{
+						auto& sceneU = GetSceneUnit(unit);
+						sceneU->SetLoadingComplete(true);
+					}
+				);
 				LoadLevel(scene, filename, data, progress);
+
 
 				scene->SetCanSubmitLoading(true);
 				//scene->sceneUnitLoaded->store(true);
 
 				levelLoaded(unit);
+
 
 			}, filename, data, levelLoaded, progress
 		);
@@ -103,15 +122,23 @@ namespace Scene
 
 		std::thread levelThread([](SceneUnitId parentUnit, std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 			{
-				std::lock_guard<std::mutex> lock(sceneUnitsMutex);
+				//std::lock_guard<std::mutex> lock(sceneUnitsMutex);
 
 				auto& scene = GetSceneUnit(parentUnit);
+
+				scene->PushLoadingExecutionCallback([=]
+					{
+						auto& sceneU = GetSceneUnit(parentUnit);
+						sceneU->SetLoadingComplete(true);
+					}
+				);
 
 				LoadLevel(scene, filename, data, progress);
 
 				scene->SetCanSubmitLoading(true);
 
 				levelLoaded(parentUnit);
+
 				/*
 				SceneUnitId unit = nostd::threadIdHash();
 				auto& scene = CreateAttachableScene(parentUnit, unit);
@@ -664,18 +691,20 @@ namespace Scene
 
 	void SceneRender()
 	{
-		std::lock_guard<std::mutex> lock(sceneUnitsMutex);
+		//std::lock_guard<std::mutex> lock(sceneUnitsMutex);
 #if defined(_EDITOR)
 		using namespace Editor;
 		UpdateBillboards();
 #endif
 		for (auto& [unit, scene] : scenesUnits)
 		{
+			if (!SceneUnitExits(unit)) continue;
+
 			if (scene->MarkedForDelete()) continue;
 
 			scene->Loading();
 
-			if (!renderableSceneUnits.contains(unit)/* && !scene->IsAttached()*/) continue;
+			if (!renderableSceneUnits.contains(unit) || !scene->IsLoadingComplete()/* && !scene->IsAttached()*/) continue;
 
 #if defined(_EDITOR)
 			if (/*!scene->IsAttached() && */!Editor::IsPlaying(unit) && !scene->IsIsolated())
@@ -699,13 +728,13 @@ namespace Scene
 
 	void ScenePostRender()
 	{
-		std::lock_guard<std::mutex> lock(sceneUnitsMutex);
+		//std::lock_guard<std::mutex> lock(sceneUnitsMutex);
 #if defined(_EDITOR)
 		using namespace Editor;
 #endif
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->MarkedForDelete() || (!renderableSceneUnits.contains(unit)/* && !scene->IsAttached() && !scene->IsIsolated()*/)) continue;
+			if (scene->MarkedForDelete() || !scene->IsLoadingComplete() || (!renderableSceneUnits.contains(unit)/* && !scene->IsAttached() && !scene->IsIsolated()*/)) continue;
 
 			scene->PostRender();
 		}
@@ -716,10 +745,10 @@ namespace Scene
 	static std::set<size_t> computeRunners;
 	void RunComputeShaders()
 	{
-		std::lock_guard<std::mutex> lock(sceneUnitsMutex);
+		//std::lock_guard<std::mutex> lock(sceneUnitsMutex);
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->MarkedForDelete()/* || scene->IsAttached()*/) continue;
+			if (scene->MarkedForDelete() || !scene->IsLoadingComplete()/* || scene->IsAttached()*/) continue;
 			computeRunners.insert(unit);
 			scene->RunComputeShaders();
 		}
@@ -727,10 +756,10 @@ namespace Scene
 
 	void SolveComputeShaders()
 	{
-		std::lock_guard<std::mutex> lock(sceneUnitsMutex);
+		//std::lock_guard<std::mutex> lock(sceneUnitsMutex);
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->MarkedForDelete()/* || scene->IsAttached()*/) continue;
+			if (scene->MarkedForDelete() || !scene->IsLoadingComplete()/* || scene->IsAttached()*/) continue;
 			if (!computeRunners.contains(unit)) continue;
 			scene->SolveComputeShaders();
 		}

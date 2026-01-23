@@ -24,6 +24,7 @@ namespace Scene
 		isolated = false;
 		loading = std::make_unique<std::atomic_bool>(false);
 		canSubmitLoading = std::make_unique<std::atomic_bool>(false);
+		loadingComplete = std::make_unique<std::atomic_bool>(false);
 		/*
 		mergeable = false;
 		deletionFrames = framesUntilDeletion;
@@ -234,6 +235,16 @@ namespace Scene
 	bool SceneUnit::IsReadyToSubmitLoading()
 	{
 		return canSubmitLoading->load();
+	}
+
+	void SceneUnit::SetLoadingComplete(bool value)
+	{
+		loadingComplete->store(value);
+	}
+
+	bool SceneUnit::IsLoadingComplete()
+	{
+		return loadingComplete->load();
 	}
 
 	void SceneUnit::Bind(JUUID uuidA, JUUID uuidB)
