@@ -88,7 +88,7 @@ namespace Editor {
 	std::string GetLevelName(SceneUnitId id);
 	void ChangeLevelName(SceneUnitId id, std::string levelFileName);
 	void SaveLevelToFile(std::string levelFileName);
-	//void SaveTemplates();
+	void SaveTemplates();
 	void DrawRightPanel();
 	//void PromptTemplateDeletion(std::vector<nlohmann::json> references, std::function<void(std::vector<nlohmann::json>)> OnDelete, std::function<void()> OnCancel);
 	//void CloseDeletionPrompt();

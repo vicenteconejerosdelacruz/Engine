@@ -429,7 +429,7 @@ namespace Templates
 			preview.textures.push_back(previewUUID);
 		}
 		preview.loadingProcessor.CloseCommandList();
-		renderer->ExecuteCommands(preview.loadingProcessor.GetCommandList(), [&]
+		renderer->ExecuteCommands(preview.loadingProcessor.GetCommandList(false), [&]
 			{
 				preview.previewLoaded->store(true);
 			}

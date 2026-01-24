@@ -869,7 +869,7 @@ namespace Editor
 					{
 						if (ImGui::MenuItem(ICON_FA_SAVE "Save Templates"))
 						{
-							//SaveTemplates();
+							SaveTemplates();
 							//menuBarItemClicked = true;
 						}
 					}, templatesModified
@@ -1415,10 +1415,9 @@ namespace Editor
 		//levelModified = false;
 	}
 
-	/*
 	void SaveTemplates()
 	{
-		using namespace Templates;
+		//using namespace Templates;
 		Templates::SaveTemplates(defaultTemplatesFolder, Shader::templateName, WriteShadersJson);
 		Templates::SaveTemplates(defaultTemplatesFolder, Material::templateName, WriteMaterialsJson);
 		Templates::SaveTemplates(defaultTemplatesFolder, Model3D::templateName, WriteModel3DsJson);
@@ -1427,7 +1426,6 @@ namespace Editor
 		Templates::SaveTemplates(defaultTemplatesFolder, RenderPass::templateName, WriteRenderPasssJson);
 		templatesModified = false;
 	}
-	*/
 
 	float separatorFactor = 0.0f;
 	const float panelMinHeight = 47.0f;
