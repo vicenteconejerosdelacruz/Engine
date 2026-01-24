@@ -387,23 +387,11 @@ namespace Scene
 					matUUID = GetMaterialUUIDByName(fallbackMaterialName); //fallback
 				}
 
-				if (name() == "floor")
-				{
-					int i = 0;
-				}
-
 				materials[pass].push_back(pass->GetRenderPassMaterialInstance(
 					unit,
 					matUUID, mesh, shadowed(),
 					mpmo, uuid(), nullptr, onPostMaterialChange));
 
-				if (name() == "floor")
-				{
-					std::unique_ptr<MaterialInstance>& mat = *materials[pass].back();
-					std::unique_ptr<ShaderInstance>& vs = *mat->vertexShaderInstanceUUID;
-					std::unique_ptr<ShaderInstance>& ps = *mat->pixelShaderInstanceUUID;
-					int i = 0;
-				}
 			}
 		}
 		else if (!model3D.empty())
@@ -836,15 +824,6 @@ namespace Scene
 			};
 		auto setShadowMapsConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
 			{
-				if (name() == "floor")
-				{
-					//std::unique_ptr<MaterialInstance>& mat = *materials[pass].back();
-					std::unique_ptr<MaterialInstance>& mat = *material;
-					std::unique_ptr<ShaderInstance>& vs = *mat->vertexShaderInstanceUUID;
-					std::unique_ptr<ShaderInstance>& ps = *mat->pixelShaderInstanceUUID;
-					int i = 0;
-				}
-
 				if (material->ShaderInstanceHasRegister([](ShaderInstanceUUID binary) { return binary->CBV.lightsShadowMap; })) {
 					if (camera->SceneHasShadowMaps())
 						return camera->GetShadowMapsConstantsBuffer()->SetRootDescriptorTable(commandList, slot, frame);
