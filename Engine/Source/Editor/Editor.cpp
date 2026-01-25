@@ -304,6 +304,51 @@ namespace Editor
 		}
 	}
 
+	void DeleteSceneUnitLevel(SceneUnitId id)
+	{
+		for (auto it = currentLevelName.begin(); it != currentLevelName.end();)
+		{
+			if (std::get<0>(*it) == id)
+			{
+				currentLevelName.erase(it);
+				return;
+			}
+			it++;
+		}
+	}
+
+	void DeleteSceneUnitGizmos(SceneUnitId id)
+	{
+		gizmos.erase(id);
+	}
+
+	void DeleteSceneUnitSelection(SceneUnitId id)
+	{
+		selectedSceneObjects.erase(id);
+	}
+
+	void DeleteSceneUnitGameController(SceneUnitId id)
+	{
+		isPlaying.erase(id);
+		isPaused.erase(id);
+		editorPrePlayDump.erase(id);
+	}
+
+	void DeleteSceneUnitBoundingBox(SceneUnitId id)
+	{
+		boundingBox.erase(id);
+	}
+
+	void DeleteSceneUnitBillboards(SceneUnitId id)
+	{
+		billboards.erase(id);
+	}
+
+	void DeleteSceneUnitEditorIndependentCamera(SceneUnitId id)
+	{
+		editorCameraUUID.erase(id);
+	}
+
 	void CopySceneUnitEditorCameraRenderPasses(SceneUnitId id)
 	{
 		if (editorCameraUUID[id]->renderPasses().size() > 0ULL) return;
@@ -436,6 +481,38 @@ namespace Editor
 		CreateSceneUnitSelection(id);
 		CreateSceneUnitGameController(id);
 		loadingProgress.Reset();
+	}
+
+	void CloseScene(SceneUnitId id)
+	{
+		if (!levelModified.contains(id)) return;
+
+		if (levelModified.at(id))
+		{
+
+		}
+		else
+		{
+			auto& scene = GetSceneUnit(id);
+			SceneUnitId nextSceneUnitId = currentSceneUnitId;
+			if (GetSceneUnitsCount() > 0ULL && currentSceneUnitId == id)
+			{
+				nextSceneUnitId = GetNextSceneUnitId(currentSceneUnitId);
+			}
+			scene->MarkForDelete([=]
+				{
+					if (GetSceneUnitsCount() == 1ULL)
+					{
+						loadingProgress.loadSceneUnitModal = true;
+						currentSceneUnitId = 0ULL;
+					}
+					else
+					{
+						currentSceneUnitId = nextSceneUnitId;
+					}
+				}
+			);
+		}
 	}
 
 	void QuitEditor()
@@ -891,6 +968,21 @@ namespace Editor
 				);
 
 				ImGui::Separator();
+
+				if (currentSceneUnitId != 0ULL)
+				{
+					std::string closeStr = ICON_FA_BOMB "Close Scene";
+					if (levelModified.at(currentSceneUnitId))
+					{
+						closeStr += "*";
+					}
+					if (ImGui::MenuItem(closeStr.c_str()))
+					{
+						CloseScene(currentSceneUnitId);
+					}
+					ImGui::Separator();
+				}
+
 				ImGui::DrawItemWithEnabledState([]
 					{
 						if (ImGui::MenuItem(ICON_FA_SAVE "Save Templates"))
@@ -1200,8 +1292,76 @@ namespace Editor
 	{
 		if (currentLevelName.empty()) return;
 
+		ImGuiIO& io = ImGui::GetIO();
+		ImVec2 mouse = io.MousePos;
+
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground;
+		ImGui::Begin("tabsBarWindow", nullptr, window_flags);
+
 		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
+		ImVec2 selectorPos = ImVec2(0, viewport->Size.y - 22);
+
+		for (auto& [unit, name] : currentLevelName)
+		{
+			std::string tabS = ((unit == currentSceneUnitId) ? "*" : "") + name;
+			ImVec2 nameSize = ImGui::CalcTextSize(tabS.c_str());
+			std::vector<ImVec2> selectorArea = {
+				ImVec2(selectorPos.x,selectorPos.y),
+				ImVec2(selectorPos.x + nameSize.x + 20.0f,selectorPos.y + 20.0f),
+			};
+			ImRect selectorRect(selectorArea.at(0), selectorArea.at(1));
+			ImRect closeButtonRect(
+				ImVec2(selectorPos.x + nameSize.x + 4.0f, selectorPos.y),
+				ImVec2(selectorPos.x + nameSize.x + 4.0f + 16, selectorPos.y + 16)
+			);
+
+			ImU32 filledColor = rgba(52, 67, 96, 0.8);
+
+			if (selectorRect.Contains(mouse) && !closeButtonRect.Contains(mouse))
+			{
+				if (unit != currentSceneUnitId)
+				{
+					filledColor = rgba(138, 107, 164, 0.8);
+					if (ImGui::IsMouseDown(0))
+					{
+						PauseSounds(currentSceneUnitId);
+						SetCurrentSceneUnit(unit);
+						ResetRenderableScenes();
+						EnableSceneUnitRendering(unit);
+					}
+				}
+				else
+				{
+					filledColor = rgba(20, 86, 218, 0.8);
+				}
+			}
+
+			draw_list->AddRectFilled(selectorArea.at(0), selectorArea.at(1), filledColor);
+
+			ImGui::PushID(std::to_string(unit).c_str());
+			{
+				ImGui::SetCursorScreenPos(ImVec2(selectorPos.x, selectorPos.y + 2.0f));
+				ImGui::Text(tabS.c_str());
+			}
+			ImGui::PopID();
+
+			ImGui::PushID(std::string(std::to_string(unit) + "-Close").c_str());
+			{
+				ImGui::SetCursorScreenPos(ImVec2(selectorPos.x + nameSize.x + 4.0f, selectorPos.y));
+				if (ImGui::Button("X"))
+				{
+					CloseScene(unit);
+				}
+			}
+			ImGui::PopID();
+
+			selectorPos.x += nameSize.x + 24.0f;
+		}
+
+		ImGui::End();
+
+		/*
 		ImVec2 tabsPos = ImVec2(0, viewport->Size.y - 22);
 		ImVec2 tabsSize = ImVec2(viewport->Size.x - panW, 20);
 
@@ -1247,6 +1407,7 @@ namespace Editor
 		}
 		ImGui::End();
 		ImGui::PopStyleVar(3); // Pop both style variables
+		*/
 	}
 
 	/*
@@ -1435,6 +1596,7 @@ namespace Editor
 
 		ChangeLevelName(currentSceneUnitId, levelFileName);
 		levelModified.at(currentSceneUnitId) = false;
+		defaultLevel.at(currentSceneUnitId) = false;
 
 		//currentLevelName = levelFileName;
 		//defaultLevel = false;

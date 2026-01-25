@@ -454,6 +454,7 @@ void AppStep()
 		return ResizeWindow();
 	}
 
+	SceneUnitsStep();
 	UpdateAudio();
 	timer.Tick([&]()
 		{

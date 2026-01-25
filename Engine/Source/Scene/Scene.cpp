@@ -35,6 +35,13 @@ namespace Editor
 	extern void CreateRegisteredBillboards(SceneUnitId id);
 	extern void UpdateBillboards();
 	extern void BindRenderableToPickingPass(RenderableSUUUID uuid);
+	extern void DeleteSceneUnitLevel(SceneUnitId id);
+	extern void DeleteSceneUnitGizmos(SceneUnitId id);
+	extern void DeleteSceneUnitSelection(SceneUnitId id);
+	extern void DeleteSceneUnitGameController(SceneUnitId id);
+	extern void DeleteSceneUnitBoundingBox(SceneUnitId id);
+	extern void DeleteSceneUnitBillboards(SceneUnitId id);
+	extern void DeleteSceneUnitEditorIndependentCamera(SceneUnitId id);
 };
 #endif
 
@@ -182,6 +189,9 @@ namespace Scene
 
 	void DestroyScene(SceneUnitId id)
 	{
+#if defined(_EDITOR)
+		using namespace Editor;
+#endif
 		//const std::map<SceneObjectType, std::function<void(SceneUnitId, JUUID)>> DeleteSO =
 		//{
 		//	{ SO_Renderables, DeleteRenderable },
@@ -194,6 +204,20 @@ namespace Scene
 
 		auto& scene = GetSceneUnit(id);
 		scene->DestroySceneObjects();
+		scene->CallDeleteCallback();
+
+		scenesUnits.erase(id);
+
+#if defined(_EDITOR)
+		DeleteSceneUnitLevel(id);
+		DeleteSceneUnitGizmos(id);
+		DeleteSceneUnitSelection(id);
+		DeleteSceneUnitGameController(id);
+		DeleteSceneUnitBoundingBox(id);
+		DeleteSceneUnitBillboards(id);
+		DeleteSceneUnitEditorIndependentCamera(id);
+#endif
+
 		/*
 		for (auto& [uuid, type] : scene->sceneObjectsTypes)
 		{
@@ -211,13 +235,15 @@ namespace Scene
 
 	void DestroyScenes(bool inmediate)
 	{
-		using namespace Scene::Level;
-		for (auto& [id, _] : scenesUnits)
+		std::set<SceneUnitId> units;
+		std::transform(scenesUnits.begin(), scenesUnits.end(), std::inserter(units, units.begin()), [](auto& pair) { return pair.first; });
+		//using namespace Scene::Level;
+		//for (auto& [id, _] : scenesUnits)
+		for (auto& id : units)
 		{
 			DestroyScene(id);
 			//DestroySceneObjects(unit);
 		}
-		scenesUnits.clear();
 		/*
 		if (inmediate)
 		{
@@ -233,6 +259,23 @@ namespace Scene
 	bool SceneUnitExits(SceneUnitId unit)
 	{
 		return scenesUnits.contains(unit);
+	}
+
+	void SceneUnitsStep()
+	{
+		std::set<SceneUnitId> scenesToDelete;
+		for (auto& [unit, scene] : scenesUnits)
+		{
+			if (scene->MarkedForDelete())
+			{
+				scenesToDelete.insert(unit);
+			}
+		}
+
+		for (auto& id : scenesToDelete)
+		{
+			DestroyScene(id);
+		}
 	}
 
 	std::unique_ptr<SceneUnit>& GetSceneUnit(SceneUnitId unit)
@@ -265,6 +308,15 @@ namespace Scene
 		std::set<SceneUnitId> unitIds;
 		std::transform(scenesUnits.begin(), scenesUnits.end(), std::inserter(unitIds, unitIds.begin()), [](auto& pair) { return pair.first; });
 		return unitIds;
+	}
+
+	SceneUnitId GetNextSceneUnitId(SceneUnitId id)
+	{
+		std::vector<SceneUnitId> unitIds;
+		std::transform(scenesUnits.begin(), scenesUnits.end(), std::back_inserter(unitIds), [](auto& pair) { return pair.first; });
+		auto it = std::find(unitIds.begin(), unitIds.end(), id);
+		int index = static_cast<int>(it - unitIds.begin());
+		return unitIds.at((index + 1) % unitIds.size());
 	}
 
 	bool SceneIsIsolated(SceneUnitId id)

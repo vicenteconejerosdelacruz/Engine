@@ -20,8 +20,9 @@ namespace Scene
 		~SceneUnit();
 		SceneUnitId Id();
 		//void Merge(std::unique_ptr<SceneUnit>& other);
-		void MarkForDelete();
+		void MarkForDelete(std::function<void()> cb = nullptr);
 		bool MarkedForDelete();
+		void CallDeleteCallback();
 		//void SetAttached(bool value);
 		//bool IsAttached();
 		void SetIsolated(bool value);
@@ -112,6 +113,7 @@ namespace Scene
 		SceneUnitId id;
 		std::string unitName;
 		bool markedForDelete;
+		std::function<void()> deleteCallback;
 		//bool attached;
 		bool isolated;
 		//bool mergeable;

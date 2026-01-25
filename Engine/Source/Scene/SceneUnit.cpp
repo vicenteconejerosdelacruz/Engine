@@ -20,6 +20,7 @@ namespace Scene
 		id = unit;
 		unitName = name;
 		markedForDelete = false;
+		deleteCallback = nullptr;
 		//attached = false;
 		isolated = false;
 		loading = std::make_unique<std::atomic_bool>(false);
@@ -63,14 +64,21 @@ namespace Scene
 		}
 	}*/
 
-	void SceneUnit::MarkForDelete()
+	void SceneUnit::MarkForDelete(std::function<void()> cb)
 	{
 		markedForDelete = true;
+		deleteCallback = cb;
 	}
 
 	bool SceneUnit::MarkedForDelete()
 	{
 		return markedForDelete;
+	}
+
+	void SceneUnit::CallDeleteCallback()
+	{
+		if (deleteCallback)
+			deleteCallback();
 	}
 
 	/*void SceneUnit::SetAttached(bool value)

@@ -26,10 +26,12 @@ namespace Scene
 	void DestroyScene(SceneUnitId unit);
 	void DestroyScenes(bool inmediate = false);
 	bool SceneUnitExits(SceneUnitId unit);
+	void SceneUnitsStep();
 	std::unique_ptr<SceneUnit>& GetSceneUnit(SceneUnitId unit);
 	size_t GetSceneUnitsCount();
 	void MergeAttachedSceneUnits();
 	std::set<SceneUnitId> GetSceneUnitIds();
+	SceneUnitId GetNextSceneUnitId(SceneUnitId id);
 
 	bool SceneIsIsolated(SceneUnitId id);
 
