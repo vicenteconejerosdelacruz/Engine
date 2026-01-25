@@ -26,6 +26,7 @@ namespace Scene
 		//bool IsAttached();
 		void SetIsolated(bool value);
 		bool IsIsolated();
+		void DestroySceneObjects();
 		std::unordered_map<JUUID, SceneObjectType>& GetSceneObjectTypes();
 		std::unordered_map<SceneObjectType, std::set<JUUID>>& GetSceneObjects();
 		std::set<JUUID>& GetUnboundedSceneObjects();

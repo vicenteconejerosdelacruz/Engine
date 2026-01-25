@@ -566,11 +566,17 @@ namespace Scene
 
 	void DestroyLights(SceneUnitId id)
 	{
-		for (auto& [uuid, _] : LightSUsceneObjects.at(id))
+		std::set<JUUID> uuids;
+		std::transform(LightSUsceneObjects.at(id).begin(), LightSUsceneObjects.at(id).end(), std::inserter(uuids, uuids.begin()), [](auto& pair) { return pair.first; });
+		for (auto& uuid : uuids)
 		{
-			LightSUUUID l = MAKESUUUID(id, uuid);
-			DeleteLightSUSceneObject(l->unit, l->uuid());
+			DeleteLightSUSceneObject(id, uuid);
 		}
+		//for (auto& [uuid, _] : LightSUsceneObjects.at(id))
+		//{
+		//	LightSUUUID l = MAKESUUUID(id, uuid);
+		//	DeleteLightSUSceneObject(l->unit, l->uuid());
+		//}
 		//auto uuids = nostd::GetUUIDS(LightsceneObjects);
 		//for (LightUUID uuid : uuids)
 		//{

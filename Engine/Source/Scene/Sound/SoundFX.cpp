@@ -405,11 +405,17 @@ namespace Scene
 
 	void DestroySoundEffects(SceneUnitId id)
 	{
-		for (auto& [uuid, _] : SoundFXSUsceneObjects.at(id))
+		std::set<JUUID> uuids;
+		std::transform(SoundFXSUsceneObjects.at(id).begin(), SoundFXSUsceneObjects.at(id).end(), std::inserter(uuids, uuids.begin()), [](auto& pair) { return pair.first; });
+		for (auto& uuid : uuids)
 		{
-			SoundFXSUUUID s = MAKESUUUID(id, uuid);
-			DeleteSoundFXSUSceneObject(s.unit(), s.uuid());
+			DeleteSoundFXSUSceneObject(id, uuid);
 		}
+		//for (auto& [uuid, _] : SoundFXSUsceneObjects.at(id))
+		//{
+		//	SoundFXSUUUID s = MAKESUUUID(id, uuid);
+		//	DeleteSoundFXSUSceneObject(s.unit(), s.uuid());
+		//}
 		//auto uuids = nostd::GetUUIDS(SoundFXsceneObjects);
 		//for (SoundFXUUID uuid : uuids)
 		//{

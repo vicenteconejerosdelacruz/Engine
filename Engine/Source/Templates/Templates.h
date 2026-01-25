@@ -25,6 +25,7 @@ namespace Templates {
 #endif
 	void LoadTemplates(nlohmann::json templates, std::function<void(nlohmann::json&)> loader);
 	void LoadTemplates(const std::string folder, const std::string fileName, std::function<void(nlohmann::json&)> loader);
+	void DestroyTemplatesInstances();
 	void DestroyTemplates();
 	/*
 #if defined(_EDITOR)

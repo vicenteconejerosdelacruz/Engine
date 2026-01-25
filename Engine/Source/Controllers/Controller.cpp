@@ -79,9 +79,13 @@ namespace Game
 	{
 		return controllersUUIDs.at(controllerUUIDsByName.at(name));
 	}*/
-	/*
+
 	void DestroyControllers()
 	{
+		controllersUUIDs.clear();
+		controllerUUIDBySUUUID.clear();
+
+		/*
 		for (auto it = controllersUUIDs.begin(); it != controllersUUIDs.end();)
 		{
 			it->second->Unmap();
@@ -89,8 +93,9 @@ namespace Game
 		}
 		controllerUUIDsByName.clear();
 		sceneObjectUUIDToControllerUUID.clear();
+		*/
 	}
-	*/
+
 	void DestroyController(JUUID uuid)
 	{
 		if (!controllersUUIDs.contains(uuid)) return;

@@ -34,7 +34,7 @@ namespace Game
 	std::unique_ptr<Controller>& GetController(JUUID uuid);
 	std::set<JUUID> GetControllersBySceneObjectUUID(SUUUID uuid);
 	//std::unique_ptr<Controller>& GetControllerByName(std::string name);
-	//void DestroyControllers();
+	void DestroyControllers();
 	void DestroyController(JUUID uuid);
 	void StepControllers(DX::StepTimer& timer);
 	void BindToV8Context(v8pp::context& context, SUUUID uuid);

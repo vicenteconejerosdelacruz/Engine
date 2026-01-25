@@ -93,6 +93,14 @@ namespace Scene
 		return isolated;
 	}
 
+	void SceneUnit::DestroySceneObjects()
+	{
+		DestroyRenderables(id);
+		DestroySoundEffects(id);
+		DestroyLights(id);
+		DestroyCameras(id);
+	}
+
 	std::unordered_map<JUUID, SceneObjectType>& SceneUnit::GetSceneObjectTypes()
 	{
 		return sceneObjectsTypes;

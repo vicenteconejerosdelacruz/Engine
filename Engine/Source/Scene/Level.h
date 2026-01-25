@@ -27,6 +27,6 @@ namespace Scene::Level
 	void LoadLevel(std::unique_ptr<SceneUnit>& scene, std::string filename, nlohmann::json data, std::function<void(std::string, unsigned int, unsigned int)> progress = [](std::string, unsigned int, unsigned int) {});
 
 	//destroy scene objects
-	void DestroySceneObjects(SceneUnitId unit);
+	//void DestroySceneObjects(SceneUnitId unit);
 };
 

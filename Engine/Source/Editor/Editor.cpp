@@ -588,7 +588,20 @@ namespace Editor
 
 	void DestroyEditor()
 	{
+		using namespace Scene;
+
 		initialized = false;
+		if (sceneObjectEdition.contains(currentSceneUnitId))
+		{
+			for (auto& uuid : sceneObjectEdition.at(currentSceneUnitId).editables)
+			{
+				SendEditorDestroyPreview(uuid, [](JUUID uuid) { return GetSceneObjectPointer(currentSceneUnitId, uuid); });
+			}
+		}
+		for (auto& uuid : templateEdition.editables)
+		{
+			SendEditorDestroyPreview(uuid, GetJTemplatePointer);
+		}
 		/*
 		for (auto& uuid : sceneObjectEdition.editables)
 		{
@@ -598,10 +611,23 @@ namespace Editor
 		{
 			SendEditorDestroyPreview(uuid, GetJTemplatePointer);
 		}
-		ClearSceneObjectsSelection();
+		*/
+
+		auto sceneIds = GetSceneUnitIds();
+		for (auto& id : sceneIds)
+		{
+			ClearSceneObjectsSelection(id);
+		}
+		for (auto& [id, _] : sceneObjectEdition)
+		{
+			sceneObjectEdition.at(id).Destroy();
+		}
+		/*
 		sceneObjectEdition.Destroy();
+		*/
 		templateEdition.Destroy();
 
+		/*
 		//mousePicking.pickedObjects.clear();
 		DestroyBillboards();
 		DestroyPickingPass();

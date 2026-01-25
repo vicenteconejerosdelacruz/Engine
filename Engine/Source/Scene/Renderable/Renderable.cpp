@@ -1092,11 +1092,24 @@ namespace Scene
 
 	void DestroyRenderables(SceneUnitId id)
 	{
+		//RenderableSUSceneObjects s;
+		//typedef std::tuple<JNAME, std::unique_ptr<Renderable>> RenderableTuple; typedef SceneObjectsContainer<RenderableTuple> RenderableSceneObjects;
+		//template <typename T>
+		//using SceneObjectsContainer = std::unordered_map<JUUID, T>;
+		//std::unordered_map<JUUID, std::tuple<JNAME, std::unique_ptr<Renderable>>>
+		std::set<JUUID> uuids;
+		std::transform(RenderableSUsceneObjects.at(id).begin(), RenderableSUsceneObjects.at(id).end(), std::inserter(uuids, uuids.begin()), [](auto& pair) { return pair.first; });
+		for (auto& uuid : uuids)
+		{
+			DeleteRenderableSUSceneObject(id, uuid);
+		}
+		/*
 		for (auto& [uuid, _] : RenderableSUsceneObjects.at(id))
 		{
 			RenderableSUUUID r = MAKESUUUID(id, uuid);
 			DeleteRenderableSUSceneObject(r->unit, r->uuid());
 		}
+		*/
 
 		//auto uuids = nostd::GetUUIDS(RenderablesceneObjects);
 		//for (RenderableUUID uuid : uuids)

@@ -841,6 +841,16 @@ namespace Templates
 		}
 	}
 
+	void DestroyTemplatesInstances()
+	{
+		ClearRenderPassInstances();
+		ClearTextureInstances();
+		//ClearSoundInstaces();
+		//ClearMeshInstances();
+		ClearMaterialInstances();
+		ClearShaderInstances();
+	}
+
 	void DestroyTemplates()
 	{
 		ReleaseRenderPassTemplates();

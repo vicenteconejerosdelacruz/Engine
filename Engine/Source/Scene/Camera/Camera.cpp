@@ -1098,14 +1098,20 @@ namespace Scene
 
 	void DestroyCameras(SceneUnitId id)
 	{
-		for (auto& [uuid, _] : CameraSUsceneObjects.at(id))
+		std::set<JUUID> uuids;
+		std::transform(CameraSUsceneObjects.at(id).begin(), CameraSUsceneObjects.at(id).end(), std::inserter(uuids, uuids.begin()), [](auto& pair) { return pair.first; });
+		for (auto& uuid : uuids)
 		{
-			CameraSUUUID cam = MAKESUUUID(id, uuid);
-			if (cam->shadowMapLight().empty())
-			{
-				DeleteCameraSUSceneObject(cam->unit, cam->uuid());
-			}
+			DeleteCameraSUSceneObject(id, uuid);
 		}
+		//for (auto& [uuid, _] : CameraSUsceneObjects.at(id))
+		//{
+		//	CameraSUUUID cam = MAKESUUUID(id, uuid);
+		//	if (cam->shadowMapLight().empty())
+		//	{
+		//		DeleteCameraSUSceneObject(cam->unit, cam->uuid());
+		//	}
+		//}
 
 		/*auto uuids = nostd::GetUUIDS(CamerasceneObjects);
 		for (CameraUUID uuid : uuids)

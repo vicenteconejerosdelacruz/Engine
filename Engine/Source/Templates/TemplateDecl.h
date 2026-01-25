@@ -33,7 +33,8 @@ typedef TemplatesContainer<TemplateName##JsonTuple> TemplateName##Templates
 	std::unique_ptr<TemplateName##Instance>& Create##TemplateName##Instance(JUUID templateUUID, JUUID instanceKey, std::function<std::unique_ptr<TemplateName##Instance>()> newRefCallback);\
 	std::unique_ptr<TemplateName##Instance>& Create##TemplateName##Instance(JUUID templateUUID);\
 	bool Delete##TemplateName##Instance(JUUID instanceKey);\
-	std::unique_ptr<TemplateName##Instance>& Get##TemplateName##Instance(JUUID instanceKey);
+	std::unique_ptr<TemplateName##Instance>& Get##TemplateName##Instance(JUUID instanceKey);\
+	void Clear##TemplateName##Instances();
 
 #define TEMPLATE_DECL(TemplateName)\
 	TemplateName##Json(nlohmann::json& json);

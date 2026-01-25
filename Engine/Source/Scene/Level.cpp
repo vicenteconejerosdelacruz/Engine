@@ -244,24 +244,24 @@ namespace Scene::Level {
 #endif
 	}
 
-	void DestroySceneObjects(SceneUnitId unit)
-	{
-		using namespace Scene;
-		using namespace Animation;
+	//void DestroySceneObjects(SceneUnitId unit)
+	//{
+	//	using namespace Scene;
+	//	using namespace Animation;
 
-		//Destroy the lights(this will destroy the lights and it's cbvs)
-		DestroyLights(unit);
+	//	//Destroy the lights(this will destroy the lights and it's cbvs)
+	//	DestroyLights(unit);
 
-		//Destroy the cameras(this will destroy the cameras and the render passes)
-		DestroyCameras(unit);
+	//	//Destroy the cameras(this will destroy the cameras and the render passes)
+	//	DestroyCameras(unit);
 
-		//Destroy sound instances
-		DestroySoundEffects(unit);
+	//	//Destroy sound instances
+	//	DestroySoundEffects(unit);
 
-		//Destroy animated(this will destroy constants buffers)
-		DestroyAnimated(unit);
+	//	//Destroy animated(this will destroy constants buffers)
+	//	DestroyAnimated(unit);
 
-		//Destroy the renderables(this will detach the renderables from the cameras and destroy the renderables, materials, cbv, meshes, etc)
-		DestroyRenderables(unit);
-	}
+	//	//Destroy the renderables(this will detach the renderables from the cameras and destroy the renderables, materials, cbv, meshes, etc)
+	//	DestroyRenderables(unit);
+	//}
 }

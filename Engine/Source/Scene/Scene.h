@@ -29,6 +29,7 @@ namespace Scene
 	std::unique_ptr<SceneUnit>& GetSceneUnit(SceneUnitId unit);
 	size_t GetSceneUnitsCount();
 	void MergeAttachedSceneUnits();
+	std::set<SceneUnitId> GetSceneUnitIds();
 
 	bool SceneIsIsolated(SceneUnitId id);
 

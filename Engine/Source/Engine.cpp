@@ -552,13 +552,14 @@ void DestroyInstance()
 	//DestroyTemplatesReferences();
 #endif
 	DestroyScenes(true);
-	/*
 	DestroyControllers();
+	/*
 	GameDestroy();
 
 	DestroySceneObjects();
 	DestroyShadowMapResources();
 	*/
+	DestroyTemplatesInstances();
 	DestroyTemplates();
 
 	/*
