@@ -493,21 +493,22 @@ namespace Editor
 		loadingProgress.Reset();
 	}
 
-	void CloseScene(SceneUnitId id)
+	void CloseScene(SceneUnitId id, std::function<void()> onCloseScene)
 	{
 		if (!levelModified.contains(id)) return;
 
 		if (levelModified.at(id) && !defaultLevel.at(id))
 		{
 			yesNoCancelModal.Init(
+				"Save the scene?", "Do you wish to save " + GetLevelName(id) + " before closing the scene?",
 				[=] {
 					SaveLevelToFile(id, GetLevelName(id));
 					yesNoCancelModal.Hide();
-					CloseScene(id);
+					CloseScene(id, onCloseScene);
 				},
 				[=] {
 					levelModified.at(id) = false;
-					CloseScene(id);
+					CloseScene(id, onCloseScene);
 					yesNoCancelModal.Hide();
 				},
 				[] {
@@ -535,6 +536,7 @@ namespace Editor
 					{
 						currentSceneUnitId = nextSceneUnitId;
 					}
+					onCloseScene();
 				}
 			);
 		}
@@ -542,6 +544,34 @@ namespace Editor
 
 	void QuitEditor()
 	{
+		if (currentLevelName.size() > 0)
+		{
+			CloseScene(std::get<0>(currentLevelName[0]), QuitEditor);
+		}
+		else if (Editor::templatesModified)
+		{
+			loadingProgress.loadSceneUnitModal = false;
+			yesNoCancelModal.Init("Save Templates?", "Templates has been modified, do you wish to save these modifications?",
+				[] {
+					SaveTemplates();
+					yesNoCancelModal.Hide();
+					QuitEditor();
+				},
+				[] {
+					Editor::templatesModified = false;
+					yesNoCancelModal.Hide();
+					QuitEditor();
+				},
+				[] {
+					yesNoCancelModal.Hide();
+				}
+			);
+			yesNoCancelModal.Show();
+		}
+		else
+		{
+			PostMessageA(hWnd, WM_QUIT, 0, 0);
+		}
 		/*
 		if ((Editor::levelModified && !Editor::defaultLevel) || Editor::templatesModified)
 		{
@@ -587,9 +617,9 @@ namespace Editor
 		}
 		else
 		*/
-		{
-			PostMessageA(hWnd, WM_QUIT, 0, 0);
-		}
+		//{
+		//	PostMessageA(hWnd, WM_QUIT, 0, 0);
+		//}
 	}
 
 	void ImGuiImplRenderInit()
@@ -859,10 +889,10 @@ namespace Editor
 			{
 				animationSequencer.DrawLoading();
 			}
-			if (yesNoCancelModal.Showing())
-			{
-				yesNoCancelModal.Draw("Save the scene?", "Do you wish to save before closing the scene?");
-			}
+		}
+		if (yesNoCancelModal.Showing())
+		{
+			yesNoCancelModal.Draw();
 		}
 
 		// Rendering

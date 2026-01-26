@@ -24,6 +24,7 @@ namespace Editor
 	extern bool IsPaused(SceneUnitId unit);
 	extern void DrawEditor();
 	extern void EraseSceneObjectFromSelection(SceneUnitId unit, JUUID uuid);
+	extern void MarkSceneUnitAsModified(SceneUnitId id);
 	extern void MarkScenePanelAssetsAsDirty();
 	extern void UpdateBoundingBox(SceneUnitId unit);
 	extern void WriteSceneUnitEditorPlayCameraConstantsBuffer(SceneUnitId unit);
@@ -204,9 +205,6 @@ namespace Scene
 
 		auto& scene = GetSceneUnit(id);
 		scene->DestroySceneObjects();
-		scene->CallDeleteCallback();
-
-		scenesUnits.erase(id);
 
 #if defined(_EDITOR)
 		DeleteSceneUnitLevel(id);
@@ -217,6 +215,8 @@ namespace Scene
 		DeleteSceneUnitBillboards(id);
 		DeleteSceneUnitEditorIndependentCamera(id);
 #endif
+		scene->CallDeleteCallback();
+		scenesUnits.erase(id);
 
 		/*
 		for (auto& [uuid, type] : scene->sceneObjectsTypes)
@@ -1173,6 +1173,7 @@ namespace Scene
 		EraseSceneObjectFromSelection(id, uuid);
 		DeleteSO.at(type)(id, uuid);
 		MarkScenePanelAssetsAsDirty();
+		MarkSceneUnitAsModified(id);
 	}
 #endif
 
@@ -1196,6 +1197,7 @@ namespace Scene
 				{
 					BindRenderableToPickingPass(MAKESUUUID(id, uuid));
 				}
+				MarkSceneUnitAsModified(id);
 #endif
 			},
 			[](std::string, unsigned int, unsigned int) {}

@@ -64,7 +64,7 @@ namespace Editor {
 	void SaveWorkbench(std::string topItem = "");
 	void LevelLoadingProgress(std::string asset, unsigned int count, unsigned int total);
 	void OnLevelLoaded(SceneUnitId id);
-	void CloseScene(SceneUnitId id);
+	void CloseScene(SceneUnitId id, std::function<void()> onCloseScene = [] {});
 	void QuitEditor();
 	void ImGuiImplRenderInit();
 	void SetupImGuiStyle();
