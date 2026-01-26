@@ -58,6 +58,7 @@ namespace Editor {
 	void DeleteSceneUnitBillboards(SceneUnitId id);
 	void DeleteSceneUnitEditorIndependentCamera(SceneUnitId id);
 	void CopySceneUnitEditorCameraRenderPasses(SceneUnitId id);
+	void MarkSceneUnitAsModified(SceneUnitId id);
 	void InitEditor();
 	void LoadWorkbench();
 	void SaveWorkbench(std::string topItem = "");
@@ -95,7 +96,7 @@ namespace Editor {
 	std::string GetLevelString(SceneUnitId id);
 	std::string GetLevelName(SceneUnitId id);
 	void ChangeLevelName(SceneUnitId id, std::string levelFileName);
-	void SaveLevelToFile(std::string levelFileName);
+	void SaveLevelToFile(SceneUnitId id, std::string levelFileName);
 	void SaveTemplates();
 	void DrawRightPanel();
 	//void PromptTemplateDeletion(std::vector<nlohmann::json> references, std::function<void(std::vector<nlohmann::json>)> OnDelete, std::function<void()> OnCancel);

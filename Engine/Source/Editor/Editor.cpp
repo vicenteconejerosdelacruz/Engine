@@ -42,6 +42,7 @@
 #include <CreatorModal.h>
 #include <DeletePrompt.h>
 #include <AnimationSequencerModal.h>
+#include <YesNoCancelModal.h>
 
 extern HWND hWnd;
 extern RECT hWndRect;
@@ -190,6 +191,7 @@ namespace Editor
 	CreatorModal<TemplateType> templateModal;
 	DeletePrompt deletePrompt;
 	AnimationSequencerModal animationSequencer;
+	YesNoCancelModal yesNoCancelModal;
 
 	void CreateSceneUnitGizmos(SceneUnitId id)
 	{
@@ -311,10 +313,12 @@ namespace Editor
 			if (std::get<0>(*it) == id)
 			{
 				currentLevelName.erase(it);
-				return;
+				break;
 			}
 			it++;
 		}
+		levelModified.erase(id);
+		defaultLevel.erase(id);
 	}
 
 	void DeleteSceneUnitGizmos(SceneUnitId id)
@@ -346,6 +350,7 @@ namespace Editor
 
 	void DeleteSceneUnitEditorIndependentCamera(SceneUnitId id)
 	{
+		levelCameraUUID.erase(id);
 		editorCameraUUID.erase(id);
 	}
 
@@ -355,6 +360,11 @@ namespace Editor
 
 		editorCameraUUID[id]->renderPasses(levelCameraUUID[id]->renderPasses());
 		editorCameraUUID[id]->renderPassesUUID = levelCameraUUID[id]->renderPassesUUID;
+	}
+
+	void MarkSceneUnitAsModified(SceneUnitId id)
+	{
+		levelModified.at(id) = true;
 	}
 
 	//Editor LifeCycle
@@ -487,9 +497,24 @@ namespace Editor
 	{
 		if (!levelModified.contains(id)) return;
 
-		if (levelModified.at(id))
+		if (levelModified.at(id) && !defaultLevel.at(id))
 		{
-
+			yesNoCancelModal.Init(
+				[=] {
+					SaveLevelToFile(id, GetLevelName(id));
+					yesNoCancelModal.Hide();
+					CloseScene(id);
+				},
+				[=] {
+					levelModified.at(id) = false;
+					CloseScene(id);
+					yesNoCancelModal.Hide();
+				},
+				[] {
+					yesNoCancelModal.Hide();
+				}
+			);
+			yesNoCancelModal.Show();
 		}
 		else
 		{
@@ -834,6 +859,10 @@ namespace Editor
 			{
 				animationSequencer.DrawLoading();
 			}
+			if (yesNoCancelModal.Showing())
+			{
+				yesNoCancelModal.Draw("Save the scene?", "Do you wish to save before closing the scene?");
+			}
 		}
 
 		// Rendering
@@ -948,7 +977,7 @@ namespace Editor
 					{
 						if (ImGui::MenuItem(ICON_FA_SAVE "Save"))
 						{
-							SaveLevelToFile(GetLevelName(currentSceneUnitId));
+							SaveLevelToFile(currentSceneUnitId, GetLevelName(currentSceneUnitId));
 							SaveWorkbench(GetLevelName(currentSceneUnitId));
 							//menuBarItemClicked = true;
 						}
@@ -1442,7 +1471,7 @@ namespace Editor
 				std::filesystem::path jsonFilePath = path;
 				jsonFilePath.replace_extension(".json");
 
-				SaveLevelToFile(nostd::WStringToString(jsonFilePath.filename()));
+				SaveLevelToFile(currentSceneUnitId, nostd::WStringToString(jsonFilePath.filename()));
 				SaveWorkbench(nostd::WStringToString(jsonFilePath.filename()));
 			}
 		);
@@ -1572,11 +1601,11 @@ namespace Editor
 		}
 	}
 
-	void SaveLevelToFile(std::string levelFileName)
+	void SaveLevelToFile(SceneUnitId id, std::string levelFileName)
 	{
 		using namespace nlohmann;
 
-		std::string levelString = GetLevelString(currentSceneUnitId);
+		std::string levelString = GetLevelString(id);
 
 		const std::string levelsRootFolder = "Levels/";
 		const std::string filename = levelsRootFolder + levelFileName;
@@ -1594,9 +1623,9 @@ namespace Editor
 		file.write(levelString.c_str(), levelString.size());
 		file.close();
 
-		ChangeLevelName(currentSceneUnitId, levelFileName);
-		levelModified.at(currentSceneUnitId) = false;
-		defaultLevel.at(currentSceneUnitId) = false;
+		ChangeLevelName(id, levelFileName);
+		levelModified.at(id) = false;
+		defaultLevel.at(id) = false;
 
 		//currentLevelName = levelFileName;
 		//defaultLevel = false;

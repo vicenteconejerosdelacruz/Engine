@@ -359,6 +359,7 @@
     <ClInclude Include="Editor\Timeline\TimelineChannel.h" />
     <ClInclude Include="Editor\Timeline\TimelineEditor.h" />
     <ClInclude Include="Editor\Timeline\TimelinePopups.h" />
+    <ClInclude Include="Editor\YesNoCancelModal.h" />
     <ClInclude Include="EngineInc.h" />
     <ClInclude Include="Game\BootLevel\BootLevel.h" />
     <ClInclude Include="Game\Game.h" />
@@ -550,6 +551,7 @@
     <ClCompile Include="Editor\Timeline\TimelineChannel.cpp" />
     <ClCompile Include="Editor\Timeline\TimelineEditor.cpp" />
     <ClCompile Include="Editor\Timeline\TimelinePopups.cpp" />
+    <ClCompile Include="Editor\YesNoCancelModal.cpp" />
     <ClCompile Include="Game\BootLevel\BootLevel.cpp" />
     <ClCompile Include="Game\Game.cpp" />
     <ClCompile Include="Game\GameEngineStates\GameEngineBoot.cpp" />

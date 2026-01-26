@@ -46,6 +46,7 @@ namespace Editor
 {
 	extern void MarkTemplatesPanelAssetsAsDirty();
 	extern void MarkScenePanelAssetsAsDirty();
+	extern void MarkSceneUnitAsModified(SceneUnitId id);
 	extern void OpenAnimationSequencer(std::string uuid);
 };
 

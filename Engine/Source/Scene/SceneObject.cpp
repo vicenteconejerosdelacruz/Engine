@@ -4,7 +4,7 @@
 #if defined(_EDITOR)
 namespace Editor
 {
-	//extern bool levelModified;
+	void MarkSceneUnitAsModified(SceneUnitId id);
 };
 #endif
 
@@ -20,7 +20,7 @@ namespace Scene
 	void SceneObject::JUpdate(nlohmann::json p)
 	{
 #if defined(_EDITOR)
-		//Editor::levelModified = true;
+		Editor::MarkSceneUnitAsModified(unit);
 #endif
 		JObject::JUpdate(p);
 	}
@@ -28,7 +28,7 @@ namespace Scene
 	void SceneObject::JPatch(nlohmann::json p)
 	{
 #if defined(_EDITOR)
-		//Editor::levelModified = true;
+		Editor::MarkSceneUnitAsModified(unit);
 #endif
 		JObject::JPatch(p);
 	}
