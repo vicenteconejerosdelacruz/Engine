@@ -508,13 +508,7 @@ namespace Scene
 				for (auto it = renVecSet.begin(); it != renVecSet.end(); it++)
 				{
 					RenderableSUUUID renderable = *it;
-					std::string name = renderable->name();
-					BoundingBox rbb = renderable->GetBoundingBox();
-					bool checkBB = renderable->checkBoundingBox();
-					ContainmentType frustumBBContainment = boundingFrustum.Contains(rbb);
-					bool disjointBB = frustumBBContainment == ContainmentType::DISJOINT;
-					if (checkBB && disjointBB)
-						//if (renderable->checkBoundingBox() && boundingFrustum.Contains(renderable->GetBoundingBox()) == ContainmentType::DISJOINT)
+					if (renderable->checkBoundingBox() && boundingFrustum.Contains(renderable->GetBoundingBox()) == ContainmentType::DISJOINT)
 						continue;
 					renderable->Render(unit, rpi, SUuuid());
 				}
@@ -820,6 +814,22 @@ namespace Scene
 
 	void Camera::CreateIBLTextures()
 	{
+		using namespace Templates;
+		CreateTextureInstance(IBLIrradiance(), [&]
+			{
+				return std::make_unique<TextureInstance>(unit, IBLIrradiance());
+			}
+		);
+		CreateTextureInstance(IBLPreFilteredEnvironment(), [&]
+			{
+				return std::make_unique<TextureInstance>(unit, IBLPreFilteredEnvironment());
+			}
+		);
+		CreateTextureInstance(IBLBRDFLUT(), [&]
+			{
+				return std::make_unique<TextureInstance>(unit, IBLBRDFLUT());
+			}
+		);
 		iblTextures.insert_or_assign(TextureShaderUsage_IBLIrradiance, IBLIrradiance());
 		iblTextures.insert_or_assign(TextureShaderUsage_IBLPreFilteredEnvironment, IBLPreFilteredEnvironment());
 		iblTextures.insert_or_assign(TextureShaderUsage_IBLBRDFLUT, IBLBRDFLUT());

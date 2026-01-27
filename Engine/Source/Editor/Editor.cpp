@@ -955,6 +955,7 @@ namespace Editor
 	{
 		auto& scene = GetSceneUnit(id);
 		editorCameraUUID[id]->renderables = levelCameraUUID[id]->renderables;
+		editorCameraUUID[id]->iblTextures = levelCameraUUID[id]->iblTextures;
 		editorCameraUUID[id]->lights = levelCameraUUID[id]->lights;
 		editorCameraUUID[id]->lightsWithShadowMaps = levelCameraUUID[id]->lightsWithShadowMaps;
 		editorCameraUUID[id]->WriteLightsConstantsBuffer(scene->Frame());
