@@ -72,6 +72,8 @@ namespace Editor {
 	bool WndProcHandlerEditor(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	void EditorStep();
 	void HandleEditorMouseMovements(SceneUnitId id);
+	std::set<std::string> GetOpenedScenes(bool skipDefault = true);
+	std::set<SceneUnitId> GetOpenedSceneUnitIds(bool skipDefault = true);
 
 	//Editor Drawing
 	void AddSceneUnitToEditor(SceneUnitId id);
@@ -99,8 +101,8 @@ namespace Editor {
 	void SaveLevelToFile(SceneUnitId id, std::string levelFileName);
 	void SaveTemplates();
 	void DrawRightPanel();
-	//void PromptTemplateDeletion(std::vector<nlohmann::json> references, std::function<void(std::vector<nlohmann::json>)> OnDelete, std::function<void()> OnCancel);
-	//void CloseDeletionPrompt();
+	void PromptTemplateDeletion(std::vector<nlohmann::json> references, std::function<void(std::vector<nlohmann::json>)> OnDelete, std::function<void()> OnCancel);
+	void CloseDeletionPrompt();
 	void BuildAssetsTree();
 
 	//SceneObjects Panel
@@ -116,6 +118,7 @@ namespace Editor {
 	void OpenTemplate(JUUID uuid);
 	void OpenTemplateOnNextFrame(JUUID uuid);
 	void MarkTemplatesPanelAssetsAsDirty();
+	void RemoveFromTemplateSelection(std::set<JUUID> uuids);
 
 	//JObject's Preview Panel
 	void SendEditorPreview(JUUID uuid, auto GetJObject, auto drawers);

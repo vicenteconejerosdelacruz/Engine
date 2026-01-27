@@ -12,12 +12,13 @@
 #if defined(_EDITOR)
 namespace Editor
 {
-	/*
-	extern std::string currentLevelName;
 	extern void PromptTemplateDeletion(std::vector<nlohmann::json> references, std::function<void(std::vector<nlohmann::json>)> OnDelete, std::function<void()> OnCancel);
 	extern void CloseDeletionPrompt();
-	*/
+	extern void MarkSceneUnitAsModified(SceneUnitId id);
 	extern void MarkTemplatesPanelAssetsAsDirty();
+	extern std::set<std::string> GetOpenedScenes(bool skipDefault = true);
+	extern std::set<SceneUnitId> GetOpenedSceneUnitIds(bool skipDefault = true);
+	extern void RemoveFromTemplateSelection(std::set<JUUID> uuids);
 }
 
 namespace Scene
@@ -26,6 +27,8 @@ namespace Scene
 	SceneObject* GetSceneObjectPointer(JUUID uuid);
 	std::function<std::vector<JUUIDName>()> GetSceneObjectsByType(SceneObjectType typeToGet);
 	*/
+	std::unordered_map<JUUID, SceneObjectType>& GetSceneObjectsTypes(SceneUnitId id);
+	SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid);
 }
 #endif
 
@@ -601,6 +604,222 @@ namespace Templates
 						{ "ConservativeRaster", "OFF" }
 					}
 				},
+			},
+			{
+				{ "name", "Camera" },
+				{ "shader_ps", "abeeba0f-8f50-4780-92c2-02226cecb5dd" },
+				{ "shader_vs", "7d076bac-db2b-4ee3-8e4e-eadf891022fb" },
+				{ "systemCreated" , true},
+				{ "mappedValues",
+					{
+						{
+							{ "value", 0.9803921580314636 },
+							{ "variable", "alphaCut" },
+							{ "variableType", "FLOAT" }
+						}
+					}
+				},
+				{ "textures",
+					{
+						{ "BaseTexture", "2c207f54-9cdc-4c7e-a70a-60b373f2de79" }
+					}
+				},
+				{ "uuid", "65d6c9ad-226a-4073-924a-74d0c61acfc6" },
+				{ "rasterizerState",
+					{
+						{ "FillMode", "SOLID" },
+						{ "CullMode", "NONE" },
+						{ "FrontCounterClockwise", false},
+						{ "DepthBias", 0},
+						{ "DepthBiasClamp", 0.0},
+						{ "SlopeScaledDepthBias", 0.0},
+						{ "DepthClipEnable", true},
+						{ "MultisampleEnable", false},
+						{ "AntialiasedLineEnable", false},
+						{ "ForcedSampleCount", 0},
+						{ "ConservativeRaster", "OFF" }
+					}
+				}
+			},
+			{
+				{ "name", "LightBulb" },
+				{ "shader_ps", "abeeba0f-8f50-4780-92c2-02226cecb5dd" },
+				{ "shader_vs", "7d076bac-db2b-4ee3-8e4e-eadf891022fb" },
+				{ "systemCreated" , true},
+				{ "mappedValues",
+					{
+						{
+							{ "value", 0.9803921580314636},
+							{ "variable", "alphaCut"},
+							{ "variableType", "FLOAT" }
+						}
+					}
+				},
+				{ "textures",
+					{
+						{ "BaseTexture", "fed123fa-e248-47cd-9662-20f73285ad0e" }
+					}
+				},
+				{ "uuid", "7b774c44-527d-4315-a80c-aacf0a1383a6" },
+				{ "rasterizerState",
+					{
+						{ "FillMode", "SOLID" },
+						{ "CullMode", "NONE" },
+						{ "FrontCounterClockwise", false},
+						{ "DepthBias", 0},
+						{ "DepthBiasClamp", 0.0},
+						{ "SlopeScaledDepthBias", 0.0},
+						{ "DepthClipEnable", true},
+						{ "MultisampleEnable", false},
+						{ "AntialiasedLineEnable", false},
+						{ "ForcedSampleCount", 0},
+						{ "ConservativeRaster", "OFF" }
+					}
+				}
+			},
+			{
+				{ "name", "SoundEffect" },
+				{ "shader_ps", "abeeba0f-8f50-4780-92c2-02226cecb5dd" },
+				{ "shader_vs", "7d076bac-db2b-4ee3-8e4e-eadf891022fb" },
+				{ "systemCreated" , true},
+				{ "mappedValues",
+					{
+						{
+							{ "value", 0.9803921580314636 },
+							{ "variable", "alphaCut" },
+							{ "variableType", "FLOAT" }
+						}
+					}
+				},
+				{ "textures",
+					{
+						{ "BaseTexture", "5e3cba75-a495-44d8-ba5b-2b888f812a2b" }
+					}
+				},
+				{ "uuid", "e14a13cf-089e-401c-904b-75ebd75984e0" },
+				{ "rasterizerState",
+					{
+						{ "FillMode", "SOLID" },
+						{ "CullMode", "NONE" },
+						{ "FrontCounterClockwise", false},
+						{ "DepthBias", 0},
+						{ "DepthBiasClamp", 0.0},
+						{ "SlopeScaledDepthBias", 0.0},
+						{ "DepthClipEnable", true},
+						{ "MultisampleEnable", false},
+						{ "AntialiasedLineEnable", false},
+						{ "ForcedSampleCount", 0},
+						{ "ConservativeRaster", "OFF" }
+					}
+				}
+			},
+			{
+				{ "name", "CameraPicking" },
+				{ "shader_ps", "2dbc1cfd-8bcb-484a-bfc2-ec8be5150e55" },
+				{ "shader_vs", "744b10ef-4f0c-46d5-bd20-e94f7b66b8f9" },
+				{ "systemCreated" , true},
+				{ "mappedValues",
+					{
+						{
+							{ "value", 0.9803921580314636 },
+							{ "variable", "alphaCut" },
+							{ "variableType", "FLOAT" }
+						}
+					}
+				},
+				{ "textures",
+					{
+						{ "BaseTexture", "2c207f54-9cdc-4c7e-a70a-60b373f2de79" }
+					}
+				},
+				{ "uuid", "e82b4687-4705-4202-8d96-65096426b00e" },
+				{ "rasterizerState",
+					{
+						{ "FillMode", "SOLID" },
+						{ "CullMode", "NONE" },
+						{ "FrontCounterClockwise", false},
+						{ "DepthBias", 0},
+						{ "DepthBiasClamp", 0.0},
+						{ "SlopeScaledDepthBias", 0.0},
+						{ "DepthClipEnable", true},
+						{ "MultisampleEnable", false},
+						{ "AntialiasedLineEnable", false},
+						{ "ForcedSampleCount", 0},
+						{ "ConservativeRaster", "OFF" }
+					}
+				}
+			},
+			{
+				{ "name", "LightBulbPicking" },
+				{ "shader_ps", "2dbc1cfd-8bcb-484a-bfc2-ec8be5150e55" },
+				{ "shader_vs", "744b10ef-4f0c-46d5-bd20-e94f7b66b8f9" },
+				{ "systemCreated" , true},
+				{ "mappedValues",
+					{
+						{
+							{ "value", 0.9803921580314636 },
+							{ "variable", "alphaCut" },
+							{ "variableType", "FLOAT" }
+						}
+					}
+				},
+				{ "textures",
+					{
+						{ "BaseTexture", "fed123fa-e248-47cd-9662-20f73285ad0e" }
+					}
+				},
+				{ "uuid", "3786f66e-550a-449d-8526-2507ebec6750" },
+				{ "rasterizerState",
+					{
+						{ "FillMode", "SOLID" },
+						{ "CullMode", "NONE" },
+						{ "FrontCounterClockwise", false},
+						{ "DepthBias", 0},
+						{ "DepthBiasClamp", 0.0},
+						{ "SlopeScaledDepthBias", 0.0},
+						{ "DepthClipEnable", true},
+						{ "MultisampleEnable", false},
+						{ "AntialiasedLineEnable", false},
+						{ "ForcedSampleCount", 0},
+						{ "ConservativeRaster", "OFF" }
+					}
+				}
+			},
+			{
+				{ "name", "SoundEffectPicking" },
+				{ "shader_ps", "2dbc1cfd-8bcb-484a-bfc2-ec8be5150e55" },
+				{ "shader_vs", "744b10ef-4f0c-46d5-bd20-e94f7b66b8f9" },
+				{ "systemCreated" , true},
+				{ "mappedValues",
+					{
+						{
+							{ "value", 0.9803921580314636 },
+							{ "variable", "alphaCut" },
+							{ "variableType", "FLOAT" }
+						}
+					}
+				},
+				{ "textures",
+					{
+						{ "BaseTexture", "5e3cba75-a495-44d8-ba5b-2b888f812a2b" }
+					}
+				},
+				{ "uuid", "44b7750d-534b-4df6-bc43-776054503b4c" },
+				{ "rasterizerState",
+					{
+						{ "FillMode", "SOLID" },
+						{ "CullMode", "NONE" },
+						{ "FrontCounterClockwise", false},
+						{ "DepthBias", 0},
+						{ "DepthBiasClamp", 0.0},
+						{ "SlopeScaledDepthBias", 0.0},
+						{ "DepthClipEnable", true},
+						{ "MultisampleEnable", false},
+						{ "AntialiasedLineEnable", false},
+						{ "ForcedSampleCount", 0},
+						{ "ConservativeRaster", "OFF" }
+					}
+				}
 			}
 		}
 	);
@@ -1162,7 +1381,6 @@ namespace Templates
 		Editor::MarkTemplatesPanelAssetsAsDirty();
 	}
 
-	/*
 	TemplateType GetTemplateTypeFromFile(std::string file)
 	{
 		const std::map<std::string, TemplateType> GetT4F = {
@@ -1176,7 +1394,7 @@ namespace Templates
 		return GetT4F.at(file);
 	}
 
-	std::string GetTemplateName(TemplateType t, std::string uuid)
+	std::string GetTemplateName(TemplateType t, JUUID uuid)
 	{
 		const std::map<TemplateType, std::function<std::string(std::string)>> GetTName = {
 			{ T_Materials, GetMaterialName },
@@ -1188,47 +1406,53 @@ namespace Templates
 		};
 		return GetTName.at(t)(uuid);
 	}
-	*/
 
-	/*
 	std::string GetTemplateFile(TemplateType t)
 	{
-		const std::map<TemplateType, std::function<std::string()>> GetF = {
-			{ T_Materials, []() {return Material::templateName; } },
-			{ T_Models3D, []() {return Model3D::templateName; } },
-			{ T_Shaders, []() {return Shader::templateName; } },
-			{ T_Sounds, []() {return Sound::templateName; } },
-			{ T_Textures, []() {return Texture::templateName; } },
-			{ T_RenderPasses, []() {return RenderPass::templateName; } },
+		const std::map<TemplateType, std::string> GetF = {
+			{ T_Materials, Material::templateName },
+			{ T_Models3D, Model3D::templateName },
+			{ T_Shaders, Shader::templateName },
+			{ T_Sounds, Sound::templateName },
+			{ T_Textures, Texture::templateName },
+			{ T_RenderPasses, RenderPass::templateName },
 		};
-		return defaultTemplatesFolder + GetF.at(t)();
+		return defaultTemplatesFolder + GetF.at(t);
 	}
-	*/
 
-	void DeleteTemplate(TemplateType t, std::string uuid)
+	void DeleteTemplate(TemplateType t, JUUID uuid)
 	{
 		templates.at(t).erase(uuid);
 		templatesTypes.erase(uuid);
 
-		const std::map<TemplateType, std::function<void(std::string)>> DeleteT = {
-			{ T_Materials, [](std::string uuid) { DeleteMaterialTemplate(uuid); }},
-			{ T_Models3D, [](std::string uuid) { DeleteModel3DTemplate(uuid); }},
-			{ T_Shaders, [](std::string uuid) { DeleteShaderTemplate(uuid); }},
-			{ T_Sounds, [](std::string uuid) { DeleteSoundTemplate(uuid); }},
-			{ T_Textures, [](std::string uuid) { DeleteTextureTemplate(uuid); }},
-			{ T_RenderPasses, [](std::string uuid) { DeleteRenderPassTemplate(uuid); }},
+		const std::map<TemplateType, std::function<void(JUUID)>> DeleteT = {
+			{ T_Materials, DeleteMaterialTemplate },
+			{ T_Models3D, DeleteModel3DTemplate },
+			{ T_Shaders, DeleteShaderTemplate },
+			{ T_Sounds, DeleteSoundTemplate },
+			{ T_Textures, DeleteTextureTemplate },
+			{ T_RenderPasses, DeleteRenderPassTemplate },
 		};
 		DeleteT.at(t)(uuid);
 	}
 
-	void DeleteTemplate(std::string uuid)
+	void DeleteTemplate(JUUID uuid)
 	{
-		/*
+		using namespace Editor;
 		TemplateType type = GetTemplateType(uuid);
 		std::string name = GetTemplateName(type, uuid);
 		std::set<std::string> skipTemplateFile = { GetTemplateFile(type) };
-		std::set<std::string> skipLevelFiles = { defaultLevelsFolder + Editor::currentLevelName + ".json" };
+		std::set<std::string> levelNames = GetOpenedScenes();
 		std::vector<nlohmann::json> references;
+		std::set<std::string> skipLevelFiles;
+		std::transform(levelNames.begin(), levelNames.end(), std::inserter(skipLevelFiles, skipLevelFiles.begin()), [](auto& name)
+			{
+				return defaultLevelsFolder + name + ".json";
+			}
+		);
+		/*
+		std::set<std::string> skipLevelFiles = { defaultLevelsFolder + Editor::currentLevelName + ".json" };
+		*/
 
 		auto deleteTemplate = [type, uuid](std::vector<nlohmann::json> references)
 			{
@@ -1259,9 +1483,14 @@ namespace Templates
 				);
 				DeleteTemplateReferences(templateReferences);
 				DeleteTemplateReferencesInLevels(sceneObjectReferences);
-				DeleteTemplateReferencesInCurrentLevel(currentLevelReferences);
-				Editor::CloseDeletionPrompt();
-				Editor::MarkTemplatesPanelAssetsAsDirty();
+				DeleteTemplateReferencesInOpenedLevels(currentLevelReferences);
+				for (int i = 0; i < currentLevelReferences.size(); i++)
+				{
+					MarkSceneUnitAsModified(static_cast<SceneUnitId>(currentLevelReferences[i].at("unit")));
+				}
+				MarkTemplatesPanelAssetsAsDirty();
+				CloseDeletionPrompt();
+				RemoveFromTemplateSelection({ uuid });
 			};
 
 		FindTemplatesReferencesInTemplates(uuid, skipTemplateFile, [&references](nlohmann::json nav)
@@ -1274,16 +1503,16 @@ namespace Templates
 				references.push_back(nav);
 			}
 		);
-		FindTemplatesReferencesInCurrentLevel(uuid, [&references](nlohmann::json nav)
+		FindTemplatesReferencesInOpenedLevels(uuid, [&references](nlohmann::json nav)
 			{
 				references.push_back(nav);
 			}
 		);
 		if (references.size() > 0U)
 		{
-			Editor::PromptTemplateDeletion(references, deleteTemplate, []()
+			PromptTemplateDeletion(references, deleteTemplate, []()
 				{
-					Editor::CloseDeletionPrompt();
+					CloseDeletionPrompt();
 				}
 			);
 		}
@@ -1291,13 +1520,10 @@ namespace Templates
 		{
 			deleteTemplate(references);
 		}
-		*/
 	}
 
-	/*
 	void DeleteTemplateReferences(std::vector<nlohmann::json> references)
 	{
-		bool modified = false;
 		for (auto& ref : references)
 		{
 			std::string uuid = ref.at("uuid");
@@ -1314,13 +1540,9 @@ namespace Templates
 			};
 
 			j->patch_inplace(j_patch);
-			modified = true;
 		}
-		Editor::templatesModified |= modified;
 	}
-	*/
 
-	/*
 	void DeleteTemplateReferencesInLevels(std::vector<nlohmann::json> references)
 	{
 		std::map<std::string, std::set<std::string>> levelPaths;
@@ -1354,15 +1576,16 @@ namespace Templates
 			ofile.close();
 		}
 	}
-	*/
 
-	/*
-	void DeleteTemplateReferencesInCurrentLevel(std::vector<nlohmann::json> references)
+	void DeleteTemplateReferencesInOpenedLevels(std::vector<nlohmann::json> references)
 	{
+		using namespace Scene;
+
 		for (auto& ref : references)
 		{
+			SceneUnitId id = ref.at("unit");
 			std::string uuid = ref.at("uuid");
-			SceneObject* so = GetSceneObjectPointer(uuid);
+			SceneObject* so = GetSceneObjectPointer(id, uuid);
 
 			std::string path = ref.at("path");
 			std::vector<std::string> parts = nostd::split(path, "/");
@@ -1397,10 +1620,8 @@ namespace Templates
 			}
 		}
 	}
-	*/
 
-	/*
-	void FindTemplatesReferencesInTemplates(std::string uuid, std::set<std::string> skipTemplateFile, std::function<void(nlohmann::json)> addReference)
+	void FindTemplatesReferencesInTemplates(JUUID uuid, std::set<std::string> skipTemplateFile, std::function<void(nlohmann::json)> addReference)
 	{
 		for (auto& entry : std::filesystem::directory_iterator(defaultTemplatesFolder))
 		{
@@ -1433,10 +1654,8 @@ namespace Templates
 			}
 		}
 	}
-	*/
 
-	/*
-	void FindTemplatesReferencesInLevels(std::string uuid, std::set<std::string> skipLevelFiles, std::function<void(nlohmann::json)> addReference)
+	void FindTemplatesReferencesInLevels(JUUID uuid, std::set<std::string> skipLevelFiles, std::function<void(nlohmann::json)> addReference)
 	{
 		for (auto& entry : std::filesystem::directory_iterator(defaultLevelsFolder))
 		{
@@ -1473,12 +1692,42 @@ namespace Templates
 			}
 		}
 	}
-	*/
 
-	/*
-	void FindTemplatesReferencesInCurrentLevel(std::string uuid, std::function<void(nlohmann::json)> addReference)
+	void FindTemplatesReferencesInOpenedLevels(JUUID uuid, std::function<void(nlohmann::json)> addReference)
 	{
 		using namespace Scene;
+		using namespace Editor;
+
+		std::set<SceneUnitId> units = GetOpenedSceneUnitIds(false);
+
+		for (auto id : units)
+		{
+			std::unordered_map<JUUID, SceneObjectType>& objectTypes = GetSceneObjectsTypes(id);
+
+			for (auto& [soUUID, type] : objectTypes)
+			{
+				SceneObject* so = GetSceneObjectPointer(id, soUUID);
+
+				nlohmann::json json = {
+					{ "delete", true },
+					{ "uuid", soUUID },
+					{ "name", so->at("name") },
+					{ "type", "currentlevel" },
+					{ "sceneObject", SceneObjectTypeJsonContainer.at(type) },
+					{ "unit", id }
+				};
+
+				FindRecursiveJsonReference(so->json(), uuid, "", [&json, addReference](std::string path)
+					{
+						json["path"] = path;
+						addReference(json);
+					}
+				);
+			}
+
+		}
+
+		/*
 		for (auto& [type, item] : SceneObjectTypeJsonContainer)
 		{
 			std::vector<JUUIDName> uuidNames = GetSceneObjectsByType(type)();
@@ -1503,11 +1752,10 @@ namespace Templates
 				);
 			}
 		}
+		*/
 	}
-	*/
 
-	/*
-	void FindRecursiveJsonReference(nlohmann::json json, std::string uuid, std::string path, std::function<void(std::string path)> addReference)
+	void FindRecursiveJsonReference(nlohmann::json json, JUUID uuid, std::string path, std::function<void(std::string path)> addReference)
 	{
 		if (json.is_object())
 		{
@@ -1534,7 +1782,6 @@ namespace Templates
 			}
 		}
 	}
-	*/
 
 #endif
 }

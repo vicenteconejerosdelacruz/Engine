@@ -791,6 +791,40 @@ namespace Editor
 		}
 	}
 
+	std::set<std::string> GetOpenedScenes(bool skipDefault)
+	{
+		std::set<std::tuple<SceneUnitId, std::string>> openedScenes;
+		std::copy_if(currentLevelName.begin(), currentLevelName.end(), std::inserter(openedScenes, openedScenes.begin()), [=](auto& tup)
+			{
+				return !defaultLevel.contains(std::get<0>(tup)) && skipDefault;
+			}
+		);
+		std::set<std::string> sceneNames;
+		std::transform(openedScenes.begin(), openedScenes.end(), std::inserter(sceneNames, sceneNames.begin()), [](auto& tup)
+			{
+				return std::get<1>(tup);
+			}
+		);
+		return sceneNames;
+	}
+
+	std::set<SceneUnitId> GetOpenedSceneUnitIds(bool skipDefault)
+	{
+		std::set<std::tuple<SceneUnitId, std::string>> openedScenes;
+		std::copy_if(currentLevelName.begin(), currentLevelName.end(), std::inserter(openedScenes, openedScenes.begin()), [=](auto& tup)
+			{
+				return !defaultLevel.contains(std::get<0>(tup)) && skipDefault;
+			}
+		);
+		std::set<SceneUnitId> sceneUnitIds;
+		std::transform(openedScenes.begin(), openedScenes.end(), std::inserter(sceneUnitIds, sceneUnitIds.begin()), [](auto& tup)
+			{
+				return std::get<0>(tup);
+			}
+		);
+		return sceneUnitIds;
+	}
+
 	void AddSceneUnitToEditor(SceneUnitId unit)
 	{
 		auto& scene = GetSceneUnit(unit);
@@ -872,10 +906,8 @@ namespace Editor
 				sceneObjectModal.DrawCreationPopup(SceneObjectsTypePanelMenuItems.at(sceneObjectModal.type));
 			if (templateModal.creating)
 				templateModal.DrawCreationPopup(TemplateTypePanelMenuItems.at(templateModal.type));
-			/*
 			if (deletePrompt.showing)
 				deletePrompt.DrawPrompt("Delete Template");
-			*/
 			if (animationSequencer.showing)
 			{
 				static const float seqAdj = 8.0f;
@@ -1753,17 +1785,16 @@ namespace Editor
 				[](JUUID uuid) { return GetJTemplatePointer(uuid); },
 				OnChangeTemplateTab,
 				matchTemplatesAttributes,
-				[](std::string uuid, bool selected) {},
-				[](std::string uuid) { SendEditorPreview(uuid, GetJTemplatePointer, templateEdition.drawers); },
+				[](JUUID uuid, bool selected) {},
+				[](JUUID uuid) { SendEditorPreview(uuid, GetJTemplatePointer, templateEdition.drawers); },
 				[](TemplateType type) { StartTemplateCreation(type); },
-				[](std::string uuid) { DeleteTemplate(uuid); }
+				[](JUUID uuid) { DeleteTemplate(uuid); }
 			);
 		}
 		ImGui::End();
 		ImGui::PopStyleVar();
 	}
 
-	/*
 	void PromptTemplateDeletion(std::vector<nlohmann::json> references, std::function<void(std::vector<nlohmann::json>)> OnDelete, std::function<void()> OnCancel)
 	{
 		deletePrompt.showing = true;
@@ -1771,14 +1802,11 @@ namespace Editor
 		deletePrompt.OnDelete = OnDelete;
 		deletePrompt.OnCancel = OnCancel;
 	}
-	*/
 
-	/*
 	void CloseDeletionPrompt()
 	{
 		deletePrompt.showing = false;
 	}
-	*/
 
 	void BuildAssetsTree()
 	{
@@ -1912,6 +1940,21 @@ namespace Editor
 	{
 		templateEdition.dirtyAssetsTree = true;
 		templatesModified = true;
+	}
+
+	void RemoveFromTemplateSelection(std::set<JUUID> uuids)
+	{
+		for (auto uuid : uuids)
+		{
+			if (templateEdition.selected.contains(uuid))
+			{
+				templateEdition.selected.erase(uuid);
+			}
+			if (templateEdition.editables.contains(uuid))
+			{
+				templateEdition.editables.erase(uuid);
+			}
+		}
 	}
 
 	//JObject's Preview Panel
