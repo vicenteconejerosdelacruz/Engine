@@ -53,6 +53,10 @@ struct TUUID {
 	{
 		return uuid < other.uuid;
 	}
+	JUUID operator()() const
+	{
+		return uuid;
+	}
 	JUUID operator()()
 	{
 		return uuid;
@@ -61,6 +65,10 @@ struct TUUID {
 	{
 		return uuid;
 	}
+	bool empty() const
+	{
+		return uuid.empty();
+	}
 	bool empty()
 	{
 		return uuid.empty();
@@ -68,6 +76,10 @@ struct TUUID {
 	void clear()
 	{
 		uuid = "";
+	}
+	void replace(JUUID u)
+	{
+		uuid = u;
 	}
 };
 

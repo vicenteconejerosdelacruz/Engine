@@ -83,9 +83,11 @@ namespace Templates
 	SoundInstance GetSoundEffectInstance(
 		JUUID uuid,
 		unsigned int flags,
-		std::string objectUUID = "",
+		std::string objectUUID = ""
+		/*,
 		JObjectChangeCallback cb = nullptr,
 		JObjectChangePostCallback postCb = nullptr
+		*/
 	);
 
 	bool SoundEffectExists(JUUID uuid);

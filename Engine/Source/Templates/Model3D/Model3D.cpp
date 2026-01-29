@@ -96,11 +96,11 @@ namespace Templates
 
 		if (seqMdls.size() > 0ULL)
 		{
-			JObject::RunChangesCallback(seqMdls, [](auto mdl)
-				{
-					mdl->clean(Model3DJson::Update_animationSequences);
-				}
-			);
+			//JObject::RunChangesCallback(seqMdls, [](auto mdl)
+			//	{
+			//		mdl->clean(Model3DJson::Update_animationSequences);
+			//	}
+			//);
 		}
 	}
 #endif
@@ -119,11 +119,11 @@ namespace Templates
 		return "mat-" + mdl->name() + "-" + std::to_string(index);
 	}
 
-	Model3DInstance::Model3DInstance(SceneUnitId id, JUUID uuid, JUUID objectUUID, JObjectChangeCallback cb, JObjectChangePostCallback postCb)
+	Model3DInstance::Model3DInstance(SceneUnitId id, JUUID uuid, JUUID objectUUID/*, JObjectChangeCallback cb, JObjectChangePostCallback postCb*/)
 	{
 		model3DUUID = uuid;
-		auto& mdl = GetModel3DTemplate(model3DUUID);
-		mdl->BindChangeCallback(objectUUID, cb, postCb);
+		//auto& mdl = GetModel3DTemplate(model3DUUID);
+		//mdl->BindChangeCallback(objectUUID, cb, postCb);
 		LoadModel3DInstance(id);
 	}
 
@@ -274,7 +274,8 @@ namespace Templates
 
 	nlohmann::json Model3DInstance::GetAssimpTexturesMaterialJson(std::filesystem::path relativePath, const aiScene* aiModel, aiMaterial* material)
 	{
-		using namespace Templates::Model3D;
+		//using namespace Templates::Model3D;
+		using namespace Templates::Texture;
 
 		nlohmann::json mat(nlohmann::json({}));
 

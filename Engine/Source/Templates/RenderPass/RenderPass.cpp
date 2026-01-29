@@ -215,9 +215,11 @@ namespace Templates
 		MeshInstanceUUID mesh,
 		bool shadowed,
 		std::vector<PassMaterialOverride> passMaterialOverride,
-		JUUID bindingUUID,
+		JUUID bindingUUID
+		/*,
 		JObjectChangeCallback materialChangeCallback,
 		JObjectChangePostCallback materialChangePostCallback
+		*/
 	)
 	{
 		using namespace RenderPass;
@@ -226,13 +228,13 @@ namespace Templates
 		std::string vertexType = VertexClassToString.at(vertexClass);
 		bool hasIbl = camera.uuid().empty() ? false : camera->HasIBL();
 
-		auto noOverride = [id, &material, vertexClass, vertexType, shadowed, hasIbl, bindingUUID, materialChangeCallback, materialChangePostCallback]()
+		auto noOverride = [id, &material, vertexClass, vertexType, shadowed, hasIbl, bindingUUID/*, materialChangeCallback, materialChangePostCallback*/]()
 			{
 				MaterialInstanceUUID instanceUUID = material() + "-" + vertexType;
-				CreateMaterialInstance(instanceUUID(), [id, &instanceUUID, &material, vertexClass, shadowed, hasIbl, bindingUUID, materialChangeCallback, materialChangePostCallback]()
+				CreateMaterialInstance(instanceUUID(), [id, &instanceUUID, &material, vertexClass, shadowed, hasIbl, bindingUUID/*, materialChangeCallback, materialChangePostCallback*/]()
 					{
 						return std::make_unique<MaterialInstance>(id, instanceUUID(), material(), vertexClass, shadowed, hasIbl, TextureShaderUsageMap(),
-							bindingUUID, materialChangeCallback, materialChangePostCallback);
+							bindingUUID/*, materialChangeCallback, materialChangePostCallback*/);
 					}
 				);
 				return instanceUUID();

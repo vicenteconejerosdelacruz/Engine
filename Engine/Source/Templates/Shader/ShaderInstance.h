@@ -50,9 +50,11 @@ namespace Templates
 		explicit ShaderInstance(
 			JUUID instance_uuid,
 			JUUID uuid, Source params,
-			JUUID objectUUID = "",
+			JUUID objectUUID = ""
+			/*,
 			JObjectChangeCallback cb = [](JUUID) {},
 			JObjectChangePostCallback postCb = [](unsigned int, unsigned int) {}
+			*/
 		);
 		~ShaderInstance() {}
 

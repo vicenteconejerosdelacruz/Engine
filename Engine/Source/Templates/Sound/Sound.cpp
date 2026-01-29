@@ -43,14 +43,14 @@ namespace Templates
 	};
 
 	SoundInstance GetSoundEffectInstance(JUUID uuid, unsigned int flags,
-		std::string objectUUID, JObjectChangeCallback cb, JObjectChangePostCallback postCb
+		std::string objectUUID/*, JObjectChangeCallback cb, JObjectChangePostCallback postCb*/
 	)
 	{
-		if (objectUUID != "" && (cb != nullptr || postCb != nullptr))
+		/*if (objectUUID != "" && (cb != nullptr || postCb != nullptr))
 		{
 			std::unique_ptr<SoundJson>& json = GetSoundTemplate(uuid);
 			json->BindChangeCallback(objectUUID, cb, postCb);
-		}
+		}*/
 		using namespace Sound;
 		if (uuidToSoundEffects.contains(uuid))
 		{
@@ -139,11 +139,13 @@ namespace Templates
 
 		if (rebuildSounds.size() > 0ULL)
 		{
+			/*
 			JObject::RunChangesCallback(rebuildSounds, [](auto sound)
 				{
 					sound->clean(SoundJson::Update_path);
 				}
 			);
+			*/
 		}
 	}
 

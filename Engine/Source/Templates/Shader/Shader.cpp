@@ -101,11 +101,11 @@ namespace Templates {
 
 		if (rebuildShaders.size() > 0ULL)
 		{
-			JObject::RunChangesCallback(rebuildShaders, [](auto shader)
-				{
-					shader->clean(ShaderJson::Update_path);
-				}
-			);
+			//JObject::RunChangesCallback(rebuildShaders, [](auto shader)
+			//	{
+			//		shader->clean(ShaderJson::Update_path);
+			//	}
+			//);
 		}
 	}
 
@@ -247,9 +247,12 @@ namespace Templates {
 	ShaderInstance::ShaderInstance(
 		JUUID instance_uuid,
 		JUUID uuid, Source params,
-		JUUID bindingUUID,
+		JUUID bindingUUID
+		/*,
 		JObjectChangeCallback shaderChangeCallback,
-		JObjectChangePostCallback shaderChangePostCallback)
+		JObjectChangePostCallback shaderChangePostCallback
+		*/
+	)
 	{
 		using namespace ShaderCompiler;
 		using namespace Templates::Shader;
@@ -257,8 +260,8 @@ namespace Templates {
 		instanceUUID = instance_uuid;
 		shaderUUID = uuid;
 
-		auto& shader = GetShaderTemplate(uuid);
-		shader->BindChangeCallback(bindingUUID, shaderChangeCallback, shaderChangePostCallback);
+		//ShaderJsonUUID shader = uuid;
+		//shader->BindChangeCallback(bindingUUID, shaderChangeCallback, shaderChangePostCallback);
 
 		Compile(*this, params, dependencies);
 	}

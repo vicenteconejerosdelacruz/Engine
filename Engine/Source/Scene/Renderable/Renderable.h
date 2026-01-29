@@ -199,6 +199,8 @@ namespace Scene
 		SequencePlayer sequencePlayer;
 		//Cameras
 		std::set<CameraSUUUID> bindedCameras;
+		//RebuildMaterials
+		//std::vector<std::tuple<unsigned int, JUUID>> rebuildMaterials;
 
 		BoundingBox boundingBox;
 		RenderableBoundingBoxUUID boundingBoxCompute; //used for animables

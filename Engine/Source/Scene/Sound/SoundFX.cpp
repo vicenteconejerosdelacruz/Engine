@@ -112,14 +112,16 @@ namespace Scene
 
 		if (!SoundTemplateExist(sound())) return;
 
-		std::unique_ptr<SoundJson>& stmp = GetSoundTemplate(sound());
+		//std::unique_ptr<SoundJson>& stmp = GetSoundTemplate(sound());
 
+		/*
 		auto OnSoundChange = [this](JUUID sound)
 			{
 				UnbindFromScene();
 				BindToScene();
 			};
-		soundEffectInstance = GetSoundEffectInstance(sound(), instanceFlags(), uuid(), OnSoundChange);
+		*/
+		soundEffectInstance = GetSoundEffectInstance(sound(), instanceFlags(), uuid()/*, OnSoundChange*/);
 
 		if (nostd::bytesHas(instanceFlags(), SoundEffectInstance_Use3D))
 		{

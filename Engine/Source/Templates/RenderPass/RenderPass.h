@@ -162,9 +162,11 @@ namespace Templates
 			MeshInstanceUUID mesh,
 			bool shadowed,
 			std::vector<PassMaterialOverride> passMaterialOverride,
-			JUUID bindingUUID = "",
+			JUUID bindingUUID = ""
+			/*,
 			JObjectChangeCallback cb = nullptr,
 			JObjectChangePostCallback postCb = nullptr
+			*/
 		);
 		void InitRenderPass();
 		void ResizeRelease();

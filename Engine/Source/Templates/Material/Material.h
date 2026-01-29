@@ -92,6 +92,7 @@ namespace Templates
 #endif
 
 	void MaterialJsonStep();
+	void UpdateMaterialTextures(std::unordered_map<TextureJsonUUID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceUUID>>> changes);
 
 	namespace Material
 	{
@@ -136,14 +137,16 @@ namespace Templates
 			bool isShadowed,
 			bool hasIBL,
 			TextureShaderUsageMap overrideTextures = {},
-			JUUID ObjectUUID = "",
+			JUUID ObjectUUID = ""
+			/*,
 			JObjectChangeCallback cb = nullptr,
 			JObjectChangePostCallback postCb = nullptr
+			*/
 		);
 		~MaterialInstance() { Destroy(); }
 
 		MaterialJsonUUID materialUUID;
-		JUUID instanceUUID;
+		MaterialInstanceUUID instanceUUID;
 
 		ShaderJsonUUID vertexShaderUUID;
 		ShaderJsonUUID pixelShaderUUID;
@@ -169,6 +172,7 @@ namespace Templates
 		void LoadVariablesMapping();
 		void SetUAVRootDescriptorTable(CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int& slot);
 		void SetSRVRootDescriptorTable(CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int& slot);
+		void UpdateTexture(TextureShaderUsage usage, TextureJsonUUID texture);
 	};
 
 	void DestroyMaterialInstance(JUUID materialInstance);

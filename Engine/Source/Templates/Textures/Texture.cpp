@@ -83,7 +83,32 @@ namespace Templates
 #endif
 
 	TEMPDEF_FULL(Texture);
-	TEMPDEF_REFTRACKER(Texture);
+	//TEMPDEF_REFTRACKER(Texture);
+	static RefTracker<JUUID, std::unique_ptr<TextureInstance>> refTracker; std::unique_ptr<TextureInstance>& CreateTextureInstance(JUUID templateUUID, std::function<std::unique_ptr<TextureInstance>()> newRefCallback) {
+		if (refTracker.Has(templateUUID)) {
+			std::unique_ptr<TextureInstance>& instance = refTracker.FindValue(templateUUID); refTracker.IncrementRefCount(templateUUID, 1U); return instance;
+		}
+		else {
+			return refTracker.AddRef(templateUUID, newRefCallback);
+		}
+	}std::unique_ptr<TextureInstance>& CreateTextureInstance(JUUID templateUUID, JUUID instanceKey, std::function<std::unique_ptr<TextureInstance>()> newRefCallback) {
+		if (refTracker.Has(instanceKey)) {
+			std::unique_ptr<TextureInstance>& instance = refTracker.FindValue(instanceKey); refTracker.IncrementRefCount(instanceKey, 1U); return instance;
+		}
+		else {
+			return refTracker.AddRef(instanceKey, newRefCallback);
+		}
+	}std::unique_ptr<TextureInstance>& CreateTextureInstance(JUUID templateUUID) {
+		return CreateTextureInstance(templateUUID, [templateUUID] { return std::make_unique<TextureInstance>(templateUUID); });
+	}bool DeleteTextureInstance(JUUID instanceKey) {
+		if (refTracker.Has(instanceKey)) {
+			refTracker.RemoveRef(instanceKey); return true;
+		} return false;
+	}std::unique_ptr<TextureInstance>& GetTextureInstance(JUUID instanceKey) {
+		return refTracker.FindValue(instanceKey);
+	}void ClearTextureInstances() {
+		refTracker.Clear();
+	};
 
 	DXGI_FORMAT GetTextureFormat(std::filesystem::path path)
 	{

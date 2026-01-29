@@ -234,7 +234,7 @@ namespace Scene
 		{
 			for (auto& mat : vec0)
 			{
-				mat->materialUUID->UnbindChangeCallback(uuid());
+				//mat->materialUUID->UnbindChangeCallback(uuid());
 			}
 		}
 	}
@@ -244,7 +244,7 @@ namespace Scene
 		if (!model().empty())
 		{
 			Model3DJsonUUID mdl = model();
-			mdl->UnbindChangeCallback(uuid());
+			//mdl->UnbindChangeCallback(uuid());
 		}
 	}
 
@@ -292,14 +292,14 @@ namespace Scene
 		{
 			CreateModel3DInstance(model(), [this]
 				{
-					return std::make_unique<Model3DInstance>(unit, model(), uuid(), [this](JUUID model3DTemplateUUID)
+					return std::make_unique<Model3DInstance>(unit, model(), uuid()/*, [this](JUUID model3DTemplateUUID)
 						{
 							auto& model = GetModel3DTemplate(model3DTemplateUUID);
 							if (model->dirty(Model3DJson::Update_animationSequences))
 							{
 								RebuildAnimationSequences();
 							}
-						}
+						}*/
 					);
 				}
 			);
@@ -338,22 +338,30 @@ namespace Scene
 
 	void Renderable::CreateRenderPassMaterialsInstances(RenderPassInstanceUUID pass)
 	{
-		auto onPostMaterialChange = [this](unsigned int index, unsigned int total)
-			{
-				/*if (index == 0U)
-				{
-					renderer->Flush();
-					renderer->ResetCommands();
-					renderer->SetCSUDescriptorHeap();
-				}
-
-				RebuildMeshMaterials();
-
-				if (index >= (total - 1))
-				{
-					renderer->CloseCommandsAndFlush();
-				}*/
-			};
+		//auto onMaterialChange = [&](JUUID uuid)
+		//	{
+		//		//MaterialJsonUUID matUUID = uuid;
+		//		//auto& mat = *matUUID;
+		//		RenderReady(false);
+		//		//auto& scene = GetSceneUnit(unit);
+		//		//scene->ResetLoadingCommandList();
+		//	};
+		//auto onPostMaterialChange = [&](unsigned int index, unsigned int total)
+		//	{
+		//		//if (index == 0U)
+		//		//{
+		//		//	renderer->Flush();
+		//		//	renderer->ResetCommands();
+		//		//	renderer->SetCSUDescriptorHeap();
+		//		//}
+		//		//
+		//		//RebuildMeshMaterials();
+		//		//
+		//		//if (index >= (total - 1))
+		//		//{
+		//		//	renderer->CloseCommandsAndFlush();
+		//		//}
+		//	};
 
 		std::vector<PassMaterialOverride> pmo = passMaterialOverrides();
 
@@ -390,7 +398,7 @@ namespace Scene
 				materials[pass].push_back(pass->GetRenderPassMaterialInstance(
 					unit,
 					matUUID, mesh, shadowed(),
-					mpmo, uuid(), nullptr, onPostMaterialChange));
+					mpmo, uuid()/*, onMaterialChange, onPostMaterialChange*/));
 
 			}
 		}
@@ -409,7 +417,7 @@ namespace Scene
 				materials[pass].push_back(pass->GetRenderPassMaterialInstance(
 					unit,
 					matUUID, mesh, shadowed(),
-					mpmo, uuid(), nullptr, onPostMaterialChange));
+					mpmo, uuid()/*, onMaterialChange, onPostMaterialChange*/));
 			}
 		}
 	}
