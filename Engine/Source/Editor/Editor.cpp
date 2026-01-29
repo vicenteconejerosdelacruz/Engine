@@ -946,6 +946,20 @@ namespace Editor
 		levelCameraUUID[unit]->WriteConstantsBuffer(scene->Frame());
 	}
 
+	void WriteSceneUnitDirectionalShadowMapAttributes(SceneUnitId id)
+	{
+		auto& scene = GetSceneUnit(id);
+		for (auto uuid : GetShadowMapLights(id))
+		{
+			LightSUUUID l = MAKESUUUID(id, uuid);
+			if (l->lightType() != LT_Directional) continue;
+
+			l->CreateDirectionalCascadeShadowMapViewProjectionMatrices();
+		}
+		CameraSUUUID c = MAKESUUUID(id, *GetSwapChainCameras(id).begin());
+		c->WriteShadowMapsConstantsBuffer(scene->Frame());
+	}
+
 	JUUID GetSceneUnitEditorCamera(SceneUnitId id)
 	{
 		return editorCameraUUID[id].uuid();
@@ -2541,6 +2555,7 @@ namespace Editor
 					if (!io.WantCaptureMouse)
 					{
 						camera->MoveAlongFwAxis(fwMovement);
+						WriteSceneUnitDirectionalShadowMapAttributes(camera.unit());
 					}
 				}
 				if (state.leftButton || state.rightButton)
@@ -2561,6 +2576,7 @@ namespace Editor
 						float dx = static_cast<float>(mousedx) * 0.3f;
 						float dy = static_cast<float>(mousedy) * 0.3f;
 						camera->Rotate(dx, dy);
+						WriteSceneUnitDirectionalShadowMapAttributes(camera.unit());
 					}
 					else
 					{
@@ -2574,6 +2590,7 @@ namespace Editor
 						float dx = -static_cast<float>(mousedx) * 0.01f;
 						float dy = -static_cast<float>(mousedy) * 0.01f;
 						camera->MovePerpendicularFwAxis(dx, dy);
+						WriteSceneUnitDirectionalShadowMapAttributes(camera.unit());
 					}
 					else
 					{
