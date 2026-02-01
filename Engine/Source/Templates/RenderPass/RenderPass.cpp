@@ -180,8 +180,8 @@ namespace Templates
 		break;
 		}
 
-		materialOverride = renderPassJson->materialOverride();
-		renderCallbackOverride = renderPassJson->renderCallbackOverride();
+		materialOverride = renderPassTemplate->materialOverride();
+		renderCallbackOverride = renderPassTemplate->renderCallbackOverride();
 		const std::map<RenderPassRenderCallbackOverride, std::function<
 			std::unique_ptr<OverridePass>(
 				JUUID camUUID,
