@@ -30,7 +30,7 @@ OverridePass::~OverridePass()
 	}
 }
 
-void OverridePass::CreateFsQuadResources(SceneUnitId id, std::string materialName, JUUID renderPassJson, std::function<void(std::string, ShaderConstantsBufferVariable&)> constantsBufferPusher)
+void OverridePass::CreateFsQuadResources(SceneUnitId id, std::string materialName, JUUID renderPassTemplate, std::function<void(std::string, ShaderConstantsBufferVariable&)> constantsBufferPusher)
 {
 	using namespace Scene;
 
@@ -82,7 +82,7 @@ void OverridePass::CreateFsQuadResources(SceneUnitId id, std::string materialNam
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 	std::string plName = "pipelineState:" + materialName;
-	auto& renderPass = GetRenderPassTemplate(renderPassJson);
+	auto& renderPass = GetRenderPassTemplate(renderPassTemplate);
 	auto rtf = renderPass->renderTargetFormats();
 	auto df = renderPass->depthStencilFormat();
 

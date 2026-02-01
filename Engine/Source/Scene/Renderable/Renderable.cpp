@@ -552,28 +552,40 @@ namespace Scene
 
 	void Renderable::CreateRenderPassPipelineStates(RenderPassInstanceUUID rp)
 	{
-		auto rtFormats = rp->GetRenderTargetsFormats();
-		auto depthFormat = rp->GetDepthStencilFormat();
+		auto setPipelineStateAt = [this](RenderPassInstanceUUID rp, unsigned int i)
+			{
+				auto rtFormats = rp->GetRenderTargetsFormats();
+				auto depthFormat = rp->GetDepthStencilFormat();
+				auto& mesh = meshes.at(i);
+				auto& mi = materials[rp].at(i);
+				auto& vsLayout = vertexInputLayoutsMap[mesh->vertexClass];
+				auto& rootSignature = rootSignatures[rp].at(i);
+				auto& vsByteCode = mi->vertexShaderInstanceUUID->byteCode;
+				auto& psByteCode = mi->pixelShaderInstanceUUID->byteCode;
+
+				auto& material = mi->materialUUID;
+				BlendDesc blendDesc = material->blendState();
+				RasterizerDesc rasterizerDesc = material->rasterizerState();
+
+				D3D12_PRIMITIVE_TOPOLOGY_TYPE primitiveTopologyType = D3D_PRIMITIVE_TOPOLOGYToD3D12_PRIMITIVE_TOPOLOGY_TYPE.at(topology());
+
+				std::string plName = "pipelineState:" + name() + ":" + std::to_string(i);
+
+				pipelineStates[rp][i] = CreateGraphicsPipelineState(plName, vsLayout, vsByteCode, psByteCode, rootSignature, blendDesc, rasterizerDesc, primitiveTopologyType, rtFormats, depthFormat);
+			};
+
+		pipelineStates[rp].resize(meshes.size(), nullptr);
 
 		for (unsigned int i = 0; i < meshes.size(); i++)
 		{
-			auto& mesh = meshes.at(i);
+			setPipelineStateAt(rp, i);
 			auto& mi = materials[rp].at(i);
-			auto& vsLayout = vertexInputLayoutsMap[mesh->vertexClass];
-			auto& rootSignature = rootSignatures[rp].at(i);
-			auto& vsByteCode = mi->vertexShaderInstanceUUID->byteCode;
-			auto& psByteCode = mi->pixelShaderInstanceUUID->byteCode;
-
 			auto& material = mi->materialUUID;
-			BlendDesc blendDesc = material->blendState();
-			RasterizerDesc rasterizerDesc = material->rasterizerState();
+			auto& renderPass = rp->renderPassTemplate;
+			size_t hash = 0;
+			nostd::hash_combine(hash, std::get<0>(SUuuid()), std::get<1>(SUuuid()), rp(), i);
 
-			D3D12_PRIMITIVE_TOPOLOGY_TYPE primitiveTopologyType = D3D_PRIMITIVE_TOPOLOGYToD3D12_PRIMITIVE_TOPOLOGY_TYPE.at(topology());
-
-			std::string plName = "pipelineState:" + name() + ":" + std::to_string(i);
-			pipelineStates[rp].push_back(
-				CreateGraphicsPipelineState(plName, vsLayout, vsByteCode, psByteCode, rootSignature, blendDesc, rasterizerDesc, primitiveTopologyType, rtFormats, depthFormat)
-			);
+			material->SetPipelineStateCallback(hash, [=] { setPipelineStateAt(rp, i); });
 		}
 	}
 

@@ -119,6 +119,9 @@ namespace Templates
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 #endif
+		void SetPipelineStateCallback(size_t hash, std::function<void()> callback);
+
+		std::unordered_map<size_t, std::function<void()>> pipelineChangeCallbacks;
 	};
 
 	TEMPDECL_FULL(Material);

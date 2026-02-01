@@ -113,6 +113,8 @@ namespace Templates
 
 #endif
 
+	void RenderPassJsonStep();
+
 	namespace RenderPass
 	{
 		inline static const std::string templateName = "renderpasses.json";
@@ -163,10 +165,6 @@ namespace Templates
 			bool shadowed,
 			std::vector<PassMaterialOverride> passMaterialOverride,
 			JUUID bindingUUID = ""
-			/*,
-			JObjectChangeCallback cb = nullptr,
-			JObjectChangePostCallback postCb = nullptr
-			*/
 		);
 		void InitRenderPass();
 		void ResizeRelease();
@@ -174,8 +172,10 @@ namespace Templates
 		std::vector<DXGI_FORMAT> GetRenderTargetsFormats();
 		DXGI_FORMAT GetDepthStencilFormat();
 
+		unsigned int renderPassIndex;
 		CameraSUUUID camera;
-		RenderPassJsonUUID renderPassJson;
+		RenderPassJsonUUID renderPassTemplate;
+		RenderPassInstanceUUID renderPassInstance;
 		RenderPassType type = RenderPassType_SwapChainPass;
 		RenderPassMaterialOverride materialOverride;
 		RenderPassRenderCallbackOverride renderCallbackOverride;

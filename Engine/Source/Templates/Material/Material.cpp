@@ -54,6 +54,12 @@ namespace Templates
 	}
 #endif
 
+	void MaterialJson::SetPipelineStateCallback(size_t hash, std::function<void()> callback)
+	{
+		if (pipelineChangeCallbacks.contains(hash)) return;
+		pipelineChangeCallbacks.insert_or_assign(hash, callback);
+	}
+
 	TEMPDEF_FULL(Material);
 	TEMPDEF_REFTRACKER(Material);
 
@@ -109,47 +115,33 @@ namespace Templates
 			UpdateMaterialTextures(changes);
 		}
 
-		//if (rebuildTextures.size() > 0ULL)
-		//{
-			//JObject::RunChangesCallback(rebuildTextures, [](MaterialJsonUUID mat)
-			//	{
-			//		auto& m = *mat;
-			//		int i = 0;
-			//	}
-			//);
-		//}
-
-		/*
-		std::set<MaterialJsonUUID> rebuildMaterials;
-		std::copy_if(mats.begin(), mats.end(), std::inserter(rebuildMaterials, rebuildMaterials.begin()), [](auto mat)
+		std::set<MaterialJsonUUID> rebuildPipelineState;
+		std::copy_if(mats.begin(), mats.end(), std::inserter(rebuildPipelineState, rebuildPipelineState.begin()), [](auto mat)
 			{
 				return mat->dirty(MaterialJson::Update_shader_vs) ||
 					mat->dirty(MaterialJson::Update_shader_ps) ||
 					mat->dirty(MaterialJson::Update_samplers) ||
-					mat->dirty(MaterialJson::Update_mappedValues) ||
-					mat->dirty(MaterialJson::Update_textures) ||
+					//mat->dirty(MaterialJson::Update_mappedValues) ||
+					//mat->dirty(MaterialJson::Update_textures) ||
 					mat->dirty(MaterialJson::Update_rasterizerState) ||
 					mat->dirty(MaterialJson::Update_blendState);
 			}
 		);
 
-		if (rebuildMaterials.size() > 0ULL)
-		{
-			JObject::RunChangesCallback(rebuildMaterials, [](auto mat)
+		std::for_each(rebuildPipelineState.begin(), rebuildPipelineState.end(), [&](auto mat)
+			{
+				for (auto& [hash, callback] : mat->pipelineChangeCallbacks)
 				{
-					mat->clean(MaterialJson::Update_shader_vs);
-					mat->clean(MaterialJson::Update_shader_ps);
-					mat->clean(MaterialJson::Update_samplers);
-					mat->clean(MaterialJson::Update_mappedValues);
-					mat->clean(MaterialJson::Update_textures);
-					mat->clean(MaterialJson::Update_rasterizerState);
-					mat->clean(MaterialJson::Update_blendState);
+					callback();
 				}
-			);
-		}
-		*/
+				mat->clean(MaterialJson::Update_shader_vs);
+				mat->clean(MaterialJson::Update_shader_ps);
+				mat->clean(MaterialJson::Update_samplers);
+				mat->clean(MaterialJson::Update_rasterizerState);
+				mat->clean(MaterialJson::Update_blendState);
+			}
+		);
 	}
-
 
 	static bool updateTexturesProcessorInitialized = false;
 	static CommandsProcessor updateTexturesProcessor;
@@ -232,9 +224,7 @@ namespace Templates
 		bool isShadowed,
 		bool hasIBL,
 		TextureShaderUsageMap overrideTextures,
-		JUUID bindingUUID/*,
-		JObjectChangeCallback materialChangeCallback,
-		JObjectChangePostCallback materialChangePostCallback*/
+		JUUID bindingUUID
 	)
 	{
 		instanceUUID = Instance_uuid;

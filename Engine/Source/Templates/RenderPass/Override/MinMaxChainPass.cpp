@@ -17,7 +17,7 @@ void MinMaxChainPass::Initialize()
 {
 	using namespace DeviceUtils;
 
-	JUUID renderPassTemplateUUID = renderPassInstance->renderPassJson();
+	JUUID renderPassTemplateUUID = renderPassInstance->renderPassTemplate();
 	RenderToTexturePassUUID rttPass = renderPassInstance->renderToTexturePass;
 	XMFLOAT2 texelInvSize = {
 		1.0f / rttPass->screenViewport.Width,

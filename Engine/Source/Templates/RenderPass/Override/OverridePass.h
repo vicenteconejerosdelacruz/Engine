@@ -6,7 +6,7 @@ struct OverridePass
 	explicit OverridePass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rp) { camera = MAKESUUUID(id, cam); renderPassIndex = rpI; renderPassInstance = rp; };
 	virtual ~OverridePass();
 	virtual void Initialize() {};
-	void CreateFsQuadResources(SceneUnitId id, std::string materialName, JUUID renderPassJson, std::function<void(std::string, ShaderConstantsBufferVariable&)> constantsBufferPusher = [](auto a, auto b) {});
+	void CreateFsQuadResources(SceneUnitId id, std::string materialName, JUUID renderPassTemplate, std::function<void(std::string, ShaderConstantsBufferVariable&)> constantsBufferPusher = [](auto a, auto b) {});
 	JUUID GetPrevPassRenderToTexture(unsigned int index = 0U);
 	virtual void Pass(SceneUnitId unit) = 0;
 

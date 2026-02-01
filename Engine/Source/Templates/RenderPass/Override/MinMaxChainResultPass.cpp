@@ -18,7 +18,7 @@ void MinMaxChainResultPass::CreateFSQuad(std::string materialName)
 	using namespace DeviceUtils;
 
 	auto& renderPassI = renderPassInstance;
-	JUUID renderPassTemplateUUID = renderPassI->renderPassJson();
+	JUUID renderPassTemplateUUID = renderPassI->renderPassTemplate();
 	SceneUnitId unit = camera.unit();
 	CreateFsQuadResources(unit, materialName, renderPassTemplateUUID);
 }

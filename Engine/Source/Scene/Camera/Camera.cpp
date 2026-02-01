@@ -256,8 +256,8 @@ namespace Scene
 		unsigned int projH = static_cast<unsigned int>(projectionHeight());
 		for (unsigned int i = 0; i < renderPasses().size(); i++)
 		{
-			std::string passUUID = renderPasses().at(i);
-			if (passUUID == "") continue;
+			JUUID passUUID = renderPasses().at(i);
+			if (passUUID.empty()) continue;
 			auto& rp = GetRenderPassTemplate(passUUID);
 			if (rp->type() == RenderPassType_SwapChainPass && rp->renderCallbackOverride() != RenderPassRenderCallbackOverride_Resolve) continue;
 

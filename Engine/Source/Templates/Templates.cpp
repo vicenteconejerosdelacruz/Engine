@@ -1107,6 +1107,7 @@ namespace Templates
 		Model3DJsonStep();
 #endif
 		MaterialJsonStep();
+		RenderPassJsonStep();
 		SoundJsonStep();
 	}
 
