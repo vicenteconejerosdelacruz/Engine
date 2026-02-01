@@ -87,8 +87,6 @@ namespace Scene
 		virtual void Unbind(JUUID uuid);
 		void UnbindCameras();
 		void UnbindCamera(JUUID cuuid);
-		void UnbindMaterialsChangesCallback();
-		void UnbindModelChangesCallback();
 
 		//Render Passes
 		std::vector<RenderPassInstanceUUID> GetCameraRenderPasses(CameraSUUUID cam);

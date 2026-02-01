@@ -181,8 +181,6 @@ namespace Scene
 #include <JEnd.h>
 
 		UnbindCameras();
-		UnbindMaterialsChangesCallback();
-		UnbindModelChangesCallback();
 		Scene::UnbindFromScene(unit, uuid());
 		if (!boundingBoxCompute.empty())
 		{
@@ -226,26 +224,6 @@ namespace Scene
 		CameraSUUUID cam = MAKESUUUID(unit, cuuid);
 		cam->UnbindRenderable(SUuuid());
 		Scene::UnbindFromScene(unit, uuid(), cuuid);
-	}
-
-	void Renderable::UnbindMaterialsChangesCallback()
-	{
-		for (auto& [rp, vec0] : materials)
-		{
-			for (auto& mat : vec0)
-			{
-				//mat->materialUUID->UnbindChangeCallback(uuid());
-			}
-		}
-	}
-
-	void Renderable::UnbindModelChangesCallback()
-	{
-		if (!model().empty())
-		{
-			Model3DJsonUUID mdl = model();
-			//mdl->UnbindChangeCallback(uuid());
-		}
 	}
 
 	XMVECTOR Renderable::rotationQ()
