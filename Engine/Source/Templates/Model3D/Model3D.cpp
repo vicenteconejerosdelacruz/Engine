@@ -113,10 +113,10 @@ namespace Templates
 		return "mat-" + uuid + "-" + std::to_string(index);
 	}
 
-	JUUID GetModel3DMaterialInstanceName(JUUID uuid, unsigned int index)
+	JUUID GetModel3DMaterialTemplateName(JUUID uuid, unsigned int index)
 	{
 		std::unique_ptr<Model3DJson>& mdl = GetModel3DTemplate(uuid);
-		return "mat-" + mdl->name() + "-" + std::to_string(index);
+		return mdl->name() + "/mat-" + std::to_string(index);
 	}
 
 	Model3DInstance::Model3DInstance(SceneUnitId id, JUUID uuid, JUUID objectUUID/*, JObjectChangeCallback cb, JObjectChangePostCallback postCb*/)
@@ -232,7 +232,7 @@ namespace Templates
 #if defined(_DEVELOPMENT)
 				MaterialJson materialJson = CreateModel3DMaterialJson(
 					materialUUID,
-					GetModel3DMaterialInstanceName(model3DUUID, meshIndex),
+					GetModel3DMaterialTemplateName(model3DUUID, meshIndex),
 					mdl->shader_vs(),
 					mdl->shader_ps(),
 					aiModel->mMaterials[aMesh->mMaterialIndex]

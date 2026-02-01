@@ -82,7 +82,7 @@ namespace Templates
 
 	std::string GetModel3DMeshInstanceUUID(std::string uuid, unsigned int index);
 	std::string GetModel3DMaterialInstanceUUID(std::string uuid, unsigned int index);
-	std::string GetModel3DMaterialInstanceName(std::string uuid, unsigned int index);
+	std::string GetModel3DMaterialTemplateName(std::string uuid, unsigned int index);
 
 	struct Model3DInstance
 	{
