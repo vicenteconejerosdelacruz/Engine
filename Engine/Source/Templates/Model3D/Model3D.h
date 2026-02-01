@@ -89,15 +89,7 @@ namespace Templates
 		JUUID model3DUUID;
 
 		Model3DInstance(JUUID uuid) { assert(!!!"do not use"); }
-		explicit Model3DInstance(
-			SceneUnitId id,
-			JUUID uuid,
-			JUUID objectUUID
-			/*,
-			JObjectChangeCallback cb = [](JUUID) {},
-			JObjectChangePostCallback postCb = [](unsigned int, unsigned int) {}
-			*/
-		);
+		explicit Model3DInstance(SceneUnitId id, JUUID uuid, JUUID objectUUID);
 		~Model3DInstance();
 		void LoadModel3DInstance(SceneUnitId id);
 		void CreateModel3DMaterialsTemplates(const aiScene* aiModel);

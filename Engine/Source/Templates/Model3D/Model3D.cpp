@@ -119,11 +119,9 @@ namespace Templates
 		return mdl->name() + "/mat-" + std::to_string(index);
 	}
 
-	Model3DInstance::Model3DInstance(SceneUnitId id, JUUID uuid, JUUID objectUUID/*, JObjectChangeCallback cb, JObjectChangePostCallback postCb*/)
+	Model3DInstance::Model3DInstance(SceneUnitId id, JUUID uuid, JUUID objectUUID)
 	{
 		model3DUUID = uuid;
-		//auto& mdl = GetModel3DTemplate(model3DUUID);
-		//mdl->BindChangeCallback(objectUUID, cb, postCb);
 		LoadModel3DInstance(id);
 	}
 
