@@ -80,9 +80,9 @@ namespace Templates
 
 	TEMPDECL_FULL(Model3D);
 
-	std::string GetModel3DMeshInstanceUUID(std::string uuid, unsigned int index);
-	std::string GetModel3DMaterialInstanceUUID(std::string uuid, unsigned int index);
-	std::string GetModel3DMaterialTemplateName(std::string uuid, unsigned int index);
+	JUUID GetModel3DMeshInstanceUUID(std::string uuid, unsigned int index);
+	JUUID GetModel3DMaterialInstanceUUID(std::string uuid, unsigned int index);
+	JUUID GetModel3DMaterialTemplateName(std::string uuid, unsigned int index);
 
 	struct Model3DInstance
 	{
