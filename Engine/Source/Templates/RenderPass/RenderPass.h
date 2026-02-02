@@ -114,6 +114,7 @@ namespace Templates
 #endif
 
 	void RenderPassJsonStep();
+	void UpdateRenderPassInstances(std::unordered_map<RenderPassJsonUUID, std::set<RenderPassInstanceUUID>> changes);
 
 	namespace RenderPass
 	{
@@ -142,6 +143,9 @@ namespace Templates
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 #endif
+		void SetPipelineStateCallback(size_t hash, std::function<void()> callback);
+
+		std::unordered_map<size_t, std::function<void()>> pipelineChangeCallbacks;
 	};
 
 	struct RenderPassInstance;
@@ -169,10 +173,14 @@ namespace Templates
 		void InitRenderPass();
 		void ResizeRelease();
 		void Resize(unsigned int width, unsigned int height);
+		void CreateRenderTargets();
 		std::vector<DXGI_FORMAT> GetRenderTargetsFormats();
 		DXGI_FORMAT GetDepthStencilFormat();
 
+
 		unsigned int renderPassIndex;
+		unsigned int width;
+		unsigned int height;
 		CameraSUUUID camera;
 		RenderPassJsonUUID renderPassTemplate;
 		RenderPassInstanceUUID renderPassInstance;

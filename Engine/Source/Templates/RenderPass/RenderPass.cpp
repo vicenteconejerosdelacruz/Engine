@@ -103,6 +103,12 @@ namespace Templates
 	}
 #endif
 
+	void RenderPassJson::SetPipelineStateCallback(size_t hash, std::function<void()> callback)
+	{
+		if (pipelineChangeCallbacks.contains(hash)) return;
+		pipelineChangeCallbacks.insert_or_assign(hash, callback);
+	}
+
 	TEMPDEF_FULL(RenderPass);
 	TEMPDEF_REFTRACKER(RenderPass);
 
@@ -134,6 +140,33 @@ namespace Templates
 				changes.insert_or_assign(pass, renderPassTemplatesInstances.at(pass));
 			}
 		);
+
+		if (changes.size() > 0ULL)
+		{
+			UpdateRenderPassInstances(changes);
+		}
+
+		std::for_each(rebuildPipelineState.begin(), rebuildPipelineState.end(), [&](auto pass)
+			{
+				for (auto& [hash, callback] : pass->pipelineChangeCallbacks)
+				{
+					callback();
+				}
+				pass->clean(RenderPassJson::Update_renderTargetFormats);
+				pass->clean(RenderPassJson::Update_depthStencilFormat);
+			}
+		);
+	}
+
+	void UpdateRenderPassInstances(std::unordered_map<RenderPassJsonUUID, std::set<RenderPassInstanceUUID>> changes)
+	{
+		for (auto& [pass, instances] : changes)
+		{
+			for (auto& instance : instances)
+			{
+				instance->CreateRenderTargets();
+			}
+		}
 	}
 
 	JUUID CreateRenderPassInstance(SceneUnitId id, JUUID cameraUUID, JUUID renderPassTemplateUUID, unsigned int renderPassIndex, unsigned int width, unsigned int height)
@@ -153,32 +186,17 @@ namespace Templates
 
 	RenderPassInstance::RenderPassInstance(SceneUnitId id, JUUID cameraUUID, JUUID renderPassTemplateUUID, JUUID renderPassInstanceUUID, unsigned int renderPassIndex, unsigned int width, unsigned int height)
 	{
-		using namespace RenderPass;
 		camera = MAKESUUUID(id, cameraUUID);
 		renderPassTemplate = renderPassTemplateUUID;
 		renderPassInstance = renderPassInstanceUUID;
 		this->renderPassIndex = renderPassIndex;
+		this->width = width;
+		this->height = height;
 
-		renderPassTemplatesInstances[renderPassTemplateUUID].insert(renderPassInstanceUUID);
+		renderPassTemplatesInstances[renderPassTemplate].insert(renderPassInstance);
 
 		type = renderPassTemplate->type();
-		switch (renderPassTemplate->type())
-		{
-		case RenderPassType_SwapChainPass:
-		{
-			swapChainPass = DeviceUtils::CreateSwapChainPass(GetRenderPassName(renderPassTemplateUUID), mainHeap, renderPassTemplate->depthStencilFormat());
-		}
-		break;
-		case RenderPassType_RenderToTexturePass:
-		{
-			assert(width != 0U); assert(height != 0U);
-			renderToTexturePass = DeviceUtils::CreateRenderToTexturePass(GetRenderPassName(renderPassTemplateUUID),
-				renderPassTemplate->renderTargetFormats(), renderPassTemplate->depthStencilFormat(),
-				width, height
-			);
-		}
-		break;
-		}
+		CreateRenderTargets();
 
 		materialOverride = renderPassTemplate->materialOverride();
 		renderCallbackOverride = renderPassTemplate->renderCallbackOverride();
@@ -195,7 +213,7 @@ namespace Templates
 			{ RenderPassRenderCallbackOverride_MinMaxChain, [&](auto c, auto rpindex, auto rpInstance) { return std::make_unique<MinMaxChainPass>(id,c,rpindex, rpInstance); } },
 			{ RenderPassRenderCallbackOverride_MinMaxChainResult, [&](auto c, auto rpindex, auto rpInstance) { return std::make_unique<MinMaxChainResultPass>(id,c,rpindex, rpInstance); } }
 		};
-		overridePass = RenderCallbackOverriders.at(renderCallbackOverride)(cameraUUID, renderPassIndex, renderPassInstanceUUID);
+		overridePass = RenderCallbackOverriders.at(renderCallbackOverride)(cameraUUID, renderPassIndex, renderPassInstance());
 		if (!camera.empty() && type == RenderPassType_RenderToTexturePass &&
 			materialOverride == RenderPassMaterialOverride_None &&
 			renderCallbackOverride == RenderPassRenderCallbackOverride_None &&
@@ -350,6 +368,29 @@ namespace Templates
 		case RenderPassType_RenderToTexturePass:
 		{
 			renderToTexturePass->Resize(width, height);
+		}
+		break;
+		}
+	}
+
+	void RenderPassInstance::CreateRenderTargets()
+	{
+		using namespace RenderPass;
+
+		switch (type)
+		{
+		case RenderPassType_SwapChainPass:
+		{
+			swapChainPass = DeviceUtils::CreateSwapChainPass(GetRenderPassName(renderPassTemplate()), mainHeap, renderPassTemplate->depthStencilFormat());
+		}
+		break;
+		case RenderPassType_RenderToTexturePass:
+		{
+			assert(width != 0U); assert(height != 0U);
+			renderToTexturePass = DeviceUtils::CreateRenderToTexturePass(GetRenderPassName(renderPassTemplate()),
+				renderPassTemplate->renderTargetFormats(), renderPassTemplate->depthStencilFormat(),
+				width, height
+			);
 		}
 		break;
 		}

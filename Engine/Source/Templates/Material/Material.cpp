@@ -121,8 +121,6 @@ namespace Templates
 				return mat->dirty(MaterialJson::Update_shader_vs) ||
 					mat->dirty(MaterialJson::Update_shader_ps) ||
 					mat->dirty(MaterialJson::Update_samplers) ||
-					//mat->dirty(MaterialJson::Update_mappedValues) ||
-					//mat->dirty(MaterialJson::Update_textures) ||
 					mat->dirty(MaterialJson::Update_rasterizerState) ||
 					mat->dirty(MaterialJson::Update_blendState);
 			}

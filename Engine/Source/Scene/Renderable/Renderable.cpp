@@ -316,31 +316,6 @@ namespace Scene
 
 	void Renderable::CreateRenderPassMaterialsInstances(RenderPassInstanceUUID pass)
 	{
-		//auto onMaterialChange = [&](JUUID uuid)
-		//	{
-		//		//MaterialJsonUUID matUUID = uuid;
-		//		//auto& mat = *matUUID;
-		//		RenderReady(false);
-		//		//auto& scene = GetSceneUnit(unit);
-		//		//scene->ResetLoadingCommandList();
-		//	};
-		//auto onPostMaterialChange = [&](unsigned int index, unsigned int total)
-		//	{
-		//		//if (index == 0U)
-		//		//{
-		//		//	renderer->Flush();
-		//		//	renderer->ResetCommands();
-		//		//	renderer->SetCSUDescriptorHeap();
-		//		//}
-		//		//
-		//		//RebuildMeshMaterials();
-		//		//
-		//		//if (index >= (total - 1))
-		//		//{
-		//		//	renderer->CloseCommandsAndFlush();
-		//		//}
-		//	};
-
 		std::vector<PassMaterialOverride> pmo = passMaterialOverrides();
 
 		if (materials.contains(pass))
@@ -376,7 +351,7 @@ namespace Scene
 				materials[pass].push_back(pass->GetRenderPassMaterialInstance(
 					unit,
 					matUUID, mesh, shadowed(),
-					mpmo, uuid()/*, onMaterialChange, onPostMaterialChange*/));
+					mpmo, uuid()));
 
 			}
 		}
@@ -395,7 +370,7 @@ namespace Scene
 				materials[pass].push_back(pass->GetRenderPassMaterialInstance(
 					unit,
 					matUUID, mesh, shadowed(),
-					mpmo, uuid()/*, onMaterialChange, onPostMaterialChange*/));
+					mpmo, uuid()));
 			}
 		}
 	}
@@ -564,6 +539,7 @@ namespace Scene
 			nostd::hash_combine(hash, std::get<0>(SUuuid()), std::get<1>(SUuuid()), rp(), i);
 
 			material->SetPipelineStateCallback(hash, [=] { setPipelineStateAt(rp, i); });
+			renderPass->SetPipelineStateCallback(hash, [=] { setPipelineStateAt(rp, i); });
 		}
 	}
 

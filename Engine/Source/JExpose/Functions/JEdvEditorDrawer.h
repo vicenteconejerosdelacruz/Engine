@@ -3914,6 +3914,15 @@ inline JEdvEditorDrawerFunction DrawVector<DXGI_FORMAT, jedv_t_dxgi_format_vecto
 		};
 }
 
+template<>
+inline JEdvEditorDrawerFunction DrawEnum<DXGI_FORMAT, jedv_t_dxgi_depth_format>(
+	std::unordered_map<DXGI_FORMAT, std::string>& EtoS,
+	std::unordered_map<std::string, DXGI_FORMAT>& StoE
+)
+{
+	return DrawEnum<DXGI_FORMAT, jedv_t_enum>(DXGI_DEPTH_FORMATToString, StringTo_DXGI_DEPTH_FORMAT);
+}
+
 struct RasterizerDesc;
 template<>
 inline JEdvEditorDrawerFunction DrawValue<RasterizerDesc, jedv_t_object>()

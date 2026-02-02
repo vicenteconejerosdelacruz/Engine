@@ -15,7 +15,7 @@ struct Renderer
 	};
 	static inline const std::unordered_map<DXGI_FORMAT, DXGI_FORMAT> depthFormatTexConversion = {
 		{ DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_TYPELESS },
-		{ DXGI_FORMAT_D24_UNORM_S8_UINT, DXGI_FORMAT_R24_UNORM_X8_TYPELESS }
+		{ DXGI_FORMAT_D24_UNORM_S8_UINT, DXGI_FORMAT_R24G8_TYPELESS }
 	};
 	static inline const std::unordered_map<DXGI_FORMAT, DXGI_FORMAT> depthFormatSRVConversion = {
 		{ DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_R32_FLOAT },
