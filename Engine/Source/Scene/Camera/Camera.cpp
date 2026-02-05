@@ -252,8 +252,8 @@ namespace Scene
 			if (!RenderPassTemplateExist(passUUID)) return;
 		}
 
-		unsigned int projW = static_cast<unsigned int>(projectionWidth());
-		unsigned int projH = static_cast<unsigned int>(projectionHeight());
+		//unsigned int projW = static_cast<unsigned int>(projectionWidth());
+		//unsigned int projH = static_cast<unsigned int>(projectionHeight());
 		for (unsigned int i = 0; i < renderPasses().size(); i++)
 		{
 			JUUID passUUID = renderPasses().at(i);
@@ -261,7 +261,54 @@ namespace Scene
 			auto& rp = GetRenderPassTemplate(passUUID);
 			if (rp->type() == RenderPassType_SwapChainPass && rp->renderCallbackOverride() != RenderPassRenderCallbackOverride_Resolve) continue;
 
-			renderPassesUUID.push_back(CreateRenderPassInstance(unit, uuid(), passUUID, i, projW, projH));
+			//renderPassesUUID.push_back(CreateRenderPassInstance(unit, uuid(), passUUID, static_cast<unsigned int>(renderPassesUUID.size()), projW, projH));
+			renderPassesUUID.push_back(CreateRenderPass(passUUID, static_cast<unsigned int>(renderPassesUUID.size())));
+		}
+	}
+
+	RenderPassJsonUUID Camera::GetRenderPassTemplateFromInstanceIndex(unsigned int passIndex)
+	{
+		return renderPassesUUID.at(passIndex)->renderPassTemplate;
+	}
+
+	RenderPassInstanceUUID Camera::CreateRenderPass(JUUID passUUID, unsigned int passIndex)
+	{
+		unsigned int projW = static_cast<unsigned int>(projectionWidth());
+		unsigned int projH = static_cast<unsigned int>(projectionHeight());
+		return CreateRenderPassInstance(unit, uuid(), passUUID, passIndex, projW, projH);
+	}
+
+	void Camera::CreateRenderPassAtIndex(JUUID passUUID, unsigned int passIndex)
+	{
+		renderPassesUUID.insert(renderPassesUUID.begin() + passIndex, CreateRenderPass(passUUID, passIndex));
+		RearrangeRenderPassesAfter(passIndex);
+	}
+
+	void Camera::DeleteRenderPassAtIndex(unsigned int passIndex)
+	{
+		renderPassesUUID.at(passIndex)->MarkForDelete();
+		renderPassesUUID.erase(renderPassesUUID.begin() + passIndex);
+		RearrangeRenderPassesAfter(passIndex);
+	}
+
+	void Camera::SwapRenderPassAtIndex(JUUID passUUID, unsigned int passIndex)
+	{
+		renderPassesUUID.at(passIndex)->MarkForDelete();
+		renderPassesUUID[passIndex] = CreateRenderPass(passUUID, passIndex);
+		RearrangeRenderPassesAfter(passIndex);
+	}
+
+	void Camera::RearrangeRenderPassesAfter(unsigned int passIndex)
+	{
+		for (unsigned int i = passIndex; i < renderPassesUUID.size(); i++)
+		{
+			renderPassesUUID.at(i)->renderPassIndex = i;
+			if (renderPassesUUID.at(i)->overridePass)
+			{
+				auto& opass = renderPassesUUID.at(i)->overridePass;
+				opass->renderPassIndex = i;
+				opass->CreatePrevPassDependentResources();
+			}
 		}
 	}
 
@@ -899,15 +946,93 @@ namespace Scene
 		std::set<CameraSUUUID> cams;
 		std::transform(Cameras.begin(), Cameras.end(), std::inserter(cams, cams.begin()), [&](auto o) { return MAKESUUUID(id, o); });
 
-		/*
 		//we construct the set of cameras with dirty render passes
-		std::set<CameraUUID> camsRpi;
-		std::copy_if(cams.begin(), cams.end(), std::inserter(camsRpi, camsRpi.begin()), [](auto cam)
+		std::set<CameraSUUUID> dirtyPassesCams;
+		std::copy_if(cams.begin(), cams.end(), std::inserter(dirtyPassesCams, dirtyPassesCams.begin()), [](auto cam)
 			{
 				return cam->dirty(Camera::Update_renderPasses);
 			}
 		);
-		*/
+
+		for (auto& cam : dirtyPassesCams)
+		{
+			std::map<RenderPassJsonUUID, std::tuple<int, int>> passes;
+
+			//prev pass fill
+			for (unsigned int i = 0; i < cam->UpdatePrevValues["renderPasses"].size(); i++)
+			{
+				RenderPassJsonUUID pass = JUUID(cam->UpdatePrevValues["renderPasses"].at(i));
+				if (pass.empty()) continue;
+				passes[pass] = std::make_tuple(-1, -1);
+			}
+			//curr pass fill
+			for (unsigned int i = 0; i < cam->at("renderPasses").size(); i++)
+			{
+				RenderPassJsonUUID pass = JUUID(cam->at("renderPasses").at(i));
+				if (pass.empty()) continue;
+				passes[pass] = std::make_tuple(-1, -1);
+			}
+			//set from indices
+			int index = 0;
+			for (unsigned int i = 0; i < cam->UpdatePrevValues["renderPasses"].size(); i++)
+			{
+				RenderPassJsonUUID pass = JUUID(cam->UpdatePrevValues["renderPasses"].at(i));
+				if (pass.empty()) continue;
+				std::get<0>(passes[pass]) = index;
+				index++;
+			}
+			//set right indices
+			index = 0;
+			for (unsigned int i = 0; i < cam->at("renderPasses").size(); i++)
+			{
+				RenderPassJsonUUID pass = JUUID(cam->at("renderPasses").at(i));
+				if (pass.empty()) continue;
+				std::get<1>(passes[pass]) = index;
+				index++;
+			}
+
+			//figure out the rearrange
+			int deleteElementIndex = -1;
+			int addElementIndex = -1;
+			RenderPassJsonUUID addElementJsonUUID;
+			for (auto& [pass, fromto] : passes)
+			{
+				auto& [from, to] = fromto;
+
+				if (from == -1)
+				{
+					addElementIndex = to;
+					addElementJsonUUID = pass;
+				}
+
+				if (to == -1)
+				{
+					deleteElementIndex = from;
+				}
+			}
+
+			//pure delete case
+			if (deleteElementIndex != -1 && addElementIndex == -1)
+			{
+				cam->DeleteRenderPassAtIndex(deleteElementIndex);
+				cam->clean(Camera::Update_renderPasses);
+				continue;
+			}
+
+			//pure add case
+			if (addElementIndex != -1 && deleteElementIndex == -1)
+			{
+				cam->CreateRenderPassAtIndex(addElementJsonUUID(), addElementIndex);
+				cam->clean(Camera::Update_renderPasses);
+				continue;
+			}
+
+			//swap case
+			assert(addElementIndex == deleteElementIndex);
+			cam->SwapRenderPassAtIndex(addElementJsonUUID(), addElementIndex);
+			cam->clean(Camera::Update_renderPasses);
+		}
+
 		/*
 		//build a set of cameras for which ibl settings changed
 		std::set<CameraUUID> camsIBL;
@@ -1071,11 +1196,6 @@ namespace Scene
 			EraseCameraFromMouseCameras(c->unit, c.uuid());
 			DeleteCameraSUSceneObject(c->unit, c.uuid());
 		}
-		/*
-	}
-);
-}
-*/
 	}
 
 	void DestroyCameras()

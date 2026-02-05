@@ -113,7 +113,7 @@ namespace Templates
 	TEMPDEF_REFTRACKER(RenderPass);
 
 	std::unordered_map<RenderPassJsonUUID, std::set<RenderPassInstanceUUID>> renderPassTemplatesInstances;
-
+	std::set<RenderPassInstanceUUID> renderPassesInstancesToDelete;
 	void RenderPassJsonStep()
 	{
 		std::set<RenderPassJsonUUID> passes;
@@ -156,6 +156,20 @@ namespace Templates
 				pass->clean(RenderPassJson::Update_depthStencilFormat);
 			}
 		);
+
+		if (renderPassesInstancesToDelete.size() > 0)
+		{
+			for (auto pass : renderPassesInstancesToDelete)
+			{
+				auto passJ = pass->renderPassTemplate;
+				if (renderPassTemplatesInstances.contains(passJ))
+				{
+					renderPassTemplatesInstances.at(passJ).erase(pass);
+				}
+				DestroyRenderPassInstance(pass());
+			}
+			renderPassesInstancesToDelete.clear();
+		}
 	}
 
 	void UpdateRenderPassInstances(std::unordered_map<RenderPassJsonUUID, std::set<RenderPassInstanceUUID>> changes)
@@ -204,16 +218,17 @@ namespace Templates
 			std::unique_ptr<OverridePass>(
 				JUUID camUUID,
 				unsigned int,
+				JUUID rpTUUID,
 				JUUID rpIUUID
 			)>> RenderCallbackOverriders =
 		{
-			{ RenderPassRenderCallbackOverride_None, [](auto c,auto rpindex, auto rpInstance) { return nullptr; }},
-			{ RenderPassRenderCallbackOverride_ToneMapping, [&](auto c, auto rpindex, auto rpInstance) { return std::make_unique<ToneMappingPass>(id,c,rpindex, rpInstance); } },
-			{ RenderPassRenderCallbackOverride_Resolve, [&](auto c, auto rpindex, auto rpInstance) { return rpindex > 0 ? std::make_unique<ResolvePass>(id,c,rpindex, rpInstance) : nullptr; } },
-			{ RenderPassRenderCallbackOverride_MinMaxChain, [&](auto c, auto rpindex, auto rpInstance) { return std::make_unique<MinMaxChainPass>(id,c,rpindex, rpInstance); } },
-			{ RenderPassRenderCallbackOverride_MinMaxChainResult, [&](auto c, auto rpindex, auto rpInstance) { return std::make_unique<MinMaxChainResultPass>(id,c,rpindex, rpInstance); } }
+			{ RenderPassRenderCallbackOverride_None, [](auto c,auto rpindex, auto rpTemplate, auto rpInstance) { return nullptr; }},
+			{ RenderPassRenderCallbackOverride_ToneMapping, [&](auto c, auto rpindex, auto rpTemplate, auto rpInstance) { return std::make_unique<ToneMappingPass>(id,c,rpindex, rpTemplate, rpInstance); } },
+			{ RenderPassRenderCallbackOverride_Resolve, [&](auto c, auto rpindex, auto rpTemplate, auto rpInstance) { return rpindex > 0 ? std::make_unique<ResolvePass>(id,c,rpindex, rpTemplate, rpInstance) : nullptr; } },
+			{ RenderPassRenderCallbackOverride_MinMaxChain, [&](auto c, auto rpindex, auto rpTemplate, auto rpInstance) { return std::make_unique<MinMaxChainPass>(id,c,rpindex, rpTemplate, rpInstance); } },
+			{ RenderPassRenderCallbackOverride_MinMaxChainResult, [&](auto c, auto rpindex, auto rpTemplate, auto rpInstance) { return std::make_unique<MinMaxChainResultPass>(id,c,rpindex, rpTemplate, rpInstance); } }
 		};
-		overridePass = RenderCallbackOverriders.at(renderCallbackOverride)(cameraUUID, renderPassIndex, renderPassInstance());
+		overridePass = RenderCallbackOverriders.at(renderCallbackOverride)(cameraUUID, renderPassIndex, renderPassTemplate(), renderPassInstance());
 		if (!camera.empty() && type == RenderPassType_RenderToTexturePass &&
 			materialOverride == RenderPassMaterialOverride_None &&
 			renderCallbackOverride == RenderPassRenderCallbackOverride_None &&
@@ -424,5 +439,11 @@ namespace Templates
 		return (type == RenderPassType_SwapChainPass) ?
 			swapChainPass->depthStencilFormat :
 			renderToTexturePass->depthStencilFormat;
+	}
+
+	void RenderPassInstance::MarkForDelete()
+	{
+		//markedForDelete = true;
+		renderPassesInstancesToDelete.insert(renderPassInstance);
 	}
 };

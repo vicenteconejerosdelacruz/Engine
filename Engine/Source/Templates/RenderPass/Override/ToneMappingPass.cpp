@@ -16,7 +16,18 @@
 
 //extern std::unique_ptr<Renderer> renderer;
 
-ToneMappingPass::ToneMappingPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(id, cam, rpI, rp)
+ToneMappingPass::ToneMappingPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rpT, JUUID rp) : OverridePass(id, cam, rpI, rpT, rp)
+{
+	CreatePrevPassDependentResources();
+}
+
+ToneMappingPass::~ToneMappingPass()
+{
+	hdrHistogram = nullptr;
+	luminanceHistogramAverage = nullptr;
+}
+
+void ToneMappingPass::CreatePrevPassDependentResources()
 {
 	using namespace Scene;
 	using namespace DeviceUtils;
@@ -24,7 +35,7 @@ ToneMappingPass::ToneMappingPass(SceneUnitId id, JUUID cam, unsigned int rpI, JU
 
 	JUUID prevPassRTTUUID = GetPrevPassRenderToTexture();
 	auto& prevPassRTT = GetRenderToTexture(prevPassRTTUUID);
-	CameraSUUUID camera = MAKESUUUID(id, cam);
+	//CameraSUUUID camera = MAKESUUUID(id, cam);
 
 	hdrHistogram = std::make_unique<LuminanceHistogram>(prevPassRTTUUID);
 	hdrHistogram->UpdateLuminanceHistogramParams(prevPassRTT->width, prevPassRTT->height, camera->minLogLuminance(), camera->maxLogLuminance());
@@ -34,13 +45,7 @@ ToneMappingPass::ToneMappingPass(SceneUnitId id, JUUID cam, unsigned int rpI, JU
 		camera->minLogLuminance(), camera->maxLogLuminance(), 0.016f, camera->tau()
 	);
 
-	CreateFsQuadResources(id, "ToneMap", camera->renderPasses().at(rpI));
-}
-
-ToneMappingPass::~ToneMappingPass()
-{
-	hdrHistogram = nullptr;
-	luminanceHistogramAverage = nullptr;
+	CreateFsQuadResources(camera.unit(), "ToneMap", renderPassTemplate());
 }
 
 extern DX::StepTimer timer;

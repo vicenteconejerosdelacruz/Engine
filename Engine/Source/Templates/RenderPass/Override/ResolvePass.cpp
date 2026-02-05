@@ -13,13 +13,19 @@
 
 //extern std::unique_ptr<Renderer> renderer;
 
-ResolvePass::ResolvePass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(id, cam, rpI, rp)
+ResolvePass::ResolvePass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rpT, JUUID rp) : OverridePass(id, cam, rpI, rpT, rp)
 {
 	using namespace Scene;
 
 	//auto& camSO = GetCameraSUSceneObject(id, cam);
-	CameraSUUUID camSO = MAKESUUUID(id, cam);
-	auto& prevPassJ = GetRenderPassTemplate(camSO->renderPasses().at(rpI - 1));
+	//CameraSUUUID camSO = MAKESUUUID(id, cam);
+	//auto& prevPassJ = GetRenderPassTemplate(camera->renderPasses().at(rpI - 1));
+	CreatePrevPassDependentResources();
+}
+
+void ResolvePass::CreatePrevPassDependentResources()
+{
+	auto prevPassJ = GetPrevRenderPassTemplate();
 	mode = ResolveMode_CopyFromRenderToTexture;
 
 	if (prevPassJ->renderTargetFormats().at(0) == DXGI_FORMAT_R8G8B8A8_UNORM)
@@ -29,7 +35,7 @@ ResolvePass::ResolvePass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rp) 
 
 	if (mode == ResolveMode_CopyFromRenderToTexture)
 	{
-		CreateFsQuadResources(camSO->unit, "FullScreenQuad", camSO->renderPasses().at(rpI), [this](std::string name, ShaderConstantsBufferVariable& var)
+		CreateFsQuadResources(camera.unit(), "FullScreenQuad", renderPassTemplate(), [this](std::string name, ShaderConstantsBufferVariable& var)
 			{
 				auto& fsCB = fsQuadConstantsBuffer;
 

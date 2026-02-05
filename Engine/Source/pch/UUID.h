@@ -137,6 +137,10 @@ struct TSUUUID {
 	{
 		return F(std::get<0>(SUuuid), std::get<1>(SUuuid));
 	}
+	std::unique_ptr<T>& operator*() const
+	{
+		return F(std::get<0>(SUuuid), std::get<1>(SUuuid));
+	}
 	bool operator<(const TSUUUID& other) const
 	{
 		//return (std::get<0>(SUuuid) < std::get<0>(other.SUuuid)) && (std::get<1>(SUuuid) < std::get<1>(other.SUuuid));

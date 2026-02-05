@@ -356,8 +356,6 @@ namespace Editor
 
 	void CopySceneUnitEditorCameraRenderPasses(SceneUnitId id)
 	{
-		if (editorCameraUUID[id]->renderPasses().size() > 0ULL) return;
-
 		editorCameraUUID[id]->renderPasses(levelCameraUUID[id]->renderPasses());
 		editorCameraUUID[id]->renderPassesUUID = levelCameraUUID[id]->renderPassesUUID;
 	}
@@ -975,6 +973,7 @@ namespace Editor
 		editorCameraUUID[id]->WriteLightsConstantsBuffer(scene->Frame());
 		editorCameraUUID[id]->WriteShadowMapsConstantsBuffer(scene->Frame());
 		editorCameraUUID[id]->RenderReady(true);
+		CopySceneUnitEditorCameraRenderPasses(id);
 		EraseCameraFromMouseCameras(id, levelCameraUUID[id].uuid());
 		EraseCameraFromSwapChainCameras(id, levelCameraUUID[id].uuid());
 		InsertCameraIntoMouseCameras(id, editorCameraUUID[id].uuid());

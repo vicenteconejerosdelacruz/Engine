@@ -125,6 +125,12 @@ namespace Scene {
 		float projectionfovAngleY();
 
 		void CreateRenderPasses();
+		RenderPassJsonUUID GetRenderPassTemplateFromInstanceIndex(unsigned int passIndex);
+		RenderPassInstanceUUID CreateRenderPass(JUUID passUUID, unsigned int passIndex);
+		void CreateRenderPassAtIndex(JUUID passUUID, unsigned int passIndex);
+		void DeleteRenderPassAtIndex(unsigned int passIndex);
+		void SwapRenderPassAtIndex(JUUID passUUID, unsigned int passIndex);
+		void RearrangeRenderPassesAfter(unsigned int passIndex);
 		void DestroyRenderPasses();
 		void ResizeReleasePasses();
 		void ResizePasses(unsigned int width, unsigned int height);

@@ -176,8 +176,9 @@ namespace Templates
 		void CreateRenderTargets();
 		std::vector<DXGI_FORMAT> GetRenderTargetsFormats();
 		DXGI_FORMAT GetDepthStencilFormat();
+		void MarkForDelete();
 
-
+		//bool markedForDelete = false;
 		unsigned int renderPassIndex;
 		unsigned int width;
 		unsigned int height;

@@ -89,10 +89,19 @@ void OverridePass::CreateFsQuadResources(SceneUnitId id, std::string materialNam
 	pipelineState = CreateGraphicsPipelineState(plName, vsLayout, vsByteCode, psByteCode, rootSignature, blendDesc, rasterizerDesc, primitiveTopologyType, rtf, df);
 }
 
+RenderPassInstanceUUID OverridePass::GetPrevRenderPass()
+{
+	if (renderPassIndex == 0U) return JUUID();
+	return camera->renderPassesUUID.at(renderPassIndex - 1);
+}
+
+RenderPassJsonUUID OverridePass::GetPrevRenderPassTemplate()
+{
+	if (renderPassIndex == 0U) return JUUID();
+	return GetPrevRenderPass()->renderPassTemplate;
+}
+
 JUUID OverridePass::GetPrevPassRenderToTexture(unsigned int index)
 {
-	using namespace Scene;
-	auto& prevPass = camera->renderPassesUUID.at(renderPassIndex - 1);
-	auto& rttPass = prevPass->renderToTexturePass;
-	return rttPass->renderToTexture.at(index)();
+	return GetPrevRenderPass()->renderToTexturePass->renderToTexture.at(index)();
 }

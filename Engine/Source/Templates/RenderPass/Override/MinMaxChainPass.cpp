@@ -9,11 +9,16 @@
 
 //extern std::unique_ptr<Renderer> renderer;
 
-MinMaxChainPass::MinMaxChainPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(id, cam, rpI, rp)
+MinMaxChainPass::MinMaxChainPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rpT, JUUID rp) : OverridePass(id, cam, rpI, rpT, rp)
 {
 }
 
 void MinMaxChainPass::Initialize()
+{
+	CreatePrevPassDependentResources();
+}
+
+void MinMaxChainPass::CreatePrevPassDependentResources()
 {
 	using namespace DeviceUtils;
 

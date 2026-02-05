@@ -9,18 +9,19 @@
 
 //extern std::unique_ptr<Renderer> renderer;
 
-MinMaxChainResultPass::MinMaxChainResultPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(id, cam, rpI, rp)
+MinMaxChainResultPass::MinMaxChainResultPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rpT, JUUID rp) : OverridePass(id, cam, rpI, rpT, rp)
 {
+}
+
+void MinMaxChainResultPass::CreatePrevPassDependentResources()
+{
+	CreateFsQuadResources(camera.unit(), materialName, renderPassTemplate());
 }
 
 void MinMaxChainResultPass::CreateFSQuad(std::string materialName)
 {
-	using namespace DeviceUtils;
-
-	auto& renderPassI = renderPassInstance;
-	JUUID renderPassTemplateUUID = renderPassI->renderPassTemplate();
-	SceneUnitId unit = camera.unit();
-	CreateFsQuadResources(unit, materialName, renderPassTemplateUUID);
+	this->materialName = materialName;
+	CreatePrevPassDependentResources();
 }
 
 void MinMaxChainResultPass::Pass(SceneUnitId unit)
