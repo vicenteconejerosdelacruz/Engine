@@ -1011,6 +1011,13 @@ namespace Scene
 				}
 			}
 
+			//dirty flag but nothing to do, example: adding a new empty slot
+			if (deleteElementIndex == -1 && addElementIndex == -1)
+			{
+				cam->clean(Camera::Update_renderPasses);
+				continue;
+			}
+
 			//pure delete case
 			if (deleteElementIndex != -1 && addElementIndex == -1)
 			{
