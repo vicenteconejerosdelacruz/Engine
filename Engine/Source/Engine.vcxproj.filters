@@ -84,9 +84,6 @@
     <ClInclude Include="pch\DXTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pch\TemplateFlags.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GameDecl.h">
       <Filter>Header Files</Filter>
     </ClInclude>

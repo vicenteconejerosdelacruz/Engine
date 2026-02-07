@@ -429,7 +429,6 @@
     <ClInclude Include="pch\DXTypes.h" />
     <ClInclude Include="pch\Json.h" />
     <ClInclude Include="pch\NoStd.h" />
-    <ClInclude Include="pch\TemplateFlags.h" />
     <ClInclude Include="Common\DirectXHelper.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>

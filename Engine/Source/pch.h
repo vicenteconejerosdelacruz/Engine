@@ -132,7 +132,6 @@ using namespace DirectX;
 using namespace DirectX::SimpleMath;
 //using namespace Concurrency;
 
-#include "pch/TemplateFlags.h"
 #include "pch/Application.h"
 #include "pch/NoStd.h"
 #include "pch/UUID.h"
