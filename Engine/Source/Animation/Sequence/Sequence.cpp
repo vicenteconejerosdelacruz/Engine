@@ -130,7 +130,6 @@ void Sequence::CreateSoundFXsAtFrame(int frame, SceneUnitId id)
 	for (auto& sfx : soundfxs)
 	{
 		SoundJsonUUID sjson = sfx->sound();
-		//SoundFXUUID soundFXUUID = getUUID();
 		JUUID soundFXUUID = getUUID();
 		soundsUUID.insert(soundFXUUID);
 		nlohmann::json jsound =
@@ -142,21 +141,9 @@ void Sequence::CreateSoundFXsAtFrame(int frame, SceneUnitId id)
 		};
 
 		sounds.at("sounds").push_back(jsound);
-		/*
-		CreateSoundFX(jsound);
-		soundFXUUID->BindToScene();
-		soundFXUUID->Play();
-		*/
 	}
 
-	AttachLevelIntoScene(id, "sfx", sounds, [&](SceneUnitId id)
-		{
-			//for (auto& uuid : soundsUUID)
-			//{
-			//	SoundFXUUID sfx = MAKESUUUID(id)
-			//}
-		}
-	);
+	AttachLevelIntoScene(id, "sfx", sounds, [&](SceneUnitId id) {});
 }
 
 void Sequence::RunScriptAtFrame(int frame, RenderableSUUUID renderable)

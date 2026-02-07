@@ -2,10 +2,6 @@
 #include "Binder.h"
 #include <Scene.h>
 #include <SceneObject.h>
-//#include <Renderable/Renderable.h>
-//#include <Camera/Camera.h>
-//#include <Light/Light.h>
-//#include <Sound/SoundFX.h>
 
 using namespace Scene;
 
@@ -104,7 +100,6 @@ std::string Binder::name(SceneUnitId id, JUUID uuid)
 	std::string name = NameFnc.at(GetSceneObjectType(unit, uuid))(uuid);
 	bindingName.insert_or_assign(uuid, name);
 	return name;
-	//return "";
 }
 #endif
 

@@ -108,7 +108,6 @@ namespace DeviceUtils {
 	void RenderToTexturePass::BeginRenderPass(SceneUnitId unit, XMVECTORF32 clearColor)
 	{
 		using namespace Scene;
-		//auto commandList = renderer->commandList;
 		auto& commandList = GetSceneUnit(unit)->GetCommandList();
 
 #if defined(_DEVELOPMENT)
@@ -151,7 +150,6 @@ namespace DeviceUtils {
 	void RenderToTexturePass::EndRenderPass(SceneUnitId unit)
 	{
 		using namespace Scene;
-		//auto commandList = renderer->commandList;
 		auto& commandList = GetSceneUnit(unit)->GetCommandList();
 
 		//transition the texture resources from render target to pixel shader resource

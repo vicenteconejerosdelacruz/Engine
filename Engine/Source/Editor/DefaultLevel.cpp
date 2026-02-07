@@ -119,26 +119,17 @@ namespace Editor::DefaultLevel {
 	};
 
 	nlohmann::json sounds = {
-		{ "sounds", {
+		{ "sounds",
+			{
 			{
 				{ "uuid", "14dc1115-f076-4293-aa53-708851b99835" },
 				{ "name", "music" },
 				{ "sound", "14336def-b73c-4d8a-afb3-8f913ef68219" },
 				{ "volume", 0.3 },
 				{ "autoPlay", true }
-			},
-		//{
-		//	{ "uuid", "9e6ff275-76c0-4d26-81a6-1eb608b94110" },
-		//	{ "name", "fireplace" },
-		//	{ "sound", "1e0c1716-ac41-4325-91ed-3ff087911687" },
-		//	{ "volume", 1.0 },
-		//	{ "autoPlay", true },
-		//	{ "loop", true },
-		//	{ "position", { 3.0f, 2.0f, 1.0f } },
-		//	{ "instanceFlags", 1 }
-		//}
-	}
-}
+			}
+			}
+		}
 	};
 
 	nlohmann::json& GetDefaultLevelRenderables()

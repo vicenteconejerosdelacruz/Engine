@@ -132,7 +132,6 @@ namespace Animation {
 	{
 		using namespace Scene;
 		using namespace DeviceUtils;
-		//auto& renderable = GetRenderableSceneObject(renderableUUID);
 		RenderableSUUUID renderable = MAKESUUUID(id, renderableUUID);
 		animationsCbv[renderableUUID] = CreateConstantsBuffer(sizeof(BonesMatrices), Renderer::numFrames, renderable->name());
 		renderable->bonesTransformation = animated->bonesOffsets;

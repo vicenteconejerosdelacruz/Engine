@@ -3,8 +3,6 @@
 #include <Renderer.h>
 #include "Variables.h"
 #include <ShaderCompiler.h>
-//#include <Templates.h>
-//#include <TemplateDef.h>
 
 extern std::unique_ptr<Renderer> renderer;
 
@@ -231,9 +229,6 @@ namespace Templates
 		materialsTemplatesInstances[materialUUID].insert(instanceUUID);
 
 		MaterialJsonUUID material = materialUUID;
-		//if (bindingUUID != "" && (materialChangeCallback != nullptr || materialChangePostCallback != nullptr)) {
-		//	material->BindChangeCallback(bindingUUID, materialChangeCallback, materialChangePostCallback);
-		//}
 
 		auto matTextures = material->textures();
 		std::transform(matTextures.begin(), matTextures.end(), std::inserter(textures, textures.end()), [&](auto& pair)
@@ -272,8 +267,6 @@ namespace Templates
 	void MaterialInstance::CreateMaterialShaderDefines()
 	{
 		defines.clear();
-
-		//OutputDebugStringA((instanceName + ": buildDefines:" + materialUUID + "\n").c_str());
 
 		std::vector<std::string> vertexClassDefines = VertexClassDefines.at(vertexClass);
 
@@ -325,24 +318,15 @@ namespace Templates
 		Source compPS = { .shaderType = PIXEL_SHADER, .shaderTarget = shaderTarget.at(PIXEL_SHADER), .shaderUUID = pixelShaderUUID(), .defines = defines };
 		vertexShaderInstanceUUID = vertexShaderUUID() + std::to_string(std::hash<Source>()(compVS));
 		pixelShaderInstanceUUID = pixelShaderUUID() + std::to_string(std::hash<Source>()(compPS));
-		/*auto onVSShaderChange = [this](JUUID vsShader)
+
+		CreateShaderInstance(vertexShaderInstanceUUID(), [this, compVS]
 			{
-				auto& mat = materialUUID;
-				mat->flag(MaterialJson::Update_shader_vs);
-			};
-		auto onPSShaderChange = [this](JUUID psShader)
-			{
-				auto& mat = materialUUID;
-				mat->flag(MaterialJson::Update_shader_ps);
-			};*/
-		CreateShaderInstance(vertexShaderInstanceUUID(), [this, compVS/*, onVSShaderChange*/]
-			{
-				return std::make_unique<ShaderInstance>(vertexShaderInstanceUUID(), compVS.shaderUUID, compVS, instanceUUID()/*, onVSShaderChange*/);
+				return std::make_unique<ShaderInstance>(vertexShaderInstanceUUID(), compVS.shaderUUID, compVS, instanceUUID());
 			}
 		);
-		CreateShaderInstance(pixelShaderInstanceUUID(), [this, compPS/*, onPSShaderChange*/]
+		CreateShaderInstance(pixelShaderInstanceUUID(), [this, compPS]
 			{
-				return std::make_unique<ShaderInstance>(pixelShaderInstanceUUID(), compPS.shaderUUID, compPS, instanceUUID()/*, onPSShaderChange*/);
+				return std::make_unique<ShaderInstance>(pixelShaderInstanceUUID(), compPS.shaderUUID, compPS, instanceUUID());
 			}
 		);
 	}
@@ -350,12 +334,6 @@ namespace Templates
 	void MaterialInstance::Destroy()
 	{
 		using namespace ShaderCompiler;
-
-		//if (ShaderTemplateExist(vertexShaderUUID()))
-		//	vertexShaderUUID->UnbindChangeCallback(instanceUUID());
-
-		//if (ShaderTemplateExist(pixelShaderUUID()))
-		//	pixelShaderUUID->UnbindChangeCallback(instanceUUID());
 
 		DeleteShaderInstance(vertexShaderInstanceUUID());
 		DeleteShaderInstance(pixelShaderInstanceUUID());

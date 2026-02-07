@@ -6,19 +6,6 @@
 #include <ShaderCompiler.h>
 #include <Templates.h>
 #include <Game.h>
-//#include <Scene.h>
-//#include <Light/Light.h>
-//#include <Level.h>
-//#include <Controller.h>
-//#include <Mesh/Mesh.h>
-//#include <RenderPass/RenderPass.h>
-//#include <Shader/Shader.h>
-//#include <Sound/Sound.h>
-//#include <Material/Material.h>
-//#include <Textures/Texture.h>
-//#include <Model3D/Model3D.h>
-//#include <Renderable/Renderable.h>
-//#include <Sound/SoundFX.h>
 #if defined(_EDITOR)
 #include <Editor.h>
 #endif
@@ -28,7 +15,6 @@
 #include "GameDecl.h"
 
 using namespace Templates;
-//using namespace Templates::RenderPass;
 using namespace Scene;
 using namespace AudioSystem;
 using namespace ShaderCompiler;
@@ -256,35 +242,15 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	//initialize the render and reset the commands
 	renderer = std::make_unique<Renderer>();
 	renderer->Initialize(hWnd);
-	//renderer->ResetCommands();
-
-	//create the resources
-	//CreateLightingResourcesMapping();
-	//CreateRenderPassMainHeap();
-
-	//create the swap chain pass
-	//renderer->CreateSwapChainPass();
-
 	//create the editor and a default scene
 #if defined(_EDITOR)
 	InitEditor();
 #endif
-
-	//kick the audio listener update
-	//AudioStep(0.0f);
-
-	//execute the commands on the GPU and wait for it's completion
-	//renderer->CloseCommandsAndFlush();
-
 	return TRUE;
 }
 
 void CreateLightingResourcesMapping()
 {
-	/*
-	using namespace Scene;
-	CreateShadowMapResources();
-	*/
 }
 
 //READ&GET
@@ -468,7 +434,6 @@ void AppStep()
 		}
 	);
 	Render();
-	//FreeGPUIntermediateResources();
 
 	//delete scenes which are marked for deletion
 	DeletedScenes();
@@ -479,29 +444,10 @@ void AppStep()
 void Render()
 {
 	using namespace Scene;
-	/*
-	renderer->ResetCommands();
-	renderer->SetCSUDescriptorHeap();
-
-	RunPreRenderComputeShaders();
-	auto commandList = renderer->commandList;
-#if defined(_DEVELOPMENT)
-	PIXBeginEvent(commandList.p, 0, "RunRender");
-#endif
-*/
 	RunComputeShaders();
 	SceneRender();
 	GameRender();
-	/*
-#if defined(_DEVELOPMENT)
-	PIXEndEvent(commandList.p);
-#endif
-	RunPostRenderComputeShaders();
-
-	renderer->ExecuteCommands();
-	*/
 	renderer->Present();
-
 	SolveComputeShaders();
 	ScenePostRender();
 	GamePostRender();
@@ -513,13 +459,7 @@ void ResizeWindow()
 
 	resizeWindow = false;
 	renderer->Flush();
-
-	/*
-	Templates::RenderPass::ResizeRelease();
-	*/
-
 	ResizeReleaseScenePasses();
-
 	GetWindowRect(hWnd, &hWndRect);
 
 	if (renderer)
@@ -529,11 +469,6 @@ void ResizeWindow()
 		renderer->Resize(HWNDWIDTH, HWNDHEIGHT);
 		renderer->swapChainPass->Resize(HWNDWIDTH, HWNDHEIGHT);
 	}
-
-	/*
-	Templates::RenderPass::Resize(HWNDWIDTH, HWNDHEIGHT);
-	*/
-
 	ResizeScenePasses(HWNDWIDTH, HWNDHEIGHT);
 }
 
@@ -541,45 +476,14 @@ void ResizeWindow()
 void DestroyInstance()
 {
 	using namespace Scene;
-	/*
-	using namespace Scene::Level;
-	using namespace Game;
-	*/
 	if (destroyed) return;
 	renderer->Flush();
 
 #if defined(_EDITOR)
 	DestroyEditor();
-	//DestroyTemplatesReferences();
 #endif
 	DestroyScenes(true);
 	DestroyControllers();
-	/*
-	GameDestroy();
-
-	DestroySceneObjects();
-	DestroyShadowMapResources();
-	*/
 	DestroyTemplatesInstances();
 	DestroyTemplates();
-
-	/*
-	DestroyConstantsBuffer();
-
-	ShutdownScripting();
-
-	ShutdownAudio();
-	gamePad.reset();
-	keyboard.reset();
-
-	renderer->DestroySwapChainPass();
-
-	DestroyRenderPassMainHeap();
-	DestroyShaderCompiler();
-
-	renderer->Destroy();
-	renderer = nullptr;
-
-	destroyed = true;
-	*/
 }

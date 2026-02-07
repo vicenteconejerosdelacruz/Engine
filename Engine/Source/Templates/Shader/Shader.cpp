@@ -1,17 +1,8 @@
 #include "pch.h"
 #include "Shader.h"
-//#include <Templates.h>
-//#include <TemplateDef.h>
 #include <ShaderCompiler.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <CompilerQueue.h>
-//#include <NoStd.h>
-//#include <nlohmann/json.hpp>
-//#include <Scene.h>
-//#include <Application.h>
-//#include <Camera/Camera.h>
-//#include <Light/Light.h>
-//#include <Animated.h>
 
 namespace Templates {
 
@@ -248,10 +239,6 @@ namespace Templates {
 		JUUID instance_uuid,
 		JUUID uuid, Source params,
 		JUUID bindingUUID
-		/*,
-		JObjectChangeCallback shaderChangeCallback,
-		JObjectChangePostCallback shaderChangePostCallback
-		*/
 	)
 	{
 		using namespace ShaderCompiler;
@@ -259,9 +246,6 @@ namespace Templates {
 
 		instanceUUID = instance_uuid;
 		shaderUUID = uuid;
-
-		//ShaderJsonUUID shader = uuid;
-		//shader->BindChangeCallback(bindingUUID, shaderChangeCallback, shaderChangePostCallback);
 
 		Compile(*this, params, dependencies);
 	}
@@ -280,8 +264,6 @@ namespace Templates {
 	void ShaderInstance::CreateResourcesBinding(const ComPtr<ID3D12ShaderReflection>& reflection, const D3D12_SHADER_DESC& desc)
 	{
 		using namespace DeviceUtils;
-		//using namespace Animation;
-		//using namespace Scene;
 
 		const std::unordered_map<std::string, int& > registersMap =
 		{
@@ -364,8 +346,6 @@ namespace Templates {
 
 	void ShaderInstance::CreateConstantsBuffersVariables(const ComPtr<ID3D12ShaderReflection>& reflection, const D3D12_SHADER_DESC& desc)
 	{
-		//using namespace Animation;
-		//using namespace Scene;
 		using namespace Templates;
 		using namespace DeviceUtils;
 

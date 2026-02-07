@@ -1,40 +1,19 @@
 #include "pch.h"
 
-//#include <functional>
-//#include <atlbase.h>
-
 #include <imgui.h>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx12.h>
 #include <IconsFontAwesome5.h>
 #include <ImGuizmo.h>
 #include <Editor.h>
-
-//#include <Application.h>
 #include <Renderer.h>
 #include <DeviceUtils/CommandsProcessor/CommandsProcessor.h>
 #include <DeviceUtils/RenderPass/SwapChainPass.h>
-
 #include <Game.h>
 #include <Scene.h>
 #include <Level.h>
-//#include <SceneUnit.h>
-//#include <RenderPass/RenderPass.h>
-//#include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <DeviceUtils/Resources/Resources.h>
-//#include <Renderable/Renderable.h>
-//#include <Camera/Camera.h>
-//#include <Light/Light.h>
-//#include <Sound/SoundFX.h>
-//#include <Templates.h>
-//#include <Sound/Sound.h>
-//#include <Textures/Texture.h>
-//#include <Shader/Shader.h>
 #include <Templates.h>
-
-//#include <Level.h>
-//#include <Mouse.h>
-//#include <Keyboard.h>
 #include <MousePicking.h>
 #include <EditorMouseCamera.h>
 #include <RightPanelComponent.h>
@@ -283,7 +262,6 @@ namespace Editor
 				{ "systemCreated", true },
 				{ "mouseController", true },
 				{ "renderPasses", {} }
-				//{ "useSwapChain", true },
 			};
 			CloneSceneObject(id, levelCameraUUID[id].uuid(), parameters);
 
@@ -296,9 +274,6 @@ namespace Editor
 			EraseCameraFromSwapChainCameras(id, editorCameraUUID[id].uuid());
 			InsertCameraIntoMouseCameras(id, levelCameraUUID[id].uuid());
 			InsertCameraIntoSwapChainCameras(id, levelCameraUUID[id].uuid());
-			//BindLightsToEditorCamera(id, editorCameraUUID[id]);
-
-			//Editor::RegisterBillboard(levelCameraUUID());
 		}
 		else
 		{
@@ -570,54 +545,6 @@ namespace Editor
 		{
 			PostMessageA(hWnd, WM_QUIT, 0, 0);
 		}
-		/*
-		if ((Editor::levelModified && !Editor::defaultLevel) || Editor::templatesModified)
-		{
-			bool quitLevel = true;
-			bool quitTemplate = true;
-			if (Editor::levelModified)
-			{
-				int response = MessageBoxA(hWnd, "The level has been modified, do you wish to Save your work before leaving?", "Save before leaving?", MB_ICONWARNING | MB_YESNOCANCEL);
-				switch (response) {
-				case IDYES:
-				{
-					//Editor::SaveLevelToFile(Editor::currentLevelName);
-				}
-				break;
-				case IDCANCEL:
-				{
-					quitLevel = false;
-				}
-				break;
-				}
-			}
-			if (Editor::templatesModified)
-			{
-				int response = MessageBoxA(hWnd, "The templates has been modified, do you wish to Save your work before leaving?", "Save before leaving?", MB_ICONWARNING | MB_YESNOCANCEL);
-				switch (response) {
-				case IDYES:
-				{
-					//Editor::SaveTemplates();
-				}
-				break;
-				case IDCANCEL:
-				{
-					quitTemplate = false;
-				}
-				break;
-				}
-			}
-
-			if (quitLevel && quitTemplate)
-			{
-				PostMessageA(hWnd, WM_QUIT, 0, 0);
-			}
-		}
-		else
-		*/
-		//{
-		//	PostMessageA(hWnd, WM_QUIT, 0, 0);
-		//}
 	}
 
 	void ImGuiImplRenderInit()
@@ -732,16 +659,6 @@ namespace Editor
 		{
 			SendEditorDestroyPreview(uuid, GetJTemplatePointer);
 		}
-		/*
-		for (auto& uuid : sceneObjectEdition.editables)
-		{
-			SendEditorDestroyPreview(uuid, GetSceneObjectPointer);
-		}
-		for (auto& uuid : templateEdition.editables)
-		{
-			SendEditorDestroyPreview(uuid, GetJTemplatePointer);
-		}
-		*/
 
 		auto sceneIds = GetSceneUnitIds();
 		for (auto& id : sceneIds)
@@ -752,17 +669,8 @@ namespace Editor
 		{
 			sceneObjectEdition.at(id).Destroy();
 		}
-		/*
-		sceneObjectEdition.Destroy();
-		*/
 		templateEdition.Destroy();
 
-		/*
-		//mousePicking.pickedObjects.clear();
-		DestroyBillboards();
-		DestroyPickingPass();
-		DestroyRenderableBoundingBox();
-		*/
 		// Cleanup
 		ImGui_ImplDX12_Shutdown();
 		ImGui_ImplWin32_Shutdown();
@@ -970,6 +878,7 @@ namespace Editor
 		editorCameraUUID[id]->iblTextures = levelCameraUUID[id]->iblTextures;
 		editorCameraUUID[id]->lights = levelCameraUUID[id]->lights;
 		editorCameraUUID[id]->lightsWithShadowMaps = levelCameraUUID[id]->lightsWithShadowMaps;
+		editorCameraUUID[id]->CopyProjection(levelCameraUUID[id]);
 		editorCameraUUID[id]->WriteLightsConstantsBuffer(scene->Frame());
 		editorCameraUUID[id]->WriteShadowMapsConstantsBuffer(scene->Frame());
 		editorCameraUUID[id]->RenderReady(true);
@@ -999,17 +908,6 @@ namespace Editor
 		InsertCameraIntoWindowCameras(id, editorCameraUUID[id].uuid());
 	}
 
-	//void BindLightsToEditorCamera(SceneUnitId id, CameraSUUUID cam)
-	//{
-	//	for (JUUID uuid : GetLights(id))
-	//	{
-	//		LightSUUUID l = MAKESUUUID(id, uuid);
-	//		auto cams = l->cameras();
-	//		cams.push_back(cam.uuid());
-	//		l->cameras(cams);
-	//	}
-	//}
-
 	void DrawApplicationBar()
 	{
 		using namespace Scene::Level;
@@ -1026,8 +924,6 @@ namespace Editor
 					{
 						if (ImGui::MenuItem(ICON_FA_FILE "New"))
 						{
-							//Level::SetDefaultLevelToLoad();
-							//menuBarItemClicked = true;
 							loadingProgress.loadSceneUnitModal = true;
 							loadingProgress.LoadLevel(true, "default");
 							LoadLevelIntoSceneUnit("default", GetDefaultLevel, OnLevelLoaded, LevelLoadingProgress);
@@ -1042,8 +938,6 @@ namespace Editor
 						if (ImGui::MenuItem(ICON_FA_FOLDER_OPEN "Open"))
 						{
 							loadingProgress.loadSceneUnitModal = true;
-							//OpenLevelFile();
-							//menuBarItemClicked = true;
 						}
 					},
 					!IsPlaying(currentSceneUnitId)
@@ -1055,10 +949,9 @@ namespace Editor
 						{
 							SaveLevelToFile(currentSceneUnitId, GetLevelName(currentSceneUnitId));
 							SaveWorkbench(GetLevelName(currentSceneUnitId));
-							//menuBarItemClicked = true;
 						}
 					},
-					/*currentLevelName != "" && levelModified &&*/ !IsPlaying(currentSceneUnitId)
+					!IsPlaying(currentSceneUnitId)
 				);
 
 				ImGui::DrawItemWithEnabledState([]
@@ -1066,7 +959,6 @@ namespace Editor
 						if (ImGui::MenuItem(ICON_FA_SAVE "Save As.."))
 						{
 							SaveLevelAs();
-							//menuBarItemClicked = true;
 						}
 					},
 					!IsPlaying(currentSceneUnitId)
@@ -1093,7 +985,6 @@ namespace Editor
 						if (ImGui::MenuItem(ICON_FA_SAVE "Save Templates"))
 						{
 							SaveTemplates();
-							//menuBarItemClicked = true;
 						}
 					}, templatesModified
 				);
@@ -1465,70 +1356,7 @@ namespace Editor
 		}
 
 		ImGui::End();
-
-		/*
-		ImVec2 tabsPos = ImVec2(0, viewport->Size.y - 22);
-		ImVec2 tabsSize = ImVec2(viewport->Size.x - panW, 20);
-
-		ImGui::SetNextWindowPos(tabsPos);
-		ImGui::SetNextWindowSize(tabsSize);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 5.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 4.0f));
-		ImGui::Begin("tabsBarWindow", nullptr, window_flags);
-
-		std::string tabBarName = "levelsTabBar";
-		if (ImGui::BeginTabBar(tabBarName.c_str(), ImGuiTabBarFlags_DrawSelectedOverline | ImGuiTabBarFlags_FittingPolicyMask_))
-		{
-			for (auto& [unit, name] : currentLevelName)
-			{
-				ImGuiTabItemFlags_ flag = (unit == currentSceneUnitId) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
-				if (flag == ImGuiTabItemFlags_SetSelected)
-				{
-					ImGui::PushStyleColor(ImGuiCol_Tab, ImVec4(0.230f, 0.230f, 0.230f, 1.0f));
-					ImGui::PushStyleColor(ImGuiCol_TabHovered, ImVec4(0.230f, 0.230f, 0.230f, 1.0f));
-				}
-				ImGui::PushID(std::to_string(unit).c_str());
-				std::string tabS = ((unit == currentSceneUnitId) ? "*" : "") + name;
-				if (ImGui::TabItemButton(tabS.c_str(), flag))
-				{
-					if (unit != currentSceneUnitId)
-					{
-						PauseSounds(currentSceneUnitId);
-						SetCurrentSceneUnit(unit);
-						MarkScenePanelAssetsAsDirty();
-						ResetRenderableScenes();
-						EnableSceneUnitRendering(unit);
-					}
-				}
-				ImGui::PopID();
-				if (flag == ImGuiTabItemFlags_SetSelected)
-				{
-					ImGui::PopStyleColor();
-					ImGui::PopStyleColor();
-				}
-			}
-			ImGui::EndTabBar();
-		}
-		ImGui::End();
-		ImGui::PopStyleVar(3); // Pop both style variables
-		*/
 	}
-
-	/*
-	void OpenLevelFile()
-	{
-		using namespace Scene::Level;
-
-		ImGui::OpenFile([](std::filesystem::path path)
-			{
-				std::filesystem::path jsonFilePath = path;
-				jsonFilePath.replace_extension(".json");
-				SetLevelToLoad(jsonFilePath.generic_string());
-			},
-			defaultLevelsFolder);
-	}
-	*/
 
 	void SaveLevelAs()
 	{
@@ -1702,10 +1530,6 @@ namespace Editor
 		ChangeLevelName(id, levelFileName);
 		levelModified.at(id) = false;
 		defaultLevel.at(id) = false;
-
-		//currentLevelName = levelFileName;
-		//defaultLevel = false;
-		//levelModified = false;
 	}
 
 	void SaveTemplates()
@@ -1724,7 +1548,6 @@ namespace Editor
 	const float panelMinHeight = 47.0f;
 	void DrawRightPanel()
 	{
-		//if (!showPanel) return;
 		if (!currentSceneUnitId) return;
 
 		auto matchSceneObjectsAttributes = []()
@@ -1881,33 +1704,6 @@ namespace Editor
 	{
 		if (currentSceneUnitId == 0) return;
 		sceneObjectEdition.at(currentSceneUnitId).dirtyAssetsTree = true;
-		//levelModified = true;
-	}
-
-	/*
-	void DestroyEditorSceneObjectsReferences()
-	{
-		ClearSceneObjectsSelection();
-		gizmoOperation = ImGuizmo::TRANSLATE;
-		gizmoMode = ImGuizmo::WORLD;
-		sceneObjectEdition.Destroy();
-		sceneObjectEdition.dirtyAssetsTree = true;
-		sceneObjectEdition.selectedTab = sceneObjectEdition.detailAbleTabs.at(0);
-		sceneObjectEdition.selected.clear();
-		sceneObjectEdition.editables.clear();
-		sceneObjectEdition.drawersOrder.clear();
-		sceneObjectEdition.drawers.clear();
-	}
-	*/
-
-	void DeleteFromScenePanelSelection(SceneUnitId id, JUUID sceneObject)
-	{
-		//if (sceneObjectEdition.selected.contains(sceneObject))
-		//{
-		//	sceneObjectEdition.selected.erase(sceneObject);
-		//	sceneObjectEdition.dirtyAssetsTree = true;
-		//	sceneObjectEdition.selectedTab = sceneObjectEdition.detailAbleTabs.at(0);
-		//}
 	}
 
 	//Templates Panel
@@ -1997,45 +1793,6 @@ namespace Editor
 	{
 		animationSequencer.Initialize(uuid);
 	}
-
-	/*
-	bool PendingAnimationSequencer()
-	{
-		return animationSequencer.initializing;
-	}
-	*/
-
-	/*
-	bool PendingAnimationSequencerDestruction()
-	{
-		return animationSequencer.destroying;
-	}
-	*/
-
-	/*
-	void LoadAnimationSequencer()
-	{
-		animationSequencer.LoadSceneObjects();
-		animationSequencer.initializing = false;
-	}
-	*/
-
-	/*
-	void StepAnimationSequencer()
-	{
-		if (!animationSequencer.showing || animationSequencer.initializing || animationSequencer.destroying) return;
-
-		animationSequencer.Step();
-	}
-	*/
-
-	/*
-	void DestroyAnimationSequencer()
-	{
-		animationSequencer.DestroySceneObjects();
-		animationSequencer.destroying = false;
-	}
-	*/
 
 	//Gizmos
 	void ResetGizmoVariableWorkers(SceneUnitId id)
@@ -2295,7 +2052,6 @@ namespace Editor
 	//SceneObject Selection
 	void SelectSceneObject(SceneUnitId id, JUUID uuid)
 	{
-		//OutputDebugStringA(std::string(std::string("selected ") + uuid + "\n").c_str());
 		if (uuid == ""
 #if defined(_EDITOR_BOUNDINGBOX)
 			|| (!boundingBox.at(id).empty() && boundingBox.at(id).uuid() == uuid)
@@ -2376,24 +2132,6 @@ namespace Editor
 	}
 
 	//BoundingBox
-	/*
-	bool RenderableBoundingBoxExists()
-	{
-		return !boundingBox.empty();
-	}
-	*/
-
-	/*
-	void DestroyRenderableBoundingBox()
-	{
-		if (!boundingBox.empty())
-		{
-			DeleteRenderableSceneObject(boundingBox());
-		}
-		boundingBox.clear();
-	}
-	*/
-
 	void UpdateBoundingBox(SceneUnitId id)
 	{
 #if !defined(_EDITOR_BOUNDINGBOX)
@@ -2617,21 +2355,6 @@ namespace Editor
 		mousePicking.pickingPass.insert_or_assign(id, CreateRenderPassInstance(id, "", GetRenderPassUUIDByName("PickingPass"), 0, HWNDWIDTH, HWNDHEIGHT));
 	}
 
-	/*
-	void DestroyPickingPass()
-	{
-		if (!mousePicking.pickingPass.empty()) {
-			UnbindPickingRenderables();
-			DestroyRenderPassInstance(mousePicking.pickingPass());
-			mousePicking.pickingPass.clear();
-		}
-		if (mousePicking.pickingCpuBuffer)
-		{
-			mousePicking.pickingCpuBuffer = nullptr;
-		}
-	}
-	*/
-
 	void BindPickingRenderables(SceneUnitId id)
 	{
 		for (auto uuid : GetRenderables(id))
@@ -2651,16 +2374,6 @@ namespace Editor
 		r->CreateRenderPassRootSignatures(pass);
 		r->CreateRenderPassPipelineStates(pass);
 	}
-
-	/*
-	void UnbindPickingRenderables()
-	{
-		for (auto uuid : GetRenderables())
-		{
-			UnbindRenderableFromPickingPass(uuid);
-		}
-	}
-	*/
 
 	void UnbindRenderableFromPickingPass(RenderableSUUUID r)
 	{
@@ -2756,12 +2469,6 @@ namespace Editor
 
 	void PickSceneObject(SceneUnitId id, unsigned int pickedObjectId)
 	{
-		/*
-		if (ImGuizmo::IsUsing())
-		{
-			return;
-		}
-		*/
 		if (pickedObjectId == 0U)
 		{
 			SelectSceneObject(id, "");
@@ -2787,20 +2494,7 @@ namespace Editor
 		}
 	}
 
-	/*
-	void ReleasePickingPassResources()
-	{
-		if (!mousePicking.pickingPass.empty()) mousePicking.pickingPass->renderToTexturePass->ReleaseResources();
-	}
-	*/
-	/*
-	void ResizePickingPass(unsigned int width, unsigned int height)
-	{
-		if (!mousePicking.pickingPass.empty()) mousePicking.pickingPass->renderToTexturePass->Resize(width, height);
-	}
-	*/
 	//JObjects Creation
-
 	void StartSceneObjectCreation(SceneObjectType type)
 	{
 		using namespace Scene;
@@ -2938,12 +2632,6 @@ namespace Editor
 		auto& reg = billboards.at(id).billboardRegistry;
 
 		return std::any_of(reg.begin(), reg.end(), [](auto& pair) { return pair.second.empty(); });
-
-		//for (auto it = billboards.at(currentSceneUnitId).billboardRegistry.begin(); it != billboards.at(currentSceneUnitId).billboardRegistry.end(); it++)
-		//{
-		//	if (it->second.empty()) return true;
-		//}
-		//return false;
 	}
 
 	void ShowBillboards(SceneUnitId id)
@@ -2980,13 +2668,6 @@ namespace Editor
 		billboard->visible(false);
 	}
 
-	/*
-	bool PendingBillboardsDestruction()
-	{
-		return billboardsToDestroy.size() > 0ULL;
-	}
-	*/
-
 	void UpdateBillboards()
 	{
 		if (!currentSceneUnitId || GetCountFromMouseCameras(currentSceneUnitId) == 0ULL) return;
@@ -3015,37 +2696,7 @@ namespace Editor
 			DeleteRenderableSUSceneObject(b.unit(), b.uuid());
 		}
 		reg.clear();
-		//for (auto b : billboardsToDestroy)
-		//{
-		//	Editor::UnbindRenderableFromPickingPass(b);
-		//	EraseRenderableFromRenderables(b());
-		//	DeleteRenderableSceneObject(b());
-		//}
-		//billboardsToDestroy.clear();
 	}
-
-	/*
-	void DestroyBillboards()
-	{
-		for (auto it = billboardRegistry.begin(); it != billboardRegistry.end(); )
-		{
-			if (it->second() != "")
-			{
-				Editor::UnbindRenderableFromPickingPass(it->second);
-				EraseRenderableFromRenderables(it->second());
-				DeleteRenderableSceneObject(it->second());
-			}
-			it = billboardRegistry.erase(it);
-		}
-		billboardsToDestroy.clear();
-	}
-	*//*
-	void ClearBillboardsRegistry()
-	{
-		billboardRegistry.clear();
-		billboardsToDestroy.clear();
-	}
-	*/
 
 	bool IsPlaying(SceneUnitId id)
 	{

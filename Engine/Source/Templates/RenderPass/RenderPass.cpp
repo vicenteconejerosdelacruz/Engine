@@ -1,20 +1,11 @@
 #include "pch.h"
 #include "RenderPass.h"
-//#include <Templates.h>
-//#include <TemplateDef.h>
 #include <Renderer.h>
 #include <DeviceUtils/DescriptorHeap/DescriptorHeap.h>
 #include <DeviceUtils/RenderPass/SwapChainPass.h>
 #include <DeviceUtils/RenderPass/RenderToTexturePass.h>
 #include <SceneObject.h>
-//#include <Material/Material.h>
-//#include <Mesh/Mesh.h>
-//#include <Camera/Camera.h>
 #include "Override/OverridePass.h"
-//#include "Override/ResolvePass.h"
-//#include "Override/ToneMappingPass.h"
-//#include "Override/MinMaxChainPass.h"
-//#include "Override/MinMaxChainResultPass.h"
 
 extern std::unique_ptr<Renderer> renderer;
 
@@ -229,15 +220,6 @@ namespace Templates
 			{ RenderPassRenderCallbackOverride_MinMaxChainResult, [&](auto c, auto rpindex, auto rpTemplate, auto rpInstance) { return std::make_unique<MinMaxChainResultPass>(id,c,rpindex, rpTemplate, rpInstance); } }
 		};
 		overridePass = RenderCallbackOverriders.at(renderCallbackOverride)(cameraUUID, renderPassIndex, renderPassTemplate(), renderPassInstance());
-		/*
-		if (!camera.empty() && type == RenderPassType_RenderToTexturePass &&
-			materialOverride == RenderPassMaterialOverride_None &&
-			renderCallbackOverride == RenderPassRenderCallbackOverride_None &&
-			camera->HasIBL())
-		{
-			camera->CreateIBLTextures();
-		}
-		*/
 	}
 
 	void DestroyRenderPassInstance(JUUID renderPassInstanceUUID)
@@ -445,7 +427,6 @@ namespace Templates
 
 	void RenderPassInstance::MarkForDelete()
 	{
-		//markedForDelete = true;
 		renderPassesInstancesToDelete.insert(renderPassInstance);
 	}
 };

@@ -4,9 +4,6 @@
 #include <SceneObject.h>
 #include "Projections/Perspective.h"
 #include "Projections/Orthographic.h"
-//#include <SceneObjectDecl.h>
-//#include <SceneObject.h>
-//#include <JTypes.h>
 
 enum ProjectionsTypes {
 	PROJ_Orthographic,
@@ -40,23 +37,9 @@ struct CameraAttributes {
 	float IBLNumEnvLevels;
 };
 
-//namespace Templates { struct TextureInstance; struct RenderPassInstance; };
-//namespace DeviceUtils { struct RenderToTexturePass; };
-
 using namespace Scene::CameraProjections;
 
-//enum TextureShaderUsage;
-
-//typedef std::unordered_map<TextureShaderUsage, JUUID> TextureUsageInstanceMap;
-
 namespace Scene {
-	//struct Light;
-	//struct Renderable;
-	//struct Camera;
-
-	//using namespace DeviceUtils;
-	//using namespace Templates;
-
 #if defined(_EDITOR)
 #include <Attributes/JOrder.h>
 #include <CameraAtt.h>
@@ -100,11 +83,6 @@ namespace Scene {
 #include <CameraAtt.h>
 #include <JEnd.h>
 
-		union {
-			CameraProjections::Perspective perspectiveProjection;
-			CameraProjections::Orthographic orthographicProjection;
-		};
-
 		Camera(SceneUnitId id, nlohmann::json& json);
 		~Camera() { Destroy(); }
 		XMVECTOR positionV();
@@ -115,6 +93,7 @@ namespace Scene {
 		XMMATRIX world();
 		XMMATRIX view();
 		XMMATRIX projection();
+		void CopyProjection(CameraSUUUID cam);
 
 		float projectionWidth();
 		float projectionRight();
@@ -153,6 +132,10 @@ namespace Scene {
 		void RenderReady(bool value);
 		void Render();
 
+		//projection
+		CameraProjections::Perspective perspectiveProjection;
+		CameraProjections::Orthographic orthographicProjection;
+
 		//Bounding Frustum
 		BoundingFrustum boundingFrustum;
 		void CalculateBoundingFrustum();
@@ -161,12 +144,9 @@ namespace Scene {
 
 		void CreateConstantsBuffer();
 		void WriteConstantsBuffer(unsigned int frame);
-		//void ProcessKeyboardInput(DirectX::Keyboard::KeyboardStateTracker& tracker, DirectX::Keyboard::State& state);
 		void MoveAlongFwAxis(float dz);
 		void MovePerpendicularFwAxis(float dx, float dy);
 		void Rotate(float dx, float dy);
-		//void ProcessGamepadInput(DirectX::GamePad::State& gamePadState, DirectX::SimpleMath::Vector2 gamePadCameraRotationSensitivity);
-		//void ProcessCameraMouseRotation(DirectX::Mouse::State& mouseState, DirectX::SimpleMath::Vector2 mouseCameraRotationSensitivity, bool firstStep);
 		void UpdateLightPosition();
 		void UdateLightRotation();
 		void MoveForward(float step);

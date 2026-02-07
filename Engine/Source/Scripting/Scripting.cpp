@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "Scripting.h"
 #include <SceneObject.h>
-//#include <JObject.h>
 
 #if defined(_EDITOR)
 namespace Editor

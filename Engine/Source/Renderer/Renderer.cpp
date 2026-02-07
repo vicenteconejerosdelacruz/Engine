@@ -6,7 +6,6 @@
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <DeviceUtils/RenderToTexture/RenderToTexture.h>
 #include <RenderPass/RenderPass.h>
-//#include <RenderPass/RenderPass.h>
 
 using namespace Templates::RenderPass;
 using namespace DeviceUtils;
@@ -64,24 +63,7 @@ void Renderer::Initialize(HWND coreHwnd) {
 
 	fence = CreateFence(d3dDevice, "Renderer");
 	fenceEvent = CreateEventHandle();
-
-	/*
-	for (int i = 0; i < numFrames; ++i) {
-		commandAllocators[i] = CreateCommandAllocator(d3dDevice);
-		commandAllocators[i]->SetName((L"commandAllocator[" + std::to_wstring(i) + L"]").c_str());
-	}
-
-	commandList = CreateCommandList(d3dDevice, commandAllocators[backBufferIndex]);
-	CCNAME_D3D12_OBJECT(commandList);
-	*/
-
 }
-
-/*
-void Renderer::CreateComputeEngine()
-{
-}
-*/
 
 void Renderer::CreateSwapChainPass()
 {
@@ -93,59 +75,6 @@ unsigned int Renderer::GetBackBufferIndex()
 {
 	return backBufferIndex;
 }
-
-//DESTROY
-/*
-void Renderer::DestroySwapChainPass()
-{
-	using namespace Templates;
-	DestroyRenderPassInstance(swapChainPass());
-}
-*/
-
-/*
-void Renderer::Destroy() {
-	Flush();
-
-	fence.Release();
-	fence = nullptr;
-
-	//release d3d12
-	commandList.Release();
-	commandList = nullptr;
-
-	for (int i = 0; i < numFrames; i++) {
-		commandAllocators[i].Release();
-		commandAllocators[i] = nullptr;
-	}
-
-	DestroyRenderToTextureDescriptorHeap();
-
-	using namespace DeviceUtils;
-	DestroyCSUDescriptorHeap();
-
-	swapChain.Release();
-	swapChain = nullptr;
-
-	commandQueue.Release();
-	commandQueue = nullptr;
-
-	d3dDevice.Release();
-	d3dDevice = nullptr;
-
-#if defined(_DEBUG)
-	debugController.Release();
-	debugController = nullptr;
-
-	//debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_DETAIL);
-	//debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_IGNORE_INTERNAL);
-	//debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_SUMMARY);
-
-	debugDevice.Release();
-	debugDevice = nullptr;
-#endif
-}
-*/
 
 void Renderer::UpdateViewportPerspective() {
 	RECT rect;
@@ -178,30 +107,6 @@ void Renderer::Resize(unsigned int width, unsigned int height) {
 	backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 }
 
-/*
-void Renderer::ResetCommands() const {
-	auto commandAllocator = commandAllocators[backBufferIndex];
-	commandAllocator->Reset();
-	commandList->Reset(commandAllocator, nullptr);
-}
-*/
-
-/*
-void Renderer::SetCSUDescriptorHeap() const {
-	ID3D12DescriptorHeap* ppHeaps[] = { GetCSUDescriptorHeap() };
-	commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
-}
-*/
-
-/*
-void Renderer::ExecuteCommands() const
-{
-	DX::ThrowIfFailed(commandList->Close());
-	ID3D12CommandList* const commandLists[] = { commandList };
-	commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
-}
-*/
-
 void Renderer::ExecuteCommands(CComPtr<ID3D12GraphicsCommandList2>& commandList, std::function<void()> callback)
 {
 	ID3D12CommandList* const commandLists[] = { commandList };
@@ -227,27 +132,3 @@ void Renderer::Flush()
 {
 	DeviceUtils::Flush(commandQueue, fence, fenceValue, fenceEvent);
 }
-
-/*
-void Renderer::CloseCommandsAndFlush() {
-	commandList->Close();
-	ID3D12CommandList* const commandLists[] = { commandList };
-	commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
-	Flush();
-}
-*/
-
-/*
-void Renderer::RenderCriticalFrame(std::function<void()> callback, bool flush)
-{
-	if (flush)
-		Flush();
-
-	ResetCommands();
-	SetCSUDescriptorHeap();
-
-	callback();
-
-	CloseCommandsAndFlush();
-}
-*/

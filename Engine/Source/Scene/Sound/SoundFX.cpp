@@ -3,10 +3,6 @@
 #include <Scene.h>
 #include <AudioSystem.h>
 #include <Sound/Sound.h>
-//#include <Renderer.h>
-//#include <SceneObjectDef.h>
-
-//extern std::unique_ptr<Renderer> renderer;
 
 #if defined(_EDITOR)
 namespace Editor
@@ -14,10 +10,8 @@ namespace Editor
 	extern void SelectSoundEffect(SceneUnitId id, JUUID suuid);
 	extern JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraSUUUID camera, std::string name, std::string material, std::string pickingMaterial);
 	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
-	//extern JUUID GetBillboard(JUUID sceneObject);
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 	extern void MarkScenePanelAssetsAsDirty();
-	extern void DeleteFromScenePanelSelection(SceneUnitId id, JUUID sceneObject);
 	extern bool IsPlaying(SceneUnitId unit);
 	extern bool IsPaused(SceneUnitId unit);
 }
@@ -112,16 +106,7 @@ namespace Scene
 
 		if (!SoundTemplateExist(sound())) return;
 
-		//std::unique_ptr<SoundJson>& stmp = GetSoundTemplate(sound());
-
-		/*
-		auto OnSoundChange = [this](JUUID sound)
-			{
-				UnbindFromScene();
-				BindToScene();
-			};
-		*/
-		soundEffectInstance = GetSoundEffectInstance(sound(), instanceFlags(), uuid()/*, OnSoundChange*/);
+		soundEffectInstance = GetSoundEffectInstance(sound(), instanceFlags(), uuid());
 
 		if (nostd::bytesHas(instanceFlags(), SoundEffectInstance_Use3D))
 		{
@@ -313,51 +298,6 @@ namespace Scene
 		std::set<SoundFXSUUUID> sfxs;
 		std::transform(SoundFxs.begin(), SoundFxs.end(), std::inserter(sfxs, sfxs.end()), [&](auto o) { return MAKESUUUID(id, o); });
 
-		//std::for_each(sfxs.begin(), sfxs.end(), [step](auto sfx)
-		//{
-		//		sfx->Step(step);
-		//#if defined(_EDITOR)
-		//		if ((sfx->instanceFlags() & SoundEffectInstance_Use3D))
-		//		{
-		//			JUUID bbuuid = Editor::GetBillboard(sfx());
-		//			if (!bbuuid.empty())
-		//			{
-		//				sfx->UpdateBillboard(bbuuid);
-		//			}
-		//		}
-		//#endif
-		//}
-		//);
-
-		//std::set<SoundFXSUUUID> sfxsDestroyI;
-		////std::set<SoundFXUUID> sfxsCreateI;
-		//std::copy_if(sfxs.begin(), sfxs.end(), std::inserter(sfxsDestroyI, sfxsDestroyI.end()), [](auto sfx)
-		//	{
-		//		return sfx->dirty(SoundFX::Update_sound) || sfx->dirty(SoundFX::Update_loop) || sfx->dirty(SoundFX::Update_instanceFlags) || (!sfx->IsPlaying() && sfx->HasStarted() && sfx->destroyOnCompletion());
-		//	}
-		//);
-
-		//		std::copy_if(sfxs.begin(), sfxs.end(), std::inserter(sfxsCreateI, sfxsCreateI.end()), [](auto sfx)
-		//			{
-		//				if (!sfx->dirty(SoundFX::Update_sound) && (sfx->dirty(SoundFX::Update_loop) || sfx->dirty(SoundFX::Update_instanceFlags)))
-		//					return true;
-		//
-		//				return (sfx->dirty(SoundFX::Update_sound) && !sfx->sound().empty());
-		//			}
-		//		);
-
-		//std::for_each(sfxsDestroyI.begin(), sfxsDestroyI.end(), [](auto sfx)
-		//	{
-		//		sfx->UnbindFromScene();
-		//	}
-		//);
-
-		//		std::for_each(sfxsCreateI.begin(), sfxsCreateI.end(), [](auto sfx)
-		//			{
-		//				sfx->BindToScene();
-		//			}
-		//		);
-
 		std::for_each(sfxs.begin(), sfxs.end(), [step](auto sfx)
 			{
 				sfx->clear();
@@ -378,10 +318,7 @@ namespace Scene
 			DeleteSoundFXSUSceneObject(sfx.unit(), sfx.uuid());
 #if defined(_EDITOR)
 			Editor::MarkScenePanelAssetsAsDirty();
-			Editor::DeleteFromScenePanelSelection(sfx.unit(), sfx.uuid());
 #endif
-			//std::shared_ptr<SoundFX> soundfx = sfx;
-			//SafeDeleteSceneObject(soundfx);
 		}
 	}
 
@@ -395,11 +332,6 @@ namespace Scene
 				DeleteSoundFXSUSceneObject(s.unit(), s.uuid());
 			}
 		}
-		//auto uuids = nostd::GetUUIDS(SoundFXsceneObjects);
-		//for (SoundFXUUID uuid : uuids)
-		//{
-		//	DeleteSoundFXSUSceneObject(uuid->unit, uuid());
-		//}
 #include <TrackUUID/JClear.h>
 #include <SoundFXAtt.h>
 #include <JEnd.h>
@@ -413,17 +345,6 @@ namespace Scene
 		{
 			DeleteSoundFXSUSceneObject(id, uuid);
 		}
-		//for (auto& [uuid, _] : SoundFXSUsceneObjects.at(id))
-		//{
-		//	SoundFXSUUUID s = MAKESUUUID(id, uuid);
-		//	DeleteSoundFXSUSceneObject(s.unit(), s.uuid());
-		//}
-		//auto uuids = nostd::GetUUIDS(SoundFXsceneObjects);
-		//for (SoundFXUUID uuid : uuids)
-		//{
-		//	if (uuid->unit != unit) continue;
-		//	DeleteSoundFXSUSceneObject(uuid->unit, uuid());
-		//}
 #include <TrackUUID/JClearUnit.h>
 #include <SoundFXAtt.h>
 #include <JEnd.h>

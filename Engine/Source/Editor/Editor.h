@@ -85,14 +85,12 @@ namespace Editor {
 	void SwitchToSceneUnitEditorPlayCamera(SceneUnitId id);
 	void RemoveSceneUnitEditorCameraFromWindowCameras(SceneUnitId id);
 	void AddSceneUnitEditorCameraToWindowCameras(SceneUnitId id);
-	//void BindLightsToEditorCamera(SceneUnitId id, CameraSUUUID cam);
 	void DrawApplicationBar();
 	void DrawLevelSelectorModal();
 	void HandleApplicationDragTitleBar(RECT& dragRect);
 	RECT GetGameControllerRect();
 	void DrawGameController();
 	void DrawLevelsTabs();
-	//void OpenLevelFile();
 	void SaveLevelAs();
 	bool SaveFileDialog(std::wstring& path, std::wstring defaultDirectory = L"", std::wstring defaultFileName = L"", std::pair<COMDLG_FILTERSPEC*, int>* pFilterInfo = nullptr);
 	std::string GetLevelString(SceneUnitId id);
@@ -110,8 +108,6 @@ namespace Editor {
 	void OpenSceneObject(JUUID uuid);
 	void OpenSceneObjectOnNextFrame(JUUID uuid);
 	void MarkScenePanelAssetsAsDirty();
-	//void DestroyEditorSceneObjectsReferences();
-	void DeleteFromScenePanelSelection(SceneUnitId id, JUUID sceneObject);
 
 	//Templates Panel
 	void OnChangeTemplateTab(std::string newTab);
@@ -126,11 +122,6 @@ namespace Editor {
 
 	//Model3D Animation Sequencer
 	void OpenAnimationSequencer(JUUID uuid);
-	//bool PendingAnimationSequencer();
-	//bool PendingAnimationSequencerDestruction();
-	//void LoadAnimationSequencer();
-	//void StepAnimationSequencer();
-	//void DestroyAnimationSequencer();
 
 	//Gizmos
 	void ResetGizmoVariableWorkers(SceneUnitId unit);
@@ -151,8 +142,6 @@ namespace Editor {
 	void ClearSceneObjectsSelection(SceneUnitId unit);
 
 	//BoundingBox
-	//bool RenderableBoundingBoxExists();
-	//void DestroyRenderableBoundingBox();
 	void UpdateBoundingBox(SceneUnitId unit);
 
 	//Mouse Processing
@@ -162,16 +151,12 @@ namespace Editor {
 	//SceneObject Picking
 	bool PickingPassExists(SceneUnitId id);
 	void CreatePickingPass(SceneUnitId id);
-	//void DestroyPickingPass();
 	void BindPickingRenderables(SceneUnitId id);
 	void BindRenderableToPickingPass(RenderableSUUUID r);
-	//void UnbindPickingRenderables();
 	void UnbindRenderableFromPickingPass(RenderableSUUUID r);
 	void RenderPickingPass(SceneUnitId id, CameraSUUUID camera);
 	void PickFromScene(SceneUnitId id);
 	void PickSceneObject(SceneUnitId id, unsigned int pickedObjectId);
-	//void ReleasePickingPassResources();
-	//void ResizePickingPass(unsigned int width, unsigned int height);
 
 	//JObjects Creation
 	void StartSceneObjectCreation(SceneObjectType type);
@@ -188,11 +173,8 @@ namespace Editor {
 	void ShowBillboard(RenderableSUUUID billboard);
 	void HideBillboards(SceneUnitId id);
 	void HideBillboard(RenderableSUUUID billboard);
-	//bool PendingBillboardsDestruction();
 	void UpdateBillboards();
 	void DestroyPendingBillboards();
-	//void DestroyBillboards();
-	//void ClearBillboardsRegistry();
 
 	//Game Mode Activation
 	bool IsPlaying(SceneUnitId id);
@@ -201,5 +183,4 @@ namespace Editor {
 	void SwitchToPauseMode(SceneUnitId id);
 	void SwitchToUnPausedMode(SceneUnitId id);
 	void SwitchToNonPlayMode(SceneUnitId id);
-
 }

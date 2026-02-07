@@ -19,12 +19,9 @@ namespace Scene
 		SceneUnit(SceneUnitId unit, std::string name);
 		~SceneUnit();
 		SceneUnitId Id();
-		//void Merge(std::unique_ptr<SceneUnit>& other);
 		void MarkForDelete(std::function<void()> cb = nullptr);
 		bool MarkedForDelete();
 		void CallDeleteCallback();
-		//void SetAttached(bool value);
-		//bool IsAttached();
 		void SetIsolated(bool value);
 		bool IsIsolated();
 		void DestroySceneObjects();
@@ -114,10 +111,7 @@ namespace Scene
 		std::string unitName;
 		bool markedForDelete;
 		std::function<void()> deleteCallback;
-		//bool attached;
 		bool isolated;
-		//bool mergeable;
-		//unsigned int deletionFrames;
 
 		//Scene
 		Binder binder;
@@ -126,7 +120,6 @@ namespace Scene
 		std::unordered_map<JUUID, SceneObjectType> sceneObjectsTypes;
 
 		//loading
-		//std::unique_ptr<std::atomic_bool> abortLoading;
 		CommandsProcessor loadingProcessor;
 		std::unique_ptr<std::atomic_bool> loading;
 		std::unique_ptr<std::atomic_bool> canSubmitLoading;
@@ -138,14 +131,6 @@ namespace Scene
 
 		//f2f
 		CommandsProcessor commandsProcessor;
-
-		//SceneUnitId parentUnit;
-		////scene objects
-		//std::unique_ptr<std::atomic_bool> sceneUnitLoaded;
-		////binding
-		////command list
-		//std::unique_ptr<std::atomic_bool> loadingSubmit;
-		//bool runningCompute;
 		CommandsProcessor computeProcessor;
 	};
 };

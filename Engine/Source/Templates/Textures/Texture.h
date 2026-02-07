@@ -7,9 +7,6 @@
 #include <imgui.h>
 #include <Templates.h>
 #include <JTemplate.h>
-//#include <TemplateDecl.h>
-//#include <Json.h>
-//#include <JTypes.h>
 #if defined(_EDITOR)
 #include <DeviceUtils/CommandsProcessor/CommandsProcessor.h>
 using namespace DeviceUtils;
@@ -101,6 +98,8 @@ namespace Templates
 
 	TEMPDECL_FULL(Texture);
 
+	void RunTextureUploadFreeResources();
+	void PushTextureUploadFreeResourceCallback(unsigned int steps, std::function<void()> callback);
 	DXGI_FORMAT GetTextureFormat(std::filesystem::path path);
 	void Create2DDDSFile(TextureJson& json);
 	void CreateArrayDDSFile(TextureJson& json);
@@ -111,7 +110,6 @@ namespace Templates
 #if defined(_EDITOR)
 	void CreateTextureFromJsonDefinition(nlohmann::json& json);
 	void PreviewTexturesStep(DX::StepTimer& timer);
-	//void ReloadPreviewTextures();
 #endif
 
 	struct TextureInstance

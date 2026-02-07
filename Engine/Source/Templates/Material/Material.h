@@ -15,7 +15,6 @@
 #include <ShaderMaterials.h>
 #include <Templates.h>
 #include <JTemplate.h>
-//#include <JTypes.h>
 #include <Shader/Shader.h>
 
 namespace Templates
@@ -126,9 +125,6 @@ namespace Templates
 
 	TEMPDECL_FULL(Material);
 
-	//DESTROY
-	//void FreeGPUTexturesUploadIntermediateResources();
-
 	struct MaterialInstance
 	{
 		MaterialInstance(JUUID uuid) { assert(!!!"do not use"); }
@@ -141,10 +137,6 @@ namespace Templates
 			bool hasIBL,
 			TextureShaderUsageMap overrideTextures = {},
 			JUUID ObjectUUID = ""
-			/*,
-			JObjectChangeCallback cb = nullptr,
-			JObjectChangePostCallback postCb = nullptr
-			*/
 		);
 		~MaterialInstance() { Destroy(); }
 

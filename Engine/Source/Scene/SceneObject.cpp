@@ -15,8 +15,6 @@ namespace Game
 
 namespace Scene
 {
-
-
 	void SceneObject::JUpdate(nlohmann::json p)
 	{
 #if defined(_EDITOR)

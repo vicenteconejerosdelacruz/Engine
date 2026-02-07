@@ -1,18 +1,7 @@
 #include "pch.h"
 #include "Light.h"
 #include <DeviceUtils/RenderPass/RenderToTexturePass.h>
-//#include <Camera/Camera.h>
 #include <Renderer.h>
-//#include <Scene.h>
-//#include <Renderable/Renderable.h>
-//#include <RenderPass/RenderPass.h>
-//#include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
-//#if defined(_EDITOR)
-//#include <RenderPass/Override/MinMaxChainPass.h>
-//#include <RenderPass/Override/MinMaxChainResultPass.h>
-//#endif
-//#include <DirectXCollision.h>
-//#include <NoMath.h>
 
 #if defined(_EDITOR)
 namespace Editor
@@ -47,8 +36,6 @@ namespace Scene
 			RenderableSUUUID r = MAKESUUUID(unit, caster);
 			auto rvCams = r->cameras();
 			auto lvCams = cameras();
-			//std::set<CameraUUID> rCams(rvCams.begin(), rvCams.end());
-			//std::set<CameraUUID> lCams(lvCams.begin(), lvCams.end());
 			std::set<CameraSUUUID> rCams;
 			std::transform(rvCams.begin(), rvCams.end(), std::inserter(rCams, rCams.begin()), [&](JUUID c) { return MAKESUUUID(unit, c); });
 			std::set<CameraSUUUID> lCams;
@@ -92,12 +79,9 @@ namespace Scene
 	{
 		InsertLightIntoShadowMapLights(unit, uuid());
 		auto& scene = GetSceneUnit(unit);
-		//if (!scene->LoadingCommandListIsOpen())
-		//{
 		scene->ResetLoadingCommandList();
 		scene->SetLoading(true);
 		scene->SetCanSubmitLoading(false);
-		//}
 
 		CreateShadowMap();
 		BindSceneObjects(scene->Id());
@@ -109,7 +93,6 @@ namespace Scene
 			cam->BindLightWithShadowMap(SUuuid());
 		}
 		scene->SetCanSubmitLoading(true);
-		//scene->CloseSubmitLoadingCommandList();
 
 #if defined(_EDITOR)
 		EditorPreview(1 << Light::Update_hasShadowMaps);
@@ -248,9 +231,7 @@ namespace Scene
 			JUUID uuid = camJ.at("uuid");
 			CreateSUCamera(unit, camJ);
 			CameraSUUUID cam = MAKESUUUID(unit, uuid);
-			//auto& cam = GetCameraSceneObject(uuid);
 			cam->BindToScene();
-			//shadowMapCameras.push_back(uuid);
 			shadowMapCameras.push_back(cam);
 		}
 		UpdateShadowMapCameraProperties();
@@ -264,10 +245,8 @@ namespace Scene
 		nlohmann::json camJ = CreateSpotShadowMapCameraJson();
 		JUUID uuid = camJ.at("uuid");
 		CreateSUCamera(unit, camJ);
-		//auto& cam = GetCameraSceneObject(uuid);
 		CameraSUUUID cam = MAKESUUUID(unit, uuid);
 		cam->BindToScene();
-		//shadowMapCameras.push_back(uuid);
 		shadowMapCameras.push_back(cam);
 		UpdateShadowMapCameraProperties();
 	}
@@ -282,10 +261,8 @@ namespace Scene
 			nlohmann::json camJ = CreatePointShadowMapCameraJson(i);
 			JUUID uuid = camJ.at("uuid");
 			CreateSUCamera(unit, camJ);
-			//auto& cam = GetCameraSceneObject(uuid);
 			CameraSUUUID cam = MAKESUUUID(unit, uuid);
 			cam->BindToScene();
-			//shadowMapCameras.push_back(uuid);
 			shadowMapCameras.push_back(cam);
 		}
 		UpdateShadowMapCameraProperties();
@@ -699,21 +676,6 @@ namespace Scene
 		shadowMapMinMaxChainRenderPass.clear();
 	}
 
-	/*
-	void RenderShadowMapMinMaxChain()
-	{
-		auto& lights = GetLightsSceneObjects();
-		std::for_each(lights.begin(), lights.end(), [](auto& light)
-			{
-				auto& tup = std::get<1>(light);
-				auto& l = std::get<1>(tup);
-				if (l->shadowMapMinMaxChainRenderPass.empty()) return;
-				l->RenderShadowMapMinMaxChain();
-			}
-		);
-	}
-	*/
-
 	void Light::RenderShadowMapMinMaxChain()
 	{
 		for (auto& rpi : shadowMapMinMaxChainRenderPass)
@@ -802,7 +764,6 @@ namespace Scene
 	void Light::RenderShadowMap(std::function<void(unsigned int)> renderScene)
 	{
 		if (cameras().empty()) return;
-		//auto& commandList = renderer->commandList;
 		auto& scene = GetSceneUnit(unit);
 		auto& commandList = scene->GetCommandList();
 		auto& smPass = shadowMapRenderPass;

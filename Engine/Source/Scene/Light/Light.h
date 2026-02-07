@@ -227,8 +227,6 @@ namespace Scene {
 		void DestroyShadowMapMinMaxChain();
 		void RenderShadowMapMinMaxChain();
 
-		//virtual std::function<bool(JObject*)> GetAssetsConditioner();
-
 		//Billboard
 		virtual JUUID CreateBillboard(CameraSUUUID camera);
 		virtual void UpdateBillboard(JUUID uuid);
@@ -269,7 +267,6 @@ namespace Scene {
 	void DeleteLight(SceneUnitId unit, JUUID uuid);
 #if defined(_EDITOR)
 	void WriteLightsJson(SceneUnitId id, nlohmann::json& json);
-	//void RenderShadowMapMinMaxChain();
 #endif
 };
 

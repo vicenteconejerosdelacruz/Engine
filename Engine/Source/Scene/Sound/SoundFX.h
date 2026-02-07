@@ -1,6 +1,5 @@
 #pragma once
 
-//#include <SceneObjectDecl.h>
 #include <Scene.h>
 #include <SceneObject.h>
 

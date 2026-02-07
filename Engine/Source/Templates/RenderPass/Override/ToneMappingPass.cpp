@@ -1,20 +1,10 @@
 #include "pch.h"
 #include "ToneMappingPass.h"
-//#include <Renderer.h>
-//#include <StepTimer.h>
 #include <DeviceUtils/Resources/Resources.h>
-//#include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <DeviceUtils/RenderToTexture/RenderToTexture.h>
-//#include <RenderPass/RenderPass.h>
 #include <Camera/Camera.h>
 #include <HDR/LuminanceHistogram.h>
 #include <HDR/LuminanceHistogramAverage.h>
-//#include <Mesh/Mesh.h>
-//#if defined(_EDITOR)
-//#include <Editor.h>
-//#endif
-
-//extern std::unique_ptr<Renderer> renderer;
 
 ToneMappingPass::ToneMappingPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rpT, JUUID rp) : OverridePass(id, cam, rpI, rpT, rp)
 {
@@ -35,7 +25,6 @@ void ToneMappingPass::CreatePrevPassDependentResources()
 
 	JUUID prevPassRTTUUID = GetPrevPassRenderToTexture();
 	auto& prevPassRTT = GetRenderToTexture(prevPassRTTUUID);
-	//CameraSUUUID camera = MAKESUUUID(id, cam);
 
 	hdrHistogram = std::make_unique<LuminanceHistogram>(prevPassRTTUUID);
 	hdrHistogram->UpdateLuminanceHistogramParams(prevPassRTT->width, prevPassRTT->height, camera->minLogLuminance(), camera->maxLogLuminance());

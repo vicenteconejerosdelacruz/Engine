@@ -1,28 +1,17 @@
 #include "pch.h"
-//#include <vector>
 #include "Renderable.h"
 #include <Scene.h>
-//#include <Camera/Camera.h>
-//#include <Light/Light.h>
-//#include <Model3D/Model3D.h>
-//#include <Mesh/Mesh.h>
-//#include <Material/MeshMaterial.h>
 #include <Renderer.h>
-//#include <RenderPass/RenderPass.h>
 #include <DeviceUtils/RootSignature/RootSignature.h>
 #include <DeviceUtils/PipelineState/PipelineState.h>
 #include <Renderable/RenderableBoundingBox.h>
-//#include <SceneObjectDef.h>
 
 extern std::unique_ptr<Renderer> renderer;
-//extern DX::StepTimer timer;
 
 #if defined(_EDITOR)
 namespace Editor
 {
 	extern void SelectRenderable(SceneUnitId unit, JUUID ruuid);
-	//extern void BindRenderableToPickingPass(RenderableUUID r);
-	//extern void UnbindRenderableFromPickingPass(RenderableUUID r);
 	extern bool IsPlaying(SceneUnitId unit);
 	extern bool IsPaused(SceneUnitId unit);
 };
@@ -564,40 +553,6 @@ namespace Scene
 		}
 	}
 
-	/*void Renderable::RebuildMeshMaterials()
-	{
-		using namespace ComputeShader;
-
-		renderException = false;
-#if defined(_EDITOR)
-		Editor::UnbindRenderableFromPickingPass(uuid());
-#endif
-		Destroy();
-		try
-		{
-			CreateMeshInstances();
-			if (!animable.empty())
-			{
-				boundingBoxCompute = CreateRenderableBoundingBox(uuid());
-				WriteAnimationConstantsBuffer(renderer->backBufferIndex);
-			}
-			for (auto& cam : bindedCameras)
-			{
-				CreateMaterialsInstances(cam);
-				CreateConstantsBuffersInstances(cam);
-				CreateRootSignatures(cam);
-				CreatePipelineStates(cam);
-			}
-#if defined(_EDITOR)
-			Editor::BindRenderableToPickingPass(uuid());
-#endif
-		}
-		catch (...)
-		{
-			renderException = true;
-		}
-	}*/
-
 	void Renderable::CreateBoundingBox()
 	{
 		using namespace Templates;
@@ -766,7 +721,6 @@ namespace Scene
 
 		if (!RenderReady() || markedForDelete || !visible() || !materials.contains(renderPass) || renderException) return;
 
-		//auto& commandList = renderer->commandList;
 		auto& scene = GetSceneUnit(unit);
 		unsigned int frame = scene->Frame();
 		auto& commandList = scene->GetCommandList();
@@ -882,56 +836,9 @@ namespace Scene
 
 	void RenderablesStep(SceneUnitId unit, float dt)
 	{
-		//#if defined(_EDITOR)
-		//		using namespace ComputeShader;
-
 		auto& Renderables = GetRenderables(unit);
-		//auto Renderables = nostd::GetUUIDS(RenderablesceneObjects);
 		std::set<RenderableSUUUID> r;
 		std::transform(Renderables.begin(), Renderables.end(), std::inserter(r, r.begin()), [&](auto o) { return MAKESUUUID(unit, o); });
-		//std::transform(Renderables.begin(), Renderables.end(), std::inserter(r, r.begin()), [](auto o) { return o; });
-		//
-		//std::set<RenderableUUID> meshes;
-		//std::copy_if(r.begin(), r.end(), std::inserter(meshes, meshes.begin()), [](auto r)
-		//	{
-		//		return (r->dirty(Renderable::Update_meshMaterials));
-		//	}
-		//);
-		//
-		//std::set<RenderableUUID> models;
-		//std::copy_if(r.begin(), r.end(), std::inserter(models, models.begin()), [](auto r)
-		//	{
-		//		return (r->dirty(Renderable::Update_model));
-		//	}
-		//);
-		//
-		//std::set<RenderableUUID> bindToCam;
-		//std::copy_if(r.begin(), r.end(), std::inserter(bindToCam, bindToCam.end()), [](auto r)
-		//	{
-		//		if (r->dirty(Renderable::Update_cameras))
-		//		{
-		//			if (r->UpdatePrevValues.contains("cameras"))
-		//			{
-		//				nlohmann::json prevCams = r->UpdatePrevValues.at("cameras");
-		//				std::set<std::string> prevCamUUIDs;
-		//				for (auto& cam : prevCams) {
-		//					if (cam != "") prevCamUUIDs.insert(cam);
-		//				}
-		//				std::vector<std::string> currCams = r->cameras();
-		//				std::set<std::string> currCamUUIDs;
-		//				for (auto& cam : currCams) {
-		//					if (cam != "") currCamUUIDs.insert(cam);
-		//				}
-		//				bool isDifferent = prevCamUUIDs != currCamUUIDs;
-		//				if (!isDifferent)
-		//					r->clean(Renderable::Update_cameras);
-		//				return isDifferent;
-		//			}
-		//			return true;
-		//		}
-		//		return false;
-		//	}
-		//);
 
 		std::set<RenderableSUUUID> todelete;
 		std::copy_if(r.begin(), r.end(), std::inserter(todelete, todelete.begin()), [](auto r)
@@ -940,84 +847,6 @@ namespace Scene
 			}
 		);
 
-		//bool criticalFrame = meshes.size() > 0ULL || models.size() > 0ULL || bindToCam.size() > 0ULL || todelete.size() > 0ULL;
-		//
-		//if (criticalFrame)
-		//{
-		//	renderer->Flush();
-		//	renderer->RenderCriticalFrame([&meshes, &models, &bindToCam, &todelete]
-		//		{
-		//			for (auto r : meshes)
-		//			{
-		//				nlohmann::json patch = { {"model",""} };
-		//				r->merge_patch(patch);
-		//				r->RebuildMeshMaterials();
-		//				r->BindToScene();
-		//				r->clean(Renderable::Update_meshMaterials);
-		//			}
-		//			for (auto r : models)
-		//			{
-		//				EraseRenderableFromAnimables(r());
-		//				nlohmann::json patch = { {"meshMaterials", nlohmann::json::array({})} };
-		//				r->merge_patch(patch);
-		//				r->RebuildMeshMaterials();
-		//				if (!r->animable.empty())
-		//				{
-		//					AttachAnimation(r(), r->model3D->animations);
-		//					r->StepAnimation(0.0f);
-		//					r->boundingBoxCompute = CreateRenderableBoundingBox(r());
-		//				}
-		//				r->BindToScene();
-		//				r->clean(Renderable::Update_model);
-		//			}
-		//
-		//			for (auto r : bindToCam)
-		//			{
-		//				std::set<std::string> currCamsUUIDs;
-		//				std::vector<std::string> cameras = r->cameras();
-		//				for (auto& cam : cameras) {
-		//					if (cam != "") currCamsUUIDs.insert(cam);
-		//				}
-		//
-		//				std::set<std::string> prevCamsUUIDs;
-		//				if (r->UpdatePrevValues.contains("cameras"))
-		//				{
-		//					nlohmann::json prevCams = r->UpdatePrevValues.at("cameras");
-		//					for (auto& cam : prevCams) {
-		//						if (cam != "") prevCamsUUIDs.insert(cam);
-		//					}
-		//				}
-		//
-		//				//get cams present in the current set, but not present in the last set(this means adding cams)
-		//				std::set<std::string> addCams;
-		//				std::set_difference(
-		//					currCamsUUIDs.begin(), currCamsUUIDs.end(),
-		//					prevCamsUUIDs.begin(), prevCamsUUIDs.end(),
-		//					std::inserter(addCams, addCams.begin())
-		//				);
-		//
-		//				//get cams present in the previous set, but not present in the current set(this means deleting cams)
-		//				std::set<std::string> delCams;
-		//				std::set_difference(
-		//					prevCamsUUIDs.begin(), prevCamsUUIDs.end(),
-		//					currCamsUUIDs.begin(), currCamsUUIDs.end(),
-		//					std::inserter(delCams, delCams.begin())
-		//				);
-		//
-		//				//remove the camera from the renderable's binded camera set
-		//				for (auto& uuid : delCams)
-		//				{
-		//					Scene::UnbindFromScene(r->Juuid(), uuid);
-		//				}
-		//				//add the camera to the renderable's binded camera set
-		//				for (auto& uuid : addCams)
-		//				{
-		//					Scene::BindToScene(r->Juuid(), uuid);
-		//				}
-		//
-		//				r->clean(Renderable::Update_cameras);
-		//			}
-		//
 		for (auto renderable : todelete)
 		{
 			EraseRenderableFromRenderables(renderable->unit, renderable.uuid());
@@ -1025,10 +854,7 @@ namespace Scene
 			EraseRenderableFromShadowCasts(renderable->unit, renderable.uuid());
 			DeleteRenderableSUSceneObject(renderable->unit, renderable.uuid());
 		}
-		//		}
-		//	);
-		//}
-		//#endif
+
 		for (auto& [renderable, player] : animationPlayers)
 		{
 			if (renderable->markedForDelete || !renderable->RenderReady())
@@ -1054,11 +880,6 @@ namespace Scene
 				DeleteRenderableSUSceneObject(r->unit, r->uuid());
 			}
 		}
-		//auto uuids = nostd::GetUUIDS(RenderablesceneObjects);
-		//for (RenderableUUID uuid : uuids)
-		//{
-		//	DeleteRenderableSUSceneObject(uuid->unit, uuid());
-		//}
 #include <TrackUUID/JClear.h>
 #include <RenderableAtt.h>
 #include <JEnd.h>
@@ -1066,31 +887,12 @@ namespace Scene
 
 	void DestroyRenderables(SceneUnitId id)
 	{
-		//RenderableSUSceneObjects s;
-		//typedef std::tuple<JNAME, std::unique_ptr<Renderable>> RenderableTuple; typedef SceneObjectsContainer<RenderableTuple> RenderableSceneObjects;
-		//template <typename T>
-		//using SceneObjectsContainer = std::unordered_map<JUUID, T>;
-		//std::unordered_map<JUUID, std::tuple<JNAME, std::unique_ptr<Renderable>>>
 		std::set<JUUID> uuids;
 		std::transform(RenderableSUsceneObjects.at(id).begin(), RenderableSUsceneObjects.at(id).end(), std::inserter(uuids, uuids.begin()), [](auto& pair) { return pair.first; });
 		for (auto& uuid : uuids)
 		{
 			DeleteRenderableSUSceneObject(id, uuid);
 		}
-		/*
-		for (auto& [uuid, _] : RenderableSUsceneObjects.at(id))
-		{
-			RenderableSUUUID r = MAKESUUUID(id, uuid);
-			DeleteRenderableSUSceneObject(r->unit, r->uuid());
-		}
-		*/
-
-		//auto uuids = nostd::GetUUIDS(RenderablesceneObjects);
-		//for (RenderableUUID uuid : uuids)
-		//{
-		//	if (uuid->unit != unit) continue;
-		//	DeleteRenderableSUSceneObject(uuid->unit, uuid());
-		//}
 #include <TrackUUID/JClearUnit.h>
 #include <RenderableAtt.h>
 #include <JEnd.h>
@@ -1102,14 +904,8 @@ namespace Scene
 		r->markedForDelete = true;
 	}
 
-	//static std::set<size_t> computeSkips;
 	void RunBoundingBoxComputeShaders(SceneUnitId id)
 	{
-		//if (!RenderableSUsceneObjects.contains(id))
-		//{
-		//	computeSkips.insert(id);
-		//	return;
-		//}
 		for (auto& [uuid, _] : RenderableSUsceneObjects.at(id))
 		{
 			RenderableSUUUID renderable = MAKESUUUID(id, uuid);
@@ -1123,11 +919,6 @@ namespace Scene
 
 	void RunBoundingBoxComputeShadersSolution(SceneUnitId id)
 	{
-		//if (computeSkips.contains(id))
-		//{
-		//	computeSkips.erase(id);
-		//	return;
-		//}
 		for (auto& [uuid, _] : RenderableSUsceneObjects.at(id))
 		{
 			RenderableSUUUID renderable = MAKESUUUID(id, uuid);

@@ -1,17 +1,12 @@
 #pragma once
 #include <Scene.h>
 #include <SceneObject.h>
-//#include <nlohmann/json.hpp>
-//#include <set>
 #include <Model3D/Model3D.h>
 #include <Material/MeshMaterial.h>
 #include <RenderPass/PassMaterialOverride.h>
 #include <Sequence/AnimationSequences.h>
 #include <Sequence/SequencePlayer.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
-
-//#include <SceneObjectDecl.h>
-//#include <SceneObject.h>
 
 typedef std::vector<MeshInstanceUUID> RenderableMeshes;
 typedef std::unordered_map<RenderPassInstanceUUID, std::vector<MaterialInstanceUUID>> RenderableMaterials; //RenderPassInstanceUUID -> MaterialInstanceUUID
@@ -115,8 +110,6 @@ namespace Scene
 		void DestroyPipelineStates(CameraSUUUID cam);
 		void DestroyRenderPassPipelineStates(RenderPassInstanceUUID rp);
 
-		//void RebuildMeshMaterials();
-
 		void CreateBoundingBox();
 		BoundingBox GetBoundingBox();
 
@@ -197,8 +190,6 @@ namespace Scene
 		SequencePlayer sequencePlayer;
 		//Cameras
 		std::set<CameraSUUUID> bindedCameras;
-		//RebuildMaterials
-		//std::vector<std::tuple<unsigned int, JUUID>> rebuildMaterials;
 
 		BoundingBox boundingBox;
 		RenderableBoundingBoxUUID boundingBoxCompute; //used for animables
