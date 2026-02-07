@@ -7,7 +7,20 @@
 
 struct TimelineEditor
 {
-	void Init(RenderableUUID renderable, Sequence& sequence);
+	static inline float markersBgHeight = 16.0f;
+	static inline ImU32 markersBgColor = rgba(216, 216, 216, 1);
+	static inline float markersLineHeight = 4.0f;
+	static inline ImU32 markersLineColor = rgba(129, 129, 129, 1);
+	static inline ImU32 markersTextColor = rgba(74, 74, 74, 1);
+	static inline int markersFramesBetweenTexts = 5;
+	static inline ImU32 channelsBgColor = rgba(255, 255, 255, 1);
+	static inline ImU32 timelineBgColor = rgba(198, 198, 198, 1);
+	static inline ImU32 addChannelButtonGlyphColor = rgba(32, 32, 32, 1);
+	static inline ImU32 scrollbarBgColor = rgba(81, 75, 165, 1);
+	static inline ImU32 scrollbarThumbColor = rgba(150, 150, 150, 1);
+	static inline ImU32 selectedFrameVerticalColor = rgba(203, 73, 136, 0.3);
+
+	void Init(RenderableSUUUID renderable, Sequence& sequence);
 	void Reset();
 	void DrawRect(ImVec2 pos, ImVec2 size, ImU32 color);
 	void DrawBackground(ImVec2 pos, ImVec2 size);
@@ -64,20 +77,7 @@ struct TimelineEditor
 	float GetTime(Sequence& sequence);
 	int GetFrame(Sequence& sequence);
 
-	static inline float markersBgHeight = 16.0f;
-	static inline ImU32 markersBgColor = rgba(216, 216, 216, 1);
-	static inline float markersLineHeight = 4.0f;
-	static inline ImU32 markersLineColor = rgba(129, 129, 129, 1);
-	static inline ImU32 markersTextColor = rgba(74, 74, 74, 1);
-	static inline int markersFramesBetweenTexts = 5;
-	static inline ImU32 channelsBgColor = rgba(255, 255, 255, 1);
-	static inline ImU32 timelineBgColor = rgba(198, 198, 198, 1);
-	static inline ImU32 addChannelButtonGlyphColor = rgba(32, 32, 32, 1);
-	static inline ImU32 scrollbarBgColor = rgba(81, 75, 165, 1);
-	static inline ImU32 scrollbarThumbColor = rgba(150, 150, 150, 1);
-	static inline ImU32 selectedFrameVerticalColor = rgba(203, 73, 136, 0.3);
-
-	RenderableUUID renderable;
+	RenderableSUUUID renderable;
 	ImVec2 scroll;
 	ImVec2 scrollbarLastMousePos;
 	bool scrollbarMouseClicked[2];

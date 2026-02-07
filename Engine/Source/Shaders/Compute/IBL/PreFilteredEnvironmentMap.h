@@ -18,6 +18,14 @@ namespace ComputeShader
 		const unsigned int pixelSize = 4U * sizeof(float);
 		const DXGI_FORMAT dataFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
 
+		PreFilteredEnvironmentMap(JUUID envMapUUID, std::filesystem::path iblPreFilteredEnvironmentMapFile);
+		~PreFilteredEnvironmentMap();
+
+		virtual void Compute(SceneUnitId unit);
+		virtual void Solution(SceneUnitId unit);
+		void WriteFile(std::vector<Image>& imgs) const;
+
+		CommandsProcessor commandsProcessor;
 		std::filesystem::path outputFile;
 
 		JUUID envMap;
@@ -32,13 +40,6 @@ namespace ComputeShader
 
 		std::vector<size_t> readBackSizes;
 		std::vector<CComPtr<ID3D12Resource>> readBackResources;
-
-		PreFilteredEnvironmentMap(JUUID envMapUUID, std::filesystem::path iblPreFilteredEnvironmentMapFile);
-		~PreFilteredEnvironmentMap();
-
-		virtual void Compute();
-		virtual void Solution();
-		void WriteFile(std::vector<Image>& imgs) const;
 	};
 };
 

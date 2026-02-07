@@ -27,13 +27,25 @@
     <ClInclude Include="TestGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameControllers\SpinYawController.h">
+    <ClInclude Include="GameStates\GameStates.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameStates\Game\BootScreen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameStates\Game\Loading.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameStates\Game\PlayMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="JExpose\Controllers\VenomControllerAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="JExpose\Controllers\SpinYawControllerAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameControllers\SpinYawController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameControllers\VenomController.h">
@@ -45,6 +57,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameStates\Game\BootScreen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameStates\Game\Loading.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameStates\Game\PlayMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameControllers\GameControllers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameControllers\SpinYawController.cpp">

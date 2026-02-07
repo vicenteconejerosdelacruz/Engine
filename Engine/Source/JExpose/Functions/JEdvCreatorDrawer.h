@@ -79,10 +79,36 @@ inline JEdvCreatorDrawerFunction DrawUniqueName(std::string objectName, auto get
 		};
 }
 
-template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_so_camera_name>() { return DrawUniqueName("Camera", Scene::GetCamerasNames); }
-template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_so_light_name>() { return DrawUniqueName("Light", Scene::GetLightsNames); }
-template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_so_renderable_name>() { return DrawUniqueName("Renderable", Scene::GetRenderablesNames); }
-template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_so_soundeffect_name>() { return DrawUniqueName("SoundEffects", Scene::GetSoundFXsNames); }
+inline JEdvCreatorDrawerFunction DrawUniqueSUName(std::string objectName, auto getNames)
+{
+	return[objectName, getNames](std::string attribute, nlohmann::json& json, nlohmann::json& modalProperties)
+		{
+			auto names = getNames(Editor::currentSceneUnitId);
+			std::set<std::string> namesSet(names.begin(), names.end());
+			ImGui::PushID(attribute.c_str());
+			{
+				ImGui::Text(attribute.c_str());
+				ImGui::DrawJsonInputText(json, attribute);
+			}
+			ImGui::PopID();
+			if (namesSet.contains(json.at(attribute)))
+			{
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+				std::string text = "*";
+				text += objectName;
+				text += " with name ";
+				text += json.at(attribute);
+				text += " Already exists";
+				ImGui::Text(text.c_str());
+				ImGui::PopStyleColor();
+			}
+		};
+}
+
+template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_so_camera_name>() { return DrawUniqueSUName("Camera", Scene::GetCamerasSUNames); }
+template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_so_light_name>() { return DrawUniqueSUName("Light", Scene::GetLightsSUNames); }
+template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_so_renderable_name>() { return DrawUniqueSUName("Renderable", Scene::GetRenderablesSUNames); }
+template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_so_soundeffect_name>() { return DrawUniqueSUName("SoundEffects", Scene::GetSoundFXsSUNames); }
 template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_material_name>() { return DrawCreatorValue<std::string, jedv_t_string>(); }
 template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_model3d_name>() { return DrawCreatorValue<std::string, jedv_t_string>(); }
 template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_renderpass_name>() { return DrawCreatorValue<std::string, jedv_t_string>(); }
@@ -343,7 +369,8 @@ inline JEdvCreatorDrawerFunction DrawCreatorVector<std::string, jedv_t_so_camera
 			{
 				currentUUIDs.insert(json.at(attribute).at(i));
 			}
-			std::vector<JUUIDName> camsUUIDNames = GetSceneObjectsByType(SO_Cameras)();
+			//std::vector<JUUIDName> camsUUIDNames = GetSceneObjectsByType(Editor::currentSceneUnitId, SO_Cameras)();
+			std::vector<JUUIDName> camsUUIDNames = GetSUSceneObjectsByType(Editor::currentSceneUnitId, SO_Cameras);
 
 			auto setCamera = [&json, attribute](unsigned int index, std::string uuid)
 				{
@@ -592,8 +619,12 @@ inline bool EditorCreatorDrawFilePath(
 		{
 			ImGui::OpenFile([setFilePath, defaultFolder, &modalProperties](std::filesystem::path p)
 				{
-					std::filesystem::path absfilepath = std::filesystem::current_path().append(defaultFolder);
+					p = std::filesystem::canonical(p);
+					std::filesystem::path currpath = std::filesystem::canonical(std::filesystem::current_path());
+					std::filesystem::path absfilepath = std::filesystem::canonical(currpath.append(defaultFolder));
 					std::filesystem::path rel = std::filesystem::relative(p, absfilepath);
+					//std::filesystem::path absfilepath = std::filesystem::current_path().append(defaultFolder);
+					//std::filesystem::path rel = std::filesystem::relative(p, absfilepath);
 					setFilePath(rel.generic_string());
 					modalProperties.at("fileFolder") = rel.parent_path().generic_string();
 				}, fileFolder, filterName, filterPattern);

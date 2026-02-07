@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Builder.h"
-#include "../../../Common/DirectXHelper.h"
+#include <DirectXHelper.h>
 
 namespace DeviceUtils {
 

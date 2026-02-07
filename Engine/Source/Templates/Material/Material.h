@@ -13,8 +13,8 @@
 #include <NoStd.h>
 #include <Textures/Texture.h>
 #include <ShaderMaterials.h>
+#include <Templates.h>
 #include <JTemplate.h>
-#include <JTypes.h>
 #include <Shader/Shader.h>
 
 namespace Templates
@@ -91,6 +91,7 @@ namespace Templates
 #endif
 
 	void MaterialJsonStep();
+	void UpdateMaterialTextures(std::unordered_map<TextureJsonUUID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceUUID>>> changes);
 
 	namespace Material
 	{
@@ -117,31 +118,30 @@ namespace Templates
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 #endif
+		void SetPipelineStateCallback(size_t hash, std::function<void()> callback);
+
+		std::unordered_map<size_t, std::function<void()>> pipelineChangeCallbacks;
 	};
 
 	TEMPDECL_FULL(Material);
-
-	//DESTROY
-	//void FreeGPUTexturesUploadIntermediateResources();
 
 	struct MaterialInstance
 	{
 		MaterialInstance(JUUID uuid) { assert(!!!"do not use"); }
 		explicit MaterialInstance(
+			SceneUnitId id,
 			JUUID Instance_uuid,
 			JUUID Template_uuid,
 			VertexClass vClass,
 			bool isShadowed,
 			bool hasIBL,
 			TextureShaderUsageMap overrideTextures = {},
-			JUUID ObjectUUID = "",
-			JObjectChangeCallback cb = nullptr,
-			JObjectChangePostCallback postCb = nullptr
+			JUUID ObjectUUID = ""
 		);
 		~MaterialInstance() { Destroy(); }
 
 		MaterialJsonUUID materialUUID;
-		JUUID instanceUUID;
+		MaterialInstanceUUID instanceUUID;
 
 		ShaderJsonUUID vertexShaderUUID;
 		ShaderJsonUUID pixelShaderUUID;
@@ -167,6 +167,7 @@ namespace Templates
 		void LoadVariablesMapping();
 		void SetUAVRootDescriptorTable(CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int& slot);
 		void SetSRVRootDescriptorTable(CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int& slot);
+		void UpdateTexture(TextureShaderUsage usage, TextureJsonUUID texture);
 	};
 
 	void DestroyMaterialInstance(JUUID materialInstance);

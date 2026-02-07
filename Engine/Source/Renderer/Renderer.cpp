@@ -7,6 +7,7 @@
 #include <DeviceUtils/RenderToTexture/RenderToTexture.h>
 #include <RenderPass/RenderPass.h>
 
+using namespace Templates::RenderPass;
 using namespace DeviceUtils;
 
 #if defined(_DEBUG)
@@ -14,10 +15,10 @@ CComPtr<ID3D12Debug1> debugController;
 CComPtr<ID3D12DebugDevice1> debugDevice;
 #endif
 
+unsigned int backBufferIndex;
+
 //CREATE
 void Renderer::Initialize(HWND coreHwnd) {
-	using namespace DeviceUtils;
-
 	hwnd = coreHwnd;
 
 #if defined(_DEBUG)
@@ -55,80 +56,24 @@ void Renderer::Initialize(HWND coreHwnd) {
 	CCNAME_D3D12_OBJECT_N(commandQueue, std::string("Renderer"));
 
 	CreateCSUDescriptorHeap(numFrames);
-
 	CreateRenderToTextureDescriptorHeap();
-
-	for (int i = 0; i < numFrames; ++i) {
-		commandAllocators[i] = CreateCommandAllocator(d3dDevice);
-		commandAllocators[i]->SetName((L"commandAllocator[" + std::to_wstring(i) + L"]").c_str());
-	}
-
-	commandList = CreateCommandList(d3dDevice, commandAllocators[backBufferIndex]);
-	CCNAME_D3D12_OBJECT(commandList);
+	CreateRenderPassMainHeap();
+	UpdateViewportPerspective();
+	CreateSwapChainPass();
 
 	fence = CreateFence(d3dDevice, "Renderer");
 	fenceEvent = CreateEventHandle();
-
-	UpdateViewportPerspective();
-}
-
-void Renderer::CreateComputeEngine()
-{
 }
 
 void Renderer::CreateSwapChainPass()
 {
 	using namespace Templates;
-	swapChainPass = CreateRenderPassInstance("", GetRenderPassUUIDByName("simplePass"), 0);
+	swapChainPass = CreateRenderPassInstance(0, "", GetRenderPassUUIDByName("simplePass"), 0);
 }
 
-//DESTROY
-void Renderer::DestroySwapChainPass()
+unsigned int Renderer::GetBackBufferIndex()
 {
-	using namespace Templates;
-	DestroyRenderPassInstance(swapChainPass());
-}
-
-void Renderer::Destroy() {
-	Flush();
-
-	fence.Release();
-	fence = nullptr;
-
-	//release d3d12
-	commandList.Release();
-	commandList = nullptr;
-
-	for (int i = 0; i < numFrames; i++) {
-		commandAllocators[i].Release();
-		commandAllocators[i] = nullptr;
-	}
-
-	DestroyRenderToTextureDescriptorHeap();
-
-	using namespace DeviceUtils;
-	DestroyCSUDescriptorHeap();
-
-	swapChain.Release();
-	swapChain = nullptr;
-
-	commandQueue.Release();
-	commandQueue = nullptr;
-
-	d3dDevice.Release();
-	d3dDevice = nullptr;
-
-#if defined(_DEBUG)
-	debugController.Release();
-	debugController = nullptr;
-
-	//debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_DETAIL);
-	//debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_IGNORE_INTERNAL);
-	//debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_SUMMARY);
-
-	debugDevice.Release();
-	debugDevice = nullptr;
-#endif
+	return backBufferIndex;
 }
 
 void Renderer::UpdateViewportPerspective() {
@@ -162,22 +107,11 @@ void Renderer::Resize(unsigned int width, unsigned int height) {
 	backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 }
 
-void Renderer::ResetCommands() const {
-	auto commandAllocator = commandAllocators[backBufferIndex];
-	commandAllocator->Reset();
-	commandList->Reset(commandAllocator, nullptr);
-}
-
-void Renderer::SetCSUDescriptorHeap() const {
-	ID3D12DescriptorHeap* ppHeaps[] = { GetCSUDescriptorHeap() };
-	commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
-}
-
-void Renderer::ExecuteCommands() const
+void Renderer::ExecuteCommands(CComPtr<ID3D12GraphicsCommandList2>& commandList, std::function<void()> callback)
 {
-	DX::ThrowIfFailed(commandList->Close());
 	ID3D12CommandList* const commandLists[] = { commandList };
 	commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+	if (callback) { executionCallback.push_back(callback); }
 }
 
 void Renderer::Present() {
@@ -190,29 +124,11 @@ void Renderer::Present() {
 
 	//make the CPU to wait for the GPU to finish the current processing
 	WaitForFenceValue(fence, frameFenceValues[backBufferIndex], fenceEvent);
+	std::for_each(executionCallback.begin(), executionCallback.end(), [](auto x) {x(); });
+	executionCallback.clear();
 }
 
 void Renderer::Flush()
 {
 	DeviceUtils::Flush(commandQueue, fence, fenceValue, fenceEvent);
-}
-
-void Renderer::CloseCommandsAndFlush() {
-	commandList->Close();
-	ID3D12CommandList* const commandLists[] = { commandList };
-	commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
-	Flush();
-}
-
-void Renderer::RenderCriticalFrame(std::function<void()> callback, bool flush)
-{
-	if (flush)
-		Flush();
-
-	ResetCommands();
-	SetCSUDescriptorHeap();
-
-	callback();
-
-	CloseCommandsAndFlush();
 }

@@ -100,13 +100,10 @@ void DeletePrompt::DrawPrompt(const char* prompTitle)
 			setAllToDelete(allToDelete);
 		}
 
-		ImGui::DrawItemWithEnabledState([this]
-			{
-				if (ImGui::Button("Delete"))
-				{
-					OnDelete(references);
-				}
-			}, deleteEnabled);
+		if (ImGui::Button("Delete"))
+		{
+			OnDelete(references);
+		}
 
 		ImGui::SameLine();
 		if (ImGui::Button("Cancel"))

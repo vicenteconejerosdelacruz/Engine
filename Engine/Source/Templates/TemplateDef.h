@@ -128,4 +128,8 @@ bool Delete##TemplateName##Instance(JUUID instanceKey)\
 std::unique_ptr<TemplateName##Instance>& Get##TemplateName##Instance(JUUID instanceKey)\
 {\
 	return refTracker.FindValue(instanceKey);\
+}\
+void Clear##TemplateName##Instances()\
+{\
+	refTracker.Clear();\
 }

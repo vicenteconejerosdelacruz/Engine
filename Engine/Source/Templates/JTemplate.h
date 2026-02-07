@@ -2,6 +2,9 @@
 
 #include <JObject.h>
 #include <nlohmann/json.hpp>
+#include <TemplateDecl.h>
+#include <TemplateDef.h>
+#include <JTypes.h>
 #if defined(_EDITOR)
 #include <IconsFontAwesome5.h>
 #endif
@@ -77,3 +80,11 @@ namespace Templates
 		}
 	};
 };
+
+#include <Shader/Shader.h>
+#include <Material/Material.h>
+#include <Model3D/Model3D.h>
+#include <RenderPass/RenderPass.h>
+#include <Sound/Sound.h>
+#include <Textures/Texture.h>
+#include <Mesh/Mesh.h>

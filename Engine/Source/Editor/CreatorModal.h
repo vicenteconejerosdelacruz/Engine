@@ -4,12 +4,13 @@ template<typename T>
 struct CreatorModal {
 	bool creating = false;
 	T type;
+	SceneUnitId unit;
 	nlohmann::json json;
 	nlohmann::json modalProperties;
 	std::vector<std::string> atts;
 	std::map<std::string, JEdvCreatorDrawerFunction> drawers;
 	std::map<std::string, JEdvCreatorValidatorFunction> validators;
-	std::function<void(T type, nlohmann::json)> onCreate;
+	std::function<void(SceneUnitId unit, T type, nlohmann::json)> onCreate;
 
 	void DrawCreationPopup(const char* title)
 	{
@@ -31,7 +32,7 @@ struct CreatorModal {
 				{
 					if (ImGui::Button("Create"))
 					{
-						onCreate(type, json);
+						onCreate(unit, type, json);
 						creating = false;
 					}
 				}, valid);

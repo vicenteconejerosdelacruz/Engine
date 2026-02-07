@@ -1,10 +1,9 @@
 #pragma once
 
+#include <Scene.h>
+#include <SceneObject.h>
 #include "Projections/Perspective.h"
 #include "Projections/Orthographic.h"
-#include <SceneObjectDecl.h>
-#include <SceneObject.h>
-#include <JTypes.h>
 
 enum ProjectionsTypes {
 	PROJ_Orthographic,
@@ -38,25 +37,9 @@ struct CameraAttributes {
 	float IBLNumEnvLevels;
 };
 
-namespace Templates { struct TextureInstance; struct RenderPassInstance; };
-namespace DeviceUtils { struct RenderToTexturePass; };
-
 using namespace Scene::CameraProjections;
 
-enum TextureShaderUsage;
-
-typedef std::unordered_map<TextureShaderUsage, JUUID> TextureUsageInstanceMap;
-
 namespace Scene {
-	struct Light;
-	struct Renderable;
-	struct Camera;
-
-	using namespace DeviceUtils;
-	using namespace Templates;
-
-	inline static const std::string CameraConstantBufferName = "camera";
-
 #if defined(_EDITOR)
 #include <Attributes/JOrder.h>
 #include <CameraAtt.h>
@@ -88,14 +71,6 @@ namespace Scene {
 
 #endif
 
-	void CamerasStep();
-	void DestroyCameras();
-	void DeleteCamera(std::string uuid);
-
-#if defined(_EDITOR)
-	void WriteCamerasJson(nlohmann::json& json);
-#endif
-
 	struct Camera : SceneObject
 	{
 		inline static const SceneObjectType sceneObjectType = SO_Cameras;
@@ -108,16 +83,8 @@ namespace Scene {
 #include <CameraAtt.h>
 #include <JEnd.h>
 
-		union {
-			CameraProjections::Perspective perspectiveProjection;
-			CameraProjections::Orthographic orthographicProjection;
-		};
-
-		Camera(nlohmann::json& json);
+		Camera(SceneUnitId id, nlohmann::json& json);
 		~Camera() { Destroy(); }
-#if defined(_EDITOR)
-		virtual void WriteJson(nlohmann::json& j);
-#endif
 		XMVECTOR positionV();
 		XMVECTOR rotationQ();
 		XMVECTOR forward();
@@ -126,6 +93,7 @@ namespace Scene {
 		XMMATRIX world();
 		XMMATRIX view();
 		XMMATRIX projection();
+		void CopyProjection(CameraSUUUID cam);
 
 		float projectionWidth();
 		float projectionRight();
@@ -135,42 +103,50 @@ namespace Scene {
 		float projectionFarZ();
 		float projectionfovAngleY();
 
-		std::vector<RenderPassInstanceUUID> renderPassesUUID;
 		void CreateRenderPasses();
+		RenderPassJsonUUID GetRenderPassTemplateFromInstanceIndex(unsigned int passIndex);
+		RenderPassInstanceUUID CreateRenderPass(JUUID passUUID, unsigned int passIndex);
+		void CreateRenderPassAtIndex(JUUID passUUID, unsigned int passIndex);
+		void DeleteRenderPassAtIndex(unsigned int passIndex);
+		void SwapRenderPassAtIndex(JUUID passUUID, unsigned int passIndex);
+		void RearrangeRenderPassesAfter(unsigned int passIndex);
 		void DestroyRenderPasses();
 		void ResizeReleasePasses();
 		void ResizePasses(unsigned int width, unsigned int height);
 		void UpdateProjection();
 
-		std::set<RenderableUUID> renderables;
 		virtual void Initialize();
 		virtual void BindToScene();
-		virtual void UnbindFromScene();
 		virtual void Bind(JUUID uuid);
+		void BindRenderable(RenderableSUUUID renderable);
+		void BindLight(LightSUUUID light);
+		void BindLightWithShadowMap(LightSUUUID light);
+		virtual void UnbindFromScene();
 		virtual void Unbind(JUUID uuid);
-		void BindRenderable(RenderableUUID renderable);
-		void UnbindRenderable(RenderableUUID renderable);
-		void BindLight(LightUUID light);
-		void UnbindLight(LightUUID light);
+		void UnbindRenderable(RenderableSUUUID renderable);
+		void UnbindLight(LightSUUUID light);
+		void UnbindLightWithShadowMap(LightSUUUID light);
+
 		bool ResolvesToSwapChain();
+		bool RenderReady();
+		void RenderReady(bool value);
 		void Render();
+
+		//projection
+		CameraProjections::Perspective perspectiveProjection;
+		CameraProjections::Orthographic orthographicProjection;
 
 		//Bounding Frustum
 		BoundingFrustum boundingFrustum;
 		void CalculateBoundingFrustum();
 
-		bool markedForDelete = false;
 		void Destroy();
 
-		ConstantsBufferUUID cameraCb;
 		void CreateConstantsBuffer();
-		void WriteConstantsBuffer(unsigned int backbufferIndex);
-		void ProcessKeyboardInput(DirectX::Keyboard::KeyboardStateTracker& tracker, DirectX::Keyboard::State& state);
+		void WriteConstantsBuffer(unsigned int frame);
 		void MoveAlongFwAxis(float dz);
 		void MovePerpendicularFwAxis(float dx, float dy);
 		void Rotate(float dx, float dy);
-		void ProcessGamepadInput(DirectX::GamePad::State& gamePadState, DirectX::SimpleMath::Vector2 gamePadCameraRotationSensitivity);
-		void ProcessCameraMouseRotation(DirectX::Mouse::State& mouseState, DirectX::SimpleMath::Vector2 mouseCameraRotationSensitivity, bool firstStep);
 		void UpdateLightPosition();
 		void UdateLightRotation();
 		void MoveForward(float step);
@@ -179,46 +155,73 @@ namespace Scene {
 		void MoveRight(float step);
 
 		//Lighting
-		ConstantsBufferUUID lightsCB;
-		std::vector<LightUUID> lights;
 		void CreateLightsConstantsBuffer();
 		void DestroyLightsConstantsBuffer();
-		ConstantsBufferUUID GetLightsConstantsBuffer() { return lightsCB; }
-		void WriteLightsConstantsBuffer();
+		ConstantsBufferUUID GetLightsConstantsBuffer() const { return lightsCB; }
+		void WriteLightsConstantsBuffer(unsigned int frame);
 
 		//ShadowMaps
-		ConstantsBufferUUID shadowMapsCB;
-		std::set<LightUUID> lightsWithShadowMaps;
 		void CreateShadowMapsConstantsBuffer();
 		void DestroyShadowMapsConstantsBuffer();
-		ConstantsBufferUUID GetShadowMapsConstantsBuffer() { return shadowMapsCB; }
-		void WriteShadowMapsConstantsBuffer();
-		bool SceneHasShadowMaps() { return !lightsWithShadowMaps.empty(); }
+		ConstantsBufferUUID GetShadowMapsConstantsBuffer() const { return shadowMapsCB; }
+		void WriteShadowMapsConstantsBuffer(unsigned int frame);
+		bool SceneHasShadowMaps() const { return !lightsWithShadowMaps.empty(); }
 
 		//IBL
 		TextureUsageInstanceMap iblTextures;
 		bool HasIBL();
 		void CreateIBLTextures();
+		void CreateIBLIrradianceTexture();
+		void CreateIBLPreFilteredEnvironmentTexture();
+		void CreateIBLBRDFLUTTexture();
+
 		void DestroyIBLTextures();
 		void SetIBLRootDescriptorTables(CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int& cbvSlot);
 #if defined(_EDITOR)
-		unsigned int previewRenderPassIndex = 0U;
-		unsigned int previewRenderToTextureIndex = 0U;
 		virtual void EditorPreview(size_t flags);
 		virtual void DestroyEditorPreview();
-		virtual JUUID CreateBillboard(CameraUUID camera);
+		virtual JUUID CreateBillboard(CameraSUUUID camera);
 		virtual void UpdateBillboard(JUUID uuid);
 		BoundingBox GetBoundingBox();
 
 		//Gizmo
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
+		virtual void WriteJson(nlohmann::json& j);
+#endif
+
+		//Destroy
+		bool markedForDelete = false;
+		//Render
+		bool renderReady = false;
+		//render passes instances
+		std::vector<RenderPassInstanceUUID> renderPassesUUID;
+		//this camera attributes
+		ConstantsBufferUUID cameraCb;
+		//renderables
+		std::set<RenderableSUUUID> renderables;
+		//lights
+		ConstantsBufferUUID lightsCB;
+		std::vector<LightSUUUID> lights;
+		//lights shadowmaps
+		ConstantsBufferUUID shadowMapsCB;
+		std::set<LightSUUUID> lightsWithShadowMaps;
+#if defined(_EDITOR)
+		unsigned int previewRenderPassIndex = 0U;
+		unsigned int previewRenderToTextureIndex = 0U;
 #endif
 	};
-
 
 	SODECL_FULL(Camera);
 
 #include <TrackUUID/JDecl.h>
 #include <CameraAtt.h>
 #include <JEnd.h>
+
+	void CamerasStep(SceneUnitId id);
+	void DestroyCameras();
+	void DestroyCameras(SceneUnitId id);
+	void DeleteCamera(SceneUnitId id, JUUID uuid);
+#if defined(_EDITOR)
+	void WriteCamerasJson(SceneUnitId id, nlohmann::json& json);
+#endif
 };

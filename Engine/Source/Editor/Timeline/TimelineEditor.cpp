@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "TimelineEditor.h"
 
-void TimelineEditor::Init(RenderableUUID renderable, Sequence& sequence)
+void TimelineEditor::Init(RenderableSUUUID renderable, Sequence& sequence)
 {
 	this->renderable = renderable;
 	channels.clear();
@@ -13,8 +13,7 @@ void TimelineEditor::Init(RenderableUUID renderable, Sequence& sequence)
 
 void TimelineEditor::Reset()
 {
-	renderable = "";
-
+	renderable.clear();
 	scroll = ImVec2(0.0f, 0.0f);
 	scrollbarLastMousePos = ImVec2(0.0f, 0.0f);
 	scrollbarMouseClicked[0] = false;
@@ -803,7 +802,7 @@ void TimelineEditor::CreatePopupForItemAt(Sequence& sequence, int channelId, int
 	popupChannelFrame = std::make_tuple(channelId, frame);
 	if (popup == TP_AddElement)
 	{
-		addElementPopup.Init(renderable(), frame);
+		addElementPopup.Init(renderable.unit(), renderable.uuid(), frame);
 	}
 }
 

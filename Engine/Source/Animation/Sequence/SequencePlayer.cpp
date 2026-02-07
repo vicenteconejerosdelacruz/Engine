@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "SequencePlayer.h"
+#include <SceneObject.h>
 
 SequencePlayer::SequencePlayer()
 {
@@ -10,7 +11,7 @@ SequencePlayer::SequencePlayer()
 	newSequence = false;
 }
 
-SequencePlayer::SequencePlayer(const Sequence& seq, JUUID uuid)
+SequencePlayer::SequencePlayer(const Sequence& seq, SceneUnitId id, JUUID uuid)
 {
 	sequence = seq;
 	time = 0.0f;
@@ -18,10 +19,10 @@ SequencePlayer::SequencePlayer(const Sequence& seq, JUUID uuid)
 	currentFrame = 0;
 	loop = false;
 	newSequence = false;
-	renderable = uuid;
+	renderable = MAKESUUUID(id, uuid);
 }
 
-void SequencePlayer::SetSequence(const Sequence& seq, JUUID uuid)
+void SequencePlayer::SetSequence(const Sequence& seq, SceneUnitId id, JUUID uuid)
 {
 	sequence = seq;
 	time = 0.0f;
@@ -30,7 +31,7 @@ void SequencePlayer::SetSequence(const Sequence& seq, JUUID uuid)
 	loop = false;
 	newSequence = true;
 	runnedFrames.clear();
-	renderable = uuid;
+	renderable = MAKESUUUID(id, uuid);
 }
 
 void SequencePlayer::Step(float dt)
@@ -225,7 +226,7 @@ void SequencePlayer::SetFrame(int frame, bool runningPlayer)
 	}
 }
 
-void SequencePlayer::ApplyFrameValues(RenderableUUID renderable)
+void SequencePlayer::ApplyFrameValues(RenderableSUUUID renderable)
 {
 	SequenceChannelElementAnimation* animation = sequence.GetAnimationElementAtFrame(currentFrame);
 	if (animation == nullptr)
@@ -246,7 +247,7 @@ void SequencePlayer::ApplyFrameValues(RenderableUUID renderable)
 
 void SequencePlayer::CreateFrameSoundFXs(int frame)
 {
-	sequence.CreateSoundFXsAtFrame(frame);
+	sequence.CreateSoundFXsAtFrame(frame, renderable.unit());
 }
 
 void SequencePlayer::ExecuteFrameScripts(int frame)

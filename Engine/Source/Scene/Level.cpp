@@ -2,22 +2,22 @@
 #include <Level.h>
 //scene objects
 #include <Scene.h>
-#include <Camera/Camera.h>
-#include <Renderable/Renderable.h>
-#include <Light/Light.h>
-#include <Sound/SoundFX.h>
-#include <Animated.h>
-#include <Controller.h>
+#include <Application.h>
+#include <fstream>
+#include <SceneObject.h>
 #if defined(_EDITOR)
-#include <Editor.h>
 #include <DefaultLevel.h>
+#include <BootLevel/BootLevel.h>
 
-using namespace Animation;
-using namespace Editor;
 namespace Editor {
-	extern std::string currentLevelName;
-	extern bool defaultLevel;
-	extern bool levelModified;
+	void MarkScenePanelAssetsAsDirty();
+	extern void CreateSceneUnitBoundingBox(SceneUnitId id);
+	extern void CreateSceneUnitBillboards(SceneUnitId id);
+	extern void CreateRegisteredBillboards(SceneUnitId id);
+	extern void CreateSceneUnitEditorIndependentCamera(SceneUnitId id);
+	extern void CopySceneUnitEditorCameraRenderPasses(SceneUnitId id);
+	extern void CreatePickingPass(SceneUnitId id);
+	extern void SwitchToSceneUnitEditorCamera(SceneUnitId id);
 }
 #endif
 
@@ -51,105 +51,149 @@ namespace Scene::Level {
 #endif
 	}
 
-	void LoadPendingLevel()
+	nlohmann::json GetDefaultLevel()
 	{
-		using namespace Game;
+		using namespace Editor::DefaultLevel;
 
-		DestroyControllers();
+		OutputDebugStringA(std::string("Loading default level\n").c_str());
 
-#if defined(_EDITOR)
-		DestroyBillboards();
-		DestroyEditorSceneObjectsReferences();
-#endif
-		DestroySceneObjects();
-#if defined(_EDITOR)
-		if (!loadDefaultLevel)
-			LoadLevel(levelToLoad);
-		else
-			LoadDefaultLevel();
-		loadDefaultLevel = false;
-#else
-		LoadLevel(levelToLoad);
-#endif
-		levelToLoad = "";
+		nlohmann::json level = nlohmann::json::object({});
+		level.merge_patch(GetDefaultLevelRenderables());
+		level.merge_patch(GetDefaultLevelCameras());
+		level.merge_patch(GetDefaultLevelLights());
+		level.merge_patch(GetDefaultLevelSounds());
+
+		return level;
 	}
 
-	void LoadSceneObjects(nlohmann::json& j, std::string type, std::function<void(nlohmann::json&)> loader)
+	nlohmann::json GetBootLevel()
+	{
+		using namespace Game::BootLevel;
+
+		OutputDebugStringA(std::string("Loading boot level\n").c_str());
+
+		nlohmann::json level = nlohmann::json::object({});
+		level.merge_patch(GetBootLevelRenderables());
+		level.merge_patch(GetBootLevelCameras());
+		level.merge_patch(GetBootLevelLights());
+		level.merge_patch(GetBootLevelSounds());
+
+		return level;
+	}
+
+	nlohmann::json GetLevelFromFile(std::filesystem::path filename)
+	{
+		std::string pathStr = "" + (std::filesystem::exists(filename) ? filename.generic_string() : (defaultLevelsFolder + filename.generic_string() + (filename.has_extension() ? "" : ".json")));
+		OutputDebugStringA(std::string("Loading level: " + pathStr + "\n").c_str());
+
+		std::ifstream file(pathStr);
+		bool isOpen = file.is_open();
+		nlohmann::json level = nlohmann::json::parse(file);
+
+		return level;
+	}
+
+	void LoadSceneObjects(std::unique_ptr<SceneUnit>& scene, nlohmann::json& j, std::string type, std::function<void(nlohmann::json&)> loader)
 	{
 		if (j.contains(type))
 		{
-			std::for_each(j.at(type).begin(), j.at(type).end(), [loader](nlohmann::json& json)
+			std::for_each(j.at(type).begin(), j.at(type).end(), [&scene, loader](nlohmann::json& json)
 				{
 					loader(json);
+					scene->AddSceneObjectToUnboundPool(json.at("uuid"));
 				}
 			);
 		}
 	}
 
-#if defined(_EDITOR)
-
-	void LoadDefaultLevel()
-	{
-		using namespace Editor::DefaultLevel;
-		using namespace Scene;
-		Editor::levelModified = false;
-		Editor::defaultLevel = true;
-		LoadSceneObjects(GetDefaultLevelRenderables(), SceneObjectTypeJsonContainer.at(SO_Renderables), Scene::CreateRenderable);
-		LoadSceneObjects(GetDefaultLevelCameras(), SceneObjectTypeJsonContainer.at(SO_Cameras), Scene::CreateCamera);
-		LoadSceneObjects(GetDefaultLevelLights(), SceneObjectTypeJsonContainer.at(SO_Lights), Scene::CreateLight);
-		LoadSceneObjects(GetDefaultLevelSounds(), SceneObjectTypeJsonContainer.at(SO_SoundEffects), Scene::CreateSoundFX);
-
-		MapControllers();
-	}
-#endif
-
-	void LoadLevel(std::filesystem::path level)
-	{
-#if defined(_EDITOR)
-		Editor::levelModified = false;
-		Editor::defaultLevel = false;
-#endif
-		std::string pathStr = "" + (std::filesystem::exists(level) ? level.generic_string() : (defaultLevelsFolder + level.generic_string() + ".json"));
-		OutputDebugStringA(std::string("Loading level: " + pathStr + "\n").c_str());
-
-		std::ifstream file(pathStr);
-		bool isOpen = file.is_open();
-		nlohmann::json data = nlohmann::json::parse(file);
-
-		DestroySceneObjects();
-
-		LoadSceneObjects(data, SceneObjectTypeJsonContainer.at(SO_Renderables), Scene::CreateRenderable);
-		LoadSceneObjects(data, SceneObjectTypeJsonContainer.at(SO_Cameras), Scene::CreateCamera);
-		LoadSceneObjects(data, SceneObjectTypeJsonContainer.at(SO_Lights), Scene::CreateLight);
-		LoadSceneObjects(data, SceneObjectTypeJsonContainer.at(SO_SoundEffects), Scene::CreateSoundFX);
-
-		MapControllers();
-
-		file.close();
-#if defined(_EDITOR)
-		Editor::currentLevelName = level.filename().string();
-		Editor::MarkScenePanelAssetsAsDirty();
-#endif
-	}
-
-	void DestroySceneObjects()
+	void LoadLevel(std::unique_ptr<SceneUnit>& scene, std::string filename, nlohmann::json data, std::function<void(std::string, unsigned int, unsigned int)> progress)
 	{
 		using namespace Scene;
-		using namespace Animation;
+#if defined(_EDITOR)
+		using namespace Editor;
 
-		//Destroy the lights(this will destroy the lights and it's cbvs)
-		DestroyLights();
+		if (!scene->IsIsolated())
+		{
+			CreateSceneUnitBillboards(scene->Id());
+		}
+#endif
+		scene->ResetLoadingCommandList();
+		scene->SetLoading(true);
+		scene->SetCanSubmitLoading(false);
 
-		//Destroy the cameras(this will destroy the cameras and the render passes)
-		DestroyCameras();
+		CreateRenderableSUSceneObjects(scene->Id());
+		CreateCameraSUSceneObjects(scene->Id());
+		CreateLightSUSceneObjects(scene->Id());
+		CreateSoundFXSUSceneObjects(scene->Id());
 
-		//Destroy sound instances
-		DestroySoundEffects();
+		std::vector<std::string> types =
+		{
+			SceneObjectTypeJsonContainer.at(SO_Renderables),
+			SceneObjectTypeJsonContainer.at(SO_Cameras),
+			SceneObjectTypeJsonContainer.at(SO_Lights),
+			SceneObjectTypeJsonContainer.at(SO_SoundEffects),
+		};
 
-		//Destroy animated(this will destroy constants buffers)
-		DestroyAnimated();
+		unsigned int total = std::accumulate(types.begin(), types.end(), 0U, [&](unsigned int sum, std::string type)
+			{
+				return sum + (data.contains(type) ? static_cast<unsigned int>(data.at(type).size()) : 0U);
+			}
+		);
+		unsigned int count = 0U;
 
-		//Destroy the renderables(this will detach the renderables from the cameras and destroy the renderables, materials, cbv, meshes, etc)
-		DestroyRenderables();
+		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Renderables), [&](nlohmann::json& json)
+			{
+				progress(json.at("name"), count, total);
+				CreateSURenderable(scene->Id(), json);
+				scene->InsertRenderableIntoLoadingPool(json.at("uuid"));
+				count++;
+				progress(json.at("name"), count, total);
+			}
+		);
+		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Cameras), [&](nlohmann::json& json)
+			{
+				progress(json.at("name"), count, total);
+				CreateSUCamera(scene->Id(), json);
+				scene->InsertCameraIntoLoadingPool(json.at("uuid"));
+				count++;
+				progress(json.at("name"), count, total);
+			}
+		);
+		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Lights), [&](nlohmann::json& json)
+			{
+				progress(json.at("name"), count, total);
+				CreateSULight(scene->Id(), json);
+				scene->InsertLightIntoLoadingPool(json.at("uuid"));
+				count++;
+				progress(json.at("name"), count, total);
+			}
+		);
+		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_SoundEffects), [&](nlohmann::json& json)
+			{
+				progress(json.at("name"), count, total);
+				CreateSUSoundFX(scene->Id(), json);
+				count++;
+				progress(json.at("name"), count, total);
+			}
+		);
+
+#if defined(_EDITOR)
+		if (!scene->IsIsolated())
+		{
+			CreatePickingPass(scene->Id());
+			CreateSceneUnitBoundingBox(scene->Id());
+			CreateSceneUnitEditorIndependentCamera(scene->Id());
+			CreateRegisteredBillboards(scene->Id());
+		}
+#endif
+
+		MapControllers(scene->Id());
+		BindSceneObjects(scene->Id());
+#if defined(_EDITOR)
+		if (!scene->IsIsolated())
+		{
+			CopySceneUnitEditorCameraRenderPasses(scene->Id());
+		}
+#endif
 	}
 }

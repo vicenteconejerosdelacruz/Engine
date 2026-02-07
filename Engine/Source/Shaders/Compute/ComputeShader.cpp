@@ -4,6 +4,7 @@
 #include "ComputeInterface.h"
 #include <DeviceUtils/RootSignature/RootSignature.h>
 #include <DeviceUtils/PipelineState/PipelineState.h>
+#include <Scene.h>
 
 extern std::unique_ptr<Renderer> renderer;
 
@@ -34,9 +35,11 @@ namespace ComputeShader
 		pipelineState = CreateComputePipelineState(std::string("pipelineState:" + shaderName), shaderIns->byteCode, rootSignature);
 	}
 
-	void ComputeShader::SetComputeState()
+	void ComputeShader::SetComputeState(SceneUnitId unit)
 	{
-		CComPtr<ID3D12GraphicsCommandList2>& commandList = renderer->commandList;
+		using namespace Scene;
+
+		CComPtr<ID3D12GraphicsCommandList2>& commandList = GetSceneUnit(unit)->GetComputeCommandList();
 		commandList->SetComputeRootSignature(rootSignature);
 		commandList->SetPipelineState(pipelineState);
 	}

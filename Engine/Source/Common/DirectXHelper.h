@@ -81,6 +81,6 @@ void LogCComPtrAddress(std::string name, CComPtr<T> p)
 	pAddressSStream << std::setw(16) << std::setfill('0') << std::hex << p.p;
 	pAddressSStream >> pAddressS;
 	std::string debugS = "Live " + std::string(typeid(T).name()) + "(" + name + ") at 0x" + pAddressS + "\n";
-	//OutputDebugStringA(debugS.c_str());
+	OutputDebugStringA(debugS.c_str());
 #endif
 }

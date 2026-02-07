@@ -11,15 +11,15 @@
 #define JEXPOSE_MAP_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
 #define JPREVIEW(NAME,JEDVALUETYPE)
 #define JTRACKUUID(CLASS,NAME,LIMIT,COND) \
-	size_t GetCountFrom##NAME();\
-	std::set<JUUID>& Get##NAME();\
-	std::unique_ptr<CLASS>& GetFrom##NAME(JUUID uuid);\
-	std::unique_ptr<CLASS>& GetFrom##NAME##ByName(std::string name);\
-	std::vector<JNAME> GetNamesFrom##NAME();\
-	std::vector<JUUIDName> GetUUIDNamesFrom##NAME();\
-	JNAME GetNameFrom##NAME(JUUID uuid);\
-	void Insert##CLASS##Into##NAME(JUUID uuid);\
-	void Erase##CLASS##From##NAME(JUUID uuid);\
+	size_t GetCountFrom##NAME(SceneUnitId id);\
+	std::set<JUUID>& Get##NAME(SceneUnitId id);\
+	std::unique_ptr<CLASS>& GetFrom##NAME(SceneUnitId id, JUUID uuid);\
+	std::unique_ptr<CLASS>& GetFrom##NAME##ByName(SceneUnitId id, std::string name);\
+	std::vector<JNAME> GetNamesFrom##NAME(SceneUnitId id);\
+	std::vector<JUUIDName> GetUUIDNamesFrom##NAME(SceneUnitId id);\
+	JNAME GetNameFrom##NAME(SceneUnitId id, JUUID uuid);\
+	void Insert##CLASS##Into##NAME(SceneUnitId id, JUUID uuid);\
+	void Erase##CLASS##From##NAME(SceneUnitId id, JUUID uuid);\
 
 #endif
 
@@ -36,56 +36,52 @@
 #define JEXPOSE_MAP_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
 #define JPREVIEW(NAME,JEDVALUETYPE)
 #define JTRACKUUID(CLASS,NAME,LIMIT,COND) \
-	static std::set<JUUID> NAME;\
-	size_t GetCountFrom##NAME() { return NAME.size(); }\
-	std::set<JUUID>& Get##NAME() { return NAME; }\
-	std::unique_ptr<CLASS>& GetFrom##NAME(JUUID uuid)\
+	static std::unordered_map<SceneUnitId, std::set<JUUID>> NAME;\
+	size_t GetCountFrom##NAME(SceneUnitId id) {\
+		return NAME[id].size();\
+	 }\
+	std::set<JUUID>& Get##NAME(SceneUnitId id) { return NAME[id]; }\
+	std::unique_ptr<CLASS>& GetFrom##NAME(SceneUnitId id, JUUID uuid)\
 	{\
-		assert(NAME.contains(uuid));\
-		return Get##CLASS##SceneObject(uuid);\
+		assert(NAME[id].contains(uuid));\
+		return Get##CLASS##SUSceneObject(id, uuid);\
 	}\
-	std::unique_ptr<CLASS>& GetFrom##NAME##ByName(std::string name)\
-	{\
-		JUUID uuid = Get##CLASS##UUIDByName(name);\
-		return GetFrom##NAME(uuid);\
-	}\
-	std::vector<JNAME> GetNamesFrom##NAME()\
+	std::vector<JNAME> GetNamesFrom##NAME(SceneUnitId id)\
 	{\
 		std::vector<JNAME> names;\
-		std::transform(NAME.begin(), NAME.end(), std::back_inserter(names), [](JUUID uuid) { return Get##CLASS##Name(uuid); });\
+		std::transform(NAME[id].begin(), NAME[id].end(), std::back_inserter(names), [id](JUUID uuid) { return Get##CLASS##SUName(id, uuid); });\
 		std::sort(names.begin(), names.end());\
 		return names;\
 	}\
-	std::vector<JUUIDName> GetUUIDNamesFrom##NAME()\
+	std::vector<JUUIDName> GetUUIDNamesFrom##NAME(SceneUnitId id)\
 	{\
 		std::vector<JUUIDName> uuidNames;\
-		std::transform(NAME.begin(), NAME.end(), std::back_inserter(uuidNames), [](JUUID uuid)\
+		std::transform(NAME[id].begin(), NAME[id].end(), std::back_inserter(uuidNames), [id](JUUID uuid)\
 			{\
 				JUUIDName uuidName;\
 				JUUID& uuid0 = std::get<0>(uuidName);\
 				JUUID& name = std::get<1>(uuidName);\
 				uuid0 = uuid;\
-				name = Get##CLASS##Name(uuid);\
+				name = Get##CLASS##SUName(id, uuid);\
 				return uuidName;\
 			}\
 		);\
 		SortUUIDByName(uuidNames);\
 		return uuidNames;\
 	}\
-	JNAME GetNameFrom##NAME(JUUID uuid)\
+	JNAME GetNameFrom##NAME(SceneUnitId id, JUUID uuid)\
 	{\
-		assert(NAME.contains(uuid));\
-		return Get##CLASS##Name(uuid);\
+		return Get##CLASS##SUName(id, uuid);\
 	}\
-	void Insert##CLASS##Into##NAME(JUUID uuid)\
+	void Insert##CLASS##Into##NAME(SceneUnitId id, JUUID uuid)\
 	{\
-		if(LIMIT>0 && !NAME.contains(uuid))\
-			assert(NAME.size()<LIMIT);\
-		NAME.insert(uuid);\
+		if(LIMIT>0 && !NAME[id].contains(uuid))\
+			assert(NAME[id].size()<LIMIT);\
+		NAME[id].insert(uuid);\
 	}\
-	void Erase##CLASS##From##NAME(JUUID uuid)\
+	void Erase##CLASS##From##NAME(SceneUnitId id, JUUID uuid)\
 	{\
-		NAME.erase(uuid);\
+		NAME[id].erase(uuid);\
 	}
 
 #endif
@@ -102,7 +98,7 @@
 #define JEXPOSE_MAP_TRANSFORM(KEYTYPE,VALUETYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
 #define JEXPOSE_MAP_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
 #define JPREVIEW(NAME,JEDVALUETYPE)
-#define JTRACKUUID(CLASS,NAME,LIMIT,COND) if(COND) { Insert##CLASS##Into##NAME(uuid()); }
+#define JTRACKUUID(CLASS,NAME,LIMIT,COND)  if(COND) { Insert##CLASS##Into##NAME(unit, uuid()); }
 
 #endif
 
@@ -118,7 +114,7 @@
 #define JEXPOSE_MAP_TRANSFORM(KEYTYPE,VALUETYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
 #define JEXPOSE_MAP_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
 #define JPREVIEW(NAME,JEDVALUETYPE)
-#define JTRACKUUID(CLASS,NAME,LIMIT,COND) Erase##CLASS##From##NAME(uuid());
+#define JTRACKUUID(CLASS,NAME,LIMIT,COND) Erase##CLASS##From##NAME(unit, uuid());
 
 #endif
 
@@ -135,5 +131,21 @@
 #define JEXPOSE_MAP_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
 #define JPREVIEW(NAME,JEDVALUETYPE)
 #define JTRACKUUID(CLASS,NAME,LIMIT,COND) NAME.clear();
+
+#endif
+
+#if defined(JEXPOSE_TRACK_UUID_CLEAR_UNIT)
+#define JCLASS(CLASS,GETJOBJECTS)
+#define JTYPE(TYPE,VALUE)
+#define JEXPOSE(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_TRANSFORM(TYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_ENUM(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_VECTOR(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_VECTOR_TRANSFORM(TYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_SET(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_MAP_TRANSFORM(KEYTYPE,VALUETYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_MAP_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JPREVIEW(NAME,JEDVALUETYPE)
+#define JTRACKUUID(CLASS,NAME,LIMIT,COND) NAME.erase(id);
 
 #endif

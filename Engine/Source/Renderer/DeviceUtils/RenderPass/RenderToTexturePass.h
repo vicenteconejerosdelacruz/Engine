@@ -22,9 +22,9 @@ namespace DeviceUtils
 		CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDepthStencilTextureHandle;
 
 		~RenderToTexturePass() { Destroy(); }
-		void Pass(std::function<void()> renderCallback, XMVECTORF32 clearColor = DirectX::Colors::Black);
-		void BeginRenderPass(XMVECTORF32 clearColor = DirectX::Colors::Black);
-		void EndRenderPass();
+		void Pass(SceneUnitId unit, std::function<void(SceneUnitId)> renderCallback, XMVECTORF32 clearColor = DirectX::Colors::Black);
+		void BeginRenderPass(SceneUnitId unit, XMVECTORF32 clearColor = DirectX::Colors::Black);
+		void EndRenderPass(SceneUnitId unit);
 		void Destroy();
 		void ReleaseResources();
 		void Resize(unsigned int width, unsigned int height);

@@ -1,6 +1,11 @@
 //#define TEXTFLOATREGEXREPLACE std::regex(".+-*/")
 #define TEXTFLOATREGEXREPLACE std::regex("\\*\\/")
 
+namespace Editor
+{
+	extern SceneUnitId currentSceneUnitId;
+};
+
 template<typename T, JsonToEditorValueType J>
 JEdvEditorDrawerFunction DrawValue() { return nullptr; }
 
@@ -1220,46 +1225,44 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_filepath_vector_i
 						return;
 					}
 
-					ImGui::DrawTextureImage((ImTextureID)texture->preview->gpuHandle.ptr, texture->width(), texture->height());
+					ImGui::DrawTextureImage((ImTextureID)texture->preview.textures.at(texture->preview.frame)->gpuHandle.ptr, texture->width(), texture->height());
 					if (texture->type() == TextureType_Array)
 					{
 						ImGui::PushID(std::string(texture->uuid() + "-controller").c_str());
 						ImGui::DrawAnimationController(
-							[&texture] { return texture->previewIsPlaying; },
-							[&texture](auto play) { texture->previewIsPlaying = play; },
-							[&texture](float time) { texture->previewTime = time; },
-							[&texture] { return texture->previewTimeFactor; },
-							[&texture](float timeFactor) { texture->previewTimeFactor = timeFactor; },
-							[&texture] {
-								texture->previewTime = 0.0f;
-								texture->previewIsLooping = false;
-								texture->previewFrame = 0;
-								texture->reloadPreview = true;
+							[&] { return texture->preview.playing; },
+							[&](auto play) { texture->preview.playing = play; },
+							[&](float time) { texture->preview.time = time; },
+							[&] { return texture->preview.timeFactor; },
+							[&](float timeFactor) { texture->preview.timeFactor = timeFactor; },
+							[&] {
+								texture->preview.time = 0.0f;
+								texture->preview.looping = false;
+								texture->preview.frame = 0;
 							},
-							[&texture] {
-								texture->previewTime = 1.0f;
-								texture->previewIsLooping = false;
-								texture->previewFrame = texture->numFrames() - 1;
-								texture->reloadPreview = true;
+							[&] {
+								texture->preview.time = 1.0f;
+								texture->preview.looping = false;
+								texture->preview.frame = texture->numFrames() - 1;
 							},
-							[&texture] { return texture->previewIsLooping; },
-							[&texture](bool looping) { texture->previewIsLooping = looping; }
+							[&] { return texture->preview.looping; },
+							[&](bool looping) { texture->preview.looping = looping; }
 						);
 						ImGui::PopID();
 
 						ImGui::SameLine();
 						ImGui::PushID(std::string(texture->uuid() + "-timeFactor").c_str());
 						ImGui::PushItemWidth(100.0f);
-						ImGui::InputFloat("timeFactor", &texture->previewTimeFactor, 0.001f, 0.001f, "%.3f");
+						ImGui::InputFloat("timeFactor", &texture->preview.timeFactor, 0.001f, 0.001f, "%.3f");
 						ImGui::PopItemWidth();
 						ImGui::PopID();
 
 						ImGui::Text("frame");
 						ImGui::SameLine();
 						ImGui::PushID((std::string(texture->uuid()) + "-frame-slider").c_str());
-						if (ImGui::SliderInt("##", &texture->previewFrame, 0, texture->numFrames() - 1))
+						if (ImGui::SliderInt("##", &texture->preview.frame, 0, texture->numFrames() - 1))
 						{
-							texture->reloadPreview = true;
+							//texture->reloadPreview = true;
 						}
 						ImGui::PopID();
 					}
@@ -1293,6 +1296,7 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_filepath_vector_i
 
 			for (auto& t : textures)
 			{
+				if (!t->preview.previewLoaded->load()) continue;
 				drawTexture(t);
 				drawTexturePreview(t);
 				if (t != *(textures.end() - 1))
@@ -1807,6 +1811,11 @@ inline void DrawResourceSelection(
 		ImGui::TableSetColumnIndex(1);
 		ImGui::PushID(attribute.c_str());
 
+		if (ImGui::Button(ICON_FA_TIMES))
+		{
+			update("");
+		}
+		ImGui::SameLine();
 		ImGui::OpenTemplate(iconCode, selected);
 		ImGui::SameLine();
 		ImGui::DrawComboSelection(selected, selectables, [attribute, &json, update](JUUIDName option)
@@ -1829,7 +1838,8 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_renderable>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
-			DrawResourceSelection(attribute, json, Scene::GetNameFromRenderables, SortUUIDNameByName(Scene::GetRenderablesUUIDsNames), ICON_FA_SNOWMAN);
+			auto getName = [](JUUID uuid) { return Scene::GetNameFromCameras(Editor::currentSceneUnitId, uuid); };
+			DrawResourceSelection(attribute, json, getName, SortUUIDSUNameByName(Editor::currentSceneUnitId, Scene::GetRenderablesSUUUIDsNames), ICON_FA_SNOWMAN);
 		};
 }
 
@@ -1942,32 +1952,30 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_animation_sequence
 				};
 			auto gotoPrevAnim = [setAnim](auto animable)
 				{
-					/*
-					if (animable->currentSequence == nullptr)
-					{
-						auto it = animable->animationsSequences.sequences.end();
-						it--;
-						setAnim(animable, it);
-						return;
-					}
-
-					for (auto it = animable->animationsSequences.sequences.begin(); it != animable->animationsSequences.sequences.end(); it++)
-					{
-						if (animable->currentSequence == &(it->second))
-						{
-							if (it == animable->animationsSequences.sequences.begin())
-							{
-								it = animable->animationsSequences.sequences.end();
-							}
-							it--;
-							setAnim(animable, it);
-							return;
-						}
-					}
-					auto it = animable->animationsSequences.sequences.end();
-					it--;
-					setAnim(animable, it);
-					*/
+					//if (animable->currentSequence == nullptr)
+					//{
+					//	auto it = animable->animationsSequences.sequences.end();
+					//	it--;
+					//	setAnim(animable, it);
+					//	return;
+					//}
+					//
+					//for (auto it = animable->animationsSequences.sequences.begin(); it != animable->animationsSequences.sequences.end(); it++)
+					//{
+					//	if (animable->currentSequence == &(it->second))
+					//	{
+					//		if (it == animable->animationsSequences.sequences.begin())
+					//		{
+					//			it = animable->animationsSequences.sequences.end();
+					//		}
+					//		it--;
+					//		setAnim(animable, it);
+					//		return;
+					//	}
+					//}
+					//auto it = animable->animationsSequences.sequences.end();
+					//it--;
+					//setAnim(animable, it);
 				};
 			auto gotoNextAnim = [setAnim](auto animable)
 				{
@@ -2040,7 +2048,7 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_animation_sequence
 							animable->SetCurrentAnimation(newSequence);
 							animable->animationTime(0.0f);
 							animable->StepAnimation(0.0f);
-							animable->sequencePlayer.ApplyFrameValues(animable->uuid());
+							animable->sequencePlayer.ApplyFrameValues(MAKESUUUID(Editor::currentSceneUnitId, animable->uuid()));
 
 						}
 					);
@@ -2178,7 +2186,6 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_te_renderpass_vec
 						std::string uuid = std::get<0>(item1);
 						if (uuid != "")
 						{
-							//std::shared_ptr<RenderPassJson> rp = GetRenderPassTemplate(uuid);
 							RenderPassJsonUUID rp = uuid;
 							if (rp->renderCallbackOverride() == RenderPassRenderCallbackOverride_Resolve) return false;
 						}
@@ -2188,7 +2195,6 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_te_renderpass_vec
 						std::string uuid = std::get<0>(item2);
 						if (uuid != "")
 						{
-							//std::shared_ptr<RenderPassJson> rp = GetRenderPassTemplate(uuid);
 							RenderPassJsonUUID rp = uuid;
 							if (rp->renderCallbackOverride() == RenderPassRenderCallbackOverride_Resolve) return false;
 						}
@@ -2231,7 +2237,9 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_camera_vector>
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
-			EditorDrawVector(attribute, json, ICON_FA_CAMERA, Scene::GetSceneObjectsByType(SO_Cameras), Scene::GetNameFromCameras, ImGui::OpenSceneObject, [&json, attribute](unsigned int index, JUUIDName item) //filtering
+			auto getName = [](JUUID uuid) { return Scene::GetNameFromCameras(Editor::currentSceneUnitId, uuid); };
+			auto getObjects = [&] {return Scene::GetSUSceneObjectsByType(Editor::currentSceneUnitId, SO_Cameras); };
+			EditorDrawVector(attribute, json, ICON_FA_CAMERA, getObjects, getName, ImGui::OpenSceneObject, [&json, attribute](unsigned int index, JUUIDName item) //filtering
 				{
 					std::string uuid = std::get<0>(item);
 					JObject* j0 = json.at(0);
@@ -2251,7 +2259,9 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_light_vector>(
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
-			EditorDrawVector(attribute, json, ICON_FA_LIGHTBULB, Scene::GetSceneObjectsByType(SO_Lights), Scene::GetNameFromLights, ImGui::OpenSceneObject);
+			auto getName = [](JUUID uuid) { return Scene::GetNameFromLights(Editor::currentSceneUnitId, uuid); };
+			auto getObjects = [&] {return Scene::GetSUSceneObjectsByType(Editor::currentSceneUnitId, SO_Lights); };
+			EditorDrawVector(attribute, json, ICON_FA_LIGHTBULB, getObjects, getName, ImGui::OpenSceneObject);
 		};
 }
 
@@ -2260,7 +2270,9 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_renderable_vec
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
-			EditorDrawVector(attribute, json, ICON_FA_SNOWMAN, Scene::GetSceneObjectsByType(SO_Renderables), Scene::GetNameFromRenderables, ImGui::OpenSceneObject);
+			auto getName = [](JUUID uuid) { return Scene::GetNameFromRenderables(Editor::currentSceneUnitId, uuid); };
+			auto getObjects = [&] {return Scene::GetSUSceneObjectsByType(Editor::currentSceneUnitId, SO_Renderables); };
+			EditorDrawVector(attribute, json, ICON_FA_SNOWMAN, getObjects, getName, ImGui::OpenSceneObject);
 		};
 }
 
@@ -2269,7 +2281,9 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_soundeffect_ve
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
-			EditorDrawVector(attribute, json, ICON_FA_MUSIC, Scene::GetSceneObjectsByType(SO_SoundEffects), Scene::GetNameFromSoundEffects, ImGui::OpenSceneObject);
+			auto getName = [](JUUID uuid) { return Scene::GetNameFromSoundEffects(Editor::currentSceneUnitId, uuid); };
+			auto getObjects = [&] {return Scene::GetSUSceneObjectsByType(Editor::currentSceneUnitId, SO_SoundEffects); };
+			EditorDrawVector(attribute, json, ICON_FA_MUSIC, getObjects, getName, ImGui::OpenSceneObject);
 		};
 }
 
@@ -3905,6 +3919,15 @@ inline JEdvEditorDrawerFunction DrawVector<DXGI_FORMAT, jedv_t_dxgi_format_vecto
 		};
 }
 
+template<>
+inline JEdvEditorDrawerFunction DrawEnum<DXGI_FORMAT, jedv_t_dxgi_depth_format>(
+	std::unordered_map<DXGI_FORMAT, std::string>& EtoS,
+	std::unordered_map<std::string, DXGI_FORMAT>& StoE
+)
+{
+	return DrawEnum<DXGI_FORMAT, jedv_t_enum>(DXGI_DEPTH_FORMATToString, StringTo_DXGI_DEPTH_FORMAT);
+}
+
 struct RasterizerDesc;
 template<>
 inline JEdvEditorDrawerFunction DrawValue<RasterizerDesc, jedv_t_object>()
@@ -4673,6 +4696,7 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_controller_vector
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
+			//this was commented
 			/*
 			auto setValue = [attribute, &json](unsigned int index, std::string controller)
 				{
@@ -4917,9 +4941,9 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_controller_vector>()
 				{
 					nlohmann::json placeholder;
 					JUUID sceneObject = json.at(objectIndex)->at("uuid");
-					JUUID uuid = CreateController(controllerName, sceneObject, placeholder);
+					JUUID uuid = CreateController(controllerName, MAKESUUUID(Editor::currentSceneUnitId, sceneObject), placeholder);
 					json.at(objectIndex)->at(attribute)[controllerName] = uuid;
-					GetController(uuid)->Map(sceneObject);
+					GetController(uuid)->Map(MAKESUUUID(Editor::currentSceneUnitId, sceneObject));
 				};
 			auto swapController = [&](int objectIndex, std::string controllerFrom, std::string controllerTo)
 				{
@@ -5049,7 +5073,7 @@ inline JEdvEditorDrawerFunction DrawPreview<jedv_draw_renderpass_vector>()
 					ImGui::Text(std::string(j->at("name")).c_str());
 				}
 
-				CameraUUID cam = std::string(json[0]->at("uuid"));
+				CameraSUUUID cam = MAKESUUUID(Editor::currentSceneUnitId, std::string(json[0]->at("uuid")));
 				unsigned int numPasses = static_cast<unsigned int>(cam->renderPassesUUID.size());
 
 				std::set<unsigned int> previewAble;

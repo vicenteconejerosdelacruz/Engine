@@ -9,8 +9,8 @@
 
 struct JObject;
 
-typedef std::function<void(JUUID)> JObjectChangeCallback;
-typedef std::function<void(unsigned int, unsigned int)> JObjectChangePostCallback;
+//typedef std::function<void(JUUID)> JObjectChangeCallback;
+//typedef std::function<void(unsigned int, unsigned int)> JObjectChangePostCallback;
 
 struct JObject : nlohmann::json
 {
@@ -86,17 +86,24 @@ struct JObject : nlohmann::json
 	virtual void EditorPreview(size_t flags) {}
 	virtual void DestroyEditorPreview() {}
 
+	/*
 	std::unordered_map<JUUID, std::tuple<JObjectChangeCallback, JObjectChangePostCallback>> bindedChangesCallbacks;
+	*/
+	/*
 	void BindChangeCallback(JUUID objectUUID = "", JObjectChangeCallback cb = nullptr, JObjectChangePostCallback postCb = nullptr)
 	{
 		if (objectUUID == "" || (cb == nullptr && postCb == nullptr)) return;
 		bindedChangesCallbacks.insert_or_assign(objectUUID, std::make_tuple(cb, postCb));
 	}
+	*/
+	/*
 	void UnbindChangeCallback(JUUID objectUUID)
 	{
 		if (objectUUID == "") return;
 		bindedChangesCallbacks.erase(objectUUID);
 	}
+	*/
+	/*
 	static inline void RunChangesCallback(auto JObjectContainer, auto cbComplete)
 	{
 		unsigned int total = 0U;
@@ -126,4 +133,5 @@ struct JObject : nlohmann::json
 			}
 		);
 	}
+	*/
 };

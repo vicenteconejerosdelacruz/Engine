@@ -19,18 +19,18 @@ namespace Templates {
 		meshes.insert_or_assign(uuid, name);
 	}
 
-	std::unique_ptr<MeshInstance>& GetMeshInstance(JUUID uuid)
+	std::unique_ptr<MeshInstance>& GetMeshInstance(SceneUnitId id, JUUID uuid)
 	{
 		using namespace Mesh;
 
 		if (meshes.contains(uuid))
 		{
 			JNAME& name = meshes.at(uuid);
-			return refTracker.AddRef(uuid, [uuid, name]()
+			return refTracker.AddRef(uuid, [&]()
 				{
 					std::unique_ptr<MeshInstance> instance = std::make_unique<MeshInstance>();
 					instance->uuid = uuid;
-					LoadPrimitiveIntoMeshFunctions.at(name)(instance, nullptr);
+					LoadPrimitiveIntoMeshFunctions.at(name)(id, instance, nullptr);
 					return instance;
 				}
 			);
@@ -41,16 +41,24 @@ namespace Templates {
 		}
 	}
 
-	std::unique_ptr<MeshInstance>& GetMeshInstance(JUUID uuid, VertexClass vertexClass, void* vertexData, unsigned int vertexSize, unsigned int verticesCount, const void* indices, unsigned int indicesCount)
+	std::unique_ptr<MeshInstance>& GetMeshInstance(JUUID uuid)
 	{
 		using namespace Mesh;
-		return refTracker.AddRef(uuid, [uuid, vertexClass, vertexData, vertexSize, verticesCount, indices, indicesCount]()
+		return  refTracker.FindValue(uuid);
+	}
+
+	std::unique_ptr<MeshInstance>& GetMeshInstance(SceneUnitId id, JUUID uuid, VertexClass vertexClass, void* vertexData, unsigned int vertexSize, unsigned int verticesCount, const void* indices, unsigned int indicesCount)
+	{
+		using namespace Mesh;
+		using namespace Scene;
+		return refTracker.AddRef(uuid, [&]()
 			{
 				std::unique_ptr<MeshInstance> instance = std::make_unique<MeshInstance>();
 				instance->uuid = uuid;
 				instance->vertexClass = vertexClass;
-				InitializeVertexBufferView(renderer->d3dDevice, renderer->commandList, vertexData, vertexSize, verticesCount, instance->vbvData);
-				InitializeIndexBufferView(renderer->d3dDevice, renderer->commandList, indices, indicesCount, instance->ibvData);
+				auto& commandList = GetSceneUnit(id)->GetLoadingCommandList();
+				InitializeVertexBufferView(renderer->d3dDevice, commandList, vertexData, vertexSize, verticesCount, instance->vbvData);
+				InitializeIndexBufferView(renderer->d3dDevice, commandList, indices, indicesCount, instance->ibvData);
 				return instance;
 			}
 		);

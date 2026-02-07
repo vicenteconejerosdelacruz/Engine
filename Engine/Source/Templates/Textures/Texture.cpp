@@ -1,30 +1,21 @@
 #include "pch.h"
 #include "Texture.h"
-#include <DXTypes.h>
-#include <NoStd.h>
-#include <DDSTextureLoader.h>
-#include <Templates.h>
-#include <TemplateDef.h>
 #include <Renderer.h>
+#include <Scene.h>
 #include <DirectXHelper.h>
 #include <ImageConvert.h>
-#include <IBL/DiffuseIrradianceMap.h>
-#include <IBL/PrefilteredEnvironmentMap.h>
-#include <IBL/BRDFLUT.h>
-#include <ShaderMaterials.h>
-#include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
-#include <algorithm>
-#include <NoMath.h>
 
 extern std::unique_ptr<Renderer> renderer;
 
 namespace Editor {
-	void MarkTemplatesPanelAssetsAsDirty();
+	extern SceneUnitId currentSceneUnitId;
+	extern void MarkTemplatesPanelAssetsAsDirty();
 };
 
 namespace Templates
 {
 #if defined(_EDITOR)
+
 #include <Editor/JDrawersDef.h>
 #include <TextureAtt.h>
 #include <JEnd.h>
@@ -44,11 +35,10 @@ namespace Templates
 #include <Creator/JValidatorDef.h>
 #include <TextureAtt.h>
 #include <JEnd.h>
+
 #endif
 
 #if defined(_EDITOR)
-	TextureInstanceUUID texturePreview;
-
 	namespace Texture
 	{
 		bool createIbl = false;
@@ -78,177 +68,28 @@ namespace Templates
 
 	TEMPDEF_FULL(Texture);
 	TEMPDEF_REFTRACKER(Texture);
+	std::vector<std::tuple<unsigned int, std::function<void()>>> textureUploadResourcesFreeCallback;
 
-#if defined(_EDITOR)
-	void TextureJson::EditorPreview(size_t flags)
+	void RunTextureUploadFreeResources()
 	{
-		if (flags & (1 << Update_images))
+		for (auto it = textureUploadResourcesFreeCallback.begin(); it != textureUploadResourcesFreeCallback.end();)
 		{
-			previewFrame = 0;
-			previewIsPlaying = false;
-			previewIsLooping = false;
-			previewTime = 0.0f;
-			previewTimeFactor = 1.0f;
-			CreatePreviewTexture();
+			auto& [steps, callback] = *it;
+			steps--;
+			if (steps == 0U)
+			{
+				callback();
+				it = textureUploadResourcesFreeCallback.erase(it);
+				continue;
+			}
+			it++;
 		}
 	}
 
-	void TextureJson::DestroyEditorPreview()
+	void PushTextureUploadFreeResourceCallback(unsigned int steps, std::function<void()> callback)
 	{
-		if (!preview.empty())
-		{
-			DeleteTextureInstance(preview());
-			preview.clear();
-		}
+		textureUploadResourcesFreeCallback.push_back(std::make_tuple(steps, callback));
 	}
-
-	void TextureJson::CreatePreviewTexture()
-	{
-		DestroyEditorPreview();
-		CreateTextureInstance(uuid(), [this]
-			{
-				return std::make_unique<TextureInstance>(uuid(), previewFrame);
-			}
-		);
-		preview = uuid();
-		reloadPreview = false;
-	}
-
-	void TextureJsonsStep()
-	{
-		std::set<TextureJsonUUID> texs;
-		std::transform(Texturetemplates.begin(), Texturetemplates.end(), std::inserter(texs, texs.begin()), [](auto& temps)
-			{
-				return temps.first;
-			}
-		);
-
-		std::set<TextureJsonUUID> rebuildImages;
-		std::copy_if(texs.begin(), texs.end(), std::inserter(rebuildImages, rebuildImages.begin()), [](auto tex)
-			{
-				return tex->dirty(TextureJson::Update_images);
-			}
-		);
-		std::set<TextureJsonUUID> changedAttributes;
-		std::copy_if(texs.begin(), texs.end(), std::inserter(changedAttributes, changedAttributes.begin()), [](auto tex)
-			{
-				return tex->dirty(TextureJson::Update_format) || tex->dirty(TextureJson::Update_width) ||
-					tex->dirty(TextureJson::Update_height) || tex->dirty(TextureJson::Update_mipLevels) ||
-					tex->dirty(TextureJson::Update_numFrames);
-			}
-		);
-
-		if (Texture::createIbl)
-		{
-			Texture::createIbl = false;
-			using namespace ComputeShader;
-
-			std::string envMapUUID = GetTextureUUIDByName(Texture::iblJson.at("name"));
-
-			auto getIBLFile = [](auto attribute, auto name)
-				{
-					std::filesystem::path path = Texture::iblJson.at("name");
-					std::string stem = path.stem().string() + "_" + name;
-					path = path.relative_path().parent_path() / (stem + ".dds");
-					path = nostd::normalize_path(path.string());
-					return path;
-				};
-
-			if (Texture::iblJson.contains("createIrradiance") && bool(Texture::iblJson.at("createIrradiance")))
-			{
-				std::filesystem::path irradiance = getIBLFile("createIrradiance", "irradiance");
-				std::shared_ptr<DiffuseIrradianceMap> diffuseIrradianceMap;
-				renderer->Flush();
-				renderer->RenderCriticalFrame([&diffuseIrradianceMap, envMapUUID, irradiance]
-					{
-						diffuseIrradianceMap = std::make_shared<DiffuseIrradianceMap>(envMapUUID, irradiance);
-						diffuseIrradianceMap->Compute();
-					}
-				);
-				diffuseIrradianceMap->Solution();
-			}
-			if (Texture::iblJson.contains("createPrefilteredEnv") && bool(Texture::iblJson.at("createPrefilteredEnv")))
-			{
-				std::filesystem::path prefiltered_env = getIBLFile("createPrefilteredEnv", "prefiltered_env");
-				std::shared_ptr<PreFilteredEnvironmentMap> preFilteredEnvironmentMap;
-				renderer->Flush();
-				renderer->RenderCriticalFrame([&preFilteredEnvironmentMap, envMapUUID, prefiltered_env]
-					{
-						preFilteredEnvironmentMap = std::make_shared<PreFilteredEnvironmentMap>(envMapUUID, prefiltered_env);
-						preFilteredEnvironmentMap->Compute();
-					}
-				);
-				preFilteredEnvironmentMap->Solution();
-			}
-			if (Texture::iblJson.contains("createBRDFLut") && bool(Texture::iblJson.at("createBRDFLut")))
-			{
-				std::filesystem::path brdflut = getIBLFile("createBRDFLut", "brdf_lut");
-				std::shared_ptr<BRDFLUT> lut;
-				renderer->Flush();
-				renderer->RenderCriticalFrame([&lut, brdflut]
-					{
-						lut = std::make_shared<BRDFLUT>(brdflut);
-						lut->Compute();
-					}
-				);
-				lut->Solution();
-			}
-
-			Editor::MarkTemplatesPanelAssetsAsDirty();
-		}
-
-		bool criticalFrame = rebuildImages.size() > 0ULL || changedAttributes.size() > 0ULL;
-
-		if (criticalFrame)
-		{
-			renderer->Flush();
-			renderer->RenderCriticalFrame([&rebuildImages, &changedAttributes]
-				{
-					std::for_each(rebuildImages.begin(), rebuildImages.end(), [](auto tex)
-						{
-							std::filesystem::path p = tex->name();
-							if (p.extension() != ".dds")
-							{
-								CreateDDSFile(*tex);
-							}
-							tex->CreatePreviewTexture();
-							tex->clean(TextureJson::Update_images);
-						}
-					);
-					std::for_each(changedAttributes.begin(), changedAttributes.end(), [](auto tex)
-						{
-							using namespace Utils;
-							std::filesystem::path ddsPath = tex->name();
-							ddsPath.replace_extension(".dds");
-							ImageConverter convert = {
-								.src = tex->name(), .dst = ddsPath, .format = tex->format(),
-								.width = tex->width(), .height = tex->height(),
-								//.mipLevels = tex->mipLevels(), .numFrames = tex->numFrames(),
-							};
-							if (tex->dirty(TextureJson::Update_mipLevels)) convert.mipLevels = tex->mipLevels();
-							if (tex->dirty(TextureJson::Update_numFrames)) convert.numFrames = tex->numFrames();
-
-							ConvertToDDS(convert);
-							tex->format(convert.format);
-							tex->width(convert.width);
-							tex->height(convert.height);
-							tex->mipLevels(convert.mipLevels);
-							tex->numFrames(convert.numFrames);
-							tex->type(convert.type);
-
-							tex->clean(TextureJson::Update_format);
-							tex->clean(TextureJson::Update_width);
-							tex->clean(TextureJson::Update_height);
-							tex->clean(TextureJson::Update_mipLevels);
-							tex->clean(TextureJson::Update_numFrames);
-							tex->CreatePreviewTexture();
-						}
-					);
-				}
-			);
-		}
-	}
-#endif
 
 	DXGI_FORMAT GetTextureFormat(std::filesystem::path path)
 	{
@@ -434,54 +275,6 @@ namespace Templates
 		return TextureJson(j);
 	};
 
-#if defined(_EDITOR)
-	void CreateTextureFromJsonDefinition(nlohmann::json& json)
-	{
-		TextureJson texJson(json);
-		switch (texJson.type())
-		{
-		case TextureType_2D:
-		{
-			Create2DDDSFile(texJson);
-		}
-		break;
-		case TextureType_Array:
-		{
-			CreateArrayDDSFile(texJson);
-		}
-		break;
-		case TextureType_Cube:
-		{
-			CreateCubeDDSFile(texJson);
-		}
-		break;
-		case TextureType_Skybox:
-		{
-			CreateCubeDDSFileFromSkyBox(texJson);
-		}
-		break;
-		}
-
-		nlohmann::json createJson = texJson.json();
-		Texture::createIbl = false;
-		Texture::iblJson = createJson;
-
-		auto atts = { "createIrradiance", "createPrefilteredEnv", "createBRDFLut" };
-		bool createIbl = false;
-		for (auto att : atts)
-		{
-			if (createJson.contains(att))
-			{
-				Texture::createIbl |= bool(createJson.at(att));
-				createJson.erase(att);
-			}
-		}
-
-		CreateTexture(createJson);
-		Editor::MarkTemplatesPanelAssetsAsDirty();
-	}
-#endif
-
 	JUUID CreateTextureTemplate(std::string name, DXGI_FORMAT format)
 	{
 		//used for creating
@@ -532,14 +325,143 @@ namespace Templates
 	}
 
 #if defined(_EDITOR)
-	void PreviewTexturesStep(float elapsedSeconds)
+	void CreateTextureFromJsonDefinition(nlohmann::json& json)
 	{
+		TextureJson texJson(json);
+		switch (texJson.type())
+		{
+		case TextureType_2D:
+		{
+			Create2DDDSFile(texJson);
+		}
+		break;
+		case TextureType_Array:
+		{
+			CreateArrayDDSFile(texJson);
+		}
+		break;
+		case TextureType_Cube:
+		{
+			CreateCubeDDSFile(texJson);
+		}
+		break;
+		case TextureType_Skybox:
+		{
+			CreateCubeDDSFileFromSkyBox(texJson);
+		}
+		break;
+		}
+
+		nlohmann::json createJson = texJson.json();
+		Texture::createIbl = false;
+		Texture::iblJson = createJson;
+
+		auto atts = { "createIrradiance", "createPrefilteredEnv", "createBRDFLut" };
+		bool createIbl = false;
+		for (auto att : atts)
+		{
+			if (createJson.contains(att))
+			{
+				Texture::createIbl |= bool(createJson.at(att));
+				createJson.erase(att);
+			}
+		}
+
+		CreateTexture(createJson);
+		Editor::MarkTemplatesPanelAssetsAsDirty();
+	}
+
+	void TextureJson::EditorPreview(size_t flags)
+	{
+		if (flags & (1 << Update_images))
+		{
+			CreatePreviewTexture();
+		}
+	}
+
+	void TextureJson::DestroyEditorPreview()
+	{
+		if (preview.previewLoaded != nullptr)
+		{
+			for (unsigned int i = 0; i < preview.textures.size(); i++)
+			{
+				DeleteTextureInstance(preview.textures.at(i)());
+			}
+			preview.textures.clear();
+			preview.previewLoaded = nullptr;
+		}
+	}
+
+	void TextureJson::CreatePreviewTexture()
+	{
+		using namespace Texture;
+		DestroyEditorPreview();
+		preview.previewLoaded = std::make_unique<std::atomic_bool>(false);
+		preview.frame = 0U;
+		preview.playing = false;
+		preview.looping = false;
+		preview.time = 0.0f;
+		preview.timeFactor = 1.0f;
+		if (!preview.processorInitialized)
+		{
+			preview.loadingProcessor.Init(renderer->d3dDevice, 0x10AD3D, 1);
+			preview.processorInitialized = true;
+		}
+
+		preview.loadingProcessor.ResetCommandList();
+		for (unsigned int i = 0U; i < numFrames(); i++)
+		{
+			JUUID previewUUID = uuid() + "-preview-" + std::to_string(i);
+			CreateTextureInstance(previewUUID, [&]
+				{
+					return std::make_unique<TextureInstance>(preview.loadingProcessor.GetCommandList(), uuid(), i);
+				}
+			);
+			preview.textures.push_back(previewUUID);
+		}
+		preview.loadingProcessor.CloseCommandList();
+		renderer->ExecuteCommands(preview.loadingProcessor.GetCommandList(false), [&]
+			{
+				preview.previewLoaded->store(true);
+			}
+		);
+	}
+
+	void TextureJsonsStep()
+	{
+		std::set<TextureJsonUUID> texs;
+		std::transform(Texturetemplates.begin(), Texturetemplates.end(), std::inserter(texs, texs.begin()), [](auto& temps)
+			{
+				return temps.first;
+			}
+		);
+
+		std::set<TextureJsonUUID> rebuildImages;
+		std::copy_if(texs.begin(), texs.end(), std::inserter(rebuildImages, rebuildImages.begin()), [](auto tex)
+			{
+				return tex->dirty(TextureJson::Update_images);
+			}
+		);
+		std::set<TextureJsonUUID> changedAttributes;
+		std::copy_if(texs.begin(), texs.end(), std::inserter(changedAttributes, changedAttributes.begin()), [](auto tex)
+			{
+				return tex->dirty(TextureJson::Update_format) || tex->dirty(TextureJson::Update_width) ||
+					tex->dirty(TextureJson::Update_height) || tex->dirty(TextureJson::Update_mipLevels) ||
+					tex->dirty(TextureJson::Update_numFrames);
+			}
+		);
+	}
+
+	void PreviewTexturesStep(DX::StepTimer& timer)
+	{
+		float elapsedSeconds = static_cast<FLOAT>(timer.GetElapsedSeconds());
+
 		std::vector<TextureJsonUUID> previewsToPlay;
 
 		for (auto& [uuid, textureTemplate] : Texturetemplates)
 		{
 			TextureJsonUUID tex = uuid;
-			if (tex->preview.empty() || !tex->previewIsPlaying || tex->numFrames() <= 1) continue;
+			if (tex->preview.previewLoaded == nullptr || !tex->preview.previewLoaded->load()) continue;
 
 			previewsToPlay.push_back(tex);
 		}
@@ -547,28 +469,27 @@ namespace Templates
 		auto previewStep = [elapsedSeconds](auto& texture)
 			{
 				float animationLength = texture->numFrames() * (1.0f / 60.0f);
-				float currentAnimationTime = texture->previewTime;
+				float currentAnimationTime = texture->preview.time;
 				unsigned int currentFrame = static_cast<unsigned int>(texture->numFrames() * (currentAnimationTime / animationLength));
 
 				if (animationLength > 0.0f)
 				{
-					currentAnimationTime += (texture->previewIsPlaying) ? texture->previewTimeFactor * elapsedSeconds : 0.0f;
-					if (texture->previewTimeFactor > 0.0f)
+					currentAnimationTime += (texture->preview.playing) ? texture->preview.timeFactor * elapsedSeconds : 0.0f;
+					if (texture->preview.timeFactor > 0.0f)
 					{
 						if (currentAnimationTime >= animationLength)
-							currentAnimationTime = (texture->previewIsLooping) ? fmodf(currentAnimationTime, animationLength) : animationLength;
+							currentAnimationTime = (texture->preview.looping) ? fmodf(currentAnimationTime, animationLength) : animationLength;
 					}
-					else if (texture->previewTimeFactor < 0.0f)
+					else if (texture->preview.timeFactor < 0.0f)
 					{
 						if (currentAnimationTime < 0.0f)
-							currentAnimationTime = (texture->previewIsLooping) ? (animationLength - fmodf(currentAnimationTime, animationLength)) : 0.0f;
+							currentAnimationTime = (texture->preview.looping) ? (animationLength - fmodf(currentAnimationTime, animationLength)) : 0.0f;
 					}
-					texture->previewTime = currentAnimationTime;
+					texture->preview.time = currentAnimationTime;
 					unsigned int newFrame = static_cast<unsigned int>(texture->numFrames() * (currentAnimationTime / animationLength));
 					if (currentFrame != newFrame)
 					{
-						texture->previewFrame = std::clamp(newFrame, 0U, texture->numFrames() - 1);
-						texture->reloadPreview = true;
+						texture->preview.frame = std::clamp(newFrame, 0U, texture->numFrames() - 1);
 					}
 				}
 			};
@@ -576,38 +497,11 @@ namespace Templates
 		std::for_each(previewsToPlay.begin(), previewsToPlay.end(), previewStep);
 	}
 
-	void ReloadPreviewTextures()
+	TextureInstance::TextureInstance(CComPtr<ID3D12GraphicsCommandList2>& commandList, JUUID uuid) : TextureInstance(commandList, uuid, 0U) {}
+
+	TextureInstance::TextureInstance(CComPtr<ID3D12GraphicsCommandList2>& commandList, JUUID uuid, unsigned int startFrame)
 	{
-		std::vector<TextureJsonUUID> previewsToReload;
-
-		for (auto& [uuid, textureTemplate] : Texturetemplates)
-		{
-			TextureJsonUUID tex = uuid;
-			if (tex->preview.empty() || !tex->reloadPreview) continue;
-
-			previewsToReload.push_back(tex);
-		}
-
-		if (previewsToReload.empty()) return;
-
-		renderer->Flush();
-		renderer->RenderCriticalFrame([&previewsToReload]
-			{
-				for (auto& tex : previewsToReload)
-				{
-					tex->CreatePreviewTexture();
-				}
-			}
-		);
-	}
-#endif
-
-	TextureInstance::TextureInstance(std::string uuid) :
-		TextureInstance(uuid, 0U) {
-	}
-
-	TextureInstance::TextureInstance(std::string uuid, unsigned int startFrame)
-	{
+		using namespace Scene;
 		using namespace Templates;
 		materialTexture = uuid;
 		std::unique_ptr<TextureJson>& tex = GetTextureTemplate(uuid);
@@ -628,16 +522,58 @@ namespace Templates
 		}
 #endif
 		std::string pathS = path.string();
-		CreateTextureResource(pathS, tex->format(), tex->type(), tex->numFrames(), tex->mipLevels(), startFrame);
+		CreateTextureResource(commandList, pathS, tex->format(), tex->type(), tex->numFrames(), tex->mipLevels(), startFrame);
+		PushTextureUploadFreeResourceCallback(2U, [&]
+			{
+				OutputDebugStringA(std::string("off-loading:" + tex->name() + "\n").c_str());
+				upload = nullptr;
+			}
+		);
+	}
+#endif
+
+	TextureInstance::TextureInstance(SceneUnitId id, JUUID uuid) : TextureInstance(id, uuid, 0U) {}
+
+	TextureInstance::TextureInstance(SceneUnitId id, JUUID uuid, unsigned int startFrame)
+	{
+		using namespace Scene;
+		using namespace Templates;
+		materialTexture = uuid;
+		std::unique_ptr<TextureJson>& tex = GetTextureTemplate(uuid);
+		std::filesystem::path path = tex->name();
+#if defined(_DEVELOPMENT)
+		if (path.extension() != ".dds")
+		{
+			path.replace_extension(".dds");
+			if (!std::filesystem::exists(path))
+			{
+				CreateDDSFile(tex);
+			}
+		}
+		else if (tex->images().size() == 0ULL || tex->images().at(0) == "")
+		{
+			nlohmann::json update = { {"images", nlohmann::json::array({tex->name()}) } };
+			tex->JUpdate(update);
+		}
+#endif
+		std::string pathS = path.string();
+		auto& scene = GetSceneUnit(id);
+		auto& commandList = scene->GetLoadingCommandList();
+		CreateTextureResource(commandList, pathS, tex->format(), tex->type(), tex->numFrames(), tex->mipLevels(), startFrame);
+		PushTextureUploadFreeResourceCallback(2U, [&]
+			{
+				OutputDebugStringA(std::string("off-loading:" + tex->name() + "\n").c_str());
+				upload = nullptr;
+			}
+		);
 	}
 
-	void TextureInstance::CreateTextureResource(std::string& path, DXGI_FORMAT format, TextureType type, unsigned int numFrames, unsigned int nMipMaps, unsigned int firstArraySlice)
+	void TextureInstance::CreateTextureResource(CComPtr<ID3D12GraphicsCommandList2>& commandList, std::string& path, DXGI_FORMAT format, TextureType type, unsigned int numFrames, unsigned int nMipMaps, unsigned int firstArraySlice)
 	{
+		using namespace Scene;
 		using namespace DeviceUtils;
 
 		auto& d3dDevice = renderer->d3dDevice;
-		auto& commandList = renderer->commandList;
-
 		//Load the dds file to a buffer using LoadDDSTextureFromFile
 		std::unique_ptr<uint8_t[]> ddsData;
 		std::vector<D3D12_SUBRESOURCE_DATA> subresources;

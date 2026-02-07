@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Interop.h"
-#include "../../../Common/DirectXHelper.h"
 #include <wrl.h>
+#include <DirectXHelper.h>
 
 namespace DeviceUtils
 {

@@ -23,8 +23,8 @@ namespace Editor::DefaultLevel {
 				{ "name", "floor" },
 				{ "position", { 0.0, -1.0, 0.0} },
 				{ "scale", { 20.0, 1.0, 20.0} },
-				{ "uuid", "31994be6-1fb5-4046-b101-6b83af3c61c3" },
-				{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbc" } }
+				{ "uuid", "31994be6-1fb5-4046-b101-6b83af3c61c4" },
+				{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } }
 			},
 			{
 				{ "castShadows", true },
@@ -46,8 +46,8 @@ namespace Editor::DefaultLevel {
 					}
 				},
 				{ "scale", { 0.009999999776482582, 0.009999999776482582, 0.009999999776482582} },
-				{ "uuid", "4fdb1d72-96c5-4a1a-a81e-f902abba25f5" },
-				{ "cameras" , {"06de4a6c-0393-42b1-91ab-1d2389cb2cbc"} },
+				{ "uuid", "4fdb1d72-96c5-4a1a-a81e-f902abba25f6" },
+				{ "cameras" , {"06de4a6c-0393-42b1-91ab-1d2389cb2cbd"} },
 				{ "controllers",
 					{
 						{ "spinyaw", {} }
@@ -63,7 +63,7 @@ namespace Editor::DefaultLevel {
 			{
 				{
 					{ "fitWindow", true },
-					{ "name", "cam.0"},
+					{ "name", "default.cam.0"},
 					{ "perspective",
 						{
 							{"farZ", 100.0 },
@@ -75,7 +75,7 @@ namespace Editor::DefaultLevel {
 					{ "projectionType", "Perspective" },
 					{ "rotation", { 0.0, 0.0, 0.0 } },
 					{ "speed", 0.05000000074505806 },
-					{ "uuid", "06de4a6c-0393-42b1-91ab-1d2389cb2cbc"},
+					{ "uuid", "06de4a6c-0393-42b1-91ab-1d2389cb2cbd"},
 					{
 						"renderPasses", { }
 					},
@@ -90,14 +90,14 @@ namespace Editor::DefaultLevel {
 		{ "lights",
 			{
 			{
-				{ "cameras" , {"06de4a6c-0393-42b1-91ab-1d2389cb2cbc"} },
+				{ "cameras" , {"06de4a6c-0393-42b1-91ab-1d2389cb2cbd"} },
 				{ "color", { 0.05000000074505806, 0.05000000074505806, 0.05000000074505806 } },
 				{ "lightType", "Ambient" },
 				{ "name", "light.0.amb" },
 				{ "uuid", "fa0f8e67-db28-411d-a042-de3a84f203f2" }
 			},
 			{
-				{ "cameras" , {"06de4a6c-0393-42b1-91ab-1d2389cb2cbc"} },
+				{ "cameras" , {"06de4a6c-0393-42b1-91ab-1d2389cb2cbd"} },
 				{ "color", { 1.0, 1.0, 1.0} },
 				{ "farZ" , 1000.0},
 				{ "nearZ", 0.01},
@@ -119,25 +119,16 @@ namespace Editor::DefaultLevel {
 	};
 
 	nlohmann::json sounds = {
-		{ "sounds", {
+		{ "sounds",
+			{
 			{
 				{ "uuid", "14dc1115-f076-4293-aa53-708851b99835" },
 				{ "name", "music" },
 				{ "sound", "14336def-b73c-4d8a-afb3-8f913ef68219" },
 				{ "volume", 0.3 },
 				{ "autoPlay", true }
-			},
-			{
-				{ "uuid", "9e6ff275-76c0-4d26-81a6-1eb608b94110" },
-				{ "name", "fireplace" },
-				{ "sound", "1e0c1716-ac41-4325-91ed-3ff087911687" },
-				{ "volume", 1.0 },
-				{ "autoPlay", true },
-				{ "loop", true },
-				{ "position", { 3.0f, 2.0f, 1.0f } },
-				{ "instanceFlags", 1 }
 			}
-		}
+			}
 		}
 	};
 

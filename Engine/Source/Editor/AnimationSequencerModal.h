@@ -26,10 +26,20 @@ static inline std::unordered_map<std::string, SequencerModalPopup> StringToSeque
 
 struct AnimationSequencerModal
 {
+	static inline ImGuiWindowFlags defaultChildFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar |
+		ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar |
+		ImGuiWindowFlags_NoMove;
+	static inline ImGuiWindowFlags popupChildFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar |
+		ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoMove;
+	static inline ImGuiWindowFlags timelineWindowFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar;
+
 	void Initialize(JUUID uuid);
-	void LoadSceneObjects();
+	nlohmann::json GetModalLevelJson();
 	void DestroySceneObjects();
 	void Step();
+	void DrawLoading();
 	void DrawSequencer(const char* title, ImVec2 pos, ImVec2 size);
 	void DrawTitleBar(const char* title, ImVec2 pos, ImVec2 size, bool& exit);
 	void DrawSequenceSelector(ImVec2 curPos, std::function<void(std::string)> onSelectSequence, std::function<void(std::string)> onEraseSequence, std::function<void(std::string)> onRenameSequence, std::function<void(std::string)> onCloneSequence, std::function<void()> onAddSequence);
@@ -45,24 +55,24 @@ struct AnimationSequencerModal
 	void Exit();
 	void SaveAndExit();
 
-	static inline ImGuiWindowFlags defaultChildFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar |
-		ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar |
-		ImGuiWindowFlags_NoMove;
-	static inline ImGuiWindowFlags popupChildFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar |
-		ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove;
-	static inline ImGuiWindowFlags timelineWindowFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar;
-
+	SceneUnitId unit;
+	std::string asset;
+	unsigned int count;
+	unsigned int total;
 	bool showing = false;
 	bool initializing = false;
 	bool destroying = false;
 	Model3DInstanceUUID model3dUUID;
-	RenderableUUID renderable;
-	RenderableUUID floor;
-	CameraUUID camera;
-	LightUUID ambientLight;
-	LightUUID directionalLight;
+	JUUID renderableUUID;
+	RenderableSUUUID renderable;
+	JUUID floorUUID;
+	RenderableSUUUID floor;
+	JUUID cameraUUID;
+	CameraSUUUID camera;
+	JUUID ambientLightUUID;
+	LightSUUUID ambientLight;
+	JUUID directionalLightUUID;
+	LightSUUUID directionalLight;
 	Model3DJsonUUID model3D;
 	XMFLOAT3 cameraInitialPos;
 	XMFLOAT3 cameraInitialRot;

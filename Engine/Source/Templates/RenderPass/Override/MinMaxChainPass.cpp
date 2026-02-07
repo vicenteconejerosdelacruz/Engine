@@ -1,35 +1,32 @@
 #include "pch.h"
 #include "MinMaxChainPass.h"
-#include <Renderer.h>
-#include <Material/Material.h>
-#include <Shader/Shader.h>
-#include <Mesh/Mesh.h>
-#include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
-#include <RenderPass/RenderPass.h>
 
-extern std::unique_ptr<Renderer> renderer;
-
-MinMaxChainPass::MinMaxChainPass(JUUID cam, unsigned int rpI, JUUID rp) : OverridePass(cam, rpI, rp)
+MinMaxChainPass::MinMaxChainPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rpT, JUUID rp) : OverridePass(id, cam, rpI, rpT, rp)
 {
 }
 
 void MinMaxChainPass::Initialize()
 {
+	CreatePrevPassDependentResources();
+}
+
+void MinMaxChainPass::CreatePrevPassDependentResources()
+{
 	using namespace DeviceUtils;
 
-	JUUID renderPassTemplateUUID = renderPassInstance->renderPassJson();
+	JUUID renderPassTemplateUUID = renderPassInstance->renderPassTemplate();
 	RenderToTexturePassUUID rttPass = renderPassInstance->renderToTexturePass;
 	XMFLOAT2 texelInvSize = {
 		1.0f / rttPass->screenViewport.Width,
 		1.0f / rttPass->screenViewport.Height
 	};
 
-	CreateFsQuadResources("DepthMinMax", renderPassTemplateUUID,
+	CreateFsQuadResources(camera.unit(), "DepthMinMax", renderPassTemplateUUID,
 		[this, texelInvSize](std::string name, ShaderConstantsBufferVariable& var)
 		{
 			auto& fsCB = fsQuadConstantsBuffer;
 
-			for (unsigned int n = 0; n < renderer->numFrames; n++)
+			for (unsigned int n = 0; n < Renderer::numFrames; n++)
 			{
 				if (name == "texelInvSize")
 				{
@@ -40,18 +37,19 @@ void MinMaxChainPass::Initialize()
 	);
 }
 
-void MinMaxChainPass::Pass()
+void MinMaxChainPass::Pass(SceneUnitId unit)
 {
 	RenderPassInstanceUUID renderPass = renderPassInstance;
 	RenderToTexturePassUUID rttPass = renderPass->renderToTexturePass;
-	rttPass->BeginRenderPass();
-	Render();
-	rttPass->EndRenderPass();
+	rttPass->BeginRenderPass(unit);
+	Render(unit);
+	rttPass->EndRenderPass(unit);
 }
 
-void MinMaxChainPass::Render()
+void MinMaxChainPass::Render(SceneUnitId id)
 {
-	auto& commandList = renderer->commandList;
+	auto& scene = GetSceneUnit(id);
+	auto& commandList = scene->GetCommandList();
 	auto& fsCB = fsQuadConstantsBuffer;
 	auto& fsQuadMesh = GetMeshInstance(fsQuad);
 
@@ -63,7 +61,7 @@ void MinMaxChainPass::Render()
 	commandList->SetGraphicsRootSignature(rootSignature);
 	commandList->SetPipelineState(pipelineState);
 
-	commandList->SetGraphicsRootDescriptorTable(0, fsCB->gpu_xhandle.at(renderer->backBufferIndex));
+	commandList->SetGraphicsRootDescriptorTable(0, fsCB->gpu_xhandle.at(scene->Frame()));
 	commandList->SetGraphicsRootDescriptorTable(1, shadowMapChainGpuHandle1);
 	commandList->SetGraphicsRootDescriptorTable(2, shadowMapChainGpuHandle2);
 

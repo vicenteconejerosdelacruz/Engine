@@ -12,8 +12,6 @@
 
 #if defined(_EDITOR)
 
-static const std::string defaultLevelName = "";
-
 inline ImU32 rgba(auto r, auto g, auto b, auto a)
 {
 	return IM_COL32(

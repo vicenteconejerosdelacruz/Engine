@@ -1,39 +1,37 @@
 #include "pch.h"
 #include "Engine.h"
-#include <StepTimer.h>
-#include <Light/Light.h>
-#include <Level.h>
 #include <Renderer.h>
-#include <ShaderCompiler.h>
-#include <AudioSystem.h>
-#include <Templates.h>
-#include <Controller.h>
-#include <Mesh/Mesh.h>
-#include <RenderPass/RenderPass.h>
-#include <Shader/Shader.h>
-#include <Sound/Sound.h>
-#include <Material/Material.h>
-#include <Textures/Texture.h>
-#include <Model3D/Model3D.h>
-#include <Renderable/Renderable.h>
-#include <Sound/SoundFX.h>
-#include <Scene.h>
 #include <Scripting.h>
+#include <AudioSystem.h>
+#include <ShaderCompiler.h>
+#include <Templates.h>
+#include <Game.h>
 #if defined(_EDITOR)
 #include <Editor.h>
 #endif
+#include <StepTimer.h>
 #include <locale>
 
 #include "GameDecl.h"
 
-using namespace Templates::RenderPass;
+using namespace Templates;
 using namespace Scene;
 using namespace AudioSystem;
 using namespace ShaderCompiler;
 using namespace Scripting;
+using namespace Game;
 #if defined(_EDITOR)
 using namespace Editor;
 #endif
+
+namespace Scene
+{
+	extern void SceneRender();
+	extern void ScenePostRender();
+	extern void SceneObjectsStep(DX::StepTimer& timer);
+	extern void DeletedScenes();
+	extern void DestroyScenes(bool inmediate);
+};
 
 //take me out from here
 extern std::string gameAppTitle;
@@ -186,7 +184,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hInstance = hInstance;
 	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CULPEOENGINE));
 	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wcex.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -197,13 +195,13 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
 	hInst = hInstance; // Store instance handle in our global variable
 
-	/*this is mode full desktop space*/
+	//this is mode full desktop space
 #if defined(_EDITOR)
 	RECT winR = GetMaximizedAreaSize();// desktopRect;
 	hWnd = CreateWindowW(szWindowClass, nostd::StringToWString(gameAppTitle).c_str(), WS_OVERLAPPEDWINDOW, winR.left, winR.top, winR.right, winR.bottom, nullptr, nullptr, hInstance, nullptr);
 #endif
 
-	/*this is windowed mode*/
+	//this is windowed mode
 #if !defined(_EDITOR)
 	hWnd = CreateWindowW(szWindowClass, nostd::StringToWString(gameAppTitle).c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 #endif
@@ -244,62 +242,15 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	//initialize the render and reset the commands
 	renderer = std::make_unique<Renderer>();
 	renderer->Initialize(hWnd);
-	renderer->ResetCommands();
-
-	//create the resources
-	CreateLightingResourcesMapping();
-	CreateRenderPassMainHeap();
-
-	//create the swap chain pass
-	renderer->CreateSwapChainPass();
-
 	//create the editor and a default scene
 #if defined(_EDITOR)
 	InitEditor();
 #endif
-
-	//kick the audio listener update
-	AudioStep(0.0f);
-
-	//execute the commands on the GPU and wait for it's completion
-	renderer->CloseCommandsAndFlush();
-
 	return TRUE;
 }
 
-void CreateSystemTemplates() {
-	using namespace Templates;
-
-	Templates::LoadTemplates(Templates::GetSystemShaders(), Templates::CreateShader);
-	Templates::LoadTemplates(Templates::GetSystemSounds(), Templates::CreateSound);
-	Templates::LoadTemplates(Templates::GetSystemMaterials(), Templates::CreateMaterial);
-	Templates::LoadTemplates(Templates::GetSystemRenderPasses(), Templates::CreateRenderPass);
-	Templates::LoadTemplates(Templates::GetSystemTextures(), Templates::CreateTexture);
-
-	CreatePrimitiveMeshTemplate("d41e5c29-49bb-4f2c-aa2b-da781fbac512", "floor");
-	CreatePrimitiveMeshTemplate("d8bfdef4-55f9-4f6e-b4a8-20915eb854d6", "utahteapot");
-	CreatePrimitiveMeshTemplate("f7786ac1-e296-4e9a-a7e6-6f1949de75ef", "cube");
-	CreatePrimitiveMeshTemplate("d76b3bd8-0f53-4128-974e-2d6d5062bc00", "pyramid");
-	CreatePrimitiveMeshTemplate("7dec1229-075f-4599-95e1-9ccfad0d48b1", "decal");
-	CreatePrimitiveMeshTemplate("30f15e68-db42-46fa-b846-b2647a0ac9b9", "boxlines");
-	CreatePrimitiveMeshTemplate("4d1174b2-8225-4c09-9db6-ff09718ae0f5", "sphere");
-	CreatePrimitiveMeshTemplate("ad73990a-c59d-45d2-8ec3-807b1f52f5b9", "cone");
-}
-
-void CreateTemplates() {
-	using namespace Templates;
-
-	Templates::LoadTemplates(defaultTemplatesFolder, Shader::templateName, Templates::CreateShader);
-	Templates::LoadTemplates(defaultTemplatesFolder, Material::templateName, Templates::CreateMaterial);
-	Templates::LoadTemplates(defaultTemplatesFolder, Model3D::templateName, Templates::CreateModel3D);
-	Templates::LoadTemplates(defaultTemplatesFolder, Sound::templateName, Templates::CreateSound);
-	Templates::LoadTemplates(defaultTemplatesFolder, Texture::templateName, Templates::CreateTexture);
-	Templates::LoadTemplates(defaultTemplatesFolder, RenderPass::templateName, Templates::CreateRenderPass);
-}
-
-void CreateLightingResourcesMapping() {
-	using namespace Scene;
-	CreateShadowMapResources();
+void CreateLightingResourcesMapping()
+{
 }
 
 //READ&GET
@@ -454,7 +405,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-void AppStep() {
+void AppStep()
+{
 	std::locale::global(std::locale("C"));
 
 	if (minimized) return;
@@ -467,71 +419,47 @@ void AppStep() {
 	if (resizeWindow && !inSizeMove) {
 		return ResizeWindow();
 	}
+
+	SceneUnitsStep();
+	UpdateAudio();
 	timer.Tick([&]()
 		{
-			GameInputStep();
 			TemplatesStep(timer);
+			StepControllers(timer);
 			GameStep();
 			SceneObjectsStep(timer);
+#if defined(_EDITOR)
+			EditorStep();
+#endif
 		}
 	);
 	Render();
-	//FreeGPUIntermediateResources();
-}
 
-void GameInputStep()
-{
-}
+	//delete scenes which are marked for deletion
+	DeletedScenes();
 
-void AnimableStep(double elapsedSeconds)
-{
-	for (RenderableUUID r : GetAnimables())
-	{
-		r->StepAnimation(elapsedSeconds);
-	}
-}
-
-void AudioStep(float step)
-{
-	GetAudioListenerVectors([](XMFLOAT3 pos, XMVECTOR orientation)
-		{
-			UpdateListener(pos, orientation);
-		}
-	);
-	UpdateAudio();
-	SoundFXsStep(step);
 }
 
 //RENDER
 void Render()
 {
-	renderer->ResetCommands();
-	renderer->SetCSUDescriptorHeap();
-
-	RunPreRenderComputeShaders();
-	auto commandList = renderer->commandList;
-#if defined(_DEVELOPMENT)
-	PIXBeginEvent(commandList.p, 0, "RunRender");
-#endif
-	RunRender();
-#if defined(_DEVELOPMENT)
-	PIXEndEvent(commandList.p);
-#endif
-	RunPostRenderComputeShaders();
-
-	renderer->ExecuteCommands();
+	using namespace Scene;
+	RunComputeShaders();
+	SceneRender();
+	GameRender();
 	renderer->Present();
-
-	PostRender();
+	SolveComputeShaders();
+	ScenePostRender();
+	GamePostRender();
 }
 
 void ResizeWindow()
 {
+	using namespace Scene;
+
 	resizeWindow = false;
 	renderer->Flush();
-
-	Templates::RenderPass::ResizeRelease();
-
+	ResizeReleaseScenePasses();
 	GetWindowRect(hWnd, &hWndRect);
 
 	if (renderer)
@@ -541,46 +469,21 @@ void ResizeWindow()
 		renderer->Resize(HWNDWIDTH, HWNDHEIGHT);
 		renderer->swapChainPass->Resize(HWNDWIDTH, HWNDHEIGHT);
 	}
-
-	Templates::RenderPass::Resize(HWNDWIDTH, HWNDHEIGHT);
+	ResizeScenePasses(HWNDWIDTH, HWNDHEIGHT);
 }
 
 //DESTROY
 void DestroyInstance()
 {
-	using namespace Scene::Level;
-	using namespace Game;
-
+	using namespace Scene;
 	if (destroyed) return;
 	renderer->Flush();
 
 #if defined(_EDITOR)
 	DestroyEditor();
-	DestroyTemplatesReferences();
 #endif
-
+	DestroyScenes(true);
 	DestroyControllers();
-	GameDestroy();
-	DestroySceneObjects();
-	DestroyShadowMapResources();
-
+	DestroyTemplatesInstances();
 	DestroyTemplates();
-
-	DestroyConstantsBuffer();
-
-	ShutdownScripting();
-
-	ShutdownAudio();
-	gamePad.reset();
-	keyboard.reset();
-
-	renderer->DestroySwapChainPass();
-
-	DestroyRenderPassMainHeap();
-	DestroyShaderCompiler();
-
-	renderer->Destroy();
-	renderer = nullptr;
-
-	destroyed = true;
 }

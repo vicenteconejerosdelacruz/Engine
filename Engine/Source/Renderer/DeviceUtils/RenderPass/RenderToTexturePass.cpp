@@ -1,11 +1,14 @@
 #include "pch.h"
+#include <map>
+#include <Scene.h>
 #include "RenderToTexturePass.h"
 #include <DirectXHelper.h>
 #include <DeviceUtils/RenderTarget/RenderTarget.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
-#include "../../Common/d3dx12.h"
-#include <map>
+#include <d3dx12.h>
+#if defined(_DEVELOPMENT)
 #include <pix3.h>
+#endif
 
 extern std::unique_ptr<Renderer> renderer;
 
@@ -95,16 +98,18 @@ namespace DeviceUtils {
 		}
 	}
 
-	void RenderToTexturePass::Pass(std::function<void()> renderCallback, XMVECTORF32 clearColor)
+	void RenderToTexturePass::Pass(SceneUnitId unit, std::function<void(SceneUnitId)> renderCallback, XMVECTORF32 clearColor)
 	{
-		BeginRenderPass(clearColor);
-		renderCallback();
-		EndRenderPass();
+		BeginRenderPass(unit, clearColor);
+		renderCallback(unit);
+		EndRenderPass(unit);
 	}
 
-	void RenderToTexturePass::BeginRenderPass(XMVECTORF32 clearColor)
+	void RenderToTexturePass::BeginRenderPass(SceneUnitId unit, XMVECTORF32 clearColor)
 	{
-		auto commandList = renderer->commandList;
+		using namespace Scene;
+		auto& commandList = GetSceneUnit(unit)->GetCommandList();
+
 #if defined(_DEVELOPMENT)
 		PIXBeginEvent(commandList.p, 0, name.c_str());
 #endif
@@ -142,9 +147,10 @@ namespace DeviceUtils {
 		}
 	}
 
-	void RenderToTexturePass::EndRenderPass()
+	void RenderToTexturePass::EndRenderPass(SceneUnitId unit)
 	{
-		auto& commandList = renderer->commandList;
+		using namespace Scene;
+		auto& commandList = GetSceneUnit(unit)->GetCommandList();
 
 		//transition the texture resources from render target to pixel shader resource
 		std::vector<CD3DX12_RESOURCE_BARRIER> barriers;

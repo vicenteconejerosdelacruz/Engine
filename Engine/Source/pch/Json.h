@@ -1,9 +1,10 @@
 #pragma once
 
+/*
 inline void UpdateSystemCreatedFromJson(unsigned int& flags, nlohmann::json object) {
 	flags |= (object.contains("systemCreated") and object["systemCreated"] != "") ? TemplateFlags::SystemCreated : TemplateFlags::None;
 }
-
+*/
 inline DirectX::XMFLOAT3 JsonToFloat3(nlohmann::json f3) {
 	return DirectX::XMFLOAT3({ f3[0], f3[1], f3[2] });
 }

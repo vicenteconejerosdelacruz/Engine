@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CustomIncludeHandler.h"
-#include "CompilerQueue.h"
 #include <Shader/Shader.h>
 
 using namespace Templates;

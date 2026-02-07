@@ -11,5 +11,7 @@ namespace DeviceUtils
 		vbvData.vertexBufferView.BufferLocation = vbvData.vertexBuffer->GetGPUVirtualAddress();
 		vbvData.vertexBufferView.SizeInBytes = vertexSize * verticesCount;
 		vbvData.vertexBufferView.StrideInBytes = vertexSize;
+		vbvData.vertexBuffer->SetName(nostd::StringToWString(std::string("vertexBuffer:(" + std::to_string(vertexSize) + "," + std::to_string(verticesCount) + ")")).c_str());
+		LogCComPtrAddress(std::string("vertexBuffer:(" + std::to_string(vertexSize) + "," + std::to_string(verticesCount) + ")"), vbvData.vertexBuffer);
 	}
 }
