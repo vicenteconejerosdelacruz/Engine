@@ -1,12 +1,13 @@
 #include "pch.h"
 #include "Scripting.h"
-#include <JObject.h>
+#include <SceneObject.h>
+//#include <JObject.h>
 
 #if defined(_EDITOR)
 namespace Editor
 {
-	extern bool IsPlaying();
-	extern bool IsPaused();
+	extern bool IsPlaying(SceneUnitId unit);
+	extern bool IsPaused(SceneUnitId unit);
 }
 #endif
 
@@ -43,10 +44,10 @@ namespace Scripting
 		binder(isolate);
 	}
 
-	void RunScript(std::string script, RenderableUUID renderable)
+	void RunScript(std::string script, RenderableSUUUID renderable)
 	{
 #if defined(_EDITOR)
-		if (!Editor::IsPlaying() || Editor::IsPaused())
+		if (!Editor::IsPlaying(renderable.unit()) || Editor::IsPaused(renderable.unit()))
 		{
 			return;
 		}

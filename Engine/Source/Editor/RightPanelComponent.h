@@ -116,12 +116,12 @@ struct RightPanelComponent
 
 		for (std::string uuid : orderedLeafs)
 		{
+			JObject* asset = assetsJsons.at(uuid);
 			ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.15f));
 			{
 				ImGui::PushID((std::string("select-") + uuid).c_str());
 				{
 					bool checked = selected.contains(uuid);
-					JObject* asset = assetsJsons.at(uuid);
 					bool enabled = true;
 					for (auto& [_, cond] : assetsConditioner)
 					{
@@ -151,10 +151,15 @@ struct RightPanelComponent
 				ImGui::SameLine();
 				ImGui::PushID((std::string("delete-") + uuid).c_str());
 				{
-					if (ImGui::Button(ICON_FA_TIMES, ImVec2(16.0f, 16.0f)))
-					{
-						OnDelete(uuid);
-					}
+					bool systemCreated = asset->contains("systemCreated") && asset->at("systemCreated");
+					ImGui::DrawItemWithEnabledState([=]
+						{
+							if (ImGui::Button(ICON_FA_TIMES, ImVec2(16.0f, 16.0f)))
+							{
+								OnDelete(uuid);
+							}
+						}, !systemCreated
+					);
 				}
 				ImGui::PopID();
 			}

@@ -2,14 +2,21 @@
 #include <memory>
 #include <string>
 #include <Audio.h>
-#include <Application.h>
+//#include <Application.h>
 #include <nlohmann/json.hpp>
-#include <JTypes.h>
+//#include <JTypes.h>
+#include <Templates.h>
 #include <JTemplate.h>
-#include <TemplateDecl.h>
-
+//#include <TemplateDecl.h>
 
 using namespace DirectX;
+
+typedef std::tuple<
+	//std::reference_wrapper<std::unique_ptr<DirectX::SoundEffect>>,
+	//std::unique_ptr<DirectX::SoundEffect>,
+	JUUID,
+	std::unique_ptr<DirectX::SoundEffectInstance>
+> SoundInstance;
 
 namespace Templates
 {
@@ -73,19 +80,18 @@ namespace Templates
 	void SoundJsonStep();
 	void ReleaseSoundEffectsInstances();
 
-	std::tuple<
-		std::unique_ptr<DirectX::SoundEffect>,
-		std::unique_ptr<DirectX::SoundEffectInstance>
-	> GetSoundEffectInstance(
+	SoundInstance GetSoundEffectInstance(
 		JUUID uuid,
 		unsigned int flags,
-		std::string objectUUID = "",
+		std::string objectUUID = ""
+		/*,
 		JObjectChangeCallback cb = nullptr,
 		JObjectChangePostCallback postCb = nullptr
+		*/
 	);
 
-	void DestroySoundEffectInstance(JUUID uuid, std::tuple<
-		std::unique_ptr<DirectX::SoundEffect>,
-		std::unique_ptr<DirectX::SoundEffectInstance>
-	>& soundEffectInstance);
+	bool SoundEffectExists(JUUID uuid);
+	std::unique_ptr<DirectX::SoundEffect>& GetSoundEffect(JUUID uuid);
+
+	void DestroySoundEffectInstance(JUUID uuid, SoundInstance& soundEffectInstance);
 };

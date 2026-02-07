@@ -19,7 +19,7 @@ namespace ComputeShader
 		rttUUID = renderToTextureUUID;
 
 		//create the luminicance histogram buffer containing the calculation parameters (C0)
-		constantsBuffers = CreateConstantsBuffer(sizeof(LuminanceHistogramBuffer), "LuminanceHistogramBuffer");
+		constantsBuffers = CreateConstantsBuffer(sizeof(LuminanceHistogramBuffer), Renderer::numFrames, "LuminanceHistogramBuffer");
 
 		//create the uav resource for the calculation results, this is table of 256 unsigned ints (U0)
 		unsigned int dataSize = static_cast<unsigned int>(sizeof(unsigned int[256]));
@@ -72,9 +72,10 @@ namespace ComputeShader
 		GetConstantsBuffer(constantsBuffers)->push(params, 0);
 	}
 
-	void LuminanceHistogram::Compute()
+	void LuminanceHistogram::Compute(SceneUnitId unit)
 	{
-		CComPtr<ID3D12GraphicsCommandList2>& commandList = renderer->commandList;
+		auto& scene = GetSceneUnit(unit);
+		CComPtr<ID3D12GraphicsCommandList2>& commandList = scene->GetComputeCommandList();
 
 #if defined(_DEVELOPMENT)
 		PIXBeginEvent(commandList.p, 0, L"LuminanceHistogram Compute");
@@ -85,7 +86,7 @@ namespace ComputeShader
 		commandList->ClearUnorderedAccessViewUint(resultGpuHandle, resultClearCpuHandle, resource, clearValue, 0, nullptr);
 
 		//after clearing the uav we can compute
-		shader.SetComputeState();
+		shader.SetComputeState(unit);
 
 		auto& rtt = GetRenderToTexture(rttUUID);
 

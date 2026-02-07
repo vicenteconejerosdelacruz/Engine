@@ -31,8 +31,8 @@ namespace ComputeShader
 		BRDFLUT(std::filesystem::path iblBRDFLUTPath);
 		~BRDFLUT();
 
-		virtual void Compute();
-		virtual void Solution();
+		virtual void Compute(SceneUnitId unit);
+		virtual void Solution(SceneUnitId unit);
 		void WriteFile(XMFLOAT4* data) const;
 	};
 }

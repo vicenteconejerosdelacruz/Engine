@@ -1,16 +1,18 @@
 #include "pch.h"
 #include "OverridePass.h"
-#include <Scene.h>
+#include <JTemplate.h>
+//#include <Scene.h>
 #include <Renderer.h>
-#include <Material/Material.h>
-#include <Shader/Shader.h>
+//#include <Material/Material.h>
+//#include <Shader/Shader.h>
 #include <Camera/Camera.h>
-#include <Mesh/Mesh.h>
+//#include <Mesh/Mesh.h>
 #include <DeviceUtils/RootSignature/RootSignature.h>
 #include <DeviceUtils/PipelineState/PipelineState.h>
-#include <RenderPass/RenderPass.h>
+#include <DeviceUtils/RenderPass/RenderToTexturePass.h>
+//#include <RenderPass/RenderPass.h>
 
-extern std::unique_ptr<Renderer> renderer;
+//extern std::unique_ptr<Renderer> renderer;
 
 OverridePass::~OverridePass()
 {
@@ -28,17 +30,17 @@ OverridePass::~OverridePass()
 	}
 }
 
-void OverridePass::CreateFsQuadResources(std::string materialName, JUUID renderPassJson, std::function<void(std::string, ShaderConstantsBufferVariable&)> constantsBufferPusher)
+void OverridePass::CreateFsQuadResources(SceneUnitId id, std::string materialName, JUUID renderPassTemplate, std::function<void(std::string, ShaderConstantsBufferVariable&)> constantsBufferPusher)
 {
 	using namespace Scene;
 
-	auto& fsQuadMesh = GetMeshInstance(GetMeshUUIDByName("decal"));
+	auto& fsQuadMesh = GetMeshInstance(id, GetMeshUUIDByName("decal"));
 	fsQuad = fsQuadMesh->uuid;
 	fsQuadMaterial = GetMaterialUUIDByName(materialName);
 	VertexClass vertexClass = fsQuadMesh->vertexClass;
-	CreateMaterialInstance(fsQuadMaterial(), [this, vertexClass]()
+	CreateMaterialInstance(fsQuadMaterial(), [this, id, vertexClass]()
 		{
-			return std::make_unique<MaterialInstance>(fsQuadMaterial(), fsQuadMaterial(), vertexClass, false, false);
+			return std::make_unique<MaterialInstance>(id, fsQuadMaterial(), fsQuadMaterial(), vertexClass, false, false);
 		}
 	);
 	auto& fsQuadMat = fsQuadMaterial;
@@ -46,7 +48,7 @@ void OverridePass::CreateFsQuadResources(std::string materialName, JUUID renderP
 	if (fsQuadMat->variablesBufferSize.size() > 0ULL)
 	{
 		size_t size = fsQuadMat->variablesBufferSize.at(0);
-		fsQuadConstantsBuffer = CreateConstantsBuffer(size, materialName + ":cbv");
+		fsQuadConstantsBuffer = CreateConstantsBuffer(size, Renderer::numFrames, materialName + ":cbv");
 
 		auto& vsVars = fsQuadMat->vertexShaderInstanceUUID->constantsBuffersVariables;
 		auto& psVars = fsQuadMat->pixelShaderInstanceUUID->constantsBuffersVariables;
@@ -80,17 +82,26 @@ void OverridePass::CreateFsQuadResources(std::string materialName, JUUID renderP
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 	std::string plName = "pipelineState:" + materialName;
-	auto& renderPass = GetRenderPassTemplate(renderPassJson);
+	auto& renderPass = GetRenderPassTemplate(renderPassTemplate);
 	auto rtf = renderPass->renderTargetFormats();
 	auto df = renderPass->depthStencilFormat();
 
 	pipelineState = CreateGraphicsPipelineState(plName, vsLayout, vsByteCode, psByteCode, rootSignature, blendDesc, rasterizerDesc, primitiveTopologyType, rtf, df);
 }
 
+RenderPassInstanceUUID OverridePass::GetPrevRenderPass()
+{
+	if (renderPassIndex == 0U) return JUUID();
+	return camera->renderPassesUUID.at(renderPassIndex - 1);
+}
+
+RenderPassJsonUUID OverridePass::GetPrevRenderPassTemplate()
+{
+	if (renderPassIndex == 0U) return JUUID();
+	return GetPrevRenderPass()->renderPassTemplate;
+}
+
 JUUID OverridePass::GetPrevPassRenderToTexture(unsigned int index)
 {
-	using namespace Scene;
-	auto& prevPass = camera->renderPassesUUID.at(renderPassIndex - 1);
-	auto& rttPass = prevPass->renderToTexturePass;
-	return rttPass->renderToTexture.at(index)();
+	return GetPrevRenderPass()->renderToTexturePass->renderToTexture.at(index)();
 }

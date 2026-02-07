@@ -43,13 +43,13 @@ namespace DeviceUtils
 		csuDescriptorHeap->FreeDescriptor(cpuHandle, gpuHandle);
 	}
 
-	JUUID CreateConstantsBuffer(size_t bufferSize, std::string cbName)
+	JUUID CreateConstantsBuffer(size_t bufferSize, unsigned int numDescriptors, std::string cbName)
 	{
 		JUUID constantsBufferUUID = getUUID();
 		std::unique_ptr<ConstantsBuffer> cbvData = std::make_unique<ConstantsBuffer>(bufferSize, cbName);
 
 		//create the d3d12 cbuffer
-		CD3DX12_RESOURCE_DESC constantBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(renderer->numFrames * cbvData->alignedConstantBufferSize);
+		CD3DX12_RESOURCE_DESC constantBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(numDescriptors * cbvData->alignedConstantBufferSize);
 		CD3DX12_HEAP_PROPERTIES uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 		DX::ThrowIfFailed(renderer->d3dDevice->CreateCommittedResource(
 			&uploadHeapProperties, D3D12_HEAP_FLAG_NONE,
@@ -62,7 +62,7 @@ namespace DeviceUtils
 
 		//create the views for the constants buffer and get the handles to the views
 		D3D12_GPU_VIRTUAL_ADDRESS cbvGpuAddress = cbvData->constantBuffer->GetGPUVirtualAddress();
-		for (UINT n = 0; n < renderer->numFrames; n++) {
+		for (UINT n = 0; n < numDescriptors; n++) {
 			D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
 			desc.BufferLocation = cbvGpuAddress;
 			desc.SizeInBytes = cbvData->alignedConstantBufferSize;
@@ -82,7 +82,7 @@ namespace DeviceUtils
 		//mapea la memoria de la PCU con la GPU y luego vacia la memoria mapeada
 		CD3DX12_RANGE readRange(0, 0);
 		DX::ThrowIfFailed(cbvData->constantBuffer->Map(0, &readRange, reinterpret_cast<void**>(&cbvData->mappedConstantBuffer)));
-		ZeroMemory(cbvData->mappedConstantBuffer, renderer->numFrames * cbvData->alignedConstantBufferSize);
+		ZeroMemory(cbvData->mappedConstantBuffer, numDescriptors * cbvData->alignedConstantBufferSize);
 
 		constantsBuffers.insert_or_assign(constantsBufferUUID, std::move(cbvData));
 		return constantsBufferUUID;

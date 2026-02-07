@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../DescriptorHeap/DescriptorHeap.h"
+#include <DeviceUtils/DescriptorHeap/DescriptorHeap.h>
 #include <dxgiformat.h>
 #include <UUID.h>
 

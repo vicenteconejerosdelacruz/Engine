@@ -22,7 +22,7 @@ namespace ComputeShader
 		histogramGpuHandle = gpuHandle;
 
 		//create the luminicance histogram buffer containing the calculation parameters (C0)
-		constantsBuffers = CreateConstantsBuffer(sizeof(LuminanceHistogramAverageBuffer), "LuminanceHistogramAverageBuffer");
+		constantsBuffers = CreateConstantsBuffer(sizeof(LuminanceHistogramAverageBuffer), Renderer::numFrames, "LuminanceHistogramAverageBuffer");
 
 		//create the uav resource for the calculation results, this is a single float
 		unsigned int dataSize = static_cast<unsigned int>(sizeof(float));
@@ -77,16 +77,17 @@ namespace ComputeShader
 		GetConstantsBuffer(constantsBuffers)->push(params, 0);
 	}
 
-	void LuminanceHistogramAverage::Compute()
+	void LuminanceHistogramAverage::Compute(SceneUnitId unit)
 	{
-		CComPtr<ID3D12GraphicsCommandList2>& commandList = renderer->commandList;
+		auto& scene = GetSceneUnit(unit);
+		CComPtr<ID3D12GraphicsCommandList2>& commandList = scene->GetComputeCommandList();
 
 #if defined(_DEVELOPMENT)
 		PIXBeginEvent(commandList.p, 0, L"LuminanceHistogramAverage Compute");
 #endif
 
 		//after clearing the uav we can compute
-		shader.SetComputeState();
+		shader.SetComputeState(unit);
 
 		commandList->SetComputeRootDescriptorTable(0, GetConstantsBuffer(constantsBuffers)->gpu_xhandle[0]);
 		commandList->SetComputeRootDescriptorTable(1, histogramGpuHandle);

@@ -2,7 +2,6 @@
 #include "pch.h"
 #include "resource.h"
 
-
 RECT GetMaximizedAreaSize();
 
 //CREATE
@@ -16,8 +15,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 ATOM MyRegisterClass(HINSTANCE hInstance);
 BOOL InitInstance(HINSTANCE, int);
-void CreateSystemTemplates();
-void CreateTemplates();
 void CreateLightingResourcesMapping();
 
 //READ&GET
@@ -25,9 +22,6 @@ void CreateLightingResourcesMapping();
 //UPDATE
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 void AppStep();
-void GameInputStep();
-void AnimableStep(double elapsedSeconds);
-void AudioStep(float step);
 
 //RENDER
 void Render();

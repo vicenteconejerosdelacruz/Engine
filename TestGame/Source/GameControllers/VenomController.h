@@ -77,18 +77,20 @@ namespace Game
 
 		//Constructor and Binding
 		VenomController(nlohmann::json& json);
+		virtual void SetInitialConditions();
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 		virtual std::map<std::string, JEdvEditorDrawerFunction> GetControllerDrawers() { return GetVenomControllerDrawers(); }
 		virtual std::vector<std::pair<std::string, JsonToEditorValueType>> GetControllerAttributes() { return GetVenomControllerAttributes(); }
 #endif
-		virtual void Map(JUUID so);
+		virtual void Map(SUUUID so);
 		virtual void Unmap();
 
 		//Step
 		virtual void Step(float delta);
 
 		//JS binding
+		virtual void BindV8Module();
 		virtual void BindToV8Context(v8pp::context& context);
 		void VenomReady();
 		void StartVenomNextPunchWindow();
@@ -135,6 +137,9 @@ namespace Game
 		void LeaveJumping();
 		void LeaveRunningJumping();
 
+		//JS Binding
+		//std::unique_ptr<v8pp::module> v8ppModule;
+
 		//State machine
 		GameStatesMachine<VenomStates> vsm;
 
@@ -143,8 +148,8 @@ namespace Game
 		LookingTo lookingTo = LT_Right;
 
 		//SceneObjects
-		RenderableUUID venom;
-		CameraUUID camera;
+		RenderableSUUUID venom;
+		CameraSUUUID camera;
 
 		//Joystick
 		XMVECTOR leftStick;

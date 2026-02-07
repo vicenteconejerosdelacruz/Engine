@@ -5,6 +5,16 @@
 #pragma once
 
 #include "targetver.h"
+
+enum SceneObjectType {
+	SO_None,
+	SO_Renderables,
+	SO_Lights,
+	SO_Cameras,
+	SO_SoundEffects
+};
+typedef size_t SceneUnitId;
+
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 // Windows Header Files
 #include <windows.h>
@@ -74,7 +84,6 @@
 #include <array>
 #include <thread>
 #include <chrono>
-#include <filesystem>
 #include <ranges>
 #include <any>
 #include <ios>
@@ -91,10 +100,9 @@
 #include <iterator>
 #include <cctype>
 #include <locale>
-#include <regex>
 
 #if defined(_EDITOR)
-#include <ShlObj.h>
+//#include <ShlObj.h>
 #include <imgui.h>
 #include "misc/cpp/imgui_stdlib.h"
 #include "imgui_internal.h"
@@ -113,8 +121,8 @@
 #include <v8.h>
 #include <libplatform/libplatform.h>
 //v8pp
-#include "v8pp/context.hpp"
-#include "v8pp/module.hpp"
+#include <v8pp/context.hpp>
+#include <v8pp/module.hpp>
 
 template<typename... Args> void whatis();
 template<typename T> void whatis(T);
@@ -122,13 +130,12 @@ template<typename T> void whatis(T);
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
-using namespace Concurrency;
+//using namespace Concurrency;
 
-#include "pch/TemplateFlags.h"
 #include "pch/Application.h"
+#include "pch/NoStd.h"
 #include "pch/UUID.h"
 #include "pch/Json.h"
-#include "pch/NoStd.h"
 #include "pch/DXTypes.h"
 #include "pch/Debug.h"
 #include "pch/ShaderMaterials.h"
@@ -142,3 +149,15 @@ using namespace Concurrency;
 #include "pch/JExposeEditor.h"
 #endif
 #include "pch/GameStateMachine.h"
+#include "pch/GameEngineState.h"
+
+template<>
+struct std::hash<SUUUID>
+{
+	std::size_t operator()(const SUUUID& other) const
+	{
+		size_t hash = 0;
+		nostd::hash_combine(hash, std::get<0>(other), std::get<1>(other));
+		return hash;
+	}
+};

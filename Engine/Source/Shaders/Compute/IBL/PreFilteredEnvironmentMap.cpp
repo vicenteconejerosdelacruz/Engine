@@ -40,9 +40,11 @@ namespace ComputeShader
 		envMap = envMapUUID;
 
 		//create a srv desc/view for reading the envmap but as a cube texture
+		commandsProcessor.Init(renderer->d3dDevice, 0x000fff, 1);
+		commandsProcessor.ResetCommandList();
 		CreateTextureInstance(envMap, [this]
 			{
-				return std::make_unique<TextureInstance>(envMap);
+				return std::make_unique<TextureInstance>(commandsProcessor.GetCommandList(), envMap);
 			}
 		);
 		auto& json = GetTextureTemplate(envMap);
@@ -94,7 +96,7 @@ namespace ComputeShader
 			};
 			renderer->d3dDevice->CreateUnorderedAccessView(resources.back(), nullptr, &uavDesc, resultCpuHandle);
 
-			mipsResultsCB.push_back(CreateConstantsBuffer(sizeof(XMFLOAT4), std::string("PrefilteredEnvironmentMap:CBV[" + std::to_string(i + 1) + "]")));
+			mipsResultsCB.push_back(CreateConstantsBuffer(sizeof(XMFLOAT4), Renderer::numFrames, std::string("PrefilteredEnvironmentMap:CBV[" + std::to_string(i + 1) + "]")));
 
 			//Create a ReadBack
 			readBackSizes.push_back(static_cast<size_t>(faceW) * static_cast<size_t>(faceH) * pixelSize * static_cast<size_t>(numFaces));
@@ -123,15 +125,16 @@ namespace ComputeShader
 		readBackResources.clear();
 	}
 
-	void PreFilteredEnvironmentMap::Compute()
+	void PreFilteredEnvironmentMap::Compute(SceneUnitId unit)
 	{
-		CComPtr<ID3D12GraphicsCommandList2>& commandList = renderer->commandList;
+		auto& scene = GetSceneUnit(unit);
+		CComPtr<ID3D12GraphicsCommandList2>& commandList = scene->GetComputeCommandList();
 
 #if defined(_DEVELOPMENT)
 		PIXBeginEvent(commandList.p, 0, L"PreFilteredEnvironmentMap Compute");
 #endif
 
-		shader.SetComputeState();
+		shader.SetComputeState(unit);
 
 		unsigned int faceW = faceWidth;
 		unsigned int faceH = faceHeight;
@@ -156,7 +159,7 @@ namespace ComputeShader
 #endif
 	}
 
-	void PreFilteredEnvironmentMap::Solution()
+	void PreFilteredEnvironmentMap::Solution(SceneUnitId unit)
 	{
 		readBackResources.clear();
 

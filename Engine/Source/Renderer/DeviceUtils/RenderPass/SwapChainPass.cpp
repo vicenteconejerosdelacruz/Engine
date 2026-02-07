@@ -1,11 +1,15 @@
 #include "pch.h"
 #include "SwapChainPass.h"
+#include <Scene.h>
 #include <Renderer.h>
 #include <DirectXHelper.h>
 #include <DeviceUtils/RenderTarget/RenderTarget.h>
 #include <DeviceUtils/DescriptorHeap/DescriptorHeap.h>
+#include <DeviceUtils/RenderToTexture/RenderToTexture.h>
 #include <NoStd.h>
+#if defined(_DEVELOPMENT)
 #include <pix3.h>
+#endif
 
 extern std::unique_ptr<Renderer> renderer;
 
@@ -63,18 +67,21 @@ namespace DeviceUtils
 		swapChainPasses.erase(uuid);
 	}
 
-	void SwapChainPass::Pass(std::function<void()> renderCallback, bool clearRTV, XMVECTORF32 clearColor)
+	void SwapChainPass::Pass(SceneUnitId unit, std::function<void(SceneUnitId)> renderCallback, bool clearRTV, XMVECTORF32 clearColor)
 	{
-		BeginRenderPass(depthStencilViewDescriptorHeap, clearRTV, clearColor);
-		renderCallback();
-		EndRenderPass();
+		BeginRenderPass(unit, depthStencilViewDescriptorHeap, clearRTV, clearColor);
+		renderCallback(unit);
+		EndRenderPass(unit);
 	}
 
-	void SwapChainPass::BeginRenderPass(CComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap, bool clearRTV, XMVECTORF32 clearColor)
+	void SwapChainPass::BeginRenderPass(SceneUnitId unit, CComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap, bool clearRTV, XMVECTORF32 clearColor)
 	{
-		unsigned int backBufferIndex = renderer->backBufferIndex;
-		auto& backBuffer = renderTargets[backBufferIndex];
-		auto& commandList = renderer->commandList;
+		using namespace Scene;
+		auto& sceneUnit = GetSceneUnit(unit);
+
+		unsigned int frame = sceneUnit->Frame();
+		auto& commandList = sceneUnit->GetCommandList();
+		auto& backBuffer = renderTargets[frame];
 
 #if defined(_DEVELOPMENT)
 		PIXBeginEvent(commandList.p, 0, name.c_str());
@@ -87,54 +94,63 @@ namespace DeviceUtils
 		commandList->RSSetViewports(1, &screenViewport);
 		commandList->RSSetScissorRects(1, &scissorRect);
 
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(rtvDescriptorHeap->descriptorHeap->GetCPUDescriptorHandleForHeapStart(), backBufferIndex, rtvDescriptorHeap->descriptorSize);
-		if (clearRTV)
-		{
-			commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
-		}
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(rtvDescriptorHeap->descriptorHeap->GetCPUDescriptorHandleForHeapStart(), frame, rtvDescriptorHeap->descriptorSize);
 
 		if (dsvDescriptorHeap)
 		{
 			CD3DX12_CPU_DESCRIPTOR_HANDLE dsv(dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-			commandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 			commandList->OMSetRenderTargets(1, &rtv, false, &dsv);
+			commandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 		}
 		else
 		{
 			commandList->OMSetRenderTargets(1, &rtv, false, nullptr);
 		}
+
+		if (clearRTV)
+		{
+			commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+		}
 	}
 
-	void SwapChainPass::CopyFromRenderToTexture(JUUID renderToTextureUUID)
+	void SwapChainPass::CopyFromRenderToTexture(SceneUnitId unit, JUUID renderToTextureUUID)
 	{
-		unsigned int backbufferIndex = renderer->backBufferIndex;
-		auto& commandList = renderer->commandList;
-		auto& backbuffer = renderTargets[backbufferIndex];
+		using namespace Scene;
+		auto& sceneUnit = GetSceneUnit(unit);
+
+		unsigned int frame = sceneUnit->Frame();
+		auto& commandList = sceneUnit->GetCommandList();
+		auto& backBuffer = renderTargets[frame];
+
 		auto& renderToTexture = GetRenderToTexture(renderToTextureUUID);
 		auto& rtt = renderToTexture->renderToTexture;
 
 		std::vector<CD3DX12_RESOURCE_BARRIER> hold = {
-			CD3DX12_RESOURCE_BARRIER::Transition(backbuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST),
+			CD3DX12_RESOURCE_BARRIER::Transition(backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST),
 			CD3DX12_RESOURCE_BARRIER::Transition(rtt, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_SOURCE),
 		};
 		commandList->ResourceBarrier((unsigned int)hold.size(), hold.data());
 
-		D3D12_TEXTURE_COPY_LOCATION src = { .pResource = renderTargets[backbufferIndex], .Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX, .SubresourceIndex = 0U };
+		D3D12_TEXTURE_COPY_LOCATION src = { .pResource = backBuffer, .Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX, .SubresourceIndex = 0U };
 		D3D12_TEXTURE_COPY_LOCATION dst = { .pResource = renderToTexture->renderToTexture, .Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX, .SubresourceIndex = 0U };
 		commandList->CopyTextureRegion(&src, 0, 0, 0, &dst, nullptr);
 
 		std::vector<CD3DX12_RESOURCE_BARRIER> release = {
-			CD3DX12_RESOURCE_BARRIER::Transition(backbuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET),
+			CD3DX12_RESOURCE_BARRIER::Transition(backBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET),
 			CD3DX12_RESOURCE_BARRIER::Transition(rtt, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
 		};
 		commandList->ResourceBarrier((unsigned int)release.size(), release.data());
 	}
 
-	void SwapChainPass::EndRenderPass()
+	void SwapChainPass::EndRenderPass(SceneUnitId unit)
 	{
-		unsigned int backBufferIndex = renderer->backBufferIndex;
-		auto& backBuffer = renderTargets[backBufferIndex];
-		auto& commandList = renderer->commandList;
+		using namespace Scene;
+		auto& sceneUnit = GetSceneUnit(unit);
+
+		unsigned int frame = sceneUnit->Frame();
+		auto& commandList = sceneUnit->GetCommandList();
+		auto& backBuffer = renderTargets[frame];
+
 		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 		commandList->ResourceBarrier(1, &barrier);
 

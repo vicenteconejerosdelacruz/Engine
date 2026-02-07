@@ -59,7 +59,14 @@ namespace ShaderCompiler {
 
 		DxcBuffer sourceBuffer{ .Ptr = pSource->GetBufferPointer(), .Size = pSource->GetBufferSize(), .Encoding = 0 };
 
-		//OutputDebugStringA(std::string("Compiling :" + nostd::WStringToString(shaderDefine.at(params.shaderType)) + filename + "\n").c_str());
+		std::string compiler_arguments;
+		for (int i = 0; i < arguments.size(); i++)
+		{
+			compiler_arguments += nostd::WStringToString(arguments[i]);
+			if (i < (arguments.size() - 1))
+				compiler_arguments += " ";
+		}
+		OutputDebugStringA(std::string("Compiling :" + nostd::WStringToString(shaderDefine.at(params.shaderType)) + " " + filename + " " + compiler_arguments + "\n").c_str());
 
 		//compile the shader
 		ComPtr<IDxcResult> pCompileResult;

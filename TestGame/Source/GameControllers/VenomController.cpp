@@ -25,6 +25,8 @@ extern DX::StepTimer timer;
 
 namespace Game
 {
+	auto* This() { return ContextController<VenomController>(); };
+
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
@@ -36,73 +38,7 @@ namespace Game
 	static XMFLOAT2 zBounds = { -6.8f ,0.90f };
 
 	//JS Module
-	static std::unique_ptr<v8pp::module> v8ppModule = nullptr;
-	static void animationUseTransformation(bool value)
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->venom->animationUseTransformation(value);
-	}
-	static void VenomReady()
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->VenomReady();
-	}
-	static void StartVenomNextPunchWindow()
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->StartVenomNextPunchWindow();
-	}
-	static void EvaluateVenomNextPunch()
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->EvaluateVenomNextPunch();
-	}
-	static void SwitchVenomToState(std::string state)
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->vsm.ChangeState(stringToVenomStates.at(state));
-	}
-	static void VenomBeginJump()
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->VenomBeginJump();
-	}
-	static void VenomEndJumpLanding()
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->VenomEndJumpLanding();
-	}
-	static void VenomBeginRunJump()
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->VenomBeginRunJump();
-	}
-	static void VenomRunJumpLanding()
-	{
-		VenomController* venom = static_cast<VenomController*>(GetControllerByName("venom").get());
-		venom->VenomRunJumpLanding();
-	}
-	static void BindV8Module()
-	{
-		if (v8ppModule == nullptr)
-		{
-			Scripting::BindModule([&](v8::Isolate* isolate)
-				{
-
-					v8ppModule = std::make_unique<v8pp::module>(isolate);
-					v8ppModule->function("animationUseTransformation", &Game::animationUseTransformation).
-						function("PlayerReady", &Game::VenomReady).
-						function("StartNextPunchWindow", &Game::StartVenomNextPunchWindow).
-						function("EvaluateNextPunch", &Game::EvaluateVenomNextPunch).
-						function("SwitchToState", &Game::SwitchVenomToState).
-						function("BeginJump", &Game::VenomBeginJump).
-						function("EndJumpLanding", &Game::VenomEndJumpLanding).
-						function("BeginRunJump", &Game::VenomBeginRunJump).
-						function("RunJumpLanding", &Game::VenomRunJumpLanding);
-				}
-			);
-		}
-	}
+	static std::map<JUUID, std::unique_ptr<v8pp::module>> v8ppModule;
 
 	//Constructor and Binding
 	VenomController::VenomController(nlohmann::json& json) : Controller(json)
@@ -118,29 +54,35 @@ namespace Game
 		vsm = {
 			.currentState = VS_None,
 			.onEnter = {
-				{ VS_Intro, [this](VenomStates prevState) { EnterIntro(); }},
-				{ VS_Idle, [this](VenomStates prevState) { EnterIdle(); }},
-				{ VS_Walking, [this](VenomStates prevState) { EnterWalking(); }},
-				{ VS_Running, [this](VenomStates prevState) { EnterRunning(); }},
-				{ VS_Jumping, [this](VenomStates prevState) { EnterJumping(); }},
-				{ VS_RunningJump, [this](VenomStates prevState) { EnterRunningJump(); }},
-				{ VS_Attack_1,[this](VenomStates prevState) { EnterAttack1(); }}
+				{ VS_Intro, [&](auto* sm, VenomStates prevState) { EnterIntro(); }},
+				{ VS_Idle, [&](auto* sm, VenomStates prevState) { EnterIdle(); }},
+				{ VS_Walking, [&](auto* sm, VenomStates prevState) { EnterWalking(); }},
+				{ VS_Running, [&](auto* sm, VenomStates prevState) { EnterRunning(); }},
+				{ VS_Jumping, [&](auto* sm, VenomStates prevState) { EnterJumping(); }},
+				{ VS_RunningJump, [&](auto* sm, VenomStates prevState) { EnterRunningJump(); }},
+				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { EnterAttack1(); }}
 			},
 			.onLeave = {
-				{ VS_Attack_1,[this](VenomStates prevState) { LeaveAttack1(); }},
-				{ VS_Jumping, [this](VenomStates prevState) { LeaveJumping(); }},
-				{ VS_Jumping, [this](VenomStates prevState) { LeaveRunningJumping(); }}
+				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { LeaveAttack1(); }},
+				{ VS_Jumping, [&](auto* sm, VenomStates prevState) { LeaveJumping(); }},
+				{ VS_Jumping, [&](auto* sm, VenomStates prevState) { LeaveRunningJumping(); }}
 			},
 			.onStep = {
-				{ VS_None, [this]() { venomScale = venom->scale(); vsm.ChangeState(VS_Intro); }},
-				{ VS_Idle, [this]() { Idle(); }},
-				{ VS_Walking, [this]() { Walking(); }},
-				{ VS_Running, [this]() { Running(); }},
-				{ VS_Jumping, [this]() { Jumping(); }},
-				{ VS_RunningJump, [this]() { RunningJump(); }},
-				{ VS_Attack_1, [this]() { Attacking1(); }}
+				{ VS_None, [&](auto* sm) { venomScale = venom->scale(); vsm.ChangeState(VS_Intro); }},
+				{ VS_Idle, [&](auto* sm) { Idle(); }},
+				{ VS_Walking, [&](auto* sm) { Walking(); }},
+				{ VS_Running, [&](auto* sm) { Running(); }},
+				{ VS_Jumping, [&](auto* sm) { Jumping(); }},
+				{ VS_RunningJump, [&](auto* sm) { RunningJump(); }},
+				{ VS_Attack_1, [&](auto* sm) { Attacking1(); }}
 			}
 		};
+		SetInitialConditions();
+	}
+
+	void VenomController::SetInitialConditions()
+	{
+		vsm.currentState = VS_None;
 		venomScale = { 0.0f,0.0f,0.0f };
 		leftStick = XMVectorZero();
 		runningJumpLeftStick = XMVectorZero();
@@ -164,18 +106,19 @@ namespace Game
 	}
 #endif
 
-	void VenomController::Map(JUUID so)
+	void VenomController::Map(SUUUID so)
 	{
 		using namespace Scene;
 		Controller::Map(so);
-		SceneObjectType type = GetSceneObjectType(so);
+		SceneObjectType type = GetSceneObjectType(FROMSUUUID(so));
+
 		if (type == SO_Renderables)
 		{
 			venom = so;
 		}
-		if (GetCountFromMouseCameras() > 0ULL)
+		if (GetCountFromMouseCameras(unit) > 0ULL)
 		{
-			camera = *GetMouseCameras().begin();
+			camera = MAKESUUUID(unit, *GetMouseCameras(unit).begin());
 		}
 		BindV8Module();
 	}
@@ -191,7 +134,7 @@ namespace Game
 	void VenomController::Step(float delta)
 	{
 #if defined(_EDITOR)
-		if (!Editor::IsPlaying() || Editor::IsPaused())
+		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
 			return;
 #endif
 
@@ -224,9 +167,71 @@ namespace Game
 	}
 
 	//JS binding
+	void VenomController::BindV8Module()
+	{
+		JUUID uuid = controller;
+		if (!v8ppModule.contains(uuid))
+		{
+			Scripting::BindModule([&](v8::Isolate* isolate)
+				{
+					v8ppModule.insert_or_assign(uuid, std::make_unique<v8pp::module>(isolate));
+					v8ppModule.at(uuid)->function("animationUseTransformation", [](bool value)
+						{
+							This()->venom->animationUseTransformation(value);
+						}
+					).function("PlayerReady", []
+						{
+							This()->VenomReady();
+						}
+					).function("StartNextPunchWindow", []
+						{
+							This()->StartVenomNextPunchWindow();
+						}
+					).function("EvaluateNextPunch", []
+						{
+							This()->EvaluateVenomNextPunch();
+						}
+					).function("SwitchToState", [](std::string state)
+						{
+							This()->vsm.ChangeState(stringToVenomStates.at(state));
+						}
+					).function("BeginJump", []
+						{
+							This()->VenomBeginJump();
+						}
+					).function("EndJumpLanding", []
+						{
+							This()->VenomEndJumpLanding();
+						}
+					).function("BeginRunJump", []
+						{
+							This()->VenomBeginRunJump();
+						}
+					).function("RunJumpLanding", []
+						{
+							This()->VenomRunJumpLanding();
+						}
+					);
+				}
+			);
+		}
+	}
+
 	void VenomController::BindToV8Context(v8pp::context& context)
 	{
-		context.value("venom", v8ppModule->new_instance());
+		context.value("venom", v8ppModule.at(controller)->new_instance());
+
+		auto* isolate = context.isolate();
+
+		v8::HandleScope handle_scope(isolate);
+		v8::MaybeLocal<v8::String> maybe_v8_string = v8::String::NewFromUtf8(
+			isolate,               // The current isolate
+			controller.c_str(),    // The C-style string pointer (const char*)
+			v8::NewStringType::kNormal, // Type of string
+			static_cast<int>(controller.length())    // Optional: length in bytes for performance
+		);
+		v8::Local<v8::String> v8_string = maybe_v8_string.ToLocalChecked();
+		context.value("uuid", v8_string);
 	}
 
 	void VenomController::VenomReady()
@@ -632,6 +637,7 @@ namespace Game
 			newAttack1 = true;
 		}
 	}
+
 	//Leaves
 	void VenomController::LeaveAttack1()
 	{
@@ -646,6 +652,7 @@ namespace Game
 		JumpingStateData.falling = false;
 		JumpingStateData.kicking = false;
 	}
+
 	void VenomController::LeaveRunningJumping()
 	{
 		RunningJumpStateData.jumpTween = nullptr;

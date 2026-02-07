@@ -6,5 +6,5 @@ namespace Scripting
 	void ShutdownScripting();
 	v8::Isolate* GetIsolate();
 	void BindModule(std::function<void(v8::Isolate*)>);
-	void RunScript(std::string script, RenderableUUID renderable);
+	void RunScript(std::string script, RenderableSUUUID renderable);
 }

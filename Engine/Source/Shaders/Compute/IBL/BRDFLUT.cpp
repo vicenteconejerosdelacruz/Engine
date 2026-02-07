@@ -47,15 +47,16 @@ namespace ComputeShader
 		readBackResource = nullptr;
 	}
 
-	void BRDFLUT::Compute()
+	void BRDFLUT::Compute(SceneUnitId unit)
 	{
-		CComPtr<ID3D12GraphicsCommandList2>& commandList = renderer->commandList;
+		auto& scene = GetSceneUnit(unit);
+		CComPtr<ID3D12GraphicsCommandList2>& commandList = scene->GetComputeCommandList();
 
 #if defined(_DEVELOPMENT)
 		PIXBeginEvent(commandList.p, 0, L"BRDFLUT Compute");
 #endif
 
-		shader.SetComputeState();
+		shader.SetComputeState(unit);
 
 		commandList->SetComputeRootDescriptorTable(0, resultGpuHandle);
 		commandList->Dispatch(8, 8, 1);
@@ -65,7 +66,7 @@ namespace ComputeShader
 #endif
 	}
 
-	void BRDFLUT::Solution()
+	void BRDFLUT::Solution(SceneUnitId unit)
 	{
 		DeviceUtils::CaptureTexture(
 			renderer->d3dDevice,

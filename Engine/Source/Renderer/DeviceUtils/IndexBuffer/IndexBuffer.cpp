@@ -11,5 +11,7 @@ namespace DeviceUtils
 		ibvData.indexBufferView.BufferLocation = ibvData.indexBuffer->GetGPUVirtualAddress();
 		ibvData.indexBufferView.Format = DXGI_FORMAT_R32_UINT;
 		ibvData.indexBufferView.SizeInBytes = sizeof(unsigned int) * indicesCount;
+		ibvData.indexBuffer->SetName(nostd::StringToWString(std::string("indexBuffer:(" + std::to_string(indicesCount) + ")")).c_str());
+		LogCComPtrAddress(std::string("indexBuffer:(" + std::to_string(indicesCount) + ")"), ibvData.indexBuffer);
 	}
 };

@@ -262,7 +262,7 @@
 		std::map<std::string, std::string> objectMap;\
 		for (nlohmann::json::iterator it = j.begin(); it != j.end(); ++it)\
 		{\
-			objectMap.insert_or_assign(it.key(), Create##TYPE(it.key(), at("uuid"), it.value())); \
+			objectMap.insert_or_assign(it.key(), Create##TYPE(it.key(), SUuuid(), it.value())); \
 		}\
 		for(auto &[key,uuid]:objectMap)\
 		{\

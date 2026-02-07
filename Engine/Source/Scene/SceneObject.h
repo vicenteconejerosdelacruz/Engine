@@ -1,21 +1,17 @@
 #pragma once
 
 #include <map>
-#include <JObject.h>
+#include <set>
+#include <Controller.h>
 #include <nlohmann/json.hpp>
+#include <JObject.h>
+#include <JTypes.h>
+#include <Scripting.h>
+#include <SceneObjectDecl.h>
+#include <SceneObjectDef.h>
 #if defined(_EDITOR)
 #include <IconsFontAwesome5.h>
 #endif
-#include <set>
-#include <Scripting.h>
-
-enum SceneObjectType {
-	SO_None,
-	SO_Renderables,
-	SO_Lights,
-	SO_Cameras,
-	SO_SoundEffects
-};
 
 inline const std::unordered_map<SceneObjectType, std::string> SceneObjectTypeToString = {
 	{ SO_Renderables, "Renderables" },
@@ -64,6 +60,12 @@ inline const std::unordered_map<std::string, std::string> StringToJsonContainer 
 	{ "SoundEffects", "sounds" }
 };
 
+//template <typename T>
+//using SceneObjectsInUnit = std::unordered_map<JUUID, T>;
+//
+//template <typename T>
+//using SceneObjectsContainer = std::unordered_map<SceneUnitId, SceneObjectsInUnit<T>>;
+
 template <typename T>
 using SceneObjectsContainer = std::unordered_map<JUUID, T>;
 
@@ -73,27 +75,48 @@ namespace Scene
 
 	struct SceneObject : JObject
 	{
-		SceneObject(nlohmann::json& json) :JObject(json) {}
-		virtual void Initialize();
-		virtual void BindToScene();
-		virtual void UnbindFromScene() {};
-		virtual XMVECTOR rotationQ() { return XMQuaternionIdentity(); }
-		virtual XMMATRIX world() { return XMMatrixIdentity(); }
-		virtual BoundingBox GetBoundingBox() { return BoundingBox(); };
+		//lifecycle
+		SceneObject(SceneUnitId id, nlohmann::json& json) :JObject(json) { unit = id; }
+		virtual void Initialize() {};
+		virtual void SetInitialConditions() {};
+		virtual void BindToScene() {};
 		virtual void Bind(JUUID uuid) {}
+		virtual void UnbindFromScene() {};
 		virtual void Unbind(JUUID uuid) {}
 
+		//transformations
+		virtual XMVECTOR rotationQ() { return XMQuaternionIdentity(); }
+		virtual XMMATRIX world() { return XMMatrixIdentity(); }
+
+		//boundingbox
+		virtual BoundingBox GetBoundingBox() { return BoundingBox(); };
+
+		//datatypes
 		virtual SceneObjectType JType() { return SO_None; }
 		JUUID Juuid() { return JUUID(at("uuid")); }
+		SUUUID SUuuid() { return std::make_tuple(unit, Juuid()); }
+
+		//json patching
 		virtual void JUpdate(nlohmann::json p);
 		virtual void JPatch(nlohmann::json p);
 
+		//Scripting
 		virtual void BindToV8Context(v8pp::context& context);
 
 #if defined(_EDITOR)
-		virtual JUUID CreateBillboard(CameraUUID camera) { return ""; }
+		//Billboard
+		virtual JUUID CreateBillboard(CameraSUUUID camera) { return ""; }
 		virtual void UpdateBillboard(JUUID billboard) {}
+
+		//Gizmos
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return false; }
 #endif
+		//scene unit for which this scene object belongs
+		SceneUnitId unit;
 	};
 };
+
+#include <Renderable/Renderable.h>
+#include <Light/Light.h>
+#include <Camera/Camera.h>
+#include <Sound/SoundFX.h>

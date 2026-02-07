@@ -1,21 +1,26 @@
 #include "pch.h"
 #include "Model3D.h"
-#include <Templates.h>
-#include <TemplateDef.h>
-#include <Mesh/Mesh.h>
-#include <VertexFormats.h>
-#include <Animated.h>
+//#include <Templates.h>
+//#include <TemplateDef.h>
+//#include <Mesh/Mesh.h>
+//#include <VertexFormats.h>
+//#include <Animated.h>
 #include <d3d12.h>
 #include <nlohmann/json.hpp>
 #include <Application.h>
 #include <NoStd.h>
-#include <Textures/Texture.h>
-#include <Material/Material.h>
-#include <DDSTextures.h>
+//#include <Textures/Texture.h>
+//#include <Material/Material.h>
+//#include <DDSTextures.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/GltfMaterial.h>
+#include <Animated.h>
 
 using namespace Animation;
-using namespace DeviceUtils;
-using namespace Templates;
+//using namespace DeviceUtils;
+//using namespace Templates;
 
 #if defined(_EDITOR)
 namespace Editor
@@ -91,11 +96,11 @@ namespace Templates
 
 		if (seqMdls.size() > 0ULL)
 		{
-			JObject::RunChangesCallback(seqMdls, [](auto mdl)
-				{
-					mdl->clean(Model3DJson::Update_animationSequences);
-				}
-			);
+			//JObject::RunChangesCallback(seqMdls, [](auto mdl)
+			//	{
+			//		mdl->clean(Model3DJson::Update_animationSequences);
+			//	}
+			//);
 		}
 	}
 #endif
@@ -108,18 +113,16 @@ namespace Templates
 		return "mat-" + uuid + "-" + std::to_string(index);
 	}
 
-	JUUID GetModel3DMaterialInstanceName(JUUID uuid, unsigned int index)
+	JUUID GetModel3DMaterialTemplateName(JUUID uuid, unsigned int index)
 	{
 		std::unique_ptr<Model3DJson>& mdl = GetModel3DTemplate(uuid);
-		return "mat-" + mdl->name() + "-" + std::to_string(index);
+		return mdl->name() + "/mat-" + std::to_string(index);
 	}
 
-	Model3DInstance::Model3DInstance(JUUID uuid, JUUID objectUUID, JObjectChangeCallback cb, JObjectChangePostCallback postCb)
+	Model3DInstance::Model3DInstance(SceneUnitId id, JUUID uuid, JUUID objectUUID)
 	{
 		model3DUUID = uuid;
-		auto& mdl = GetModel3DTemplate(model3DUUID);
-		mdl->BindChangeCallback(objectUUID, cb, postCb);
-		LoadModel3DInstance();
+		LoadModel3DInstance(id);
 	}
 
 	Model3DInstance::~Model3DInstance()
@@ -131,7 +134,7 @@ namespace Templates
 		meshes.clear();
 	}
 
-	void Model3DInstance::LoadModel3DInstance()
+	void Model3DInstance::LoadModel3DInstance(SceneUnitId id)
 	{
 		auto& mdl = GetModel3DTemplate(model3DUUID);
 
@@ -178,7 +181,7 @@ namespace Templates
 			}
 
 			unsigned int indicesCount = aMesh->mNumFaces * aMesh->mFaces[0].mNumIndices;
-			std::unique_ptr<MeshInstance>& mesh = GetMeshInstance(GetModel3DMeshInstanceUUID(model3DUUID, meshIndex), vertexClass, vertexData.data(), static_cast<unsigned int>(vertexSize), aMesh->mNumVertices, indicesData.data(), indicesCount);
+			std::unique_ptr<MeshInstance>& mesh = GetMeshInstance(id, GetModel3DMeshInstanceUUID(model3DUUID, meshIndex), vertexClass, vertexData.data(), static_cast<unsigned int>(vertexSize), aMesh->mNumVertices, indicesData.data(), indicesCount);
 
 			CreateBoundingBox(mesh->boundingBox, aMesh);
 
@@ -227,7 +230,7 @@ namespace Templates
 #if defined(_DEVELOPMENT)
 				MaterialJson materialJson = CreateModel3DMaterialJson(
 					materialUUID,
-					GetModel3DMaterialInstanceName(model3DUUID, meshIndex),
+					GetModel3DMaterialTemplateName(model3DUUID, meshIndex),
 					mdl->shader_vs(),
 					mdl->shader_ps(),
 					aiModel->mMaterials[aMesh->mMaterialIndex]
@@ -269,7 +272,8 @@ namespace Templates
 
 	nlohmann::json Model3DInstance::GetAssimpTexturesMaterialJson(std::filesystem::path relativePath, const aiScene* aiModel, aiMaterial* material)
 	{
-		using namespace Templates::Model3D;
+		//using namespace Templates::Model3D;
+		using namespace Templates::Texture;
 
 		nlohmann::json mat(nlohmann::json({}));
 

@@ -1,9 +1,12 @@
 #include "pch.h"
-#include <Templates.h>
-#include <TemplateDef.h>
 #include "Material.h"
+#include <Renderer.h>
 #include "Variables.h"
 #include <ShaderCompiler.h>
+//#include <Templates.h>
+//#include <TemplateDef.h>
+
+extern std::unique_ptr<Renderer> renderer;
 
 namespace Templates
 {
@@ -51,8 +54,16 @@ namespace Templates
 	}
 #endif
 
+	void MaterialJson::SetPipelineStateCallback(size_t hash, std::function<void()> callback)
+	{
+		if (pipelineChangeCallbacks.contains(hash)) return;
+		pipelineChangeCallbacks.insert_or_assign(hash, callback);
+	}
+
 	TEMPDEF_FULL(Material);
 	TEMPDEF_REFTRACKER(Material);
+
+	std::unordered_map<MaterialJsonUUID, std::set<MaterialInstanceUUID>> materialsTemplatesInstances;
 
 	void MaterialJsonStep()
 	{
@@ -63,65 +74,185 @@ namespace Templates
 			}
 		);
 
-		std::set<MaterialJsonUUID> rebuildMaterials;
-		std::copy_if(mats.begin(), mats.end(), std::inserter(rebuildMaterials, rebuildMaterials.begin()), [](auto mat)
+		std::set<MaterialJsonUUID> rebuildTextures;
+		std::copy_if(mats.begin(), mats.end(), std::inserter(rebuildTextures, rebuildTextures.begin()), [](auto mat)
+			{
+				return mat->dirty(MaterialJson::Update_textures)
+					&& materialsTemplatesInstances.contains(mat)
+					&& materialsTemplatesInstances.at(mat).size() > 0ULL;
+			}
+		);
+
+		std::unordered_map<TextureJsonUUID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceUUID>>> changes;
+		std::for_each(rebuildTextures.begin(), rebuildTextures.end(), [&](auto mat)
+			{
+				for (auto& texUsage : materialTexturesShaderUsage)
+				{
+					std::string texUsageS = TextureShaderUsageToString.at(texUsage);
+					JUUID prevTexUUID = "";
+					if (mat->UpdatePrevValues["textures"].contains(texUsageS))
+					{
+						prevTexUUID = mat->UpdatePrevValues["textures"].at(texUsageS);
+					}
+					JUUID newTexUUID = "";
+					if (mat->at("textures").contains(texUsageS))
+					{
+						newTexUUID = mat->at("textures").at(texUsageS);
+					}
+					if (prevTexUUID == newTexUUID) continue;
+
+					for (auto instance : materialsTemplatesInstances.at(mat))
+					{
+						changes[newTexUUID].insert(std::make_tuple(texUsage, instance));
+					}
+				}
+				mat->clean(MaterialJson::Update_textures);
+			}
+		);
+
+		if (changes.size() > 0ULL)
+		{
+			UpdateMaterialTextures(changes);
+		}
+
+		std::set<MaterialJsonUUID> rebuildPipelineState;
+		std::copy_if(mats.begin(), mats.end(), std::inserter(rebuildPipelineState, rebuildPipelineState.begin()), [](auto mat)
 			{
 				return mat->dirty(MaterialJson::Update_shader_vs) ||
 					mat->dirty(MaterialJson::Update_shader_ps) ||
 					mat->dirty(MaterialJson::Update_samplers) ||
-					mat->dirty(MaterialJson::Update_mappedValues) ||
-					mat->dirty(MaterialJson::Update_textures) ||
 					mat->dirty(MaterialJson::Update_rasterizerState) ||
 					mat->dirty(MaterialJson::Update_blendState);
 			}
 		);
 
-		if (rebuildMaterials.size() > 0ULL)
-		{
-			JObject::RunChangesCallback(rebuildMaterials, [](auto mat)
+		std::for_each(rebuildPipelineState.begin(), rebuildPipelineState.end(), [&](auto mat)
+			{
+				for (auto& [hash, callback] : mat->pipelineChangeCallbacks)
 				{
-					mat->clean(MaterialJson::Update_shader_vs);
-					mat->clean(MaterialJson::Update_shader_ps);
-					mat->clean(MaterialJson::Update_samplers);
-					mat->clean(MaterialJson::Update_mappedValues);
-					mat->clean(MaterialJson::Update_textures);
-					mat->clean(MaterialJson::Update_rasterizerState);
-					mat->clean(MaterialJson::Update_blendState);
+					callback();
 				}
-			);
+				mat->clean(MaterialJson::Update_shader_vs);
+				mat->clean(MaterialJson::Update_shader_ps);
+				mat->clean(MaterialJson::Update_samplers);
+				mat->clean(MaterialJson::Update_rasterizerState);
+				mat->clean(MaterialJson::Update_blendState);
+			}
+		);
+	}
+
+	static bool updateTexturesProcessorInitialized = false;
+	static CommandsProcessor updateTexturesProcessor;
+	void UpdateMaterialTextures(std::unordered_map<TextureJsonUUID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceUUID>>> changes)
+	{
+		using namespace Templates::Texture;
+
+		if (!updateTexturesProcessorInitialized)
+		{
+			updateTexturesProcessor.Init(renderer->d3dDevice, 0x10AD3D, 1);
+			updateTexturesProcessorInitialized = true;
 		}
+
+		std::thread updateTexThread([](std::unordered_map<TextureJsonUUID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceUUID>>> changes)
+			{
+				updateTexturesProcessor.ResetCommandList();
+
+				std::unordered_map<TextureJsonUUID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceUUID>>> postChanges;
+				std::transform(changes.begin(), changes.end(), std::inserter(postChanges, postChanges.begin()), [](auto& pair)
+					{
+						std::pair<TextureJsonUUID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceUUID>>> replacement;
+						replacement.second = pair.second;
+						auto texUUID = pair.first;
+						if (!texUUID.empty())
+						{
+							replacement.first = pair.first;
+							return replacement;
+						}
+
+						auto usage = std::get<0>(*pair.second.begin());
+						switch (usage)
+						{
+						case TextureShaderUsage_Base:
+						{
+							replacement.first = GetTextureUUIDByName(defaultBaseTexture);
+						}
+						break;
+						case TextureShaderUsage_NormalMap:
+						{
+							replacement.first = GetTextureUUIDByName(defaultNormalMap);
+						}
+						break;
+						}
+						return replacement;
+					}
+				);
+
+				for (auto& [texUUID, usageMat] : postChanges)
+				{
+					if (texUUID.empty()) continue;
+
+					CreateTextureInstance(texUUID(), [&]
+						{
+							return std::make_unique<TextureInstance>(updateTexturesProcessor.GetCommandList(), texUUID());
+						}
+					);
+				}
+				updateTexturesProcessor.CloseCommandList();
+				renderer->ExecuteCommands(updateTexturesProcessor.GetCommandList(false), [=]
+					{
+						for (auto& [texUUID, usageMapSet] : postChanges)
+						{
+							for (auto [usage, instance] : usageMapSet)
+							{
+								instance->UpdateTexture(usage, texUUID);
+							}
+						}
+					}
+				);
+			}, changes
+		);
+		updateTexThread.detach();
 	}
 
 	MaterialInstance::MaterialInstance(
-		JUUID instance_uuid,
-		JUUID uuid,
+		SceneUnitId id,
+		JUUID Instance_uuid,
+		JUUID Template_uuid,
 		VertexClass vClass,
 		bool isShadowed,
 		bool hasIBL,
 		TextureShaderUsageMap overrideTextures,
-		JUUID bindingUUID,
-		JObjectChangeCallback materialChangeCallback,
-		JObjectChangePostCallback materialChangePostCallback
+		JUUID bindingUUID
 	)
 	{
-		instanceUUID = instance_uuid;
-		materialUUID = uuid;
+		instanceUUID = Instance_uuid;
+		materialUUID = Template_uuid;
 
-		std::unique_ptr<MaterialJson>& material = GetMaterialTemplate(uuid);
-		if (bindingUUID != "" && (materialChangeCallback != nullptr || materialChangePostCallback != nullptr)) {
-			material->BindChangeCallback(bindingUUID, materialChangeCallback, materialChangePostCallback);
-		}
+		materialsTemplatesInstances[materialUUID].insert(instanceUUID);
+
+		MaterialJsonUUID material = materialUUID;
+		//if (bindingUUID != "" && (materialChangeCallback != nullptr || materialChangePostCallback != nullptr)) {
+		//	material->BindChangeCallback(bindingUUID, materialChangeCallback, materialChangePostCallback);
+		//}
 
 		auto matTextures = material->textures();
-		std::transform(matTextures.begin(), matTextures.end(), std::inserter(textures, textures.end()), [](auto& pair)
+		std::transform(matTextures.begin(), matTextures.end(), std::inserter(textures, textures.end()), [&](auto& pair)
 			{
-				CreateTextureInstance(pair.second);
+				CreateTextureInstance(pair.second, [&]
+					{
+						return std::make_unique<TextureInstance>(id, pair.second);
+					}
+				);
 				return TextureUsageInstancePair(pair.first, pair.second);
 			}
 		);
-		std::transform(overrideTextures.begin(), overrideTextures.end(), std::inserter(textures, textures.end()), [](auto& pair)
+		std::transform(overrideTextures.begin(), overrideTextures.end(), std::inserter(textures, textures.end()), [&](auto& pair)
 			{
-				CreateTextureInstance(pair.second);
+				CreateTextureInstance(pair.second, [&]
+					{
+						return std::make_unique<TextureInstance>(id, pair.second);
+					}
+				);
 				return TextureUsageInstancePair(pair.first, pair.second);
 			}
 		);
@@ -194,7 +325,7 @@ namespace Templates
 		Source compPS = { .shaderType = PIXEL_SHADER, .shaderTarget = shaderTarget.at(PIXEL_SHADER), .shaderUUID = pixelShaderUUID(), .defines = defines };
 		vertexShaderInstanceUUID = vertexShaderUUID() + std::to_string(std::hash<Source>()(compVS));
 		pixelShaderInstanceUUID = pixelShaderUUID() + std::to_string(std::hash<Source>()(compPS));
-		auto onVSShaderChange = [this](JUUID vsShader)
+		/*auto onVSShaderChange = [this](JUUID vsShader)
 			{
 				auto& mat = materialUUID;
 				mat->flag(MaterialJson::Update_shader_vs);
@@ -203,15 +334,15 @@ namespace Templates
 			{
 				auto& mat = materialUUID;
 				mat->flag(MaterialJson::Update_shader_ps);
-			};
-		CreateShaderInstance(vertexShaderInstanceUUID(), [this, compVS, onVSShaderChange]
+			};*/
+		CreateShaderInstance(vertexShaderInstanceUUID(), [this, compVS/*, onVSShaderChange*/]
 			{
-				return std::make_unique<ShaderInstance>(vertexShaderInstanceUUID(), compVS.shaderUUID, compVS, instanceUUID, onVSShaderChange);
+				return std::make_unique<ShaderInstance>(vertexShaderInstanceUUID(), compVS.shaderUUID, compVS, instanceUUID()/*, onVSShaderChange*/);
 			}
 		);
-		CreateShaderInstance(pixelShaderInstanceUUID(), [this, compPS, onPSShaderChange]
+		CreateShaderInstance(pixelShaderInstanceUUID(), [this, compPS/*, onPSShaderChange*/]
 			{
-				return std::make_unique<ShaderInstance>(pixelShaderInstanceUUID(), compPS.shaderUUID, compPS, instanceUUID, onPSShaderChange);
+				return std::make_unique<ShaderInstance>(pixelShaderInstanceUUID(), compPS.shaderUUID, compPS, instanceUUID()/*, onPSShaderChange*/);
 			}
 		);
 	}
@@ -220,11 +351,11 @@ namespace Templates
 	{
 		using namespace ShaderCompiler;
 
-		if (ShaderTemplateExist(vertexShaderUUID()))
-			vertexShaderUUID->UnbindChangeCallback(instanceUUID);
+		//if (ShaderTemplateExist(vertexShaderUUID()))
+		//	vertexShaderUUID->UnbindChangeCallback(instanceUUID());
 
-		if (ShaderTemplateExist(pixelShaderUUID()))
-			pixelShaderUUID->UnbindChangeCallback(instanceUUID);
+		//if (ShaderTemplateExist(pixelShaderUUID()))
+		//	pixelShaderUUID->UnbindChangeCallback(instanceUUID());
 
 		DeleteShaderInstance(vertexShaderInstanceUUID());
 		DeleteShaderInstance(pixelShaderInstanceUUID());
@@ -232,6 +363,7 @@ namespace Templates
 		{
 			DeleteTextureInstance(tex);
 		}
+		materialsTemplatesInstances[materialUUID].erase(instanceUUID);
 	}
 
 	void MaterialInstance::LoadVariablesMapping()
@@ -392,6 +524,17 @@ namespace Templates
 			commandList->SetGraphicsRootDescriptorTable(slot, texInstance->gpuHandle);
 			slot++;
 		}
+	}
+
+	void MaterialInstance::UpdateTexture(TextureShaderUsage usage, TextureJsonUUID texture)
+	{
+		using namespace Templates::Texture;
+
+		if (!textures.at(usage).empty())
+			DeleteTextureInstance(textures.at(usage));
+		textures.at(usage) = texture();
+		CreateMaterialShaderDefines();
+		CreateShaderInstances();
 	}
 
 	void DestroyMaterialInstance(JUUID materialInstance)

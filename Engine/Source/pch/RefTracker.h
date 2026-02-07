@@ -56,4 +56,10 @@ struct RefTracker
 	{
 		return instances.at(key);
 	}
+
+	void Clear()
+	{
+		instances.clear();
+		instancesRefCount.clear();
+	}
 };

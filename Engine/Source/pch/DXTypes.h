@@ -273,6 +273,18 @@ static inline std::unordered_map<std::string, DXGI_FORMAT> StringToDXGI_FORMAT =
 	{ "FORCE_UINT", DXGI_FORMAT_FORCE_UINT }
 };
 
+static inline std::unordered_map<DXGI_FORMAT, std::string> DXGI_DEPTH_FORMATToString =
+{
+	{ DXGI_FORMAT_D32_FLOAT, "D32_FLOAT" },
+	{ DXGI_FORMAT_D24_UNORM_S8_UINT, "D24_UNORM_S8_UINT" }
+};
+
+static inline std::unordered_map<std::string, DXGI_FORMAT> StringTo_DXGI_DEPTH_FORMAT =
+{
+	{ "D32_FLOAT", DXGI_FORMAT_D32_FLOAT },
+	{ "D24_UNORM_S8_UINT", DXGI_FORMAT_D24_UNORM_S8_UINT }
+};
+
 inline std::string FromDXGIFormat(DXGI_FORMAT v) { return DXGI_FORMATToString.at(v); }
 
 inline DXGI_FORMAT ToDXGIFormat(std::string v) { return StringToDXGI_FORMAT.at(v); }

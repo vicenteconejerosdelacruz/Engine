@@ -34,8 +34,8 @@ namespace ComputeShader
 
 		void UpdateLuminanceHistogramParams(unsigned int width, unsigned int height, float minLogLuminance, float maxLogLuminance) const;
 
-		virtual void Compute();
-		virtual void Solution() {};
+		virtual void Compute(SceneUnitId unit);
+		virtual void Solution(SceneUnitId unit) {};
 	};
 }
 

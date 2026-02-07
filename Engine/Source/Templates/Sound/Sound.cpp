@@ -4,8 +4,8 @@
 #include <set>
 #include <Audio.h>
 #include <AudioSystem.h>
-#include <Templates.h>
-#include <TemplateDef.h>
+//#include <Templates.h>
+//#include <TemplateDef.h>
 
 using namespace AudioSystem;
 using namespace DirectX;
@@ -38,19 +38,19 @@ namespace Templates
 
 	namespace Sound
 	{
-		std::map<JUUID, std::unique_ptr<DirectX::SoundEffect>> uuidToSoundEffects;
-		std::map<JUUID, unsigned int> uuidInstanceCount;
+		std::unordered_map<JUUID, std::unique_ptr<DirectX::SoundEffect>> uuidToSoundEffects;
+		std::unordered_map<JUUID, unsigned int> uuidInstanceCount;
 	};
 
-	std::tuple<std::unique_ptr<DirectX::SoundEffect>, std::unique_ptr<DirectX::SoundEffectInstance>>
-		GetSoundEffectInstance(JUUID uuid, unsigned int flags,
-			std::string objectUUID, JObjectChangeCallback cb, JObjectChangePostCallback postCb)
+	SoundInstance GetSoundEffectInstance(JUUID uuid, unsigned int flags,
+		std::string objectUUID/*, JObjectChangeCallback cb, JObjectChangePostCallback postCb*/
+	)
 	{
-		if (objectUUID != "" && (cb != nullptr || postCb != nullptr))
+		/*if (objectUUID != "" && (cb != nullptr || postCb != nullptr))
 		{
 			std::unique_ptr<SoundJson>& json = GetSoundTemplate(uuid);
 			json->BindChangeCallback(objectUUID, cb, postCb);
-		}
+		}*/
 		using namespace Sound;
 		if (uuidToSoundEffects.contains(uuid))
 		{
@@ -63,19 +63,35 @@ namespace Templates
 			uuidToSoundEffects[uuid] = std::make_unique<DirectX::SoundEffect>(GetAudioEngine().get(), path.c_str());
 			uuidInstanceCount[uuid] = 1;
 		}
-		return std::make_tuple(std::move(uuidToSoundEffects[uuid]), std::move(uuidToSoundEffects[uuid]->CreateInstance(SOUND_EFFECT_INSTANCE_FLAGS(flags))));
+		//std::unique_ptr<SoundJson>& json = GetSoundTemplate(uuid);
+		//OutputDebugStringA(std::string(std::string("create") + json->name() + ":" + std::to_string(uuidInstanceCount[uuid]) + "\n").c_str());
+		return std::make_tuple(
+			uuid,
+			std::move(uuidToSoundEffects[uuid]->CreateInstance(SOUND_EFFECT_INSTANCE_FLAGS(flags)))
+		);
 	}
 
-	void DestroySoundEffectInstance(JUUID uuid, std::tuple<
-		std::unique_ptr<DirectX::SoundEffect>,
-		std::unique_ptr<DirectX::SoundEffectInstance>
-	>& soundEffectInstance)
+	bool SoundEffectExists(JUUID uuid)
+	{
+		using namespace Sound;
+		return uuidToSoundEffects.contains(uuid);
+	}
+
+	std::unique_ptr<DirectX::SoundEffect>& GetSoundEffect(JUUID uuid)
+	{
+		using namespace Sound;
+		return uuidToSoundEffects.at(uuid);
+	}
+
+	void DestroySoundEffectInstance(JUUID uuid, SoundInstance& soundEffectInstance)
 	{
 		using namespace Sound;
 		uuidInstanceCount[uuid]--;
-		std::unique_ptr<DirectX::SoundEffectInstance>& sfxI = std::get<1>(soundEffectInstance);
-		sfxI = nullptr;
-		soundEffectInstance = std::make_tuple(nullptr, nullptr);
+		//std::unique_ptr<SoundJson>& json = GetSoundTemplate(uuid);
+		//OutputDebugStringA(std::string(std::string("destroy") + json->name() + ":" + std::to_string(uuidInstanceCount[uuid]) + "\n").c_str());
+		//std::unique_ptr<DirectX::SoundEffectInstance>& sfxI = std::get<1>(soundEffectInstance);
+		//sfxI = nullptr;
+		soundEffectInstance = std::make_tuple("", nullptr);
 		if (uuidInstanceCount[uuid] == 0)
 		{
 			uuidToSoundEffects.erase(uuid);
@@ -123,11 +139,13 @@ namespace Templates
 
 		if (rebuildSounds.size() > 0ULL)
 		{
+			/*
 			JObject::RunChangesCallback(rebuildSounds, [](auto sound)
 				{
 					sound->clean(SoundJson::Update_path);
 				}
 			);
+			*/
 		}
 	}
 

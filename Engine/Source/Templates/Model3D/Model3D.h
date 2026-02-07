@@ -1,20 +1,22 @@
 #pragma once
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <assimp/GltfMaterial.h>
-#include <VertexFormats.h>
-#include <Mesh/Mesh.h>
-#include <Material/Material.h>
-#include <Animated.h>
-#include <DirectXCollision.h>
+//#include <assimp/Importer.hpp>
+//#include <assimp/scene.h>
+//#include <assimp/postprocess.h>
+//#include <assimp/GltfMaterial.h>
+//#include <VertexFormats.h>
+//#include <Mesh/Mesh.h>
+//#include <Material/Material.h>
+//#include <Animated.h>
+//#include <DirectXCollision.h>
+#include <Templates.h>
 #include <JTemplate.h>
-#include <JTypes.h>
+//#include <JTypes.h>
+//#include <TemplateDecl.h>
 #include <Sequence/AnimationSequences.h>
 
-namespace Animation { struct Animated; };
-namespace Templates { struct TextureJson; struct MaterialJson; };
+//namespace Animation { struct Animated; };
+//namespace Templates { struct TextureJson; struct MaterialJson; };
 
 namespace Templates
 {
@@ -55,8 +57,6 @@ namespace Templates
 	namespace Model3D
 	{
 		inline static const std::string templateName = "model3ds.json";
-		inline static const std::string defaultBaseTexture = "Assets/textures/gridmap.dds";
-		inline static const std::string defaultNormalMap = "Assets/textures/bumpmapflat.dds";
 		inline static const std::string fallbackMaterialName = "BaseLighting";
 		inline static const TemplateType templateType = T_Models3D;
 	}
@@ -80,22 +80,18 @@ namespace Templates
 
 	TEMPDECL_FULL(Model3D);
 
-	std::string GetModel3DMeshInstanceUUID(std::string uuid, unsigned int index);
-	std::string GetModel3DMaterialInstanceUUID(std::string uuid, unsigned int index);
-	std::string GetModel3DMaterialInstanceName(std::string uuid, unsigned int index);
+	JUUID GetModel3DMeshInstanceUUID(std::string uuid, unsigned int index);
+	JUUID GetModel3DMaterialInstanceUUID(std::string uuid, unsigned int index);
+	JUUID GetModel3DMaterialTemplateName(std::string uuid, unsigned int index);
 
 	struct Model3DInstance
 	{
 		JUUID model3DUUID;
 
 		Model3DInstance(JUUID uuid) { assert(!!!"do not use"); }
-		explicit Model3DInstance(
-			JUUID uuid,
-			JUUID objectUUID,
-			JObjectChangeCallback cb = [](JUUID) {},
-			JObjectChangePostCallback postCb = [](unsigned int, unsigned int) {});
+		explicit Model3DInstance(SceneUnitId id, JUUID uuid, JUUID objectUUID);
 		~Model3DInstance();
-		void LoadModel3DInstance();
+		void LoadModel3DInstance(SceneUnitId id);
 		void CreateModel3DMaterialsTemplates(const aiScene* aiModel);
 		void CreateBoundingBox(BoundingBox& boundingBox, aiMesh* aMesh);
 		nlohmann::json GetAssimpTexturesMaterialJson(std::filesystem::path relativePath, const aiScene* aiModel, aiMaterial* material);

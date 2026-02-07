@@ -9,6 +9,11 @@ namespace DeviceUtils
 
 	static constexpr unsigned int csuNumDescriptorsInFrame = 1000;
 
+	inline static const std::string CameraConstantBufferName = "camera";
+	inline static const std::string LightConstantBufferName = "lights";
+	inline static const std::string ShadowMapConstantBufferName = "shadowMaps";
+	inline static const std::string AnimationConstantBufferName = "animation";
+
 	void CreateCSUDescriptorHeap(unsigned int numFrames);
 	void DestroyCSUDescriptorHeap();
 	unsigned int GetCSUDescriptorSize();
@@ -16,7 +21,7 @@ namespace DeviceUtils
 	void AllocCSUDescriptor(::CD3DX12_CPU_DESCRIPTOR_HANDLE& cpuHandle, ::CD3DX12_GPU_DESCRIPTOR_HANDLE& gpuHandle);
 	void FreeCSUDescriptor(::CD3DX12_CPU_DESCRIPTOR_HANDLE& cpuHandle, ::CD3DX12_GPU_DESCRIPTOR_HANDLE& gpuHandle);
 
-	JUUID CreateConstantsBuffer(size_t bufferSize, std::string cbName = "");
+	JUUID CreateConstantsBuffer(size_t bufferSize, unsigned int numDescriptors, std::string cbName = "");
 	void DestroyConstantsBuffer(JUUID constantsBufferUUID);
 	void DestroyConstantsBuffer();
 	::CD3DX12_CPU_DESCRIPTOR_HANDLE GetCpuDescriptorHandle(JUUID constantsBufferUUID, unsigned int index);

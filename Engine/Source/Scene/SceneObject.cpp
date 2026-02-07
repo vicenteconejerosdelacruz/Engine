@@ -1,28 +1,26 @@
 #include "pch.h"
 #include "SceneObject.h"
-#include <Controller.h>
 
 #if defined(_EDITOR)
 namespace Editor
 {
-	extern bool levelModified;
+	void MarkSceneUnitAsModified(SceneUnitId id);
 };
 #endif
 
+namespace Game
+{
+	extern void BindToV8Context(v8pp::context& context, SUUUID uuid);
+};
+
 namespace Scene
 {
-	void SceneObject::Initialize()
-	{
-	}
 
-	void SceneObject::BindToScene()
-	{
-	}
 
 	void SceneObject::JUpdate(nlohmann::json p)
 	{
 #if defined(_EDITOR)
-		Editor::levelModified = true;
+		Editor::MarkSceneUnitAsModified(unit);
 #endif
 		JObject::JUpdate(p);
 	}
@@ -30,13 +28,13 @@ namespace Scene
 	void SceneObject::JPatch(nlohmann::json p)
 	{
 #if defined(_EDITOR)
-		Editor::levelModified = true;
+		Editor::MarkSceneUnitAsModified(unit);
 #endif
 		JObject::JPatch(p);
 	}
 
 	void SceneObject::BindToV8Context(v8pp::context& context)
 	{
-		Game::BindToV8Context(context, Juuid());
+		Game::BindToV8Context(context, SUuuid());
 	}
 }

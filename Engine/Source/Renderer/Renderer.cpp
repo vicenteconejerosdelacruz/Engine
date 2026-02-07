@@ -6,7 +6,9 @@
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <DeviceUtils/RenderToTexture/RenderToTexture.h>
 #include <RenderPass/RenderPass.h>
+//#include <RenderPass/RenderPass.h>
 
+using namespace Templates::RenderPass;
 using namespace DeviceUtils;
 
 #if defined(_DEBUG)
@@ -14,10 +16,10 @@ CComPtr<ID3D12Debug1> debugController;
 CComPtr<ID3D12DebugDevice1> debugDevice;
 #endif
 
+unsigned int backBufferIndex;
+
 //CREATE
 void Renderer::Initialize(HWND coreHwnd) {
-	using namespace DeviceUtils;
-
 	hwnd = coreHwnd;
 
 #if defined(_DEBUG)
@@ -55,9 +57,15 @@ void Renderer::Initialize(HWND coreHwnd) {
 	CCNAME_D3D12_OBJECT_N(commandQueue, std::string("Renderer"));
 
 	CreateCSUDescriptorHeap(numFrames);
-
 	CreateRenderToTextureDescriptorHeap();
+	CreateRenderPassMainHeap();
+	UpdateViewportPerspective();
+	CreateSwapChainPass();
 
+	fence = CreateFence(d3dDevice, "Renderer");
+	fenceEvent = CreateEventHandle();
+
+	/*
 	for (int i = 0; i < numFrames; ++i) {
 		commandAllocators[i] = CreateCommandAllocator(d3dDevice);
 		commandAllocators[i]->SetName((L"commandAllocator[" + std::to_wstring(i) + L"]").c_str());
@@ -65,30 +73,37 @@ void Renderer::Initialize(HWND coreHwnd) {
 
 	commandList = CreateCommandList(d3dDevice, commandAllocators[backBufferIndex]);
 	CCNAME_D3D12_OBJECT(commandList);
+	*/
 
-	fence = CreateFence(d3dDevice, "Renderer");
-	fenceEvent = CreateEventHandle();
-
-	UpdateViewportPerspective();
 }
 
+/*
 void Renderer::CreateComputeEngine()
 {
 }
+*/
 
 void Renderer::CreateSwapChainPass()
 {
 	using namespace Templates;
-	swapChainPass = CreateRenderPassInstance("", GetRenderPassUUIDByName("simplePass"), 0);
+	swapChainPass = CreateRenderPassInstance(0, "", GetRenderPassUUIDByName("simplePass"), 0);
+}
+
+unsigned int Renderer::GetBackBufferIndex()
+{
+	return backBufferIndex;
 }
 
 //DESTROY
+/*
 void Renderer::DestroySwapChainPass()
 {
 	using namespace Templates;
 	DestroyRenderPassInstance(swapChainPass());
 }
+*/
 
+/*
 void Renderer::Destroy() {
 	Flush();
 
@@ -130,6 +145,7 @@ void Renderer::Destroy() {
 	debugDevice = nullptr;
 #endif
 }
+*/
 
 void Renderer::UpdateViewportPerspective() {
 	RECT rect;
@@ -162,22 +178,35 @@ void Renderer::Resize(unsigned int width, unsigned int height) {
 	backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 }
 
+/*
 void Renderer::ResetCommands() const {
 	auto commandAllocator = commandAllocators[backBufferIndex];
 	commandAllocator->Reset();
 	commandList->Reset(commandAllocator, nullptr);
 }
+*/
 
+/*
 void Renderer::SetCSUDescriptorHeap() const {
 	ID3D12DescriptorHeap* ppHeaps[] = { GetCSUDescriptorHeap() };
 	commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 }
+*/
 
+/*
 void Renderer::ExecuteCommands() const
 {
 	DX::ThrowIfFailed(commandList->Close());
 	ID3D12CommandList* const commandLists[] = { commandList };
 	commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+}
+*/
+
+void Renderer::ExecuteCommands(CComPtr<ID3D12GraphicsCommandList2>& commandList, std::function<void()> callback)
+{
+	ID3D12CommandList* const commandLists[] = { commandList };
+	commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+	if (callback) { executionCallback.push_back(callback); }
 }
 
 void Renderer::Present() {
@@ -190,6 +219,8 @@ void Renderer::Present() {
 
 	//make the CPU to wait for the GPU to finish the current processing
 	WaitForFenceValue(fence, frameFenceValues[backBufferIndex], fenceEvent);
+	std::for_each(executionCallback.begin(), executionCallback.end(), [](auto x) {x(); });
+	executionCallback.clear();
 }
 
 void Renderer::Flush()
@@ -197,13 +228,16 @@ void Renderer::Flush()
 	DeviceUtils::Flush(commandQueue, fence, fenceValue, fenceEvent);
 }
 
+/*
 void Renderer::CloseCommandsAndFlush() {
 	commandList->Close();
 	ID3D12CommandList* const commandLists[] = { commandList };
 	commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
 	Flush();
 }
+*/
 
+/*
 void Renderer::RenderCriticalFrame(std::function<void()> callback, bool flush)
 {
 	if (flush)
@@ -216,3 +250,4 @@ void Renderer::RenderCriticalFrame(std::function<void()> callback, bool flush)
 
 	CloseCommandsAndFlush();
 }
+*/
