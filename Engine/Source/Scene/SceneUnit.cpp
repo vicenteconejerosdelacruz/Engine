@@ -21,19 +21,10 @@ namespace Scene
 		unitName = name;
 		markedForDelete = false;
 		deleteCallback = nullptr;
-		//attached = false;
 		isolated = false;
 		loading = std::make_unique<std::atomic_bool>(false);
 		canSubmitLoading = std::make_unique<std::atomic_bool>(false);
 		loadingComplete = std::make_unique<std::atomic_bool>(false);
-		/*
-		mergeable = false;
-		deletionFrames = framesUntilDeletion;
-		runningCompute = false;
-		abortLoading = std::make_unique<std::atomic_bool>(false);
-		sceneUnitLoaded = std::make_unique<std::atomic_bool>(false);
-		loadingSubmit = std::make_unique<std::atomic_bool>(false);
-		*/
 		binder.unit = unit;
 		CreateShadowMapResources(id);
 	}
@@ -47,22 +38,6 @@ namespace Scene
 	{
 		return id;
 	}
-
-	/*void SceneUnit::Merge(std::unique_ptr<SceneUnit>& other)
-	{
-		for (auto& [type, juuids] : other->sceneObjects)
-		{
-			for (auto& uuid : juuids)
-			{
-				MoveSceneObjectUnit(uuid, other->id, id);
-				sceneObjects[type].insert(uuid);
-			}
-		}
-		for (auto& [uuid, type] : other->sceneObjectsTypes)
-		{
-			sceneObjectsTypes.insert_or_assign(uuid, type);
-		}
-	}*/
 
 	void SceneUnit::MarkForDelete(std::function<void()> cb)
 	{
@@ -80,16 +55,6 @@ namespace Scene
 		if (deleteCallback)
 			deleteCallback();
 	}
-
-	/*void SceneUnit::SetAttached(bool value)
-	{
-		attached = value;
-	}*/
-
-	/*bool SceneUnit::IsAttached()
-	{
-		return attached;
-	}*/
 
 	void SceneUnit::SetIsolated(bool value)
 	{
@@ -393,7 +358,11 @@ namespace Scene
 
 	void SceneUnit::SubmitCommandList()
 	{
-		renderer->ExecuteCommands(GetCommandList(false));
+		renderer->ExecuteCommands(GetCommandList(false), [&]
+			{
+				RunTextureUploadFreeResources();
+			}
+		);
 	}
 
 	void SceneUnit::Render()
@@ -403,14 +372,11 @@ namespace Scene
 		using namespace Editor;
 #endif
 
-		//if (!sceneUnitLoaded->load() || markedForDelete)
-		//	return;
-
-		if (renderer->GetBackBufferIndex() == Frame()/* && !attached*/)
+		if (renderer->GetBackBufferIndex() == Frame())
 		{
 
 #if defined(_EDITOR)
-			if (!IsPlaying(id)/* && !IsIsolated()*/)
+			if (!IsPlaying(id))
 				HandleEditorMouseMovements(id);
 #endif
 			WriteConstantsBuffers(id);
@@ -435,29 +401,6 @@ namespace Scene
 #if defined(_EDITOR)
 		using namespace Editor;
 #endif
-
-		/*
-		if (!sceneUnitLoaded->load())
-			return;
-
-		if (loadingSubmit->load())
-		{
-			loadingSubmit->store(false);
-			for (auto& uuid : renderablesInLoadingPool)
-			{
-				RenderableSUUUID r = MAKESUUUID(id, uuid);
-				if (r->renderReady || !IsBound(uuid))
-					continue;
-				r->renderReady = true;
-			}
-			renderablesInLoadingPool.clear();
-			if (attached)
-				mergeable = true;
-#if defined(_EDITOR)
-			MarkScenePanelAssetsAsDirty();
-#endif
-		}
-		*/
 		PickFromScene(id);
 	}
 
@@ -489,13 +432,6 @@ namespace Scene
 	void SceneUnit::RunComputeShaders()
 	{
 		using namespace Scene;
-
-		/*
-		if (!sceneUnitLoaded->load())
-			return;
-
-		runningCompute = true;
-		*/
 		ResetComputeCommandList();
 		RunBoundingBoxComputeShaders(id);
 	}
@@ -503,12 +439,7 @@ namespace Scene
 	void SceneUnit::SolveComputeShaders()
 	{
 		using namespace Scene;
-
-		//if (!sceneUnitLoaded->load() || !runningCompute)
-		//	return;
-
 		RunBoundingBoxComputeShadersSolution(id);
 		CloseSubmitAndNextComputeCommandList();
-		//runningCompute = false;
 	}
 };

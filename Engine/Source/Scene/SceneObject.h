@@ -60,12 +60,6 @@ inline const std::unordered_map<std::string, std::string> StringToJsonContainer 
 	{ "SoundEffects", "sounds" }
 };
 
-//template <typename T>
-//using SceneObjectsInUnit = std::unordered_map<JUUID, T>;
-//
-//template <typename T>
-//using SceneObjectsContainer = std::unordered_map<SceneUnitId, SceneObjectsInUnit<T>>;
-
 template <typename T>
 using SceneObjectsContainer = std::unordered_map<JUUID, T>;
 

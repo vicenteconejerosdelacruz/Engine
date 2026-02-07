@@ -5,23 +5,11 @@
 #include <Application.h>
 #include <fstream>
 #include <SceneObject.h>
-//#include <Camera/Camera.h>
-//#include <Renderable/Renderable.h>
-//#include <Light/Light.h>
-//#include <Sound/SoundFX.h>
-//#include <Animated.h>
-//#include <Controller.h>
 #if defined(_EDITOR)
-//#include <Editor.h>
 #include <DefaultLevel.h>
 #include <BootLevel/BootLevel.h>
 
-//using namespace Animation;
-//using namespace Editor;
 namespace Editor {
-	//extern std::string currentLevelName;
-	//extern bool defaultLevel;
-	//extern bool levelModified;
 	void MarkScenePanelAssetsAsDirty();
 	extern void CreateSceneUnitBoundingBox(SceneUnitId id);
 	extern void CreateSceneUnitBillboards(SceneUnitId id);
@@ -105,41 +93,14 @@ namespace Scene::Level {
 		return level;
 	}
 
-	/*void LoadPendingLevel()
-	{
-		using namespace Game;
-
-		DestroyControllers();
-
-#if defined(_EDITOR)
-		DestroyBillboards();
-		DestroyEditorSceneObjectsReferences();
-#endif
-		DestroySceneObjects();
-#if defined(_EDITOR)
-		if (!loadDefaultLevel)
-			LoadLevel(levelToLoad);
-		else
-			LoadDefaultLevel();
-		loadDefaultLevel = false;
-#else
-		LoadLevel(levelToLoad);
-#endif
-		levelToLoad = "";
-	}*/
-
 	void LoadSceneObjects(std::unique_ptr<SceneUnit>& scene, nlohmann::json& j, std::string type, std::function<void(nlohmann::json&)> loader)
 	{
 		if (j.contains(type))
 		{
 			std::for_each(j.at(type).begin(), j.at(type).end(), [&scene, loader](nlohmann::json& json)
 				{
-					//if (scene->abortLoading->load())
-					//	return;
-
 					loader(json);
 					scene->AddSceneObjectToUnboundPool(json.at("uuid"));
-					//scene->unboundedSceneObjects.insert(json.at("uuid"));
 				}
 			);
 		}
@@ -151,7 +112,7 @@ namespace Scene::Level {
 #if defined(_EDITOR)
 		using namespace Editor;
 
-		if (/*!scene->IsAttached() && */!scene->IsIsolated())
+		if (!scene->IsIsolated())
 		{
 			CreateSceneUnitBillboards(scene->Id());
 		}
@@ -217,7 +178,7 @@ namespace Scene::Level {
 		);
 
 #if defined(_EDITOR)
-		if (/*!scene->IsAttached() && */!scene->IsIsolated())
+		if (!scene->IsIsolated())
 		{
 			CreatePickingPass(scene->Id());
 			CreateSceneUnitBoundingBox(scene->Id());
@@ -226,42 +187,13 @@ namespace Scene::Level {
 		}
 #endif
 
-		//if (scene->abortLoading->load())
-		//	return;
-
-		//if (!scene->IsAttached())
-		//{
 		MapControllers(scene->Id());
 		BindSceneObjects(scene->Id());
-		//}
 #if defined(_EDITOR)
-		if (/*!scene->IsAttached() && */!scene->IsIsolated())
+		if (!scene->IsIsolated())
 		{
 			CopySceneUnitEditorCameraRenderPasses(scene->Id());
 		}
-		//Editor::currentLevelName = filename;
-		//Editor::MarkScenePanelAssetsAsDirty();
 #endif
 	}
-
-	//void DestroySceneObjects(SceneUnitId unit)
-	//{
-	//	using namespace Scene;
-	//	using namespace Animation;
-
-	//	//Destroy the lights(this will destroy the lights and it's cbvs)
-	//	DestroyLights(unit);
-
-	//	//Destroy the cameras(this will destroy the cameras and the render passes)
-	//	DestroyCameras(unit);
-
-	//	//Destroy sound instances
-	//	DestroySoundEffects(unit);
-
-	//	//Destroy animated(this will destroy constants buffers)
-	//	DestroyAnimated(unit);
-
-	//	//Destroy the renderables(this will detach the renderables from the cameras and destroy the renderables, materials, cbv, meshes, etc)
-	//	DestroyRenderables(unit);
-	//}
 }

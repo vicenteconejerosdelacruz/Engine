@@ -1,18 +1,11 @@
 #include "pch.h"
 #include "OverridePass.h"
 #include <JTemplate.h>
-//#include <Scene.h>
 #include <Renderer.h>
-//#include <Material/Material.h>
-//#include <Shader/Shader.h>
 #include <Camera/Camera.h>
-//#include <Mesh/Mesh.h>
 #include <DeviceUtils/RootSignature/RootSignature.h>
 #include <DeviceUtils/PipelineState/PipelineState.h>
 #include <DeviceUtils/RenderPass/RenderToTexturePass.h>
-//#include <RenderPass/RenderPass.h>
-
-//extern std::unique_ptr<Renderer> renderer;
 
 OverridePass::~OverridePass()
 {

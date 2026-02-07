@@ -12,7 +12,6 @@ namespace Scene::Level
 	void SetDefaultLevelToLoad();
 #endif
 	bool PendingLevelToLoad();
-	//void LoadPendingLevel();
 
 	//level handling
 	nlohmann::json GetDefaultLevel();
@@ -21,12 +20,6 @@ namespace Scene::Level
 	nlohmann::json GetLevelFromFile(std::filesystem::path level);
 
 	void LoadSceneObjects(std::unique_ptr<SceneUnit>& scene, nlohmann::json& j, std::string type, std::function<void(nlohmann::json&)> loader);
-#if defined(_EDITOR)
-	//void LoadDefaultLevel();
-#endif
 	void LoadLevel(std::unique_ptr<SceneUnit>& scene, std::string filename, nlohmann::json data, std::function<void(std::string, unsigned int, unsigned int)> progress = [](std::string, unsigned int, unsigned int) {});
-
-	//destroy scene objects
-	//void DestroySceneObjects(SceneUnitId unit);
 };
 

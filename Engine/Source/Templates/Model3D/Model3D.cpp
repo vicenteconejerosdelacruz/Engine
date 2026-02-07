@@ -1,17 +1,9 @@
 #include "pch.h"
 #include "Model3D.h"
-//#include <Templates.h>
-//#include <TemplateDef.h>
-//#include <Mesh/Mesh.h>
-//#include <VertexFormats.h>
-//#include <Animated.h>
 #include <d3d12.h>
 #include <nlohmann/json.hpp>
 #include <Application.h>
 #include <NoStd.h>
-//#include <Textures/Texture.h>
-//#include <Material/Material.h>
-//#include <DDSTextures.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -19,8 +11,6 @@
 #include <Animated.h>
 
 using namespace Animation;
-//using namespace DeviceUtils;
-//using namespace Templates;
 
 #if defined(_EDITOR)
 namespace Editor
@@ -399,7 +389,6 @@ namespace Templates
 			}
 			texUUID = CreateTextureTemplate(textureJsonPath.string(), textureJsonFormat);
 		}
-		//m.textures_insert(textureType, texUUID);
 		if (!m.contains("textures"))
 		{
 			m["textures"] = nlohmann::json::object({});

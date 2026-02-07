@@ -1,11 +1,6 @@
 #include "pch.h"
 #include "Light.h"
-//#include <Renderer.h>
 #include <Scene.h>
-//#include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
-//#include <SceneObjectDef.h>
-
-//extern std::unique_ptr<Renderer> renderer;
 
 #if defined(_EDITOR)
 namespace Editor
@@ -13,7 +8,6 @@ namespace Editor
 	extern void SelectLight(SceneUnitId id, JUUID luuid);
 	extern JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraSUUUID camera, std::string name, std::string material, std::string pickingMaterial);
 	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
-	//extern JUUID GetBillboard(JUUID sceneObject);
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 }
 #endif
@@ -340,16 +334,10 @@ namespace Scene
 
 	void LightsStep(SceneUnitId id)
 	{
-		//#if defined(_EDITOR)
-		//std::set<LightSUUUID> lightsToDestroyShadowMaps;
-		//std::set<LightSUUUID> lightsToCreateShadowMaps;
 		std::set<LightSUUUID> lightsToUpdateCamAttributes;
 		std::set<LightSUUUID> lightsToUpdateTransformation;
 		std::set<LightSUUUID> lightsToDelete;
 		std::set<LightSUUUID> lightToRecreateCameras;
-#if defined(_EDITOR)
-		//std::set<LightSUUUID> lightsToDestroySMChain;
-#endif
 
 		std::set<Light::Light_UpdateFlags> smCamAttributes =
 		{
@@ -362,19 +350,12 @@ namespace Scene
 		};
 
 		auto lights = GetLights(id);
-		//auto lights = nostd::GetUUIDS(LightsceneObjects);
 
 		for (auto& uuid : lights)
 		{
 			LightSUUUID l = MAKESUUUID(id, uuid);
 			if (l->lightType() != LT_Ambient)
 			{
-				//JUUID bbuuid = Editor::GetBillboard(l());
-				//if (!bbuuid.empty())
-				//{
-				//	l->UpdateBillboard(bbuuid);
-				//}
-
 				if (l->dirty(Light::Update_cameras))
 				{
 					l->RenderReady(false);
@@ -391,7 +372,6 @@ namespace Scene
 				//we deactivate shadowmaps always a light type is converted
 				if (l->hasShadowMaps())
 				{
-					//lightsToDestroyShadowMaps.insert(l);
 					l->hasShadowMaps(false);
 				}
 
@@ -402,17 +382,12 @@ namespace Scene
 			{
 				if (l->hasShadowMaps())
 				{
-					//lightsToCreateShadowMaps.insert(l);
 					l->LoadShadowMap();
 				}
 				else
 				{
 					l->UnloadShadowMap();
 				}
-				//else
-				//{
-				//	lightsToDestroyShadowMaps.insert(l);
-				//}
 				l->clean(Light::Update_hasShadowMaps);
 			}
 
@@ -422,24 +397,10 @@ namespace Scene
 				l->destroySteps--;
 				if (l->destroySteps == 0)
 				{
-					//lightsToDestroySMChain.insert(l);
 					l->destroySMChain = false;
 					l->DestroyShadowMapMinMaxChain();
 				}
 			}
-
-			//			//if resizing
-			//			if (l->dirty(Light::Update_shadowMapWidth) || l->dirty(Light::Update_shadowMapHeight))
-			//			{
-			//				//verify first if the light has shadowmaps(it should)
-			//				if (l->hasShadowMaps())
-			//				{
-			//					lightsToDestroyShadowMaps.insert(l);
-			//					lightsToCreateShadowMaps.insert(l);
-			//				}
-			//				l->clean(Light::Update_shadowMapWidth);
-			//				l->clean(Light::Update_shadowMapHeight);
-			//			}
 
 			if (std::any_of(smCamAttributes.begin(), smCamAttributes.end(), [&l](auto flag) { return l->dirty(flag); }))
 			{
@@ -455,51 +416,7 @@ namespace Scene
 			if (l->markedForDelete)
 			{
 				lightsToDelete.insert(l);
-				//if (l->hasShadowMaps())
-				//{
-				//	lightsToDestroyShadowMaps.insert(l);
-				//}
 			}
-			//		}
-			//
-			//		bool criticalFrame = !!lightsToDestroyShadowMaps.size() || !!lightsToCreateShadowMaps.size() || !!lightsToDestroySMChain.size() || !!lightsToDelete.size();
-			//
-			//		if (criticalFrame)
-			//		{
-			//			renderer->Flush();
-			//			renderer->RenderCriticalFrame([
-			//				&lightsToDestroyShadowMaps,
-			//				&lightsToCreateShadowMaps,
-			//				&lightsToDestroySMChain,
-			//				&lightsToDelete
-			//			]
-			//				{
-			//					for (auto l : lightsToDestroyShadowMaps)
-			//					{
-			//						l->UnbindRenderablesFromShadowMapCameras();
-			//						l->DestroyShadowMapMinMaxChain();
-			//						l->DestroyShadowMap();
-			//					}
-			//					for (auto l : lightsToCreateShadowMaps)
-			//					{
-			//						l->CreateShadowMap();
-			//						l->CreateShadowMapMinMaxChain();
-			//						l->BindRenderablesToShadowMapCamera();
-			//					}
-			//					for (auto l : lightsToDestroySMChain)
-			//					{
-			//						l->DestroyShadowMapMinMaxChain();
-			//					}
-			//for (auto l : lightsToDelete)
-			//{
-			//	EraseLightFromLights(l->unit, l.uuid());
-			//	EraseLightFromShadowMapLights(l->unit, l.uuid());
-			//	DeleteLightSUSceneObject(l->unit, l.uuid());
-			//}
-			//				}
-			//			);
-			//		}
-
 			for (auto l : lightsToUpdateCamAttributes)
 			{
 				l->UpdateShadowMapCameraProperties();
@@ -508,7 +425,6 @@ namespace Scene
 			{
 				l->UpdateShadowMapCameraTransformation();
 			}
-			//#endif
 		}
 
 		for (auto l : lightsToDelete)
@@ -572,17 +488,6 @@ namespace Scene
 		{
 			DeleteLightSUSceneObject(id, uuid);
 		}
-		//for (auto& [uuid, _] : LightSUsceneObjects.at(id))
-		//{
-		//	LightSUUUID l = MAKESUUUID(id, uuid);
-		//	DeleteLightSUSceneObject(l->unit, l->uuid());
-		//}
-		//auto uuids = nostd::GetUUIDS(LightsceneObjects);
-		//for (LightUUID uuid : uuids)
-		//{
-		//	if (uuid->unit != unit) continue;
-		//	DeleteLightSUSceneObject(uuid->unit, uuid());
-		//}
 #include <TrackUUID/JClearUnit.h>
 #include <LightAtt.h>
 #include <JEnd.h>

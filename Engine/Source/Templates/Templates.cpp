@@ -1,13 +1,6 @@
 #include "pch.h"
 #include <fstream>
 #include "Templates.h"
-//#include <Shader/Shader.h>
-//#include <Material/Material.h>
-//#include <Model3D/Model3D.h>
-//#include <RenderPass/RenderPass.h>
-//#include <Sound/Sound.h>
-//#include <Textures/Texture.h>
-//#include <Mesh/Mesh.h>
 
 #if defined(_EDITOR)
 namespace Editor
@@ -23,10 +16,6 @@ namespace Editor
 
 namespace Scene
 {
-	/*
-	SceneObject* GetSceneObjectPointer(JUUID uuid);
-	std::function<std::vector<JUUIDName>()> GetSceneObjectsByType(SceneObjectType typeToGet);
-	*/
 	std::unordered_map<JUUID, SceneObjectType>& GetSceneObjectsTypes(SceneUnitId id);
 	SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid);
 }

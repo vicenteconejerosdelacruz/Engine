@@ -1,13 +1,5 @@
 #include "pch.h"
 #include "MinMaxChainResultPass.h"
-//#include <Renderer.h>
-//#include <Material/Material.h>
-//#include <Shader/Shader.h>
-//#include <Mesh/Mesh.h>
-//#include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
-//#include <RenderPass/RenderPass.h>
-
-//extern std::unique_ptr<Renderer> renderer;
 
 MinMaxChainResultPass::MinMaxChainResultPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rpT, JUUID rp) : OverridePass(id, cam, rpI, rpT, rp)
 {

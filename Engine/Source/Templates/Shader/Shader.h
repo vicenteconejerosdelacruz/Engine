@@ -8,10 +8,8 @@
 #include <wrl/client.h>
 #include <dxcapi.h>
 #include <string>
-//#include <JTypes.h>
 #include <Templates.h>
 #include <JTemplate.h>
-//#include <TemplateDecl.h>
 #include "ShaderInstance.h"
 
 namespace Templates

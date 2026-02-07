@@ -2,24 +2,12 @@
 #include "ResolvePass.h"
 #include <Scene.h>
 #include <SceneObject.h>
-//#include <Renderer.h>
-//#include <Material/Material.h>
-//#include <Shader/Shader.h>
-//#include <Camera/Camera.h>
-//#include <Mesh/Mesh.h>
-//#include <RenderPass/RenderPass.h>
 #include <DeviceUtils/RenderToTexture/RenderToTexture.h>
 #include <DeviceUtils/RenderPass/SwapChainPass.h>
-
-//extern std::unique_ptr<Renderer> renderer;
 
 ResolvePass::ResolvePass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rpT, JUUID rp) : OverridePass(id, cam, rpI, rpT, rp)
 {
 	using namespace Scene;
-
-	//auto& camSO = GetCameraSUSceneObject(id, cam);
-	//CameraSUUUID camSO = MAKESUUUID(id, cam);
-	//auto& prevPassJ = GetRenderPassTemplate(camera->renderPasses().at(rpI - 1));
 	CreatePrevPassDependentResources();
 }
 
@@ -70,7 +58,6 @@ void ResolvePass::Pass(SceneUnitId unit)
 void ResolvePass::Render(SceneUnitId unit)
 {
 	using namespace Scene;
-	//auto& commandList = renderer->commandList;
 	auto& scene = GetSceneUnit(unit);
 	auto& commandList = scene->GetCommandList();
 	auto& fsCB = fsQuadConstantsBuffer;

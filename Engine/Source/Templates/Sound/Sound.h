@@ -2,21 +2,13 @@
 #include <memory>
 #include <string>
 #include <Audio.h>
-//#include <Application.h>
 #include <nlohmann/json.hpp>
-//#include <JTypes.h>
 #include <Templates.h>
 #include <JTemplate.h>
-//#include <TemplateDecl.h>
 
 using namespace DirectX;
 
-typedef std::tuple<
-	//std::reference_wrapper<std::unique_ptr<DirectX::SoundEffect>>,
-	//std::unique_ptr<DirectX::SoundEffect>,
-	JUUID,
-	std::unique_ptr<DirectX::SoundEffectInstance>
-> SoundInstance;
+typedef std::tuple<JUUID, std::unique_ptr<DirectX::SoundEffectInstance>> SoundInstance;
 
 namespace Templates
 {
@@ -84,10 +76,6 @@ namespace Templates
 		JUUID uuid,
 		unsigned int flags,
 		std::string objectUUID = ""
-		/*,
-		JObjectChangeCallback cb = nullptr,
-		JObjectChangePostCallback postCb = nullptr
-		*/
 	);
 
 	bool SoundEffectExists(JUUID uuid);

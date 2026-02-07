@@ -22,13 +22,8 @@ struct Renderer
 		{ DXGI_FORMAT_D24_UNORM_S8_UINT, DXGI_FORMAT_R24_UNORM_X8_TYPELESS }
 	};
 
-	//command
-	//CComPtr<ID3D12CommandAllocator> commandAllocators[numFrames];
-	//CComPtr<ID3D12GraphicsCommandList2> commandList;
-
 	//CREATE
 	void Initialize(HWND hwnd);
-	//void CreateComputeEngine();
 	void CreateSwapChainPass();
 
 	//READ&GET
@@ -37,18 +32,9 @@ struct Renderer
 	//UPDATE
 	void UpdateViewportPerspective();
 	void Resize(unsigned int width, unsigned int height);
-	//void ResetCommands() const;
-	//void SetCSUDescriptorHeap() const;
-	//void CloseCommandsAndFlush();
-	//void RenderCriticalFrame(std::function<void()> callback = []() {}, bool flush = true);
-	//void ExecuteCommands() const;
 	void ExecuteCommands(CComPtr<ID3D12GraphicsCommandList2>& commandList, std::function<void()> callback = nullptr);
 	void Present();
 	void Flush();
-
-	//DESTROY
-	//void DestroySwapChainPass();
-	//void Destroy();
 
 	//Depth 32F support
 	bool d32FSupported;
