@@ -52,7 +52,6 @@ namespace Game
 
 	void DestroyController(JUUID uuid)
 	{
-		if (!controllersUUIDs.contains(uuid)) return;
 		controllersUUIDs.at(uuid)->Unmap();
 		controllersUUIDs.erase(uuid);
 		for (auto it = controllerUUIDsByName.begin(); it != controllerUUIDsByName.end();)
