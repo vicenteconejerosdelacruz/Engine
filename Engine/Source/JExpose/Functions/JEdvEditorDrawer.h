@@ -1811,6 +1811,11 @@ inline void DrawResourceSelection(
 		ImGui::TableSetColumnIndex(1);
 		ImGui::PushID(attribute.c_str());
 
+		if (ImGui::Button(ICON_FA_TIMES))
+		{
+			update("");
+		}
+		ImGui::SameLine();
 		ImGui::OpenTemplate(iconCode, selected);
 		ImGui::SameLine();
 		ImGui::DrawComboSelection(selected, selectables, [attribute, &json, update](JUUIDName option)
