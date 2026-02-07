@@ -169,10 +169,20 @@ struct TSUUUID {
 		unit = 0;
 		uuid = "";
 	}
+	SceneUnitId unit() const
+	{
+		const SceneUnitId& id = std::get<0>(SUuuid);
+		return id;
+	}
 	SceneUnitId unit()
 	{
 		SceneUnitId& id = std::get<0>(SUuuid);
 		return id;
+	}
+	JUUID uuid() const
+	{
+		JUUID& uuid = std::get<1>(SUuuid);
+		return uuid;
 	}
 	JUUID uuid()
 	{
