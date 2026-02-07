@@ -88,6 +88,7 @@ namespace Scene
 		UpdateProjection();
 		CreateConstantsBuffer();
 		CreateRenderPasses();
+		CreateIBLTextures();
 
 #if defined(_EDITOR)
 		//if (GetCountFromMouseCameras(unit) > 0 && uuid() != *GetMouseCameras(unit).begin() && shadowMapLight().empty())
@@ -856,29 +857,80 @@ namespace Scene
 	//IBL
 	bool Camera::HasIBL()
 	{
-		return !IBLIrradiance().empty() && !IBLPreFilteredEnvironment().empty() && !IBLBRDFLUT().empty();
+		//return !IBLIrradiance().empty() && !IBLPreFilteredEnvironment().empty() && !IBLBRDFLUT().empty();
+		return iblTextures.size() == 3ULL;
 	}
 
 	void Camera::CreateIBLTextures()
 	{
+		CreateIBLIrradianceTexture();
+		CreateIBLPreFilteredEnvironmentTexture();
+		CreateIBLBRDFLUTTexture();
+	}
+
+	void Camera::CreateIBLIrradianceTexture()
+	{
 		using namespace Templates;
+
+		if (iblTextures.contains(TextureShaderUsage_IBLIrradiance))
+		{
+			DeleteTextureInstance(iblTextures.at(TextureShaderUsage_IBLIrradiance));
+			iblTextures.erase(TextureShaderUsage_IBLIrradiance);
+		}
+
+		if (IBLIrradiance().empty())
+			return;
+
 		CreateTextureInstance(IBLIrradiance(), [&]
 			{
 				return std::make_unique<TextureInstance>(unit, IBLIrradiance());
 			}
 		);
+
+		iblTextures.insert_or_assign(TextureShaderUsage_IBLIrradiance, IBLIrradiance());
+	}
+
+	void Camera::CreateIBLPreFilteredEnvironmentTexture()
+	{
+		using namespace Templates;
+
+		if (iblTextures.contains(TextureShaderUsage_IBLPreFilteredEnvironment))
+		{
+			DeleteTextureInstance(iblTextures.at(TextureShaderUsage_IBLPreFilteredEnvironment));
+			iblTextures.erase(TextureShaderUsage_IBLPreFilteredEnvironment);
+		}
+
+		if (IBLPreFilteredEnvironment().empty())
+			return;
+
 		CreateTextureInstance(IBLPreFilteredEnvironment(), [&]
 			{
 				return std::make_unique<TextureInstance>(unit, IBLPreFilteredEnvironment());
 			}
 		);
+
+		iblTextures.insert_or_assign(TextureShaderUsage_IBLPreFilteredEnvironment, IBLPreFilteredEnvironment());
+	}
+
+	void Camera::CreateIBLBRDFLUTTexture()
+	{
+		using namespace Templates;
+
+		if (iblTextures.contains(TextureShaderUsage_IBLBRDFLUT))
+		{
+			DeleteTextureInstance(iblTextures.at(TextureShaderUsage_IBLBRDFLUT));
+			iblTextures.erase(TextureShaderUsage_IBLBRDFLUT);
+		}
+
+		if (IBLBRDFLUT().empty())
+			return;
+
 		CreateTextureInstance(IBLBRDFLUT(), [&]
 			{
 				return std::make_unique<TextureInstance>(unit, IBLBRDFLUT());
 			}
 		);
-		iblTextures.insert_or_assign(TextureShaderUsage_IBLIrradiance, IBLIrradiance());
-		iblTextures.insert_or_assign(TextureShaderUsage_IBLPreFilteredEnvironment, IBLPreFilteredEnvironment());
+
 		iblTextures.insert_or_assign(TextureShaderUsage_IBLBRDFLUT, IBLBRDFLUT());
 	}
 
@@ -1040,6 +1092,72 @@ namespace Scene
 			cam->clean(Camera::Update_renderPasses);
 		}
 
+		//now get cameras with dirty ibl
+		std::set<CameraSUUUID> dirtyIBL;
+		std::copy_if(cams.begin(), cams.end(), std::inserter(dirtyIBL, dirtyIBL.begin()), [](auto cam)
+			{
+				return cam->dirty(Camera::Update_IBLIrradiance) || cam->dirty(Camera::Update_IBLPreFilteredEnvironment) || cam->dirty(Camera::Update_IBLBRDFLUT);
+			}
+		);
+
+		std::map<SceneUnitId, std::set<CameraSUUUID>> camerasToRebind;
+		for (auto& cam : dirtyIBL)
+		{
+			size_t prevTexSize = cam->iblTextures.size();
+			if (cam->dirty(Camera::Update_IBLIrradiance))
+			{
+				cam->CreateIBLIrradianceTexture();
+				cam->clean(Camera::Update_IBLIrradiance);
+			}
+			if (cam->dirty(Camera::Update_IBLPreFilteredEnvironment))
+			{
+				cam->CreateIBLPreFilteredEnvironmentTexture();
+				cam->clean(Camera::Update_IBLPreFilteredEnvironment);
+			}
+			if (cam->dirty(Camera::Update_IBLBRDFLUT))
+			{
+				cam->CreateIBLBRDFLUTTexture();
+				cam->clean(Camera::Update_IBLBRDFLUT);
+			}
+			size_t currTexSize = cam->iblTextures.size();
+
+			if ((prevTexSize != 3ULL && currTexSize == 3ULL) || (prevTexSize == 3ULL && currTexSize != 3ULL))
+			{
+				camerasToRebind[cam.unit()].insert(cam);
+			}
+		}
+
+		auto rebindCam = [](auto cam)
+			{
+				for (auto& renderable : cam->renderables)
+				{
+					renderable->DestroyMaterialsInstances(cam);
+					renderable->DestroyConstantsBuffersInstances(cam);
+					renderable->DestroyRootSignatures(cam);
+					renderable->DestroyPipelineStates(cam);
+				}
+				for (auto& renderable : cam->renderables)
+				{
+					renderable->CreateMaterialsInstances(cam);
+					renderable->CreateConstantsBuffersInstances(cam);
+					renderable->CreateRootSignatures(cam);
+					renderable->CreatePipelineStates(cam);
+				}
+			};
+
+		for (auto& [id, cams] : camerasToRebind)
+		{
+			auto& scene = GetSceneUnit(id);
+			scene->ResetLoadingCommandList();
+			scene->SetLoading(true);
+			scene->SetCanSubmitLoading(false);
+			for (auto& cam : cams)
+			{
+				rebindCam(cam);
+			}
+			scene->CloseSubmitLoadingCommandList();
+		}
+
 		/*
 		//build a set of cameras for which ibl settings changed
 		std::set<CameraUUID> camsIBL;
@@ -1057,100 +1175,100 @@ namespace Scene
 		for (auto cam : allCams)
 		{
 			//as a special case update the billboard
-#if defined(_EDITOR)
-			if (cam() != *GetMouseCameras().begin() && cam->shadowMapLight().empty())
-			{
-				JUUID bbuuid = Editor::GetBillboard(cam());
-				if (!bbuuid.empty())
+	#if defined(_EDITOR)
+				if (cam() != *GetMouseCameras().begin() && cam->shadowMapLight().empty())
 				{
-					cam->UpdateBillboard(bbuuid);
-				}
-
-			}
-#endif
-			if (!cam->dirty(Camera::Update_useSwapChain)) continue;
-			cam->clean(Camera::Update_useSwapChain);
-			if (cam->useSwapChain())
-			{
-				InsertCameraIntoSwapChainCameras(cam());
-			}
-			else
-			{
-				EraseCameraFromSwapChainCameras(cam());
-			}
-			//as swapchain changed add this camera to the update renderpass set
-			camsRpi.insert(cam);
-		}
-
-		//do the same for the camera controllers cameras
-		for (auto cam : allCams)
-		{
-			if (!cam->dirty(Camera::Update_mouseController)) continue;
-			cam->clean(Camera::Update_mouseController);
-
-			if (cam->mouseController())
-			{
-				InsertCameraIntoMouseCameras(cam());
-			}
-			else
-			{
-				EraseCameraFromMouseCameras(cam());
-			}
-		}
-
-		//update projection attributes
-		for (auto cam : allCams)
-		{
-			if (
-				!cam->dirty(Camera::Update_projectionType) &&
-				!cam->dirty(Camera::Update_perspective) &&
-				!cam->dirty(Camera::Update_orthographic) &&
-				!cam->dirty(Camera::Update_fitWindow)
-				) continue;
-			cam->clean(Camera::Update_projectionType);
-			cam->clean(Camera::Update_perspective);
-			cam->clean(Camera::Update_orthographic);
-			cam->clean(Camera::Update_fitWindow);
-			cam->UpdateProjection();
-		}
-
-		//rebuild ibl attributes if needed
-		if (camsIBL.size() > 0ULL)
-		{
-			renderer->Flush();
-			renderer->RenderCriticalFrame([&camsIBL]
-				{
-					for (auto cam : camsIBL)
+					JUUID bbuuid = Editor::GetBillboard(cam());
+					if (!bbuuid.empty())
 					{
-						std::set<RenderableUUID> renderables(cam->renderables.begin(), cam->renderables.end());
-
-						for (auto r : renderables)
-						{
-							cam->UnbindRenderable(r());
-						}
-
-						cam->DestroyIBLTextures();
-						cam->DestroyRenderPasses();
-						DestroyConstantsBuffer(cam->cameraCb());
-
-						cam->CreateConstantsBuffer();
-						cam->CreateRenderPasses();
-
-						for (auto r : renderables)
-						{
-							cam->BindRenderable(r());
-						}
-
-						cam->clean(Camera::Update_IBLIrradiance);
-						cam->clean(Camera::Update_IBLPreFilteredEnvironment);
-						cam->clean(Camera::Update_IBLBRDFLUT);
+						cam->UpdateBillboard(bbuuid);
 					}
-				});
-		}
-		*/
+
+				}
+	#endif
+				if (!cam->dirty(Camera::Update_useSwapChain)) continue;
+				cam->clean(Camera::Update_useSwapChain);
+				if (cam->useSwapChain())
+				{
+					InsertCameraIntoSwapChainCameras(cam());
+				}
+				else
+				{
+					EraseCameraFromSwapChainCameras(cam());
+				}
+				//as swapchain changed add this camera to the update renderpass set
+				camsRpi.insert(cam);
+			}
+
+			//do the same for the camera controllers cameras
+			for (auto cam : allCams)
+			{
+				if (!cam->dirty(Camera::Update_mouseController)) continue;
+				cam->clean(Camera::Update_mouseController);
+
+				if (cam->mouseController())
+				{
+					InsertCameraIntoMouseCameras(cam());
+				}
+				else
+				{
+					EraseCameraFromMouseCameras(cam());
+				}
+			}
+
+			//update projection attributes
+			for (auto cam : allCams)
+			{
+				if (
+					!cam->dirty(Camera::Update_projectionType) &&
+					!cam->dirty(Camera::Update_perspective) &&
+					!cam->dirty(Camera::Update_orthographic) &&
+					!cam->dirty(Camera::Update_fitWindow)
+					) continue;
+				cam->clean(Camera::Update_projectionType);
+				cam->clean(Camera::Update_perspective);
+				cam->clean(Camera::Update_orthographic);
+				cam->clean(Camera::Update_fitWindow);
+				cam->UpdateProjection();
+			}
+
+			//rebuild ibl attributes if needed
+			if (camsIBL.size() > 0ULL)
+			{
+				renderer->Flush();
+				renderer->RenderCriticalFrame([&camsIBL]
+					{
+						for (auto cam : camsIBL)
+						{
+							std::set<RenderableUUID> renderables(cam->renderables.begin(), cam->renderables.end());
+
+							for (auto r : renderables)
+							{
+								cam->UnbindRenderable(r());
+							}
+
+							cam->DestroyIBLTextures();
+							cam->DestroyRenderPasses();
+							DestroyConstantsBuffer(cam->cameraCb());
+
+							cam->CreateConstantsBuffer();
+							cam->CreateRenderPasses();
+
+							for (auto r : renderables)
+							{
+								cam->BindRenderable(r());
+							}
+
+							cam->clean(Camera::Update_IBLIrradiance);
+							cam->clean(Camera::Update_IBLPreFilteredEnvironment);
+							cam->clean(Camera::Update_IBLBRDFLUT);
+						}
+					});
+			}
+			*/
 
 		std::set<CameraSUUUID> delCams;
-		std::copy_if(cams.begin(), cams.end(), std::inserter(delCams, delCams.begin()), [](auto c) {return c->markedForDelete; });
+		std::copy_if(cams.begin(), cams.end(), std::inserter(delCams, delCams.begin()), [](auto c) { return c->markedForDelete; });
 
 		/*
 		if (camsRpi.size() > 0ULL || delCams.size() > 0ULL)
@@ -1195,6 +1313,7 @@ namespace Scene
 						}
 					}
 					*/
+
 		for (auto c : delCams)
 		{
 			EraseCameraFromCameras(c->unit, c.uuid());

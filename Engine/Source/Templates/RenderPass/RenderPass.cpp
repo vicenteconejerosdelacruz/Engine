@@ -229,6 +229,7 @@ namespace Templates
 			{ RenderPassRenderCallbackOverride_MinMaxChainResult, [&](auto c, auto rpindex, auto rpTemplate, auto rpInstance) { return std::make_unique<MinMaxChainResultPass>(id,c,rpindex, rpTemplate, rpInstance); } }
 		};
 		overridePass = RenderCallbackOverriders.at(renderCallbackOverride)(cameraUUID, renderPassIndex, renderPassTemplate(), renderPassInstance());
+		/*
 		if (!camera.empty() && type == RenderPassType_RenderToTexturePass &&
 			materialOverride == RenderPassMaterialOverride_None &&
 			renderCallbackOverride == RenderPassRenderCallbackOverride_None &&
@@ -236,6 +237,7 @@ namespace Templates
 		{
 			camera->CreateIBLTextures();
 		}
+		*/
 	}
 
 	void DestroyRenderPassInstance(JUUID renderPassInstanceUUID)

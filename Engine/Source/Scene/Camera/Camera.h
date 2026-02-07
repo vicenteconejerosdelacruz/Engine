@@ -191,6 +191,10 @@ namespace Scene {
 		TextureUsageInstanceMap iblTextures;
 		bool HasIBL();
 		void CreateIBLTextures();
+		void CreateIBLIrradianceTexture();
+		void CreateIBLPreFilteredEnvironmentTexture();
+		void CreateIBLBRDFLUTTexture();
+
 		void DestroyIBLTextures();
 		void SetIBLRootDescriptorTables(CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int& cbvSlot);
 #if defined(_EDITOR)
