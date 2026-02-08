@@ -69,6 +69,8 @@ DirectX::Keyboard::KeyboardStateTracker keys;
 //GamePad
 std::unique_ptr<DirectX::GamePad> gamePad;
 DirectX::GamePad::ButtonStateTracker buttons;
+//Physx
+static physx::PxDefaultAllocator gAllocator;
 
 //app destruction
 bool destroyed = false;
