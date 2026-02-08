@@ -49,7 +49,7 @@ namespace Scene
 
 #endif
 
-	std::unordered_map<RenderableSUUUID, SequencePlayer*> animationPlayers;
+	std::unordered_map<RenderableID, SequencePlayer*> animationPlayers;
 
 	Renderable::Renderable(SceneUnitId id, nlohmann::json& json) :SceneObject(id, json)
 	{
@@ -153,8 +153,8 @@ namespace Scene
 		auto lights = GetShadowMapLights(unit);
 		for (auto uuid : lights)
 		{
-			LightSUUUID light = MAKESUUUID(unit, uuid);
-			for (CameraSUUUID cam : light->shadowMapCameras)
+			LightID light = MAKESUUUID(unit, uuid);
+			for (CameraID cam : light->shadowMapCameras)
 			{
 				BindCamera(cam.uuid());
 			}
@@ -202,7 +202,7 @@ namespace Scene
 			auto smlights = GetShadowMapLights(unit);
 			for (auto& uuid : smlights)
 			{
-				LightSUUUID l = MAKESUUUID(unit, uuid);
+				LightID l = MAKESUUUID(unit, uuid);
 				l->UnbindRenderableFromShadowMapCamera(SUuuid());
 			}
 		}
@@ -210,7 +210,7 @@ namespace Scene
 
 	void Renderable::UnbindCamera(JUUID cuuid)
 	{
-		CameraSUUUID cam = MAKESUUUID(unit, cuuid);
+		CameraID cam = MAKESUUUID(unit, cuuid);
 		cam->UnbindRenderable(SUuuid());
 		Scene::UnbindFromScene(unit, uuid(), cuuid);
 	}
@@ -286,16 +286,16 @@ namespace Scene
 		}
 	}
 
-	std::vector<RenderPassInstanceUUID> Renderable::GetCameraRenderPasses(CameraSUUUID cam)
+	std::vector<RenderPassInstanceID> Renderable::GetCameraRenderPasses(CameraID cam)
 	{
 		if (!cam->useSwapChain()) return cam->renderPassesUUID;
 
-		std::vector<RenderPassInstanceUUID> rpiv = cam->renderPassesUUID;
+		std::vector<RenderPassInstanceID> rpiv = cam->renderPassesUUID;
 		rpiv.push_back(renderer->swapChainPass);
 		return rpiv;
 	}
 
-	void Renderable::CreateMaterialsInstances(CameraSUUUID cam)
+	void Renderable::CreateMaterialsInstances(CameraID cam)
 	{
 		for (auto& rp : GetCameraRenderPasses(cam))
 		{
@@ -303,7 +303,7 @@ namespace Scene
 		}
 	}
 
-	void Renderable::CreateRenderPassMaterialsInstances(RenderPassInstanceUUID pass)
+	void Renderable::CreateRenderPassMaterialsInstances(RenderPassInstanceID pass)
 	{
 		std::vector<PassMaterialOverride> pmo = passMaterialOverrides();
 
@@ -364,7 +364,7 @@ namespace Scene
 		}
 	}
 
-	void Renderable::DestroyMaterialsInstances(CameraSUUUID cam)
+	void Renderable::DestroyMaterialsInstances(CameraID cam)
 	{
 		for (auto& rp : GetCameraRenderPasses(cam))
 		{
@@ -372,7 +372,7 @@ namespace Scene
 		}
 	}
 
-	void Renderable::DestroyRenderPassMaterialsInstances(RenderPassInstanceUUID rp)
+	void Renderable::DestroyRenderPassMaterialsInstances(RenderPassInstanceID rp)
 	{
 		if (!materials.contains(rp))
 		{
@@ -385,7 +385,7 @@ namespace Scene
 		materials.erase(rp);
 	}
 
-	void Renderable::CreateConstantsBuffersInstances(CameraSUUUID cam)
+	void Renderable::CreateConstantsBuffersInstances(CameraID cam)
 	{
 		for (auto& rp : GetCameraRenderPasses(cam))
 		{
@@ -393,7 +393,7 @@ namespace Scene
 		}
 	}
 
-	void Renderable::CreateRenderPassConstantsBuffersInstances(RenderPassInstanceUUID pass)
+	void Renderable::CreateRenderPassConstantsBuffersInstances(RenderPassInstanceID pass)
 	{
 		if (constantsBuffers.contains(pass))
 			return;
@@ -406,7 +406,7 @@ namespace Scene
 			for (unsigned int j = 0; j < mi->variablesBufferSize.size(); j++)
 			{
 				size_t size = mi->variablesBufferSize[j];
-				ConstantsBufferUUID cbuffer = CreateConstantsBuffer(size, Renderer::numFrames, name() + "." + std::to_string(j) + "." + mesh->uuid);
+				ConstantsBufferID cbuffer = CreateConstantsBuffer(size, Renderer::numFrames, name() + "." + std::to_string(j) + "." + mesh->uuid);
 				for (unsigned int n = 0; n < Renderer::numFrames; n++)
 				{
 					WriteMaterialVariablesToConstantsBufferSpace(mi, cbuffer, n);
@@ -416,7 +416,7 @@ namespace Scene
 		}
 	}
 
-	void Renderable::DestroyConstantsBuffersInstances(CameraSUUUID cam)
+	void Renderable::DestroyConstantsBuffersInstances(CameraID cam)
 	{
 		for (auto& rp : GetCameraRenderPasses(cam))
 		{
@@ -424,7 +424,7 @@ namespace Scene
 		}
 	}
 
-	void Renderable::DestroyRenderPassConstantsBuffersInstances(RenderPassInstanceUUID pass)
+	void Renderable::DestroyRenderPassConstantsBuffersInstances(RenderPassInstanceID pass)
 	{
 		if (!constantsBuffers.contains(pass)) return;
 
@@ -438,7 +438,7 @@ namespace Scene
 		constantsBuffers.erase(pass);
 	}
 
-	void Renderable::CreateRootSignatures(CameraSUUUID cam)
+	void Renderable::CreateRootSignatures(CameraID cam)
 	{
 		for (auto& rp : GetCameraRenderPasses(cam))
 		{
@@ -447,18 +447,18 @@ namespace Scene
 		}
 	}
 
-	void Renderable::CreateRenderPassRootSignatures(RenderPassInstanceUUID rp)
+	void Renderable::CreateRenderPassRootSignatures(RenderPassInstanceID rp)
 	{
 		for (unsigned int i = 0; i < meshes.size(); i++)
 		{
 			auto& mi = materials[rp].at(i);
 
-			auto& vsCBparams = mi->vertexShaderInstanceUUID->constantsBuffersParameters;
-			auto& psCBparams = mi->pixelShaderInstanceUUID->constantsBuffersParameters;
-			auto& uavParams = mi->pixelShaderInstanceUUID->uavParameters;
-			auto& psSRVCSparams = mi->pixelShaderInstanceUUID->srvCSParameters;
-			auto& psSRVTexparams = mi->pixelShaderInstanceUUID->srvTexParameters;
-			auto& psSamplersParams = mi->pixelShaderInstanceUUID->samplersParameters;
+			auto& vsCBparams = mi->vertexShaderInstanceID->constantsBuffersParameters;
+			auto& psCBparams = mi->pixelShaderInstanceID->constantsBuffersParameters;
+			auto& uavParams = mi->pixelShaderInstanceID->uavParameters;
+			auto& psSRVCSparams = mi->pixelShaderInstanceID->srvCSParameters;
+			auto& psSRVTexparams = mi->pixelShaderInstanceID->srvTexParameters;
+			auto& psSamplersParams = mi->pixelShaderInstanceID->samplersParameters;
 			auto& samplers = mi->samplers;
 
 			std::string rsName = "rootSignature:" + name() + ":" + std::to_string(i);
@@ -468,7 +468,7 @@ namespace Scene
 		}
 	}
 
-	void Renderable::DestroyRootSignatures(CameraSUUUID cam)
+	void Renderable::DestroyRootSignatures(CameraID cam)
 	{
 		if (cam.empty()) return;
 		for (auto& rp : GetCameraRenderPasses(cam))
@@ -477,13 +477,13 @@ namespace Scene
 		}
 	}
 
-	void Renderable::DestroyRenderPassRootSignatures(RenderPassInstanceUUID rp)
+	void Renderable::DestroyRenderPassRootSignatures(RenderPassInstanceID rp)
 	{
 		if (rootSignatures.contains(rp))
 			rootSignatures.erase(rp);
 	}
 
-	void Renderable::CreatePipelineStates(CameraSUUUID cam)
+	void Renderable::CreatePipelineStates(CameraID cam)
 	{
 		for (auto& rp : GetCameraRenderPasses(cam))
 		{
@@ -492,9 +492,9 @@ namespace Scene
 		}
 	}
 
-	void Renderable::CreateRenderPassPipelineStates(RenderPassInstanceUUID rp)
+	void Renderable::CreateRenderPassPipelineStates(RenderPassInstanceID rp)
 	{
-		auto setPipelineStateAt = [this](RenderPassInstanceUUID rp, unsigned int i)
+		auto setPipelineStateAt = [this](RenderPassInstanceID rp, unsigned int i)
 			{
 				auto rtFormats = rp->GetRenderTargetsFormats();
 				auto depthFormat = rp->GetDepthStencilFormat();
@@ -502,8 +502,8 @@ namespace Scene
 				auto& mi = materials[rp].at(i);
 				auto& vsLayout = vertexInputLayoutsMap[mesh->vertexClass];
 				auto& rootSignature = rootSignatures[rp].at(i);
-				auto& vsByteCode = mi->vertexShaderInstanceUUID->byteCode;
-				auto& psByteCode = mi->pixelShaderInstanceUUID->byteCode;
+				auto& vsByteCode = mi->vertexShaderInstanceID->byteCode;
+				auto& psByteCode = mi->pixelShaderInstanceID->byteCode;
 
 				auto& material = mi->materialUUID;
 				BlendDesc blendDesc = material->blendState();
@@ -532,7 +532,7 @@ namespace Scene
 		}
 	}
 
-	void Renderable::DestroyPipelineStates(CameraSUUUID cam)
+	void Renderable::DestroyPipelineStates(CameraID cam)
 	{
 		if (cam.empty()) return;
 		for (auto& rp : GetCameraRenderPasses(cam))
@@ -541,7 +541,7 @@ namespace Scene
 		}
 	}
 
-	void Renderable::DestroyRenderPassPipelineStates(RenderPassInstanceUUID rp)
+	void Renderable::DestroyRenderPassPipelineStates(RenderPassInstanceID rp)
 	{
 		if (pipelineStates.contains(rp))
 		{
@@ -573,7 +573,7 @@ namespace Scene
 		return bbw;
 	}
 
-	void Renderable::WriteMaterialVariablesToConstantsBufferSpace(MaterialInstanceUUID material, ConstantsBufferUUID cbvData, unsigned int cbvFrameIndex)
+	void Renderable::WriteMaterialVariablesToConstantsBufferSpace(MaterialInstanceID material, ConstantsBufferID cbvData, unsigned int cbvFrameIndex)
 	{
 		for (auto& [varName, varMapping] : material->variablesMapping)
 		{
@@ -714,7 +714,7 @@ namespace Scene
 	}
 
 	//RENDER
-	void Renderable::Render(SceneUnitId unit, RenderPassInstanceUUID renderPass, CameraSUUUID camera)
+	void Renderable::Render(SceneUnitId unit, RenderPassInstanceID renderPass, CameraID camera)
 	{
 		using namespace Animation;
 		using namespace Scene;
@@ -740,19 +740,19 @@ namespace Scene
 			};
 		auto setCameraConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
 			{
-				if (!camera.empty() && material->ShaderInstanceHasRegister([](ShaderInstanceUUID binary) { return binary->CBV.camera; })) {
+				if (!camera.empty() && material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->CBV.camera; })) {
 					camera->cameraCb->SetRootDescriptorTable(commandList, slot, frame);
 				}
 			};
-		auto setLightsConstantsBufferDescriptorTable = [&](MaterialInstanceUUID material, unsigned int& slot)
+		auto setLightsConstantsBufferDescriptorTable = [&](MaterialInstanceID material, unsigned int& slot)
 			{
-				if (material->ShaderInstanceHasRegister([](ShaderInstanceUUID binary) { return binary->CBV.light; })) {
+				if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->CBV.light; })) {
 					camera->GetLightsConstantsBuffer()->SetRootDescriptorTable(commandList, slot, frame);
 				}
 			};
 		auto setShadowMapsConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
 			{
-				if (material->ShaderInstanceHasRegister([](ShaderInstanceUUID binary) { return binary->CBV.lightsShadowMap; })) {
+				if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->CBV.lightsShadowMap; })) {
 					if (camera->SceneHasShadowMaps())
 						return camera->GetShadowMapsConstantsBuffer()->SetRootDescriptorTable(commandList, slot, frame);
 					slot++;
@@ -760,7 +760,7 @@ namespace Scene
 			};
 		auto setSkinningConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
 			{
-				if (material->ShaderInstanceHasRegister([this](ShaderInstanceUUID binary) { return binary->CBV.animation; })) {
+				if (material->ShaderInstanceHasRegister([this](ShaderInstanceID binary) { return binary->CBV.animation; })) {
 					if (!animable.empty())
 						return GetAnimatedConstantsBuffer(uuid())->SetRootDescriptorTable(commandList, slot, frame);
 					slot++;
@@ -772,7 +772,7 @@ namespace Scene
 			};
 		auto setIBLRootDescriptorTable = [&](auto& material, unsigned int& slot)
 			{
-				if (material->ShaderInstanceHasRegister([](ShaderInstanceUUID binary) { return
+				if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return
 					(binary->SRV.iblIrradiance == -1 || binary->SRV.iblPrefiteredEnv == -1 || binary->SRV.iblBRDFLUT == -1) ? -1 : 1; })
 					)
 				{
@@ -785,7 +785,7 @@ namespace Scene
 			};
 		auto setShadowMapsSRVDescriptorTable = [&](auto& material, unsigned int& slot)
 			{
-				if (material->ShaderInstanceHasRegister([](ShaderInstanceUUID binary) { return binary->SRV.lightsShadowMap; })) {
+				if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->SRV.lightsShadowMap; })) {
 					if (camera->SceneHasShadowMaps())
 						return commandList->SetGraphicsRootDescriptorTable(slot, GetShadowMapGpuDescriptorHandleStart(unit));
 					slot++;
@@ -837,10 +837,10 @@ namespace Scene
 	void RenderablesStep(SceneUnitId unit, float dt)
 	{
 		auto& Renderables = GetRenderables(unit);
-		std::set<RenderableSUUUID> r;
+		std::set<RenderableID> r;
 		std::transform(Renderables.begin(), Renderables.end(), std::inserter(r, r.begin()), [&](auto o) { return MAKESUUUID(unit, o); });
 
-		std::set<RenderableSUUUID> todelete;
+		std::set<RenderableID> todelete;
 		std::copy_if(r.begin(), r.end(), std::inserter(todelete, todelete.begin()), [](auto r)
 			{
 				return r->markedForDelete;
@@ -876,7 +876,7 @@ namespace Scene
 		{
 			for (auto& [uuid, _] : container)
 			{
-				RenderableSUUUID r = MAKESUUUID(id, uuid);
+				RenderableID r = MAKESUUUID(id, uuid);
 				DeleteRenderableSUSceneObject(r->unit, r->uuid());
 			}
 		}
@@ -900,7 +900,7 @@ namespace Scene
 
 	void DeleteRenderable(SceneUnitId id, JUUID uuid)
 	{
-		RenderableSUUUID r = MAKESUUUID(id, uuid);
+		RenderableID r = MAKESUUUID(id, uuid);
 		r->markedForDelete = true;
 	}
 
@@ -908,7 +908,7 @@ namespace Scene
 	{
 		for (auto& [uuid, _] : RenderableSUsceneObjects.at(id))
 		{
-			RenderableSUUUID renderable = MAKESUUUID(id, uuid);
+			RenderableID renderable = MAKESUUUID(id, uuid);
 
 			if (renderable->boundingBoxCompute.empty())
 				continue;
@@ -921,7 +921,7 @@ namespace Scene
 	{
 		for (auto& [uuid, _] : RenderableSUsceneObjects.at(id))
 		{
-			RenderableSUUUID renderable = MAKESUUUID(id, uuid);
+			RenderableID renderable = MAKESUUUID(id, uuid);
 
 			if (renderable->boundingBoxCompute.empty())
 				continue;

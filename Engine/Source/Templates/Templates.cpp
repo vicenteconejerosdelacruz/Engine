@@ -1163,37 +1163,37 @@ namespace Templates
 		{
 			{ T_Shaders, [str2JUUIDName](JUUID uuid)
 				{
-					ShaderJsonUUID o = uuid;
+					ShaderJsonID o = uuid;
 					return str2JUUIDName(TemplateTypeToString.at(T_Shaders), o->uuid(),o->name());
 				}
 			},
 			{ T_Materials, [str2JUUIDName](JUUID uuid)
 				{
-					MaterialJsonUUID o = uuid;
+					MaterialJsonID o = uuid;
 					return str2JUUIDName(TemplateTypeToString.at(T_Materials), o->uuid(),o->name());
 				}
 			},
 			{ T_Models3D, [str2JUUIDName](JUUID uuid)
 				{
-					Model3DJsonUUID o = uuid;
+					Model3DJsonID o = uuid;
 					return str2JUUIDName(TemplateTypeToString.at(T_Models3D), o->uuid(),o->name());
 				}
 			},
 			{ T_Sounds, [str2JUUIDName](JUUID uuid)
 				{
-					SoundJsonUUID o = uuid;
+					SoundJsonID o = uuid;
 					return str2JUUIDName(TemplateTypeToString.at(T_Sounds), o->uuid(),o->name());
 				}
 			},
 			{ T_Textures, [str2JUUIDName](JUUID uuid)
 				{
-					TextureJsonUUID o = uuid;
+					TextureJsonID o = uuid;
 					return str2JUUIDName(TemplateTypeToString.at(T_Textures), o->uuid(),o->name());
 				}
 			},
 			{ T_RenderPasses, [str2JUUIDName](JUUID uuid)
 				{
-					RenderPassJsonUUID o = uuid;
+					RenderPassJsonID o = uuid;
 					return str2JUUIDName(TemplateTypeToString.at(T_RenderPasses), o->uuid(),o->name());
 				}
 			}

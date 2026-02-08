@@ -6,7 +6,7 @@
 
 struct MousePicking
 {
-	std::unordered_map<SceneUnitId, RenderPassInstanceUUID> pickingPass;
+	std::unordered_map<SceneUnitId, RenderPassInstanceID> pickingPass;
 	CComPtr<ID3D12Resource> pickingCpuBuffer;
 	unsigned int pickingX = 0U;
 	unsigned int pickingY = 0U;

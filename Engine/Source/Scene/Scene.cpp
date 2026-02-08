@@ -24,7 +24,7 @@ namespace Editor
 	extern void HandleEditorMouseMovements(SceneUnitId id);
 	extern void CreateRegisteredBillboards(SceneUnitId id);
 	extern void UpdateBillboards();
-	extern void BindRenderableToPickingPass(RenderableSUUUID uuid);
+	extern void BindRenderableToPickingPass(RenderableID uuid);
 	extern void DeleteSceneUnitLevel(SceneUnitId id);
 	extern void DeleteSceneUnitGizmos(SceneUnitId id);
 	extern void DeleteSceneUnitSelection(SceneUnitId id);
@@ -236,7 +236,7 @@ namespace Scene
 			auto& cameras = GetWindowCameras(id);
 			for (auto& uuid : cameras)
 			{
-				CameraSUUUID cam = MAKESUUUID(id, uuid);
+				CameraID cam = MAKESUUUID(id, uuid);
 				cam->ResizeReleasePasses();
 			}
 #if defined(_EDITOR)
@@ -258,7 +258,7 @@ namespace Scene
 			auto& cameras = GetWindowCameras(id);
 			for (auto& uuid : cameras)
 			{
-				CameraSUUUID cam = MAKESUUUID(id, uuid);
+				CameraID cam = MAKESUUUID(id, uuid);
 				cam->ResizePasses(width, height);
 			}
 #if defined(_EDITOR)
@@ -469,7 +469,7 @@ namespace Scene
 
 		for (JUUID uuid : GetRenderables(id))
 		{
-			RenderableSUUUID r = MAKESUUUID(id, uuid);
+			RenderableID r = MAKESUUUID(id, uuid);
 			if (!r->RenderReady()) continue;
 
 			r->WriteAnimationConstantsBuffer(scene->Frame());
@@ -479,7 +479,7 @@ namespace Scene
 		//write the constants buffers of the cameras which renders shadow maps
 		for (JUUID uuid : GetCameras(id))
 		{
-			CameraSUUUID c = MAKESUUUID(id, uuid);
+			CameraID c = MAKESUUUID(id, uuid);
 			if (!c->RenderReady() || !c->shadowMapLight().empty()) continue;
 
 			c->WriteLightsConstantsBuffer(scene->Frame());
@@ -493,7 +493,7 @@ namespace Scene
 
 		for (JUUID uuid : GetLights(id))
 		{
-			LightSUUUID l = MAKESUUUID(id, uuid);
+			LightID l = MAKESUUUID(id, uuid);
 
 			if (!l->RenderReady() || !l->hasShadowMaps()) continue;
 
@@ -501,7 +501,7 @@ namespace Scene
 				{
 					auto& camera = l->shadowMapCameras.at(cameraIndex);
 					auto& rp = camera->renderPassesUUID.at(0);
-					for (RenderableSUUUID r : camera->renderables)
+					for (RenderableID r : camera->renderables)
 					{
 						if (r->castShadows())
 						{
@@ -554,7 +554,7 @@ namespace Scene
 			}
 
 			//filter out cameras used to render shadow maps
-			CameraSUUUID cam = MAKESUUUID(id, uuid);
+			CameraID cam = MAKESUUUID(id, uuid);
 			if (!cam->RenderReady() || !cam->shadowMapLight().empty())
 			{
 				it = cameras.erase(it);
@@ -595,7 +595,7 @@ namespace Scene
 		bool resolvedToSwapchain = std::any_of(nonSwapChainCams.begin(), nonSwapChainCams.end(), [&](JUUID camUUID)
 			{
 				auto& cam = GetCameraSUSceneObject(id, camUUID);
-				return std::any_of(cam->renderPassesUUID.begin(), cam->renderPassesUUID.end(), [](RenderPassInstanceUUID& pass)
+				return std::any_of(cam->renderPassesUUID.begin(), cam->renderPassesUUID.end(), [](RenderPassInstanceID& pass)
 					{
 						return pass->renderCallbackOverride == RenderPassRenderCallbackOverride_Resolve;
 					}
@@ -622,7 +622,7 @@ namespace Scene
 	{
 		for (JUUID uuid : GetAnimables(id))
 		{
-			RenderableSUUUID r = MAKESUUUID(id, uuid);
+			RenderableID r = MAKESUUUID(id, uuid);
 			r->StepAnimation(elapsedSeconds);
 		}
 	}
@@ -755,28 +755,28 @@ namespace Scene
 				{
 					{ SO_Renderables, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 						{
-							RenderableSUUUID o = MAKESUUUID(id,uuid);
+							RenderableID o = MAKESUUUID(id,uuid);
 							if (o->hidden()) return JUUIDName();
 							return str2JUUIDName(SceneObjectTypeToString.at(SO_Renderables), o->uuid(),o->name());
 						}
 					},
 					{ SO_Cameras, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 						{
-							CameraSUUUID o = MAKESUUUID(id,uuid);
+							CameraID o = MAKESUUUID(id,uuid);
 							if (o->hidden()) return JUUIDName();
 							return str2JUUIDName(SceneObjectTypeToString.at(SO_Cameras), o->uuid(),o->name());
 						}
 					},
 					{ SO_Lights, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 						{
-							LightSUUUID o = MAKESUUUID(id,uuid);
+							LightID o = MAKESUUUID(id,uuid);
 							if (o->hidden()) return JUUIDName();
 							return str2JUUIDName(SceneObjectTypeToString.at(SO_Lights), o->uuid(),o->name());
 						}
 					},
 					{ SO_SoundEffects, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 						{
-							SoundFXSUUUID o = MAKESUUUID(id,uuid);
+							SoundFXID o = MAKESUUUID(id,uuid);
 							if (o->hidden()) return JUUIDName();
 							return str2JUUIDName(SceneObjectTypeToString.at(SO_SoundEffects), o->uuid(),o->name());
 						}
@@ -811,28 +811,28 @@ namespace Scene
 		{
 			{ SO_Renderables, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					RenderableSUUUID o = MAKESUUUID(id,uuid);
+					RenderableID o = MAKESUUUID(id,uuid);
 					if (o->hidden()) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Renderables), o->uuid(),o->name());
 				}
 			},
 			{ SO_Cameras, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					CameraSUUUID o = MAKESUUUID(id,uuid);
+					CameraID o = MAKESUUUID(id,uuid);
 					if (o->hidden()) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Cameras), o->uuid(),o->name());
 				}
 			},
 			{ SO_Lights, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					LightSUUUID o = MAKESUUUID(id,uuid);
+					LightID o = MAKESUUUID(id,uuid);
 					if (o->hidden()) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Lights), o->uuid(),o->name());
 				}
 			},
 			{ SO_SoundEffects, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					SoundFXSUUUID o = MAKESUUUID(id,uuid);
+					SoundFXID o = MAKESUUUID(id,uuid);
 					if (o->hidden()) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_SoundEffects), o->uuid(),o->name());
 				}
@@ -866,28 +866,28 @@ namespace Scene
 		{
 			{ SO_Renderables, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					RenderableSUUUID o = MAKESUUUID(id,uuid);
+					RenderableID o = MAKESUUUID(id,uuid);
 					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Renderables), o->uuid(),o->name());
 				}
 			},
 			{ SO_Cameras, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					CameraSUUUID o = MAKESUUUID(id,uuid);
+					CameraID o = MAKESUUUID(id,uuid);
 					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Cameras), o->uuid(),o->name());
 				}
 			},
 			{ SO_Lights, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					LightSUUUID o = MAKESUUUID(id,uuid);
+					LightID o = MAKESUUUID(id,uuid);
 					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Lights), o->uuid(),o->name());
 				}
 			},
 			{ SO_SoundEffects, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					SoundFXSUUUID o = MAKESUUUID(id,uuid);
+					SoundFXID o = MAKESUUUID(id,uuid);
 					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_SoundEffects), o->uuid(),o->name());
 				}

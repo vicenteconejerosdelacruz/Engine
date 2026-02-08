@@ -8,7 +8,7 @@
 namespace Editor
 {
 	extern void SelectSoundEffect(SceneUnitId id, JUUID suuid);
-	extern JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraSUUUID camera, std::string name, std::string material, std::string pickingMaterial);
+	extern JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
 	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 	extern void MarkScenePanelAssetsAsDirty();
@@ -255,13 +255,13 @@ namespace Scene
 	}
 
 #if defined(_EDITOR)
-	JUUID SoundFX::CreateBillboard(CameraSUUUID camera)
+	JUUID SoundFX::CreateBillboard(CameraID camera)
 	{
 		if (!(instanceFlags() & SoundEffectInstance_Use3D)) return "";
 
 		JUUID uuid = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "SoundEffect", "SoundEffectPicking");
 		UpdateBillboard(uuid);
-		RenderableSUUUID bb = MAKESUUUID(unit, uuid);
+		RenderableID bb = MAKESUUUID(unit, uuid);
 		bb->OnPick = [this] {Editor::SelectSoundEffect(unit, this->uuid()); };
 		return uuid;
 	}
@@ -274,7 +274,7 @@ namespace Scene
 		auto& scene = GetSceneUnit(unit);
 
 		XMFLOAT3 baseColor = { 1.0f,1.0f,1.0f };
-		RenderableSUUUID bb = MAKESUUUID(unit, uuid);
+		RenderableID bb = MAKESUUUID(unit, uuid);
 		bb->position(position());
 		bb->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
 		bb->WriteConstantsBuffer(scene->Frame());
@@ -295,7 +295,7 @@ namespace Scene
 		if (!SoundEffects.contains(id)) return;
 
 		auto& SoundFxs = SoundEffects.at(id);
-		std::set<SoundFXSUUUID> sfxs;
+		std::set<SoundFXID> sfxs;
 		std::transform(SoundFxs.begin(), SoundFxs.end(), std::inserter(sfxs, sfxs.end()), [&](auto o) { return MAKESUUUID(id, o); });
 
 		std::for_each(sfxs.begin(), sfxs.end(), [step](auto sfx)
@@ -304,7 +304,7 @@ namespace Scene
 			}
 		);
 
-		std::set<SoundFXSUUUID> sfxsDelete;
+		std::set<SoundFXID> sfxsDelete;
 		std::copy_if(sfxs.begin(), sfxs.end(), std::inserter(sfxsDelete, sfxsDelete.end()), [](auto sfx)
 			{
 				return sfx->markedForDelete;
@@ -328,7 +328,7 @@ namespace Scene
 		{
 			for (auto& [uuid, _] : container)
 			{
-				SoundFXSUUUID s = MAKESUUUID(id, uuid);
+				SoundFXID s = MAKESUUUID(id, uuid);
 				DeleteSoundFXSUSceneObject(s.unit(), s.uuid());
 			}
 		}
@@ -352,7 +352,7 @@ namespace Scene
 
 	void DeleteSoundFX(SceneUnitId id, JUUID uuid)
 	{
-		SoundFXSUUUID sfx = MAKESUUUID(id, uuid);
+		SoundFXID sfx = MAKESUUUID(id, uuid);
 #if defined(_EDITOR)
 		Editor::DestroyBillboard(id, uuid);
 #endif
@@ -363,7 +363,7 @@ namespace Scene
 	{
 		for (auto& [uuid, _] : SoundFXSUsceneObjects.at(id))
 		{
-			SoundFXSUUUID sfx = MAKESUUUID(id, uuid);
+			SoundFXID sfx = MAKESUUUID(id, uuid);
 			if (sfx->markedForDelete) continue;
 			sfx->Play();
 		}
@@ -373,7 +373,7 @@ namespace Scene
 	{
 		for (auto& [uuid, _] : SoundFXSUsceneObjects.at(id))
 		{
-			SoundFXSUUUID sfx = MAKESUUUID(id, uuid);
+			SoundFXID sfx = MAKESUUUID(id, uuid);
 			sfx->Pause();
 		}
 	}
@@ -382,7 +382,7 @@ namespace Scene
 	{
 		for (auto& [uuid, _] : SoundFXSUsceneObjects.at(id))
 		{
-			SoundFXSUUUID sfx = MAKESUUUID(id, uuid);
+			SoundFXID sfx = MAKESUUUID(id, uuid);
 			if (sfx->markedForDelete) continue;
 			sfx->Resume();
 		}
@@ -392,7 +392,7 @@ namespace Scene
 	{
 		for (auto& [uuid, _] : SoundFXSUsceneObjects.at(id))
 		{
-			SoundFXSUUUID sfx = MAKESUUUID(id, uuid);
+			SoundFXID sfx = MAKESUUUID(id, uuid);
 			sfx->Stop();
 		}
 	}

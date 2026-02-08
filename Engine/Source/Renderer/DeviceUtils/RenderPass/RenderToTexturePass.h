@@ -14,7 +14,7 @@ namespace DeviceUtils
 		std::string name;
 		D3D12_VIEWPORT screenViewport;
 		D3D12_RECT scissorRect;
-		std::vector<RenderToTextureUUID> renderToTexture;
+		std::vector<RenderToTextureID> renderToTexture;
 		DXGI_FORMAT depthStencilFormat;
 		CComPtr<ID3D12DescriptorHeap> depthStencilViewDescriptorHeap;
 		CComPtr<ID3D12Resource> depthStencilTexture;

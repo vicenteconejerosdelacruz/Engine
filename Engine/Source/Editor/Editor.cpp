@@ -76,8 +76,8 @@ struct LoadingProgress
 
 struct BillboardRegistry
 {
-	std::map<JUUID, RenderableSUUUID> billboardRegistry; //scene object -> renderable billboard
-	std::set<RenderableSUUUID> billboardsToDestroy;
+	std::map<JUUID, RenderableID> billboardRegistry; //scene object -> renderable billboard
+	std::set<RenderableID> billboardsToDestroy;
 };
 
 struct GizmoInteraction
@@ -156,10 +156,10 @@ namespace Editor
 	std::unordered_map<SceneUnitId, bool> isPaused;
 	std::unordered_map<SceneUnitId, std::string> editorPrePlayDump;
 	//BoundingBox
-	std::unordered_map<SceneUnitId, RenderableSUUUID> boundingBox;
+	std::unordered_map<SceneUnitId, RenderableID> boundingBox;
 	//Editor Camera
-	std::unordered_map<SceneUnitId, CameraSUUUID> levelCameraUUID;
-	std::unordered_map<SceneUnitId, CameraSUUUID> editorCameraUUID;
+	std::unordered_map<SceneUnitId, CameraID> levelCameraUUID;
+	std::unordered_map<SceneUnitId, CameraID> editorCameraUUID;
 	//Billboards
 	std::unordered_map<SceneUnitId, BillboardRegistry> billboards;
 
@@ -757,8 +757,8 @@ namespace Editor
 		if (inSizeMove) return;
 
 		unsigned int backBufferIndex = renderer->GetBackBufferIndex();
-		RenderPassInstanceUUID renderPass = renderer->swapChainPass;
-		SwapChainPassUUID pass = renderPass->swapChainPass;
+		RenderPassInstanceID renderPass = renderer->swapChainPass;
+		SwapChainPassID pass = renderPass->swapChainPass;
 		auto backBuffer = pass->renderTargets[backBufferIndex];
 		commandListProcessor.ResetCommandList();
 		auto commandList = commandListProcessor.GetCommandList();
@@ -857,12 +857,12 @@ namespace Editor
 		auto& scene = GetSceneUnit(id);
 		for (auto uuid : GetShadowMapLights(id))
 		{
-			LightSUUUID l = MAKESUUUID(id, uuid);
+			LightID l = MAKESUUUID(id, uuid);
 			if (l->lightType() != LT_Directional) continue;
 
 			l->CreateDirectionalCascadeShadowMapViewProjectionMatrices();
 		}
-		CameraSUUUID c = MAKESUUUID(id, *GetSwapChainCameras(id).begin());
+		CameraID c = MAKESUUUID(id, *GetSwapChainCameras(id).begin());
 		c->WriteShadowMapsConstantsBuffer(scene->Frame());
 	}
 
@@ -1824,7 +1824,7 @@ namespace Editor
 		return !objects2Gizmo.empty();
 	}
 
-	void DrawPickedObjectsGizmo(SceneUnitId id, CameraSUUUID camera)
+	void DrawPickedObjectsGizmo(SceneUnitId id, CameraID camera)
 	{
 		if (!gizmos.contains(id)) return;
 
@@ -2030,7 +2030,7 @@ namespace Editor
 		);
 	}
 
-	void BeginGizmoInteraction(CameraSUUUID camera, std::function<void(XMFLOAT4X4 view, XMFLOAT4X4 proj)> interaction)
+	void BeginGizmoInteraction(CameraID camera, std::function<void(XMFLOAT4X4 view, XMFLOAT4X4 proj)> interaction)
 	{
 		ImGuizmo::BeginFrame();
 		ImGuizmo::SetOrthographic(false);
@@ -2061,7 +2061,7 @@ namespace Editor
 			return;
 		}
 
-		RenderableSUUUID r = MAKESUUUID(id, uuid);
+		RenderableID r = MAKESUUUID(id, uuid);
 		r->OnPick();
 	}
 
@@ -2185,7 +2185,7 @@ namespace Editor
 		return coordsInArea(x, y, gameArea) && !coordsInArea(x, y, controllersArea);
 	}
 
-	void GameAreaMouseProcessing(std::unique_ptr<DirectX::Mouse>& mouse, CameraSUUUID camera)
+	void GameAreaMouseProcessing(std::unique_ptr<DirectX::Mouse>& mouse, CameraID camera)
 	{
 		if (loadingProgress.loadSceneUnitModal || sceneObjectModal.creating || templateModal.creating || deletePrompt.showing || animationSequencer.showing) return;
 
@@ -2363,7 +2363,7 @@ namespace Editor
 		}
 	}
 
-	void BindRenderableToPickingPass(RenderableSUUUID r)
+	void BindRenderableToPickingPass(RenderableID r)
 	{
 #if !defined(_EDITOR_PICKINGPASS)
 		return;
@@ -2375,7 +2375,7 @@ namespace Editor
 		r->CreateRenderPassPipelineStates(pass);
 	}
 
-	void UnbindRenderableFromPickingPass(RenderableSUUUID r)
+	void UnbindRenderableFromPickingPass(RenderableID r)
 	{
 #if !defined(_EDITOR_PICKINGPASS)
 		return;
@@ -2387,7 +2387,7 @@ namespace Editor
 		r->DestroyRenderPassPipelineStates(pass);
 	}
 
-	void RenderPickingPass(SceneUnitId id, CameraSUUUID camera)
+	void RenderPickingPass(SceneUnitId id, CameraID camera)
 	{
 #if !defined(_EDITOR_PICKINGPASS)
 		return;
@@ -2417,7 +2417,7 @@ namespace Editor
 				unsigned int objectId = 1U;
 				for (JUUID uuid : GetRenderables(id))
 				{
-					RenderableSUUUID r = MAKESUUUID(id, uuid);
+					RenderableID r = MAKESUUUID(id, uuid);
 					//OutputDebugStringA(("RenderPickingPass:" + r->name() + ":" + std::to_string(objectId) + "\n").c_str());
 					if (!r->visible()
 #if defined(_EDITOR_BOUNDINGBOX)
@@ -2478,7 +2478,7 @@ namespace Editor
 		unsigned int objectId = 1U;
 		for (JUUID uuid : GetRenderables(id))
 		{
-			RenderableSUUUID r = MAKESUUUID(id, uuid);
+			RenderableID r = MAKESUUUID(id, uuid);
 			if (!r->visible()
 #if defined(_EDITOR_BOUNDINGBOX)
 				|| r.uuid() == boundingBox.at(id).uuid()
@@ -2522,7 +2522,7 @@ namespace Editor
 	}
 
 	//Billboards
-	JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraSUUUID camera, std::string name, std::string material, std::string pickingMaterial)
+	JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial)
 	{
 #if !defined(_EDITOR_BILLBOARD)
 		return "";
@@ -2606,7 +2606,7 @@ namespace Editor
 
 		auto& reg = billboards.at(id).billboardRegistry;
 
-		CameraSUUUID camera = MAKESUUUID(id, *GetSwapChainCameras(id).begin());
+		CameraID camera = MAKESUUUID(id, *GetSwapChainCameras(id).begin());
 
 		for (auto it = reg.begin(); it != reg.end(); it++)
 		{
@@ -2646,7 +2646,7 @@ namespace Editor
 		}
 	}
 
-	void ShowBillboard(RenderableSUUUID billboard)
+	void ShowBillboard(RenderableID billboard)
 	{
 		billboard->visible(true);
 	}
@@ -2663,7 +2663,7 @@ namespace Editor
 		}
 	}
 
-	void HideBillboard(RenderableSUUUID billboard)
+	void HideBillboard(RenderableID billboard)
 	{
 		billboard->visible(false);
 	}

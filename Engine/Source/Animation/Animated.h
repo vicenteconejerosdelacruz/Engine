@@ -73,7 +73,7 @@ namespace Animation
 	void DestroyAnimated(SceneUnitId id);
 
 	void AttachAnimation(SceneUnitId id, JUUID renderableUUID, std::unique_ptr<Animated>& animated);
-	ConstantsBufferUUID GetAnimatedConstantsBuffer(JUUID renderableUUID);
+	ConstantsBufferID GetAnimatedConstantsBuffer(JUUID renderableUUID);
 	void WriteBoneTransformationsToConstantsBuffer(JUUID renderableUUID, BonesTransformations& bonesTransformation, unsigned int backbufferIndex);
 
 	void TraverseMultiplycationQueue(float time, std::string currentAnimation, std::unique_ptr<Animated>& animations, BonesTransformations& bonesTransformation);

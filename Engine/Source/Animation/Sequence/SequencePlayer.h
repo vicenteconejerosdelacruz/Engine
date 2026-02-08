@@ -10,7 +10,7 @@ struct SequencePlayer
 	bool loop;
 	bool newSequence;
 	std::set<int> runnedFrames;
-	RenderableSUUUID renderable;
+	RenderableID renderable;
 
 	SequencePlayer();
 	SequencePlayer(const Sequence& seq, SceneUnitId id, JUUID uuid);
@@ -19,7 +19,7 @@ struct SequencePlayer
 	void SetTime(float t);
 	void StepFrame(int df);
 	void SetFrame(int frame, bool runningPlayer = true);
-	void ApplyFrameValues(RenderableSUUUID renderable);
+	void ApplyFrameValues(RenderableID renderable);
 	void CreateFrameSoundFXs(int frame);
 	void ExecuteFrameScripts(int frame);
 	void ResetFrames();

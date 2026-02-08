@@ -429,20 +429,20 @@ namespace Templates
 
 	void TextureJsonsStep()
 	{
-		std::set<TextureJsonUUID> texs;
+		std::set<TextureJsonID> texs;
 		std::transform(Texturetemplates.begin(), Texturetemplates.end(), std::inserter(texs, texs.begin()), [](auto& temps)
 			{
 				return temps.first;
 			}
 		);
 
-		std::set<TextureJsonUUID> rebuildImages;
+		std::set<TextureJsonID> rebuildImages;
 		std::copy_if(texs.begin(), texs.end(), std::inserter(rebuildImages, rebuildImages.begin()), [](auto tex)
 			{
 				return tex->dirty(TextureJson::Update_images);
 			}
 		);
-		std::set<TextureJsonUUID> changedAttributes;
+		std::set<TextureJsonID> changedAttributes;
 		std::copy_if(texs.begin(), texs.end(), std::inserter(changedAttributes, changedAttributes.begin()), [](auto tex)
 			{
 				return tex->dirty(TextureJson::Update_format) || tex->dirty(TextureJson::Update_width) ||
@@ -456,11 +456,11 @@ namespace Templates
 	{
 		float elapsedSeconds = static_cast<FLOAT>(timer.GetElapsedSeconds());
 
-		std::vector<TextureJsonUUID> previewsToPlay;
+		std::vector<TextureJsonID> previewsToPlay;
 
 		for (auto& [uuid, textureTemplate] : Texturetemplates)
 		{
-			TextureJsonUUID tex = uuid;
+			TextureJsonID tex = uuid;
 			if (tex->preview.previewLoaded == nullptr || !tex->preview.previewLoaded->load()) continue;
 
 			previewsToPlay.push_back(tex);

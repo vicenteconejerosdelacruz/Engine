@@ -6,7 +6,7 @@
 namespace Editor
 {
 	extern void SelectLight(SceneUnitId id, JUUID luuid);
-	extern JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraSUUUID camera, std::string name, std::string material, std::string pickingMaterial);
+	extern JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
 	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 }
@@ -142,7 +142,7 @@ namespace Scene
 	void Light::UnbindCamera(JUUID cuuid)
 	{
 		if (cuuid.empty()) return;
-		CameraSUUUID cam = MAKESUUUID(unit, cuuid);
+		CameraID cam = MAKESUUUID(unit, cuuid);
 		cam->UnbindLight(MAKESUUUID(unit, uuid()));
 		Scene::UnbindFromScene(unit, uuid(), cuuid);
 	}
@@ -294,14 +294,14 @@ namespace Scene
 		}
 	}
 
-	JUUID Light::CreateBillboard(CameraSUUUID camera)
+	JUUID Light::CreateBillboard(CameraID camera)
 	{
 		using namespace Editor;
 
 		if (lightType() == LT_Ambient) return "";
 
 		JUUID uuid = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "LightBulb", "LightBulbPicking");
-		RenderableSUUUID bb = MAKESUUUID(unit, uuid);
+		RenderableID bb = MAKESUUUID(unit, uuid);
 		bb->OnPick = [&] { SelectLight(unit, this->uuid()); };
 		UpdateBillboard(uuid);
 		return uuid;
@@ -315,7 +315,7 @@ namespace Scene
 		auto& scene = GetSceneUnit(unit);
 
 		XMFLOAT3 baseColor = color();
-		RenderableSUUUID bb = MAKESUUUID(unit, uuid);
+		RenderableID bb = MAKESUUUID(unit, uuid);
 		bb->position(position());
 		bb->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
 		bb->WriteConstantsBuffer(scene->Frame());
@@ -334,10 +334,10 @@ namespace Scene
 
 	void LightsStep(SceneUnitId id)
 	{
-		std::set<LightSUUUID> lightsToUpdateCamAttributes;
-		std::set<LightSUUUID> lightsToUpdateTransformation;
-		std::set<LightSUUUID> lightsToDelete;
-		std::set<LightSUUUID> lightToRecreateCameras;
+		std::set<LightID> lightsToUpdateCamAttributes;
+		std::set<LightID> lightsToUpdateTransformation;
+		std::set<LightID> lightsToDelete;
+		std::set<LightID> lightToRecreateCameras;
 
 		std::set<Light::Light_UpdateFlags> smCamAttributes =
 		{
@@ -353,7 +353,7 @@ namespace Scene
 
 		for (auto& uuid : lights)
 		{
-			LightSUUUID l = MAKESUUUID(id, uuid);
+			LightID l = MAKESUUUID(id, uuid);
 			if (l->lightType() != LT_Ambient)
 			{
 				if (l->dirty(Light::Update_cameras))
@@ -471,7 +471,7 @@ namespace Scene
 		{
 			for (auto& [uuid, _] : container)
 			{
-				LightSUUUID l = MAKESUUUID(id, uuid);
+				LightID l = MAKESUUUID(id, uuid);
 				DeleteLightSUSceneObject(l->unit, l->uuid());
 			}
 		}
@@ -498,7 +498,7 @@ namespace Scene
 #if defined(_EDITOR)
 		using namespace Editor;
 #endif
-		LightSUUUID l = MAKESUUUID(id, uuid);
+		LightID l = MAKESUUUID(id, uuid);
 #if defined(_EDITOR)
 		DestroyBillboard(l->unit, uuid);
 #endif

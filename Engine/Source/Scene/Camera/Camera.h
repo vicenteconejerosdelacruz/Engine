@@ -93,7 +93,7 @@ namespace Scene {
 		XMMATRIX world();
 		XMMATRIX view();
 		XMMATRIX projection();
-		void CopyProjection(CameraSUUUID cam);
+		void CopyProjection(CameraID cam);
 
 		float projectionWidth();
 		float projectionRight();
@@ -104,8 +104,8 @@ namespace Scene {
 		float projectionfovAngleY();
 
 		void CreateRenderPasses();
-		RenderPassJsonUUID GetRenderPassTemplateFromInstanceIndex(unsigned int passIndex);
-		RenderPassInstanceUUID CreateRenderPass(JUUID passUUID, unsigned int passIndex);
+		RenderPassJsonID GetRenderPassTemplateFromInstanceIndex(unsigned int passIndex);
+		RenderPassInstanceID CreateRenderPass(JUUID passUUID, unsigned int passIndex);
 		void CreateRenderPassAtIndex(JUUID passUUID, unsigned int passIndex);
 		void DeleteRenderPassAtIndex(unsigned int passIndex);
 		void SwapRenderPassAtIndex(JUUID passUUID, unsigned int passIndex);
@@ -118,14 +118,14 @@ namespace Scene {
 		virtual void Initialize();
 		virtual void BindToScene();
 		virtual void Bind(JUUID uuid);
-		void BindRenderable(RenderableSUUUID renderable);
-		void BindLight(LightSUUUID light);
-		void BindLightWithShadowMap(LightSUUUID light);
+		void BindRenderable(RenderableID renderable);
+		void BindLight(LightID light);
+		void BindLightWithShadowMap(LightID light);
 		virtual void UnbindFromScene();
 		virtual void Unbind(JUUID uuid);
-		void UnbindRenderable(RenderableSUUUID renderable);
-		void UnbindLight(LightSUUUID light);
-		void UnbindLightWithShadowMap(LightSUUUID light);
+		void UnbindRenderable(RenderableID renderable);
+		void UnbindLight(LightID light);
+		void UnbindLightWithShadowMap(LightID light);
 
 		bool ResolvesToSwapChain();
 		bool RenderReady();
@@ -157,13 +157,13 @@ namespace Scene {
 		//Lighting
 		void CreateLightsConstantsBuffer();
 		void DestroyLightsConstantsBuffer();
-		ConstantsBufferUUID GetLightsConstantsBuffer() const { return lightsCB; }
+		ConstantsBufferID GetLightsConstantsBuffer() const { return lightsCB; }
 		void WriteLightsConstantsBuffer(unsigned int frame);
 
 		//ShadowMaps
 		void CreateShadowMapsConstantsBuffer();
 		void DestroyShadowMapsConstantsBuffer();
-		ConstantsBufferUUID GetShadowMapsConstantsBuffer() const { return shadowMapsCB; }
+		ConstantsBufferID GetShadowMapsConstantsBuffer() const { return shadowMapsCB; }
 		void WriteShadowMapsConstantsBuffer(unsigned int frame);
 		bool SceneHasShadowMaps() const { return !lightsWithShadowMaps.empty(); }
 
@@ -180,7 +180,7 @@ namespace Scene {
 #if defined(_EDITOR)
 		virtual void EditorPreview(size_t flags);
 		virtual void DestroyEditorPreview();
-		virtual JUUID CreateBillboard(CameraSUUUID camera);
+		virtual JUUID CreateBillboard(CameraID camera);
 		virtual void UpdateBillboard(JUUID uuid);
 		BoundingBox GetBoundingBox();
 
@@ -194,17 +194,17 @@ namespace Scene {
 		//Render
 		bool renderReady = false;
 		//render passes instances
-		std::vector<RenderPassInstanceUUID> renderPassesUUID;
+		std::vector<RenderPassInstanceID> renderPassesUUID;
 		//this camera attributes
-		ConstantsBufferUUID cameraCb;
+		ConstantsBufferID cameraCb;
 		//renderables
-		std::set<RenderableSUUUID> renderables;
+		std::set<RenderableID> renderables;
 		//lights
-		ConstantsBufferUUID lightsCB;
-		std::vector<LightSUUUID> lights;
+		ConstantsBufferID lightsCB;
+		std::vector<LightID> lights;
 		//lights shadowmaps
-		ConstantsBufferUUID shadowMapsCB;
-		std::set<LightSUUUID> lightsWithShadowMaps;
+		ConstantsBufferID shadowMapsCB;
+		std::set<LightID> lightsWithShadowMaps;
 #if defined(_EDITOR)
 		unsigned int previewRenderPassIndex = 0U;
 		unsigned int previewRenderToTextureIndex = 0U;

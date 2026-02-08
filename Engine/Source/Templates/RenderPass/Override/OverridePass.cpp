@@ -43,15 +43,15 @@ void OverridePass::CreateFsQuadResources(SceneUnitId id, std::string materialNam
 		size_t size = fsQuadMat->variablesBufferSize.at(0);
 		fsQuadConstantsBuffer = CreateConstantsBuffer(size, Renderer::numFrames, materialName + ":cbv");
 
-		auto& vsVars = fsQuadMat->vertexShaderInstanceUUID->constantsBuffersVariables;
-		auto& psVars = fsQuadMat->pixelShaderInstanceUUID->constantsBuffersVariables;
+		auto& vsVars = fsQuadMat->vertexShaderInstanceID->constantsBuffersVariables;
+		auto& psVars = fsQuadMat->pixelShaderInstanceID->constantsBuffersVariables;
 
 		for (auto& [name, var] : vsVars) { constantsBufferPusher(name, var); }
 		for (auto& [name, var] : psVars) { constantsBufferPusher(name, var); }
 	}
 
-	auto& miVS = fsQuadMat->vertexShaderInstanceUUID;
-	auto& miPS = fsQuadMat->pixelShaderInstanceUUID;
+	auto& miVS = fsQuadMat->vertexShaderInstanceID;
+	auto& miPS = fsQuadMat->pixelShaderInstanceID;
 
 	auto& vsCBparams = miVS->constantsBuffersParameters;
 	auto& psCBparams = miPS->constantsBuffersParameters;
@@ -68,7 +68,7 @@ void OverridePass::CreateFsQuadResources(SceneUnitId id, std::string materialNam
 	auto& vsByteCode = miVS->byteCode;
 	auto& psByteCode = miPS->byteCode;
 
-	MaterialJsonUUID material = fsQuadMaterial();
+	MaterialJsonID material = fsQuadMaterial();
 	BlendDesc blendDesc = material->blendState();
 	RasterizerDesc rasterizerDesc = material->rasterizerState();
 
@@ -82,13 +82,13 @@ void OverridePass::CreateFsQuadResources(SceneUnitId id, std::string materialNam
 	pipelineState = CreateGraphicsPipelineState(plName, vsLayout, vsByteCode, psByteCode, rootSignature, blendDesc, rasterizerDesc, primitiveTopologyType, rtf, df);
 }
 
-RenderPassInstanceUUID OverridePass::GetPrevRenderPass()
+RenderPassInstanceID OverridePass::GetPrevRenderPass()
 {
 	if (renderPassIndex == 0U) return JUUID();
 	return camera->renderPassesUUID.at(renderPassIndex - 1);
 }
 
-RenderPassJsonUUID OverridePass::GetPrevRenderPassTemplate()
+RenderPassJsonID OverridePass::GetPrevRenderPassTemplate()
 {
 	if (renderPassIndex == 0U) return JUUID();
 	return GetPrevRenderPass()->renderPassTemplate;

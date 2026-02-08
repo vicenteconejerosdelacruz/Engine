@@ -78,7 +78,7 @@ namespace Scene
 		void UpdateEmmiter();
 
 #if defined(_EDITOR)
-		virtual JUUID CreateBillboard(CameraSUUUID camera);
+		virtual JUUID CreateBillboard(CameraID camera);
 		virtual void UpdateBillboard(JUUID billboard);
 		BoundingBox GetBoundingBox();
 

@@ -36,7 +36,7 @@ namespace DeviceUtils {
 
 		for (auto format : renderTargetsFormats)
 		{
-			RenderToTextureUUID rtt = CreateRenderToTexture();
+			RenderToTextureID rtt = CreateRenderToTexture();
 			rtt->name = name + "[" + std::to_string(renderPass->renderToTexture.size()) + "]";
 			rtt->format = format;
 			rtt->width = width;

@@ -187,7 +187,7 @@ namespace Scene {
 		void UnbindCameras();
 		void UnbindCamera(JUUID cuuid);
 		void UnbindRenderablesFromShadowMapCameras();
-		void UnbindRenderableFromShadowMapCamera(RenderableSUUUID r);
+		void UnbindRenderableFromShadowMapCamera(RenderableID r);
 
 		void LoadShadowMap();
 		void CreateShadowMap();
@@ -228,7 +228,7 @@ namespace Scene {
 		void RenderShadowMapMinMaxChain();
 
 		//Billboard
-		virtual JUUID CreateBillboard(CameraSUUUID camera);
+		virtual JUUID CreateBillboard(CameraID camera);
 		virtual void UpdateBillboard(JUUID uuid);
 		BoundingBox GetBoundingBox();
 		//Gizmo
@@ -240,18 +240,18 @@ namespace Scene {
 		bool renderReady = false;
 		//Camera
 		unsigned int shadowMapIndex = 0xFFFFFFFF;
-		std::vector<CameraSUUUID> shadowMapCameras;
+		std::vector<CameraID> shadowMapCameras;
 		std::vector<D3D12_RECT> shadowMapScissorRect;
 		std::vector<D3D12_VIEWPORT> shadowMapViewport;
-		RenderToTexturePassUUID shadowMapRenderPass;
+		RenderToTexturePassID shadowMapRenderPass;
 		std::vector<std::tuple<float, float>> shadowMapNearFarPlanes;
 		XMFLOAT2 shadowMapTexelInvSize;
 #if defined(_EDITOR)
 		unsigned int const destroyStepsCount = 2U;
 		unsigned int destroySteps;
 		bool destroySMChain = false;
-		std::vector<RenderPassInstanceUUID> shadowMapMinMaxChainRenderPass;
-		RenderPassInstanceUUID shadowMapMinMaxChainResultRenderPass;
+		std::vector<RenderPassInstanceID> shadowMapMinMaxChainRenderPass;
+		RenderPassInstanceID shadowMapMinMaxChainResultRenderPass;
 #endif
 	};
 

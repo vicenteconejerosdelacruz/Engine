@@ -138,7 +138,7 @@ namespace Scene
 	{
 		for (auto& uuid : GetRenderablesInLoadingPool())
 		{
-			RenderableSUUUID r = MAKESUUUID(id, uuid);
+			RenderableID r = MAKESUUUID(id, uuid);
 			if (r->RenderReady() || !IsBound(uuid))
 				continue;
 			r->RenderReady(true);
@@ -149,7 +149,7 @@ namespace Scene
 	{
 		for (auto& uuid : GetCamerasInLoadingPool())
 		{
-			CameraSUUUID c = MAKESUUUID(id, uuid);
+			CameraID c = MAKESUUUID(id, uuid);
 			if (c->RenderReady() || !IsBound(uuid))
 				continue;
 			c->RenderReady(true);
@@ -160,7 +160,7 @@ namespace Scene
 	{
 		for (auto& uuid : GetLightsInLoadingPool())
 		{
-			LightSUUUID l = MAKESUUUID(id, uuid);
+			LightID l = MAKESUUUID(id, uuid);
 			if (l->RenderReady() || !IsBound(uuid))
 				continue;
 			l->RenderReady(true);
@@ -385,7 +385,7 @@ namespace Scene
 #if defined(_EDITOR)
 				if (GetCountFromSwapChainCameras(id) > 0)
 				{
-					CameraSUUUID camera = MAKESUUUID(id, (*GetSwapChainCameras(id).begin()));
+					CameraID camera = MAKESUUUID(id, (*GetSwapChainCameras(id).begin()));
 					RenderPickingPass(id, camera);
 				}
 #endif

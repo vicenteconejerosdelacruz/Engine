@@ -113,7 +113,7 @@ namespace DeviceUtils
 		}
 	}
 
-	void SwapChainPass::CopyFromRenderToTexture(SceneUnitId unit, JUUID renderToTextureUUID)
+	void SwapChainPass::CopyFromRenderToTexture(SceneUnitId unit, JUUID RenderToTextureID)
 	{
 		using namespace Scene;
 		auto& sceneUnit = GetSceneUnit(unit);
@@ -122,7 +122,7 @@ namespace DeviceUtils
 		auto& commandList = sceneUnit->GetCommandList();
 		auto& backBuffer = renderTargets[frame];
 
-		auto& renderToTexture = GetRenderToTexture(renderToTextureUUID);
+		auto& renderToTexture = GetRenderToTexture(RenderToTextureID);
 		auto& rtt = renderToTexture->renderToTexture;
 
 		std::vector<CD3DX12_RESOURCE_BARRIER> hold = {

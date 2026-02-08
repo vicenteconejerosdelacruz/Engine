@@ -10,7 +10,7 @@ struct SequenceChannelElementSoundFX : SequenceChannelElement
 	int GetFrameStart();
 	int GetFrameEnd();
 
-	SoundJsonUUID sound;
+	SoundJsonID sound;
 	float volume;
 	bool loop;
 };

@@ -2176,7 +2176,7 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_te_renderpass_vec
 				[](unsigned int index, JUUIDName item) //filtering
 				{
 					JUUID uuid = std::get<0>(item);
-					RenderPassJsonUUID rp = uuid;
+					RenderPassJsonID rp = uuid;
 					return rp->type() == RenderPassType_RenderToTexturePass || (rp->renderCallbackOverride() == RenderPassRenderCallbackOverride_Resolve && index != 0);
 				},
 				[](unsigned int index1, unsigned int index2, unsigned int numItems, JUUIDName item1, JUUIDName item2) //swap
@@ -2186,7 +2186,7 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_te_renderpass_vec
 						std::string uuid = std::get<0>(item1);
 						if (uuid != "")
 						{
-							RenderPassJsonUUID rp = uuid;
+							RenderPassJsonID rp = uuid;
 							if (rp->renderCallbackOverride() == RenderPassRenderCallbackOverride_Resolve) return false;
 						}
 					}
@@ -2195,7 +2195,7 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_te_renderpass_vec
 						std::string uuid = std::get<0>(item2);
 						if (uuid != "")
 						{
-							RenderPassJsonUUID rp = uuid;
+							RenderPassJsonID rp = uuid;
 							if (rp->renderCallbackOverride() == RenderPassRenderCallbackOverride_Resolve) return false;
 						}
 					}
@@ -5073,14 +5073,14 @@ inline JEdvEditorDrawerFunction DrawPreview<jedv_draw_renderpass_vector>()
 					ImGui::Text(std::string(j->at("name")).c_str());
 				}
 
-				CameraSUUUID cam = MAKESUUUID(Editor::currentSceneUnitId, std::string(json[0]->at("uuid")));
+				CameraID cam = MAKESUUUID(Editor::currentSceneUnitId, std::string(json[0]->at("uuid")));
 				unsigned int numPasses = static_cast<unsigned int>(cam->renderPassesUUID.size());
 
 				std::set<unsigned int> previewAble;
 				std::set<unsigned int> shadowMapPass;
 				for (unsigned int i = 0; i < numPasses; i++)
 				{
-					RenderPassInstanceUUID pass = cam->renderPassesUUID.at(i);
+					RenderPassInstanceID pass = cam->renderPassesUUID.at(i);
 					if (pass->type == RenderPassType_SwapChainPass)
 					{
 						continue;
@@ -5119,7 +5119,7 @@ inline JEdvEditorDrawerFunction DrawPreview<jedv_draw_renderpass_vector>()
 				unsigned int p = cam->previewRenderPassIndex;
 				if (!previewAble.contains(p)) return;
 
-				RenderPassInstanceUUID pass = cam->renderPassesUUID.at(p);
+				RenderPassInstanceID pass = cam->renderPassesUUID.at(p);
 				if (!shadowMapPass.contains(p))
 				{
 					unsigned int rt = cam->previewRenderToTextureIndex;

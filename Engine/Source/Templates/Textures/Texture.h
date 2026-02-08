@@ -64,7 +64,7 @@ namespace Templates
 		bool processorInitialized = false;
 		CommandsProcessor loadingProcessor;
 		std::unique_ptr<std::atomic_bool> previewLoaded;
-		std::vector<TextureInstanceUUID> textures;
+		std::vector<TextureInstanceID> textures;
 		int frame;
 		bool playing;
 		bool looping;
@@ -140,7 +140,7 @@ namespace Templates
 
 inline auto ToTextureJson(std::vector<JObject*>& json)
 {
-	std::vector<TextureJsonUUID> textures;
+	std::vector<TextureJsonID> textures;
 	std::transform(json.begin(), json.end(), std::back_inserter(textures), [](auto j)
 		{
 			return std::string(j->at("uuid"));

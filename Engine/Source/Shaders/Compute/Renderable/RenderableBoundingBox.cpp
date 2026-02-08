@@ -10,7 +10,7 @@ namespace ComputeShader
 {
 	static std::unordered_map<JUUID, std::unique_ptr<RenderableBoundingBox>> renderableBoundingBoxCompute;
 
-	JUUID CreateRenderableBoundingBox(RenderableSUUUID renderable)
+	JUUID CreateRenderableBoundingBox(RenderableID renderable)
 	{
 		JUUID compUUID = getUUID();
 		std::unique_ptr<RenderableBoundingBox> rbbComp = std::make_unique<RenderableBoundingBox>(renderable.unit(), renderable.uuid());
@@ -32,7 +32,7 @@ namespace ComputeShader
 	{
 		using namespace Animation;
 		bonesCbv = GetAnimatedConstantsBuffer(renderableUUID);
-		RenderableSUUUID r = MAKESUUUID(id, renderableUUID);
+		RenderableID r = MAKESUUUID(id, renderableUUID);
 		auto& shaderInstance = GetShaderInstance(shader.shader);
 
 		auto createComputeResource = [this, &r](size_t numResources)

@@ -31,7 +31,7 @@ struct AddElementPopup
 	SequenceChannelElementSoundFX soundfx;
 	SequenceChannelElementScript script;
 
-	RenderableSUUUID renderable;
+	RenderableID renderable;
 	std::vector<std::string> animations;
 	JUUIDName selectedSoundEffect;
 	std::vector<JUUIDName> soundEffects;

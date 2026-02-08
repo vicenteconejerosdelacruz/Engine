@@ -15,7 +15,7 @@ void MinMaxChainPass::CreatePrevPassDependentResources()
 	using namespace DeviceUtils;
 
 	JUUID renderPassTemplateUUID = renderPassInstance->renderPassTemplate();
-	RenderToTexturePassUUID rttPass = renderPassInstance->renderToTexturePass;
+	RenderToTexturePassID rttPass = renderPassInstance->renderToTexturePass;
 	XMFLOAT2 texelInvSize = {
 		1.0f / rttPass->screenViewport.Width,
 		1.0f / rttPass->screenViewport.Height
@@ -39,8 +39,8 @@ void MinMaxChainPass::CreatePrevPassDependentResources()
 
 void MinMaxChainPass::Pass(SceneUnitId unit)
 {
-	RenderPassInstanceUUID renderPass = renderPassInstance;
-	RenderToTexturePassUUID rttPass = renderPass->renderToTexturePass;
+	RenderPassInstanceID renderPass = renderPassInstance;
+	RenderToTexturePassID rttPass = renderPass->renderToTexturePass;
 	rttPass->BeginRenderPass(unit);
 	Render(unit);
 	rttPass->EndRenderPass(unit);

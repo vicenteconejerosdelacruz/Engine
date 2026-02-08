@@ -61,6 +61,6 @@ struct Renderer
 	D3D12_RECT scissorRect;
 
 	//the swap chain pass
-	RenderPassInstanceUUID swapChainPass;
+	RenderPassInstanceID swapChainPass;
 };
 

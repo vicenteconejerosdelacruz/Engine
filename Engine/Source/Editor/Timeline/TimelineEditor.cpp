@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "TimelineEditor.h"
 
-void TimelineEditor::Init(RenderableSUUUID renderable, Sequence& sequence)
+void TimelineEditor::Init(RenderableID renderable, Sequence& sequence)
 {
 	this->renderable = renderable;
 	channels.clear();

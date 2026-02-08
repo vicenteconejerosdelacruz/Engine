@@ -19,7 +19,7 @@
 
 namespace Editor
 {
-	extern void SetEditorCamera(CameraSUUUID camera);
+	extern void SetEditorCamera(CameraID camera);
 	extern void ShowEditorController(bool show);
 	//extern void ShowEditorPanel(bool show);
 };

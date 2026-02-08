@@ -70,14 +70,14 @@ namespace Templates
 #if defined(_EDITOR)
 	void Model3DJsonStep()
 	{
-		std::set<Model3DJsonUUID> models;
+		std::set<Model3DJsonID> models;
 		std::transform(Model3Dtemplates.begin(), Model3Dtemplates.end(), std::inserter(models, models.begin()), [](auto& mdl)
 			{
 				return mdl.first;
 			}
 		);
 
-		std::set<Model3DJsonUUID> seqMdls;
+		std::set<Model3DJsonID> seqMdls;
 		std::copy_if(models.begin(), models.end(), std::inserter(seqMdls, seqMdls.begin()), [](auto mdl)
 			{
 				return mdl->dirty(Model3DJson::Update_animationSequences);
@@ -95,11 +95,11 @@ namespace Templates
 	}
 #endif
 
-	JUUID GetModel3DMeshInstanceUUID(JUUID uuid, unsigned int index) {
+	JUUID GetModel3DMeshInstanceID(JUUID uuid, unsigned int index) {
 		return "mesh-" + uuid + "-" + std::to_string(index);
 	}
 
-	JUUID GetModel3DMaterialInstanceUUID(JUUID uuid, unsigned int index) {
+	JUUID GetModel3DMaterialInstanceID(JUUID uuid, unsigned int index) {
 		return "mat-" + uuid + "-" + std::to_string(index);
 	}
 
@@ -171,7 +171,7 @@ namespace Templates
 			}
 
 			unsigned int indicesCount = aMesh->mNumFaces * aMesh->mFaces[0].mNumIndices;
-			std::unique_ptr<MeshInstance>& mesh = GetMeshInstance(id, GetModel3DMeshInstanceUUID(model3DUUID, meshIndex), vertexClass, vertexData.data(), static_cast<unsigned int>(vertexSize), aMesh->mNumVertices, indicesData.data(), indicesCount);
+			std::unique_ptr<MeshInstance>& mesh = GetMeshInstance(id, GetModel3DMeshInstanceID(model3DUUID, meshIndex), vertexClass, vertexData.data(), static_cast<unsigned int>(vertexSize), aMesh->mNumVertices, indicesData.data(), indicesCount);
 
 			CreateBoundingBox(mesh->boundingBox, aMesh);
 
@@ -213,7 +213,7 @@ namespace Templates
 
 			nlohmann::json texturesMaterialJson = GetAssimpTexturesMaterialJson(path.relative_path(), aiModel, aiMat);
 
-			std::string materialUUID = GetModel3DMaterialInstanceUUID(model3DUUID, meshIndex);
+			std::string materialUUID = GetModel3DMaterialInstanceID(model3DUUID, meshIndex);
 
 			if (!MaterialTemplateExist(materialUUID))
 			{

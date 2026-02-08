@@ -80,8 +80,8 @@ namespace Templates
 
 	TEMPDECL_FULL(Model3D);
 
-	JUUID GetModel3DMeshInstanceUUID(std::string uuid, unsigned int index);
-	JUUID GetModel3DMaterialInstanceUUID(std::string uuid, unsigned int index);
+	JUUID GetModel3DMeshInstanceID(std::string uuid, unsigned int index);
+	JUUID GetModel3DMaterialInstanceID(std::string uuid, unsigned int index);
 	JUUID GetModel3DMaterialTemplateName(std::string uuid, unsigned int index);
 
 	struct Model3DInstance
@@ -101,7 +101,7 @@ namespace Templates
 		MaterialJson CreateModel3DMaterialJson(JUUID materialUUID, JNAME materialName, JUUID vertexShader, JUUID pixelShader, aiMaterial* material);
 #endif
 		VertexClass vertexClass;
-		std::vector<MeshInstanceUUID> meshes;
+		std::vector<MeshInstanceID> meshes;
 		std::vector<JUUID> materialUUIDs;
 		//animation
 		std::unique_ptr<Animation::Animated> animations;

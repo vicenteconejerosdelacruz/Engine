@@ -46,7 +46,7 @@ namespace Game
 
 		//auto o = GetSceneObjectPointer(sceneObject);
 		SceneUnitId unit = std::get<0>(sceneObject);
-		RenderableSUUUID o = sceneObject;
+		RenderableID o = sceneObject;
 
 		if (!o->contains("rotation"))
 			return;

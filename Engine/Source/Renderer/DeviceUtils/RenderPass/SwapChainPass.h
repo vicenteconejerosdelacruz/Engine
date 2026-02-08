@@ -22,7 +22,7 @@ namespace DeviceUtils
 
 		void Pass(SceneUnitId unit, std::function<void(SceneUnitId)> renderCallback, bool clearRTV = true, XMVECTORF32 clearColor = DirectX::Colors::Black);
 		void BeginRenderPass(SceneUnitId unit, CComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap, bool clearRTV = true, XMVECTORF32 clearColor = DirectX::Colors::Black);
-		void CopyFromRenderToTexture(SceneUnitId unit, JUUID renderToTextureUUID);
+		void CopyFromRenderToTexture(SceneUnitId unit, JUUID RenderToTextureID);
 		void EndRenderPass(SceneUnitId unit);
 		void ReleaseResources();
 		void Resize(unsigned int width, unsigned int height);

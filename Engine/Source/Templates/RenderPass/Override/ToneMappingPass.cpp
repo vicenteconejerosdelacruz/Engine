@@ -42,7 +42,7 @@ void ToneMappingPass::Pass(SceneUnitId id)
 {
 	using namespace Scene;
 	auto& prevPassRTT = GetRenderToTexture(GetPrevPassRenderToTexture());
-	CameraSUUUID cam = camera;
+	CameraID cam = camera;
 
 	float dt = static_cast<float>(timer.GetElapsedSeconds());
 	//not a solution, without dt the algorithm explodes in pure colors

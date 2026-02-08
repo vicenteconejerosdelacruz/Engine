@@ -126,8 +126,8 @@ namespace Editor {
 	//Gizmos
 	void ResetGizmoVariableWorkers(SceneUnitId unit);
 	bool InteractWithGizmos(SceneUnitId unit, std::set<SceneObject*>& objects2Gizmo);
-	void DrawPickedObjectsGizmo(SceneUnitId unit, CameraSUUUID camera);
-	void BeginGizmoInteraction(CameraSUUUID camera, std::function<void(DirectX::XMFLOAT4X4, DirectX::XMFLOAT4X4)> interaction = [](DirectX::XMFLOAT4X4, DirectX::XMFLOAT4X4) {});
+	void DrawPickedObjectsGizmo(SceneUnitId unit, CameraID camera);
+	void BeginGizmoInteraction(CameraID camera, std::function<void(DirectX::XMFLOAT4X4, DirectX::XMFLOAT4X4)> interaction = [](DirectX::XMFLOAT4X4, DirectX::XMFLOAT4X4) {});
 
 	//SceneObject Selection
 	void SelectSceneObject(SceneUnitId unit, JUUID uuid);
@@ -146,15 +146,15 @@ namespace Editor {
 
 	//Mouse Processing
 	bool MouseIsInGameArea(std::unique_ptr<DirectX::Mouse>& mouse);
-	void GameAreaMouseProcessing(std::unique_ptr<DirectX::Mouse>& mouse, CameraSUUUID camera);
+	void GameAreaMouseProcessing(std::unique_ptr<DirectX::Mouse>& mouse, CameraID camera);
 
 	//SceneObject Picking
 	bool PickingPassExists(SceneUnitId id);
 	void CreatePickingPass(SceneUnitId id);
 	void BindPickingRenderables(SceneUnitId id);
-	void BindRenderableToPickingPass(RenderableSUUUID r);
-	void UnbindRenderableFromPickingPass(RenderableSUUUID r);
-	void RenderPickingPass(SceneUnitId id, CameraSUUUID camera);
+	void BindRenderableToPickingPass(RenderableID r);
+	void UnbindRenderableFromPickingPass(RenderableID r);
+	void RenderPickingPass(SceneUnitId id, CameraID camera);
 	void PickFromScene(SceneUnitId id);
 	void PickSceneObject(SceneUnitId id, unsigned int pickedObjectId);
 
@@ -163,16 +163,16 @@ namespace Editor {
 	void StartTemplateCreation(TemplateType type);
 
 	//Billboards
-	JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraSUUUID camera, std::string name, std::string material, std::string pickingMaterial);
+	JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
 	void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
 	JUUID GetBillboard(SceneUnitId id, JUUID sceneObject);
 	void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 	void CreateRegisteredBillboards(SceneUnitId id);
 	bool PendingBillboards(SceneUnitId id);
 	void ShowBillboards(SceneUnitId id);
-	void ShowBillboard(RenderableSUUUID billboard);
+	void ShowBillboard(RenderableID billboard);
 	void HideBillboards(SceneUnitId id);
-	void HideBillboard(RenderableSUUUID billboard);
+	void HideBillboard(RenderableID billboard);
 	void UpdateBillboards();
 	void DestroyPendingBillboards();
 

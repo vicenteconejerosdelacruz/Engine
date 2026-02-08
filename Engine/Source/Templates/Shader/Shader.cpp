@@ -76,14 +76,14 @@ namespace Templates {
 #if defined(_DEVELOPMENT)
 	void ShaderJsonStep()
 	{
-		std::set<ShaderJsonUUID> shaders;
+		std::set<ShaderJsonID> shaders;
 		std::transform(Shadertemplates.begin(), Shadertemplates.end(), std::inserter(shaders, shaders.begin()), [](auto& temps)
 			{
 				return temps.first;
 			}
 		);
 
-		std::set<ShaderJsonUUID> rebuildShaders;
+		std::set<ShaderJsonID> rebuildShaders;
 		std::copy_if(shaders.begin(), shaders.end(), std::inserter(rebuildShaders, rebuildShaders.begin()), [](auto shader)
 			{
 				return shader->dirty(ShaderJson::Update_path);

@@ -8,11 +8,11 @@
 #include <Sequence/SequencePlayer.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 
-typedef std::vector<MeshInstanceUUID> RenderableMeshes;
-typedef std::unordered_map<RenderPassInstanceUUID, std::vector<MaterialInstanceUUID>> RenderableMaterials; //RenderPassInstanceUUID -> MaterialInstanceUUID
-typedef std::unordered_map<RenderPassInstanceUUID, std::vector<std::vector<ConstantsBufferUUID>>> RenderableConstantsBuffer; //RenderPassUUID -> vector:vector:ConstantsBufferUUID
-typedef std::unordered_map<RenderPassInstanceUUID, std::vector<CComPtr<ID3D12RootSignature>>> RenderableRootSignatures; //RenderPassUUID -> vector:RootSignature
-typedef std::unordered_map<RenderPassInstanceUUID, std::vector<CComPtr<ID3D12PipelineState>>> RenderablePipelineStates; //RenderPassUUID -> vector:PipelineState
+typedef std::vector<MeshInstanceID> RenderableMeshes;
+typedef std::unordered_map<RenderPassInstanceID, std::vector<MaterialInstanceID>> RenderableMaterials; //RenderPassInstanceID -> MaterialInstanceID
+typedef std::unordered_map<RenderPassInstanceID, std::vector<std::vector<ConstantsBufferID>>> RenderableConstantsBuffer; //RenderPassUUID -> vector:vector:ConstantsBufferID
+typedef std::unordered_map<RenderPassInstanceID, std::vector<CComPtr<ID3D12RootSignature>>> RenderableRootSignatures; //RenderPassUUID -> vector:RootSignature
+typedef std::unordered_map<RenderPassInstanceID, std::vector<CComPtr<ID3D12PipelineState>>> RenderablePipelineStates; //RenderPassUUID -> vector:PipelineState
 
 static nlohmann::json defaultShadowMapShaderAttributes = { { "uniqueMaterialInstance", false }, { "castShadows",false }, { "ibl", false} };
 #if defined(_EDITOR)
@@ -84,36 +84,36 @@ namespace Scene
 		void UnbindCamera(JUUID cuuid);
 
 		//Render Passes
-		std::vector<RenderPassInstanceUUID> GetCameraRenderPasses(CameraSUUUID cam);
+		std::vector<RenderPassInstanceID> GetCameraRenderPasses(CameraID cam);
 
 		//Meshes
 		void CreateMeshInstances();
 
 		//Materials
-		void CreateMaterialsInstances(CameraSUUUID cam);
-		void CreateRenderPassMaterialsInstances(RenderPassInstanceUUID pass);
-		void DestroyMaterialsInstances(CameraSUUUID cam);
-		void DestroyRenderPassMaterialsInstances(RenderPassInstanceUUID pass);
+		void CreateMaterialsInstances(CameraID cam);
+		void CreateRenderPassMaterialsInstances(RenderPassInstanceID pass);
+		void DestroyMaterialsInstances(CameraID cam);
+		void DestroyRenderPassMaterialsInstances(RenderPassInstanceID pass);
 		//Constants Buffers
-		void CreateConstantsBuffersInstances(CameraSUUUID cam);
-		void CreateRenderPassConstantsBuffersInstances(RenderPassInstanceUUID pass);
-		void DestroyConstantsBuffersInstances(CameraSUUUID cam);
-		void DestroyRenderPassConstantsBuffersInstances(RenderPassInstanceUUID pass);
+		void CreateConstantsBuffersInstances(CameraID cam);
+		void CreateRenderPassConstantsBuffersInstances(RenderPassInstanceID pass);
+		void DestroyConstantsBuffersInstances(CameraID cam);
+		void DestroyRenderPassConstantsBuffersInstances(RenderPassInstanceID pass);
 		//Root Signatures
-		void CreateRootSignatures(CameraSUUUID cam);
-		void CreateRenderPassRootSignatures(RenderPassInstanceUUID rp);
-		void DestroyRootSignatures(CameraSUUUID cam);
-		void DestroyRenderPassRootSignatures(RenderPassInstanceUUID rp);
+		void CreateRootSignatures(CameraID cam);
+		void CreateRenderPassRootSignatures(RenderPassInstanceID rp);
+		void DestroyRootSignatures(CameraID cam);
+		void DestroyRenderPassRootSignatures(RenderPassInstanceID rp);
 		//Pipeline States
-		void CreatePipelineStates(CameraSUUUID cam);
-		void CreateRenderPassPipelineStates(RenderPassInstanceUUID rp);
-		void DestroyPipelineStates(CameraSUUUID cam);
-		void DestroyRenderPassPipelineStates(RenderPassInstanceUUID rp);
+		void CreatePipelineStates(CameraID cam);
+		void CreateRenderPassPipelineStates(RenderPassInstanceID rp);
+		void DestroyPipelineStates(CameraID cam);
+		void DestroyRenderPassPipelineStates(RenderPassInstanceID rp);
 
 		void CreateBoundingBox();
 		BoundingBox GetBoundingBox();
 
-		void WriteMaterialVariablesToConstantsBufferSpace(MaterialInstanceUUID material, ConstantsBufferUUID cbvData, unsigned int cbvFrameIndex);
+		void WriteMaterialVariablesToConstantsBufferSpace(MaterialInstanceID material, ConstantsBufferID cbvData, unsigned int cbvFrameIndex);
 		template<typename T>
 		void WriteConstantsBuffer(std::string constantName, T& data, unsigned int backbufferIndex, unsigned int slot = 0U, size_t offset = 0ULL)
 		{
@@ -121,8 +121,8 @@ namespace Scene
 			{
 				for (unsigned int mesh = 0; mesh < meshMaterials.size(); mesh++)
 				{
-					auto& vsVars = meshMaterials.at(mesh)->vertexShaderInstanceUUID->constantsBuffersVariables;
-					auto& psVars = meshMaterials.at(mesh)->pixelShaderInstanceUUID->constantsBuffersVariables;
+					auto& vsVars = meshMaterials.at(mesh)->vertexShaderInstanceID->constantsBuffersVariables;
+					auto& psVars = meshMaterials.at(mesh)->pixelShaderInstanceID->constantsBuffersVariables;
 					auto& cbuffers = constantsBuffers.at(rp).at(mesh);
 
 					if (vsVars.contains(constantName)) {
@@ -155,7 +155,7 @@ namespace Scene
 		//DESTROY
 		void Destroy();
 
-		void Render(SceneUnitId unit, RenderPassInstanceUUID renderPass, CameraSUUUID camera);
+		void Render(SceneUnitId unit, RenderPassInstanceID renderPass, CameraID camera);
 		bool RenderReady();
 		void RenderReady(bool value);
 
@@ -175,7 +175,7 @@ namespace Scene
 		bool renderReady = false;
 		bool renderException = false;
 		//Model3D
-		Model3DInstanceUUID model3D;
+		Model3DInstanceID model3D;
 		//Meshes
 		RenderableMeshes meshes;
 		RenderableMaterials materials;
@@ -183,16 +183,16 @@ namespace Scene
 		RenderableRootSignatures rootSignatures;
 		RenderablePipelineStates pipelineStates;
 		//Animations
-		Model3DInstanceUUID animable;
+		Model3DInstanceID animable;
 		Animation::BonesTransformations bonesTransformation;
 		XMMATRIX animationTransformation;
 		AnimationSequences animationsSequences;
 		SequencePlayer sequencePlayer;
 		//Cameras
-		std::set<CameraSUUUID> bindedCameras;
+		std::set<CameraID> bindedCameras;
 
 		BoundingBox boundingBox;
-		RenderableBoundingBoxUUID boundingBoxCompute; //used for animables
+		RenderableBoundingBoxID boundingBoxCompute; //used for animables
 	};
 
 	SODECL_FULL(Renderable);

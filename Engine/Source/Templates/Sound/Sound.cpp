@@ -123,14 +123,14 @@ namespace Templates
 
 	void SoundJsonStep()
 	{
-		std::set<SoundJsonUUID> sounds;
+		std::set<SoundJsonID> sounds;
 		std::transform(Soundtemplates.begin(), Soundtemplates.end(), std::inserter(sounds, sounds.begin()), [](auto& temps)
 			{
 				return temps.first;
 			}
 		);
 
-		std::set<SoundJsonUUID> rebuildSounds;
+		std::set<SoundJsonID> rebuildSounds;
 		std::copy_if(sounds.begin(), sounds.end(), std::inserter(rebuildSounds, rebuildSounds.begin()), [](auto sound)
 			{
 				return sound->dirty(SoundJson::Update_path);

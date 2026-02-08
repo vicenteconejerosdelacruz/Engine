@@ -7,22 +7,22 @@ struct OverridePass
 	virtual ~OverridePass();
 	virtual void Initialize() {};
 	void CreateFsQuadResources(SceneUnitId id, std::string materialName, JUUID renderPassTemplate, std::function<void(std::string, ShaderConstantsBufferVariable&)> constantsBufferPusher = [](auto a, auto b) {});
-	RenderPassInstanceUUID GetPrevRenderPass();
-	RenderPassJsonUUID GetPrevRenderPassTemplate();
+	RenderPassInstanceID GetPrevRenderPass();
+	RenderPassJsonID GetPrevRenderPassTemplate();
 	JUUID GetPrevPassRenderToTexture(unsigned int index = 0U);
 	virtual void CreatePrevPassDependentResources() = 0;
 	virtual void Pass(SceneUnitId unit) = 0;
 
 	//data from camera and renderpass
-	CameraSUUUID camera;
+	CameraID camera;
 	unsigned int renderPassIndex;
-	RenderPassJsonUUID renderPassTemplate;
-	RenderPassInstanceUUID renderPassInstance;
+	RenderPassJsonID renderPassTemplate;
+	RenderPassInstanceID renderPassInstance;
 
 	//fsQuad
 	JUUID fsQuad;
-	MaterialInstanceUUID fsQuadMaterial;
-	ConstantsBufferUUID fsQuadConstantsBuffer;
+	MaterialInstanceID fsQuadMaterial;
+	ConstantsBufferID fsQuadConstantsBuffer;
 	CComPtr<ID3D12RootSignature> rootSignature;
 	CComPtr<ID3D12PipelineState> pipelineState;
 };

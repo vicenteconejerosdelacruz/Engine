@@ -29,7 +29,7 @@ namespace ComputeShader
 		std::unique_ptr<DeviceUtils::DescriptorHeap> resultClearHeap; //UAV (U0)
 		CD3DX12_CPU_DESCRIPTOR_HANDLE resultClearCpuHandle; //UAV (U0)
 
-		LuminanceHistogram(JUUID renderToTextureUUID);
+		LuminanceHistogram(JUUID RenderToTextureID);
 		~LuminanceHistogram();
 
 		void UpdateLuminanceHistogramParams(unsigned int width, unsigned int height, float minLogLuminance, float maxLogLuminance) const;

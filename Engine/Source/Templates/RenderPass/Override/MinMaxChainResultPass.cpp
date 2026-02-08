@@ -19,7 +19,7 @@ void MinMaxChainResultPass::CreateFSQuad(std::string materialName)
 void MinMaxChainResultPass::Pass(SceneUnitId unit)
 {
 	auto& renderPass = renderPassInstance;
-	RenderToTexturePassUUID rttPass = renderPass->renderToTexturePass;
+	RenderToTexturePassID rttPass = renderPass->renderToTexturePass;
 	rttPass->BeginRenderPass(unit);
 	Render(unit);
 	rttPass->EndRenderPass(unit);

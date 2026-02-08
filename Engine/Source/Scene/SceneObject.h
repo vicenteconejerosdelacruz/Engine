@@ -99,7 +99,7 @@ namespace Scene
 
 #if defined(_EDITOR)
 		//Billboard
-		virtual JUUID CreateBillboard(CameraSUUUID camera) { return ""; }
+		virtual JUUID CreateBillboard(CameraID camera) { return ""; }
 		virtual void UpdateBillboard(JUUID billboard) {}
 
 		//Gizmos

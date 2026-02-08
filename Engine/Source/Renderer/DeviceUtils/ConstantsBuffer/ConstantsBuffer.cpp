@@ -45,7 +45,7 @@ namespace DeviceUtils
 
 	JUUID CreateConstantsBuffer(size_t bufferSize, unsigned int numDescriptors, std::string cbName)
 	{
-		JUUID constantsBufferUUID = getUUID();
+		JUUID ConstantsBufferID = getUUID();
 		std::unique_ptr<ConstantsBuffer> cbvData = std::make_unique<ConstantsBuffer>(bufferSize, cbName);
 
 		//create the d3d12 cbuffer
@@ -84,13 +84,13 @@ namespace DeviceUtils
 		DX::ThrowIfFailed(cbvData->constantBuffer->Map(0, &readRange, reinterpret_cast<void**>(&cbvData->mappedConstantBuffer)));
 		ZeroMemory(cbvData->mappedConstantBuffer, numDescriptors * cbvData->alignedConstantBufferSize);
 
-		constantsBuffers.insert_or_assign(constantsBufferUUID, std::move(cbvData));
-		return constantsBufferUUID;
+		constantsBuffers.insert_or_assign(ConstantsBufferID, std::move(cbvData));
+		return ConstantsBufferID;
 	}
 
-	void DestroyConstantsBuffer(JUUID constantsBufferUUID)
+	void DestroyConstantsBuffer(JUUID ConstantsBufferID)
 	{
-		constantsBuffers.erase(constantsBufferUUID);
+		constantsBuffers.erase(ConstantsBufferID);
 	}
 
 	void DestroyConstantsBuffer()
@@ -98,19 +98,19 @@ namespace DeviceUtils
 		constantsBuffers.clear();
 	}
 
-	::CD3DX12_CPU_DESCRIPTOR_HANDLE GetCpuDescriptorHandle(JUUID constantsBufferUUID, unsigned int index)
+	::CD3DX12_CPU_DESCRIPTOR_HANDLE GetCpuDescriptorHandle(JUUID ConstantsBufferID, unsigned int index)
 	{
-		return constantsBuffers.at(constantsBufferUUID)->cpu_xhandle[index];
+		return constantsBuffers.at(ConstantsBufferID)->cpu_xhandle[index];
 	}
 
-	::CD3DX12_GPU_DESCRIPTOR_HANDLE GetGpuDescriptorHandle(JUUID constantsBufferUUID, unsigned int index)
+	::CD3DX12_GPU_DESCRIPTOR_HANDLE GetGpuDescriptorHandle(JUUID ConstantsBufferID, unsigned int index)
 	{
-		return constantsBuffers.at(constantsBufferUUID)->gpu_xhandle[index];
+		return constantsBuffers.at(ConstantsBufferID)->gpu_xhandle[index];
 	}
 
-	std::unique_ptr<ConstantsBuffer>& GetConstantsBuffer(JUUID constantsBufferUUID)
+	std::unique_ptr<ConstantsBuffer>& GetConstantsBuffer(JUUID ConstantsBufferID)
 	{
-		return constantsBuffers.at(constantsBufferUUID);
+		return constantsBuffers.at(ConstantsBufferID);
 	}
 
 	void ConstantsBuffer::SetRootDescriptorTable(CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int& cbvSlot, unsigned int backBufferIndex)

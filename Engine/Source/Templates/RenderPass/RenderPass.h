@@ -114,7 +114,7 @@ namespace Templates
 #endif
 
 	void RenderPassJsonStep();
-	void UpdateRenderPassInstances(std::unordered_map<RenderPassJsonUUID, std::set<RenderPassInstanceUUID>> changes);
+	void UpdateRenderPassInstances(std::unordered_map<RenderPassJsonID, std::set<RenderPassInstanceID>> changes);
 
 	namespace RenderPass
 	{
@@ -154,18 +154,18 @@ namespace Templates
 	TEMPDECL_REFTRACKER(RenderPass);
 
 	JUUID CreateRenderPassInstance(SceneUnitId id, JUUID cameraUUID, JUUID renderPassTemplateUUID, unsigned int renderPassIndex, unsigned int width = 0U, unsigned int height = 0U);
-	void DestroyRenderPassInstance(JUUID renderPassInstanceUUID);
+	void DestroyRenderPassInstance(JUUID RenderPassInstanceID);
 
 	struct RenderPassInstance
 	{
 		RenderPassInstance(JUUID uuid) { assert(!!!"do not use"); }
-		explicit RenderPassInstance(SceneUnitId id, JUUID cameraUUID, JUUID renderPassTemplateUUID, JUUID renderPassInstanceUUID, unsigned int renderPassIndex, unsigned int width, unsigned int height);
+		explicit RenderPassInstance(SceneUnitId id, JUUID cameraUUID, JUUID renderPassTemplateUUID, JUUID RenderPassInstanceID, unsigned int renderPassIndex, unsigned int width, unsigned int height);
 		~RenderPassInstance();
 		void Pass(SceneUnitId unit, std::function<void(SceneUnitId)> renderCallback = [](SceneUnitId) {}, bool clearRTV = true, XMVECTORF32 clearColor = DirectX::Colors::Black);
 		JUUID GetRenderPassMaterialInstance(
 			SceneUnitId id,
-			MaterialJsonUUID material,
-			MeshInstanceUUID mesh,
+			MaterialJsonID material,
+			MeshInstanceID mesh,
 			bool shadowed,
 			std::vector<PassMaterialOverride> passMaterialOverride,
 			JUUID bindingUUID = ""
@@ -182,15 +182,15 @@ namespace Templates
 		unsigned int renderPassIndex;
 		unsigned int width;
 		unsigned int height;
-		CameraSUUUID camera;
-		RenderPassJsonUUID renderPassTemplate;
-		RenderPassInstanceUUID renderPassInstance;
+		CameraID camera;
+		RenderPassJsonID renderPassTemplate;
+		RenderPassInstanceID renderPassInstance;
 		RenderPassType type = RenderPassType_SwapChainPass;
 		RenderPassMaterialOverride materialOverride;
 		RenderPassRenderCallbackOverride renderCallbackOverride;
 		std::unique_ptr<OverridePass> overridePass;
-		SwapChainPassUUID swapChainPass;
-		RenderToTexturePassUUID renderToTexturePass;
+		SwapChainPassID swapChainPass;
+		RenderToTexturePassID renderToTexturePass;
 	};
 };
 

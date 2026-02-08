@@ -89,11 +89,11 @@ namespace NAMESPACE\
 	struct TYPE;\
 	extern std::unique_ptr<TYPE>& GETTER(JUUID uuid);\
 };\
-typedef TUUID<NAMESPACE::TYPE, NAMESPACE::GETTER> TYPE##UUID;\
+typedef TUUID<NAMESPACE::TYPE, NAMESPACE::GETTER> TYPE##ID;\
 template <>\
-struct std::hash<TYPE##UUID>\
+struct std::hash<TYPE##ID>\
 {\
-	std::size_t operator()(const TYPE##UUID& other) const\
+	std::size_t operator()(const TYPE##ID& other) const\
 	{\
 		return std::hash<std::string>{}(other.uuid);\
 	}\
@@ -143,7 +143,6 @@ struct TSUUUID {
 	}
 	bool operator<(const TSUUUID& other) const
 	{
-		//return (std::get<0>(SUuuid) < std::get<0>(other.SUuuid)) && (std::get<1>(SUuuid) < std::get<1>(other.SUuuid));
 		if (std::get<0>(SUuuid) != std::get<0>(other.SUuuid))
 		{
 			return std::get<0>(SUuuid) < std::get<0>(other.SUuuid);
@@ -197,11 +196,11 @@ namespace NAMESPACE\
 	struct TYPE;\
 	extern std::unique_ptr<TYPE>& GETTER(SceneUnitId, JUUID uuid);\
 };\
-typedef TSUUUID<NAMESPACE::TYPE, NAMESPACE::GETTER> TYPE##SUUUID;\
+typedef TSUUUID<NAMESPACE::TYPE, NAMESPACE::GETTER> TYPE##ID;\
 template <>\
-struct std::hash<TYPE##SUUUID>\
+struct std::hash<TYPE##ID>\
 {\
-	std::size_t operator()(const TYPE##SUUUID& other) const\
+	std::size_t operator()(const TYPE##ID& other) const\
 	{\
 		size_t hash = 0;\
 		nostd::hash_combine(hash, std::get<0>(other.SUuuid), std::get<1>(other.SUuuid));\

@@ -13,10 +13,10 @@ using namespace DeviceUtils;
 
 namespace ComputeShader
 {
-	LuminanceHistogram::LuminanceHistogram(JUUID renderToTextureUUID) : ComputeInterface("LuminanceHistogram_cs")
+	LuminanceHistogram::LuminanceHistogram(JUUID RenderToTextureID) : ComputeInterface("LuminanceHistogram_cs")
 	{
 		//hold a copy to the render to texture used for HDR rendering (T0)
-		rttUUID = renderToTextureUUID;
+		rttUUID = RenderToTextureID;
 
 		//create the luminicance histogram buffer containing the calculation parameters (C0)
 		constantsBuffers = CreateConstantsBuffer(sizeof(LuminanceHistogramBuffer), Renderer::numFrames, "LuminanceHistogramBuffer");

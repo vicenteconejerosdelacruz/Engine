@@ -40,7 +40,7 @@
 auto objs = GETJOBJECTS(id);\
 std::for_each(objs.begin(), objs.end(), [&](auto o)\
 	{\
-		CLASS##SUUUID uuid = MAKESUUUID(id,o);\
+		CLASS##ID uuid = MAKESUUUID(id,o);\
 		if (uuid->hidden() || (uuid->contains("systemCreated") && uuid->at("systemCreated")==true))\
 			return;\
 		nlohmann::json obj;\
