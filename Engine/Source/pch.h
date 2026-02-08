@@ -123,6 +123,8 @@ typedef size_t SceneUnitId;
 //v8pp
 #include <v8pp/context.hpp>
 #include <v8pp/module.hpp>
+//physx
+#include <PxPhysicsAPI.h>
 
 template<typename... Args> void whatis();
 template<typename T> void whatis(T);
