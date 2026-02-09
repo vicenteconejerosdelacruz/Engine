@@ -325,23 +325,14 @@ namespace Scene
 			for (unsigned i = 0; i < mm.size(); i++)
 			{
 				std::vector<PassMaterialOverride> mpmo;
-				std::copy_if(pmo.begin(), pmo.end(), std::back_inserter(mpmo), [i](PassMaterialOverride& o)
-					{
-						return o.meshIndex == i;
-					}
-				);
+				std::copy_if(pmo.begin(), pmo.end(), std::back_inserter(mpmo), [i](PassMaterialOverride& o) { return o.meshIndex == i; });
 				auto& mesh = meshes.at(i);
 				JUUID matUUID = mm.at(i).materialUUID;
 				if (!MaterialTemplateExist(matUUID))
 				{
 					matUUID = GetMaterialUUIDByName(fallbackMaterialName); //fallback
 				}
-
-				materials[pass].push_back(pass->GetRenderPassMaterialInstance(
-					unit,
-					matUUID, mesh, shadowed(),
-					mpmo, uuid()));
-
+				materials[pass].push_back(pass->GetRenderPassMaterialInstance(unit, matUUID, mesh, shadowed(), mpmo, uuid()));
 			}
 		}
 		else if (!model3D.empty())
@@ -349,17 +340,10 @@ namespace Scene
 			for (unsigned int i = 0; i < meshes.size(); i++)
 			{
 				std::vector<PassMaterialOverride> mpmo;
-				std::copy_if(pmo.begin(), pmo.end(), std::back_inserter(mpmo), [i](PassMaterialOverride& o)
-					{
-						return o.meshIndex == i;
-					}
-				);
+				std::copy_if(pmo.begin(), pmo.end(), std::back_inserter(mpmo), [i](PassMaterialOverride& o) { return o.meshIndex == i; });
 				auto& mesh = meshes.at(i);
-				JUUID matUUID = model3D->materialUUIDs.at(i);
-				materials[pass].push_back(pass->GetRenderPassMaterialInstance(
-					unit,
-					matUUID, mesh, shadowed(),
-					mpmo, uuid()));
+				JUUID matUUID = model3D->materials.at(i)();
+				materials[pass].push_back(pass->GetRenderPassMaterialInstance(unit, matUUID, mesh, shadowed(), mpmo, uuid()));
 			}
 		}
 	}

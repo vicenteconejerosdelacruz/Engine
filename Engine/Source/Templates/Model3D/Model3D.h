@@ -72,7 +72,7 @@ namespace Templates
 
 	struct Model3DInstance
 	{
-		JUUID model3DUUID;
+		Model3DJsonID model3D;
 
 		Model3DInstance(JUUID uuid) { assert(!!!"do not use"); }
 		explicit Model3DInstance(SceneUnitId id, JUUID uuid, JUUID objectUUID);
@@ -88,7 +88,7 @@ namespace Templates
 #endif
 		VertexClass vertexClass;
 		std::vector<MeshInstanceID> meshes;
-		std::vector<JUUID> materialUUIDs;
+		std::vector<MaterialJsonID> materials;
 		//animation
 		std::unique_ptr<Animation::Animated> animations;
 	};
