@@ -275,7 +275,7 @@ namespace Scene
 	{
 		unsigned int projW = static_cast<unsigned int>(projectionWidth());
 		unsigned int projH = static_cast<unsigned int>(projectionHeight());
-		return CreateRenderPassInstance(unit, uuid(), passUUID, passIndex, projW, projH);
+		return CreateRenderPassInstance(SUuuid(), passUUID, passIndex, projW, projH);
 	}
 
 	void Camera::CreateRenderPassAtIndex(JUUID passUUID, unsigned int passIndex)
@@ -314,9 +314,9 @@ namespace Scene
 
 	void Camera::DestroyRenderPasses()
 	{
-		for (auto uuid : renderPassesUUID)
+		for (auto pass : renderPassesUUID)
 		{
-			DestroyRenderPassInstance(uuid());
+			DestroyRenderPassInstance(pass);
 		}
 		renderPassesUUID.clear();
 	}

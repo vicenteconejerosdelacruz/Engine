@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "MinMaxChainResultPass.h"
 
-MinMaxChainResultPass::MinMaxChainResultPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rpT, JUUID rp) : OverridePass(id, cam, rpI, rpT, rp)
+MinMaxChainResultPass::MinMaxChainResultPass(CameraID cam, unsigned int rpI, RenderPassJsonID rpT, RenderPassInstanceID rp) : OverridePass(cam, rpI, rpT, rp)
 {
 }
 

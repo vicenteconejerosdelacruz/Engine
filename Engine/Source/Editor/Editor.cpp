@@ -2352,7 +2352,7 @@ namespace Editor
 		return;
 #endif
 		if (mousePicking.pickingPass.contains(id)) return;
-		mousePicking.pickingPass.insert_or_assign(id, CreateRenderPassInstance(id, "", GetRenderPassUUIDByName("PickingPass"), 0, HWNDWIDTH, HWNDHEIGHT));
+		mousePicking.pickingPass.insert_or_assign(id, CreateRenderPassInstance(CameraID(), GetRenderPassUUIDByName("PickingPass"), 0, HWNDWIDTH, HWNDHEIGHT));
 	}
 
 	void BindPickingRenderables(SceneUnitId id)

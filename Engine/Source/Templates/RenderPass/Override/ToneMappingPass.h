@@ -13,7 +13,7 @@ using namespace ComputeShader;
 struct ToneMappingPass : public OverridePass
 {
 
-	ToneMappingPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rpT, JUUID rp);
+	ToneMappingPass(CameraID cam, unsigned int rpI, RenderPassJsonID rpT, RenderPassInstanceID rp);
 	virtual ~ToneMappingPass();
 	virtual void CreatePrevPassDependentResources();
 	virtual void Pass(SceneUnitId id);

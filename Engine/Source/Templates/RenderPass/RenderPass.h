@@ -4,14 +4,10 @@
 #include <map>
 #include <vector>
 #include <dxgiformat.h>
-//#include <RenderPass/SwapChainPass.h>
-//#include <RenderPass/RenderToTexturePass.h>
 #include <RenderPass/Override/OverridePass.h>
 #include "PassMaterialOverride.h"
 #include <Templates.h>
 #include <JTemplate.h>
-//#include <JTypes.h>
-//#include <TemplateDecl.h>
 
 enum RenderPassType
 {
@@ -153,13 +149,13 @@ namespace Templates
 	TEMPDECL_FULL(RenderPass);
 	TEMPDECL_REFTRACKER(RenderPass);
 
-	JUUID CreateRenderPassInstance(SceneUnitId id, JUUID cameraUUID, JUUID renderPassTemplateUUID, unsigned int renderPassIndex, unsigned int width = 0U, unsigned int height = 0U);
-	void DestroyRenderPassInstance(JUUID RenderPassInstanceID);
+	RenderPassInstanceID CreateRenderPassInstance(CameraID camera, RenderPassJsonID renderPassTemplate, unsigned int renderPassIndex, unsigned int width = 0U, unsigned int height = 0U);
+	void DestroyRenderPassInstance(RenderPassInstanceID renderPassInstanceID);
 
 	struct RenderPassInstance
 	{
 		RenderPassInstance(JUUID uuid) { assert(!!!"do not use"); }
-		explicit RenderPassInstance(SceneUnitId id, JUUID cameraUUID, JUUID renderPassTemplateUUID, JUUID RenderPassInstanceID, unsigned int renderPassIndex, unsigned int width, unsigned int height);
+		explicit RenderPassInstance(CameraID camera, RenderPassJsonID renderPassTemplate, RenderPassInstanceID renderPassInstance, unsigned int renderPassIndex, unsigned int width, unsigned int height);
 		~RenderPassInstance();
 		void Pass(SceneUnitId unit, std::function<void(SceneUnitId)> renderCallback = [](SceneUnitId) {}, bool clearRTV = true, XMVECTORF32 clearColor = DirectX::Colors::Black);
 		JUUID GetRenderPassMaterialInstance(

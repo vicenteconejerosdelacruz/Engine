@@ -6,7 +6,7 @@
 #include <HDR/LuminanceHistogram.h>
 #include <HDR/LuminanceHistogramAverage.h>
 
-ToneMappingPass::ToneMappingPass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rpT, JUUID rp) : OverridePass(id, cam, rpI, rpT, rp)
+ToneMappingPass::ToneMappingPass(CameraID cam, unsigned int rpI, RenderPassJsonID rpT, RenderPassInstanceID rp) : OverridePass(cam, rpI, rpT, rp)
 {
 	CreatePrevPassDependentResources();
 }

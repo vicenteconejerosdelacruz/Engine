@@ -3,7 +3,7 @@
 struct OverridePass
 {
 	OverridePass() { assert(!!!"do not use"); }
-	explicit OverridePass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rpT, JUUID rp) { camera = MAKESUUUID(id, cam); renderPassIndex = rpI; renderPassTemplate = rpT; renderPassInstance = rp; };
+	explicit OverridePass(CameraID cam, unsigned int rpI, RenderPassJsonID rpT, RenderPassInstanceID rp) { camera = cam; renderPassIndex = rpI; renderPassTemplate = rpT; renderPassInstance = rp; };
 	virtual ~OverridePass();
 	virtual void Initialize() {};
 	void CreateFsQuadResources(SceneUnitId id, std::string materialName, JUUID renderPassTemplate, std::function<void(std::string, ShaderConstantsBufferVariable&)> constantsBufferPusher = [](auto a, auto b) {});

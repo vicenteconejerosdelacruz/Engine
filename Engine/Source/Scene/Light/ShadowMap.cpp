@@ -622,7 +622,7 @@ namespace Scene
 		do
 		{
 			shadowMapMinMaxChainRenderPass.push_back(
-				CreateRenderPassInstance(unit, "", GetRenderPassUUIDByName("ShadowMapMinMaxChainPass"), renderPassIndex, std::max(2U, width), std::max(2U, height))
+				CreateRenderPassInstance(CameraID(), GetRenderPassUUIDByName("ShadowMapMinMaxChainPass"), renderPassIndex, std::max(2U, width), std::max(2U, height))
 			);
 			auto& rpInstance = shadowMapMinMaxChainRenderPass.back();
 			MinMaxChainPass* chainPass = static_cast<MinMaxChainPass*>(rpInstance->overridePass.get());
@@ -649,7 +649,7 @@ namespace Scene
 		unsigned int texUWidth = 512U;
 		unsigned int texUHeight = 512U * ((lightType() == LT_Point) ? 6U : 1U);
 		shadowMapMinMaxChainResultRenderPass = CreateRenderPassInstance(
-			unit, "", GetRenderPassUUIDByName("ShadowMapMinMaxChainResultPass"), 0, texUWidth, texUHeight);
+			CameraID(), GetRenderPassUUIDByName("ShadowMapMinMaxChainResultPass"), 0, texUWidth, texUHeight);
 
 		MinMaxChainResultPass* resultPass = static_cast<MinMaxChainResultPass*>(shadowMapMinMaxChainResultRenderPass->overridePass.get());
 

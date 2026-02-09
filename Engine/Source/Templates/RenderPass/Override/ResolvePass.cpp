@@ -5,9 +5,8 @@
 #include <DeviceUtils/RenderToTexture/RenderToTexture.h>
 #include <DeviceUtils/RenderPass/SwapChainPass.h>
 
-ResolvePass::ResolvePass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rpT, JUUID rp) : OverridePass(id, cam, rpI, rpT, rp)
+ResolvePass::ResolvePass(CameraID cam, unsigned int rpI, RenderPassJsonID rpT, RenderPassInstanceID rp) : OverridePass(cam, rpI, rpT, rp)
 {
-	using namespace Scene;
 	CreatePrevPassDependentResources();
 }
 
