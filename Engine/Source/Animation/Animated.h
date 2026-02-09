@@ -72,9 +72,9 @@ namespace Animation
 	void DestroyAnimated();
 	void DestroyAnimated(SceneUnitId id);
 
-	void AttachAnimation(SceneUnitId id, JUUID renderableUUID, std::unique_ptr<Animated>& animated);
-	ConstantsBufferID GetAnimatedConstantsBuffer(JUUID renderableUUID);
-	void WriteBoneTransformationsToConstantsBuffer(JUUID renderableUUID, BonesTransformations& bonesTransformation, unsigned int backbufferIndex);
+	void AttachAnimation(RenderableID renderable, std::unique_ptr<Animated>& animated);
+	ConstantsBufferID GetAnimatedConstantsBuffer(RenderableID renderable);
+	void WriteBoneTransformationsToConstantsBuffer(RenderableID renderable, BonesTransformations& bonesTransformation, unsigned int backbufferIndex);
 
 	void TraverseMultiplycationQueue(float time, std::string currentAnimation, std::unique_ptr<Animated>& animations, BonesTransformations& bonesTransformation);
 	void TraverseMultiplycationQueue(float time, MultiplyCmdQueue& cmds, BonesKeysMap& boneKeys, BonesTransformations& bonesTransformation, BonesTransformations& bonesOffsets, XMMATRIX& rootNodeInverseTransform, XMMATRIX parentTransformation);

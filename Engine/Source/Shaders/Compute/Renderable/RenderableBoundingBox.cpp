@@ -13,7 +13,7 @@ namespace ComputeShader
 	JUUID CreateRenderableBoundingBox(RenderableID renderable)
 	{
 		JUUID compUUID = getUUID();
-		std::unique_ptr<RenderableBoundingBox> rbbComp = std::make_unique<RenderableBoundingBox>(renderable.unit(), renderable.uuid());
+		std::unique_ptr<RenderableBoundingBox> rbbComp = std::make_unique<RenderableBoundingBox>(renderable);
 		renderableBoundingBoxCompute.insert_or_assign(compUUID, std::move(rbbComp));
 		return compUUID;
 	}
@@ -28,14 +28,13 @@ namespace ComputeShader
 		renderableBoundingBoxCompute.erase(compUUID);
 	}
 
-	RenderableBoundingBox::RenderableBoundingBox(SceneUnitId id, JUUID renderableUUID) : ComputeInterface("BoundingBox_cs")
+	RenderableBoundingBox::RenderableBoundingBox(RenderableID renderable) : ComputeInterface("BoundingBox_cs")
 	{
 		using namespace Animation;
-		bonesCbv = GetAnimatedConstantsBuffer(renderableUUID);
-		RenderableID r = MAKESUUUID(id, renderableUUID);
+		bonesCbv = GetAnimatedConstantsBuffer(renderable);
 		auto& shaderInstance = GetShaderInstance(shader.shader);
 
-		auto createComputeResource = [this, &r](size_t numResources)
+		auto createComputeResource = [this, &renderable](size_t numResources)
 			{
 				size_t dataSize = sizeof(XMFLOAT4) * 2ULL;
 				D3D12_HEAP_PROPERTIES defaultHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
@@ -60,8 +59,8 @@ namespace ComputeShader
 					renderer->d3dDevice->CreateCommittedResource(
 						&defaultHeapProperties, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&resource)
 					);
-					CCNAME_D3D12_OBJECT_N(resource, std::string(r->name() + ":" + std::to_string(i)));
-					LogCComPtrAddress(std::string(r->name() + ":" + std::to_string(i)), resource);
+					CCNAME_D3D12_OBJECT_N(resource, std::string(renderable->name() + ":" + std::to_string(i)));
+					LogCComPtrAddress(std::string(renderable->name() + ":" + std::to_string(i)), resource);
 
 					resultCpuHandle.push_back(::CD3DX12_CPU_DESCRIPTOR_HANDLE());
 					resultGpuHandle.push_back(::CD3DX12_GPU_DESCRIPTOR_HANDLE());
@@ -77,8 +76,8 @@ namespace ComputeShader
 						&readBackHeapProperties, D3D12_HEAP_FLAG_NONE, &bufferDescReadBack,
 						D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&readBackResource)
 					);
-					CCNAME_D3D12_OBJECT_N(readBackResource, std::string(r->name() + "readback:" + std::to_string(i)));
-					LogCComPtrAddress(std::string(r->name() + ":" + std::to_string(i)), readBackResource);
+					CCNAME_D3D12_OBJECT_N(readBackResource, std::string(renderable->name() + "readback:" + std::to_string(i)));
+					LogCComPtrAddress(std::string(renderable->name() + ":" + std::to_string(i)), readBackResource);
 				}
 			};
 
@@ -99,10 +98,10 @@ namespace ComputeShader
 			};
 
 		//Create the bounding box compute resource
-		createComputeResource(r->meshes.size());
+		createComputeResource(renderable->meshes.size());
 
 		bool extend = false;
-		for (auto& mesh : r->meshes)
+		for (auto& mesh : renderable->meshes)
 		{
 			//Create the SRV for the vertex buffers of each mesh
 			createMeshVerticesShaderResourceView(mesh);

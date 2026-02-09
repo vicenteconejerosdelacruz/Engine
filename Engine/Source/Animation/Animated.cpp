@@ -6,7 +6,7 @@
 
 namespace Animation {
 
-	std::map<JUUID, JUUID> animationsCbv; //Renderable -> ConstantsBuffer
+	std::map<RenderableID, ConstantsBufferID> animationsCbv; //Renderable -> ConstantsBuffer
 
 	void BuildBonesOffsets(const aiScene* aiModel, BonesTransformations& bonesOffsets)
 	{
@@ -119,7 +119,7 @@ namespace Animation {
 	{
 		for (auto& [r, c] : animationsCbv)
 		{
-			DestroyConstantsBuffer(c);
+			DestroyConstantsBuffer(c());
 		}
 		animationsCbv.clear();
 	}
@@ -128,25 +128,24 @@ namespace Animation {
 	{
 	}
 
-	void AttachAnimation(SceneUnitId id, JUUID renderableUUID, std::unique_ptr<Animated>& animated)
+	void AttachAnimation(RenderableID renderable, std::unique_ptr<Animated>& animated)
 	{
 		using namespace Scene;
 		using namespace DeviceUtils;
-		RenderableID renderable = MAKESUUUID(id, renderableUUID);
-		animationsCbv[renderableUUID] = CreateConstantsBuffer(sizeof(BonesMatrices), Renderer::numFrames, renderable->name());
+		animationsCbv[renderable] = CreateConstantsBuffer(sizeof(BonesMatrices), Renderer::numFrames, renderable->name());
 		renderable->bonesTransformation = animated->bonesOffsets;
 	}
 
 
-	ConstantsBufferID GetAnimatedConstantsBuffer(JUUID renderableUUID)
+	ConstantsBufferID GetAnimatedConstantsBuffer(RenderableID renderable)
 	{
-		return animationsCbv[renderableUUID];
+		return animationsCbv[renderable];
 	}
 
-	void WriteBoneTransformationsToConstantsBuffer(JUUID renderableUUID, BonesTransformations& bonesTransformation, unsigned int backbufferIndex)
+	void WriteBoneTransformationsToConstantsBuffer(RenderableID renderable, BonesTransformations& bonesTransformation, unsigned int backbufferIndex)
 	{
 		using namespace DeviceUtils;
-		auto bonesCbv = GetAnimatedConstantsBuffer(renderableUUID);
+		auto bonesCbv = GetAnimatedConstantsBuffer(renderable);
 
 		XMMATRIX* bones = reinterpret_cast<XMMATRIX*>(bonesCbv->mappedConstantBuffer + bonesCbv->alignedConstantBufferSize * backbufferIndex);
 

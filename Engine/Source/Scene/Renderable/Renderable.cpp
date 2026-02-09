@@ -84,7 +84,7 @@ namespace Scene
 
 		if (!animable.empty())
 		{
-			AttachAnimation(unit, uuid(), model3D->animations);
+			AttachAnimation(SUuuid(), model3D->animations);
 			boundingBoxCompute = CreateRenderableBoundingBox(MAKESUUUID(unit, uuid()));
 			sequencePlayer.renderable = SUuuid();
 		}
@@ -588,7 +588,7 @@ namespace Scene
 		if (animable.empty()) return;
 
 		using namespace Animation;
-		WriteBoneTransformationsToConstantsBuffer(uuid(), bonesTransformation, frame);
+		WriteBoneTransformationsToConstantsBuffer(SUuuid(), bonesTransformation, frame);
 	}
 
 	void Renderable::WriteConstantsBuffer(unsigned int frame)
@@ -762,7 +762,7 @@ namespace Scene
 			{
 				if (material->ShaderInstanceHasRegister([this](ShaderInstanceID binary) { return binary->CBV.animation; })) {
 					if (!animable.empty())
-						return GetAnimatedConstantsBuffer(uuid())->SetRootDescriptorTable(commandList, slot, frame);
+						return GetAnimatedConstantsBuffer(SUuuid())->SetRootDescriptorTable(commandList, slot, frame);
 					slot++;
 				}
 			};
