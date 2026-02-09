@@ -421,7 +421,6 @@
     <ClInclude Include="JExpose\Templates\ShaderAtt.h" />
     <ClInclude Include="JExpose\Templates\SoundAtt.h" />
     <ClInclude Include="JExpose\Templates\TextureAtt.h" />
-    <ClInclude Include="pch\Command.h" />
     <ClInclude Include="pch\DDSTextures.h" />
     <ClInclude Include="pch\Debug.h" />
     <ClInclude Include="pch\ShaderMaterials.h" />

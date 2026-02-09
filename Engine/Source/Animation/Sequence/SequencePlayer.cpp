@@ -11,7 +11,7 @@ SequencePlayer::SequencePlayer()
 	newSequence = false;
 }
 
-SequencePlayer::SequencePlayer(const Sequence& seq, SceneUnitId id, JUUID uuid)
+SequencePlayer::SequencePlayer(const Sequence& seq, RenderableID renderable)
 {
 	sequence = seq;
 	time = 0.0f;
@@ -19,10 +19,10 @@ SequencePlayer::SequencePlayer(const Sequence& seq, SceneUnitId id, JUUID uuid)
 	currentFrame = 0;
 	loop = false;
 	newSequence = false;
-	renderable = MAKESUUUID(id, uuid);
+	this->renderable = renderable;
 }
 
-void SequencePlayer::SetSequence(const Sequence& seq, SceneUnitId id, JUUID uuid)
+void SequencePlayer::SetSequence(const Sequence& seq, RenderableID renderable)
 {
 	sequence = seq;
 	time = 0.0f;
@@ -31,7 +31,7 @@ void SequencePlayer::SetSequence(const Sequence& seq, SceneUnitId id, JUUID uuid
 	loop = false;
 	newSequence = true;
 	runnedFrames.clear();
-	renderable = MAKESUUUID(id, uuid);
+	this->renderable = renderable;
 }
 
 void SequencePlayer::Step(float dt)

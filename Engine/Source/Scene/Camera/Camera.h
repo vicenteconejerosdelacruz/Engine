@@ -180,8 +180,8 @@ namespace Scene {
 #if defined(_EDITOR)
 		virtual void EditorPreview(size_t flags);
 		virtual void DestroyEditorPreview();
-		virtual JUUID CreateBillboard(CameraID camera);
-		virtual void UpdateBillboard(JUUID uuid);
+		virtual RenderableID CreateBillboard(CameraID camera);
+		virtual void UpdateBillboard(RenderableID renderable);
 		BoundingBox GetBoundingBox();
 
 		//Gizmo

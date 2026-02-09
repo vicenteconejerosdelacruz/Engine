@@ -11,8 +11,8 @@ extern std::unique_ptr<Renderer> renderer;
 #if defined(_EDITOR)
 namespace Editor
 {
-	extern void SelectCamera(SceneUnitId id, JUUID camera);
-	extern JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
+	extern void SelectCamera(CameraID camera);
+	extern RenderableID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
 	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 }
@@ -881,27 +881,25 @@ namespace Scene
 	{
 	}
 
-	JUUID Camera::CreateBillboard(CameraID camera)
+	RenderableID Camera::CreateBillboard(CameraID camera)
 	{
-		JUUID uuid = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "Camera", "CameraPicking");
-		RenderableID bb = MAKESUUUID(unit, uuid);
-		bb->OnPick = [this] {Editor::SelectCamera(unit, this->uuid()); };
-		UpdateBillboard(uuid);
-		return uuid;
+		RenderableID bb = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "Camera", "CameraPicking");
+		bb->OnPick = [&] {Editor::SelectCamera(SUuuid()); };
+		UpdateBillboard(bb);
+		return bb;
 	}
 
-	void Camera::UpdateBillboard(JUUID uuid)
+	void Camera::UpdateBillboard(RenderableID renderable)
 	{
-		assert(!uuid.empty());
-		if (uuid.empty()) return;
+		assert(!renderable.empty());
+		if (renderable.empty()) return;
 
 		auto& scene = GetSceneUnit(unit);
 
 		XMFLOAT3 baseColor = { 1.0f,1.0f,1.0f };
-		RenderableID bb = MAKESUUUID(unit, uuid);
-		bb->position(position());
-		bb->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
-		bb->WriteConstantsBuffer(scene->Frame());
+		renderable->position(position());
+		renderable->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
+		renderable->WriteConstantsBuffer(scene->Frame());
 	}
 
 	BoundingBox Camera::GetBoundingBox()

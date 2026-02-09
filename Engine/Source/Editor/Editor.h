@@ -131,10 +131,10 @@ namespace Editor {
 
 	//SceneObject Selection
 	void SelectSceneObject(SceneUnitId unit, JUUID uuid);
-	void SelectRenderable(SceneUnitId unit, JUUID ruuid);
-	void SelectLight(SceneUnitId unit, JUUID luuid);
-	void SelectCamera(SceneUnitId unit, JUUID cuuid);
-	void SelectSoundEffect(SceneUnitId unit, JUUID suuid);
+	void SelectRenderable(RenderableID renderable);
+	void SelectLight(LightID light);
+	void SelectCamera(CameraID camera);
+	void SelectSoundEffect(SoundFXID soundfx);
 	void ToggleSceneObjectFromSelection(SceneUnitId unit, JUUID uuid);
 	void SetSceneObjectSelection(SceneUnitId unit, JUUID uuid, bool selected);
 	void InsertSceneObjectToSelection(SceneUnitId unit, JUUID uuid);
@@ -163,9 +163,9 @@ namespace Editor {
 	void StartTemplateCreation(TemplateType type);
 
 	//Billboards
-	JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
+	RenderableID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
 	void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
-	JUUID GetBillboard(SceneUnitId id, JUUID sceneObject);
+	RenderableID GetBillboard(SceneUnitId id, JUUID sceneObject);
 	void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 	void CreateRegisteredBillboards(SceneUnitId id);
 	bool PendingBillboards(SceneUnitId id);

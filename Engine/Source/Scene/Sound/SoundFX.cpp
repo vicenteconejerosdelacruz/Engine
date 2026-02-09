@@ -7,8 +7,8 @@
 #if defined(_EDITOR)
 namespace Editor
 {
-	extern void SelectSoundEffect(SceneUnitId id, JUUID suuid);
-	extern JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
+	extern void SelectSoundEffect(SoundFXID soundfx);
+	extern RenderableID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
 	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 	extern void MarkScenePanelAssetsAsDirty();
@@ -255,29 +255,27 @@ namespace Scene
 	}
 
 #if defined(_EDITOR)
-	JUUID SoundFX::CreateBillboard(CameraID camera)
+	RenderableID SoundFX::CreateBillboard(CameraID camera)
 	{
-		if (!(instanceFlags() & SoundEffectInstance_Use3D)) return "";
+		if (!(instanceFlags() & SoundEffectInstance_Use3D)) return RenderableID();
 
-		JUUID uuid = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "SoundEffect", "SoundEffectPicking");
-		UpdateBillboard(uuid);
-		RenderableID bb = MAKESUUUID(unit, uuid);
-		bb->OnPick = [this] {Editor::SelectSoundEffect(unit, this->uuid()); };
-		return uuid;
+		RenderableID bb = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "SoundEffect", "SoundEffectPicking");
+		UpdateBillboard(bb);
+		bb->OnPick = [&] {Editor::SelectSoundEffect(SUuuid()); };
+		return bb;
 	}
 
-	void SoundFX::UpdateBillboard(JUUID uuid)
+	void SoundFX::UpdateBillboard(RenderableID renderable)
 	{
-		assert(!uuid.empty());
-		if (uuid.empty()) return;
+		assert(!renderable.empty());
+		if (renderable.empty()) return;
 
 		auto& scene = GetSceneUnit(unit);
 
 		XMFLOAT3 baseColor = { 1.0f,1.0f,1.0f };
-		RenderableID bb = MAKESUUUID(unit, uuid);
-		bb->position(position());
-		bb->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
-		bb->WriteConstantsBuffer(scene->Frame());
+		renderable->position(position());
+		renderable->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
+		renderable->WriteConstantsBuffer(scene->Frame());
 	}
 
 	BoundingBox SoundFX::GetBoundingBox()

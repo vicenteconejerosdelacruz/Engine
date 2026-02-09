@@ -5,8 +5,8 @@
 #if defined(_EDITOR)
 namespace Editor
 {
-	extern void SelectLight(SceneUnitId id, JUUID luuid);
-	extern JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
+	extern void SelectLight(LightID light);
+	extern RenderableID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
 	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 }
@@ -294,31 +294,29 @@ namespace Scene
 		}
 	}
 
-	JUUID Light::CreateBillboard(CameraID camera)
+	RenderableID Light::CreateBillboard(CameraID camera)
 	{
 		using namespace Editor;
 
-		if (lightType() == LT_Ambient) return "";
+		if (lightType() == LT_Ambient) return RenderableID();
 
-		JUUID uuid = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "LightBulb", "LightBulbPicking");
-		RenderableID bb = MAKESUUUID(unit, uuid);
-		bb->OnPick = [&] { SelectLight(unit, this->uuid()); };
-		UpdateBillboard(uuid);
-		return uuid;
+		RenderableID bb = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "LightBulb", "LightBulbPicking");
+		bb->OnPick = [&] { SelectLight(SUuuid()); };
+		UpdateBillboard(bb);
+		return bb;
 	}
 
-	void Light::UpdateBillboard(JUUID uuid)
+	void Light::UpdateBillboard(RenderableID renderable)
 	{
-		assert(!uuid.empty());
-		if (uuid.empty()) return;
+		assert(!renderable.empty());
+		if (renderable.empty()) return;
 
 		auto& scene = GetSceneUnit(unit);
 
 		XMFLOAT3 baseColor = color();
-		RenderableID bb = MAKESUUUID(unit, uuid);
-		bb->position(position());
-		bb->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
-		bb->WriteConstantsBuffer(scene->Frame());
+		renderable->position(position());
+		renderable->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
+		renderable->WriteConstantsBuffer(scene->Frame());
 	}
 
 	BoundingBox Light::GetBoundingBox()

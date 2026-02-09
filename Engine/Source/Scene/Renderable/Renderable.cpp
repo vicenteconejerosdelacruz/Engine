@@ -11,7 +11,7 @@ extern std::unique_ptr<Renderer> renderer;
 #if defined(_EDITOR)
 namespace Editor
 {
-	extern void SelectRenderable(SceneUnitId unit, JUUID ruuid);
+	extern void SelectRenderable(RenderableID renderable);
 	extern bool IsPlaying(SceneUnitId unit);
 	extern bool IsPaused(SceneUnitId unit);
 };
@@ -92,7 +92,7 @@ namespace Scene
 		SetInitialConditions();
 
 #if defined(_EDITOR)
-		OnPick = [this] { Editor::SelectRenderable(unit, uuid()); };
+		OnPick = [&] { Editor::SelectRenderable(SUuuid()); };
 #endif
 	}
 

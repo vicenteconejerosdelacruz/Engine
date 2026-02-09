@@ -3,7 +3,6 @@
 #include <DirectXTex.h>
 #include <texdiag.h>
 #include <texassemble.h>
-#include <Command.h>
 #include <regex>
 #include <DXTypes.h>
 #include <NoStd.h>

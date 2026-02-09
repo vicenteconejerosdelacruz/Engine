@@ -93,9 +93,6 @@
     <ClInclude Include="pch\ShaderMaterials.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pch\Command.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pch\DDSTextures.h">
       <Filter>Header Files</Filter>
     </ClInclude>

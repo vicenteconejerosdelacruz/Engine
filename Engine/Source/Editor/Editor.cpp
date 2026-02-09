@@ -2065,24 +2065,24 @@ namespace Editor
 		r->OnPick();
 	}
 
-	void SelectRenderable(SceneUnitId unit, JUUID ruuid)
+	void SelectRenderable(RenderableID renderable)
 	{
-		ToggleSceneObjectFromSelection(unit, ruuid);
+		ToggleSceneObjectFromSelection(FROMSUUUID(renderable()));
 	}
 
-	void SelectLight(SceneUnitId unit, JUUID luuid)
+	void SelectLight(LightID light)
 	{
-		ToggleSceneObjectFromSelection(unit, luuid);
+		ToggleSceneObjectFromSelection(FROMSUUUID(light()));
 	}
 
-	void SelectCamera(SceneUnitId unit, JUUID cuuid)
+	void SelectCamera(CameraID camera)
 	{
-		ToggleSceneObjectFromSelection(unit, cuuid);
+		ToggleSceneObjectFromSelection(FROMSUUUID(camera()));
 	}
 
-	void SelectSoundEffect(SceneUnitId unit, JUUID suuid)
+	void SelectSoundEffect(SoundFXID soundfx)
 	{
-		ToggleSceneObjectFromSelection(unit, suuid);
+		ToggleSceneObjectFromSelection(FROMSUUUID(soundfx()));
 	}
 
 	void ToggleSceneObjectFromSelection(SceneUnitId unit, JUUID uuid)
@@ -2522,10 +2522,10 @@ namespace Editor
 	}
 
 	//Billboards
-	JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial)
+	RenderableID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial)
 	{
 #if !defined(_EDITOR_BILLBOARD)
-		return "";
+		return RenderableID();
 #endif
 		std::string jname = name;
 		jname += "-billboard";
@@ -2565,7 +2565,7 @@ namespace Editor
 		);
 		CreateSURenderable(id, jbillboard);
 		GetSceneUnit(id)->InsertRenderableIntoLoadingPool(uuid);
-		return uuid;
+		return MAKESUUUID(id, uuid);
 	}
 
 	void RegisterBillboard(SceneUnitId id, JUUID sceneObject)
@@ -2576,12 +2576,12 @@ namespace Editor
 		billboards.at(id).billboardRegistry.insert_or_assign(sceneObject, MAKESUUUID(id, ""));
 	}
 
-	JUUID GetBillboard(SceneUnitId id, JUUID sceneObject)
+	RenderableID GetBillboard(SceneUnitId id, JUUID sceneObject)
 	{
 #if !defined(_EDITOR_BILLBOARD)
 		return "";
 #endif
-		return billboards.at(id).billboardRegistry.contains(sceneObject) ? billboards.at(id).billboardRegistry.at(sceneObject).uuid() : "";
+		return billboards.at(id).billboardRegistry.contains(sceneObject) ? billboards.at(id).billboardRegistry.at(sceneObject) : RenderableID();
 	}
 
 	void DestroyBillboard(SceneUnitId id, JUUID sceneObject)
@@ -2589,11 +2589,11 @@ namespace Editor
 #if !defined(_EDITOR_BILLBOARD)
 		return;
 #endif
-		JUUID billboard = GetBillboard(id, sceneObject);
+		RenderableID billboard = GetBillboard(id, sceneObject);
 		if (billboard.empty())
 			return;
 
-		billboards.at(id).billboardsToDestroy.insert(MAKESUUUID(id, billboard));
+		billboards.at(id).billboardsToDestroy.insert(billboard);
 		billboards.at(id).billboardRegistry.erase(sceneObject);
 	}
 
@@ -2615,7 +2615,7 @@ namespace Editor
 			auto so = GetSceneObjectPointer(id, it->first);
 			if (so->contains("hidden") && so->at("hidden") == true) continue;
 
-			it->second = MAKESUUUID(id, so->CreateBillboard(camera));
+			it->second = so->CreateBillboard(camera);
 			if (!it->second.empty())
 			{
 				auto& bb = it->second;

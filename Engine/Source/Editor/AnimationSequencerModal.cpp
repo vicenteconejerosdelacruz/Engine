@@ -330,7 +330,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			if (sequence != "")
 			{
 				Sequence& seq = animationsSequences.sequences.at(sequence);
-				sequencePlayer.SetSequence(seq, unit, renderable.uuid());
+				sequencePlayer.SetSequence(seq, renderable);
 				timelineEditor.Init(renderable, sequencePlayer.sequence);
 				renderable->SetCurrentAnimation(&sequencePlayer);
 			}
@@ -351,7 +351,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			playingSequence = false;
 			playingSequenceTime = 0.0f;
 			timelineEditor.Reset();
-			sequencePlayer.SetSequence(Sequence(), unit, "");
+			sequencePlayer.SetSequence(Sequence(), RenderableID());
 			renderable->SetCurrentAnimation(nullptr);
 			selectedTransformationKeyframe = nullptr;
 			keyFrameFrame = -1;
@@ -376,7 +376,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			playingSequence = false;
 			playingSequenceTime = 0.0f;
 			Sequence& seq = animationsSequences.sequences.at(seqName);
-			sequencePlayer.SetSequence(seq, unit, renderable.uuid());
+			sequencePlayer.SetSequence(seq, renderable);
 			timelineEditor.Init(renderable, sequencePlayer.sequence);
 			renderable->SetCurrentAnimation(&sequencePlayer);
 		};

@@ -228,8 +228,8 @@ namespace Scene {
 		void RenderShadowMapMinMaxChain();
 
 		//Billboard
-		virtual JUUID CreateBillboard(CameraID camera);
-		virtual void UpdateBillboard(JUUID uuid);
+		virtual RenderableID CreateBillboard(CameraID camera);
+		virtual void UpdateBillboard(RenderableID renderable);
 		BoundingBox GetBoundingBox();
 		//Gizmo
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation);

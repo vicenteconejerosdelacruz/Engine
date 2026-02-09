@@ -78,8 +78,8 @@ namespace Scene
 		void UpdateEmmiter();
 
 #if defined(_EDITOR)
-		virtual JUUID CreateBillboard(CameraID camera);
-		virtual void UpdateBillboard(JUUID billboard);
+		virtual RenderableID CreateBillboard(CameraID camera);
+		virtual void UpdateBillboard(RenderableID renderable);
 		BoundingBox GetBoundingBox();
 
 		//Gizmo
