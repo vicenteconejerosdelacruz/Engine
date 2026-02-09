@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include <Renderer.h>
 #include <Scripting.h>
+#include <Physics.h>
 #include <AudioSystem.h>
 #include <ShaderCompiler.h>
 #include <Templates.h>
@@ -19,6 +20,7 @@ using namespace Scene;
 using namespace AudioSystem;
 using namespace ShaderCompiler;
 using namespace Scripting;
+using namespace Physics;
 using namespace Game;
 #if defined(_EDITOR)
 using namespace Editor;
@@ -69,8 +71,6 @@ DirectX::Keyboard::KeyboardStateTracker keys;
 //GamePad
 std::unique_ptr<DirectX::GamePad> gamePad;
 DirectX::GamePad::ButtonStateTracker buttons;
-//Physx
-static physx::PxDefaultAllocator gAllocator;
 
 //app destruction
 bool destroyed = false;
@@ -149,6 +149,9 @@ int APIENTRY EngineWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevIns
 	//create an isolate and a handle scope for the application lifetime
 	v8::Isolate::Scope isolate_scope(isolate);
 	v8::HandleScope handle_scope(isolate);
+
+	//Initialize the physics
+	InitializePhysics();
 
 	// Main loop
 	while (!appDone)
@@ -250,12 +253,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 #endif
 	return TRUE;
 }
-
-void CreateLightingResourcesMapping()
-{
-}
-
-//READ&GET
 
 //UPDATE
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -439,7 +436,6 @@ void AppStep()
 
 	//delete scenes which are marked for deletion
 	DeletedScenes();
-
 }
 
 //RENDER
@@ -484,8 +480,10 @@ void DestroyInstance()
 #if defined(_EDITOR)
 	DestroyEditor();
 #endif
+
 	DestroyScenes(true);
 	DestroyControllers();
+	DestroyPhysics();
 	DestroyTemplatesInstances();
 	DestroyTemplates();
 }

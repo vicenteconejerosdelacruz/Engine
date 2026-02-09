@@ -594,6 +594,9 @@
     <ClInclude Include="Editor\YesNoCancelModal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Physics\Physics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -861,6 +864,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Editor\YesNoCancelModal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\Physics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
