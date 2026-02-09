@@ -33,13 +33,11 @@ namespace Templates {
 	namespace Shader
 	{
 		ShaderIncludesDependencies dependencies;
-		std::set<Source> GetSourcesFromShaderUUID(std::string shaderUUID)
+		std::set<Source> GetSourcesFromShaderUUID(JUUID shaderTemplate)
 		{
 			ShaderIncludesDependencies matchingUUIDs;
-			std::copy_if(dependencies.begin(), dependencies.end(), std::inserter(matchingUUIDs, matchingUUIDs.begin()), [shaderUUID](const auto& dep)
-				{
-					return dep.first.shaderUUID == shaderUUID;
-				}
+			std::copy_if(dependencies.begin(), dependencies.end(), std::inserter(matchingUUIDs, matchingUUIDs.begin()),
+				[shaderTemplate](const auto& dep) { return dep.first.shaderTemplate() == shaderTemplate; }
 			);
 			std::set<Source> sources;
 			std::transform(matchingUUIDs.begin(), matchingUUIDs.end(), std::inserter(sources, sources.begin()), [](const auto& pair) { return pair.first; });
@@ -100,7 +98,7 @@ namespace Templates {
 		}
 	}
 
-	bool CheckChangesCompilation(std::string uuid)
+	bool CheckChangesCompilation(JUUID uuid)
 	{
 		using namespace Shader;
 		using namespace ShaderCompiler;
@@ -109,7 +107,7 @@ namespace Templates {
 		std::set<Source> sources = GetSourcesFromShaderUUID(uuid);
 		for (auto src : sources)
 		{
-			ShaderInstance dummy("", src.shaderUUID, src);
+			ShaderInstance dummy("", src.shaderTemplate(), src);
 			ShaderIncludesDependencies deps;
 			if (!Compile(dummy, src, deps))
 				return false;
@@ -136,9 +134,8 @@ namespace Templates {
 		for (auto& [src, deps] : dependencies)
 		{
 			//if the file is not in the dependency skip
-			if (!deps.contains(dependency) || !CheckChangesCompilation(src.shaderUUID)) continue;
-			auto& shader = GetShaderTemplate(src.shaderUUID);
-			shader->flag(ShaderJson::Update_path);
+			if (!deps.contains(dependency) || !CheckChangesCompilation(src.shaderTemplate())) continue;
+			src.shaderTemplate->flag(ShaderJson::Update_path);
 		}
 	}
 

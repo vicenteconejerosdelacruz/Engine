@@ -18,7 +18,7 @@ namespace ShaderCompiler {
 		std::lock_guard<std::mutex> lock(compileMutex);
 		//read the shader
 
-		auto& json = GetShaderTemplate(params.shaderUUID);
+		auto& json = params.shaderTemplate;
 
 		const std::string filename = defaultShadersFolder + json->path();
 		ShaderByteCode shaderSource = DX::ReadDataAsync(filename.c_str()).get();

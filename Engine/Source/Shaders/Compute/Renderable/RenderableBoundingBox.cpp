@@ -32,7 +32,7 @@ namespace ComputeShader
 	{
 		using namespace Animation;
 		bonesCbv = GetAnimatedConstantsBuffer(renderable);
-		auto& shaderInstance = GetShaderInstance(shader.shader);
+		ShaderInstanceID shaderInstance = shader.shader(); //instance ID = json ID, yes this was on purpose
 
 		auto createComputeResource = [this, &renderable](size_t numResources)
 			{

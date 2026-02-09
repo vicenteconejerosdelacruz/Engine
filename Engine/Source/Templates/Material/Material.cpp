@@ -314,19 +314,19 @@ namespace Templates
 	void MaterialInstance::CreateShaderInstances()
 	{
 		using namespace ShaderCompiler;
-		Source compVS = { .shaderType = VERTEX_SHADER, .shaderTarget = shaderTarget.at(VERTEX_SHADER),.shaderUUID = vertexShaderUUID(), .defines = defines };
-		Source compPS = { .shaderType = PIXEL_SHADER, .shaderTarget = shaderTarget.at(PIXEL_SHADER), .shaderUUID = pixelShaderUUID(), .defines = defines };
+		Source compVS = { .shaderType = VERTEX_SHADER, .shaderTarget = shaderTarget.at(VERTEX_SHADER),.shaderTemplate = vertexShaderUUID, .defines = defines };
+		Source compPS = { .shaderType = PIXEL_SHADER, .shaderTarget = shaderTarget.at(PIXEL_SHADER), .shaderTemplate = pixelShaderUUID, .defines = defines };
 		vertexShaderInstanceID = vertexShaderUUID() + std::to_string(std::hash<Source>()(compVS));
 		pixelShaderInstanceID = pixelShaderUUID() + std::to_string(std::hash<Source>()(compPS));
 
 		CreateShaderInstance(vertexShaderInstanceID(), [this, compVS]
 			{
-				return std::make_unique<ShaderInstance>(vertexShaderInstanceID(), compVS.shaderUUID, compVS, instanceUUID());
+				return std::make_unique<ShaderInstance>(vertexShaderInstanceID(), compVS.shaderTemplate(), compVS, instanceUUID());
 			}
 		);
 		CreateShaderInstance(pixelShaderInstanceID(), [this, compPS]
 			{
-				return std::make_unique<ShaderInstance>(pixelShaderInstanceID(), compPS.shaderUUID, compPS, instanceUUID());
+				return std::make_unique<ShaderInstance>(pixelShaderInstanceID(), compPS.shaderTemplate(), compPS, instanceUUID());
 			}
 		);
 	}

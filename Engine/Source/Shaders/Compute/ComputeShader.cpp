@@ -16,10 +16,10 @@ namespace ComputeShader
 
 		//Get an instance of the BoundingBox Compute shader
 		shader = GetShaderUUIDByName(shaderName);
-		Source compCS = { .shaderType = COMPUTE_SHADER, .shaderTarget = target, .shaderUUID = shader };
-		auto& shaderIns = CreateShaderInstance(shader, [compCS]
+		Source compCS = { .shaderType = COMPUTE_SHADER, .shaderTarget = target, .shaderTemplate = shader };
+		auto& shaderIns = CreateShaderInstance(shader(), [compCS]
 			{
-				return std::make_unique<ShaderInstance>(compCS.shaderUUID, compCS.shaderUUID, compCS);
+				return std::make_unique<ShaderInstance>(compCS.shaderTemplate(), compCS.shaderTemplate(), compCS);
 			}
 		);
 

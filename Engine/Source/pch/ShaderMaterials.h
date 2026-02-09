@@ -30,12 +30,12 @@ inline static std::map<std::string, ShaderType> StrToShaderType = {
 struct Source {
 	ShaderType shaderType;
 	std::wstring shaderTarget;
-	std::string shaderUUID;
+	ShaderJsonID shaderTemplate;
 	std::vector<std::string> defines;
 
 	bool operator<(const Source& other) const
 	{
-		return std::tie(shaderType, shaderTarget, shaderUUID, defines) < std::tie(other.shaderType, other.shaderTarget, other.shaderUUID, other.defines);
+		return std::tie(shaderType, shaderTarget, shaderTemplate, defines) < std::tie(other.shaderType, other.shaderTarget, other.shaderTemplate, other.defines);
 	}
 
 	std::string to_string()
@@ -47,7 +47,7 @@ struct Source {
 			if (i < (defines.size() - 1))
 				defs += ",";
 		}
-		return ShaderTypeToStr.at(shaderType) + ":" + shaderUUID + " (" + defs + ")";
+		return ShaderTypeToStr.at(shaderType) + ":" + shaderTemplate() + " (" + defs + ")";
 	}
 };
 
@@ -59,7 +59,7 @@ struct std::hash<Source>
 		using std::hash;
 		std::string s = "";
 		s += ShaderTypeToStr.at(src.shaderType);
-		s += src.shaderUUID;
+		s += src.shaderTemplate();
 		for (auto& v : src.defines) { s += v; }
 		return hash<std::string>()(s);
 	}
@@ -68,7 +68,7 @@ struct std::hash<Source>
 		using std::hash;
 		std::string s = "";
 		s += ShaderTypeToStr.at(src.shaderType);
-		s += src.shaderUUID;
+		s += src.shaderTemplate();
 		for (auto& v : src.defines) { s += v; }
 		return hash<std::string>()(s);
 	}
