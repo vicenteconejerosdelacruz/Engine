@@ -30,8 +30,8 @@ namespace DeviceUtils
 		void Resize(unsigned int width, unsigned int height);
 	};
 
-	JUUID CreateRenderToTexturePass(const std::string name, std::vector<DXGI_FORMAT> renderTargetsFormats, DXGI_FORMAT depthStencilFormat, unsigned int width, unsigned int height);
+	RenderToTexturePassID CreateRenderToTexturePass(const std::string name, std::vector<DXGI_FORMAT> renderTargetsFormats, DXGI_FORMAT depthStencilFormat, unsigned int width, unsigned int height);
 	std::unique_ptr<RenderToTexturePass>& GetRenderToTexturePass(JUUID uuid);
-	void DeleteRenderToTexturePass(JUUID uuid);
+	void DeleteRenderToTexturePass(RenderToTexturePassID renderToTexturePassId);
 };
 

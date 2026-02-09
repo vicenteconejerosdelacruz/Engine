@@ -21,7 +21,7 @@ namespace ComputeShader
 		//histogram
 		JUUID rttUUID; // HDR BaseTexture, (T0)
 		CComPtr<ID3D12Resource> resource; //LuminanceHistogram (U0)
-		JUUID constantsBuffers; //LuminanceHistogramBuffer CBV (C0)
+		ConstantsBufferID constantsBuffers; //LuminanceHistogramBuffer CBV (C0)
 		CD3DX12_CPU_DESCRIPTOR_HANDLE resultCpuHandle;	//UAV, (U0) 
 		CD3DX12_GPU_DESCRIPTOR_HANDLE resultGpuHandle; //UAV, (U0)
 

@@ -69,7 +69,7 @@ namespace ComputeShader
 			.minLogLuminance = minLogLuminance,
 			.oneOverLogLuminanceRange = 1.0f / (maxLogLuminance - minLogLuminance)
 		};
-		GetConstantsBuffer(constantsBuffers)->push(params, 0);
+		constantsBuffers->push(params, 0);
 	}
 
 	void LuminanceHistogram::Compute(SceneUnitId unit)
@@ -90,7 +90,7 @@ namespace ComputeShader
 
 		auto& rtt = GetRenderToTexture(rttUUID);
 
-		commandList->SetComputeRootDescriptorTable(0, GetConstantsBuffer(constantsBuffers)->gpu_xhandle[0]);
+		commandList->SetComputeRootDescriptorTable(0, constantsBuffers->gpu_xhandle[0]);
 		commandList->SetComputeRootDescriptorTable(1, resultGpuHandle);
 		commandList->SetComputeRootDescriptorTable(2, rtt->gpuTextureHandle);
 		unsigned int numDispatchX = (rtt->width / 16U) + ((rtt->width % 16U) ? 1U : 0U);

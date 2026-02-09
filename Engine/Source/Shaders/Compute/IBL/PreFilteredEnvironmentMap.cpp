@@ -140,7 +140,7 @@ namespace ComputeShader
 		unsigned int faceH = faceHeight;
 		for (unsigned int i = 0; i < mipsResultsGpuHandle.size(); i++)
 		{
-			auto& mipResCB = GetConstantsBuffer(mipsResultsCB.at(i));
+			auto& mipResCB = mipsResultsCB.at(i);
 			unsigned int threadsX = std::max(faceW / 8, 1U);
 			unsigned int threadsY = std::max(faceH / 8, 1U);
 			float roughness = static_cast<float>(i) / static_cast<float>(numMipMaps);

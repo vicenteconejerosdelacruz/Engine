@@ -11,7 +11,7 @@ extern std::unique_ptr<Renderer> renderer;
 namespace DeviceUtils
 {
 	std::unique_ptr<DescriptorHeap> csuDescriptorHeap;
-	static std::unordered_map<JUUID, std::unique_ptr<ConstantsBuffer>> constantsBuffers;
+	static std::unordered_map<ConstantsBufferID, std::unique_ptr<ConstantsBuffer>> constantsBuffers;
 
 	void CreateCSUDescriptorHeap(unsigned int numFrames) {
 		csuDescriptorHeap = std::make_unique<DescriptorHeap>();
@@ -43,9 +43,9 @@ namespace DeviceUtils
 		csuDescriptorHeap->FreeDescriptor(cpuHandle, gpuHandle);
 	}
 
-	JUUID CreateConstantsBuffer(size_t bufferSize, unsigned int numDescriptors, std::string cbName)
+	ConstantsBufferID CreateConstantsBuffer(size_t bufferSize, unsigned int numDescriptors, std::string cbName)
 	{
-		JUUID ConstantsBufferID = getUUID();
+		ConstantsBufferID constantsBufferID = getUUID();
 		std::unique_ptr<ConstantsBuffer> cbvData = std::make_unique<ConstantsBuffer>(bufferSize, cbName);
 
 		//create the d3d12 cbuffer
@@ -84,11 +84,11 @@ namespace DeviceUtils
 		DX::ThrowIfFailed(cbvData->constantBuffer->Map(0, &readRange, reinterpret_cast<void**>(&cbvData->mappedConstantBuffer)));
 		ZeroMemory(cbvData->mappedConstantBuffer, numDescriptors * cbvData->alignedConstantBufferSize);
 
-		constantsBuffers.insert_or_assign(ConstantsBufferID, std::move(cbvData));
-		return ConstantsBufferID;
+		constantsBuffers.insert_or_assign(constantsBufferID, std::move(cbvData));
+		return constantsBufferID;
 	}
 
-	void DestroyConstantsBuffer(JUUID ConstantsBufferID)
+	void DestroyConstantsBuffer(ConstantsBufferID ConstantsBufferID)
 	{
 		constantsBuffers.erase(ConstantsBufferID);
 	}
@@ -98,14 +98,14 @@ namespace DeviceUtils
 		constantsBuffers.clear();
 	}
 
-	::CD3DX12_CPU_DESCRIPTOR_HANDLE GetCpuDescriptorHandle(JUUID ConstantsBufferID, unsigned int index)
+	::CD3DX12_CPU_DESCRIPTOR_HANDLE GetCpuDescriptorHandle(ConstantsBufferID constantsBuffer, unsigned int index)
 	{
-		return constantsBuffers.at(ConstantsBufferID)->cpu_xhandle[index];
+		return constantsBuffer->cpu_xhandle[index];
 	}
 
-	::CD3DX12_GPU_DESCRIPTOR_HANDLE GetGpuDescriptorHandle(JUUID ConstantsBufferID, unsigned int index)
+	::CD3DX12_GPU_DESCRIPTOR_HANDLE GetGpuDescriptorHandle(ConstantsBufferID constantsBuffer, unsigned int index)
 	{
-		return constantsBuffers.at(ConstantsBufferID)->gpu_xhandle[index];
+		return constantsBuffer->gpu_xhandle[index];
 	}
 
 	std::unique_ptr<ConstantsBuffer>& GetConstantsBuffer(JUUID ConstantsBufferID)

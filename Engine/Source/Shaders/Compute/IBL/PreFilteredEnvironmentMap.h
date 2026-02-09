@@ -36,7 +36,7 @@ namespace ComputeShader
 		std::vector<CComPtr<ID3D12Resource>> resources;
 		std::vector<CD3DX12_CPU_DESCRIPTOR_HANDLE> mipsResultsCpuHandle; //UAV, (U0) 
 		std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> mipsResultsGpuHandle; //UAV, (U0)
-		std::vector<JUUID> mipsResultsCB; //CBV, (C0)
+		std::vector<ConstantsBufferID> mipsResultsCB; //CBV, (C0)
 
 		std::vector<size_t> readBackSizes;
 		std::vector<CComPtr<ID3D12Resource>> readBackResources;

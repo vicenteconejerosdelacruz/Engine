@@ -23,13 +23,13 @@ namespace DeviceUtils {
 		renderToTextureDescriptorHeap = nullptr;
 	}
 
-	static std::unordered_map<JUUID, std::unique_ptr<RenderToTexture>> renderToTextures;
+	static std::unordered_map<RenderToTextureID, std::unique_ptr<RenderToTexture>> renderToTextures;
 
-	JUUID CreateRenderToTexture()
+	RenderToTextureID CreateRenderToTexture()
 	{
-		JUUID uuid = getUUID();
-		renderToTextures.insert_or_assign(uuid, std::make_unique<RenderToTexture>());
-		return uuid;
+		RenderToTextureID rtt = getUUID();
+		renderToTextures.insert_or_assign(rtt, std::make_unique<RenderToTexture>());
+		return rtt;
 	}
 
 	std::unique_ptr<RenderToTexture>& GetRenderToTexture(JUUID rttUUID)
@@ -37,7 +37,7 @@ namespace DeviceUtils {
 		return renderToTextures.at(rttUUID);
 	}
 
-	void DeleteRenderToTexture(JUUID rttUUID)
+	void DeleteRenderToTexture(RenderToTextureID rttUUID)
 	{
 		renderToTextures.erase(rttUUID);
 	}

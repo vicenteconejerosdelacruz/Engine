@@ -90,11 +90,10 @@ namespace ComputeShader
 
 		auto createNumVerticesConstantsBuffer = [this, &shaderInstance](auto mesh)
 			{
-				JUUID cbvUUID = CreateConstantsBuffer(shaderInstance->cbufferSize[0], 1U, "bboxCS." + mesh->uuid);
+				ConstantsBufferID cbv = CreateConstantsBuffer(shaderInstance->cbufferSize[0], 1U, "bboxCS." + mesh->uuid);
 				unsigned int numVertices = mesh->vbvData.vertexBufferView.SizeInBytes / mesh->vbvData.vertexBufferView.StrideInBytes;
-				auto& cbv = GetConstantsBuffer(cbvUUID);
 				cbv->push<unsigned int>(numVertices, 0);
-				constantsBuffers.push_back(cbvUUID);
+				constantsBuffers.push_back(cbv);
 			};
 
 		//Create the bounding box compute resource

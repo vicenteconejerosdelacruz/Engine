@@ -21,11 +21,11 @@ namespace DeviceUtils
 	void AllocCSUDescriptor(::CD3DX12_CPU_DESCRIPTOR_HANDLE& cpuHandle, ::CD3DX12_GPU_DESCRIPTOR_HANDLE& gpuHandle);
 	void FreeCSUDescriptor(::CD3DX12_CPU_DESCRIPTOR_HANDLE& cpuHandle, ::CD3DX12_GPU_DESCRIPTOR_HANDLE& gpuHandle);
 
-	JUUID CreateConstantsBuffer(size_t bufferSize, unsigned int numDescriptors, std::string cbName = "");
-	void DestroyConstantsBuffer(JUUID ConstantsBufferID);
+	ConstantsBufferID CreateConstantsBuffer(size_t bufferSize, unsigned int numDescriptors, std::string cbName = "");
+	void DestroyConstantsBuffer(ConstantsBufferID ConstantsBufferID);
 	void DestroyConstantsBuffer();
-	::CD3DX12_CPU_DESCRIPTOR_HANDLE GetCpuDescriptorHandle(JUUID ConstantsBufferID, unsigned int index);
-	::CD3DX12_GPU_DESCRIPTOR_HANDLE GetGpuDescriptorHandle(JUUID ConstantsBufferID, unsigned int index);
+	::CD3DX12_CPU_DESCRIPTOR_HANDLE GetCpuDescriptorHandle(ConstantsBufferID constantsBuffer, unsigned int index);
+	::CD3DX12_GPU_DESCRIPTOR_HANDLE GetGpuDescriptorHandle(ConstantsBufferID constantsBuffer, unsigned int index);
 	std::unique_ptr<ConstantsBuffer>& GetConstantsBuffer(JUUID ConstantsBufferID);
 
 	struct ConstantsBuffer {

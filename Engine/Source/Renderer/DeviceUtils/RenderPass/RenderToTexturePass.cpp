@@ -14,11 +14,11 @@ extern std::unique_ptr<Renderer> renderer;
 
 namespace DeviceUtils {
 
-	static std::unordered_map<JUUID, std::unique_ptr<RenderToTexturePass>> renderToTexturePasses;
+	static std::unordered_map<RenderToTexturePassID, std::unique_ptr<RenderToTexturePass>> renderToTexturePasses;
 
-	JUUID CreateRenderToTexturePass(const std::string name, std::vector<DXGI_FORMAT> renderTargetsFormats, DXGI_FORMAT depthStencilFormat, unsigned int width, unsigned int height)
+	RenderToTexturePassID CreateRenderToTexturePass(const std::string name, std::vector<DXGI_FORMAT> renderTargetsFormats, DXGI_FORMAT depthStencilFormat, unsigned int width, unsigned int height)
 	{
-		JUUID uuid = getUUID();
+		RenderToTexturePassID renderToTexturePassId = getUUID();
 		auto& d3dDevice = renderer->d3dDevice;
 		std::unique_ptr<RenderToTexturePass> renderPass = std::make_unique<RenderToTexturePass>();
 
@@ -80,8 +80,8 @@ namespace DeviceUtils {
 			d3dDevice->CreateShaderResourceView(renderPass->depthStencilTexture, &depthStencilSRVDesc, renderPass->cpuDepthStencilTextureHandle);
 		}
 
-		renderToTexturePasses.insert_or_assign(uuid, std::move(renderPass));
-		return uuid;
+		renderToTexturePasses.insert_or_assign(renderToTexturePassId, std::move(renderPass));
+		return renderToTexturePassId;
 	}
 
 	std::unique_ptr<RenderToTexturePass>& GetRenderToTexturePass(JUUID uuid)
@@ -89,12 +89,12 @@ namespace DeviceUtils {
 		return renderToTexturePasses.at(uuid);
 	}
 
-	void DeleteRenderToTexturePass(JUUID uuid)
+	void DeleteRenderToTexturePass(RenderToTexturePassID renderToTexturePassId)
 	{
-		if (renderToTexturePasses.contains(uuid))
+		if (renderToTexturePasses.contains(renderToTexturePassId))
 		{
-			renderToTexturePasses.at(uuid)->ReleaseResources();
-			renderToTexturePasses.erase(uuid);
+			renderToTexturePassId->ReleaseResources();
+			renderToTexturePasses.erase(renderToTexturePassId);
 		}
 	}
 
