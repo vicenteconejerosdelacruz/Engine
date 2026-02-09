@@ -271,16 +271,16 @@ namespace Scene
 		return renderPassesUUID.at(passIndex)->renderPassTemplate;
 	}
 
-	RenderPassInstanceID Camera::CreateRenderPass(JUUID passUUID, unsigned int passIndex)
+	RenderPassInstanceID Camera::CreateRenderPass(RenderPassJsonID pass, unsigned int passIndex)
 	{
 		unsigned int projW = static_cast<unsigned int>(projectionWidth());
 		unsigned int projH = static_cast<unsigned int>(projectionHeight());
-		return CreateRenderPassInstance(SUuuid(), passUUID, passIndex, projW, projH);
+		return CreateRenderPassInstance(SUuuid(), pass, passIndex, projW, projH);
 	}
 
-	void Camera::CreateRenderPassAtIndex(JUUID passUUID, unsigned int passIndex)
+	void Camera::CreateRenderPassAtIndex(RenderPassJsonID pass, unsigned int passIndex)
 	{
-		renderPassesUUID.insert(renderPassesUUID.begin() + passIndex, CreateRenderPass(passUUID, passIndex));
+		renderPassesUUID.insert(renderPassesUUID.begin() + passIndex, CreateRenderPass(pass, passIndex));
 		RearrangeRenderPassesAfter(passIndex);
 	}
 
@@ -291,10 +291,10 @@ namespace Scene
 		RearrangeRenderPassesAfter(passIndex);
 	}
 
-	void Camera::SwapRenderPassAtIndex(JUUID passUUID, unsigned int passIndex)
+	void Camera::SwapRenderPassAtIndex(RenderPassJsonID pass, unsigned int passIndex)
 	{
 		renderPassesUUID.at(passIndex)->MarkForDelete();
-		renderPassesUUID[passIndex] = CreateRenderPass(passUUID, passIndex);
+		renderPassesUUID[passIndex] = CreateRenderPass(pass, passIndex);
 		RearrangeRenderPassesAfter(passIndex);
 	}
 

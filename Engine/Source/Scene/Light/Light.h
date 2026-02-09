@@ -181,11 +181,11 @@ namespace Scene {
 		virtual void Initialize();
 		virtual void BindToScene();
 		void BindCameras();
-		void BindCamera(JUUID cuuid);
+		void BindCamera(CameraID camera);
 		void BindRenderablesToShadowMapCamera();
 		virtual void UnbindFromScene();
 		void UnbindCameras();
-		void UnbindCamera(JUUID cuuid);
+		void UnbindCamera(CameraID camera);
 		void UnbindRenderablesFromShadowMapCameras();
 		void UnbindRenderableFromShadowMapCamera(RenderableID r);
 

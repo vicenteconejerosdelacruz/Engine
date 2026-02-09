@@ -105,14 +105,14 @@ namespace Scene
 	{
 		auto cams = cameras();
 		for (auto& uuid : cams) {
-			BindCamera(uuid);
+			BindCamera(MAKESUUUID(unit, uuid));
 		}
 	}
 
-	void Light::BindCamera(JUUID cuuid)
+	void Light::BindCamera(CameraID camera)
 	{
-		if (cuuid.empty()) return;
-		Scene::BindToScene(unit, uuid(), cuuid);
+		if (camera.empty()) return;
+		Scene::BindToScene(unit, uuid(), camera.uuid());
 	}
 
 	void Light::UnbindFromScene()
@@ -135,16 +135,15 @@ namespace Scene
 	{
 		auto cams = cameras();
 		for (auto& uuid : cams) {
-			UnbindCamera(uuid);
+			UnbindCamera(MAKESUUUID(unit, uuid));
 		}
 	}
 
-	void Light::UnbindCamera(JUUID cuuid)
+	void Light::UnbindCamera(CameraID camera)
 	{
-		if (cuuid.empty()) return;
-		CameraID cam = MAKESUUUID(unit, cuuid);
-		cam->UnbindLight(MAKESUUUID(unit, uuid()));
-		Scene::UnbindFromScene(unit, uuid(), cuuid);
+		if (camera.empty()) return;
+		camera->UnbindLight(MAKESUUUID(unit, uuid()));
+		Scene::UnbindFromScene(unit, uuid(), camera.uuid());
 	}
 
 	void Light::Destroy()

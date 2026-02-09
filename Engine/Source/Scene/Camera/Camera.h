@@ -105,10 +105,10 @@ namespace Scene {
 
 		void CreateRenderPasses();
 		RenderPassJsonID GetRenderPassTemplateFromInstanceIndex(unsigned int passIndex);
-		RenderPassInstanceID CreateRenderPass(JUUID passUUID, unsigned int passIndex);
-		void CreateRenderPassAtIndex(JUUID passUUID, unsigned int passIndex);
+		RenderPassInstanceID CreateRenderPass(RenderPassJsonID pass, unsigned int passIndex);
+		void CreateRenderPassAtIndex(RenderPassJsonID pass, unsigned int passIndex);
 		void DeleteRenderPassAtIndex(unsigned int passIndex);
-		void SwapRenderPassAtIndex(JUUID passUUID, unsigned int passIndex);
+		void SwapRenderPassAtIndex(RenderPassJsonID pass, unsigned int passIndex);
 		void RearrangeRenderPassesAfter(unsigned int passIndex);
 		void DestroyRenderPasses();
 		void ResizeReleasePasses();
