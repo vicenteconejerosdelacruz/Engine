@@ -1,22 +1,8 @@
 #pragma once
 
-//#include <assimp/Importer.hpp>
-//#include <assimp/scene.h>
-//#include <assimp/postprocess.h>
-//#include <assimp/GltfMaterial.h>
-//#include <VertexFormats.h>
-//#include <Mesh/Mesh.h>
-//#include <Material/Material.h>
-//#include <Animated.h>
-//#include <DirectXCollision.h>
 #include <Templates.h>
 #include <JTemplate.h>
-//#include <JTypes.h>
-//#include <TemplateDecl.h>
 #include <Sequence/AnimationSequences.h>
-
-//namespace Animation { struct Animated; };
-//namespace Templates { struct TextureJson; struct MaterialJson; };
 
 namespace Templates
 {
@@ -80,9 +66,9 @@ namespace Templates
 
 	TEMPDECL_FULL(Model3D);
 
-	JUUID GetModel3DMeshInstanceID(std::string uuid, unsigned int index);
-	JUUID GetModel3DMaterialInstanceID(std::string uuid, unsigned int index);
-	JUUID GetModel3DMaterialTemplateName(std::string uuid, unsigned int index);
+	JUUID GetModel3DMeshInstanceID(JUUID meshInstanceUUID, unsigned int index);
+	JUUID GetModel3DMaterialInstanceID(JUUID materialInstanceUUID, unsigned int index);
+	JUUID GetModel3DMaterialTemplateName(Model3DJsonID mdl, unsigned int index);
 
 	struct Model3DInstance
 	{

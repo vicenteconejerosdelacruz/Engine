@@ -95,17 +95,16 @@ namespace Templates
 	}
 #endif
 
-	JUUID GetModel3DMeshInstanceID(JUUID uuid, unsigned int index) {
-		return "mesh-" + uuid + "-" + std::to_string(index);
+	JUUID GetModel3DMeshInstanceID(JUUID meshInstanceUUID, unsigned int index) {
+		return "mesh-" + meshInstanceUUID + "-" + std::to_string(index);
 	}
 
-	JUUID GetModel3DMaterialInstanceID(JUUID uuid, unsigned int index) {
-		return "mat-" + uuid + "-" + std::to_string(index);
+	JUUID GetModel3DMaterialInstanceID(JUUID materialInstanceUUID, unsigned int index) {
+		return "mat-" + materialInstanceUUID + "-" + std::to_string(index);
 	}
 
-	JUUID GetModel3DMaterialTemplateName(JUUID uuid, unsigned int index)
+	JUUID GetModel3DMaterialTemplateName(Model3DJsonID mdl, unsigned int index)
 	{
-		std::unique_ptr<Model3DJson>& mdl = GetModel3DTemplate(uuid);
 		return mdl->name() + "/mat-" + std::to_string(index);
 	}
 
