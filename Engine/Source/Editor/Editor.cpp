@@ -2679,7 +2679,7 @@ namespace Editor
 			if (it->second.empty()) continue;
 
 			auto so = GetSceneObjectPointer(currentSceneUnitId, it->first);
-			so->UpdateBillboard(it->second.uuid());
+			so->UpdateBillboard(it->second);
 		}
 	}
 

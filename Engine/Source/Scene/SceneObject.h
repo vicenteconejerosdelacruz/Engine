@@ -100,7 +100,7 @@ namespace Scene
 #if defined(_EDITOR)
 		//Billboard
 		virtual RenderableID CreateBillboard(CameraID camera) { return RenderableID(); }
-		virtual void UpdateBillboard(JUUID billboard) {}
+		virtual void UpdateBillboard(RenderableID renderable) {}
 
 		//Gizmos
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return false; }
