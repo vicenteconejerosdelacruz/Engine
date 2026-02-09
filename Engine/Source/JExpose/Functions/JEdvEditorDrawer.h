@@ -1838,8 +1838,8 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_renderable>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
-			auto getName = [](JUUID uuid) { return Scene::GetNameFromCameras(Editor::currentSceneUnitId, uuid); };
-			DrawResourceSelection(attribute, json, getName, SortUUIDSUNameByName(Editor::currentSceneUnitId, Scene::GetRenderablesSUUUIDsNames), ICON_FA_SNOWMAN);
+			auto getName = [](JUUID uuid) { return Scene::GetCameraName(MAKESUUUID(Editor::currentSceneUnitId, uuid)); };
+			DrawResourceSelection(attribute, json, getName, SortUUIDSUNameByName(Editor::currentSceneUnitId, Scene::GetRenderablesIDsNames), ICON_FA_SNOWMAN);
 		};
 }
 
@@ -2237,7 +2237,7 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_camera_vector>
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
-			auto getName = [](JUUID uuid) { return Scene::GetNameFromCameras(Editor::currentSceneUnitId, uuid); };
+			auto getName = [](JUUID uuid) { return Scene::GetCameraName(MAKESUUUID(Editor::currentSceneUnitId, uuid)); };
 			auto getObjects = [&] {return Scene::GetSUSceneObjectsByType(Editor::currentSceneUnitId, SO_Cameras); };
 			EditorDrawVector(attribute, json, ICON_FA_CAMERA, getObjects, getName, ImGui::OpenSceneObject, [&json, attribute](unsigned int index, JUUIDName item) //filtering
 				{
@@ -2259,7 +2259,7 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_light_vector>(
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
-			auto getName = [](JUUID uuid) { return Scene::GetNameFromLights(Editor::currentSceneUnitId, uuid); };
+			auto getName = [](JUUID uuid) { return Scene::GetLightName(MAKESUUUID(Editor::currentSceneUnitId, uuid)); };
 			auto getObjects = [&] {return Scene::GetSUSceneObjectsByType(Editor::currentSceneUnitId, SO_Lights); };
 			EditorDrawVector(attribute, json, ICON_FA_LIGHTBULB, getObjects, getName, ImGui::OpenSceneObject);
 		};
@@ -2270,7 +2270,7 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_renderable_vec
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
-			auto getName = [](JUUID uuid) { return Scene::GetNameFromRenderables(Editor::currentSceneUnitId, uuid); };
+			auto getName = [](JUUID uuid) { return Scene::GetRenderableName(MAKESUUUID(Editor::currentSceneUnitId, uuid)); };
 			auto getObjects = [&] {return Scene::GetSUSceneObjectsByType(Editor::currentSceneUnitId, SO_Renderables); };
 			EditorDrawVector(attribute, json, ICON_FA_SNOWMAN, getObjects, getName, ImGui::OpenSceneObject);
 		};
@@ -2281,7 +2281,7 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_soundeffect_ve
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
 		{
-			auto getName = [](JUUID uuid) { return Scene::GetNameFromSoundEffects(Editor::currentSceneUnitId, uuid); };
+			auto getName = [](JUUID uuid) { return Scene::GetSoundFXName(MAKESUUUID(Editor::currentSceneUnitId, uuid)); };
 			auto getObjects = [&] {return Scene::GetSUSceneObjectsByType(Editor::currentSceneUnitId, SO_SoundEffects); };
 			EditorDrawVector(attribute, json, ICON_FA_MUSIC, getObjects, getName, ImGui::OpenSceneObject);
 		};

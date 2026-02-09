@@ -309,22 +309,22 @@ namespace Scene
 		{
 			{ SO_Renderables, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
 			{
-				mover(GetRenderablesSUSceneObjects,uuid,fromId,toId);
+				mover(GetRenderablesSceneObjects,uuid,fromId,toId);
 			}
 			},
 			{ SO_Cameras, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
 			{
-				mover(GetCamerasSUSceneObjects,uuid,fromId,toId);
+				mover(GetCamerasSceneObjects,uuid,fromId,toId);
 			}
 			},
 			{ SO_Lights, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
 			{
-				mover(GetLightsSUSceneObjects,uuid,fromId,toId);
+				mover(GetLightsSceneObjects,uuid,fromId,toId);
 			}
 			},
 			{ SO_SoundEffects, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
 			{
-				mover(GetSoundFXsSUSceneObjects,uuid,fromId,toId);
+				mover(GetSoundFXsSceneObjects,uuid,fromId,toId);
 			}
 			},
 		};
@@ -355,27 +355,27 @@ namespace Scene
 			{
 				SO_Renderables, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& so = GetRenderableSUSceneObject(id, uuid);
+					auto& so = GetRenderableSceneObject(id, uuid);
 					so->BindToScene();
 				}
 			},
 			{
 				SO_Cameras, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& so = GetCameraSUSceneObject(id, uuid);
+					auto& so = GetCameraSceneObject(id, uuid);
 					so->BindToScene();
 				}
 			},
 			{ SO_Lights, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& so = GetLightSUSceneObject(id, uuid);
+					auto& so = GetLightSceneObject(id, uuid);
 					so->BindToScene();
 				}
 			},
 			{
 				SO_SoundEffects, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& so = GetSoundFXSUSceneObject(id, uuid);
+					auto& so = GetSoundFXSceneObject(id, uuid);
 					so->BindToScene();
 				}
 			}
@@ -406,22 +406,22 @@ namespace Scene
 		{
 		case SO_Cameras:
 		{
-			CreateSUCamera(id, data);
+			CreateCamera(id, data);
 		}
 		break;
 		case SO_Lights:
 		{
-			CreateSULight(id, data);
+			CreateLight(id, data);
 		}
 		break;
 		case SO_Renderables:
 		{
-			CreateSURenderable(id, data);
+			CreateRenderable(id, data);
 		}
 		break;
 		case SO_SoundEffects:
 		{
-			CreateSUSoundFX(id, data);
+			CreateSoundFX(id, data);
 		}
 		break;
 		}
@@ -567,7 +567,7 @@ namespace Scene
 		std::vector<JUUID> nonSwapChainCams;
 		std::copy_if(cameras.begin(), cameras.end(), std::back_inserter(nonSwapChainCams), [&](JUUID uuid)
 			{
-				auto& cam = GetCameraSUSceneObject(id, uuid);
+				CameraID cam = MAKESUUUID(id, uuid);
 				//we skip swap chain cams
 				if (cam->useSwapChain()) return false;
 				//we skip cameras which resolves to the swapchain
@@ -581,7 +581,7 @@ namespace Scene
 		//render non swapchain buffer cameras(rtt stuff)
 		for (auto& uuid : nonSwapChainCams)
 		{
-			auto& cam = GetCameraSUSceneObject(id, uuid);
+			CameraID cam = MAKESUUUID(id, uuid);
 #if defined(_DEVELOPMENT)
 			PIXBeginEvent(commandList.p, 0, std::string("nonSwapChain:" + cam->name()).c_str());
 #endif
@@ -592,9 +592,9 @@ namespace Scene
 		}
 
 		//check if there is any camera with any render pass resolving to the swapchain
-		bool resolvedToSwapchain = std::any_of(nonSwapChainCams.begin(), nonSwapChainCams.end(), [&](JUUID camUUID)
+		bool resolvedToSwapchain = std::any_of(nonSwapChainCams.begin(), nonSwapChainCams.end(), [&](JUUID uuid)
 			{
-				auto& cam = GetCameraSUSceneObject(id, camUUID);
+				CameraID cam = MAKESUUUID(id, uuid);
 				return std::any_of(cam->renderPassesUUID.begin(), cam->renderPassesUUID.end(), [](RenderPassInstanceID& pass)
 					{
 						return pass->renderCallbackOverride == RenderPassRenderCallbackOverride_Resolve;
@@ -708,25 +708,25 @@ namespace Scene
 		{
 			{ SO_Renderables, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& o = GetRenderableSUSceneObject(id, uuid);
+					auto& o = GetRenderableSceneObject(id, uuid);
 					return static_cast<SceneObject*>(o.get());
 				}
 			},
 			{ SO_Cameras, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& o = GetCameraSUSceneObject(id, uuid);
+					auto& o = GetCameraSceneObject(id, uuid);
 					return static_cast<SceneObject*>(o.get());
 				}
 			},
 			{ SO_Lights, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& o = GetLightSUSceneObject(id, uuid);
+					auto& o = GetLightSceneObject(id, uuid);
 					return static_cast<SceneObject*>(o.get());
 				}
 			},
 			{ SO_SoundEffects, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& o = GetSoundFXSUSceneObject(id, uuid);
+					auto& o = GetSoundFXSceneObject(id, uuid);
 					return static_cast<SceneObject*>(o.get());
 				}
 			}

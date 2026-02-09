@@ -51,7 +51,7 @@ namespace Scene
 	void MoveSceneObjectUnit(JUUID uuid, SceneUnitId fromId, SceneUnitId toId);
 
 	template<SceneObjectType T, typename J>
-	inline void CreateJsonSUSceneObject(SceneUnitId id, nlohmann::json& json, auto getTypesSceneObjects)
+	inline void CreateJsonSceneObject(SceneUnitId id, nlohmann::json& json, auto getTypesSceneObjects)
 	{
 		JUUID uuid = json.at("uuid");
 		JNAME name = json.at("name");
@@ -82,7 +82,7 @@ namespace Scene
 	}
 
 	template<SceneObjectType T, typename J>
-	inline void DeleteJsonSUSceneObject(SceneUnitId id, JUUID uuid, auto getTypesSceneObjects)
+	inline void DeleteJsonSceneObject(SceneUnitId id, JUUID uuid, auto getTypesSceneObjects)
 	{
 		auto& uuidSet = GetSceneObjects(id, T);
 		auto& typesMap = GetSceneObjectsTypes(id);
@@ -98,11 +98,6 @@ namespace Scene
 		uuidSet.erase(uuid);
 		typesMap.erase(uuid);
 		sceneObjects.erase(uuid);
-	}
-
-	inline void WriteSceneObjectsJson(nlohmann::json& json, auto& sceneObjects)
-	{
-
 	}
 
 	void ResetRenderableScenes();

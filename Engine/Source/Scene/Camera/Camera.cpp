@@ -115,7 +115,7 @@ namespace Scene
 	{
 		if (!shadowMapLight().empty())
 		{
-			auto& lcam = GetLightSUSceneObject(unit, shadowMapLight());
+			LightID lcam = MAKESUUUID(unit, shadowMapLight());
 			if (lcam->lightType() == LT_Point)
 			{
 				unsigned int i = 0U;
@@ -136,7 +136,7 @@ namespace Scene
 	{
 		if (!shadowMapLight().empty())
 		{
-			auto& lcam = GetLightSUSceneObject(unit, shadowMapLight());
+			LightID lcam = MAKESUUUID(unit, shadowMapLight());
 			if (lcam->lightType() == LT_Point)
 			{
 				unsigned int i = 0U;
@@ -1102,7 +1102,7 @@ namespace Scene
 			EraseCameraFromWindowCameras(c->unit, c.uuid());
 			EraseCameraFromSwapChainCameras(c->unit, c.uuid());
 			EraseCameraFromMouseCameras(c->unit, c.uuid());
-			DeleteCameraSUSceneObject(c->unit, c.uuid());
+			DeleteCameraSceneObject(c);
 		}
 	}
 
@@ -1115,7 +1115,7 @@ namespace Scene
 				CameraID cam = MAKESUUUID(id, uuid);
 				if (cam->shadowMapLight().empty())
 				{
-					DeleteCameraSUSceneObject(cam->unit, cam->uuid());
+					DeleteCameraSceneObject(cam);
 				}
 			}
 		}
@@ -1130,7 +1130,7 @@ namespace Scene
 		std::transform(CameraSUsceneObjects.at(id).begin(), CameraSUsceneObjects.at(id).end(), std::inserter(uuids, uuids.begin()), [](auto& pair) { return pair.first; });
 		for (auto& uuid : uuids)
 		{
-			DeleteCameraSUSceneObject(id, uuid);
+			DeleteCameraSceneObject(MAKESUUUID(id, uuid));
 		}
 #include <TrackUUID/JClearUnit.h>
 #include <CameraAtt.h>

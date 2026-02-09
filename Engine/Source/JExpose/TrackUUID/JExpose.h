@@ -17,7 +17,6 @@
 	std::unique_ptr<CLASS>& GetFrom##NAME##ByName(SceneUnitId id, std::string name);\
 	std::vector<JNAME> GetNamesFrom##NAME(SceneUnitId id);\
 	std::vector<JUUIDName> GetUUIDNamesFrom##NAME(SceneUnitId id);\
-	JNAME GetNameFrom##NAME(SceneUnitId id, JUUID uuid);\
 	void Insert##CLASS##Into##NAME(SceneUnitId id, JUUID uuid);\
 	void Erase##CLASS##From##NAME(SceneUnitId id, JUUID uuid);\
 
@@ -44,12 +43,12 @@
 	std::unique_ptr<CLASS>& GetFrom##NAME(SceneUnitId id, JUUID uuid)\
 	{\
 		assert(NAME[id].contains(uuid));\
-		return Get##CLASS##SUSceneObject(id, uuid);\
+		return Get##CLASS##SceneObject(id, uuid);\
 	}\
 	std::vector<JNAME> GetNamesFrom##NAME(SceneUnitId id)\
 	{\
 		std::vector<JNAME> names;\
-		std::transform(NAME[id].begin(), NAME[id].end(), std::back_inserter(names), [id](JUUID uuid) { return Get##CLASS##SUName(id, uuid); });\
+		std::transform(NAME[id].begin(), NAME[id].end(), std::back_inserter(names), [id](JUUID uuid) { return Get##CLASS##Name(MAKESUUUID(id, uuid)); });\
 		std::sort(names.begin(), names.end());\
 		return names;\
 	}\
@@ -62,16 +61,12 @@
 				JUUID& uuid0 = std::get<0>(uuidName);\
 				JUUID& name = std::get<1>(uuidName);\
 				uuid0 = uuid;\
-				name = Get##CLASS##SUName(id, uuid);\
+				name = Get##CLASS##Name(MAKESUUUID(id, uuid));\
 				return uuidName;\
 			}\
 		);\
 		SortUUIDByName(uuidNames);\
 		return uuidNames;\
-	}\
-	JNAME GetNameFrom##NAME(SceneUnitId id, JUUID uuid)\
-	{\
-		return Get##CLASS##SUName(id, uuid);\
 	}\
 	void Insert##CLASS##Into##NAME(SceneUnitId id, JUUID uuid)\
 	{\

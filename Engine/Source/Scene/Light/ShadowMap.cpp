@@ -229,7 +229,7 @@ namespace Scene
 		{
 			nlohmann::json camJ = CreateDirectionalShadowMapCameraJson(i);
 			JUUID uuid = camJ.at("uuid");
-			CreateSUCamera(unit, camJ);
+			CreateCamera(unit, camJ);
 			CameraID cam = MAKESUUUID(unit, uuid);
 			cam->BindToScene();
 			shadowMapCameras.push_back(cam);
@@ -244,7 +244,7 @@ namespace Scene
 
 		nlohmann::json camJ = CreateSpotShadowMapCameraJson();
 		JUUID uuid = camJ.at("uuid");
-		CreateSUCamera(unit, camJ);
+		CreateCamera(unit, camJ);
 		CameraID cam = MAKESUUUID(unit, uuid);
 		cam->BindToScene();
 		shadowMapCameras.push_back(cam);
@@ -260,7 +260,7 @@ namespace Scene
 		{
 			nlohmann::json camJ = CreatePointShadowMapCameraJson(i);
 			JUUID uuid = camJ.at("uuid");
-			CreateSUCamera(unit, camJ);
+			CreateCamera(unit, camJ);
 			CameraID cam = MAKESUUUID(unit, uuid);
 			cam->BindToScene();
 			shadowMapCameras.push_back(cam);
@@ -349,7 +349,7 @@ namespace Scene
 					CameraID cam = MAKESUUUID(unit, c);
 					for (LightID light : cam->lightsWithShadowMaps)
 					{
-						if (!LightSUSceneObjectExist(light->unit, light.uuid()) || light->shadowMapIndex <= shadowMapIndex || light->shadowMapIndex == 0 || light->shadowMapIndex == 0xFFFFFFFF) continue;
+						if (!LightSceneObjectExist(light) || light->shadowMapIndex <= shadowMapIndex || light->shadowMapIndex == 0 || light->shadowMapIndex == 0xFFFFFFFF) continue;
 						lightsToShift.insert(light);
 					}
 				}
@@ -375,8 +375,8 @@ namespace Scene
 		for (auto cam : shadowMapCameras)
 		{
 			cam->DestroyRenderPasses();
-			DestroyConstantsBuffer(cam->cameraCb());
-			DeleteCameraSUSceneObject(cam->unit, cam.uuid());
+			DestroyConstantsBuffer(cam->cameraCb);
+			DeleteCameraSceneObject(cam);
 		}
 		shadowMapCameras.clear();
 	}
@@ -424,7 +424,7 @@ namespace Scene
 		}
 	}
 
-	BoundingFrustum GetCascadeViewCameraBoundingFrustum(std::unique_ptr<Camera>& cam, unsigned int cascadeId, std::vector<std::tuple<float, float>>& shadowMapNearFarPlanes)
+	BoundingFrustum GetCascadeViewCameraBoundingFrustum(CameraID cam, unsigned int cascadeId, std::vector<std::tuple<float, float>>& shadowMapNearFarPlanes)
 	{
 		XMMATRIX camWorld = cam->world();
 		float nearFarRange = cam->projectionFarZ() - cam->projectionNearZ();
@@ -462,8 +462,8 @@ namespace Scene
 		}
 #endif
 
-		auto& viewCamera = GetCameraSUSceneObject(unit, camUUID);
-		auto& lightCamera = GetCameraSUSceneObject(unit, shadowMapCameras.at(0).uuid());
+		CameraID viewCamera = MAKESUUUID(unit, camUUID);
+		CameraID lightCamera = MAKESUUUID(unit, shadowMapCameras.at(0).uuid());
 		XMMATRIX lightViewMatrix = lightCamera->view();
 
 		for (unsigned int i = 0U; i < (ARRAYSIZE(cascadePartitionsZeroToOne) - 1ULL); i++)
@@ -478,7 +478,7 @@ namespace Scene
 			BoundingBox lightSpaceCascadeAABB;
 			BoundingBox::CreateFromPoints(lightSpaceCascadeAABB, ARRAYSIZE(cornersLightViewSpace), cornersLightViewSpace, sizeof(cornersLightViewSpace[0]));
 
-			auto& cascadeLightCamera = GetCameraSUSceneObject(unit, shadowMapCameras.at(i).uuid());
+			CameraID cascadeLightCamera = MAKESUUUID(unit, shadowMapCameras.at(i).uuid());
 			auto& csmProj = cascadeLightCamera->orthographicProjection;
 
 			csmProj.viewLeft = lightSpaceCascadeAABB.Center.x - lightSpaceCascadeAABB.Extents.x;

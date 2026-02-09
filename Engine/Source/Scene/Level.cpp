@@ -121,10 +121,10 @@ namespace Scene::Level {
 		scene->SetLoading(true);
 		scene->SetCanSubmitLoading(false);
 
-		CreateRenderableSUSceneObjects(scene->Id());
-		CreateCameraSUSceneObjects(scene->Id());
-		CreateLightSUSceneObjects(scene->Id());
-		CreateSoundFXSUSceneObjects(scene->Id());
+		CreateRenderableSceneObjects(scene->Id());
+		CreateCameraSceneObjects(scene->Id());
+		CreateLightSceneObjects(scene->Id());
+		CreateSoundFXSceneObjects(scene->Id());
 
 		std::vector<std::string> types =
 		{
@@ -144,7 +144,7 @@ namespace Scene::Level {
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Renderables), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateSURenderable(scene->Id(), json);
+				CreateRenderable(scene->Id(), json);
 				scene->InsertRenderableIntoLoadingPool(MAKESUUUID(scene->Id(), JUUID(json.at("uuid"))));
 				count++;
 				progress(json.at("name"), count, total);
@@ -153,7 +153,7 @@ namespace Scene::Level {
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Cameras), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateSUCamera(scene->Id(), json);
+				CreateCamera(scene->Id(), json);
 				scene->InsertCameraIntoLoadingPool(MAKESUUUID(scene->Id(), JUUID(json.at("uuid"))));
 				count++;
 				progress(json.at("name"), count, total);
@@ -162,7 +162,7 @@ namespace Scene::Level {
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Lights), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateSULight(scene->Id(), json);
+				CreateLight(scene->Id(), json);
 				scene->InsertLightIntoLoadingPool(MAKESUUUID(scene->Id(), JUUID(json.at("uuid"))));
 				count++;
 				progress(json.at("name"), count, total);
@@ -171,7 +171,7 @@ namespace Scene::Level {
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_SoundEffects), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateSUSoundFX(scene->Id(), json);
+				CreateSoundFX(scene->Id(), json);
 				count++;
 				progress(json.at("name"), count, total);
 			}

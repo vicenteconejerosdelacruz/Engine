@@ -224,7 +224,7 @@ namespace Editor
 				{ "checkBoundingBox", false },
 			}
 		);
-		CreateSURenderable(id, jbox);
+		CreateRenderable(id, jbox);
 		boundingBox[id]->BindToScene();
 		GetSceneUnit(id)->InsertRenderableIntoLoadingPool(boundingBox[id]);
 	}
@@ -2563,7 +2563,7 @@ namespace Editor
 				}
 			}
 		);
-		CreateSURenderable(id, jbillboard);
+		CreateRenderable(id, jbillboard);
 		RenderableID renderable = MAKESUUUID(id, uuid);
 		GetSceneUnit(id)->InsertRenderableIntoLoadingPool(renderable);
 		return renderable;
@@ -2694,7 +2694,7 @@ namespace Editor
 		{
 			UnbindRenderableFromPickingPass(b);
 			EraseRenderableFromRenderables(b.unit(), b.uuid());
-			DeleteRenderableSUSceneObject(b.unit(), b.uuid());
+			DeleteRenderableSceneObject(b);
 		}
 		reg.clear();
 	}

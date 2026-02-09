@@ -852,7 +852,7 @@ namespace Scene
 			EraseRenderableFromRenderables(renderable->unit, renderable.uuid());
 			EraseRenderableFromAnimables(renderable->unit, renderable.uuid());
 			EraseRenderableFromShadowCasts(renderable->unit, renderable.uuid());
-			DeleteRenderableSUSceneObject(renderable->unit, renderable.uuid());
+			DeleteRenderableSceneObject(renderable);
 		}
 
 		for (auto& [renderable, player] : animationPlayers)
@@ -877,7 +877,7 @@ namespace Scene
 			for (auto& [uuid, _] : container)
 			{
 				RenderableID r = MAKESUUUID(id, uuid);
-				DeleteRenderableSUSceneObject(r->unit, r->uuid());
+				DeleteRenderableSceneObject(r);
 			}
 		}
 #include <TrackUUID/JClear.h>
@@ -891,7 +891,7 @@ namespace Scene
 		std::transform(RenderableSUsceneObjects.at(id).begin(), RenderableSUsceneObjects.at(id).end(), std::inserter(uuids, uuids.begin()), [](auto& pair) { return pair.first; });
 		for (auto& uuid : uuids)
 		{
-			DeleteRenderableSUSceneObject(id, uuid);
+			DeleteRenderableSceneObject(MAKESUUUID(id, uuid));
 		}
 #include <TrackUUID/JClearUnit.h>
 #include <RenderableAtt.h>

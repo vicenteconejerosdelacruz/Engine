@@ -313,7 +313,7 @@ namespace Scene
 		{
 			EraseSoundFXFromSoundEffects(sfx.unit(), sfx.uuid());
 			EraseSoundFXFromSound3DEffects(sfx.unit(), sfx.uuid());
-			DeleteSoundFXSUSceneObject(sfx.unit(), sfx.uuid());
+			DeleteSoundFXSceneObject(sfx);
 #if defined(_EDITOR)
 			Editor::MarkScenePanelAssetsAsDirty();
 #endif
@@ -327,7 +327,7 @@ namespace Scene
 			for (auto& [uuid, _] : container)
 			{
 				SoundFXID s = MAKESUUUID(id, uuid);
-				DeleteSoundFXSUSceneObject(s.unit(), s.uuid());
+				DeleteSoundFXSceneObject(s);
 			}
 		}
 #include <TrackUUID/JClear.h>
@@ -341,7 +341,7 @@ namespace Scene
 		std::transform(SoundFXSUsceneObjects.at(id).begin(), SoundFXSUsceneObjects.at(id).end(), std::inserter(uuids, uuids.begin()), [](auto& pair) { return pair.first; });
 		for (auto& uuid : uuids)
 		{
-			DeleteSoundFXSUSceneObject(id, uuid);
+			DeleteSoundFXSceneObject(MAKESUUUID(id, uuid));
 		}
 #include <TrackUUID/JClearUnit.h>
 #include <SoundFXAtt.h>

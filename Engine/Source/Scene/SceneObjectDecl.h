@@ -4,19 +4,18 @@
 typedef SceneObjectsContainer<SOClass##Tuple> SOClass##SceneObjects;\
 typedef std::unordered_map<SceneUnitId, SOClass##SceneObjects> SOClass##SUSceneObjects
 
-#define SODECL_CREATESCENEOBJECTS(SOClass) void Create##SOClass##SUSceneObjects(SceneUnitId id)
-#define SODECL_GETSCENEOBJECTS(SOClass) SOClass##SceneObjects& Get##SOClass##sSUSceneObjects(SceneUnitId id)
-#define SODECL_CREATE(SOClass) void CreateSU##SOClass(SceneUnitId id, nlohmann::json& json)
-#define SODECL_GET(SOClass) std::unique_ptr<SOClass>& Get##SOClass##SUSceneObject(SceneUnitId id, JUUID uuid)
-#define SODECL_GETUUIDNAMES(SOClass) std::vector<JUUIDName> Get##SOClass##sSUUUIDsNames(SceneUnitId id)
-#define SODECL_GETNAMES(SOClass) std::vector<JNAME> Get##SOClass##sSUNames(SceneUnitId id)
-#define SODECL_GETNAME(SOClass) JNAME Get##SOClass##SUName(SceneUnitId unit, JUUID uuid) 
-#define SODECL_GETUUIDBYNAME(SOClass) JUUID Get##SOClass##SUUUIDByName(SceneUnitId id, JNAME name)
-#define SODECL_WRITEJSON(SOClass) void Write##SOClass##SUSceneObject(SceneUnitId id, nlohmann::json& json)
-#define SODECL_RELEASE(SOClass) void Release##SOClass##SUSceneObjects(SceneUnitId id)
-#define SODECL_EXIST(SOClass) bool SOClass##SUSceneObjectExist(SceneUnitId id, JUUID uuid)
-#define SODECL_RENAME(SOClass) void Rename##SOClass##SUSceneObject(SceneUnitId id, JUUID uuid, std::string newName)
-#define SODECL_DELETE(SOClass) void Delete##SOClass##SUSceneObject(SceneUnitId id, JUUID uuid)
+#define SODECL_CREATESCENEOBJECTS(SOClass) void Create##SOClass##SceneObjects(SceneUnitId id)
+#define SODECL_GETSCENEOBJECTS(SOClass) SOClass##SceneObjects& Get##SOClass##sSceneObjects(SceneUnitId id)
+#define SODECL_CREATE(SOClass) void Create##SOClass(SceneUnitId id, nlohmann::json& json)
+#define SODECL_GET(SOClass) std::unique_ptr<SOClass>& Get##SOClass##SceneObject(SceneUnitId id, JUUID uuid)
+#define SODECL_GETIDNAMES(SOClass) std::vector<JUUIDName> Get##SOClass##sIDsNames(SceneUnitId id)
+#define SODECL_GETNAMES(SOClass) std::vector<JNAME> Get##SOClass##sNames(SceneUnitId id)
+#define SODECL_GETNAME(SOClass) JNAME Get##SOClass##Name(SOClass##ID so) 
+#define SODECL_GETIDBYNAME(SOClass) SOClass##ID Get##SOClass##IDByName(SceneUnitId id, JNAME name)
+#define SODECL_RELEASE(SOClass) void Release##SOClass##SceneObjects(SceneUnitId id)
+#define SODECL_EXIST(SOClass) bool SOClass##SceneObjectExist(SOClass##ID so)
+#define SODECL_RENAME(SOClass) void Rename##SOClass##SceneObject(SOClass##ID so, std::string newName)
+#define SODECL_DELETE(SOClass) void Delete##SOClass##SceneObject(SOClass##ID so)
 
 #define SODECL_FULL(SOClass) \
 	SODECL_TUPLE(SOClass);\
@@ -24,11 +23,10 @@ typedef std::unordered_map<SceneUnitId, SOClass##SceneObjects> SOClass##SUSceneO
 	SODECL_GETSCENEOBJECTS(SOClass);\
 	SODECL_CREATE(SOClass);\
 	SODECL_GET(SOClass);\
-	SODECL_GETUUIDNAMES(SOClass);\
+	SODECL_GETIDNAMES(SOClass);\
 	SODECL_GETNAMES(SOClass);\
 	SODECL_GETNAME(SOClass);\
-	SODECL_GETUUIDBYNAME(SOClass);\
-	SODECL_WRITEJSON(SOClass);\
+	SODECL_GETIDBYNAME(SOClass);\
 	SODECL_RELEASE(SOClass);\
 	SODECL_EXIST(SOClass);\
 	SODECL_RENAME(SOClass);\

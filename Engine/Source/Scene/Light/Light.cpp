@@ -429,7 +429,7 @@ namespace Scene
 		{
 			EraseLightFromLights(l->unit, l.uuid());
 			EraseLightFromShadowMapLights(l->unit, l.uuid());
-			DeleteLightSUSceneObject(l->unit, l.uuid());
+			DeleteLightSceneObject(l);
 		}
 
 		if (lightToRecreateCameras.size() > 0)
@@ -470,7 +470,7 @@ namespace Scene
 			for (auto& [uuid, _] : container)
 			{
 				LightID l = MAKESUUUID(id, uuid);
-				DeleteLightSUSceneObject(l->unit, l->uuid());
+				DeleteLightSceneObject(l);
 			}
 		}
 #include <TrackUUID/JClear.h>
@@ -484,7 +484,7 @@ namespace Scene
 		std::transform(LightSUsceneObjects.at(id).begin(), LightSUsceneObjects.at(id).end(), std::inserter(uuids, uuids.begin()), [](auto& pair) { return pair.first; });
 		for (auto& uuid : uuids)
 		{
-			DeleteLightSUSceneObject(id, uuid);
+			DeleteLightSceneObject(MAKESUUUID(id, uuid));
 		}
 #include <TrackUUID/JClearUnit.h>
 #include <LightAtt.h>
