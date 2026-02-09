@@ -802,7 +802,7 @@ void TimelineEditor::CreatePopupForItemAt(Sequence& sequence, int channelId, int
 	popupChannelFrame = std::make_tuple(channelId, frame);
 	if (popup == TP_AddElement)
 	{
-		addElementPopup.Init(renderable.unit(), renderable.uuid(), frame);
+		addElementPopup.Init(renderable, frame);
 	}
 }
 

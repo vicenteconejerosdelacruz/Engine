@@ -2048,7 +2048,7 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_animation_sequence
 							animable->SetCurrentAnimation(newSequence);
 							animable->animationTime(0.0f);
 							animable->StepAnimation(0.0f);
-							animable->sequencePlayer.ApplyFrameValues(MAKESUUUID(Editor::currentSceneUnitId, animable->uuid()));
+							animable->sequencePlayer.ApplyFrameValues(animable->SUuuid());
 
 						}
 					);

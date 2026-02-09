@@ -36,7 +36,7 @@ struct AddElementPopup
 	JUUIDName selectedSoundEffect;
 	std::vector<JUUIDName> soundEffects;
 
-	void Init(SceneUnitId id, JUUID uuid, int frame);
+	void Init(RenderableID renderable, int frame);
 	void Draw(ImVec2 pos, std::unordered_map<SequenceChannelElementType, std::function<void(SequenceChannelElement*)>> elementBuilders, std::function<void()> closePopup);
 };
 
