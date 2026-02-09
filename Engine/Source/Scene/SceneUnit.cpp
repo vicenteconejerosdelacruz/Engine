@@ -89,32 +89,32 @@ namespace Scene
 		return unboundedSceneObjects;
 	}
 
-	void SceneUnit::InsertRenderableIntoLoadingPool(JUUID uuid)
+	void SceneUnit::InsertRenderableIntoLoadingPool(RenderableID uuid)
 	{
 		renderablesInLoadingPool.insert(uuid);
 	}
 
-	void SceneUnit::InsertCameraIntoLoadingPool(JUUID uuid)
+	void SceneUnit::InsertCameraIntoLoadingPool(CameraID uuid)
 	{
 		camerasInLoadingPool.insert(uuid);
 	}
 
-	void SceneUnit::InsertLightIntoLoadingPool(JUUID uuid)
+	void SceneUnit::InsertLightIntoLoadingPool(LightID uuid)
 	{
 		lightsInLoadingPool.insert(uuid);
 	}
 
-	std::set<JUUID>& SceneUnit::GetRenderablesInLoadingPool()
+	std::set<RenderableID>& SceneUnit::GetRenderablesInLoadingPool()
 	{
 		return renderablesInLoadingPool;
 	}
 
-	std::set<JUUID>& SceneUnit::GetCamerasInLoadingPool()
+	std::set<CameraID>& SceneUnit::GetCamerasInLoadingPool()
 	{
 		return camerasInLoadingPool;
 	}
 
-	std::set<JUUID>& SceneUnit::GetLightsInLoadingPool()
+	std::set<LightID>& SceneUnit::GetLightsInLoadingPool()
 	{
 		return lightsInLoadingPool;
 	}
@@ -136,10 +136,9 @@ namespace Scene
 
 	void SceneUnit::MarkRenderablesInLoadingPoolAsReady()
 	{
-		for (auto& uuid : GetRenderablesInLoadingPool())
+		for (RenderableID r : GetRenderablesInLoadingPool())
 		{
-			RenderableID r = MAKESUUUID(id, uuid);
-			if (r->RenderReady() || !IsBound(uuid))
+			if (r->RenderReady() || !IsBound(r->uuid()))
 				continue;
 			r->RenderReady(true);
 		}
@@ -147,10 +146,9 @@ namespace Scene
 
 	void SceneUnit::MarkCamerasInLoadingPoolAsReady()
 	{
-		for (auto& uuid : GetCamerasInLoadingPool())
+		for (CameraID c : GetCamerasInLoadingPool())
 		{
-			CameraID c = MAKESUUUID(id, uuid);
-			if (c->RenderReady() || !IsBound(uuid))
+			if (c->RenderReady() || !IsBound(c->uuid()))
 				continue;
 			c->RenderReady(true);
 		}
@@ -158,10 +156,9 @@ namespace Scene
 
 	void SceneUnit::MarkLightsInLoadingPoolAsReady()
 	{
-		for (auto& uuid : GetLightsInLoadingPool())
+		for (LightID l : GetLightsInLoadingPool())
 		{
-			LightID l = MAKESUUUID(id, uuid);
-			if (l->RenderReady() || !IsBound(uuid))
+			if (l->RenderReady() || !IsBound(l->uuid()))
 				continue;
 			l->RenderReady(true);
 		}

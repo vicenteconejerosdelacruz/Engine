@@ -30,12 +30,12 @@ namespace Scene
 		std::set<JUUID>& GetUnboundedSceneObjects();
 
 		//Loading
-		void InsertRenderableIntoLoadingPool(JUUID uuid);
-		void InsertCameraIntoLoadingPool(JUUID uuid);
-		void InsertLightIntoLoadingPool(JUUID uuid);
-		std::set<JUUID>& GetRenderablesInLoadingPool();
-		std::set<JUUID>& GetCamerasInLoadingPool();
-		std::set<JUUID>& GetLightsInLoadingPool();
+		void InsertRenderableIntoLoadingPool(RenderableID uuid);
+		void InsertCameraIntoLoadingPool(CameraID uuid);
+		void InsertLightIntoLoadingPool(LightID uuid);
+		std::set<RenderableID>& GetRenderablesInLoadingPool();
+		std::set<CameraID>& GetCamerasInLoadingPool();
+		std::set<LightID>& GetLightsInLoadingPool();
 		size_t GetRenderablesLoadingPoolSize();
 		size_t GetCamerasLoadingPoolSize();
 		size_t GetLightsLoadingPoolSize();
@@ -124,9 +124,9 @@ namespace Scene
 		std::unique_ptr<std::atomic_bool> loading;
 		std::unique_ptr<std::atomic_bool> canSubmitLoading;
 		std::unique_ptr<std::atomic_bool> loadingComplete;
-		std::set<JUUID> renderablesInLoadingPool;
-		std::set<JUUID> camerasInLoadingPool;
-		std::set<JUUID> lightsInLoadingPool;
+		std::set<RenderableID> renderablesInLoadingPool;
+		std::set<CameraID> camerasInLoadingPool;
+		std::set<LightID> lightsInLoadingPool;
 		std::vector<std::function<void()>> postLoadingExecutionCallbacks;
 
 		//f2f

@@ -226,7 +226,7 @@ namespace Editor
 		);
 		CreateSURenderable(id, jbox);
 		boundingBox[id]->BindToScene();
-		GetSceneUnit(id)->InsertRenderableIntoLoadingPool(uuid);
+		GetSceneUnit(id)->InsertRenderableIntoLoadingPool(boundingBox[id]);
 	}
 
 	void CreateSceneUnitBillboards(SceneUnitId id)
@@ -2564,8 +2564,9 @@ namespace Editor
 			}
 		);
 		CreateSURenderable(id, jbillboard);
-		GetSceneUnit(id)->InsertRenderableIntoLoadingPool(uuid);
-		return MAKESUUUID(id, uuid);
+		RenderableID renderable = MAKESUUUID(id, uuid);
+		GetSceneUnit(id)->InsertRenderableIntoLoadingPool(renderable);
+		return renderable;
 	}
 
 	void RegisterBillboard(SceneUnitId id, JUUID sceneObject)

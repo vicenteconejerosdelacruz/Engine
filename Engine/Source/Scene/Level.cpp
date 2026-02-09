@@ -145,7 +145,7 @@ namespace Scene::Level {
 			{
 				progress(json.at("name"), count, total);
 				CreateSURenderable(scene->Id(), json);
-				scene->InsertRenderableIntoLoadingPool(json.at("uuid"));
+				scene->InsertRenderableIntoLoadingPool(MAKESUUUID(scene->Id(), JUUID(json.at("uuid"))));
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -154,7 +154,7 @@ namespace Scene::Level {
 			{
 				progress(json.at("name"), count, total);
 				CreateSUCamera(scene->Id(), json);
-				scene->InsertCameraIntoLoadingPool(json.at("uuid"));
+				scene->InsertCameraIntoLoadingPool(MAKESUUUID(scene->Id(), JUUID(json.at("uuid"))));
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -163,7 +163,7 @@ namespace Scene::Level {
 			{
 				progress(json.at("name"), count, total);
 				CreateSULight(scene->Id(), json);
-				scene->InsertLightIntoLoadingPool(json.at("uuid"));
+				scene->InsertLightIntoLoadingPool(MAKESUUUID(scene->Id(), JUUID(json.at("uuid"))));
 				count++;
 				progress(json.at("name"), count, total);
 			}
