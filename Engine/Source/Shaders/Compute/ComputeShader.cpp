@@ -10,6 +10,10 @@ extern std::unique_ptr<Renderer> renderer;
 
 namespace ComputeShader
 {
+	ComputeShader::~ComputeShader() {
+		DeleteShaderInstance(shader());
+	}
+
 	void ComputeShader::Init(std::string shaderName, std::vector<MaterialSamplerDesc> samplers, std::wstring target)
 	{
 		using namespace DeviceUtils;

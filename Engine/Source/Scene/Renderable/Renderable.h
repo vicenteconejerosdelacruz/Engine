@@ -7,6 +7,7 @@
 #include <Sequence/AnimationSequences.h>
 #include <Sequence/SequencePlayer.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
+#include <Renderable/RenderableBoundingBox.h>
 
 typedef std::vector<MeshInstanceID> RenderableMeshes;
 typedef std::unordered_map<RenderPassInstanceID, std::vector<MaterialInstanceID>> RenderableMaterials; //RenderPassInstanceID -> MaterialInstanceID
@@ -211,3 +212,6 @@ namespace Scene
 	void WriteRenderablesJson(SceneUnitId id, nlohmann::json& json);
 #endif
 }
+
+using namespace Scene;
+DEF_SCENEOBJECT_ID_HASH(Renderable);

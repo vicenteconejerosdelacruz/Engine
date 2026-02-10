@@ -3,6 +3,8 @@
 #include <Templates.h>
 #include <JTemplate.h>
 #include <Sequence/AnimationSequences.h>
+#include <Mesh/Mesh.h>
+#include <UUID.h>
 
 namespace Templates
 {
@@ -64,7 +66,12 @@ namespace Templates
 #endif
 	};
 
+	struct Model3DInstance;
+
 	TEMPDECL_FULL(Model3D);
+	TEMPDECL_REFTRACKER(Model3D);
+	DEF_TEMPLATE_ID(Model3DJson, GetModel3DTemplate);
+	DEF_TEMPLATE_ID(Model3DInstance, GetModel3DInstance);
 
 	JUUID GetModel3DMeshInstanceID(JUUID meshInstanceUUID, unsigned int index);
 	JUUID GetModel3DMaterialInstanceID(JUUID materialInstanceUUID, unsigned int index);
@@ -92,6 +99,8 @@ namespace Templates
 		//animation
 		std::unique_ptr<Animation::Animated> animations;
 	};
-
-	TEMPDECL_REFTRACKER(Model3D);
 }
+
+using namespace Templates;
+DEF_TEMPLATE_ID_HASH(Model3DJson);
+DEF_TEMPLATE_ID_HASH(Model3DInstance);

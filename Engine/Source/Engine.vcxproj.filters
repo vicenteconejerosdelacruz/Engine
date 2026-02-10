@@ -243,18 +243,6 @@
     <ClInclude Include="EngineInc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pch\UUID\SceneObjectUUID.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pch\UUID\TemplateUUID.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pch\UUID\DeviceUtilsUUID.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pch\UUID\ComputeShaderUUID.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="JExpose\Scripting\JExpose.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -292,9 +280,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Templates\Shader\Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Templates\Shader\ShaderInstance.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Templates\JTemplate.h">
@@ -592,6 +577,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Physics\Physics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch\SceneUnitId.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

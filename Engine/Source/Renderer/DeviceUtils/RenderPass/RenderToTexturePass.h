@@ -3,6 +3,7 @@
 #include <DeviceUtils/DescriptorHeap/DescriptorHeap.h>
 #include <DirectXColors.h>
 #include <functional>
+#include <UUID.h>
 
 using namespace DeviceUtils;
 using namespace DirectX;
@@ -30,8 +31,13 @@ namespace DeviceUtils
 		void Resize(unsigned int width, unsigned int height);
 	};
 
-	RenderToTexturePassID CreateRenderToTexturePass(const std::string name, std::vector<DXGI_FORMAT> renderTargetsFormats, DXGI_FORMAT depthStencilFormat, unsigned int width, unsigned int height);
 	std::unique_ptr<RenderToTexturePass>& GetRenderToTexturePass(JUUID uuid);
+	DEF_TEMPLATE_ID(RenderToTexturePass, GetRenderToTexturePass);
+
+	RenderToTexturePassID CreateRenderToTexturePass(const std::string name, std::vector<DXGI_FORMAT> renderTargetsFormats, DXGI_FORMAT depthStencilFormat, unsigned int width, unsigned int height);
 	void DeleteRenderToTexturePass(RenderToTexturePassID renderToTexturePassId);
 };
+
+using namespace DeviceUtils;
+DEF_TEMPLATE_ID_HASH(RenderToTexturePass);
 

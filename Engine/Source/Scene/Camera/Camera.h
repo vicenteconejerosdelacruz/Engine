@@ -225,3 +225,6 @@ namespace Scene {
 	void WriteCamerasJson(SceneUnitId id, nlohmann::json& json);
 #endif
 };
+
+using namespace Scene;
+DEF_SCENEOBJECT_ID_HASH(Camera);

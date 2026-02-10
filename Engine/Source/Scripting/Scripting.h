@@ -1,5 +1,11 @@
 #pragma once
+#include <UUID.h>
 
+namespace Scene
+{
+	DEF_SCENEOBJECT_ID_DEP(Renderable);
+};
+using namespace Scene;
 namespace Scripting
 {
 	void InitScripting(const char* path);

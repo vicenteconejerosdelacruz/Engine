@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <UUID.h>
 
 enum ShaderType {
 	VERTEX_SHADER,
@@ -27,6 +28,12 @@ inline static std::map<std::string, ShaderType> StrToShaderType = {
 };
 
 //shader compilation source (it's shader type, the hlsl path, the uuid and defines)
+namespace Templates
+{
+	DEF_TEMPLATE_ID_DEP(ShaderJson, GetShaderTemplate);
+};
+
+using namespace Templates;
 struct Source {
 	ShaderType shaderType;
 	std::wstring shaderTarget;

@@ -7,13 +7,18 @@
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <memory>
 
-namespace Scene { struct Renderable; };
+namespace Scene
+{
+	DEF_SCENEOBJECT_ID_DEP(Renderable);
+};
 struct aiScene;
 
 using namespace DirectX;
+using namespace Scene;
 
 namespace Animation
 {
+
 	static const unsigned int MAX_BONES = 1024U;
 	typedef XMMATRIX BonesMatrices[MAX_BONES];
 

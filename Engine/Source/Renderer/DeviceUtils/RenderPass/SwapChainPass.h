@@ -28,7 +28,12 @@ namespace DeviceUtils
 		void Resize(unsigned int width, unsigned int height);
 	};
 
-	SwapChainPassID CreateSwapChainPass(const std::string name, std::unique_ptr<DeviceUtils::DescriptorHeap>& descriptorHeap, DXGI_FORMAT depthStencilFormat);
 	std::unique_ptr<SwapChainPass>& GetSwapChainPass(JUUID uuid);
+	DEF_TEMPLATE_ID(SwapChainPass, GetSwapChainPass);
+
+	SwapChainPassID CreateSwapChainPass(const std::string name, std::unique_ptr<DeviceUtils::DescriptorHeap>& descriptorHeap, DXGI_FORMAT depthStencilFormat);
 	void DeleteSwapChainPass(SwapChainPassID swapChainPassId);
-}
+};
+
+using namespace DeviceUtils;
+DEF_TEMPLATE_ID_HASH(SwapChainPass);

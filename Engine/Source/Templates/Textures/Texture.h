@@ -58,22 +58,12 @@ namespace Templates
 		inline static const TemplateType templateType = T_Textures;
 	};
 
+	struct TextureJson;
+	struct TextureInstance;
 #if defined(_EDITOR)
-	struct TexturePreview
-	{
-		bool processorInitialized = false;
-		CommandsProcessor loadingProcessor;
-		std::unique_ptr<std::atomic_bool> previewLoaded;
-		std::vector<TextureInstanceID> textures;
-		int frame;
-		bool playing;
-		bool looping;
-		float time;
-		float timeFactor;
-	};
+	struct TexturePreview;
 #endif
 
-	struct TextureInstance;
 	struct TextureJson : public JTemplate
 	{
 		TEMPLATE_DECL(Texture);
@@ -92,7 +82,7 @@ namespace Templates
 		virtual void DestroyEditorPreview();
 		void CreatePreviewTexture();
 
-		TexturePreview preview;
+		std::unique_ptr<TexturePreview> preview;
 #endif
 	};
 
@@ -135,8 +125,30 @@ namespace Templates
 		CComPtr<ID3D12Resource> upload;
 		size_t bufferSize;
 	};
+
 	TEMPDECL_REFTRACKER(Texture);
+	DEF_TEMPLATE_ID(TextureJson, GetTextureTemplate);
+	DEF_TEMPLATE_ID(TextureInstance, GetTextureInstance);
+
+#if defined(_EDITOR)
+	struct TexturePreview
+	{
+		bool processorInitialized = false;
+		CommandsProcessor loadingProcessor;
+		std::unique_ptr<std::atomic_bool> previewLoaded;
+		std::vector<TextureInstanceID> textures;
+		int frame;
+		bool playing;
+		bool looping;
+		float time;
+		float timeFactor;
+	};
+#endif
 };
+
+using namespace Templates;
+DEF_TEMPLATE_ID_HASH(TextureJson);
+DEF_TEMPLATE_ID_HASH(TextureInstance);
 
 inline auto ToTextureJson(std::vector<JObject*>& json)
 {

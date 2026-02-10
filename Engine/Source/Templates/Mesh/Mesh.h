@@ -26,6 +26,7 @@ namespace Templates {
 	std::unique_ptr<MeshInstance>& GetMeshInstance(SceneUnitId id, JUUID uuid);
 	std::unique_ptr<MeshInstance>& GetMeshInstance(JUUID uuid);
 	std::unique_ptr<MeshInstance>& GetMeshInstance(SceneUnitId id, JUUID uuid, VertexClass vertexClass, void* vertexData, unsigned int vertexSize, unsigned int verticesCount, const void* indices, unsigned int indicesCount);
+	DEF_TEMPLATE_ID(MeshInstance, GetMeshInstance);
 
 	//READ&GET
 	JNAME GetMeshName(JUUID uuid);
@@ -33,10 +34,9 @@ namespace Templates {
 	JUUID GetMeshUUIDByName(JNAME name);
 	bool MeshInstanceExists(JUUID uuid);
 
-	//UPDATE
-
 	//DESTROY
 	void DestroyMeshInstance(JUUID uuid);
-
-	//EDITOR
 };
+
+using namespace Templates;
+DEF_TEMPLATE_ID_HASH(MeshInstance);

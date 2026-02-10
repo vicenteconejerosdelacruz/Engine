@@ -1,13 +1,15 @@
-#pragma once
+#ifndef _UUID_TYPES_H
+#define _UUID_TYPES_H
 
 #include <string>
 #include <tuple>
 #include "nlohmann/json.hpp"
 
-typedef std::string JUUID;
-typedef std::string JNAME;
-typedef std::tuple<JUUID, JNAME> JUUIDName;
-typedef std::tuple<SceneUnitId, JUUID> SUUUID;
+using JUUID = std::string;
+using JNAME = std::string;
+using JUUIDName = std::tuple<JUUID, JNAME>;
+using SUUUID = std::tuple<SceneUnitId, JUUID>;
+
 #define MAKESUUUID(id,juuid) std::make_tuple(id,juuid)
 #define FROMSUUUID(tup) std::get<0>(tup),std::get<1>(tup)
 
@@ -83,13 +85,15 @@ struct TUUID {
 	}
 };
 
-#define DEF_UUID_TYPE(NAMESPACE,TYPE,GETTER)\
-namespace NAMESPACE\
-{\
-	struct TYPE;\
-	extern std::unique_ptr<TYPE>& GETTER(JUUID uuid);\
-};\
-typedef TUUID<NAMESPACE::TYPE, NAMESPACE::GETTER> TYPE##ID;\
+#define DEF_TEMPLATE_ID(TYPE,GETTER)\
+using TYPE##ID = TUUID<TYPE, GETTER>;
+
+#define DEF_TEMPLATE_ID_DEP(TYPE,GETTER)\
+struct TYPE;\
+extern std::unique_ptr<TYPE>& GETTER(JUUID uuid);\
+DEF_TEMPLATE_ID(TYPE,GETTER)
+
+#define DEF_TEMPLATE_ID_HASH(TYPE)\
 template <>\
 struct std::hash<TYPE##ID>\
 {\
@@ -97,7 +101,7 @@ struct std::hash<TYPE##ID>\
 	{\
 		return std::hash<std::string>{}(other.uuid);\
 	}\
-};
+}
 
 template<typename T, std::unique_ptr<T>& F(SceneUnitId, JUUID)>
 struct TSUUUID {
@@ -190,13 +194,15 @@ struct TSUUUID {
 	}
 };
 
-#define DEF_SUUUID_TYPE(NAMESPACE,TYPE,GETTER)\
-namespace NAMESPACE\
-{\
-	struct TYPE;\
-	extern std::unique_ptr<TYPE>& GETTER(SceneUnitId, JUUID uuid);\
-};\
-typedef TSUUUID<NAMESPACE::TYPE, NAMESPACE::GETTER> TYPE##ID;\
+#define DEF_SCENEOBJECT_ID(TYPE)\
+using TYPE##ID = TSUUUID<TYPE, Get##TYPE##SceneObject>;
+
+#define DEF_SCENEOBJECT_ID_DEP(TYPE)\
+struct TYPE;\
+extern std::unique_ptr<TYPE>& Get##TYPE##SceneObject(SceneUnitId, JUUID uuid);\
+DEF_SCENEOBJECT_ID(TYPE)
+
+#define DEF_SCENEOBJECT_ID_HASH(TYPE)\
 template <>\
 struct std::hash<TYPE##ID>\
 {\
@@ -206,7 +212,7 @@ struct std::hash<TYPE##ID>\
 		nostd::hash_combine(hash, std::get<0>(other.SUuuid), std::get<1>(other.SUuuid));\
 		return hash;\
 	}\
-};
+}
 
 //Create a new UUID
 inline std::string getUUID()
@@ -333,3 +339,4 @@ inline std::vector<JUUIDName> GetUUIDsNames(auto& items)
 	return uuidsNames;
 }
 
+#endif

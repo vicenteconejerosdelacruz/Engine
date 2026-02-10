@@ -400,9 +400,6 @@
     <ClInclude Include="JExpose\TrackUUID\JInsert.h" />
     <ClInclude Include="JExpose\JTypes.h" />
     <ClInclude Include="JExpose\JObject.h" />
-    <ClInclude Include="pch\UUID\ComputeShaderUUID.h" />
-    <ClInclude Include="pch\UUID\DeviceUtilsUUID.h" />
-    <ClInclude Include="pch\UUID\TemplateUUID.h" />
     <ClInclude Include="pch\GameStateMachine.h" />
     <ClInclude Include="pch\JExposeEditor.h" />
     <ClInclude Include="JExpose\JEnd.h" />
@@ -423,6 +420,7 @@
     <ClInclude Include="JExpose\Templates\TextureAtt.h" />
     <ClInclude Include="pch\DDSTextures.h" />
     <ClInclude Include="pch\Debug.h" />
+    <ClInclude Include="pch\SceneUnitId.h" />
     <ClInclude Include="pch\ShaderMaterials.h" />
     <ClInclude Include="pch\UUID.h" />
     <ClInclude Include="pch\DXTypes.h" />
@@ -470,7 +468,6 @@
     <ClInclude Include="Renderer\DeviceUtils\RenderPass\RenderToTexturePass.h" />
     <ClInclude Include="Renderer\VertexFormats.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="pch\UUID\SceneObjectUUID.h" />
     <ClInclude Include="Scene\Binder.h" />
     <ClInclude Include="Scene\Camera\Camera.h" />
     <ClInclude Include="Scene\Camera\Projections\Orthographic.h" />
@@ -517,7 +514,6 @@
     <ClInclude Include="Templates\RenderPass\PassMaterialOverride.h" />
     <ClInclude Include="Templates\RenderPass\RenderPass.h" />
     <ClInclude Include="Templates\Shader\Shader.h" />
-    <ClInclude Include="Templates\Shader\ShaderInstance.h" />
     <ClInclude Include="Templates\Sound\Sound.h" />
     <ClInclude Include="Templates\TemplateDecl.h" />
     <ClInclude Include="Templates\TemplateDef.h" />

@@ -4,6 +4,8 @@
 #include <map>
 #include <vector>
 #include <dxgiformat.h>
+#include <DeviceUtils/RenderPass/RenderToTexturePass.h>
+#include <DeviceUtils/RenderPass/SwapChainPass.h>
 #include <RenderPass/Override/OverridePass.h>
 #include "PassMaterialOverride.h"
 #include <Templates.h>
@@ -110,7 +112,6 @@ namespace Templates
 #endif
 
 	void RenderPassJsonStep();
-	void UpdateRenderPassInstances(std::unordered_map<RenderPassJsonID, std::set<RenderPassInstanceID>> changes);
 
 	namespace RenderPass
 	{
@@ -148,6 +149,11 @@ namespace Templates
 
 	TEMPDECL_FULL(RenderPass);
 	TEMPDECL_REFTRACKER(RenderPass);
+	DEF_TEMPLATE_ID(RenderPassJson, GetRenderPassTemplate);
+	DEF_TEMPLATE_ID_DEP(MeshInstance, GetMeshInstance);
+	DEF_TEMPLATE_ID_DEP(MaterialJson, GetMaterialTemplate);
+
+	void UpdateRenderPassInstances(std::unordered_map<RenderPassJsonID, std::set<RenderPassInstanceID>> changes);
 
 	RenderPassInstanceID CreateRenderPassInstance(CameraID camera, RenderPassJsonID renderPassTemplate, unsigned int renderPassIndex, unsigned int width = 0U, unsigned int height = 0U);
 	void DestroyRenderPassInstance(RenderPassInstanceID renderPassInstanceID);
@@ -188,5 +194,11 @@ namespace Templates
 		SwapChainPassID swapChainPass;
 		RenderToTexturePassID renderToTexturePass;
 	};
+
+	DEF_TEMPLATE_ID(RenderPassInstance, GetRenderPassInstance);
 };
+
+using namespace Templates;
+DEF_TEMPLATE_ID_HASH(RenderPassJson);
+DEF_TEMPLATE_ID_HASH(RenderPassInstance);
 

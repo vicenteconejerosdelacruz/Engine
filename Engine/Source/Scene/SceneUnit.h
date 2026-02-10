@@ -11,6 +11,8 @@ enum SceneObjectType;
 
 namespace Scene
 {
+	DEF_SCENEOBJECT_ID_DEP(Light);
+
 	class SceneUnit
 	{
 	public:

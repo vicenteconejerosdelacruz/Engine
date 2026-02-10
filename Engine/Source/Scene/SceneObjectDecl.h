@@ -8,6 +8,7 @@ typedef std::unordered_map<SceneUnitId, SOClass##SceneObjects> SOClass##SUSceneO
 #define SODECL_GETSCENEOBJECTS(SOClass) SOClass##SceneObjects& Get##SOClass##sSceneObjects(SceneUnitId id)
 #define SODECL_CREATE(SOClass) void Create##SOClass(SceneUnitId id, nlohmann::json& json)
 #define SODECL_GET(SOClass) std::unique_ptr<SOClass>& Get##SOClass##SceneObject(SceneUnitId id, JUUID uuid)
+#define SODECL_SUUUID(SOClass) DEF_SCENEOBJECT_ID(SOClass);
 #define SODECL_GETIDNAMES(SOClass) std::vector<JUUIDName> Get##SOClass##sIDsNames(SceneUnitId id)
 #define SODECL_GETNAMES(SOClass) std::vector<JNAME> Get##SOClass##sNames(SceneUnitId id)
 #define SODECL_GETNAME(SOClass) JNAME Get##SOClass##Name(SOClass##ID so) 
@@ -23,6 +24,7 @@ typedef std::unordered_map<SceneUnitId, SOClass##SceneObjects> SOClass##SUSceneO
 	SODECL_GETSCENEOBJECTS(SOClass);\
 	SODECL_CREATE(SOClass);\
 	SODECL_GET(SOClass);\
+	SODECL_SUUUID(SOClass);\
 	SODECL_GETIDNAMES(SOClass);\
 	SODECL_GETNAMES(SOClass);\
 	SODECL_GETNAME(SOClass);\

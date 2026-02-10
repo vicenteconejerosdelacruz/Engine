@@ -123,7 +123,14 @@ namespace Templates
 		std::unordered_map<size_t, std::function<void()>> pipelineChangeCallbacks;
 	};
 
+	struct MaterialInstance;
+
 	TEMPDECL_FULL(Material);
+	TEMPDECL_REFTRACKER(Material);
+	DEF_TEMPLATE_ID(MaterialJson, GetMaterialTemplate);
+	DEF_TEMPLATE_ID(MaterialInstance, GetMaterialInstance);
+	DEF_TEMPLATE_ID_DEP(ShaderJson, GetShaderTemplate);
+	DEF_TEMPLATE_ID_DEP(ShaderInstance, GetShaderInstance);
 
 	struct MaterialInstance
 	{
@@ -171,6 +178,8 @@ namespace Templates
 	};
 
 	void DestroyMaterialInstance(JUUID materialInstance);
-
-	TEMPDECL_REFTRACKER(Material);
 };
+
+using namespace Templates;
+DEF_TEMPLATE_ID_HASH(MaterialJson);
+DEF_TEMPLATE_ID_HASH(MaterialInstance);

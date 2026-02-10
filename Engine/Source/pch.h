@@ -13,7 +13,8 @@ enum SceneObjectType {
 	SO_Cameras,
 	SO_SoundEffects
 };
-typedef size_t SceneUnitId;
+
+#include "pch/SceneUnitID.h"
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 // Windows Header Files
@@ -138,10 +139,6 @@ using namespace DirectX::SimpleMath;
 #include "pch/Application.h"
 #include "pch/NoStd.h"
 #include "pch/UUID.h"
-#include "pch/UUID/DeviceUtilsUUID.h"
-#include "pch/UUID/TemplateUUID.h"
-#include "pch/UUID/SceneObjectUUID.h"
-#include "pch/UUID/ComputeShaderUUID.h"
 #include "pch/Json.h"
 #include "pch/DXTypes.h"
 #include "pch/Debug.h"

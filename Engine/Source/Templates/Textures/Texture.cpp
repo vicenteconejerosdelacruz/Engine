@@ -7,10 +7,12 @@
 
 extern std::unique_ptr<Renderer> renderer;
 
+#if defined(_EDITOR)
 namespace Editor {
 	extern SceneUnitId currentSceneUnitId;
 	extern void MarkTemplatesPanelAssetsAsDirty();
 };
+#endif
 
 namespace Templates
 {
@@ -381,14 +383,15 @@ namespace Templates
 
 	void TextureJson::DestroyEditorPreview()
 	{
-		if (preview.previewLoaded != nullptr)
+		if (preview->previewLoaded != nullptr)
 		{
-			for (unsigned int i = 0; i < preview.textures.size(); i++)
+			for (unsigned int i = 0; i < preview->textures.size(); i++)
 			{
-				DeleteTextureInstance(preview.textures.at(i)());
+				DeleteTextureInstance(preview->textures.at(i)());
 			}
-			preview.textures.clear();
-			preview.previewLoaded = nullptr;
+			preview->textures.clear();
+			preview->previewLoaded = nullptr;
+			preview = nullptr;
 		}
 	}
 
@@ -396,33 +399,34 @@ namespace Templates
 	{
 		using namespace Texture;
 		DestroyEditorPreview();
-		preview.previewLoaded = std::make_unique<std::atomic_bool>(false);
-		preview.frame = 0U;
-		preview.playing = false;
-		preview.looping = false;
-		preview.time = 0.0f;
-		preview.timeFactor = 1.0f;
-		if (!preview.processorInitialized)
+		preview = std::make_unique<TexturePreview>();
+		preview->previewLoaded = std::make_unique<std::atomic_bool>(false);
+		preview->frame = 0U;
+		preview->playing = false;
+		preview->looping = false;
+		preview->time = 0.0f;
+		preview->timeFactor = 1.0f;
+		if (!preview->processorInitialized)
 		{
-			preview.loadingProcessor.Init(renderer->d3dDevice, 0x10AD3D, 1);
-			preview.processorInitialized = true;
+			preview->loadingProcessor.Init(renderer->d3dDevice, 0x10AD3D, 1);
+			preview->processorInitialized = true;
 		}
 
-		preview.loadingProcessor.ResetCommandList();
+		preview->loadingProcessor.ResetCommandList();
 		for (unsigned int i = 0U; i < numFrames(); i++)
 		{
 			JUUID previewUUID = uuid() + "-preview-" + std::to_string(i);
 			CreateTextureInstance(previewUUID, [&]
 				{
-					return std::make_unique<TextureInstance>(preview.loadingProcessor.GetCommandList(), uuid(), i);
+					return std::make_unique<TextureInstance>(preview->loadingProcessor.GetCommandList(), uuid(), i);
 				}
 			);
-			preview.textures.push_back(previewUUID);
+			preview->textures.push_back(previewUUID);
 		}
-		preview.loadingProcessor.CloseCommandList();
-		renderer->ExecuteCommands(preview.loadingProcessor.GetCommandList(false), [&]
+		preview->loadingProcessor.CloseCommandList();
+		renderer->ExecuteCommands(preview->loadingProcessor.GetCommandList(false), [&]
 			{
-				preview.previewLoaded->store(true);
+				preview->previewLoaded->store(true);
 			}
 		);
 	}
@@ -461,7 +465,7 @@ namespace Templates
 		for (auto& [uuid, textureTemplate] : Texturetemplates)
 		{
 			TextureJsonID tex = uuid;
-			if (tex->preview.previewLoaded == nullptr || !tex->preview.previewLoaded->load()) continue;
+			if (tex->preview == nullptr || tex->preview->previewLoaded == nullptr || !tex->preview->previewLoaded->load()) continue;
 
 			previewsToPlay.push_back(tex);
 		}
@@ -469,27 +473,27 @@ namespace Templates
 		auto previewStep = [elapsedSeconds](auto& texture)
 			{
 				float animationLength = texture->numFrames() * (1.0f / 60.0f);
-				float currentAnimationTime = texture->preview.time;
+				float currentAnimationTime = texture->preview->time;
 				unsigned int currentFrame = static_cast<unsigned int>(texture->numFrames() * (currentAnimationTime / animationLength));
 
 				if (animationLength > 0.0f)
 				{
-					currentAnimationTime += (texture->preview.playing) ? texture->preview.timeFactor * elapsedSeconds : 0.0f;
-					if (texture->preview.timeFactor > 0.0f)
+					currentAnimationTime += (texture->preview->playing) ? texture->preview->timeFactor * elapsedSeconds : 0.0f;
+					if (texture->preview->timeFactor > 0.0f)
 					{
 						if (currentAnimationTime >= animationLength)
-							currentAnimationTime = (texture->preview.looping) ? fmodf(currentAnimationTime, animationLength) : animationLength;
+							currentAnimationTime = (texture->preview->looping) ? fmodf(currentAnimationTime, animationLength) : animationLength;
 					}
-					else if (texture->preview.timeFactor < 0.0f)
+					else if (texture->preview->timeFactor < 0.0f)
 					{
 						if (currentAnimationTime < 0.0f)
-							currentAnimationTime = (texture->preview.looping) ? (animationLength - fmodf(currentAnimationTime, animationLength)) : 0.0f;
+							currentAnimationTime = (texture->preview->looping) ? (animationLength - fmodf(currentAnimationTime, animationLength)) : 0.0f;
 					}
-					texture->preview.time = currentAnimationTime;
+					texture->preview->time = currentAnimationTime;
 					unsigned int newFrame = static_cast<unsigned int>(texture->numFrames() * (currentAnimationTime / animationLength));
 					if (currentFrame != newFrame)
 					{
-						texture->preview.frame = std::clamp(newFrame, 0U, texture->numFrames() - 1);
+						texture->preview->frame = std::clamp(newFrame, 0U, texture->numFrames() - 1);
 					}
 				}
 			};

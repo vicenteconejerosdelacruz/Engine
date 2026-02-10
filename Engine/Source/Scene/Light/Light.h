@@ -270,3 +270,5 @@ namespace Scene {
 #endif
 };
 
+using namespace Scene;
+DEF_SCENEOBJECT_ID_HASH(Light);

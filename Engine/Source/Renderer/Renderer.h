@@ -1,6 +1,7 @@
 #pragma once
 
 #include <dxgi1_6.h>
+#include <RenderPass/RenderPass.h>
 
 using namespace Microsoft::WRL;
 using namespace DirectX;

@@ -6,6 +6,7 @@
 #include <set>
 #include <memory>
 #include <nlohmann/json.hpp>
+#include <SceneUnitId.h>
 #include <Renderer.h>
 #include <Templates.h>
 #include <SceneUnit.h>

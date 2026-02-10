@@ -5,6 +5,7 @@
 #include <wrl/client.h>
 #include <d3dx12.h>
 #include <DirectXHelper.h>
+#include <UUID.h>
 #include "../ComputeInterface.h"
 
 namespace ComputeShader
@@ -30,8 +31,11 @@ namespace ComputeShader
 		virtual void Solution(SceneUnitId unit);
 	};
 
-	JUUID CreateRenderableBoundingBox(RenderableID renderable);
 	std::unique_ptr<RenderableBoundingBox>& GetRenderableBoundingBox(JUUID compUUID);
-	void DeleteRenderableBoundingBox(JUUID compUUID);
-}
+	DEF_TEMPLATE_ID(RenderableBoundingBox, GetRenderableBoundingBox);
 
+	JUUID CreateRenderableBoundingBox(RenderableID renderable);
+	void DeleteRenderableBoundingBox(JUUID compUUID);
+};
+
+DEF_TEMPLATE_ID_HASH(RenderableBoundingBox);

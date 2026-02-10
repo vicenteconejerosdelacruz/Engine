@@ -1,6 +1,13 @@
 #pragma once
 #include "SequenceChannelElement.h"
+#include <UUID.h>
 
+namespace Templates
+{
+	DEF_TEMPLATE_ID_DEP(SoundJson, GetSoundTemplate);
+};
+
+using namespace Templates;
 struct SequenceChannelElementSoundFX : SequenceChannelElement
 {
 	SequenceChannelElementSoundFX();

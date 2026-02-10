@@ -3,6 +3,10 @@
 #include "CustomIncludeHandler.h"
 #include <Shader/Shader.h>
 
+namespace Templates
+{
+	struct ShaderInstance;
+};
 using namespace Templates;
 
 namespace ShaderCompiler {
