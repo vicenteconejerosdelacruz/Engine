@@ -5,6 +5,7 @@
 #include <Application.h>
 #include <fstream>
 #include <SceneObject.h>
+#include <Physics.h>
 #if defined(_EDITOR)
 #include <DefaultLevel.h>
 #include <BootLevel/BootLevel.h>
@@ -21,9 +22,10 @@ namespace Editor {
 }
 #endif
 
-namespace Scene::Level {
-
+namespace Scene::Level
+{
 	using namespace Scene;
+	using namespace Physics;
 
 	std::filesystem::path levelToLoad;
 #if defined(_EDITOR)
@@ -176,6 +178,7 @@ namespace Scene::Level {
 				progress(json.at("name"), count, total);
 			}
 		);
+		CreatePhysicsScene(scene->Id());
 
 #if defined(_EDITOR)
 		if (!scene->IsIsolated())

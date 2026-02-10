@@ -1,7 +1,11 @@
 #include "pch.h"
 #include "Physics.h"
-
+#include <unordered_map>
+#include <cassert>
 //Physx
+#include <PxPhysicsAPI.h>
+#include <extensions/PxDefaultAllocator.h>
+
 using namespace physx;
 #define PVD_HOST "127.0.0.1"
 static PxDefaultAllocator gAllocator;
@@ -9,9 +13,12 @@ static PxDefaultErrorCallback gErrorCallback;
 static PxFoundation* gFoundation = nullptr;
 static PxPvd* gPvd = nullptr;
 static PxPhysics* gPhysics = nullptr;
+static PxDefaultCpuDispatcher* gDispatcher = nullptr;
 
 namespace Physics
 {
+	std::unordered_map<SceneUnitId, PxScene*> physxScenes;
+
 	void InitializePhysics()
 	{
 		gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
@@ -21,6 +28,8 @@ namespace Physics
 
 		gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, gPvd);
 		PxInitExtensions(*gPhysics, gPvd);
+
+		gDispatcher = PxDefaultCpuDispatcherCreate(2);
 	}
 
 	void DestroyPhysics()
@@ -34,5 +43,15 @@ namespace Physics
 			PX_RELEASE(transport);
 		}
 		PX_RELEASE(gFoundation);
+	}
+
+	void CreatePhysicsScene(SceneUnitId id, XMFLOAT3 gravity)
+	{
+		assert(!physxScenes.contains(id));
+		PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
+		sceneDesc.gravity = PxVec3(gravity.x, gravity.y, gravity.z);
+		sceneDesc.cpuDispatcher = gDispatcher;
+		sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+		physxScenes.insert_or_assign(id, gPhysics->createScene(sceneDesc));
 	}
 }
