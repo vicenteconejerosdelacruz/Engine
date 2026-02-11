@@ -66,6 +66,7 @@ enum JsonToEditorValueType
 	jedv_t_so_soundeffect,
 	jedv_t_so_soundeffect_name,
 	jedv_t_so_soundeffect_vector,
+	jedv_t_so_physicscene_name,
 	jedv_t_te_material,
 	jedv_t_te_material_name,
 	jedv_t_te_material_vector,

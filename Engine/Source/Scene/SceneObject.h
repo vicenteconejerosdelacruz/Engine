@@ -17,14 +17,16 @@ inline const std::unordered_map<SceneObjectType, std::string> SceneObjectTypeToS
 	{ SO_Renderables, "Renderables" },
 	{ SO_Lights,	"Lights" },
 	{ SO_Cameras, "Cameras" },
-	{ SO_SoundEffects, "SoundEffects" }
+	{ SO_SoundEffects, "SoundEffects" },
+	{ SO_PhysicScenes, "PhysicScenes" }
 };
 
 inline const std::unordered_map<std::string, SceneObjectType> StringToSceneObjectType = {
 	{ "Renderables", SO_Renderables },
 	{ "Lights", SO_Lights },
 	{ "Cameras", SO_Cameras },
-	{ "SoundEffects", SO_SoundEffects }
+	{ "SoundEffects", SO_SoundEffects },
+	{ "PhysicScenes", SO_PhysicScenes }
 };
 
 #if defined(_EDITOR)
@@ -32,7 +34,8 @@ inline const std::unordered_map<SceneObjectType, const char*> SceneObjectsTypePa
 	{ SO_Renderables, ICON_FA_SNOWMAN "Renderables" },
 	{ SO_Lights, ICON_FA_LIGHTBULB "Lights" },
 	{ SO_Cameras, ICON_FA_CAMERA "Cameras" },
-	{ SO_SoundEffects, ICON_FA_MUSIC "SoundEffects" }
+	{ SO_SoundEffects, ICON_FA_MUSIC "SoundEffects" },
+	{ SO_PhysicScenes, ICON_FA_IGLOO "PhysicScenes" }
 };
 #endif
 
@@ -41,7 +44,8 @@ inline const std::unordered_map<SceneObjectType, std::string> SceneObjectTypeJso
 	{ SO_Renderables, "renderables" },
 	{ SO_Lights, "lights" },
 	{ SO_Cameras, "cameras" },
-	{ SO_SoundEffects, "sounds" }
+	{ SO_SoundEffects, "sounds" },
+	{ SO_PhysicScenes, "physicScenes" }
 };
 
 inline const std::unordered_map<std::string, std::string> JsonContainerToString =
@@ -49,7 +53,8 @@ inline const std::unordered_map<std::string, std::string> JsonContainerToString 
 	{ "renderables", "Renderables" },
 	{ "lights", "Lights" },
 	{ "cameras", "Cameras" },
-	{ "sounds", "SoundEffects" }
+	{ "sounds", "SoundEffects" },
+	{ "physicScenes", "PhysicScenes" }
 };
 
 inline const std::unordered_map<std::string, std::string> StringToJsonContainer =
@@ -57,7 +62,8 @@ inline const std::unordered_map<std::string, std::string> StringToJsonContainer 
 	{ "Renderables", "renderables" },
 	{ "Lights", "lights" },
 	{ "Cameras", "cameras" },
-	{ "SoundEffects", "sounds" }
+	{ "SoundEffects", "sounds" },
+	{ "PhysicScenes", "physicScenes" }
 };
 
 template <typename T>
@@ -114,3 +120,4 @@ namespace Scene
 #include <Light/Light.h>
 #include <Camera/Camera.h>
 #include <Sound/SoundFX.h>
+#include <Physics/PhysicScene.h>

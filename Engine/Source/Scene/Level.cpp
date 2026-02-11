@@ -64,6 +64,7 @@ namespace Scene::Level
 		level.merge_patch(GetDefaultLevelCameras());
 		level.merge_patch(GetDefaultLevelLights());
 		level.merge_patch(GetDefaultLevelSounds());
+		level.merge_patch(GetDefaultLevelPhysicsScenes());
 
 		return level;
 	}
@@ -127,6 +128,7 @@ namespace Scene::Level
 		CreateCameraSceneObjects(scene->Id());
 		CreateLightSceneObjects(scene->Id());
 		CreateSoundFXSceneObjects(scene->Id());
+		CreatePhysicSceneSceneObjects(scene->Id());
 
 		std::vector<std::string> types =
 		{
@@ -134,6 +136,7 @@ namespace Scene::Level
 			SceneObjectTypeJsonContainer.at(SO_Cameras),
 			SceneObjectTypeJsonContainer.at(SO_Lights),
 			SceneObjectTypeJsonContainer.at(SO_SoundEffects),
+			SceneObjectTypeJsonContainer.at(SO_PhysicScenes),
 		};
 
 		unsigned int total = std::accumulate(types.begin(), types.end(), 0U, [&](unsigned int sum, std::string type)
@@ -178,7 +181,14 @@ namespace Scene::Level
 				progress(json.at("name"), count, total);
 			}
 		);
-		CreatePhysicsScene(scene->Id());
+		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_PhysicScenes), [&](nlohmann::json& json)
+			{
+				progress(json.at("name"), count, total);
+				CreatePhysicScene(scene->Id(), json);
+				count++;
+				progress(json.at("name"), count, total);
+			}
+		);
 
 #if defined(_EDITOR)
 		if (!scene->IsIsolated())

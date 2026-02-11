@@ -132,6 +132,18 @@ namespace Editor::DefaultLevel {
 		}
 	};
 
+	nlohmann::json physicsScenes = {
+		{ "physicScenes",
+			{
+			{
+				{ "uuid", "7113a419-952e-4c88-9e2a-faa561ff240e" },
+				{ "name", "default-level-physics" },
+				{ "gravity", { 0.0, -9.81, 0.0 } }
+			}
+			}
+		}
+	};
+
 	nlohmann::json& GetDefaultLevelRenderables()
 	{
 		return renderables;
@@ -150,6 +162,11 @@ namespace Editor::DefaultLevel {
 	nlohmann::json& GetDefaultLevelSounds()
 	{
 		return sounds;
+	}
+
+	nlohmann::json& GetDefaultLevelPhysicsScenes()
+	{
+		return physicsScenes;
 	}
 }
 

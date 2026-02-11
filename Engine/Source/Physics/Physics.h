@@ -1,9 +1,15 @@
 #pragma once
 #include <SceneUnitId.h>
+#include <UUID.h>
+
+namespace Scene
+{
+	DEF_SCENEOBJECT_ID_DEP(PhysicScene);
+};
 
 namespace Physics
 {
 	void InitializePhysics();
 	void DestroyPhysics();
-	void CreatePhysicsScene(SceneUnitId id, XMFLOAT3 gravity = XMFLOAT3(0.0f, -9.81f, 0.0f));
-}
+	void CreatePhysicsScene(PhysicSceneID physicScene);
+};

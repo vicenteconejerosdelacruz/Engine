@@ -4,6 +4,7 @@
 #include <Renderer.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <Level.h>
+#include <unordered_map>
 
 extern std::unique_ptr<Renderer> renderer;
 #if defined(_EDITOR)
@@ -327,6 +328,11 @@ namespace Scene
 				mover(GetSoundFXsSceneObjects,uuid,fromId,toId);
 			}
 			},
+			{ SO_PhysicScenes, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
+			{
+				mover(GetPhysicScenesSceneObjects,uuid,fromId,toId);
+			}
+			},
 		};
 
 		SceneObjectType type = GetSceneObjectType(fromId, uuid);
@@ -378,6 +384,13 @@ namespace Scene
 					auto& so = GetSoundFXSceneObject(id, uuid);
 					so->BindToScene();
 				}
+			},
+			{
+				SO_PhysicScenes, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& so = GetPhysicSceneSceneObject(id, uuid);
+					so->BindToScene();
+				}
 			}
 		};
 		for (auto& uuid : GetUnboundedSceneObjects(id))
@@ -424,6 +437,11 @@ namespace Scene
 			CreateSoundFX(id, data);
 		}
 		break;
+		case SO_PhysicScenes:
+		{
+			CreatePhysicScene(id, data);
+		}
+		break;
 		}
 		return uuid;
 	}
@@ -455,6 +473,7 @@ namespace Scene
 			if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
 				dt = 0.0f;
 #endif
+			PhysicSceneStep(unit, dt);
 			SoundFXsStep(unit, dt);
 			RenderablesStep(unit, dt);
 			AnimableStep(unit, dt);
@@ -698,10 +717,6 @@ namespace Scene
 		computeRunners.clear();
 	}
 
-	void DeletedScenes()
-	{
-	}
-
 	SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid)
 	{
 		std::map<SceneObjectType, std::function<SceneObject* (SceneUnitId id, JUUID uuid)>> getP =
@@ -727,6 +742,12 @@ namespace Scene
 			{ SO_SoundEffects, [](SceneUnitId id, JUUID uuid)
 				{
 					auto& o = GetSoundFXSceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			},
+			{ SO_PhysicScenes, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetPhysicSceneSceneObject(id, uuid);
 					return static_cast<SceneObject*>(o.get());
 				}
 			}
@@ -779,6 +800,13 @@ namespace Scene
 							SoundFXID o = MAKESUUUID(id,uuid);
 							if (o->hidden()) return JUUIDName();
 							return str2JUUIDName(SceneObjectTypeToString.at(SO_SoundEffects), o->uuid(),o->name());
+						}
+					},
+					{ SO_PhysicScenes, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+						{
+							PhysicSceneID o = MAKESUUUID(id,uuid);
+							if (o->hidden()) return JUUIDName();
+							return str2JUUIDName(SceneObjectTypeToString.at(SO_PhysicScenes), o->uuid(),o->name());
 						}
 					}
 				};
@@ -836,6 +864,13 @@ namespace Scene
 					if (o->hidden()) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_SoundEffects), o->uuid(),o->name());
 				}
+			},
+			{ SO_PhysicScenes, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					PhysicSceneID o = MAKESUUUID(id,uuid);
+					if (o->hidden()) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_PhysicScenes), o->uuid(),o->name());
+				}
 			}
 		};
 
@@ -891,6 +926,13 @@ namespace Scene
 					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_SoundEffects), o->uuid(),o->name());
 				}
+			},
+			{ SO_PhysicScenes, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					PhysicSceneID o = MAKESUUUID(id,uuid);
+					if (o->hidden() || o->markedForDelete) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_PhysicScenes), o->uuid(),o->name());
+				}
 			}
 		};
 
@@ -909,84 +951,91 @@ namespace Scene
 
 	std::vector<std::pair<std::string, JsonToEditorValueType>> GetSceneObjectAttributes(SceneObjectType so)
 	{
-		const std::map<SceneObjectType, std::function<std::vector<std::pair<std::string, JsonToEditorValueType>>()>> GetSOAtts =
+		const std::unordered_map<SceneObjectType, std::function<std::vector<std::pair<std::string, JsonToEditorValueType>>()>> GetSOAtts =
 		{
 			{ SO_Renderables, GetRenderableAttributes },
 			{ SO_Lights, GetLightAttributes },
 			{ SO_Cameras, GetCameraAttributes },
-			{ SO_SoundEffects, GetSoundFXAttributes }
+			{ SO_SoundEffects, GetSoundFXAttributes },
+			{ SO_PhysicScenes, GetPhysicSceneAttributes },
 		};
 		return GetSOAtts.at(so)();
 	}
 
 	std::map<std::string, JEdvEditorDrawerFunction> GetSceneObjectDrawers(SceneObjectType so)
 	{
-		const std::map<SceneObjectType, std::function<std::map<std::string, JEdvEditorDrawerFunction>()>> GetSODrawers =
+		const std::unordered_map<SceneObjectType, std::function<std::map<std::string, JEdvEditorDrawerFunction>()>> GetSODrawers =
 		{
 			{ SO_Renderables, GetRenderableDrawers },
 			{ SO_Lights, GetLightDrawers },
 			{ SO_Cameras, GetCameraDrawers },
-			{ SO_SoundEffects, GetSoundFXDrawers }
+			{ SO_SoundEffects, GetSoundFXDrawers },
+			{ SO_PhysicScenes, GetPhysicSceneDrawers },
 		};
 		return GetSODrawers.at(so)();
 	}
 
 	std::map<std::string, JEdvEditorDrawerFunction> GetSceneObjectPreviewers(SceneObjectType so)
 	{
-		const std::map<SceneObjectType, std::function<std::map<std::string, JEdvEditorDrawerFunction>()>> GetSOPreviewers =
+		const std::unordered_map<SceneObjectType, std::function<std::map<std::string, JEdvEditorDrawerFunction>()>> GetSOPreviewers =
 		{
 			{ SO_Renderables, GetRenderablePreviewers },
 			{ SO_Lights, GetLightPreviewers },
 			{ SO_Cameras, GetCameraPreviewers },
-			{ SO_SoundEffects, GetSoundFXPreviewers }
+			{ SO_SoundEffects, GetSoundFXPreviewers },
+			{ SO_PhysicScenes, GetPhysicScenePreviewers },
 		};
 		return GetSOPreviewers.at(so)();
 	}
 
 	nlohmann::json GetSceneObjectJson(SceneObjectType so)
 	{
-		const std::map<SceneObjectType, std::function<nlohmann::json()>> GetSOJson =
+		const std::unordered_map<SceneObjectType, std::function<nlohmann::json()>> GetSOJson =
 		{
 			{ SO_Renderables, CreateRenderableJson },
 			{ SO_Lights, CreateLightJson },
 			{ SO_Cameras, CreateCameraJson },
-			{ SO_SoundEffects, CreateSoundFXJson }
+			{ SO_SoundEffects, CreateSoundFXJson },
+			{ SO_PhysicScenes, CreatePhysicSceneJson },
 		};
 		return GetSOJson.at(so)();
 	}
 
 	std::vector<std::string> GetSceneObjectRequiredAttributes(SceneObjectType so)
 	{
-		const std::map<SceneObjectType, std::function<std::vector<std::string>()>> GetSORequiredAtts =
+		const std::unordered_map<SceneObjectType, std::function<std::vector<std::string>()>> GetSORequiredAtts =
 		{
 			{ SO_Renderables, GetRenderableRequiredAttributes },
 			{ SO_Lights, GetLightRequiredAttributes },
 			{ SO_Cameras, GetCameraRequiredAttributes },
-			{ SO_SoundEffects, GetSoundFXRequiredAttributes }
+			{ SO_SoundEffects, GetSoundFXRequiredAttributes },
+			{ SO_PhysicScenes, GetPhysicSceneRequiredAttributes },
 		};
 		return GetSORequiredAtts.at(so)();
 	}
 
 	std::map<std::string, JEdvCreatorDrawerFunction> GetSceneObjectCreatorDrawers(SceneObjectType so)
 	{
-		const std::map<SceneObjectType, std::function<std::map<std::string, JEdvCreatorDrawerFunction>()>> GetSODrawers =
+		const std::unordered_map<SceneObjectType, std::function<std::map<std::string, JEdvCreatorDrawerFunction>()>> GetSODrawers =
 		{
 			{ SO_Renderables, GetRenderableCreatorDrawers },
 			{ SO_Lights, GetLightCreatorDrawers },
 			{ SO_Cameras, GetCameraCreatorDrawers },
-			{ SO_SoundEffects, GetSoundFXCreatorDrawers }
+			{ SO_SoundEffects, GetSoundFXCreatorDrawers },
+			{ SO_PhysicScenes, GetPhysicSceneCreatorDrawers },
 		};
 		return GetSODrawers.at(so)();
 	}
 
 	std::map<std::string, JEdvCreatorValidatorFunction> GetSceneObjectValidators(SceneObjectType so)
 	{
-		const std::map<SceneObjectType, std::function<std::map<std::string, JEdvCreatorValidatorFunction>()>> GetSOValidators =
+		const std::unordered_map<SceneObjectType, std::function<std::map<std::string, JEdvCreatorValidatorFunction>()>> GetSOValidators =
 		{
 			{ SO_Renderables, GetRenderableCreatorValidator },
 			{ SO_Lights, GetLightCreatorValidator },
 			{ SO_Cameras, GetCameraCreatorValidator },
-			{ SO_SoundEffects, GetSoundFXCreatorValidator }
+			{ SO_SoundEffects, GetSoundFXCreatorValidator },
+			{ SO_PhysicScenes, GetPhysicSceneCreatorValidator }
 		};
 		return GetSOValidators.at(so)();
 	}
@@ -1001,7 +1050,8 @@ namespace Scene
 			{ SO_Renderables, DeleteRenderable },
 			{ SO_Lights, DeleteLight },
 			{ SO_Cameras, DeleteCamera },
-			{ SO_SoundEffects, DeleteSoundFX }
+			{ SO_SoundEffects, DeleteSoundFX },
+			{ SO_PhysicScenes, DeletePhysicScene },
 		};
 		EraseSceneObjectFromSelection(id, uuid);
 		DeleteSO.at(type)(id, uuid);

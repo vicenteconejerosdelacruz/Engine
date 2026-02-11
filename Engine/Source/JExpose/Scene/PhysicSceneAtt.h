@@ -1,0 +1,7 @@
+JCLASS(PhysicScene, GetPhysicScenes)
+JTYPE(SceneObjectType, SO_PhysicScenes)
+JEXPOSE(std::string, uuid, "", jedv_t_hidden, 0, false)
+JEXPOSE(bool, hidden, false, jedv_t_hidden, 0, false)
+JEXPOSE(std::string, name, "physic.scene", jedv_t_so_physicscene_name, 0, true)
+JEXPOSE_TRANSFORM(XMFLOAT3, gravity, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(0.0f, -9.81f, 0.0f), jedv_t_float3, 0, false)
+JTRACKUUID(PhysicScene, PhysicScenes, 1, true)

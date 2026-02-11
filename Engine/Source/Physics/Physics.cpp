@@ -17,8 +17,6 @@ static PxDefaultCpuDispatcher* gDispatcher = nullptr;
 
 namespace Physics
 {
-	std::unordered_map<SceneUnitId, PxScene*> physxScenes;
-
 	void InitializePhysics()
 	{
 		gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
@@ -45,13 +43,13 @@ namespace Physics
 		PX_RELEASE(gFoundation);
 	}
 
-	void CreatePhysicsScene(SceneUnitId id, XMFLOAT3 gravity)
+	void CreatePhysicsScene(PhysicSceneID physicScene)
 	{
-		assert(!physxScenes.contains(id));
 		PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
+		XMFLOAT3 gravity = physicScene->gravity();
 		sceneDesc.gravity = PxVec3(gravity.x, gravity.y, gravity.z);
 		sceneDesc.cpuDispatcher = gDispatcher;
 		sceneDesc.filterShader = PxDefaultSimulationFilterShader;
-		physxScenes.insert_or_assign(id, gPhysics->createScene(sceneDesc));
+		physicScene->pxScene = gPhysics->createScene(sceneDesc);
 	}
 }

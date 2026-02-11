@@ -31,7 +31,6 @@ namespace Scene
 	extern void SceneRender();
 	extern void ScenePostRender();
 	extern void SceneObjectsStep(DX::StepTimer& timer);
-	extern void DeletedScenes();
 	extern void DestroyScenes(bool inmediate);
 };
 
@@ -433,9 +432,6 @@ void AppStep()
 		}
 	);
 	Render();
-
-	//delete scenes which are marked for deletion
-	DeletedScenes();
 }
 
 //RENDER

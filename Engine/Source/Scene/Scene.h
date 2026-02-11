@@ -120,7 +120,6 @@ namespace Scene
 	void ScenePostRender();
 	void RunComputeShaders();
 	void SolveComputeShaders();
-	void DeletedScenes();
 
 	SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid);
 

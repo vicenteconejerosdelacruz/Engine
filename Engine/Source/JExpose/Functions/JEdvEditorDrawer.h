@@ -1752,6 +1752,7 @@ template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_came
 template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_light_name>() { return DrawNonEmptyValue([] {Editor::MarkScenePanelAssetsAsDirty(); }); }
 template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_renderable_name>() { return DrawNonEmptyValue([] {Editor::MarkScenePanelAssetsAsDirty(); }); }
 template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_soundeffect_name>() { return DrawNonEmptyValue([] {Editor::MarkScenePanelAssetsAsDirty(); }); }
+template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_physicscene_name>() { return DrawNonEmptyValue([] {Editor::MarkScenePanelAssetsAsDirty(); }); }
 template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_material_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
 template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_model3d_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
 template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_renderpass_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
