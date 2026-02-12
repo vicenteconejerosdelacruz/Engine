@@ -1,7 +1,6 @@
 #pragma once
 #include <ShaderMaterials.h>
 #include <nlohmann/json.hpp>
-#include <DirectXMath.h>
 #include <SimpleMath.h>
 
 template<MaterialVariablesTypes T, typename V>

@@ -15,7 +15,7 @@ enum SceneObjectType {
 	SO_PhysicScenes,
 };
 
-#include "pch/SceneUnitID.h"
+#include "pch/SceneUnitId.h"
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 // Windows Header Files
@@ -41,7 +41,6 @@ enum SceneObjectType {
 #if defined(_DEVELOPMENT)
 #include <DirectXTex.h>
 #endif
-#include <DirectXMath.h>
 #include <DirectXColors.h>
 
 #include <d3d12.h>

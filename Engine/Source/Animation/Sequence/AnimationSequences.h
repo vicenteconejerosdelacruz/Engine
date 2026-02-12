@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <string>
 #include <nlohmann/json.hpp>
-#include <DirectXMath.h>
+#include <SimpleMath.h>
 #include "Sequence.h"
 
 struct AnimationSequences

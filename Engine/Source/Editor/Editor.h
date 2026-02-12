@@ -3,7 +3,8 @@
 #include <wrl.h>
 #include <JObject.h>
 #include <Templates.h>
-#include <DirectXMath.h>
+#include <SimpleMath.h>
+#include <SceneUnitId.h>
 
 #define _EDITOR_BOUNDINGBOX
 #define _EDITOR_PICKINGPASS

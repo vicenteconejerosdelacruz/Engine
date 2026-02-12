@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../ComputeInterface.h"
-#include <DirectXMath.h>
+#include <SimpleMath.h>
 #include <filesystem>
 #include <wrl.h>
 #include <wrl/client.h>

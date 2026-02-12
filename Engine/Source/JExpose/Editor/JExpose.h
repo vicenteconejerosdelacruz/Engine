@@ -72,19 +72,33 @@ std::for_each(objs.begin(), objs.end(), [&](auto o)\
 #define JEXPOSE_SET(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
 #define JEXPOSE_MAP_TRANSFORM(KEYTYPE,VALUETYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
 #define JEXPOSE_MAP_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)\
-	nlohmann::json& objects = (*this)[#ATT];\
-	std::map<std::string, nlohmann::json> jmap;\
-	for (nlohmann::json::iterator it = objects.begin(); it != objects.end(); it++)\
+	nlohmann::json& objects##ATT = (*this)[#ATT];\
+	if(objects##ATT.is_object())\
 	{\
-		nlohmann::json jreplacement;\
-		auto& obj = Get##TYPE(it.value());\
-		obj->WriteJson(jreplacement);\
-		jmap.insert_or_assign(it.key(),jreplacement); \
+		std::map<std::string, nlohmann::json> jmap##ATT;\
+		for (nlohmann::json::iterator it = objects##ATT.begin(); it != objects##ATT.end(); it++)\
+		{\
+			nlohmann::json jreplacement;\
+			auto& obj = Get##TYPE(it.value());\
+			obj->WriteJson(jreplacement);\
+			jmap##ATT.insert_or_assign(it.key(),jreplacement); \
+		}\
+		j[#ATT] = nlohmann::json::object({});\
+		for(auto &[k,v]:jmap##ATT)\
+		{\
+			j[#ATT][k]=v;\
+		}\
 	}\
-	j[#ATT] = nlohmann::json::object({});\
-	for(auto &[k,v]:jmap)\
+	else if(objects##ATT.is_array())\
 	{\
-		j[#ATT][k]=v;\
+		j[#ATT] = nlohmann::json::array({});\
+		for(size_t index = 0ULL; index < objects##ATT.size(); index++)\
+		{\
+			nlohmann::json jreplacement;\
+			auto& obj = Get##TYPE(objects##ATT[index]);\
+			obj->WriteJson(jreplacement);\
+			j[#ATT].push_back(jreplacement);\
+		}\
 	}
 
 #define JPREVIEW(NAME,JEDVALUETYPE)

@@ -13,14 +13,14 @@ enum ShaderType {
 	COMPUTE_SHADER,
 };
 
-inline static std::map<ShaderType, std::string> ShaderTypeToStr = {
+inline static std::unordered_map<ShaderType, std::string> ShaderTypeToStr = {
 	{ VERTEX_SHADER, "VERTEX_SHADER" },
 	{ PIXEL_SHADER, "PIXEL_SHADER" },
 	{ GEOMETRY_SHADER, "GEOMETRY_SHADER" },
 	{ COMPUTE_SHADER, "GEOMETRY_SHADER" },
 };
 
-inline static std::map<std::string, ShaderType> StrToShaderType = {
+inline static std::unordered_map<std::string, ShaderType> StrToShaderType = {
 	{ "VERTEX_SHADER", VERTEX_SHADER },
 	{ "PIXEL_SHADER", PIXEL_SHADER },
 	{ "GEOMETRY_SHADER", GEOMETRY_SHADER },

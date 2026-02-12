@@ -2,7 +2,8 @@
 #include "SequenceChannelElement.h"
 #include <unordered_map>
 #include <string>
-#include <DirectXMath.h>
+#include <SimpleMath.h>
+#include <nlohmann/json.hpp>
 
 enum Easing {
 	Easing_Linear,
@@ -26,6 +27,8 @@ static inline std::unordered_map<std::string, Easing> StringToEasing =
 	{ "Sine_Ease_Out", Easing_Sine_Ease_Out},
 	{ "Sine_Ease_In_Out", Easing_Sine_Ease_In_Out},
 };
+
+using namespace DirectX;
 
 struct TransformationKeyFrame
 {

@@ -20,7 +20,7 @@ JEdvEditorDrawerFunction DrawEnum(
 	std::unordered_map<E, std::string>& EtoS,
 	std::unordered_map<std::string, E>& StoE
 ) {
-	if (J == jedv_t_hidden) return nullptr;
+	if (J == jedv_t_hidden) return[](std::string attribute, std::vector<JObject*>& json) {};
 	return [&EtoS, &StoE](std::string attribute, std::vector<JObject*>& json)
 		{
 			auto allSame = [attribute, &json]()
@@ -4692,224 +4692,6 @@ inline JEdvEditorDrawerFunction DrawValue<Orthographic, jedv_t_object>()
 
 }
 
-template<>
-inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_controller_vector>()
-{
-	return[](std::string attribute, std::vector<JObject*>& json)
-		{
-			//this was commented
-			/*
-			auto setValue = [attribute, &json](unsigned int index, std::string controller)
-				{
-					for (auto& j : json)
-					{
-						nlohmann::json cpy = j->at(attribute);
-						cpy.at(index) = controller;
-						nlohmann::json patch = { { attribute, cpy } };
-						j->JUpdate(patch);
-					}
-				};
-			auto append = [attribute, &json](unsigned int index)
-				{
-					auto push_back = [attribute, &json](std::string value)
-						{
-							for (auto& j : json)
-							{
-								nlohmann::json cpy = j->at(attribute);
-								cpy.push_back("");
-								nlohmann::json patch = { { attribute, cpy } };
-								j->JUpdate(patch);
-							}
-						};
-					auto fit = [attribute, &json](unsigned int index, std::string value)
-						{
-							auto& v0 = json.at(0)->at(attribute);
-							std::vector<std::string> v1;
-							v1.insert(v1.begin(), v0.begin(), std::next(v0.begin(), index));
-							v1.push_back(value);
-							v1.insert(v1.end(), std::next(v0.begin(), index), v0.end());
-
-							for (auto& j : json)
-							{
-								nlohmann::json patch = { { attribute, v1 } };
-								j->JUpdate(patch);
-							}
-						};
-
-					unsigned int size = static_cast<unsigned int>(json.at(0)->at(attribute).size());
-					//only push_back if the vector is empty or if we are gonna push after the last item, otherwise we need to fit the values between
-					if (size == 0U || index == size)
-					{
-						push_back("");
-					}
-					else
-					{
-						fit(index, "");
-					}
-				};
-			auto remove = [attribute, &json](unsigned int index)
-				{
-					for (auto& j : json)
-					{
-						nlohmann::json value = j->at(attribute);
-						value.erase(index);
-						nlohmann::json patch = { { attribute, value } };
-						j->JUpdate(patch);
-					}
-				};
-			auto currentItems = [attribute, &json]()
-				{
-					std::set<std::string> items;
-					unsigned int sz = static_cast<unsigned int>(json.at(0)->at("controllers").size());
-					for (unsigned int i = 0; i < sz; i++)
-					{
-						std::string controller = json.at(0)->at("controllers").at(i);
-						if (controller == "") continue;
-						items.insert(controller);
-					}
-					return items;
-				};
-
-			ImGui::PushID(attribute.c_str());
-
-			int removeIndex = -1;
-
-			bool allEq = true;// allSame();
-
-			std::vector<std::string> controllers = Game::GetGameControllers();
-
-			std::string tableName = "tables-" + attribute + "-table";
-			if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
-			{
-				ImGui::TableNextRow();
-				ImGui::TableSetColumnIndex(0);
-				ImGui::Text(attribute.c_str());
-				ImGui::TableSetColumnIndex(1);
-
-				bool disabled = !allEq;
-
-				ImGui::DrawItemWithEnabledState([disabled, append]()
-					{
-						ImGui::PushID("PlusTop");
-						if (ImGui::Button(ICON_FA_PLUS, ImVec2(ImGui::GetContentRegionAvail().x, 20.0f)) && !disabled)
-						{
-							append(0);
-						}
-						ImGui::PopID();
-					}
-				, allEq);
-
-				if (allEq)
-				{
-					unsigned int numItems = static_cast<unsigned int>(json.at(0)->at(attribute).size());
-
-					std::set<std::string> cItems = currentItems();
-
-					for (unsigned int index = 0U; index < numItems; index++)
-					{
-						std::vector<std::string> selectables = { "" };
-						std::vector<std::string> filteredItems;
-						std::string currentController = json.at(0)->at(attribute).at(index);
-						std::copy_if(controllers.begin(), controllers.end(), std::back_inserter(filteredItems), [&cItems, currentController](auto item)
-							{
-								return !cItems.contains(item) || item == currentController;
-							}
-						);
-						nostd::AppendToVector(selectables, filteredItems);
-
-						ImGui::TableNextRow();
-						ImGui::TableSetColumnIndex(0);
-
-						//draw the plus button to append items
-						ImGui::PushID((std::string("PlusLeft-") + std::to_string(index)).c_str());
-						if (ImGui::Button(ICON_FA_PLUS))
-						{
-							append(index);
-						}
-						ImGui::PopID();
-
-						//draw the minus button to delete items
-						ImGui::SameLine();
-						ImGui::PushID((std::string("DeleteLeft-") + std::to_string(index)).c_str());
-						if (ImGui::Button(ICON_FA_TIMES))
-						{
-							removeIndex = index;
-						}
-						ImGui::PopID();
-
-						//move to second column where the actual list is displayed
-						ImGui::TableSetColumnIndex(1);
-
-						std::string selected = json.at(0)->at("controllers").at(index);
-
-						//draw the actual
-						ImGui::PushID((std::string("selectables-") + std::to_string(index)).c_str());
-						ImGui::DrawComboSelection(selected, selectables, [setValue, index](std::string controller)
-							{
-								setValue(index, controller);
-							}
-						);
-						ImGui::PopID();
-					}
-
-					if (numItems >= 1U)
-					{
-						ImGui::TableNextRow();
-						ImGui::TableSetColumnIndex(1);
-						ImGui::DrawItemWithEnabledState([disabled, numItems, append]()
-							{
-								ImGui::PushID("PlusBottom");
-								if (ImGui::Button(ICON_FA_PLUS, ImVec2(ImGui::GetContentRegionAvail().x, 20.0f)) && !disabled)
-								{
-									append(numItems);
-								}
-								ImGui::PopID();
-							}
-						, allEq);
-					}
-				}
-				else
-				{
-					//std::vector<JUUIDName> uuidNames;
-					//std::copy_if(items.begin(), items.end(), std::back_inserter(uuidNames), [FilterItem](UUIDName item)
-					//	{
-					//		return FilterItem(0, item);
-					//	}
-					//);
-					//std::vector<JUUIDName> selectables = { std::make_tuple("","") };
-					//selectables.insert(selectables.end(), uuidNames.begin(), uuidNames.end());
-					//
-					//ImGui::TableSetColumnIndex(1);
-					//UUIDName& selected = selectables.at(0);
-					//
-					//ImGui::DrawItemWithEnabledState([selected, iconCode]()
-					//	{
-					//		ImGui::PushID((std::string("goto-selected") + std::to_string(0)).c_str());
-					//		ImGui::OpenTemplate(iconCode, selected);
-					//		ImGui::PopID();
-					//	}, std::get<0>(selected) != "");
-					//ImGui::SameLine();
-					//
-					//ImGui::PushID((std::string("selectables-neq")).c_str());
-					//ImGui::DrawComboSelection(selected, selectables, [&resetUUID](UUIDName option)
-					//	{
-					//		std::string& nuuid = std::get<0>(option);
-					//		resetUUID = nuuid;
-					//	}
-					//);
-					//ImGui::PopID();
-				}
-
-				ImGui::EndTable();
-			}
-			ImGui::PopID();
-
-			if (removeIndex != -1)
-				remove(removeIndex);
-				*/
-		};
-}
-
 template <>
 inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_controller_vector>()
 {
@@ -5026,6 +4808,7 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_controller_vector>()
 					}
 				};
 
+			ImGui::Separator();
 			ImGui::Text(attribute.c_str());
 
 			for (int i = 0; i < json.size(); i++)
@@ -5058,6 +4841,104 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_controller_vector>()
 			if (std::get<0>(swapTuple) != -1)
 			{
 				swapController(std::get<0>(swapTuple), std::get<1>(swapTuple), std::get<2>(swapTuple));
+			}
+		};
+}
+
+template <>
+inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			if (json.size() > 1) return;
+
+			ImGui::Separator();
+			bool addPressed = false;
+			bool removePressed = false;
+
+			auto addPhysicsBehavior = [&]()
+				{
+					nlohmann::json placeholder;
+					JUUID sceneObject = json.at(0)->at("uuid");
+					JUUID uuid = CreatePhysicObject(attribute, MAKESUUUID(Editor::currentSceneUnitId, sceneObject), placeholder);
+					json.at(0)->at(attribute).push_back(uuid);
+				};
+			auto removePhysicsBehavior = [&]()
+				{
+					std::string physicObjectUUID = json.at(0)->at(attribute).at(0);
+					DestroyPhysicObject(physicObjectUUID);
+					json.at(0)->at(attribute).clear();
+				};
+
+			auto drawAddPhysicBehavior = [&]()
+				{
+					std::string uuid = json.at(0)->at("uuid");
+					std::string tableName = "tables-" + uuid + "-add-physics-behavior-table";
+					if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+					{
+						ImGui::TableNextRow();
+						ImGui::TableSetColumnIndex(0);
+						ImGui::Text("Physics Behavior");
+						ImGui::TableSetColumnIndex(1);
+						ImGui::PushID("add-physics-behavior");
+						if (ImGui::Button(ICON_FA_PLUS))
+						{
+							addPressed = true;
+						}
+						ImGui::PopID();
+						ImGui::EndTable();
+					}
+				};
+			auto drawRemovePhysicBehavior = [&]()
+				{
+					std::string uuid = json.at(0)->at("uuid");
+					std::string tableName = "tables-" + uuid + "-remove-physics-behavior-table";
+					if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+					{
+						ImGui::TableNextRow();
+						ImGui::TableSetColumnIndex(0);
+						ImGui::Text("Physics Behavior");
+						ImGui::TableSetColumnIndex(1);
+						ImGui::PushID("remove-physics-behavior");
+						if (ImGui::Button(ICON_FA_TIMES))
+						{
+							removePressed = true;
+						}
+						ImGui::PopID();
+						ImGui::EndTable();
+					}
+				};
+			auto drawPhysicBehavior = [&]()
+				{
+					std::string physicObjectUUID = json.at(0)->at(attribute).at(0);
+					auto& physicObject = GetPhysicObject(physicObjectUUID);
+					std::vector<JObject*> jvec = { physicObject.get() };
+					auto drawers = GetPhysicObjectDrawers();
+
+					auto attributes = physicObject->GetPhysicBehaviorAttributes();
+					for (auto& att : attributes)
+					{
+						drawers.at(att)(att, jvec);
+					}
+				};
+
+			if (json.at(0)->at(attribute).size() == 0ULL)
+			{
+				drawAddPhysicBehavior();
+			}
+			else if (json.at(0)->at(attribute).size() == 1ULL)
+			{
+				drawRemovePhysicBehavior();
+				drawPhysicBehavior();
+			}
+
+			if (addPressed)
+			{
+				addPhysicsBehavior();
+			}
+			if (removePressed)
+			{
+				removePhysicsBehavior();
 			}
 		};
 }

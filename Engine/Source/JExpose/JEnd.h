@@ -49,6 +49,7 @@ json.push_back(obj); });
 #endif
 
 #ifdef JEXPOSE_EDITOR_WRITE_JSON
+j.erase("uuid");
 #undef JEXPOSE_EDITOR_WRITE_JSON
 #endif
 

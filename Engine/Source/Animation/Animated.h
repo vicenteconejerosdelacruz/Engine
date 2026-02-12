@@ -2,7 +2,7 @@
 
 #include <queue>
 #include <map>
-#include <DirectXMath.h>
+#include <SimpleMath.h>
 #include <assimp/scene.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <memory>

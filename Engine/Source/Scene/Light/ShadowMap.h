@@ -1,5 +1,5 @@
 #pragma once
-#include <DirectXMath.h>
+#include <SimpleMath.h>
 #include <d3dx12.h>
 
 namespace Scene { struct Light; }

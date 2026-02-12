@@ -3,8 +3,7 @@
 #include <VertexFormats.h>
 #include <DeviceUtils/VertexBuffer/VertexBuffer.h>
 #include <DeviceUtils/IndexBuffer/IndexBuffer.h>
-#include <DirectXCollision.h>
-//#include <Application.h>
+#include <SimpleMath.h>
 
 namespace Templates {
 

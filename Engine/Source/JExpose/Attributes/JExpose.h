@@ -383,8 +383,8 @@
 #define JEXPOSE_SET(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
 #define JEXPOSE_MAP_TRANSFORM(KEYTYPE,VALUETYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
 #define JEXPOSE_MAP_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) \
-	nlohmann::json& j = (*this)[#ATT];\
-	for (nlohmann::json::iterator it = j.begin(); it != j.end(); ++it)\
+	nlohmann::json& j##ATT = (*this)[#ATT];\
+	for (nlohmann::json::iterator it = j##ATT.begin(); it != j##ATT.end(); ++it)\
 	{\
 		Destroy##TYPE(it.value()); \
 	}

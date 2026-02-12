@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "SequenceChannelElementTransformation.h"
-#include <DirectXMath.h>
 #include <NoStd.h>
+#include <NoMath.h>
 
 XMMATRIX TransformationKeyFrame::ToMatrix()
 {

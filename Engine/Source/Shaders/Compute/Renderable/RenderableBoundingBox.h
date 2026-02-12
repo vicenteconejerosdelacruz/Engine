@@ -1,5 +1,5 @@
 #pragma once
-#include <DirectXCollision.h>
+#include <SimpleMath.h>
 #include <vector>
 #include <atlbase.h>
 #include <wrl/client.h>

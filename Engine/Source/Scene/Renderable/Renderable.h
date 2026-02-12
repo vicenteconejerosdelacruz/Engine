@@ -8,6 +8,7 @@
 #include <Sequence/SequencePlayer.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <Renderable/RenderableBoundingBox.h>
+#include <Physics.h>
 
 typedef std::vector<MeshInstanceID> RenderableMeshes;
 typedef std::unordered_map<RenderPassInstanceID, std::vector<MaterialInstanceID>> RenderableMaterials; //RenderPassInstanceID -> MaterialInstanceID
@@ -21,6 +22,7 @@ static nlohmann::json defaultPickingShaderAttributes = { { "uniqueMaterialInstan
 #endif
 
 using namespace Game;
+using namespace Physics;
 
 namespace Scene
 {
