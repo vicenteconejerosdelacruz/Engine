@@ -106,7 +106,7 @@ namespace Editor::DefaultLevel {
 							{"nearZ", 0.001 }
 						}
 					},
-					{ "position", { 0.0, 0.0, 0.0 } },
+					{ "position", { 0.0, 0.0, -5.0 } },
 					{ "projectionType", "Perspective" },
 					{ "rotation", { 0.0, 0.0, 0.0 } },
 					{ "speed", 0.05000000074505806 },

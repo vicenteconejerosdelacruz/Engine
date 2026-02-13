@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Sphere.h"
+#include <corecrt_math_defines.h>
 
 const float t = (1.0f + std::sqrt(5.0f)) / 2.0f;
 
@@ -120,11 +121,14 @@ std::vector<Sphere::VertexType> Sphere::GetVertices()
 	std::vector<VertexType> vertices;
 	for (auto& p : teselationPoints)
 	{
-		VertexType v = {
+		float u = std::atan2f(p.x, p.z) / (2.0f * M_PI) + 0.5f;
+		float v = std::asinf(p.y) / M_PI + 0.5f;
+		VertexType vertex = {
 			.Position = p,
 			.Normal = p,
+			.TexCoord = XMFLOAT2(u,v)
 		};
-		vertices.push_back(v);
+		vertices.push_back(vertex);
 	}
 	return vertices;
 }

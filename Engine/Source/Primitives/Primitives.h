@@ -52,6 +52,14 @@ namespace Primitives {
 	}
 
 	template<>
+	inline void LoadPrimitiveIntoPxGeometry<Sphere>(PhysicObject& physicObject)
+	{
+		RenderableID renderable = physicObject.sceneObject;
+		XMFLOAT3 scale = renderable->scale();
+		physicObject.geometry = PxSphereGeometry(scale.x * 0.5f);
+	}
+
+	template<>
 	inline void LoadPrimitiveIntoPxGeometry<Floor>(PhysicObject& physicObject)
 	{
 		RenderableID renderable = physicObject.sceneObject;

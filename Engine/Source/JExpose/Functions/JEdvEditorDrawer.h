@@ -4873,8 +4873,7 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
 
 			auto drawAddPhysicBehavior = [&]()
 				{
-					std::string uuid = json.at(0)->at(attribute).at(0);
-					std::string tableName = "tables-" + uuid + "-add-physics-behavior-table";
+					std::string tableName = "tables-" + attribute + "-add-physics-behavior-table";
 					if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
 					{
 						ImGui::TableNextRow();
@@ -4892,8 +4891,7 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
 				};
 			auto drawRemovePhysicBehavior = [&]()
 				{
-					std::string uuid = json.at(0)->at(attribute).at(0);
-					std::string tableName = "tables-" + uuid + "-remove-physics-behavior-table";
+					std::string tableName = "tables-" + attribute + "-remove-physics-behavior-table";
 					if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
 					{
 						ImGui::TableNextRow();

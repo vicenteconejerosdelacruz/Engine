@@ -2,6 +2,7 @@
 #include <SimpleMath.h>
 #include <corecrt_math_defines.h>
 #include <foundation/PxVec3.h>
+#include <foundation/PxQuat.h>
 
 namespace DirectX
 {
@@ -180,4 +181,9 @@ using namespace physx;
 inline PxVec3 ToPxVec3(XMFLOAT3 v)
 {
 	return PxVec3(v.x, v.y, v.z);
+}
+
+inline PxQuat ToPxQuat(XMVECTOR Q)
+{
+	return PxQuat(Q.m128_f32[0], Q.m128_f32[1], Q.m128_f32[2], Q.m128_f32[3]);
 }

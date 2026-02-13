@@ -61,6 +61,7 @@ namespace Physics
 		void CreateDynamicFromMesh();
 		void CreateStaticFromModel3D();
 		void CreateDynamicFromModel3D();
+		void SetInitialConditions();
 
 		//dynamics
 		void UpdateFromGlobalPose();
@@ -85,5 +86,6 @@ namespace Physics
 
 	std::unique_ptr<PhysicObject>& GetPhysicObject(JUUID uuid);
 	void DestroyPhysicObject(JUUID uuid);
+	std::set<JUUID> GetPhysicsObjectsBySceneObjectUUID(SUUUID uuid);
 	JUUID CreatePhysicObject(std::string name, SUUUID sceneObject, nlohmann::json& json);
 };

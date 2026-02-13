@@ -5,7 +5,7 @@
 struct Sphere : public Primitive
 {
 	unsigned int teleselationLevel = 4U;
-	static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL;
+	static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL_TEXCOORD0;
 	typedef Vertex<VertexClass> VertexType;
 
 	std::vector<XMFLOAT3> teselationPoints;

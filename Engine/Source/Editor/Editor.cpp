@@ -1472,11 +1472,13 @@ namespace Editor
 		level["lights"] = json::array();
 		level["cameras"] = json::array();
 		level["sounds"] = json::array();
+		level["physicScenes"] = json::array();
 
 		WriteRenderablesJson(id, level["renderables"]);
 		WriteLightsJson(id, level["lights"]);
 		WriteCamerasJson(id, level["cameras"]);
 		WriteSoundFXsJson(id, level["sounds"]);
+		WritePhysicSceneJson(id, level["physicScenes"]);
 
 		std::string levelString = level.dump(4);
 		return levelString;
@@ -2792,6 +2794,10 @@ namespace Editor
 			for (auto& cuuid : GetControllersBySceneObjectUUID(so->SUuuid()))
 			{
 				GetController(cuuid)->SetInitialConditions();
+			}
+			for (auto& puuid : GetPhysicsObjectsBySceneObjectUUID(so->SUuuid()))
+			{
+				GetPhysicObject(puuid)->SetInitialConditions();
 			}
 		}
 

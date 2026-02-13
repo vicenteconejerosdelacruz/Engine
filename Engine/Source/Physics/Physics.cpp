@@ -5,6 +5,7 @@
 #include <SimpleMath.h>
 #include <Physics/PhysicScene.h>
 #include <Primitives.h>
+#include <NoMath.h>
 //Physx
 #include <PxPhysicsAPI.h>
 #include <extensions/PxDefaultAllocator.h>
@@ -24,7 +25,7 @@ namespace Physics
 {
 	std::unordered_map<JUUID, std::unique_ptr<PhysicObject>> physicObjectsUUIDs;
 	std::unordered_map<SceneUnitId, std::set<JUUID>> physicObjectsBySceneUnitId;
-	//std::unordered_map<SUUUID, std::set<JUUID>> physicObjectsUUIDBySUUUID;
+	std::unordered_map<SUUUID, std::set<JUUID>> physicObjectsUUIDBySUUUID;
 
 	void InitializePhysics()
 	{
@@ -94,6 +95,20 @@ namespace Physics
 				phO->CreatePhysicsBehavior();
 				phO->clean(PhysicObject::Update_behavior);
 			}
+
+			if (phO->dirty(PhysicObject::Update_linearVelocity))
+			{
+				PxRigidDynamic* pxDynamic = (PxRigidDynamic*)phO->actor;
+				pxDynamic->setLinearVelocity(ToPxVec3(phO->linearVelocity()));
+				phO->clean(PhysicObject::Update_linearVelocity);
+			}
+
+			if (phO->dirty(PhysicObject::Update_angularVelocity))
+			{
+				PxRigidDynamic* pxDynamic = (PxRigidDynamic*)phO->actor;
+				pxDynamic->setAngularVelocity(ToPxVec3(phO->angularVelocity()));
+				phO->clean(PhysicObject::Update_angularVelocity);
+			}
 		}
 	}
 
@@ -115,6 +130,21 @@ namespace Physics
 			else
 				it++;
 		}
+		for (auto it = physicObjectsUUIDBySUUUID.begin(); it != physicObjectsUUIDBySUUUID.end(); it++)
+		{
+			if (it->second.contains(uuid))
+				it->second.erase(uuid);
+
+			if (it->second.size() == 0ULL)
+				it = physicObjectsUUIDBySUUUID.erase(it);
+			else
+				it++;
+		}
+	}
+
+	std::set<JUUID> GetPhysicsObjectsBySceneObjectUUID(SUUUID uuid)
+	{
+		return(physicObjectsUUIDBySUUUID.contains(uuid)) ? physicObjectsUUIDBySUUUID.at(uuid) : std::set<JUUID>();
 	}
 
 	JUUID CreatePhysicObject(std::string name, SUUUID sceneObject, nlohmann::json& json)
@@ -130,6 +160,7 @@ namespace Physics
 			physicObjectsBySceneUnitId.insert_or_assign(id, std::set<JUUID>());
 		}
 		physicObjectsBySceneUnitId.at(id).insert(uuid);
+		physicObjectsUUIDBySUUUID[sceneObject].insert(uuid);
 		return uuid;
 	}
 
@@ -176,9 +207,12 @@ namespace Physics
 	{
 		RenderableID renderable = sceneObject;
 		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		actor->detachShape(*shape);
 		scene->pxScene->removeActor(*actor);
-		//PX_RELEASE(material);
-		//PX_RELEASE(actor);
+		//actor->release();
+		//material->release();
+		PX_RELEASE(material);
+		PX_RELEASE(actor);
 		//PX_RELEASE(shape);
 	}
 
@@ -189,20 +223,13 @@ namespace Physics
 		JNAME name = GetMeshName(mesh->uuid);
 		LoadPrimitiveIntoPxGeometryFunctions.at(name)(*this);
 
-		//create the PxActor
-		actor = gPhysics->createRigidStatic(PxTransform(PxIdentity));
-
-		//create the PxShape
+		//create the PxActor & the PxShape
+		actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(renderable->position())));
 		shape = PxRigidActorExt::createExclusiveShape(*actor, geometry.any(), *material);
 		shape->setLocalPose(PxTransform(PxIdentity));
-		actor->attachShape(*shape);
 
 		//set the actor position and rotation
-		XMFLOAT3 pos = renderable->position();
-		XMVECTOR rotation = renderable->rotationQ();
-		PxVec3 pxPos(pos.x, pos.y, pos.z);
-		PxQuat pxQuat(rotation.m128_f32[0], rotation.m128_f32[1], rotation.m128_f32[2], rotation.m128_f32[3]);
-		actor->setGlobalPose(PxTransform(pxPos, pxQuat));
+		actor->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
 
 		//add the actor to the pxScene
 		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
@@ -222,20 +249,15 @@ namespace Physics
 		//create the PxShape
 		shape = PxRigidActorExt::createExclusiveShape(*actor, geometry.any(), *material);
 		shape->setLocalPose(PxTransform(PxIdentity));
-		actor->attachShape(*shape);
 
 		//set the actor position and rotation
-		XMFLOAT3 pos = renderable->position();
-		XMVECTOR rotation = renderable->rotationQ();
-		PxVec3 pxPos(pos.x, pos.y, pos.z);
-		PxQuat pxQuat(rotation.m128_f32[0], rotation.m128_f32[1], rotation.m128_f32[2], rotation.m128_f32[3]);
-		actor->setGlobalPose(PxTransform(pxPos, pxQuat));
+		actor->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
 
 		//set the body(actor) density and compute it's inertia
 		PxRigidBody* pxBody = (PxRigidBody*)actor;
 		PxRigidBodyExt::updateMassAndInertia(*pxBody, density());
 
-		//set the initial velocity and acceleration
+		//set the velocity and acceleration
 		PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
 		pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
 		pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
@@ -251,6 +273,17 @@ namespace Physics
 
 	void PhysicObject::CreateDynamicFromModel3D()
 	{
+	}
+
+	void PhysicObject::SetInitialConditions()
+	{
+		if (behavior() == PB_Static) return;
+
+		RenderableID renderable = sceneObject;
+		PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
+		pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+		pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
+		pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
 	}
 
 	void PhysicObject::UpdateFromGlobalPose()
@@ -280,8 +313,7 @@ namespace Physics
 		{
 			atts.insert(atts.end(),
 				{
-					"density", "linearVelocity", "angularVelocity",
-					"linearAcceleration", "angularAcceleration"
+					"density", "linearVelocity", "angularVelocity"
 				}
 			);
 		}

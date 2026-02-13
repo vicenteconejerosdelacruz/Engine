@@ -9,9 +9,6 @@
 
 struct JObject;
 
-//typedef std::function<void(JUUID)> JObjectChangeCallback;
-//typedef std::function<void(unsigned int, unsigned int)> JObjectChangePostCallback;
-
 struct JObject : nlohmann::json
 {
 	virtual ~JObject() = default;
@@ -85,53 +82,4 @@ struct JObject : nlohmann::json
 
 	virtual void EditorPreview(size_t flags) {}
 	virtual void DestroyEditorPreview() {}
-
-	/*
-	std::unordered_map<JUUID, std::tuple<JObjectChangeCallback, JObjectChangePostCallback>> bindedChangesCallbacks;
-	*/
-	/*
-	void BindChangeCallback(JUUID objectUUID = "", JObjectChangeCallback cb = nullptr, JObjectChangePostCallback postCb = nullptr)
-	{
-		if (objectUUID == "" || (cb == nullptr && postCb == nullptr)) return;
-		bindedChangesCallbacks.insert_or_assign(objectUUID, std::make_tuple(cb, postCb));
-	}
-	*/
-	/*
-	void UnbindChangeCallback(JUUID objectUUID)
-	{
-		if (objectUUID == "") return;
-		bindedChangesCallbacks.erase(objectUUID);
-	}
-	*/
-	/*
-	static inline void RunChangesCallback(auto JObjectContainer, auto cbComplete)
-	{
-		unsigned int total = 0U;
-		std::for_each(JObjectContainer.begin(), JObjectContainer.end(), [&total, cbComplete](auto j) mutable
-			{
-				for (auto& [_, lambdas] : j->bindedChangesCallbacks)
-				{
-					auto& lambda = std::get<0>(lambdas);
-					if (lambda)
-						lambda(j());
-					total++;
-				}
-				cbComplete(j);
-			}
-		);
-
-		unsigned int idx = 0;
-		std::for_each(JObjectContainer.begin(), JObjectContainer.end(), [&idx, total](auto j)
-			{
-				for (auto& [_, lambdas] : j->bindedChangesCallbacks)
-				{
-					auto& lambda = std::get<1>(lambdas);
-					if (lambda)
-						lambda(idx, total);
-					idx++;
-				}
-			}
-		);
-	}
-	*/
 };
