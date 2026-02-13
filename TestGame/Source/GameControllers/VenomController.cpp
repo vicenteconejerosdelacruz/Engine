@@ -102,6 +102,7 @@ namespace Game
 #include <Editor/JWriteJson.h>
 #include <VenomControllerAtt.h>
 #include <JEnd.h>
+		j.erase("uuid");
 	}
 #endif
 

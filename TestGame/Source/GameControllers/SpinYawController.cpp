@@ -33,9 +33,10 @@ namespace Game
 #if defined(_EDITOR)
 	void SpinYawController::WriteJson(nlohmann::json& j)
 	{
-		#include <Editor/JWriteJson.h>
-		#include <SpinYawControllerAtt.h>
-		#include <JEnd.h>
+#include <Editor/JWriteJson.h>
+#include <SpinYawControllerAtt.h>
+#include <JEnd.h>
+		j.erase("uuid");
 	}
 #endif
 
