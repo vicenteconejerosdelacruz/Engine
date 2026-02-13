@@ -24,8 +24,15 @@ namespace Editor::DefaultLevel {
 				{ "position", { 0.0, -1.0, 0.0} },
 				{ "scale", { 20.0, 1.0, 20.0} },
 				{ "uuid", "31994be6-1fb5-4046-b101-6b83af3c61c4" },
-				{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } }
-			},
+				{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } },
+				{ "physicObject",
+					{
+						{
+							{ "behavior", "Static" }
+						}
+					}
+				}
+			}/*,
 			{
 				{ "castShadows", true },
 				{ "shadowed", true },
@@ -51,6 +58,34 @@ namespace Editor::DefaultLevel {
 				{ "controllers",
 					{
 						{ "spinyaw", {} }
+					}
+				}
+			}*/,
+			{
+				{ "castShadows", true },
+				{ "shadowed", true },
+				{
+					"meshMaterials",
+					{
+						{
+							{ "material", "f3f37590-3eac-41c4-8288-a79f279857ce"},
+							{ "mesh", "f7786ac1-e296-4e9a-a7e6-6f1949de75ef" }
+						}
+					}
+				},
+				{ "name", "crate" },
+				{ "position", { 0.0, 2.0, 4.0} },
+				{ "rotation", { 45.0, 45.0f, 45.0f } },
+				{ "scale", { 0.5, 0.5, 0.5} },
+				{ "uuid", "729f8eaa-e10f-41fb-968a-0148d0e52971" },
+				{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } },
+				{ "physicObject",
+					{
+						{
+							{ "behavior", "Dynamic" },
+							{ "linearVelocity" , { 0.0, 6.0, 0.0 } },
+							{ "angularVelocity" , { 10.0, 4.0, 6.0 } }
+						}
 					}
 				}
 			}

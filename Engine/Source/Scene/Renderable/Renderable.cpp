@@ -215,6 +215,11 @@ namespace Scene
 		Scene::UnbindFromScene(unit, uuid(), cuuid);
 	}
 
+	void Renderable::rotationQ(XMFLOAT4 q)
+	{
+		rotation(Quaternion2Euler(XMLoadFloat4(&q)));
+	}
+
 	XMVECTOR Renderable::rotationQ()
 	{
 		XMFLOAT3 rotV = rotation();

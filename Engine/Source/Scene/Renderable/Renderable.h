@@ -162,6 +162,7 @@ namespace Scene
 		bool RenderReady();
 		void RenderReady(bool value);
 
+		void rotationQ(XMFLOAT4 q);
 		XMVECTOR rotationQ();
 		XMMATRIX world();
 

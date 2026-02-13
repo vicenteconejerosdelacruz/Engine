@@ -1,6 +1,7 @@
 #pragma once
 #include <SimpleMath.h>
 #include <corecrt_math_defines.h>
+#include <foundation/PxVec3.h>
 
 namespace DirectX
 {
@@ -173,4 +174,10 @@ inline XMFLOAT3 Quaternion2Euler(XMVECTOR Q)
 	angles.y = XMConvertToDegrees(angles.y);
 	angles.z = XMConvertToDegrees(angles.z);
 	return angles;
+}
+
+using namespace physx;
+inline PxVec3 ToPxVec3(XMFLOAT3 v)
+{
+	return PxVec3(v.x, v.y, v.z);
 }
