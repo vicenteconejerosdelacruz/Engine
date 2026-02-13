@@ -294,6 +294,39 @@
 		(*this)[#ATT].erase(key);\
 	}
 
+#define JEXPOSE_VECTOR_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)\
+	void create_##ATT(nlohmann::json m)\
+	{\
+		if (!contains(#ATT))\
+		{\
+			(*this)[#ATT] = INITIAL; \
+		}\
+		nlohmann::json& j = (*this)[#ATT]; \
+		for (size_t index = 0; index < j.size(); index++)\
+		{\
+			j.at(index) = Create##TYPE(#ATT, SUuuid(), j.at(index)); \
+		}\
+	}\
+	std::vector<std::reference_wrapper<std::unique_ptr<TYPE>>> ATT()\
+	{\
+		std::vector<std::reference_wrapper<std::unique_ptr<TYPE>>> m; \
+		nlohmann::json& j = (*this)[#ATT]; \
+		for (size_t index; index < j.size(); index++)\
+		{\
+			m.push_back(Get##TYPE(j.at(index))); \
+		}\
+		return m; \
+	}\
+	void ATT##_insert(size_t pos, JUUID uuid)\
+	{\
+		nlohmann::json placeholder; \
+		(*this)[#ATT].insert((*this)[#ATT].begin() + pos, Create##TYPE(#ATT, SUuuid(), placeholder)); \
+	}\
+	void ATT##_erase(size_t pos)\
+	{\
+		(*this)[#ATT].erase((*this)[#ATT].begin() + pos); \
+	}
+
 #define JPREVIEW(NAME,JEDVALUETYPE)
 #define JTRACKUUID(CLASS,NAME,LIMIT,COND)
 
@@ -311,6 +344,7 @@
 #define JEXPOSE_SET(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) create_##ATT(INITIAL);
 #define JEXPOSE_MAP_TRANSFORM(KEYTYPE,VALUETYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) create_##ATT(INITIAL);
 #define JEXPOSE_MAP_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) create_##ATT(INITIAL);
+#define JEXPOSE_VECTOR_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) create_##ATT(INITIAL);
 #define JPREVIEW(NAME,JEDVALUETYPE)
 #define JTRACKUUID(CLASS,NAME,LIMIT,COND)
 
@@ -330,6 +364,7 @@
 #define JEXPOSE_SET(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) std::make_pair(#ATT,JEDVALUETYPE),
 #define JEXPOSE_MAP_TRANSFORM(KEYTYPE,VALUETYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) std::make_pair(#ATT,JEDVALUETYPE),
 #define JEXPOSE_MAP_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) std::make_pair(#ATT,JEDVALUETYPE),
+#define JEXPOSE_VECTOR_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) std::make_pair(#ATT,JEDVALUETYPE),
 #define JPREVIEW(NAME,JEDVALUETYPE)
 #define JTRACKUUID(CLASS,NAME,LIMIT,COND)
 
@@ -348,6 +383,7 @@
 #define JEXPOSE_SET(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) Update_##ATT,
 #define JEXPOSE_MAP_TRANSFORM(KEYTYPE,VALUETYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) Update_##ATT,
 #define JEXPOSE_MAP_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) Update_##ATT,
+#define JEXPOSE_VECTOR_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) Update_##ATT,
 #define JPREVIEW(NAME,JEDVALUETYPE)
 #define JTRACKUUID(CLASS,NAME,LIMIT,COND)
 
@@ -366,6 +402,7 @@
 #define JEXPOSE_SET(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) { #ATT, std::make_tuple(1 << Update_##ATT, !!UPDATEMASK) },
 #define JEXPOSE_MAP_TRANSFORM(KEYTYPE,VALUETYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) { #ATT, std::make_tuple(1 << Update_##ATT, !!UPDATEMASK) },
 #define JEXPOSE_MAP_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) { #ATT, std::make_tuple(1 << Update_##ATT, !!UPDATEMASK) },
+#define JEXPOSE_VECTOR_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) { #ATT, std::make_tuple(1 << Update_##ATT, !!UPDATEMASK) },
 #define JPREVIEW(NAME,JEDVALUETYPE)
 #define JTRACKUUID(CLASS,NAME,LIMIT,COND)
 
@@ -387,6 +424,12 @@
 	for (nlohmann::json::iterator it = j##ATT.begin(); it != j##ATT.end(); ++it)\
 	{\
 		Destroy##TYPE(it.value()); \
+	}
+#define JEXPOSE_VECTOR_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)\
+	nlohmann::json& j##ATT = (*this)[#ATT]; \
+	for (size_t index = 0; index < j##ATT.size(); index++)\
+	{\
+		Destroy##TYPE(j##ATT[index]); \
 	}
 
 #define JPREVIEW(NAME,JEDVALUETYPE)

@@ -357,7 +357,7 @@
     <ClInclude Include="Primitives\Primitive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Primitives\Primivites.h">
+    <ClInclude Include="Primitives\Primitives.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Primitives\Sphere.h">

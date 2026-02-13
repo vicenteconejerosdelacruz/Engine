@@ -4,6 +4,7 @@
 #include <cassert>
 #include <SimpleMath.h>
 #include <Physics/PhysicScene.h>
+#include <Primitives.h>
 //Physx
 #include <PxPhysicsAPI.h>
 #include <extensions/PxDefaultAllocator.h>
@@ -22,6 +23,8 @@ using namespace DirectX;
 namespace Physics
 {
 	std::unordered_map<JUUID, std::unique_ptr<PhysicObject>> physicObjectsUUIDs;
+	std::unordered_map<SceneUnitId, std::set<JUUID>> physicObjectsBySceneUnitId;
+	//std::unordered_map<SUUUID, std::set<JUUID>> physicObjectsUUIDBySUUUID;
 
 	void InitializePhysics()
 	{
@@ -59,6 +62,41 @@ namespace Physics
 		physicScene->pxScene = gPhysics->createScene(sceneDesc);
 	}
 
+	void CreatePhysicsObjectsBehaviors(SceneUnitId id)
+	{
+		for (auto& uuid : physicObjectsBySceneUnitId.at(id))
+		{
+			physicObjectsUUIDs.at(uuid)->CreatePhysicsBehavior();
+		}
+	}
+
+	void UpdateFromGlobalPose(SceneUnitId id)
+	{
+		if (!physicObjectsBySceneUnitId.contains(id)) return;
+
+		for (auto& uuid : physicObjectsBySceneUnitId.at(id))
+		{
+			auto& phO = GetPhysicObject(uuid);
+			phO->UpdateFromGlobalPose();
+		}
+	}
+
+	void UpdatePhysicObjects(SceneUnitId id)
+	{
+		if (!physicObjectsBySceneUnitId.contains(id)) return;
+
+		for (auto& uuid : physicObjectsBySceneUnitId.at(id))
+		{
+			auto& phO = GetPhysicObject(uuid);
+			if (phO->dirty(PhysicObject::Update_behavior))
+			{
+				phO->DestroyPhisicsBehavior();
+				phO->CreatePhysicsBehavior();
+				phO->clean(PhysicObject::Update_behavior);
+			}
+		}
+	}
+
 	std::unique_ptr<PhysicObject>& GetPhysicObject(JUUID uuid)
 	{
 		return physicObjectsUUIDs.at(uuid);
@@ -67,6 +105,16 @@ namespace Physics
 	void DestroyPhysicObject(JUUID uuid)
 	{
 		physicObjectsUUIDs.erase(uuid);
+		for (auto it = physicObjectsBySceneUnitId.begin(); it != physicObjectsBySceneUnitId.end();)
+		{
+			if (it->second.contains(uuid))
+				it->second.erase(uuid);
+
+			if (it->second.size() == 0ULL)
+				it = physicObjectsBySceneUnitId.erase(it);
+			else
+				it++;
+		}
 	}
 
 	JUUID CreatePhysicObject(std::string name, SUUUID sceneObject, nlohmann::json& json)
@@ -76,6 +124,12 @@ namespace Physics
 		physicObject->sceneObject = sceneObject;
 		(*physicObject)["uuid"] = uuid;
 		physicObjectsUUIDs.insert_or_assign(uuid, std::move(physicObject));
+		SceneUnitId id = std::get<0>(sceneObject);
+		if (!physicObjectsBySceneUnitId.contains(id))
+		{
+			physicObjectsBySceneUnitId.insert_or_assign(id, std::set<JUUID>());
+		}
+		physicObjectsBySceneUnitId.at(id).insert(uuid);
 		return uuid;
 	}
 
@@ -98,32 +152,126 @@ namespace Physics
 #include <JEnd.h>
 	}
 
+	void PhysicObject::CreatePhysicsBehavior()
+	{
+		RenderableID renderable = sceneObject;
+		MeshInstanceID mesh = renderable->meshes.at(0);
+		JNAME name = GetMeshName(mesh->uuid);
+
+		std::map<std::tuple<bool, bool>, std::function<void()>> creatorsFunctions =
+		{
+			{std::tuple(false,false),[&] { CreateStaticFromMesh(); }},
+			{std::tuple(false,true),[&] { CreateDynamicFromMesh(); }},
+			{std::tuple(true,false),[&] { CreateStaticFromModel3D(); }},
+			{std::tuple(true,true),[&] { CreateDynamicFromModel3D(); }},
+		};
+
+		bool fromModel = !renderable->model().empty();
+		bool isDynamic = behavior() == PB_Dynamic && PrimitiveCanBeMadeDynamic.at(name);
+		material = gPhysics->createMaterial(staticFriction(), dynamicFriction(), restitution());
+		creatorsFunctions.at(std::tuple(fromModel, isDynamic))();
+	}
+
+	void PhysicObject::DestroyPhisicsBehavior()
+	{
+		RenderableID renderable = sceneObject;
+		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		scene->pxScene->removeActor(*actor);
+		//PX_RELEASE(material);
+		//PX_RELEASE(actor);
+		//PX_RELEASE(shape);
+	}
+
+	void PhysicObject::CreateStaticFromMesh()
+	{
+		RenderableID renderable = sceneObject;
+		MeshInstanceID mesh = renderable->meshes.at(0);
+		JNAME name = GetMeshName(mesh->uuid);
+		LoadPrimitiveIntoPxGeometryFunctions.at(name)(*this);
+
+		//create the PxActor
+		XMFLOAT3 pos = renderable->position();
+		PxVec3 pxPos(pos.x, pos.y, pos.z);
+		actor = gPhysics->createRigidStatic(PxTransform(pxPos));
+
+		//create the PxShape
+		shape = PxRigidActorExt::createExclusiveShape(*actor, geometry.any(), *material);
+		XMVECTOR q = renderable->rotationQ();
+		PxQuat pxQuat(q.m128_f32[0], q.m128_f32[1], q.m128_f32[2], q.m128_f32[3]);
+		shape->setLocalPose(PxTransform(pxQuat));
+
+		//add the actor to the pxScene
+		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		scene->pxScene->addActor(*actor);
+	}
+
+	void PhysicObject::CreateDynamicFromMesh()
+	{
+		RenderableID renderable = sceneObject;
+		MeshInstanceID mesh = renderable->meshes.at(0);
+		JNAME name = GetMeshName(mesh->uuid);
+		LoadPrimitiveIntoPxGeometryFunctions.at(name)(*this);
+
+		//create the PxActor
+		XMFLOAT3 pos = renderable->position();
+		PxVec3 pxPos(pos.x, pos.y, pos.z);
+		actor = gPhysics->createRigidDynamic(PxTransform(pxPos));
+
+		//create the PxShape
+		shape = PxRigidActorExt::createExclusiveShape(*actor, geometry.any(), *material);
+		XMVECTOR q = renderable->rotationQ();
+		PxQuat pxQuat(q.m128_f32[0], q.m128_f32[1], q.m128_f32[2], q.m128_f32[3]);
+		shape->setLocalPose(PxTransform(pxQuat));
+
+		//set the body(actor) density and compute it's inertia
+		PxRigidBody* pxBody = (PxRigidBody*)actor;
+		PxRigidBodyExt::updateMassAndInertia(*pxBody, density());
+
+		//add the actor to the pxScene
+		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		scene->pxScene->addActor(*actor);
+	}
+
+	void PhysicObject::CreateStaticFromModel3D()
+	{
+	}
+
+	void PhysicObject::CreateDynamicFromModel3D()
+	{
+	}
+
+	void PhysicObject::UpdateFromGlobalPose()
+	{
+		PxTransform transform = actor->getGlobalPose();
+		RenderableID r = sceneObject;
+		XMFLOAT3 pos(transform.p.x, transform.p.y, transform.p.z);
+		r->position(pos);
+	}
+
 #if defined(_EDITOR)
 	void PhysicObject::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
 #include <PhysicObjectAtt.h>
 #include <JEnd.h>
+		j.erase("uuid");
 	}
 
 	std::vector<std::string> PhysicObject::GetPhysicBehaviorAttributes()
 	{
-		std::vector<std::string> atts = { "behavior" };
+		std::vector<std::string> atts = { "behavior", "staticFriction", "dynamicFriction", "restitution", };
+
 		if (behavior() == PB_Dynamic)
 		{
 			atts.insert(atts.end(),
 				{
-					"mass",
-					"linearVelocity",
-					"angularVelocity",
-					"linearAcceleration",
-					"angularAcceleration"
+					"density", "linearVelocity", "angularVelocity",
+					"linearAcceleration", "angularAcceleration"
 				}
 			);
 		}
 
 		return atts;
 	}
-
 #endif
-}
+};

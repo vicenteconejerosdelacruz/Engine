@@ -2580,7 +2580,8 @@ namespace Editor
 	RenderableID GetBillboard(SceneUnitId id, JUUID sceneObject)
 	{
 #if !defined(_EDITOR_BILLBOARD)
-		return "";
+		RenderableID r;
+		return r;
 #endif
 		return billboards.at(id).billboardRegistry.contains(sceneObject) ? billboards.at(id).billboardRegistry.at(sceneObject) : RenderableID();
 	}

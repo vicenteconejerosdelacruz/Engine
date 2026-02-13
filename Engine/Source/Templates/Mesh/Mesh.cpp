@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Mesh.h"
-#include <Primivites.h>
+#include <Primitives.h>
 #include <RefTracker.h>
 #include <UUID.h>
 

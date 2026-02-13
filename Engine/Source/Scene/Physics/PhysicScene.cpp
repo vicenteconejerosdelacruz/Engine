@@ -86,28 +86,6 @@ namespace Scene
 #include <TrackUUID/JInsert.h>
 #include <PhysicSceneAtt.h>
 #include <JEnd.h>
-
-		//		using namespace Templates;
-		//
-		//		if (!SoundTemplateExist(sound())) return;
-		//
-		//		soundEffectInstance = GetSoundEffectInstance(sound(), instanceFlags(), uuid());
-		//
-		//		if (nostd::bytesHas(instanceFlags(), SoundEffectInstance_Use3D))
-		//		{
-		//			audioEmitter.SetPosition(position());
-		//			audioEmitter.SetOrientationFromQuaternion(rotationQ());
-		//		}
-		//		if (!std::get<0>(soundEffectInstance).empty() && autoPlay())
-		//		{
-		//#if defined(_EDITOR)
-		//			if (Editor::IsPlaying(unit) && !Editor::IsPaused(unit))
-		//#endif
-		//				Play();
-		//		}
-		//#if defined(_EDITOR)
-		//		SceneObject::BindToScene();
-		//#endif
 	}
 
 	void PhysicScene::UnbindFromScene()
@@ -115,22 +93,6 @@ namespace Scene
 #include <TrackUUID/JErase.h>
 #include <PhysicSceneAtt.h>
 #include <JEnd.h>
-
-		//using namespace Templates;
-		//
-		//if (EffectExists())
-		//{
-		//	if (dirty(SoundFX::Update_sound))
-		//	{
-		//		std::string prevSoundUUID = UpdatePrevValues.at("sound");
-		//		DestroySoundEffectInstance(prevSoundUUID, soundEffectInstance);
-		//	}
-		//	else
-		//	{
-		//		DestroySoundEffectInstance(sound(), soundEffectInstance);
-		//	}
-		//}
-		//markedForDelete = true;
 	}
 
 	void PhysicScene::Destroy()
@@ -142,46 +104,18 @@ namespace Scene
 
 	void PhysicSceneStep(SceneUnitId id, float step)
 	{
-		//		if (!SoundEffects.contains(id)) return;
-		//
-		//		auto& SoundFxs = SoundEffects.at(id);
-		//		std::set<SoundFXID> sfxs;
-		//		std::transform(SoundFxs.begin(), SoundFxs.end(), std::inserter(sfxs, sfxs.end()), [&](auto o) { return MAKESUUUID(id, o); });
-		//
-		//		std::for_each(sfxs.begin(), sfxs.end(), [step](auto sfx)
-		//			{
-		//				sfx->clear();
-		//			}
-		//		);
-		//
-		//		std::set<SoundFXID> sfxsDelete;
-		//		std::copy_if(sfxs.begin(), sfxs.end(), std::inserter(sfxsDelete, sfxsDelete.end()), [](auto sfx)
-		//			{
-		//				return sfx->markedForDelete;
-		//			}
-		//		);
-		//
-		//		for (auto sfx : sfxsDelete)
-		//		{
-		//			EraseSoundFXFromSoundEffects(sfx.unit(), sfx.uuid());
-		//			EraseSoundFXFromSound3DEffects(sfx.unit(), sfx.uuid());
-		//			DeleteSoundFXSceneObject(sfx);
-		//#if defined(_EDITOR)
-		//			Editor::MarkScenePanelAssetsAsDirty();
-		//#endif
-		//		}
+		UpdatePhysicObjects(id);
+
+		if (step == 0.0f) return;
+
+		PhysicSceneID scene = MAKESUUUID(id, *GetPhysicScenes(id).begin());
+		scene->pxScene->simulate(step);
+		scene->pxScene->fetchResults(true);
+		UpdateFromGlobalPose(id);
 	}
 
 	void DestroyPhysicScenes()
 	{
-		//for (auto& [id, container] : SoundFXSUsceneObjects)
-		//{
-		//	for (auto& [uuid, _] : container)
-		//	{
-		//		SoundFXID s = MAKESUUUID(id, uuid);
-		//		DeleteSoundFXSceneObject(s);
-		//	}
-		//}
 #include <TrackUUID/JClear.h>
 #include <PhysicSceneAtt.h>
 #include <JEnd.h>
@@ -189,12 +123,6 @@ namespace Scene
 
 	void DestroyPhysicScene(SceneUnitId id)
 	{
-		//std::set<JUUID> uuids;
-		//std::transform(SoundFXSUsceneObjects.at(id).begin(), SoundFXSUsceneObjects.at(id).end(), std::inserter(uuids, uuids.begin()), [](auto& pair) { return pair.first; });
-		//for (auto& uuid : uuids)
-		//{
-		//	DeleteSoundFXSceneObject(MAKESUUUID(id, uuid));
-		//}
 #include <TrackUUID/JClearUnit.h>
 #include <PhysicSceneAtt.h>
 #include <JEnd.h>

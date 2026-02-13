@@ -4862,6 +4862,7 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
 					JUUID sceneObject = json.at(0)->at("uuid");
 					JUUID uuid = CreatePhysicObject(attribute, MAKESUUUID(Editor::currentSceneUnitId, sceneObject), placeholder);
 					json.at(0)->at(attribute).push_back(uuid);
+					GetPhysicObject(uuid)->CreatePhysicsBehavior();
 				};
 			auto removePhysicsBehavior = [&]()
 				{
@@ -4872,7 +4873,7 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
 
 			auto drawAddPhysicBehavior = [&]()
 				{
-					std::string uuid = json.at(0)->at("uuid");
+					std::string uuid = json.at(0)->at(attribute).at(0);
 					std::string tableName = "tables-" + uuid + "-add-physics-behavior-table";
 					if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
 					{
@@ -4891,7 +4892,7 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
 				};
 			auto drawRemovePhysicBehavior = [&]()
 				{
-					std::string uuid = json.at(0)->at("uuid");
+					std::string uuid = json.at(0)->at(attribute).at(0);
 					std::string tableName = "tables-" + uuid + "-remove-physics-behavior-table";
 					if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
 					{
@@ -4918,6 +4919,13 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
 					auto attributes = physicObject->GetPhysicBehaviorAttributes();
 					for (auto& att : attributes)
 					{
+						if (!drawers.contains(att))
+						{
+							ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+							ImGui::Text(std::string("No " + att + " attribute present").c_str());
+							ImGui::PopStyleColor();
+							continue;
+						}
 						drawers.at(att)(att, jvec);
 					}
 				};

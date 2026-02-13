@@ -49,7 +49,6 @@ json.push_back(obj); });
 #endif
 
 #ifdef JEXPOSE_EDITOR_WRITE_JSON
-j.erase("uuid");
 #undef JEXPOSE_EDITOR_WRITE_JSON
 #endif
 
@@ -115,5 +114,6 @@ return creatorValidator; }
 #undef JEXPOSE_SET
 #undef JEXPOSE_MAP_TRANSFORM
 #undef JEXPOSE_MAP_OBJECT
+#undef JEXPOSE_VECTOR_OBJECT
 #undef JPREVIEW
 #undef JTRACKUUID

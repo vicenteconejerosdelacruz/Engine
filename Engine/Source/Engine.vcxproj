@@ -450,7 +450,7 @@
     <ClInclude Include="Primitives\Floor.h" />
     <ClInclude Include="Primitives\Pentahedron.h" />
     <ClInclude Include="Primitives\Primitive.h" />
-    <ClInclude Include="Primitives\Primivites.h" />
+    <ClInclude Include="Primitives\Primitives.h" />
     <ClInclude Include="Primitives\Sphere.h" />
     <ClInclude Include="Primitives\UtahTeapot.h" />
     <ClInclude Include="Renderer\DeviceUtils\CommandsProcessor\CommandsProcessor.h" />
