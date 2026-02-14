@@ -109,7 +109,7 @@ namespace Scene
 		if (step == 0.0f) return;
 
 		PhysicSceneID scene = MAKESUUUID(id, *GetPhysicScenes(id).begin());
-		scene->pxScene->simulate(step);
+		scene->pxScene->simulate(1.0f / 60.0f);
 		scene->pxScene->fetchResults(true);
 		UpdateRenderablesFromGlobalPose(id);
 	}

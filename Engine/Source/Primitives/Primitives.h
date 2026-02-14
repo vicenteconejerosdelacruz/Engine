@@ -38,8 +38,8 @@ namespace Primitives {
 		InitializeIndexBufferView(renderer->d3dDevice, commandList, indices.data(), static_cast<unsigned int>(indices.size()), mesh->ibvData);
 	}
 
-	template<typename T, bool sdf = true>
-	void LoadPrimitiveIntoPxGeometry(PhysicObject& physicObject)
+	template<typename T>
+	void LoadPrimitiveIntoPxGeometry(PhysicObject& physicObject, std::function<void(PxSDFDesc&)> sdf = nullptr)
 	{
 		RenderableID renderable = physicObject.sceneObject;
 		T p;
@@ -48,21 +48,22 @@ namespace Primitives {
 		std::vector<Vertex<T::VertexClass>> vertices = p.GetVertices();
 
 		PxSDFDesc sdfDesc;
-		sdfDesc.spacing = 0.05f;
-		sdfDesc.subgridSize = 6;
-		sdfDesc.bitsPerSubgridPixel = PxSdfBitsPerSubgridPixel::e16_BIT_PER_PIXEL;
-		sdfDesc.numThreadsForSdfConstruction = 8;
-
-		//if (enableGpuAcceleratedCooking)
-		//{
-		//	//If sdfBuilder is NULL, the sdf will get cooked on the CPU using the number of threads specified above
-		//	sdfDesc.sdfBuilder = PxGetPhysicsGpu()->createSDFBuilder(cudaContextManager);
-		//}
+		if (sdf)
+		{
+			sdf(sdfDesc);
+		}
 
 		PxTolerancesScale tolerances;
-		const PxCookingParams params(tolerances);
+		//const 
+		PxCookingParams params(tolerances);
+		// disable mesh cleaning - perform mesh validation on development configurations
+		params.meshPreprocessParams |= PxMeshPreprocessingFlag::eDISABLE_CLEAN_MESH;
+		// disable edge precompute, edges are set for each triangle, slows contact generation
+		params.meshPreprocessParams |= PxMeshPreprocessingFlag::eDISABLE_ACTIVE_EDGES_PRECOMPUTE;
+		// lower hierarchy for internal mesh
+		//params.meshCookingHint = PxMeshCookingHint::eCOOKING_PERFORMANCE;
 		PxTriangleMeshDesc meshDesc;
-		meshDesc.sdfDesc = sdf ? &sdfDesc : nullptr;;
+		meshDesc.sdfDesc = sdf ? &sdfDesc : nullptr;
 		meshDesc.points = PxBoundedData(vertices.data(), sizeof(T::VertexType), static_cast<unsigned int>(vertices.size()));
 		meshDesc.triangles = PxBoundedData(indices.data(), sizeof(indices[0]) * 3U, static_cast<unsigned int>(indices.size() / 3U));
 
@@ -73,7 +74,7 @@ namespace Primitives {
 	}
 
 	template<>
-	inline void LoadPrimitiveIntoPxGeometry<Cube>(PhysicObject& physicObject)
+	inline void LoadPrimitiveIntoPxGeometry<Cube>(PhysicObject& physicObject, std::function<void(PxSDFDesc&)> sdf)
 	{
 		RenderableID renderable = physicObject.sceneObject;
 		XMFLOAT3 scale = renderable->scale();
@@ -81,7 +82,7 @@ namespace Primitives {
 	}
 
 	template<>
-	inline void LoadPrimitiveIntoPxGeometry<Sphere>(PhysicObject& physicObject)
+	inline void LoadPrimitiveIntoPxGeometry<Sphere>(PhysicObject& physicObject, std::function<void(PxSDFDesc&)> sdf)
 	{
 		RenderableID renderable = physicObject.sceneObject;
 		XMFLOAT3 scale = renderable->scale();
@@ -89,7 +90,7 @@ namespace Primitives {
 	}
 
 	template<>
-	inline void LoadPrimitiveIntoPxGeometry<Floor>(PhysicObject& physicObject)
+	inline void LoadPrimitiveIntoPxGeometry<Floor>(PhysicObject& physicObject, std::function<void(PxSDFDesc&)> sdf)
 	{
 		RenderableID renderable = physicObject.sceneObject;
 		Floor p;
@@ -122,9 +123,9 @@ static const std::map<std::string, std::function<void(SceneUnitId, const std::un
 	{ "cone", Primitives::LoadPrimitiveIntoMesh<Cone> },
 };
 
-static const std::map<std::string, std::function<void(PhysicObject& physicObject)>> LoadPrimitiveIntoPxGeometryFunctions =
+static const std::map<std::string, std::function<void(PhysicObject& physicObject, std::function<void(PxSDFDesc&)> sdf)>> LoadPrimitiveIntoPxGeometryFunctions =
 {
-	{ "utahteapot", Primitives::LoadPrimitiveIntoPxGeometry<UtahTeapot,false> },
+	{ "utahteapot", Primitives::LoadPrimitiveIntoPxGeometry<UtahTeapot> },
 	{ "cube", Primitives::LoadPrimitiveIntoPxGeometry<Cube> },
 	{ "pyramid", Primitives::LoadPrimitiveIntoPxGeometry<Pentahedron> },
 	{ "floor", Primitives::LoadPrimitiveIntoPxGeometry<Floor> },
@@ -136,7 +137,7 @@ static const std::map<std::string, std::function<void(PhysicObject& physicObject
 
 static const std::map<std::string, bool> PrimitiveCanBeMadeDynamic =
 {
-	{ "utahteapot", false },
+	{ "utahteapot", true },
 	{ "cube", true },
 	{ "pyramid", true },
 	{ "floor", false },

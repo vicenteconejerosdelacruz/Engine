@@ -7,18 +7,22 @@
 #include <Primitives.h>
 #include <NoMath.h>
 //Physx
-//#include <PxPhysicsAPI.h>
+#include <PxPhysicsAPI.h>
 #include <extensions/PxDefaultAllocator.h>
+#include <extensions/PxCudaHelpersExt.h>
+#include <gpu/PxGpu.h>
+#include <gpu/PxPhysicsGpu.h>
+
 
 using namespace physx;
 #define PVD_HOST "127.0.0.1"
-static PxDefaultAllocator gAllocator;
-static PxDefaultErrorCallback gErrorCallback;
-static PxFoundation* gFoundation = nullptr;
-static PxPvd* gPvd = nullptr;
-static PxPhysics* gPhysics = nullptr;
-static PxDefaultCpuDispatcher* gDispatcher = nullptr;
-static PxCudaContextManager* gCudaContextManager = nullptr;
+PxDefaultAllocator gAllocator;
+PxDefaultErrorCallback gErrorCallback;
+PxFoundation* gFoundation = nullptr;
+PxPvd* gPvd = nullptr;
+PxPhysics* gPhysics = nullptr;
+PxDefaultCpuDispatcher* gDispatcher = nullptr;
+PxCudaContextManager* gCudaContextManager = nullptr;
 
 using namespace Scene;
 using namespace DirectX;
@@ -228,7 +232,7 @@ namespace Physics
 		RenderableID renderable = sceneObject;
 		MeshInstanceID mesh = renderable->meshes.at(0);
 		JNAME name = GetMeshName(mesh->uuid);
-		LoadPrimitiveIntoPxGeometryFunctions.at(name)(*this);
+		LoadPrimitiveIntoPxGeometryFunctions.at(name)(*this, nullptr);
 
 		//create the PxActor & the PxShape
 		actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(renderable->position())));
@@ -248,7 +252,15 @@ namespace Physics
 		RenderableID renderable = sceneObject;
 		MeshInstanceID mesh = renderable->meshes.at(0);
 		JNAME name = GetMeshName(mesh->uuid);
-		LoadPrimitiveIntoPxGeometryFunctions.at(name)(*this);
+		LoadPrimitiveIntoPxGeometryFunctions.at(name)(*this,
+			[](PxSDFDesc& sdfDesc)
+			{
+				sdfDesc.spacing = 0.05f;
+				sdfDesc.subgridSize = 6;
+				sdfDesc.bitsPerSubgridPixel = PxSdfBitsPerSubgridPixel::e16_BIT_PER_PIXEL;
+				sdfDesc.numThreadsForSdfConstruction = 8;
+				sdfDesc.sdfBuilder = PxGetPhysicsGpu()->createSDFBuilder(gCudaContextManager);
+			});
 
 		//create the PxActor
 		actor = gPhysics->createRigidDynamic(PxTransform(PxIdentity));
