@@ -383,7 +383,7 @@ namespace Templates
 
 	void TextureJson::DestroyEditorPreview()
 	{
-		if (preview->previewLoaded != nullptr)
+		if (preview != nullptr && preview->previewLoaded != nullptr)
 		{
 			for (unsigned int i = 0; i < preview->textures.size(); i++)
 			{
@@ -413,7 +413,7 @@ namespace Templates
 		}
 
 		preview->loadingProcessor.ResetCommandList();
-		for (unsigned int i = 0U; i < numFrames(); i++)
+		for (unsigned int i = 0U; i < std::max(numFrames(), 1U); i++)
 		{
 			JUUID previewUUID = uuid() + "-preview-" + std::to_string(i);
 			CreateTextureInstance(previewUUID, [&]

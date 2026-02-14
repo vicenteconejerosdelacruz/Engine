@@ -1219,7 +1219,7 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_filepath_vector_i
 				};
 			auto drawTexturePreview = [](auto& texture)
 				{
-					if (std::set<TextureType>({ TextureType_Cube, TextureType_Skybox }).contains(texture->type()))
+					if (texture->preview == nullptr || !texture->preview->previewLoaded->load() || std::set<TextureType>({ TextureType_Cube, TextureType_Skybox }).contains(texture->type()))
 					{
 						ImGui::Text("Preview not available");
 						return;
