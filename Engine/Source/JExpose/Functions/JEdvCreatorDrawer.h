@@ -624,8 +624,6 @@ inline bool EditorCreatorDrawFilePath(
 					std::filesystem::path currpath = std::filesystem::canonical(std::filesystem::current_path());
 					std::filesystem::path absfilepath = std::filesystem::canonical(currpath.append(defaultFolder));
 					std::filesystem::path rel = std::filesystem::relative(p, absfilepath);
-					//std::filesystem::path absfilepath = std::filesystem::current_path().append(defaultFolder);
-					//std::filesystem::path rel = std::filesystem::relative(p, absfilepath);
 					setFilePath(rel.generic_string());
 					modalProperties.at("fileFolder") = rel.parent_path().generic_string();
 				}, fileFolder, filterName, filterPattern);

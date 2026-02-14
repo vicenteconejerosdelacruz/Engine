@@ -27,12 +27,6 @@ namespace Templates {
 	void LoadTemplates(const std::string folder, const std::string fileName, std::function<void(nlohmann::json&)> loader);
 	void DestroyTemplatesInstances();
 	void DestroyTemplates();
-	/*
-#if defined(_EDITOR)
-	void DestroyTemplatesReferences();
-#endif
-	void FreeGPUIntermediateResources();
-	*/
 
 	template<TemplateType T, typename J>
 	inline void CreateJsonTemplate(nlohmann::json& json, auto getTypesTemplates)

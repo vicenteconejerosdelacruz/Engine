@@ -5,6 +5,8 @@
 #include <SceneUnitId.h>
 #include <PxPhysicsAPI.h>
 
+enum SceneObjectType;
+
 namespace Scene
 {
 	using namespace physx;
