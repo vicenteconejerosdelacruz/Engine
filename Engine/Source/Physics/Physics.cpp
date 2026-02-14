@@ -7,7 +7,7 @@
 #include <Primitives.h>
 #include <NoMath.h>
 //Physx
-#include <PxPhysicsAPI.h>
+//#include <PxPhysicsAPI.h>
 #include <extensions/PxDefaultAllocator.h>
 
 using namespace physx;
@@ -18,6 +18,7 @@ static PxFoundation* gFoundation = nullptr;
 static PxPvd* gPvd = nullptr;
 static PxPhysics* gPhysics = nullptr;
 static PxDefaultCpuDispatcher* gDispatcher = nullptr;
+static PxCudaContextManager* gCudaContextManager = nullptr;
 
 using namespace Scene;
 using namespace DirectX;
@@ -38,6 +39,9 @@ namespace Physics
 		PxInitExtensions(*gPhysics, gPvd);
 
 		gDispatcher = PxDefaultCpuDispatcherCreate(2);
+
+		PxCudaContextManagerDesc cudaContextManagerDesc;
+		gCudaContextManager = PxCreateCudaContextManager(*gFoundation, cudaContextManagerDesc, PxGetProfilerCallback());
 	}
 
 	void DestroyPhysics()
@@ -60,6 +64,9 @@ namespace Physics
 		sceneDesc.gravity = PxVec3(gravity.x, gravity.y, gravity.z);
 		sceneDesc.cpuDispatcher = gDispatcher;
 		sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+		sceneDesc.cudaContextManager = gCudaContextManager;
+		sceneDesc.flags |= PxSceneFlag::eENABLE_GPU_DYNAMICS;
+		sceneDesc.broadPhaseType = PxBroadPhaseType::eGPU;
 		physicScene->pxScene = gPhysics->createScene(sceneDesc);
 	}
 

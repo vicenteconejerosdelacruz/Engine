@@ -2,13 +2,14 @@
 #include <SceneUnitId.h>
 #include <UUID.h>
 #include <JObject.h>
+#include <Physics/PhysicScene.h>
 //Physx
 #include <PxPhysicsAPI.h>
 
-namespace Scene
-{
-	DEF_SCENEOBJECT_ID_DEP(PhysicScene);
-};
+//namespace Scene
+//{
+//	DEF_SCENEOBJECT_ID_DEP(PhysicScene);
+//};
 
 enum PhysicsBehavior
 {
