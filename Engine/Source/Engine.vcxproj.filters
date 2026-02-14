@@ -591,6 +591,9 @@
     <ClInclude Include="JExpose\Physics\PhysicObjectAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Physics\PhysicObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -864,6 +867,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Scene\Physics\PhysicScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\PhysicObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

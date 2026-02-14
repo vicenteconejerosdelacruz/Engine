@@ -8,7 +8,7 @@
 #include <Sequence/SequencePlayer.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <Renderable/RenderableBoundingBox.h>
-#include <Physics.h>
+#include <PhysicObject.h>
 
 typedef std::vector<MeshInstanceID> RenderableMeshes;
 typedef std::unordered_map<RenderPassInstanceID, std::vector<MaterialInstanceID>> RenderableMaterials; //RenderPassInstanceID -> MaterialInstanceID

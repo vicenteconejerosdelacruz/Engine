@@ -442,6 +442,7 @@
     </ClInclude>
     <ClInclude Include="Common\d3dx12.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Physics\PhysicObject.h" />
     <ClInclude Include="Physics\Physics.h" />
     <ClInclude Include="Primitives\BoxLines.h" />
     <ClInclude Include="Primitives\Cone.h" />
@@ -562,6 +563,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Editor_Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Physics\PhysicObject.cpp" />
     <ClCompile Include="Physics\Physics.cpp" />
     <ClCompile Include="Primitives\BoxLines.cpp" />
     <ClCompile Include="Primitives\Cone.cpp" />

@@ -2795,9 +2795,9 @@ namespace Editor
 			{
 				GetController(cuuid)->SetInitialConditions();
 			}
-			for (auto& puuid : GetPhysicsObjectsBySceneObjectUUID(so->SUuuid()))
+			for (PhysicObjectID phO : GetPhysicsObjectsBySceneObjectUUID(so->SUuuid()))
 			{
-				GetPhysicObject(puuid)->SetInitialConditions();
+				phO->SetInitialConditions();
 			}
 		}
 

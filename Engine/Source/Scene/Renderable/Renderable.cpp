@@ -842,9 +842,9 @@ namespace Scene
 
 		for (auto& rp : rGPose)
 		{
-			for (JUUID p0 : GetPhysicsObjectsBySceneObjectUUID(rp->SUuuid()))
+			for (PhysicObjectID phO : GetPhysicsObjectsBySceneObjectUUID(rp->SUuuid()))
 			{
-				GetPhysicObject(p0)->UpdateGlobalPoseFromRenderable();
+				phO->UpdateGlobalPoseFromRenderable();
 			}
 		}
 

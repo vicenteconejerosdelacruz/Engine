@@ -121,8 +121,8 @@ std::vector<Sphere::VertexType> Sphere::GetVertices()
 	std::vector<VertexType> vertices;
 	for (auto& p : teselationPoints)
 	{
-		float u = std::atan2f(p.x, p.z) / (2.0f * M_PI) + 0.5f;
-		float v = std::asinf(p.y) / M_PI + 0.5f;
+		float u = std::atan2f(p.x, p.z) / (2.0f * static_cast<float>(M_PI)) + 0.5f;
+		float v = std::asinf(p.y) / static_cast<float>(M_PI) + 0.5f;
 		VertexType vertex = {
 			.Position = p,
 			.Normal = p,
