@@ -71,14 +71,14 @@ namespace Physics
 		}
 	}
 
-	void UpdateFromGlobalPose(SceneUnitId id)
+	void UpdateRenderablesFromGlobalPose(SceneUnitId id)
 	{
 		if (!physicObjectsBySceneUnitId.contains(id)) return;
 
 		for (auto& uuid : physicObjectsBySceneUnitId.at(id))
 		{
 			auto& phO = GetPhysicObject(uuid);
-			phO->UpdateFromGlobalPose();
+			phO->UpdateRenderableFromGlobalPose();
 		}
 	}
 
@@ -286,7 +286,7 @@ namespace Physics
 		pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
 	}
 
-	void PhysicObject::UpdateFromGlobalPose()
+	void PhysicObject::UpdateRenderableFromGlobalPose()
 	{
 		if (behavior() == PB_Static) return;
 
@@ -294,6 +294,13 @@ namespace Physics
 		RenderableID r = sceneObject;
 		r->position(*((XMFLOAT3*)&pxT.p.x));
 		r->rotationQ(*((XMFLOAT4*)&pxT.q.x));
+	}
+
+	void PhysicObject::UpdateGlobalPoseFromRenderable()
+	{
+		RenderableID renderable = sceneObject;
+		PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
+		pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
 	}
 
 #if defined(_EDITOR)

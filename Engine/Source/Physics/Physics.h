@@ -64,7 +64,8 @@ namespace Physics
 		void SetInitialConditions();
 
 		//dynamics
-		void UpdateFromGlobalPose();
+		void UpdateRenderableFromGlobalPose();
+		void UpdateGlobalPoseFromRenderable();
 
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
@@ -81,7 +82,7 @@ namespace Physics
 	void DestroyPhysics();
 	void CreatePhysicsScene(PhysicSceneID physicScene);
 	void CreatePhysicsObjectsBehaviors(SceneUnitId id);
-	void UpdateFromGlobalPose(SceneUnitId id);
+	void UpdateRenderablesFromGlobalPose(SceneUnitId id);
 	void UpdatePhysicObjects(SceneUnitId id);
 
 	std::unique_ptr<PhysicObject>& GetPhysicObject(JUUID uuid);

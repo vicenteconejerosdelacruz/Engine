@@ -38,9 +38,38 @@ namespace Primitives {
 		InitializeIndexBufferView(renderer->d3dDevice, commandList, indices.data(), static_cast<unsigned int>(indices.size()), mesh->ibvData);
 	}
 
-	template<typename T>
+	template<typename T, bool sdf = true>
 	void LoadPrimitiveIntoPxGeometry(PhysicObject& physicObject)
 	{
+		RenderableID renderable = physicObject.sceneObject;
+		T p;
+
+		std::vector<uint32_t> indices = p.GetIndices();
+		std::vector<Vertex<T::VertexClass>> vertices = p.GetVertices();
+
+		PxSDFDesc sdfDesc;
+		sdfDesc.spacing = 0.05f;
+		sdfDesc.subgridSize = 6;
+		sdfDesc.bitsPerSubgridPixel = PxSdfBitsPerSubgridPixel::e16_BIT_PER_PIXEL;
+		sdfDesc.numThreadsForSdfConstruction = 8;
+
+		//if (enableGpuAcceleratedCooking)
+		//{
+		//	//If sdfBuilder is NULL, the sdf will get cooked on the CPU using the number of threads specified above
+		//	sdfDesc.sdfBuilder = PxGetPhysicsGpu()->createSDFBuilder(cudaContextManager);
+		//}
+
+		PxTolerancesScale tolerances;
+		const PxCookingParams params(tolerances);
+		PxTriangleMeshDesc meshDesc;
+		meshDesc.sdfDesc = sdf ? &sdfDesc : nullptr;;
+		meshDesc.points = PxBoundedData(vertices.data(), sizeof(T::VertexType), static_cast<unsigned int>(vertices.size()));
+		meshDesc.triangles = PxBoundedData(indices.data(), sizeof(indices[0]) * 3U, static_cast<unsigned int>(indices.size() / 3U));
+
+		PxTriangleMesh* triangleMesh = PxCreateTriangleMesh(params, meshDesc);
+		XMFLOAT3 scale = renderable->scale();
+		PxMeshScale pxScale(PxVec3(scale.x, scale.y, scale.z));
+		physicObject.geometry = PxTriangleMeshGeometry(triangleMesh, pxScale);
 	}
 
 	template<>
@@ -95,7 +124,7 @@ static const std::map<std::string, std::function<void(SceneUnitId, const std::un
 
 static const std::map<std::string, std::function<void(PhysicObject& physicObject)>> LoadPrimitiveIntoPxGeometryFunctions =
 {
-	{ "utahteapot", Primitives::LoadPrimitiveIntoPxGeometry<UtahTeapot> },
+	{ "utahteapot", Primitives::LoadPrimitiveIntoPxGeometry<UtahTeapot,false> },
 	{ "cube", Primitives::LoadPrimitiveIntoPxGeometry<Cube> },
 	{ "pyramid", Primitives::LoadPrimitiveIntoPxGeometry<Pentahedron> },
 	{ "floor", Primitives::LoadPrimitiveIntoPxGeometry<Floor> },
@@ -109,10 +138,10 @@ static const std::map<std::string, bool> PrimitiveCanBeMadeDynamic =
 {
 	{ "utahteapot", false },
 	{ "cube", true },
-	{ "pyramid", false },
+	{ "pyramid", true },
 	{ "floor", false },
 	{ "decal", false },
 	{ "boxlines", true },
 	{ "sphere", true },
-	{ "cone", false },
+	{ "cone", true },
 };

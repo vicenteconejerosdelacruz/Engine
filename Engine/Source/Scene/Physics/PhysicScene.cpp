@@ -111,7 +111,7 @@ namespace Scene
 		PhysicSceneID scene = MAKESUUUID(id, *GetPhysicScenes(id).begin());
 		scene->pxScene->simulate(step);
 		scene->pxScene->fetchResults(true);
-		UpdateFromGlobalPose(id);
+		UpdateRenderablesFromGlobalPose(id);
 	}
 
 	void DestroyPhysicScenes()

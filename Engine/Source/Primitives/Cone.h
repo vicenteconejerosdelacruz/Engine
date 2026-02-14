@@ -15,4 +15,5 @@ struct Cone : public Primitive
 	std::vector<VertexType> GetVertices();
 
 	Cone(void* params);
+	Cone() :Cone(nullptr) {}
 };

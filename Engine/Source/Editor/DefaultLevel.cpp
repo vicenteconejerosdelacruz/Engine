@@ -74,7 +74,7 @@ namespace Editor::DefaultLevel {
 					}
 				},
 				{ "name", "crate" },
-				{ "position", { 0.0, 2.0, 4.0} },
+				{ "position", { 0.0, 12.0, 4.0} },
 				{ "rotation", { 45.0, 45.0f, 45.0f } },
 				{ "scale", { 0.5, 0.5, 0.5} },
 				{ "uuid", "729f8eaa-e10f-41fb-968a-0148d0e52971" },
@@ -88,7 +88,59 @@ namespace Editor::DefaultLevel {
 						}
 					}
 				}
-			}
+			},
+			{
+				{ "castShadows", true },
+				{ "shadowed", true },
+				{
+					"meshMaterials",
+					{
+						{
+							{ "material", "c50c40b7-9e17-42fb-a6bc-c3d15d72310f"},
+							{ "mesh", "d76b3bd8-0f53-4128-974e-2d6d5062bc00" }
+						}
+					}
+				},
+				{ "name", "pyramid" },
+				{ "position", { 0.0, -1.0, 4.0 } },
+				{ "rotation", { 0.0, 0.0f, 0.0f } },
+				{ "scale", { 1.0, 1.0, 1.0} },
+				{ "uuid", "40f3fd66-0729-4f98-bb6b-5f94d7461f86" },
+				{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } },
+				{ "physicObject",
+					{
+						{
+							{ "behavior", "Dynamic" }
+						}
+					}
+				}
+			}/*,
+			{
+				{ "castShadows", true },
+				{ "shadowed", true },
+				{
+					"meshMaterials",
+					{
+						{
+							{ "material", "4a5a2cb8-f2ea-4e15-8584-22bb675ae1bc"},
+							{ "mesh", "ad73990a-c59d-45d2-8ec3-807b1f52f5b9" }
+						}
+					}
+				},
+				{ "name", "cone" },
+				{ "position", { 0.0, 2.5706214904785156, 2.5761494636535645 } },
+				{ "rotation", { 0, 0.0f, 0.0f } },
+				{ "scale", { 1.0, 1.0, 1.0} },
+				{ "uuid", "91629983-c901-4126-bf21-e388ab6f6e16" },
+				{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } },
+				{ "physicObject",
+					{
+						{
+							{ "behavior", "Dynamic" }
+						}
+					}
+				}
+			}*/
 		}
 	}
 	};
@@ -143,7 +195,8 @@ namespace Editor::DefaultLevel {
 				{ "viewWidth", 32.0},
 				{ "viewBottom", 0.0},
 				{ "hasShadowMaps", true },
-				{ "rotation", {40.31087875366211, -0.30000039935112, 0.0} },
+				//{ "rotation", {-130.31087875366211, -0.30000039935112, 0.0} },
+				{ "rotation", {63.0, 0.0, 0.0} },
 				{ "lightType", "Directional"},
 				{ "name", "light.1.dir"},
 				{ "uuid", "9ec2714e-0184-45f2-aaee-b9b5d08e5763"},

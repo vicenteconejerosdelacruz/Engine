@@ -829,6 +829,44 @@ namespace Scene
 		std::set<RenderableID> r;
 		std::transform(Renderables.begin(), Renderables.end(), std::inserter(r, r.begin()), [&](auto o) { return MAKESUUUID(unit, o); });
 
+		std::set<RenderableID> rGPose;
+		std::copy_if(r.begin(), r.end(), std::inserter(rGPose, rGPose.begin()), [](auto& o)
+			{
+				bool updated = o->dirty(Renderable::Update_position) || o->dirty(Renderable::Update_rotation);
+				o->clean(Renderable::Update_position);
+				o->clean(Renderable::Update_rotation);
+				return updated && !o->at("physicObject").empty();
+			}
+		);
+
+
+		for (auto& rp : rGPose)
+		{
+			for (JUUID p0 : GetPhysicsObjectsBySceneObjectUUID(rp->SUuuid()))
+			{
+				GetPhysicObject(p0)->UpdateGlobalPoseFromRenderable();
+			}
+		}
+
+		std::set<RenderableID> rGeom;
+		std::copy_if(r.begin(), r.end(), std::inserter(rGeom, rGeom.begin()), [](auto& o)
+			{
+				bool updated = o->dirty(Renderable::Update_scale);
+				o->clean(Renderable::Update_scale);
+				return updated && !o->at("physicObject").empty();
+			}
+		);
+
+		for (auto& rp : rGeom)
+		{
+			for (JUUID p0 : GetPhysicsObjectsBySceneObjectUUID(rp->SUuuid()))
+			{
+				auto& phO = GetPhysicObject(p0);
+				phO->DestroyPhisicsBehavior();
+				phO->CreatePhysicsBehavior();
+			}
+		}
+
 		std::set<RenderableID> todelete;
 		std::copy_if(r.begin(), r.end(), std::inserter(todelete, todelete.begin()), [](auto r)
 			{
