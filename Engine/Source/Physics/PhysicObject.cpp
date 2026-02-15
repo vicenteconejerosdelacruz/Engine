@@ -3,14 +3,9 @@
 #include <Primitives.h>
 //Physx
 #include <PxPhysicsAPI.h>
-#include <extensions/PxDefaultAllocator.h>
-#include <extensions/PxCudaHelpersExt.h>
-#include <gpu/PxGpu.h>
-#include <gpu/PxPhysicsGpu.h>
 
 using namespace physx;
 extern PxPhysics* gPhysics;
-extern PxCudaContextManager* gCudaContextManager;
 
 namespace Physics
 {
@@ -39,132 +34,109 @@ namespace Physics
 
 	void PhysicObject::CreatePhysicsBehavior()
 	{
-		/*
-		RenderableID renderable = sceneObject;
-		MeshInstanceID mesh = renderable->meshes.at(0);
-		JNAME name = GetMeshName(mesh->uuid);
+		if (geometry().empty())
+			return;
+		PhysicGeometryJsonID jg = geometry();
 
-		std::map<std::tuple<bool, bool>, std::function<void()>> creatorsFunctions =
+		if (jg->mesh().empty() && jg->model().empty())
+			return;
+
+		//why using physicGeometryInstance instead of the mesh/model as key?
+		//basically because as the scale of the geometries are built-in in the geometry bulding time
+		//we cannot split from the instancing, so instances are unique but what we can put in a cache is the mesh soup
+		physicGeometryInstance = getUUID();
+		if (!jg->mesh().empty())
 		{
-			{std::tuple(false,false),[&] { CreateStaticFromMesh(); }},
-			{std::tuple(false,true),[&] { CreateDynamicFromMesh(); }},
-			{std::tuple(true,false),[&] { CreateStaticFromModel3D(); }},
-			{std::tuple(true,true),[&] { CreateDynamicFromModel3D(); }},
-		};
+			CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
+				{
+					return std::make_unique<PhysicGeometryInstance>(renderable, jg->mesh(), physicGeometryInstance(), behavior());
+				}
+			);
+		}
+		else if (jg->model().empty())
+		{
+			Model3DJsonID modelJ = jg->model();
+			CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
+				{
+					return std::make_unique<PhysicGeometryInstance>(renderable, modelJ, physicGeometryInstance(), behavior());
+				}
+			);
+		}
 
-		bool fromModel = !renderable->model().empty();
-		bool isDynamic = behavior() == PB_Dynamic && PrimitiveCanBeMadeDynamic.at(name);
 		material = gPhysics->createMaterial(staticFriction(), dynamicFriction(), restitution());
-		creatorsFunctions.at(std::tuple(fromModel, isDynamic))();
-		*/
+
+		if (behavior() == PB_Static)
+		{
+			//create the PxActor & the PxShape
+			actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(renderable->position())));
+			shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
+			shape->setLocalPose(PxTransform(PxIdentity));
+
+			//set the actor position and rotation
+			actor->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+		}
+		else
+		{
+			//create the PxActor
+			actor = gPhysics->createRigidDynamic(PxTransform(PxIdentity));
+
+			//create the PxShape
+			shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
+			shape->setLocalPose(PxTransform(PxIdentity));
+
+			//set the actor position and rotation
+			actor->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+
+			//set the body(actor) density and compute it's inertia
+			PxRigidBody* pxBody = (PxRigidBody*)actor;
+			PxRigidBodyExt::updateMassAndInertia(*pxBody, density());
+
+			//set the velocity and acceleration
+			PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
+			pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
+			pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
+		}
+
+		//add the actor to the pxScene
+		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		scene->pxScene->addActor(*actor);
 	}
 
 	void PhysicObject::DestroyPhisicsBehavior()
 	{
-		//RenderableID renderable = sceneObject;
-		//PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
-		//actor->detachShape(*shape);
-		//scene->pxScene->removeActor(*actor);
-		////actor->release();
-		////material->release();
-		//PX_RELEASE(material);
-		//PX_RELEASE(actor);
-		////PX_RELEASE(shape);
-	}
-
-	void PhysicObject::CreateStaticFromMesh()
-	{
-		//RenderableID renderable = sceneObject;
-		//MeshInstanceID mesh = renderable->meshes.at(0);
-		//JNAME name = GetMeshName(mesh->uuid);
-		//LoadPrimitiveIntoPxGeometryFunctions.at(name)(*this, nullptr);
-		//
-		////create the PxActor & the PxShape
-		//actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(renderable->position())));
-		//shape = PxRigidActorExt::createExclusiveShape(*actor, geometry.any(), *material);
-		//shape->setLocalPose(PxTransform(PxIdentity));
-		//
-		////set the actor position and rotation
-		//actor->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
-		//
-		////add the actor to the pxScene
-		//PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
-		//scene->pxScene->addActor(*actor);
-	}
-
-	void PhysicObject::CreateDynamicFromMesh()
-	{
-		//RenderableID renderable = sceneObject;
-		//MeshInstanceID mesh = renderable->meshes.at(0);
-		//JNAME name = GetMeshName(mesh->uuid);
-		//LoadPrimitiveIntoPxGeometryFunctions.at(name)(*this,
-		//	[](PxSDFDesc& sdfDesc)
-		//	{
-		//		sdfDesc.spacing = 0.05f;
-		//		sdfDesc.subgridSize = 6;
-		//		sdfDesc.bitsPerSubgridPixel = PxSdfBitsPerSubgridPixel::e16_BIT_PER_PIXEL;
-		//		sdfDesc.numThreadsForSdfConstruction = 8;
-		//		sdfDesc.sdfBuilder = PxGetPhysicsGpu()->createSDFBuilder(gCudaContextManager);
-		//	});
-		//
-		////create the PxActor
-		//actor = gPhysics->createRigidDynamic(PxTransform(PxIdentity));
-		//
-		////create the PxShape
-		//shape = PxRigidActorExt::createExclusiveShape(*actor, geometry.any(), *material);
-		//shape->setLocalPose(PxTransform(PxIdentity));
-		//
-		////set the actor position and rotation
-		//actor->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
-		//
-		////set the body(actor) density and compute it's inertia
-		//PxRigidBody* pxBody = (PxRigidBody*)actor;
-		//PxRigidBodyExt::updateMassAndInertia(*pxBody, density());
-		//
-		////set the velocity and acceleration
-		//PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
-		//pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
-		//pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
-		//
-		////add the actor to the pxScene
-		//PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
-		//scene->pxScene->addActor(*actor);
-	}
-
-	void PhysicObject::CreateStaticFromModel3D()
-	{
-	}
-
-	void PhysicObject::CreateDynamicFromModel3D()
-	{
+		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		actor->detachShape(*shape);
+		scene->pxScene->removeActor(*actor);
+		//actor->release();
+		//material->release();
+		PX_RELEASE(material);
+		PX_RELEASE(actor);
+		//PX_RELEASE(shape);
 	}
 
 	void PhysicObject::SetInitialConditions()
 	{
-		//if (behavior() == PB_Static) return;
-		//
-		//RenderableID renderable = sceneObject;
-		//PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
-		//pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
-		//pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
-		//pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
+		if (behavior() == PB_Static) return;
+
+		PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
+		pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+		pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
+		pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
 	}
 
 	void PhysicObject::UpdateRenderableFromGlobalPose()
 	{
-		//if (behavior() == PB_Static) return;
-		//
-		//PxTransform pxT = actor->getGlobalPose();
-		//RenderableID r = sceneObject;
-		//r->position(*((XMFLOAT3*)&pxT.p.x));
-		//r->rotationQ(*((XMFLOAT4*)&pxT.q.x));
+		if (behavior() == PB_Static) return;
+
+		PxTransform pxT = actor->getGlobalPose();
+		renderable->position(*((XMFLOAT3*)&pxT.p.x));
+		renderable->rotationQ(*((XMFLOAT4*)&pxT.q.x));
 	}
 
 	void PhysicObject::UpdateGlobalPoseFromRenderable()
 	{
-		//RenderableID renderable = sceneObject;
-		//PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
-		//pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+		PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
+		pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
 	}
 
 #if defined(_EDITOR)
@@ -178,7 +150,7 @@ namespace Physics
 
 	std::vector<std::string> PhysicObject::GetPhysicBehaviorAttributes()
 	{
-		std::vector<std::string> atts = { "behavior", "staticFriction", "dynamicFriction", "restitution", };
+		std::vector<std::string> atts = { "behavior", "staticFriction", "dynamicFriction", "restitution", "geometry" };
 
 		if (behavior() == PB_Dynamic)
 		{
@@ -232,7 +204,7 @@ namespace Physics
 	{
 		JUUID uuid = getUUID();
 		std::unique_ptr<PhysicObject> physicObject = std::make_unique<PhysicObject>(json);
-		physicObject->sceneObject = sceneObject;
+		physicObject->renderable = sceneObject;
 		(*physicObject)["uuid"] = uuid;
 		physicObjectsUUIDs.insert_or_assign(uuid, std::move(physicObject));
 		SceneUnitId id = std::get<0>(sceneObject);

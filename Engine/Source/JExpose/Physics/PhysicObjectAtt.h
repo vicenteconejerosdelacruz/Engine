@@ -1,5 +1,6 @@
 JCLASS(PhysicObject, _)
 JEXPOSE_ENUM(PhysicsBehavior, behavior, PB_Static, jedv_t_physic_behavior, 1, false)
+JEXPOSE(std::string, geometry, "", jedv_t_te_physycgeometry, 1, false)
 JEXPOSE(float, staticFriction, 0.5f, jedv_t_float, 1, false)
 JEXPOSE(float, dynamicFriction, 0.5f, jedv_t_float, 1, false)
 JEXPOSE(float, restitution, 0.1f, jedv_t_float, 1, false)

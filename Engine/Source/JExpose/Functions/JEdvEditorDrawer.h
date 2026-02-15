@@ -1729,8 +1729,9 @@ inline JEdvEditorDrawerFunction DrawNonEmptyValue(auto onChange)
 				ImGui::Text(attribute.c_str());
 				ImGui::TableSetColumnIndex(1);
 				std::string str = allSame() ? json.at(0)->at(attribute) : "";
+				ImGuiInputTextFlags inputFlags = (json.at(0)->contains("systemCreated")) ? ImGuiInputTextFlags_ReadOnly : 0;
 				ImGui::PushItemWidth(ImGui::GetWindowWidth());
-				if (ImGui::InputText("", &str))
+				if (ImGui::InputText("", &str, inputFlags))
 				{
 					if (str != "")
 					{
@@ -1759,13 +1760,15 @@ template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_rend
 template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_shader_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
 template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_sound_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
 template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_texture_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
+template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_physycgeometry_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
 
 inline void DrawResourceSelection(
 	std::string attribute,
 	std::vector<JObject*>& json,
 	std::function<std::string(std::string)> ResourceUUIDToName,
 	std::function<std::vector<JUUIDName>()> GetResourcesUUIDsNames,
-	const char* iconCode
+	const char* iconCode,
+	bool readOnly = false
 )
 {
 	std::vector<JUUIDName> selectables;
@@ -1819,15 +1822,27 @@ inline void DrawResourceSelection(
 		ImGui::SameLine();
 		ImGui::OpenTemplate(iconCode, selected);
 		ImGui::SameLine();
-		ImGui::DrawComboSelection(selected, selectables, [attribute, &json, update](JUUIDName option)
-			{
-				std::string uuid = std::get<0>(option);
-				//if (uuid != "")
+		if (!readOnly)
+		{
+			ImGui::DrawComboSelection(selected, selectables, [attribute, &json, update](JUUIDName option)
 				{
-					update(uuid);
+					std::string uuid = std::get<0>(option);
+					//if (uuid != "")
+					{
+						update(uuid);
+					}
 				}
+			);
+		}
+		else
+		{
+			ImGui::PushID(std::string("combo-sel-" + attribute).c_str());
+			{
+				std::string& name = std::get<1>(selected);
+				ImGui::InputText("##", name.data(), name.size(), ImGuiInputTextFlags_ReadOnly);
 			}
-		);
+			ImGui::PopID();
+		}
 
 		ImGui::PopID();
 		ImGui::EndTable();
@@ -1845,6 +1860,15 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_renderable>()
 }
 
 template<>
+inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_mesh>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			DrawResourceSelection(attribute, json, Templates::GetMeshName, SortUUIDNameByName(Templates::GetMeshesUUIDsNames), ICON_FA_HOTEL, true);
+		};
+}
+
+template<>
 inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_shader>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
@@ -1858,7 +1882,8 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_model3d>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
-			DrawResourceSelection(attribute, json, Templates::GetModel3DName, SortUUIDNameByName(Templates::GetModel3DsUUIDsNames), ICON_FA_CUBE);
+			bool systemCreated = json.at(0)->contains("systemCreated");
+			DrawResourceSelection(attribute, json, Templates::GetModel3DName, SortUUIDNameByName(Templates::GetModel3DsUUIDsNames), ICON_FA_CUBE, systemCreated);
 		};
 }
 
@@ -1877,6 +1902,15 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_texture>()
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
 			DrawResourceSelection(attribute, json, Templates::GetTextureName, SortUUIDNameByName(Templates::GetTexturesUUIDsNames), ICON_FA_IMAGE);
+		};
+}
+
+template<>
+inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_physycgeometry>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			DrawResourceSelection(attribute, json, Templates::GetPhysicGeometryName, SortUUIDNameByName(Templates::GetPhysicGeometrysUUIDsNames), ICON_FA_IMAGE);
 		};
 }
 

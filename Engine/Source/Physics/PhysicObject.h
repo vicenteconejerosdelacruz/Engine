@@ -58,10 +58,6 @@ namespace Physics
 		PhysicObject(nlohmann::json& json);
 		void CreatePhysicsBehavior();
 		void DestroyPhisicsBehavior();
-		void CreateStaticFromMesh();
-		void CreateDynamicFromMesh();
-		void CreateStaticFromModel3D();
-		void CreateDynamicFromModel3D();
 		void SetInitialConditions();
 
 		//dynamics
@@ -72,8 +68,9 @@ namespace Physics
 		virtual void WriteJson(nlohmann::json& j);
 		std::vector<std::string> GetPhysicBehaviorAttributes();
 #endif
-		SUUUID sceneObject;
-		PxGeometryHolder geometry;
+		RenderableID renderable;
+
+		PhysicGeometryInstanceID physicGeometryInstance;
 		PxMaterial* material;
 		PxRigidActor* actor;
 		PxShape* shape;

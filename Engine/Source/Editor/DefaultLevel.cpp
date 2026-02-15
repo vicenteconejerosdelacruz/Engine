@@ -28,7 +28,8 @@ namespace Editor::DefaultLevel {
 				{ "physicObject",
 					{
 						{
-							{ "behavior", "Static" }
+							{ "behavior", "Static" },
+							{ "geometry", "330c6bfd-2c71-4c6b-be42-b797d07ab5ba" }
 						}
 					}
 				}
@@ -84,7 +85,8 @@ namespace Editor::DefaultLevel {
 						{
 							{ "behavior", "Dynamic" },
 							{ "linearVelocity" , { 0.0, 6.0, 0.0 } },
-							{ "angularVelocity" , { 10.0, 4.0, 6.0 } }
+							{ "angularVelocity" , { 10.0, 4.0, 6.0 } },
+							{ "geometry", "a5d06057-5344-413c-9647-ed2aac874021" }
 						}
 					}
 				}
@@ -110,7 +112,8 @@ namespace Editor::DefaultLevel {
 				{ "physicObject",
 					{
 						{
-							{ "behavior", "Dynamic" }
+							{ "behavior", "Dynamic" },
+							{ "geometry", "36c75d6d-970f-43dc-97bd-9bc13a035a3a" }
 						}
 					}
 				}
@@ -136,7 +139,8 @@ namespace Editor::DefaultLevel {
 				{ "physicObject",
 					{
 						{
-							{ "behavior", "Dynamic" }
+							{ "behavior", "Dynamic" },
+							{ "geometry", "8a41c342-e388-4e1f-8ba9-8b0a41b1c975" }
 						}
 					}
 				}

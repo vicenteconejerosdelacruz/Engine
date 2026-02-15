@@ -953,6 +953,46 @@ namespace Templates
 		}
 	);
 
+	nlohmann::json systemPhysicGeometries = nlohmann::json::array(
+		{
+			{
+				{ "name", "floor" },
+				{ "uuid", "330c6bfd-2c71-4c6b-be42-b797d07ab5ba" },
+				{ "model", ""},
+				{ "mesh", "d41e5c29-49bb-4f2c-aa2b-da781fbac512"},
+				{ "systemCreated" , true}
+			},
+			{
+				{ "name", "cube" },
+				{ "uuid", "a5d06057-5344-413c-9647-ed2aac874021" },
+				{ "model", ""},
+				{ "mesh", "f7786ac1-e296-4e9a-a7e6-6f1949de75ef"},
+				{ "systemCreated" , true}
+			},
+			{
+				{ "name", "pyramid" },
+				{ "uuid", "36c75d6d-970f-43dc-97bd-9bc13a035a3a" },
+				{ "model", ""},
+				{ "mesh", "d76b3bd8-0f53-4128-974e-2d6d5062bc00"},
+				{ "systemCreated" , true}
+			},
+			{
+				{ "name", "sphere" },
+				{ "uuid", "a96cbfaf-0827-4b04-ae68-548c9bffaf87" },
+				{ "model", ""},
+				{ "mesh", "4d1174b2-8225-4c09-9db6-ff09718ae0f5"},
+				{ "systemCreated" , true  }
+			},
+			{
+				{ "name", "cone" },
+				{ "uuid", "8a41c342-e388-4e1f-8ba9-8b0a41b1c975" },
+				{ "model", ""},
+				{ "mesh", "ad73990a-c59d-45d2-8ec3-807b1f52f5b9"},
+				{ "systemCreated" , true  }
+			},
+		}
+	);
+
 	std::unordered_map<TemplateType, std::set<JUUID>> templates;
 	std::unordered_map<JUUID, TemplateType> templatesTypes;
 	std::set<JUUID>& GetTemplates(TemplateType type)
@@ -981,6 +1021,7 @@ namespace Templates
 		LoadTemplates(systemMaterials, CreateMaterial);
 		LoadTemplates(systemRenderPasses, CreateRenderPass);
 		LoadTemplates(systemTextures, CreateTexture);
+		LoadTemplates(systemPhysicGeometries, CreatePhysicGeometry);
 
 		CreatePrimitiveMeshTemplate("d41e5c29-49bb-4f2c-aa2b-da781fbac512", "floor");
 		CreatePrimitiveMeshTemplate("d8bfdef4-55f9-4f6e-b4a8-20915eb854d6", "utahteapot");

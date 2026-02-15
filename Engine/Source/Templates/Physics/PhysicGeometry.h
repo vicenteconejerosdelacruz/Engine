@@ -3,6 +3,9 @@
 #include <Templates.h>
 #include <JTemplate.h>
 #include <UUID.h>
+#include <PxPhysicsAPI.h>
+
+enum PhysicsBehavior;
 
 namespace Templates
 {
@@ -62,18 +65,26 @@ namespace Templates
 	};
 
 	struct PhysicGeometryInstance;
+	std::unique_ptr<PhysicGeometryInstance>& CreatePhysicGeometryInstance(JUUID instanceId, std::function<std::unique_ptr<PhysicGeometryInstance>()> newRefCallback);
+	std::unique_ptr<PhysicGeometryInstance>& GetPhysicGeometryInstance(JUUID instanceId);
+	void ClearPhysicGeometryInstances();
 
 	TEMPDECL_FULL(PhysicGeometry);
-	TEMPDECL_REFTRACKER(PhysicGeometry);
 	DEF_TEMPLATE_ID(PhysicGeometryJson, GetPhysicGeometryTemplate);
 	DEF_TEMPLATE_ID(PhysicGeometryInstance, GetPhysicGeometryInstance);
 
 	struct PhysicGeometryInstance
 	{
-		PhysicGeometryJsonID model3D;
+		//PhysicGeometryInstanceID instance;
+		Model3DJsonID model3D;
+		JUUID mesh;
+		RenderableID renderable;
 
-		PhysicGeometryInstance(JUUID uuid);// { assert(!!!"do not use"); }
-		//explicit PhysicGeometryInstance(SceneUnitId id, JUUID uuid, JUUID objectUUID);
+		PxGeometryHolder geometry;
+
+		PhysicGeometryInstance(JUUID uuid) { assert(!!!"do not use"); }
+		PhysicGeometryInstance(RenderableID renderable, Model3DJsonID model3D, JUUID instanceId, PhysicsBehavior behavior);
+		PhysicGeometryInstance(RenderableID renderable, JUUID meshId, JUUID instanceId, PhysicsBehavior behavior);
 		~PhysicGeometryInstance();
 	};
 }

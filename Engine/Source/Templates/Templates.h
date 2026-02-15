@@ -12,6 +12,9 @@
 
 namespace Templates {
 
+	using JUUID = std::string;
+	using JNAME = std::string;
+
 	std::set<JUUID>& GetTemplates(TemplateType type);
 	std::unordered_map<JUUID, TemplateType>& GetTemplatesTypes();
 	TemplateType GetTemplateType(JUUID uuid);

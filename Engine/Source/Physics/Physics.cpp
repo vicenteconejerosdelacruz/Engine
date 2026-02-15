@@ -64,6 +64,4 @@ namespace Physics
 		sceneDesc.broadPhaseType = PxBroadPhaseType::eGPU;
 		physicScene->pxScene = gPhysics->createScene(sceneDesc);
 	}
-
-
 };
