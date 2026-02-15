@@ -25,6 +25,12 @@ inline std::unordered_map<std::string, PhysicsBehavior> StringToPhysicsBehavior 
 
 namespace Physics
 {
+	namespace Cooking
+	{
+		inline static const std::string cookingFolder = "Assets/cooking";
+		inline static const std::string cookingSDFFolder = "Assets/cooking/sdf";
+	};
+
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>

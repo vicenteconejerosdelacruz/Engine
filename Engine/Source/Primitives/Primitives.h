@@ -12,8 +12,8 @@
 #include "Cone.h"
 
 extern std::unique_ptr<Renderer> renderer;
-namespace Primitives {
-
+namespace Primitives
+{
 	using namespace Templates;
 	using namespace Scene;
 
@@ -38,6 +38,7 @@ namespace Primitives {
 		InitializeIndexBufferView(renderer->d3dDevice, commandList, indices.data(), static_cast<unsigned int>(indices.size()), mesh->ibvData);
 	}
 
+	/*
 	template<typename T>
 	void LoadPrimitiveIntoPxGeometry(PhysicObject& physicObject, std::function<void(PxSDFDesc&)> sdf = nullptr)
 	{
@@ -54,7 +55,7 @@ namespace Primitives {
 		}
 
 		PxTolerancesScale tolerances;
-		//const 
+		//const
 		PxCookingParams params(tolerances);
 		// disable mesh cleaning - perform mesh validation on development configurations
 		params.meshPreprocessParams |= PxMeshPreprocessingFlag::eDISABLE_CLEAN_MESH;
@@ -72,7 +73,9 @@ namespace Primitives {
 		PxMeshScale pxScale(PxVec3(scale.x, scale.y, scale.z));
 		physicObject.geometry = PxTriangleMeshGeometry(triangleMesh, pxScale);
 	}
+	*/
 
+	/*
 	template<>
 	inline void LoadPrimitiveIntoPxGeometry<Cube>(PhysicObject& physicObject, std::function<void(PxSDFDesc&)> sdf)
 	{
@@ -80,7 +83,9 @@ namespace Primitives {
 		XMFLOAT3 scale = renderable->scale();
 		physicObject.geometry = PxBoxGeometry(scale.x, scale.y, scale.z);
 	}
+	*/
 
+	/*
 	template<>
 	inline void LoadPrimitiveIntoPxGeometry<Sphere>(PhysicObject& physicObject, std::function<void(PxSDFDesc&)> sdf)
 	{
@@ -88,7 +93,9 @@ namespace Primitives {
 		XMFLOAT3 scale = renderable->scale();
 		physicObject.geometry = PxSphereGeometry(scale.x * 0.5f);
 	}
+	*/
 
+	/*
 	template<>
 	inline void LoadPrimitiveIntoPxGeometry<Floor>(PhysicObject& physicObject, std::function<void(PxSDFDesc&)> sdf)
 	{
@@ -109,7 +116,8 @@ namespace Primitives {
 		PxMeshScale pxScale(PxVec3(scale.x, scale.y, scale.z));
 		physicObject.geometry = PxTriangleMeshGeometry(triangleMesh, pxScale);
 	}
-}
+	*/
+};
 
 static const std::map<std::string, std::function<void(SceneUnitId, const std::unique_ptr<Templates::MeshInstance>&, void* params)>> LoadPrimitiveIntoMeshFunctions =
 {
@@ -123,6 +131,7 @@ static const std::map<std::string, std::function<void(SceneUnitId, const std::un
 	{ "cone", Primitives::LoadPrimitiveIntoMesh<Cone> },
 };
 
+/*
 static const std::map<std::string, std::function<void(PhysicObject& physicObject, std::function<void(PxSDFDesc&)> sdf)>> LoadPrimitiveIntoPxGeometryFunctions =
 {
 	{ "utahteapot", Primitives::LoadPrimitiveIntoPxGeometry<UtahTeapot> },
@@ -146,3 +155,4 @@ static const std::map<std::string, bool> PrimitiveCanBeMadeDynamic =
 	{ "sphere", true },
 	{ "cone", true },
 };
+*/

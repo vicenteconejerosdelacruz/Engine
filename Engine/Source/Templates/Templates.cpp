@@ -1057,6 +1057,7 @@ namespace Templates
 		//ClearMeshInstances();
 		ClearMaterialInstances();
 		ClearShaderInstances();
+		ClearPhysicGeometryInstances();
 	}
 
 	void DestroyTemplates()
@@ -1068,23 +1069,8 @@ namespace Templates
 		//ReleaseMeshTemplates();
 		ReleaseMaterialTemplates();
 		ReleaseShaderTemplates();
+		ReleasePhysicGeometryTemplates();
 	}
-
-#if defined(_EDITOR)
-	/*
-	void DestroyTemplatesReferences()
-	{
-		//ReleaseSoundEffectsInstances();
-	}
-	*/
-#endif
-
-	/*
-	void FreeGPUIntermediateResources()
-	{
-		//FreeGPUTexturesUploadIntermediateResources();
-	}
-	*/
 
 	void TemplatesStep(DX::StepTimer& timer)
 	{
@@ -1139,7 +1125,13 @@ namespace Templates
 					auto& t = GetRenderPassTemplate(uuid);
 					return static_cast<JTemplate*>(t.get());
 				}
-			}
+			},
+			{ T_PhysicGeometries, [](JUUID uuid)
+				{
+					auto& t = GetPhysicGeometryTemplate(uuid);
+					return static_cast<JTemplate*>(t.get());
+				}
+			},
 		};
 
 		TemplateType type = GetTemplateType(uuid);
@@ -1196,7 +1188,13 @@ namespace Templates
 					RenderPassJsonID o = uuid;
 					return str2JUUIDName(TemplateTypeToString.at(T_RenderPasses), o->uuid(),o->name());
 				}
-			}
+			},
+			{ T_PhysicGeometries, [str2JUUIDName](JUUID uuid)
+				{
+					PhysicGeometryJsonID o = uuid;
+					return str2JUUIDName(TemplateTypeToString.at(T_PhysicGeometries), o->uuid(),o->name());
+				}
+			},
 		};
 
 		std::vector<JUUIDName> templatesTypeList;
@@ -1219,7 +1217,8 @@ namespace Templates
 			{ T_Shaders, GetShaderAttributes },
 			{ T_Sounds, GetSoundAttributes },
 			{ T_Textures, GetTextureAttributes },
-			{ T_RenderPasses, GetRenderPassAttributes }
+			{ T_RenderPasses, GetRenderPassAttributes },
+			{ T_PhysicGeometries, GetPhysicGeometryAttributes },
 		};
 		return GetTAtts.at(t)();
 	}
@@ -1233,7 +1232,8 @@ namespace Templates
 			{ T_Shaders, GetShaderDrawers },
 			{ T_Sounds, GetSoundDrawers },
 			{ T_Textures, GetTextureDrawers },
-			{ T_RenderPasses, GetRenderPassDrawers }
+			{ T_RenderPasses, GetRenderPassDrawers },
+			{ T_PhysicGeometries, GetPhysicGeometryDrawers },
 		};
 		return GetTDrawers.at(t)();
 	}
@@ -1247,7 +1247,8 @@ namespace Templates
 			{ T_Shaders, GetShaderPreviewers },
 			{ T_Sounds, GetSoundPreviewers },
 			{ T_Textures, GetTexturePreviewers },
-			{ T_RenderPasses, GetRenderPassPreviewers }
+			{ T_RenderPasses, GetRenderPassPreviewers },
+			{ T_PhysicGeometries, GetPhysicGeometryPreviewers },
 		};
 		return GetTPreviewers.at(t)();
 	}
@@ -1261,7 +1262,8 @@ namespace Templates
 			{ T_Shaders, CreateShaderJson },
 			{ T_Sounds, CreateSoundJson },
 			{ T_Textures, CreateTextureJson },
-			{ T_RenderPasses, CreateRenderPassJson }
+			{ T_RenderPasses, CreateRenderPassJson },
+			{ T_PhysicGeometries, CreatePhysicGeometryJson },
 		};
 		return GetTJson.at(t)();
 	}
@@ -1299,7 +1301,12 @@ namespace Templates
 				{
 					{ "assetsFolder" , defaultAssetsFolder },
 					{ "fileFolder" , defaultAssetsFolder }
-				}); }}
+				}); }},
+			{ T_PhysicGeometries, [] { return nlohmann::json(
+				{
+					{ "assetsFolder" , defaultAssetsFolder },
+					{ "fileFolder" , defaultAssetsFolder }
+				}); }},
 		};
 		return GetTJson.at(t)();
 	}
@@ -1313,7 +1320,8 @@ namespace Templates
 			{ T_Shaders, GetShaderRequiredAttributes },
 			{ T_Sounds, GetSoundRequiredAttributes },
 			{ T_Textures, GetTextureRequiredAttributes },
-			{ T_RenderPasses, GetRenderPassRequiredAttributes }
+			{ T_RenderPasses, GetRenderPassRequiredAttributes },
+			{ T_PhysicGeometries, GetPhysicGeometryRequiredAttributes },
 		};
 		return GetTRequiredAtts.at(t)();
 	}
@@ -1327,7 +1335,8 @@ namespace Templates
 			{ T_Shaders, GetShaderCreatorDrawers },
 			{ T_Sounds, GetSoundCreatorDrawers },
 			{ T_Textures, GetTextureCreatorDrawers },
-			{ T_RenderPasses, GetRenderPassCreatorDrawers }
+			{ T_RenderPasses, GetRenderPassCreatorDrawers },
+			{ T_PhysicGeometries, GetPhysicGeometryCreatorDrawers },
 		};
 		return GetTDrawers.at(t)();
 	}
@@ -1341,7 +1350,8 @@ namespace Templates
 			{ T_Shaders, GetShaderCreatorValidator },
 			{ T_Sounds, GetSoundCreatorValidator },
 			{ T_Textures, GetTextureCreatorValidator },
-			{ T_RenderPasses, GetRenderPassCreatorValidator }
+			{ T_RenderPasses, GetRenderPassCreatorValidator },
+			{ T_PhysicGeometries, GetPhysicGeometryCreatorValidator },
 		};
 		return GetTValidator.at(t)();
 	}
@@ -1366,6 +1376,7 @@ namespace Templates
 			{ T_Sounds,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateSound); } },
 			{ T_Textures,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateTextureFromJsonDefinition); } },
 			{ T_RenderPasses,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateRenderPass); } },
+			{ T_PhysicGeometries,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreatePhysicGeometry); } },
 		};
 		CreateT.at(t)(json);
 		Editor::MarkTemplatesPanelAssetsAsDirty();
@@ -1380,6 +1391,7 @@ namespace Templates
 			{ Sound::templateName, T_Sounds },
 			{ Texture::templateName, T_Textures },
 			{ RenderPass::templateName, T_RenderPasses },
+			{ PhysicGeometry::templateName, T_PhysicGeometries },
 		};
 		return GetT4F.at(file);
 	}
@@ -1393,6 +1405,7 @@ namespace Templates
 			{ T_Sounds, GetSoundName },
 			{ T_Textures, GetTextureName },
 			{ T_RenderPasses, GetRenderPassName },
+			{ T_PhysicGeometries, GetPhysicGeometryName },
 		};
 		return GetTName.at(t)(uuid);
 	}
@@ -1406,6 +1419,7 @@ namespace Templates
 			{ T_Sounds, Sound::templateName },
 			{ T_Textures, Texture::templateName },
 			{ T_RenderPasses, RenderPass::templateName },
+			{ T_PhysicGeometries, PhysicGeometry::templateName },
 		};
 		return defaultTemplatesFolder + GetF.at(t);
 	}
@@ -1422,6 +1436,7 @@ namespace Templates
 			{ T_Sounds, DeleteSoundTemplate },
 			{ T_Textures, DeleteTextureTemplate },
 			{ T_RenderPasses, DeleteRenderPassTemplate },
+			{ T_PhysicGeometries, DeletePhysicGeometryTemplate },
 		};
 		DeleteT.at(t)(uuid);
 	}
@@ -1440,9 +1455,6 @@ namespace Templates
 				return defaultLevelsFolder + name + ".json";
 			}
 		);
-		/*
-		std::set<std::string> skipLevelFiles = { defaultLevelsFolder + Editor::currentLevelName + ".json" };
-		*/
 
 		auto deleteTemplate = [type, uuid](std::vector<nlohmann::json> references)
 			{
