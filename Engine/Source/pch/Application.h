@@ -6,6 +6,8 @@ static const std::string defaultShadersFolder = "Shaders/";
 static const std::string defaultShadersBinariesFolder = "Shaders/bin/";
 static const std::string defaultAssetsFolder = "Assets/";
 static const std::string default3DModelsFolder = "Assets/models/";
+static const std::string defaultPhysxCookingFolder = "Assets/cooking/";
+static const std::string defaultPhysxCookingSDFFolder = "Assets/cooking/sdf/";
 static const std::string defaultSoundsFolder = "Assets/sounds/";
 static const std::vector<std::string> defaultTexturesFilters = {
 	"All Image files. (*.jpg,*jpeg,*.png)","JPEG files. (*.jpg,*jpeg)", "PNG files. (*.png)"

@@ -49,16 +49,16 @@ namespace Physics
 		{
 			CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
 				{
-					return std::make_unique<PhysicGeometryInstance>(renderable, jg->mesh(), physicGeometryInstance(), behavior());
+					return std::make_unique<PhysicGeometryInstance>(jg, renderable, jg->mesh(), physicGeometryInstance(), behavior());
 				}
 			);
 		}
-		else if (jg->model().empty())
+		else if (!jg->model().empty())
 		{
 			Model3DJsonID modelJ = jg->model();
 			CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
 				{
-					return std::make_unique<PhysicGeometryInstance>(renderable, modelJ, physicGeometryInstance(), behavior());
+					return std::make_unique<PhysicGeometryInstance>(jg, renderable, modelJ, physicGeometryInstance(), behavior());
 				}
 			);
 		}
@@ -105,12 +105,21 @@ namespace Physics
 	void PhysicObject::DestroyPhisicsBehavior()
 	{
 		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
-		actor->detachShape(*shape);
-		scene->pxScene->removeActor(*actor);
+		if (actor)
+		{
+			actor->detachShape(*shape);
+			scene->pxScene->removeActor(*actor);
+		}
 		//actor->release();
 		//material->release();
-		PX_RELEASE(material);
-		PX_RELEASE(actor);
+		if (material)
+		{
+			PX_RELEASE(material);
+		}
+		if (actor)
+		{
+			PX_RELEASE(actor);
+		}
 		//PX_RELEASE(shape);
 	}
 
@@ -241,11 +250,12 @@ namespace Physics
 
 		for (PhysicObjectID phO : physicObjectsBySceneUnitId.at(id))
 		{
-			if (phO->dirty(PhysicObject::Update_behavior))
+			if (phO->dirty(PhysicObject::Update_behavior) || phO->dirty(PhysicObject::Update_geometry))
 			{
 				phO->DestroyPhisicsBehavior();
 				phO->CreatePhysicsBehavior();
 				phO->clean(PhysicObject::Update_behavior);
+				phO->clean(PhysicObject::Update_geometry);
 			}
 
 			if (phO->dirty(PhysicObject::Update_linearVelocity))

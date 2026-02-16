@@ -1041,6 +1041,7 @@ namespace Templates
 		LoadTemplates(defaultTemplatesFolder, Sound::templateName, CreateSound);
 		LoadTemplates(defaultTemplatesFolder, Texture::templateName, CreateTexture);
 		LoadTemplates(defaultTemplatesFolder, RenderPass::templateName, CreateRenderPass);
+		LoadTemplates(defaultTemplatesFolder, PhysicGeometry::templateName, CreatePhysicGeometry);
 	}
 
 #if defined(_EDITOR)

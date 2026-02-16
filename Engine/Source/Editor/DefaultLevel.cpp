@@ -117,36 +117,48 @@ namespace Editor::DefaultLevel {
 						}
 					}
 				}
-			}/*,
+			},
 			{
 				{ "castShadows", true },
 				{ "shadowed", true },
-				{
-					"meshMaterials",
-					{
-						{
-							{ "material", "4a5a2cb8-f2ea-4e15-8584-22bb675ae1bc"},
-							{ "mesh", "ad73990a-c59d-45d2-8ec3-807b1f52f5b9" }
-						}
-					}
-				},
-				{ "name", "cone" },
-				{ "position", { 0.0, 2.5706214904785156, 2.5761494636535645 } },
-				{ "rotation", { 0, 0.0f, 0.0f } },
-				{ "scale", { 1.0, 1.0, 1.0} },
-				{ "uuid", "91629983-c901-4126-bf21-e388ab6f6e16" },
+				{ "name", "building_row" },
+				{ "position", {  -3.693021297454834, -0.034743160009384155, 5.449404716491699 } },
+				{ "rotation", { -90.0, -54.384132385253906, 0.0 } },
+				{ "scale", { 0.1, 0.1, 0.1} },
+				{ "uuid", "387d34eb-b705-40ad-b460-7a75634c0aad" },
 				{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } },
-				{ "physicObject",
+				{ "model", "379011d0-8ea6-41bd-9c4e-59bfc11412d2" }
+			}
+		/*,
+		{
+			{ "castShadows", true },
+			{ "shadowed", true },
+			{
+				"meshMaterials",
+				{
 					{
-						{
-							{ "behavior", "Dynamic" },
-							{ "geometry", "8a41c342-e388-4e1f-8ba9-8b0a41b1c975" }
-						}
+						{ "material", "4a5a2cb8-f2ea-4e15-8584-22bb675ae1bc"},
+						{ "mesh", "ad73990a-c59d-45d2-8ec3-807b1f52f5b9" }
 					}
 				}
-			}*/
-		}
+			},
+			{ "name", "cone" },
+			{ "position", { 0.0, 2.5706214904785156, 2.5761494636535645 } },
+			{ "rotation", { 0, 0.0f, 0.0f } },
+			{ "scale", { 1.0, 1.0, 1.0} },
+			{ "uuid", "91629983-c901-4126-bf21-e388ab6f6e16" },
+			{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } },
+			{ "physicObject",
+				{
+					{
+						{ "behavior", "Dynamic" },
+						{ "geometry", "8a41c342-e388-4e1f-8ba9-8b0a41b1c975" }
+					}
+				}
+			}
+		}*/
 	}
+}
 	};
 
 	nlohmann::json cameras = {

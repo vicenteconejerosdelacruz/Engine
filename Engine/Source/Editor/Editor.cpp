@@ -1543,6 +1543,7 @@ namespace Editor
 		Templates::SaveTemplates(defaultTemplatesFolder, Sound::templateName, WriteSoundsJson);
 		Templates::SaveTemplates(defaultTemplatesFolder, Texture::templateName, WriteTexturesJson);
 		Templates::SaveTemplates(defaultTemplatesFolder, RenderPass::templateName, WriteRenderPasssJson);
+		Templates::SaveTemplates(defaultTemplatesFolder, PhysicGeometry::templateName, WritePhysicGeometrysJson);
 		templatesModified = false;
 	}
 

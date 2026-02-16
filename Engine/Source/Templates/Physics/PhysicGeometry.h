@@ -75,7 +75,8 @@ namespace Templates
 
 	struct PhysicGeometryInstance
 	{
-		//PhysicGeometryInstanceID instance;
+		PhysicGeometryJsonID geometryTemplate;
+		PhysicGeometryInstanceID instance;
 		Model3DJsonID model3D;
 		JUUID mesh;
 		RenderableID renderable;
@@ -83,8 +84,8 @@ namespace Templates
 		PxGeometryHolder geometry;
 
 		PhysicGeometryInstance(JUUID uuid) { assert(!!!"do not use"); }
-		PhysicGeometryInstance(RenderableID renderable, Model3DJsonID model3D, JUUID instanceId, PhysicsBehavior behavior);
-		PhysicGeometryInstance(RenderableID renderable, JUUID meshId, JUUID instanceId, PhysicsBehavior behavior);
+		PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, RenderableID renderable, Model3DJsonID model3D, JUUID instance, PhysicsBehavior behavior);
+		PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, RenderableID renderable, JUUID mesh, JUUID instance, PhysicsBehavior behavior);
 		~PhysicGeometryInstance();
 	};
 }

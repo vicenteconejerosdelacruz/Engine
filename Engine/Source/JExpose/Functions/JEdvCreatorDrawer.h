@@ -116,6 +116,7 @@ template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_
 template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_shader_name>() { return DrawCreatorValue<std::string, jedv_t_string>(); }
 template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_sound_name>() { return DrawCreatorValue<std::string, jedv_t_string>(); }
 template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_texture_name>() { return DrawCreatorValue<std::string, jedv_t_string>(); }
+template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_physycgeometry_name>() { return DrawCreatorValue<std::string, jedv_t_string>(); }
 
 template<>
 inline JEdvCreatorDrawerFunction DrawCreatorValue<bool, jedv_t_boolean>()

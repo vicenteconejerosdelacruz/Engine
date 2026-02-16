@@ -5081,3 +5081,22 @@ inline JEdvEditorDrawerFunction DrawPreview<jedv_draw_animator_sequencer>()
 			}
 		};
 }
+
+template <>
+inline JEdvEditorDrawerFunction DrawPreview<jedv_cook_physx_mesh>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			if (json.size() > 1ULL) return;
+
+			PhysicGeometryJson* ph = (PhysicGeometryJson*)json.at(0);
+			if (ph->model().empty()) return;
+
+			ImGui::Text("cook model3d physx mesh");
+			ImGui::SameLine();
+			if (ImGui::Button(ICON_FA_RUNNING))
+			{
+
+			}
+		};
+}

@@ -71,9 +71,9 @@ namespace Physics
 		RenderableID renderable;
 
 		PhysicGeometryInstanceID physicGeometryInstance;
-		PxMaterial* material;
-		PxRigidActor* actor;
-		PxShape* shape;
+		PxMaterial* material = nullptr;
+		PxRigidActor* actor = nullptr;
+		PxShape* shape = nullptr;
 	};
 
 	std::unique_ptr<PhysicObject>& GetPhysicObject(JUUID uuid);
