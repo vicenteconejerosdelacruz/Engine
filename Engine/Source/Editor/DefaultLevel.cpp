@@ -127,7 +127,15 @@ namespace Editor::DefaultLevel {
 				{ "scale", { 0.1, 0.1, 0.1} },
 				{ "uuid", "387d34eb-b705-40ad-b460-7a75634c0aad" },
 				{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } },
-				{ "model", "379011d0-8ea6-41bd-9c4e-59bfc11412d2" }
+				{ "model", "379011d0-8ea6-41bd-9c4e-59bfc11412d2" },
+				{ "physicObject",
+					{
+						{
+							{ "behavior", "Static" },
+							{ "geometry", "5d85bf6d-4570-46db-a632-40976a685374" }
+						}
+					}
+				}
 			}
 		/*,
 		{

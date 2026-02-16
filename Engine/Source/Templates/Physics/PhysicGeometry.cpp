@@ -30,14 +30,6 @@ namespace Editor
 
 void CookAssimpIntoPxTriangleMeshFile(Model3DJsonID model3D, bool sdf)
 {
-	//this was taken from Animated.cpp, assimp assets are mostly rotated at transformation level(skinning) so we apply the same transformation below
-	static const XMMATRIX AssimpFlipYZ = XMMatrixSet(
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, -1.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
-
 	std::string filename = default3DModelsFolder + model3D->path();
 	std::filesystem::path modelPath(filename);
 	std::string cookedFilename = ((sdf) ? defaultPhysxCookingSDFFolder : defaultPhysxCookingFolder) + model3D->uuid() + ".cooked";
@@ -47,7 +39,7 @@ void CookAssimpIntoPxTriangleMeshFile(Model3DJsonID model3D, bool sdf)
 
 	Assimp::Importer importer;
 	const aiScene* aiModel = importer.ReadFile(modelPath.string(),
-		aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_PreTransformVertices
+		aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_ConvertToLeftHanded
 	);
 
 	unsigned int vertexOffset = 0U;
@@ -59,12 +51,10 @@ void CookAssimpIntoPxTriangleMeshFile(Model3DJsonID model3D, bool sdf)
 
 		for (unsigned int vertexIndex = 0; vertexIndex < aMesh->mNumVertices; vertexIndex++)
 		{
-			XMVECTOR pos{ .m128_f32 = {aMesh->mVertices[vertexIndex][0],aMesh->mVertices[vertexIndex][1],aMesh->mVertices[vertexIndex][2],1.0f} };
-			pos = XMVector4Transform(pos, AssimpFlipYZ);
 			VertexPos v;
-			v.Position.x = pos.m128_f32[0];
-			v.Position.y = pos.m128_f32[1];
-			v.Position.z = pos.m128_f32[2];
+			v.Position.x = aMesh->mVertices[vertexIndex][0];
+			v.Position.y = aMesh->mVertices[vertexIndex][1];
+			v.Position.z = aMesh->mVertices[vertexIndex][2];
 			vertices.push_back(v);
 		}
 
