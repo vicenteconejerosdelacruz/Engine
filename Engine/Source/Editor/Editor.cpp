@@ -951,7 +951,7 @@ namespace Editor
 							SaveWorkbench(GetLevelName(currentSceneUnitId));
 						}
 					},
-					!IsPlaying(currentSceneUnitId)
+					!IsPlaying(currentSceneUnitId) && levelModified.at(currentSceneUnitId) && !defaultLevel.at(currentSceneUnitId)
 				);
 
 				ImGui::DrawItemWithEnabledState([]
