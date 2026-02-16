@@ -1,0 +1,6 @@
+JCLASS(Trigger, GetTriggers)
+JTYPE(SceneObjectType, SO_Triggers)
+JEXPOSE(std::string, uuid, "", jedv_t_hidden, 0, false)
+JEXPOSE(bool, hidden, false, jedv_t_boolean, 0, false)
+JEXPOSE(std::string, name, "trigger", jedv_t_so_trigger_name, 0, true)
+JTRACKUUID(Trigger, Triggers, 1, true)

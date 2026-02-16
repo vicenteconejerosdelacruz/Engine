@@ -129,6 +129,7 @@ namespace Scene::Level
 		CreateLightSceneObjects(scene->Id());
 		CreateSoundFXSceneObjects(scene->Id());
 		CreatePhysicSceneSceneObjects(scene->Id());
+		CreateTriggerSceneObjects(scene->Id());
 
 		std::vector<std::string> types =
 		{
@@ -137,6 +138,7 @@ namespace Scene::Level
 			SceneObjectTypeJsonContainer.at(SO_Lights),
 			SceneObjectTypeJsonContainer.at(SO_SoundEffects),
 			SceneObjectTypeJsonContainer.at(SO_PhysicScenes),
+			SceneObjectTypeJsonContainer.at(SO_Triggers),
 		};
 
 		unsigned int total = std::accumulate(types.begin(), types.end(), 0U, [&](unsigned int sum, std::string type)
@@ -185,6 +187,14 @@ namespace Scene::Level
 			{
 				progress(json.at("name"), count, total);
 				CreatePhysicScene(scene->Id(), json);
+				count++;
+				progress(json.at("name"), count, total);
+			}
+		);
+		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Triggers), [&](nlohmann::json& json)
+			{
+				progress(json.at("name"), count, total);
+				CreateTrigger(scene->Id(), json);
 				count++;
 				progress(json.at("name"), count, total);
 			}

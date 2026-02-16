@@ -18,7 +18,8 @@ inline const std::unordered_map<SceneObjectType, std::string> SceneObjectTypeToS
 	{ SO_Lights,	"Lights" },
 	{ SO_Cameras, "Cameras" },
 	{ SO_SoundEffects, "SoundEffects" },
-	{ SO_PhysicScenes, "PhysicScenes" }
+	{ SO_PhysicScenes, "PhysicScenes" },
+	{ SO_Triggers, "Triggers" },
 };
 
 inline const std::unordered_map<std::string, SceneObjectType> StringToSceneObjectType = {
@@ -26,7 +27,8 @@ inline const std::unordered_map<std::string, SceneObjectType> StringToSceneObjec
 	{ "Lights", SO_Lights },
 	{ "Cameras", SO_Cameras },
 	{ "SoundEffects", SO_SoundEffects },
-	{ "PhysicScenes", SO_PhysicScenes }
+	{ "PhysicScenes", SO_PhysicScenes },
+	{ "Triggers", SO_Triggers },
 };
 
 #if defined(_EDITOR)
@@ -35,7 +37,8 @@ inline const std::unordered_map<SceneObjectType, const char*> SceneObjectsTypePa
 	{ SO_Lights, ICON_FA_LIGHTBULB "Lights" },
 	{ SO_Cameras, ICON_FA_CAMERA "Cameras" },
 	{ SO_SoundEffects, ICON_FA_MUSIC "SoundEffects" },
-	{ SO_PhysicScenes, ICON_FA_IGLOO "PhysicScenes" }
+	{ SO_PhysicScenes, ICON_FA_IGLOO "PhysicScenes" },
+	{ SO_Triggers, ICON_FA_IGLOO "Triggers" },
 };
 #endif
 
@@ -45,7 +48,8 @@ inline const std::unordered_map<SceneObjectType, std::string> SceneObjectTypeJso
 	{ SO_Lights, "lights" },
 	{ SO_Cameras, "cameras" },
 	{ SO_SoundEffects, "sounds" },
-	{ SO_PhysicScenes, "physicScenes" }
+	{ SO_PhysicScenes, "physicScenes" },
+	{ SO_Triggers, "triggers" },
 };
 
 inline const std::unordered_map<std::string, std::string> JsonContainerToString =
@@ -54,7 +58,8 @@ inline const std::unordered_map<std::string, std::string> JsonContainerToString 
 	{ "lights", "Lights" },
 	{ "cameras", "Cameras" },
 	{ "sounds", "SoundEffects" },
-	{ "physicScenes", "PhysicScenes" }
+	{ "physicScenes", "PhysicScenes" },
+	{ "triggers", "Triggers" },
 };
 
 inline const std::unordered_map<std::string, std::string> StringToJsonContainer =
@@ -63,7 +68,8 @@ inline const std::unordered_map<std::string, std::string> StringToJsonContainer 
 	{ "Lights", "lights" },
 	{ "Cameras", "cameras" },
 	{ "SoundEffects", "sounds" },
-	{ "PhysicScenes", "physicScenes" }
+	{ "PhysicScenes", "physicScenes" },
+	{ "Triggers", "triggers" },
 };
 
 template <typename T>
@@ -121,3 +127,4 @@ namespace Scene
 #include <Camera/Camera.h>
 #include <Sound/SoundFX.h>
 #include <Physics/PhysicScene.h>
+#include <Physics/Trigger.h>

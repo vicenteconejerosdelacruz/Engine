@@ -13,6 +13,7 @@ enum SceneObjectType {
 	SO_Cameras,
 	SO_SoundEffects,
 	SO_PhysicScenes,
+	SO_Triggers
 };
 
 #include "pch/SceneUnitId.h"

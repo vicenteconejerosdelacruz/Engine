@@ -110,6 +110,7 @@ template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_
 template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_so_renderable_name>() { return DrawUniqueSUName("Renderable", Scene::GetRenderablesNames); }
 template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_so_soundeffect_name>() { return DrawUniqueSUName("SoundEffects", Scene::GetSoundFXsNames); }
 template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_so_physicscene_name>() { return DrawUniqueSUName("PhysicScenes", Scene::GetPhysicScenesNames); }
+template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_so_trigger_name>() { return DrawUniqueSUName("Triggers", Scene::GetTriggersNames); }
 template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_material_name>() { return DrawCreatorValue<std::string, jedv_t_string>(); }
 template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_model3d_name>() { return DrawCreatorValue<std::string, jedv_t_string>(); }
 template<>inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_renderpass_name>() { return DrawCreatorValue<std::string, jedv_t_string>(); }

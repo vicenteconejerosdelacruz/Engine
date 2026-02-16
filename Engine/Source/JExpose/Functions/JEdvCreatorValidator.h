@@ -31,6 +31,22 @@ inline JEdvCreatorValidatorFunction CreatorValidValue<std::string, jedv_t_so_cam
 }
 
 template<>
+inline JEdvCreatorValidatorFunction CreatorValidValue<std::string, jedv_t_so_physicscene_name>() {
+	return[](std::string attribute, nlohmann::json& json)
+		{
+			return json.at(attribute) != "";
+		};
+}
+
+template<>
+inline JEdvCreatorValidatorFunction CreatorValidValue<std::string, jedv_t_so_trigger_name>() {
+	return[](std::string attribute, nlohmann::json& json)
+		{
+			return json.at(attribute) != "";
+		};
+}
+
+template<>
 inline JEdvCreatorValidatorFunction CreatorValidValue<std::string, jedv_t_string>() {
 	return[](std::string attribute, nlohmann::json& json)
 		{

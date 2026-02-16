@@ -1473,12 +1473,14 @@ namespace Editor
 		level["cameras"] = json::array();
 		level["sounds"] = json::array();
 		level["physicScenes"] = json::array();
+		level["triggers"] = json::array();
 
 		WriteRenderablesJson(id, level["renderables"]);
 		WriteLightsJson(id, level["lights"]);
 		WriteCamerasJson(id, level["cameras"]);
 		WriteSoundFXsJson(id, level["sounds"]);
 		WritePhysicSceneJson(id, level["physicScenes"]);
+		WriteTriggersJson(id, level["triggers"]);
 
 		std::string levelString = level.dump(4);
 		return levelString;
