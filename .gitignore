@@ -408,3 +408,4 @@ FodyWeavers.xsd
 /TestGame/Editor_Development
 /TestGame/Editor_Release
 /SDKs/v8pp-2.1.1/out
+*.cooked
