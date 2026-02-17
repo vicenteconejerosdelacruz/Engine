@@ -1583,7 +1583,7 @@ namespace Editor
 
 		ImGui::SetNextWindowPos(panPos);
 		ImGui::SetNextWindowSize(panSize);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 0));
 		ImGui::Begin("Right panel", (bool*)1, panFlags);
 		{
 			float halfY = panSize.y * 0.5f;
