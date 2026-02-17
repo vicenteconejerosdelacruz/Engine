@@ -152,7 +152,8 @@ PxGeometryHolder LoadMeshIntoPxGeometry(JNAME uuid, XMFLOAT3 scale, bool sdf)
 {
 	if (!pxTrianglesMeshes.contains(std::make_tuple(uuid, sdf)))
 	{
-		T p;
+		nlohmann::json ph;
+		T p(p);
 
 		std::vector<uint32_t> indices = p.GetIndices();
 		std::vector<Vertex<T::VertexClass>> vertices = p.GetVertices();
@@ -181,6 +182,7 @@ PxGeometryHolder LoadSphereIntoPxGeometry(XMFLOAT3 scale)
 	return PxSphereGeometry(scale.x * 0.5f);
 }
 
+using namespace Primitives;
 std::map<JNAME, std::function<PxGeometryHolder(RenderableID renderable, bool sdf)>> PxGeometryPrimitiveBuilder =
 {
 	{ "cube", [](auto r, bool sdf) { return LoadCubeIntoPxGeometry(r->scale()); } },

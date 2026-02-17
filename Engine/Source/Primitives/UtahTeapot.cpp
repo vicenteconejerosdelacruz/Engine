@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "UtahTeapot.h"
 
+using namespace Primitives;
+
 static std::vector<uint32_t> indices = {
 		7, 6, 1,
 		1, 2, 7,
@@ -1028,11 +1030,6 @@ static std::vector<uint32_t> indices = {
 		470, 530, 529
 };
 
-std::vector<uint32_t> UtahTeapot::GetIndices()
-{
-	return indices;
-}
-
 static std::vector<UtahTeapot::VertexType> vertices = {
 	{ XMFLOAT3(0.0f,0.0f,0.0f),                           XMFLOAT3(0.0f,0.0f,0.0f),                          },
 	{ XMFLOAT3(40.6266f,28.3457f,-1.10804f),              XMFLOAT3(-0.966742f,-0.255752f,0.0f),              },
@@ -1567,7 +1564,15 @@ static std::vector<UtahTeapot::VertexType> vertices = {
 	{ XMFLOAT3(34.9202f,28.3457f,-15.6121f),              XMFLOAT3(0.48559f,0.850653f,-0.201474f),           },
 };
 
-std::vector<UtahTeapot::VertexType> UtahTeapot::GetVertices()
+namespace Primitives
 {
-	return vertices;
-}
+	std::vector<uint32_t> UtahTeapot::GetIndices()
+	{
+		return indices;
+	}
+
+	std::vector<UtahTeapot::VertexType> UtahTeapot::GetVertices()
+	{
+		return vertices;
+	}
+};

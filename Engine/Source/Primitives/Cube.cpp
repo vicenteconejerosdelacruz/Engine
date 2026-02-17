@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Cube.h"
 
+using namespace Primitives;
+
 static std::vector<uint32_t> indices =
 {
 		0 , 1, 2, 3, 2, 1, //+Y
@@ -11,12 +13,8 @@ static std::vector<uint32_t> indices =
 		20,21,22,23,22,21  //-Y
 };
 
-std::vector<uint32_t> Cube::GetIndices()
+static std::vector<Cube::VertexType> vertices =
 {
-	return indices;
-}
-
-static std::vector<Cube::VertexType> vertices = {
 	//+Y
 	{ XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT3(0.0f,  1.0f,  0.0f), XMFLOAT2(1.0f, 0.0f) },
 	{ XMFLOAT3(1.0f,  1.0f,  1.0f), XMFLOAT3(0.0f,  1.0f,  0.0f), XMFLOAT2(0.0f, 0.0f) },
@@ -54,7 +52,15 @@ static std::vector<Cube::VertexType> vertices = {
 	{ XMFLOAT3(1.0f, -1.0f,  1.0f), XMFLOAT3(0.0f, -1.0f,  0.0f), XMFLOAT2(0.0f, 1.0f) }
 };
 
-std::vector<Cube::VertexType> Cube::GetVertices()
+namespace Primitives
 {
-	return vertices;
+	std::vector<uint32_t> Cube::GetIndices()
+	{
+		return indices;
+	}
+
+	std::vector<Cube::VertexType> Cube::GetVertices()
+	{
+		return vertices;
+	}
 }

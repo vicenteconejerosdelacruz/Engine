@@ -2,11 +2,15 @@
 #include "Primitive.h"
 #include <VertexFormats.h>
 
-struct BoxLines : public Primitive
+namespace Primitives
 {
-	static constexpr VertexClass VertexClass = VertexClass::POS;
-	typedef Vertex<VertexClass> VertexType;
+	struct BoxLines : Primitive
+	{
+		static constexpr VertexClass VertexClass = VertexClass::POS;
+		typedef Vertex<VertexClass> VertexType;
 
-	std::vector<uint32_t> GetIndices();
-	std::vector<VertexType> GetVertices();
+		BoxLines(nlohmann::json& json) : Primitive(json) {}
+		std::vector<uint32_t> GetIndices();
+		std::vector<VertexType> GetVertices();
+	};
 };

@@ -21,7 +21,9 @@ namespace Primitives
 	void LoadPrimitiveIntoMesh(SceneUnitId id, const std::unique_ptr<MeshInstance>& mesh, void* params) {
 
 		mesh->vertexClass = T::VertexClass;
-		T p(params);
+		nlohmann::json ph;
+		T p(ph);
+		//T p(params);
 
 		std::vector<uint32_t> indices = p.GetIndices();
 		std::vector<Vertex<T::VertexClass>> vertices = p.GetVertices();
@@ -37,88 +39,9 @@ namespace Primitives
 		//upload the index buffer to the GPU and create the index buffer view
 		InitializeIndexBufferView(renderer->d3dDevice, commandList, indices.data(), static_cast<unsigned int>(indices.size()), mesh->ibvData);
 	}
-
-	/*
-	template<typename T>
-	void LoadPrimitiveIntoPxGeometry(PhysicObject& physicObject, std::function<void(PxSDFDesc&)> sdf = nullptr)
-	{
-		RenderableID renderable = physicObject.sceneObject;
-		T p;
-
-		std::vector<uint32_t> indices = p.GetIndices();
-		std::vector<Vertex<T::VertexClass>> vertices = p.GetVertices();
-
-		PxSDFDesc sdfDesc;
-		if (sdf)
-		{
-			sdf(sdfDesc);
-		}
-
-		PxTolerancesScale tolerances;
-		//const
-		PxCookingParams params(tolerances);
-		// disable mesh cleaning - perform mesh validation on development configurations
-		params.meshPreprocessParams |= PxMeshPreprocessingFlag::eDISABLE_CLEAN_MESH;
-		// disable edge precompute, edges are set for each triangle, slows contact generation
-		params.meshPreprocessParams |= PxMeshPreprocessingFlag::eDISABLE_ACTIVE_EDGES_PRECOMPUTE;
-		// lower hierarchy for internal mesh
-		//params.meshCookingHint = PxMeshCookingHint::eCOOKING_PERFORMANCE;
-		PxTriangleMeshDesc meshDesc;
-		meshDesc.sdfDesc = sdf ? &sdfDesc : nullptr;
-		meshDesc.points = PxBoundedData(vertices.data(), sizeof(T::VertexType), static_cast<unsigned int>(vertices.size()));
-		meshDesc.triangles = PxBoundedData(indices.data(), sizeof(indices[0]) * 3U, static_cast<unsigned int>(indices.size() / 3U));
-
-		PxTriangleMesh* triangleMesh = PxCreateTriangleMesh(params, meshDesc);
-		XMFLOAT3 scale = renderable->scale();
-		PxMeshScale pxScale(PxVec3(scale.x, scale.y, scale.z));
-		physicObject.geometry = PxTriangleMeshGeometry(triangleMesh, pxScale);
-	}
-	*/
-
-	/*
-	template<>
-	inline void LoadPrimitiveIntoPxGeometry<Cube>(PhysicObject& physicObject, std::function<void(PxSDFDesc&)> sdf)
-	{
-		RenderableID renderable = physicObject.sceneObject;
-		XMFLOAT3 scale = renderable->scale();
-		physicObject.geometry = PxBoxGeometry(scale.x, scale.y, scale.z);
-	}
-	*/
-
-	/*
-	template<>
-	inline void LoadPrimitiveIntoPxGeometry<Sphere>(PhysicObject& physicObject, std::function<void(PxSDFDesc&)> sdf)
-	{
-		RenderableID renderable = physicObject.sceneObject;
-		XMFLOAT3 scale = renderable->scale();
-		physicObject.geometry = PxSphereGeometry(scale.x * 0.5f);
-	}
-	*/
-
-	/*
-	template<>
-	inline void LoadPrimitiveIntoPxGeometry<Floor>(PhysicObject& physicObject, std::function<void(PxSDFDesc&)> sdf)
-	{
-		RenderableID renderable = physicObject.sceneObject;
-		Floor p;
-
-		std::vector<uint32_t> indices = p.GetIndices();
-		std::vector<Vertex<Floor::VertexClass>> vertices = p.GetVertices();
-
-		PxTolerancesScale tolerances;
-		const PxCookingParams params(tolerances);
-		PxTriangleMeshDesc meshDesc;
-		meshDesc.points = PxBoundedData(vertices.data(), sizeof(Floor::VertexType), static_cast<unsigned int>(vertices.size()));
-		meshDesc.triangles = PxBoundedData(indices.data(), sizeof(indices[0]) * 3U, static_cast<unsigned int>(indices.size() / 3U));
-
-		PxTriangleMesh* triangleMesh = PxCreateTriangleMesh(params, meshDesc);
-		XMFLOAT3 scale = renderable->scale();
-		PxMeshScale pxScale(PxVec3(scale.x, scale.y, scale.z));
-		physicObject.geometry = PxTriangleMeshGeometry(triangleMesh, pxScale);
-	}
-	*/
 };
 
+using namespace Primitives;
 static const std::map<std::string, std::function<void(SceneUnitId, const std::unique_ptr<Templates::MeshInstance>&, void* params)>> LoadPrimitiveIntoMeshFunctions =
 {
 	{ "utahteapot", Primitives::LoadPrimitiveIntoMesh<UtahTeapot> },
@@ -130,29 +53,3 @@ static const std::map<std::string, std::function<void(SceneUnitId, const std::un
 	{ "sphere", Primitives::LoadPrimitiveIntoMesh<Sphere> },
 	{ "cone", Primitives::LoadPrimitiveIntoMesh<Cone> },
 };
-
-/*
-static const std::map<std::string, std::function<void(PhysicObject& physicObject, std::function<void(PxSDFDesc&)> sdf)>> LoadPrimitiveIntoPxGeometryFunctions =
-{
-	{ "utahteapot", Primitives::LoadPrimitiveIntoPxGeometry<UtahTeapot> },
-	{ "cube", Primitives::LoadPrimitiveIntoPxGeometry<Cube> },
-	{ "pyramid", Primitives::LoadPrimitiveIntoPxGeometry<Pentahedron> },
-	{ "floor", Primitives::LoadPrimitiveIntoPxGeometry<Floor> },
-	{ "decal", Primitives::LoadPrimitiveIntoPxGeometry<Decal> },
-	{ "boxlines", Primitives::LoadPrimitiveIntoPxGeometry<BoxLines> },
-	{ "sphere", Primitives::LoadPrimitiveIntoPxGeometry<Sphere> },
-	{ "cone", Primitives::LoadPrimitiveIntoPxGeometry<Cone> },
-};
-
-static const std::map<std::string, bool> PrimitiveCanBeMadeDynamic =
-{
-	{ "utahteapot", true },
-	{ "cube", true },
-	{ "pyramid", true },
-	{ "floor", false },
-	{ "decal", false },
-	{ "boxlines", true },
-	{ "sphere", true },
-	{ "cone", true },
-};
-*/

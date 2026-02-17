@@ -2,12 +2,15 @@
 #include "Primitive.h"
 #include <VertexFormats.h>
 
-struct Cube : public Primitive
+namespace Primitives
 {
-	static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL_TEXCOORD0;
-	typedef Vertex<VertexClass> VertexType;
+	struct Cube : Primitive
+	{
+		static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL_TEXCOORD0;
+		typedef Vertex<VertexClass> VertexType;
 
-	std::vector<uint32_t> GetIndices();
-	std::vector<VertexType> GetVertices();
+		Cube(nlohmann::json& json) : Primitive(json) {}
+		std::vector<uint32_t> GetIndices();
+		std::vector<VertexType> GetVertices();
+	};
 };
-

@@ -1,7 +1,13 @@
 #pragma once
+#include <UUID.h>
+#include <JObject.h>
 
-struct Primitive
+namespace Primitives
 {
-	Primitive() { Primitive(nullptr); }
-	Primitive(void* params) {};
-};
+	struct Primitive : JObject
+	{
+		Primitive(nlohmann::json& json) : JObject(json) {}
+		//Primitive() { Primitive(nullptr); }
+		//Primitive(void* params) {};
+	};
+}
