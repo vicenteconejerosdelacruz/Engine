@@ -12,11 +12,13 @@ namespace Editor::DefaultLevel {
 				{ "castShadows", false },
 				{ "shadowed", true },
 				{
-					"meshMaterials",
+					"meshMaterial",
 					{
-						{
-							{ "material", "ecd1688c-73d6-49d0-870f-ca916a417c49"},
-							{ "mesh", "d41e5c29-49bb-4f2c-aa2b-da781fbac512" }
+						{ "material", "ecd1688c-73d6-49d0-870f-ca916a417c49"},
+						{ "mesh",
+							{
+								{ "primitive", "d41e5c29-49bb-4f2c-aa2b-da781fbac512"}
+							}
 						}
 					}
 				},
@@ -33,27 +35,24 @@ namespace Editor::DefaultLevel {
 						}
 					}
 				}
-			}/*,
+			},
 			{
 				{ "castShadows", true },
 				{ "shadowed", true },
 				{
-					"meshMaterials",
+					"meshMaterial",
 					{
-						{
-							{ "material", "4a5a2cb8-f2ea-4e15-8584-22bb675ae1bc" },
-							{ "mesh", "d8bfdef4-55f9-4f6e-b4a8-20915eb854d6" }
+						{ "material", "4a5a2cb8-f2ea-4e15-8584-22bb675ae1bc" },
+						{ "mesh",
+							{
+								{ "primitive", "d8bfdef4-55f9-4f6e-b4a8-20915eb854d6" }
+							}
 						}
 					}
 				},
 				{ "name", "utahteapot" },
 				{ "position", { 0.0, -0.6000000238418579, 2.5} },
-				{ "rasterizerState" ,
-					{
-						{ "CullMode", "NONE" }
-					}
-				},
-				{ "scale", { 0.009999999776482582, 0.009999999776482582, 0.009999999776482582} },
+				{ "scale", { 1.0, 1.0f, 1.0f } },
 				{ "uuid", "4fdb1d72-96c5-4a1a-a81e-f902abba25f6" },
 				{ "cameras" , {"06de4a6c-0393-42b1-91ab-1d2389cb2cbd"} },
 				{ "controllers",
@@ -61,16 +60,18 @@ namespace Editor::DefaultLevel {
 						{ "spinyaw", {} }
 					}
 				}
-			}*/,
+			},
 			{
 				{ "castShadows", true },
 				{ "shadowed", true },
 				{
-					"meshMaterials",
+					"meshMaterial",
 					{
-						{
-							{ "material", "f3f37590-3eac-41c4-8288-a79f279857ce"},
-							{ "mesh", "f7786ac1-e296-4e9a-a7e6-6f1949de75ef" }
+						{ "material", "f3f37590-3eac-41c4-8288-a79f279857ce"},
+						{ "mesh",
+							{
+								{ "primitive", "f7786ac1-e296-4e9a-a7e6-6f1949de75ef" }
+							}
 						}
 					}
 				},
@@ -95,11 +96,13 @@ namespace Editor::DefaultLevel {
 				{ "castShadows", true },
 				{ "shadowed", true },
 				{
-					"meshMaterials",
+					"meshMaterial",
 					{
-						{
-							{ "material", "c50c40b7-9e17-42fb-a6bc-c3d15d72310f"},
-							{ "mesh", "d76b3bd8-0f53-4128-974e-2d6d5062bc00" }
+						{ "material", "c50c40b7-9e17-42fb-a6bc-c3d15d72310f"},
+						{ "mesh",
+							{
+								{ "primitive", "d76b3bd8-0f53-4128-974e-2d6d5062bc00"}
+							}
 						}
 					}
 				},
@@ -136,36 +139,59 @@ namespace Editor::DefaultLevel {
 						}
 					}
 				}
-			}
-		/*,
-		{
-			{ "castShadows", true },
-			{ "shadowed", true },
+			},
 			{
-				"meshMaterials",
+				{ "castShadows", true },
+				{ "shadowed", true },
 				{
+					"meshMaterial",
 					{
 						{ "material", "4a5a2cb8-f2ea-4e15-8584-22bb675ae1bc"},
-						{ "mesh", "ad73990a-c59d-45d2-8ec3-807b1f52f5b9" }
+						{ "mesh",
+							{
+								{"primitive", "4d1174b2-8225-4c09-9db6-ff09718ae0f5"}
+							}
+						}
 					}
-				}
+				},
+				{ "name", "sphere" },
+				{ "position", { 0.0, 5.5706214904785156, 2.5761494636535645 } },
+				{ "rotation", { 0, 0.0f, 0.0f } },
+				{ "scale", { 1.0, 1.0, 1.0} },
+				{ "uuid", "4c582e2a-66df-4c9a-af8d-ee2504a5d18b" },
+				{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } }
 			},
-			{ "name", "cone" },
-			{ "position", { 0.0, 2.5706214904785156, 2.5761494636535645 } },
-			{ "rotation", { 0, 0.0f, 0.0f } },
-			{ "scale", { 1.0, 1.0, 1.0} },
-			{ "uuid", "91629983-c901-4126-bf21-e388ab6f6e16" },
-			{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } },
-			{ "physicObject",
+			{
+				{ "castShadows", true },
+				{ "shadowed", true },
 				{
+					"meshMaterial",
 					{
-						{ "behavior", "Dynamic" },
-						{ "geometry", "8a41c342-e388-4e1f-8ba9-8b0a41b1c975" }
+						{ "material", "4a5a2cb8-f2ea-4e15-8584-22bb675ae1bc"},
+						{ "mesh",
+							{
+								{"primitive", "ad73990a-c59d-45d2-8ec3-807b1f52f5b9"}
+							}
+						}
 					}
+				},
+				{ "name", "cone" },
+				{ "position", { 0.0, 2.5706214904785156, 2.5761494636535645 } },
+				{ "rotation", { 0, 0.0f, 0.0f } },
+				{ "scale", { 1.0, 1.0, 1.0} },
+				{ "uuid", "91629983-c901-4126-bf21-e388ab6f6e16" },
+				{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } }
+		/*,
+		{ "physicObject",
+			{
+				{
+					{ "behavior", "Dynamic" },
+					{ "geometry", "8a41c342-e388-4e1f-8ba9-8b0a41b1c975" }
 				}
 			}
 		}*/
 	}
+}
 }
 	};
 

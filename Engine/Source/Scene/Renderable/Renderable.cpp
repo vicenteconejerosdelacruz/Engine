@@ -243,21 +243,10 @@ namespace Scene
 	void Renderable::CreateMeshInstances()
 	{
 		using namespace Templates;
-		if (!meshMaterials().empty())
+		if (!meshMaterial().mesh.empty() && meshMaterial().mesh.contains("primitive") && !meshMaterial().mesh.at("primitive").empty() && !meshMaterial().materialUUID.empty())
 		{
-			std::vector<MeshMaterial> rmm = meshMaterials();
-			std::vector<MeshMaterial> mm;
-			std::copy_if(rmm.begin(), rmm.end(), std::back_inserter(mm), [](const MeshMaterial& mm)
-				{
-					return mm.mesh != "" && mm.materialUUID != "";
-				}
-			);
-
-			std::transform(mm.begin(), mm.end(), std::back_inserter(meshes), [&](const MeshMaterial& m)
-				{
-					return GetMeshInstance(unit, m.mesh)->uuid;
-				}
-			);
+			nlohmann::json mesh = meshMaterial().mesh;
+			meshes.push_back(GetMeshInstance(unit, mesh)->uuid);
 			CreateBoundingBox();
 		}
 		else if (Model3DTemplateExist(model()))
@@ -317,8 +306,19 @@ namespace Scene
 			return;
 		}
 
-		if (!meshMaterials().empty())
+		if (!meshMaterial().mesh.empty() && meshMaterial().mesh.contains("primitive") && !meshMaterial().mesh.at("primitive").empty() && !meshMaterial().materialUUID.empty())
 		{
+			std::vector<PassMaterialOverride> mpmo;
+			std::copy_if(pmo.begin(), pmo.end(), std::back_inserter(mpmo), [](PassMaterialOverride& o) { return o.meshIndex == 0; });
+			auto& mesh = meshes.at(0);
+			JUUID matUUID = meshMaterial().materialUUID;
+			if (!MaterialTemplateExist(matUUID))
+			{
+				matUUID = GetMaterialUUIDByName(fallbackMaterialName); //fallback
+			}
+			materials[pass].push_back(pass->GetRenderPassMaterialInstance(unit, matUUID, mesh, shadowed(), mpmo, uuid()));
+
+			/*
 			std::vector<MeshMaterial> rmm = meshMaterials();
 			std::vector<MeshMaterial> mm;
 			std::copy_if(rmm.begin(), rmm.end(), std::back_inserter(mm), [](const MeshMaterial& mm)
@@ -339,6 +339,7 @@ namespace Scene
 				}
 				materials[pass].push_back(pass->GetRenderPassMaterialInstance(unit, matUUID, mesh, shadowed(), mpmo, uuid()));
 			}
+			*/
 		}
 		else if (!model3D.empty())
 		{
@@ -839,7 +840,6 @@ namespace Scene
 			}
 		);
 
-
 		for (auto& rp : rGPose)
 		{
 			for (PhysicObjectID phO : GetPhysicsObjectsBySceneObjectUUID(rp->SUuuid()))
@@ -865,6 +865,42 @@ namespace Scene
 				phO->DestroyPhisicsBehavior();
 				phO->CreatePhysicsBehavior();
 			}
+		}
+
+		std::set<RenderableID> rMeshMaterial;
+		std::copy_if(r.begin(), r.end(), std::inserter(rMeshMaterial, rMeshMaterial.begin()), [](auto& o)
+			{
+				return o->dirty(Renderable::Update_meshMaterial);
+			}
+		);
+
+		if (rMeshMaterial.size() > 0)
+		{
+			for (auto o : rMeshMaterial)
+			{
+				o->clean(Renderable::Update_meshMaterial);
+				o->visible(false);
+			}
+			auto& scene = GetSceneUnit(unit);
+			scene->SubmitForLoading([=]
+				{
+					auto destroyMeshInstance = [](auto& vec) { for (auto& mesh : vec) { DestroyMeshInstance(mesh()); } };
+					for (auto o : rMeshMaterial)
+					{
+						destroyMeshInstance(o->meshes);
+						o->meshes.clear();
+						o->CreateMeshInstances();
+					}
+				}
+			);
+			scene->PushLoadingExecutionCallback([=]
+				{
+					for (auto o : rMeshMaterial)
+					{
+						o->visible(true);
+					}
+				}
+			);
 		}
 
 		std::set<RenderableID> todelete;

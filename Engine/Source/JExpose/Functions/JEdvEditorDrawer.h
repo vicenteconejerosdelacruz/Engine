@@ -2323,7 +2323,6 @@ inline JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_soundeffect_ve
 		};
 }
 
-struct MeshMaterial;
 template<>
 inline JEdvEditorDrawerFunction DrawVector<MeshMaterial, jedv_t_vector>()
 {
@@ -2348,7 +2347,6 @@ inline JEdvEditorDrawerFunction DrawVector<MeshMaterial, jedv_t_vector>()
 								cpy.push_back(value);
 								nlohmann::json patch = { {attribute,cpy} };
 								j->JUpdate(patch);
-								//(*j)[attribute].push_back(value);
 							}
 						};
 					auto fit = [attribute, &json](unsigned int index, nlohmann::json value)
@@ -2363,7 +2361,6 @@ inline JEdvEditorDrawerFunction DrawVector<MeshMaterial, jedv_t_vector>()
 							{
 								nlohmann::json patch = { {attribute,v1} };
 								j->JUpdate(patch);
-								//j->at(attribute) = v1;
 							}
 						};
 
@@ -2394,7 +2391,6 @@ inline JEdvEditorDrawerFunction DrawVector<MeshMaterial, jedv_t_vector>()
 						cpy.erase(index);
 						nlohmann::json patch = { {attribute,cpy} };
 						j->JUpdate(patch);
-						//j->at(attribute).erase(index);
 					}
 				};
 			auto swap = [attribute, &json](unsigned int from, unsigned int to)
@@ -2414,11 +2410,6 @@ inline JEdvEditorDrawerFunction DrawVector<MeshMaterial, jedv_t_vector>()
 
 						nlohmann::json patch = { {attribute,cpy} };
 						j->JUpdate(patch);
-
-						//j->at(attribute).at(from).at("mesh") = uuidMeshTo;
-						//j->at(attribute).at(to).at("mesh") = uuidMeshFrom;
-						//j->at(attribute).at(from).at("material") = uuidMaterialTo;
-						//j->at(attribute).at(to).at("material") = uuidMaterialFrom;
 					}
 				};
 			auto skip = [&json](unsigned int index, bool value)
@@ -3963,6 +3954,118 @@ inline JEdvEditorDrawerFunction DrawEnum<DXGI_FORMAT, jedv_t_dxgi_depth_format>(
 {
 	return DrawEnum<DXGI_FORMAT, jedv_t_enum>(DXGI_DEPTH_FORMATToString, StringTo_DXGI_DEPTH_FORMAT);
 }
+
+struct MeshMaterial;
+template<>
+inline JEdvEditorDrawerFunction DrawValue<MeshMaterial, jedv_t_mesh_material>()
+{
+	return [](std::string attribute, std::vector<JObject*>& json)
+		{
+			std::vector<JUUIDName> selectablesMeshes = { std::make_tuple("","") };
+			std::vector<JUUIDName> selectablesMaterials = { std::make_tuple("","") };
+			std::vector<JUUIDName> meshesUUIDs = Templates::GetMeshesUUIDsNames();
+			std::vector<JUUIDName> materialsUUIDs = Templates::GetMaterialsUUIDsNames();
+
+			selectablesMeshes.insert(selectablesMeshes.end(), meshesUUIDs.begin(), meshesUUIDs.end());
+			selectablesMaterials.insert(selectablesMaterials.end(), materialsUUIDs.begin(), materialsUUIDs.end());
+
+			auto setMesh = [attribute, &json](JUUIDName mesh)
+				{
+					for (auto& j : json)
+					{
+						nlohmann::json cpy = j->at(attribute);
+						cpy.at("mesh") = { { "primitive", std::get<0>(mesh) } };
+						nlohmann::json patch = { { attribute, cpy } };
+						j->JUpdate(patch);
+					}
+				};
+			auto setMaterial = [attribute, &json](JUUIDName material)
+				{
+					for (auto& j : json)
+					{
+						nlohmann::json cpy = j->at(attribute);
+						cpy.at("material") = std::get<0>(material);
+						nlohmann::json patch = { { attribute, cpy } };
+						j->JUpdate(patch);
+					}
+				};
+			auto getSelectedMesh = [&]
+				{
+					std::set<JUUIDName> uuidNames;
+					for (auto& j : json)
+					{
+						MeshMaterial m = ToMeshMaterial(j->at(attribute));
+						if (!m.mesh.empty() && m.mesh.contains("primitive") && !m.mesh.at("primitive").empty())
+							uuidNames.insert(std::make_tuple(m.mesh.at("primitive"), GetMeshName(m.mesh.at("primitive"))));
+					}
+					return (uuidNames.size() == 1) ? *uuidNames.begin() : JUUIDName();
+				};
+			auto getSelectedMaterial = [&]
+				{
+					std::set<JUUIDName> uuidNames;
+					for (auto& j : json)
+					{
+						MeshMaterial m = ToMeshMaterial(j->at(attribute));
+						if (!m.materialUUID.empty())
+							uuidNames.insert(std::make_tuple(m.materialUUID, GetMaterialName(m.materialUUID)));
+					}
+					return (uuidNames.size() == 1) ? *uuidNames.begin() : JUUIDName();
+				};
+			auto rebuildPrimitive = [&](nlohmann::json new_atts)
+				{
+					for (auto& j : json)
+					{
+						nlohmann::json cpy = j->at(attribute);
+						for (nlohmann::json::iterator it = new_atts.begin(); it != new_atts.end(); ++it) {
+							cpy.at("mesh")[it.key()] = it.value();
+						}
+						nlohmann::json patch = { { attribute, cpy } };
+						j->JUpdate(patch);
+					}
+
+				};
+			auto drawPrimitiveParameters = [&]
+				{
+					if (json.size() > 1) return;
+					Renderable* renderable = (Renderable*)json.at(0);
+					if (!renderable->model().empty() || renderable->meshes.size() != 1) return;
+
+					JUUID primitive = renderable->meshMaterial().mesh.at("primitive");
+					JNAME name = GetMeshName(primitive);
+
+					if (!DrawPrimitiveAttributesFunctions.contains(name)) return;
+
+					DrawPrimitiveAttributesFunctions.at(name)(json.at(0)->at("meshMaterial").at("mesh"), rebuildPrimitive);
+				};
+
+			std::string tableName = "mesh-materials";
+			if (ImGui::BeginTable(tableName.c_str(), 2, ImGuiTableFlags_NoSavedSettings))
+			{
+				ImGui::TableSetupColumn("mesh", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableSetupColumn("material", ImGuiTableColumnFlags_WidthStretch);
+
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::TableHeader("mesh");
+				ImGui::TableSetColumnIndex(1);
+				ImGui::TableHeader("material");
+
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::PushID("mesh");
+				ImGui::DrawComboSelection(getSelectedMesh(), selectablesMeshes, setMesh);
+				ImGui::PopID();
+				ImGui::TableSetColumnIndex(1);
+				ImGui::PushID("material");
+				ImGui::DrawComboSelection(getSelectedMaterial(), selectablesMaterials, setMaterial);
+				ImGui::PopID();
+				ImGui::EndTable();
+			}
+
+			drawPrimitiveParameters();
+		};
+}
+
 
 struct RasterizerDesc;
 template<>

@@ -990,6 +990,13 @@ namespace Templates
 				{ "mesh", "ad73990a-c59d-45d2-8ec3-807b1f52f5b9"},
 				{ "systemCreated" , true  }
 			},
+			{
+				{ "name", "capsule" },
+				{ "uuid", "95eee3bb-5b2f-41d7-b43a-11ab5524cca1" },
+				{ "model", ""},
+				{ "mesh", "c900056b-9f67-47d1-a252-71e0ef1f9a65"},
+				{ "systemCreated" , true  }
+			},
 		}
 	);
 
@@ -1031,6 +1038,7 @@ namespace Templates
 		CreatePrimitiveMeshTemplate("30f15e68-db42-46fa-b846-b2647a0ac9b9", "boxlines");
 		CreatePrimitiveMeshTemplate("4d1174b2-8225-4c09-9db6-ff09718ae0f5", "sphere");
 		CreatePrimitiveMeshTemplate("ad73990a-c59d-45d2-8ec3-807b1f52f5b9", "cone");
+		CreatePrimitiveMeshTemplate("c900056b-9f67-47d1-a252-71e0ef1f9a65", "capsule");
 	}
 
 	void CreateTemplates()

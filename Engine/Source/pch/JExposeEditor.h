@@ -10,6 +10,7 @@
 #include <SceneObject.h>
 #include <JTemplate.h>
 #include <DeviceUtils/RenderPass/RenderToTexturePass.h>
+#include <Primitives.h>
 
 namespace Templates
 {

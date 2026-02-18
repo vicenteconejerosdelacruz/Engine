@@ -7,32 +7,32 @@ namespace Primitives
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <SphereAtt.h>
+#include <CapsuleAtt.h>
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <SphereAtt.h>
+#include <CapsuleAtt.h>
 #include <JEnd.h>
 
 #endif
 
-	struct Sphere : Primitive
+	struct Capsule : Primitive
 	{
 #include <Attributes/JFlags.h>
-#include <SphereAtt.h>
+#include <CapsuleAtt.h>
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <SphereAtt.h>
+#include <CapsuleAtt.h>
 #include <JEnd.h>
 
 		static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL_TEXCOORD0;
 		typedef Vertex<VertexClass> VertexType;
 
-		std::vector<XMFLOAT3> teselationPoints;
-		std::vector<uint32_t> teselationIndices;
+		//std::vector<XMFLOAT3> teselationPoints;
+		//std::vector<uint32_t> teselationIndices;
 
-		Sphere(nlohmann::json& json);
+		Capsule(nlohmann::json& json);
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 #endif
@@ -40,31 +40,10 @@ namespace Primitives
 
 		std::vector<uint32_t> GetIndices();
 		std::vector<VertexType> GetVertices();
-
+		/*
 		void NormalizePoint(DirectX::XMFLOAT3& p, float factor = 1.0f);
 		void NormalizePoints(std::vector<XMFLOAT3>& points, float factor = 1.0f);
 		void TeselateIcosahedron(std::vector<XMFLOAT3>& points, std::vector<uint32_t>& indices, uint32_t teselationLevel);
+		*/
 	};
-
-	template<>
-	inline void DrawPrimitiveAttributes<Sphere>(nlohmann::json& json, std::function<void(nlohmann::json new_atts)> update)
-	{
-		Sphere s(json);
-		std::vector<JObject*> jvec = { &s };
-
-		nlohmann::json source = nlohmann::json::parse(s.dump());
-
-		auto drawers = GetSphereDrawers();
-		auto attributes = GetSphereAttributes();
-		for (auto& [att, _] : attributes)
-		{
-			drawers.at(att)(att, jvec);
-		}
-
-		nlohmann::json target = nlohmann::json::parse(s.dump());
-		if (nlohmann::json::diff(source, target).size() > 0)
-		{
-			update(target);
-		}
-	}
 };

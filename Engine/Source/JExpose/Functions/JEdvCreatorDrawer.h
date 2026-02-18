@@ -250,6 +250,98 @@ inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_texture
 }
 
 template<>
+inline JEdvCreatorDrawerFunction DrawCreatorValue<MeshMaterial, jedv_t_mesh_material>()
+{
+	return [](std::string attribute, nlohmann::json& json, nlohmann::json& modalProperties)
+		{
+			bool hasModel = json.contains("model") && json.at("model") != "";
+
+			std::vector<JUUIDName> selectablesMeshes = { std::make_tuple("","") };
+			std::vector<JUUIDName> selectablesMaterials = { std::make_tuple("","") };
+			std::vector<JUUIDName> selectablesModels = { std::make_tuple("","") };
+			std::vector<JUUIDName> meshesUUIDs = Templates::GetMeshesUUIDsNames();
+			std::vector<JUUIDName> materialsUUIDs = Templates::GetMaterialsUUIDsNames();
+			std::vector<JUUIDName> model3DsUUIDs = Templates::GetModel3DsUUIDsNames();
+
+			selectablesMeshes.insert(selectablesMeshes.end(), meshesUUIDs.begin(), meshesUUIDs.end());
+			selectablesMaterials.insert(selectablesMaterials.end(), materialsUUIDs.begin(), materialsUUIDs.end());
+			selectablesModels.insert(selectablesModels.end(), model3DsUUIDs.begin(), model3DsUUIDs.end());
+
+			auto eraseMeshMaterial = [&]
+				{
+					json["meshMaterial"] = {
+						{ "mesh",
+							{
+								{ "primitive", "" }
+							}
+						},
+						{ "material", "" }
+					};
+				};
+			auto eraseModel = [&]
+				{
+					json["model"] = "";
+				};
+			auto getSelectedMesh = [&]
+				{
+					std::string uuid = (
+						json.contains("meshMaterial") &&
+						json.at("meshMaterial").contains("mesh") &&
+						json.at("meshMaterial").at("mesh").contains("primitive") &&
+						!json.at("meshMaterial").at("mesh").at("primitive").empty()
+						) ? json.at("meshMaterial").at("mesh").at("primitive") : "";
+					std::string name = uuid.empty() ? "" : GetMeshName(uuid);
+					return std::make_tuple(uuid, name);
+				};
+			auto setMesh = [&](JUUIDName uuidName)
+				{
+					json["meshMaterial"]["mesh"]["primitive"] = std::get<0>(uuidName);
+					eraseModel();
+				};
+			auto getSelectedMaterial = [&]
+				{
+					std::string uuid = (json.contains("meshMaterial") && json.at("meshMaterial").contains("material")) ? json.at("meshMaterial").at("material") : "";
+					std::string name = uuid.empty() ? "" : GetMaterialName(uuid);
+					return std::make_tuple(uuid, name);
+				};
+			auto setMaterial = [&](JUUIDName uuidName)
+				{
+					json["meshMaterial"]["material"] = std::get<0>(uuidName);
+					eraseModel();
+				};
+			auto getSelectedModel = [&]
+				{
+					std::string model = json.contains("model") ? json.at("model") : "";
+					std::string modelName = model.empty() ? "" : Templates::GetModel3DName(model);
+					return std::make_tuple(model, modelName);
+				};
+			auto setModel = [&](JUUIDName uuidName)
+				{
+					json["model"] = std::get<0>(uuidName);
+					eraseMeshMaterial();
+				};
+			ImGui::PushID(attribute.c_str());
+			{
+				ImGui::Text(attribute.c_str());
+
+				ImGui::PushID("mesh");
+				ImGui::DrawComboSelection(getSelectedMesh(), meshesUUIDs, setMesh);
+				ImGui::PopID();
+				ImGui::SameLine();
+				ImGui::PushID("material");
+				ImGui::DrawComboSelection(getSelectedMaterial(), materialsUUIDs, setMaterial);
+				ImGui::PopID();
+
+				ImGui::Text("model");
+				ImGui::PushID("model");
+				ImGui::DrawComboSelection(getSelectedModel(), model3DsUUIDs, setModel);
+				ImGui::PopID();
+			}
+			ImGui::PopID();
+		};
+}
+
+template<>
 inline JEdvCreatorDrawerFunction DrawCreatorVector<MeshMaterial, jedv_t_vector>()
 {
 	return [](std::string attribute, nlohmann::json& json, nlohmann::json& modalProperties)
@@ -265,34 +357,34 @@ inline JEdvCreatorDrawerFunction DrawCreatorVector<MeshMaterial, jedv_t_vector>(
 			selectablesMeshes.insert(selectablesMeshes.end(), meshesUUIDs.begin(), meshesUUIDs.end());
 			selectablesMaterials.insert(selectablesMaterials.end(), materialsUUIDs.begin(), materialsUUIDs.end());
 
-			auto clearMeshMaterial = [&json]
+			auto clearMeshMaterial = [&]
 				{
 					json.at("meshMaterials").clear();
 				};
-			auto eraseModel = [&json]
+			auto eraseModel = [&]
 				{
 					json.erase("model");
 				};
-			auto setMesh = [&json, eraseModel](unsigned int index, std::string uuid)
+			auto setMesh = [&](unsigned int index, std::string uuid)
 				{
-					json.at("meshMaterials").at(index)["mesh"] = uuid;
+					json.at("meshMaterials").at(index).at("mesh")["primitive"] = uuid;
 					if (json.contains("model")) json.erase("model");
 					eraseModel();
 				};
-			auto setMaterial = [&json, eraseModel](unsigned int index, std::string uuid)
+			auto setMaterial = [&](unsigned int index, std::string uuid)
 				{
 					json.at("meshMaterials").at(index)["material"] = uuid;
 					if (json.contains("model")) json.erase("model");
 					eraseModel();
 				};
-			auto setModel = [&json, clearMeshMaterial](std::string uuid)
+			auto setModel = [&](std::string uuid)
 				{
 					json["model"] = uuid;
 					clearMeshMaterial();
 				};
-			auto drawRow = [setMesh, setMaterial, meshesUUIDs, materialsUUIDs, selectablesMeshes, selectablesMaterials, &json](unsigned int index)
+			auto drawRow = [&](unsigned int index)
 				{
-					std::string mesh = json.at("meshMaterials").at(index).at("mesh");
+					std::string mesh = json.at("meshMaterials").at(index).at("mesh").at("primitive");
 					std::string material = json.at("meshMaterials").at(index).at("material");
 					std::string meshName = mesh.empty() ? "" : Templates::GetMeshName(mesh);
 					std::string materialName = material.empty() ? "" : Templates::GetMaterialName(material);
@@ -301,7 +393,7 @@ inline JEdvCreatorDrawerFunction DrawCreatorVector<MeshMaterial, jedv_t_vector>(
 					JUUIDName matUN = std::make_tuple(material, materialName);
 
 					ImGui::PushID((std::string("mesh-") + std::to_string(index)).c_str());
-					ImGui::DrawComboSelection(meshUN, meshesUUIDs, [index, setMesh](JUUIDName option)
+					ImGui::DrawComboSelection(meshUN, meshesUUIDs, [&](JUUIDName option)
 						{
 							std::string& nuuid = std::get<0>(option);
 							setMesh(index, nuuid);
@@ -311,7 +403,7 @@ inline JEdvCreatorDrawerFunction DrawCreatorVector<MeshMaterial, jedv_t_vector>(
 
 					ImGui::SameLine();
 					ImGui::PushID((std::string("material-") + std::to_string(index)).c_str());
-					ImGui::DrawComboSelection(matUN, materialsUUIDs, [index, setMaterial](JUUIDName option)
+					ImGui::DrawComboSelection(matUN, materialsUUIDs, [&](JUUIDName option)
 						{
 							std::string& nuuid = std::get<0>(option);
 							setMaterial(index, nuuid);
@@ -328,13 +420,21 @@ inline JEdvCreatorDrawerFunction DrawCreatorVector<MeshMaterial, jedv_t_vector>(
 					drawRow(i);
 				}
 
-				if (ImGui::Button(ICON_FA_PLUS, ImVec2(ImGui::GetContentRegionAvail().x, 20.0f)))
+				if (size < 1)
 				{
-					json.at("meshMaterials").push_back({
-							{ "mesh", "" },
-							{ "material", "" },
-						}
+					if (ImGui::Button(ICON_FA_PLUS, ImVec2(ImGui::GetContentRegionAvail().x, 20.0f)))
+					{
+						json.at("meshMaterials").push_back(
+							{
+								{ "mesh",
+									{
+										{ "primitive", "" }
+									}
+								},
+								{ "material", "" }
+							}
 						);
+					}
 				}
 
 				ImGui::Text("model");
@@ -348,14 +448,13 @@ inline JEdvCreatorDrawerFunction DrawCreatorVector<MeshMaterial, jedv_t_vector>(
 				JUUIDName modelUN = std::make_tuple(model, modelName);
 
 				ImGui::PushID(std::string("model").c_str());
-				ImGui::DrawComboSelection(modelUN, model3DsUUIDs, [setModel](JUUIDName option)
+				ImGui::DrawComboSelection(modelUN, model3DsUUIDs, [&](JUUIDName option)
 					{
 						std::string& nuuid = std::get<0>(option);
 						setModel(nuuid);
 					}
 				);
 				ImGui::PopID();
-
 			}
 			ImGui::PopID();
 		};

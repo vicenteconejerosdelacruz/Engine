@@ -1,4 +1,5 @@
 #pragma once
+#include <set>
 #include <UUID.h>
 #include <JObject.h>
 //Physx
@@ -52,7 +53,6 @@ namespace Physics
 #include <Attributes/JDecl.h>
 #include <PhysicObjectAtt.h>
 #include <JEnd.h>
-#include <set>
 
 		virtual ~PhysicObject() {};
 		PhysicObject(nlohmann::json& json);

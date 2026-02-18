@@ -19,25 +19,29 @@ namespace Templates {
 		meshes.insert_or_assign(uuid, name);
 	}
 
-	std::unique_ptr<MeshInstance>& GetMeshInstance(SceneUnitId id, JUUID uuid)
+	std::unique_ptr<MeshInstance>& GetMeshInstance(SceneUnitId id, nlohmann::json& json)
 	{
 		using namespace Mesh;
+
+		//is not a real uuid but we need some identifier for meshes that can be repeated
+		JUUID uuid = json.at("primitive");
+		JUUID huuid = uuid + "-" + std::to_string(std::hash<std::string>{}(json.dump(0)));
 
 		if (meshes.contains(uuid))
 		{
 			JNAME& name = meshes.at(uuid);
-			return refTracker.AddRef(uuid, [&]()
+			return refTracker.AddRef(huuid, [&]()
 				{
 					std::unique_ptr<MeshInstance> instance = std::make_unique<MeshInstance>();
-					instance->uuid = uuid;
-					LoadPrimitiveIntoMeshFunctions.at(name)(id, instance, nullptr);
+					instance->uuid = huuid;
+					LoadPrimitiveIntoMeshFunctions.at(name)(id, instance, json);
 					return instance;
 				}
 			);
 		}
 		else
 		{
-			return  refTracker.FindValue(uuid);
+			return  refTracker.FindValue(huuid);
 		}
 	}
 
@@ -99,6 +103,21 @@ namespace Templates {
 	{
 		using namespace Mesh;
 		return refTracker.Has(uuid);
+	}
+
+	nlohmann::json GetMeshJsonByName(JNAME name)
+	{
+		nlohmann::json j;
+		for (auto& [meshUUID, meshName] : meshes)
+		{
+			if (meshName == name)
+			{
+				j["primitive"] = meshUUID;
+				return j;
+			}
+		}
+		assert(!!!"mesh not found");
+		return j;
 	}
 
 	//UPDATE

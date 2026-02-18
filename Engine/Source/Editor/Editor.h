@@ -6,9 +6,9 @@
 #include <SimpleMath.h>
 #include <SceneUnitId.h>
 
-#define _EDITOR_BOUNDINGBOX
-#define _EDITOR_PICKINGPASS
-#define _EDITOR_BILLBOARD
+//#define _EDITOR_BOUNDINGBOX
+//#define _EDITOR_PICKINGPASS
+//#define _EDITOR_BILLBOARD
 
 enum SceneObjectType;
 enum TemplateType;

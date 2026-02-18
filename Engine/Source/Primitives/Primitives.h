@@ -2,6 +2,13 @@
 #include <Mesh/Mesh.h>
 #include <Renderer.h>
 #include <Scene.h>
+
+namespace Primitives
+{
+	template<typename T>
+	void DrawPrimitiveAttributes(nlohmann::json&, std::function<void(nlohmann::json)>) {}
+};
+
 #include "Cube.h"
 #include "Decal.h"
 #include "Floor.h"
@@ -10,6 +17,7 @@
 #include "BoxLines.h"
 #include "Sphere.h"
 #include "Cone.h"
+#include "Capsule.h"
 
 extern std::unique_ptr<Renderer> renderer;
 namespace Primitives
@@ -18,13 +26,12 @@ namespace Primitives
 	using namespace Scene;
 
 	template<typename T>
-	void LoadPrimitiveIntoMesh(SceneUnitId id, const std::unique_ptr<MeshInstance>& mesh, void* params) {
+	void LoadPrimitiveIntoMesh(SceneUnitId id, const std::unique_ptr<MeshInstance>& mesh, nlohmann::json& json) {
 
 		mesh->vertexClass = T::VertexClass;
-		nlohmann::json ph;
-		T p(ph);
-		//T p(params);
+		T p(json);
 
+		p.PrepareMesh();
 		std::vector<uint32_t> indices = p.GetIndices();
 		std::vector<Vertex<T::VertexClass>> vertices = p.GetVertices();
 
@@ -42,7 +49,7 @@ namespace Primitives
 };
 
 using namespace Primitives;
-static const std::map<std::string, std::function<void(SceneUnitId, const std::unique_ptr<Templates::MeshInstance>&, void* params)>> LoadPrimitiveIntoMeshFunctions =
+static const std::map<std::string, std::function<void(SceneUnitId, const std::unique_ptr<Templates::MeshInstance>&, nlohmann::json&)>> LoadPrimitiveIntoMeshFunctions =
 {
 	{ "utahteapot", Primitives::LoadPrimitiveIntoMesh<UtahTeapot> },
 	{ "cube", Primitives::LoadPrimitiveIntoMesh<Cube> },
@@ -52,4 +59,11 @@ static const std::map<std::string, std::function<void(SceneUnitId, const std::un
 	{ "boxlines", Primitives::LoadPrimitiveIntoMesh<BoxLines> },
 	{ "sphere", Primitives::LoadPrimitiveIntoMesh<Sphere> },
 	{ "cone", Primitives::LoadPrimitiveIntoMesh<Cone> },
+	{ "capsule", Primitives::LoadPrimitiveIntoMesh<Capsule> },
+};
+
+static const std::map<std::string, std::function<void(nlohmann::json&, std::function<void(nlohmann::json)>)>> DrawPrimitiveAttributesFunctions =
+{
+	{ "sphere", Primitives::DrawPrimitiveAttributes<Sphere> },
+	{ "cone", Primitives::DrawPrimitiveAttributes<Cone> }
 };

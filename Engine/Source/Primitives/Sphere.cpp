@@ -5,7 +5,7 @@
 const float t = (1.0f + std::sqrt(5.0f)) / 2.0f;
 
 //non normalized points, don't use directly
-std::vector<XMFLOAT3> icosahedronNNPoints = {
+static std::vector<XMFLOAT3> icosahedronNNPoints = {
 	XMFLOAT3(-1.0f, t, 0.0f),
 	XMFLOAT3(1.0f, t, 0.0f),
 	XMFLOAT3(-1.0f, -t, 0.0f),
@@ -20,7 +20,7 @@ std::vector<XMFLOAT3> icosahedronNNPoints = {
 	XMFLOAT3(-t, 0.0, 1.0),
 };
 
-std::vector<uint32_t> icosahedronIndices = {
+static std::vector<uint32_t> icosahedronIndices = {
 	0, 11, 5,
 	0, 5, 1,
 	0, 1, 7,
@@ -45,13 +45,42 @@ std::vector<uint32_t> icosahedronIndices = {
 
 namespace Primitives
 {
+#if defined(_EDITOR)
+
+#include <Editor/JDrawersDef.h>
+#include <SphereAtt.h>
+#include <JEnd.h>
+
+#endif
+
 	Sphere::Sphere(nlohmann::json& json) : Primitive(json)
 	{
+#include <Attributes/JInit.h>
+#include <SphereAtt.h>
+#include <JEnd.h>
+
+#include <Attributes/JUpdate.h>
+#include <SphereAtt.h>
+#include <JEnd.h>
+
 		teselationPoints = icosahedronNNPoints;
 		NormalizePoints(teselationPoints, 0.5f);
 		teselationIndices = icosahedronIndices;
+	}
 
-		TeselateIcosahedron(teselationPoints, teselationIndices, teleselationLevel);
+#if defined(_EDITOR)
+	void Sphere::WriteJson(nlohmann::json& j)
+	{
+#include <Editor/JWriteJson.h>
+#include <SphereAtt.h>
+#include <JEnd.h>
+		j.erase("uuid");
+	}
+#endif
+
+	void Sphere::PrepareMesh()
+	{
+		TeselateIcosahedron(teselationPoints, teselationIndices, teselationLevel());
 	}
 
 	std::vector<uint32_t> Sphere::GetIndices()
@@ -75,9 +104,9 @@ namespace Primitives
 		}
 	}
 
-	void Sphere::TeselateIcosahedron(std::vector<XMFLOAT3>& points, std::vector<uint32_t>& indices, uint32_t teleselationLevel)
+	void Sphere::TeselateIcosahedron(std::vector<XMFLOAT3>& points, std::vector<uint32_t>& indices, uint32_t teleselationCount)
 	{
-		while (teleselationLevel != 0)
+		while (teleselationCount != 0)
 		{
 			std::vector<uint32_t> newIndices;
 			for (unsigned int i = 0U; i < indices.size();)
@@ -113,7 +142,7 @@ namespace Primitives
 
 				i += 3;
 			}
-			teleselationLevel--;
+			teleselationCount--;
 			indices = newIndices;
 		}
 	}

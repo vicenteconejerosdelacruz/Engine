@@ -54,6 +54,7 @@ enum JsonToEditorValueType
 	jedv_t_dxgi_format,
 	jedv_t_dxgi_format_vector,
 	jedv_t_dxgi_depth_format,
+	jedv_t_mesh_material,
 	jedv_t_so_camera,
 	jedv_t_so_camera_name,
 	jedv_t_so_camera_vector,

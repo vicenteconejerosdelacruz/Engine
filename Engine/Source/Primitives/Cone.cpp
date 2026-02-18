@@ -3,17 +3,45 @@
 
 namespace Primitives
 {
-	//Cone::Cone(void* params)
+#if defined(_EDITOR)
+
+#include <Editor/JDrawersDef.h>
+#include <ConeAtt.h>
+#include <JEnd.h>
+
+#endif
+
 	Cone::Cone(nlohmann::json& json) : Primitive(json)
 	{
-		float dr = XM_2PI / static_cast<float>(spread);
+#include <Attributes/JInit.h>
+#include <ConeAtt.h>
+#include <JEnd.h>
+
+#include <Attributes/JUpdate.h>
+#include <ConeAtt.h>
+#include <JEnd.h>
+	}
+
+#if defined(_EDITOR)
+	void Cone::WriteJson(nlohmann::json& j)
+	{
+#include <Editor/JWriteJson.h>
+#include <ConeAtt.h>
+#include <JEnd.h>
+		j.erase("uuid");
+	}
+#endif
+
+	void Cone::PrepareMesh()
+	{
+		float dr = XM_2PI / static_cast<float>(spread());
 		float r = 0.0f;
 
 		XMVECTOR v = { 0.0f, 0.5f, 1.0f, 0.0f };
 		XMVECTOR n = { 0.0f, 0.5f, -1.0f, 0.0f };
 		XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(0.0f, 0.0f, dr);
 
-		unsigned int steps = spread * 2 + 1;
+		unsigned int steps = spread() * 2 + 1;
 		for (unsigned int i = 0; i < steps; i++)
 		{
 			XMVECTOR v2 = XMVector3Rotate(v, rotQ);

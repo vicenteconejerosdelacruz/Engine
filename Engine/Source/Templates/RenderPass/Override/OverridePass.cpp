@@ -29,7 +29,8 @@ namespace Templates
 	{
 		using namespace Scene;
 
-		auto& fsQuadMesh = GetMeshInstance(id, GetMeshUUIDByName("decal"));
+		nlohmann::json decalMeshJson = GetMeshJsonByName("decal");
+		auto& fsQuadMesh = GetMeshInstance(id, decalMeshJson);
 		fsQuad = fsQuadMesh->uuid;
 		fsQuadMaterial = GetMaterialUUIDByName(materialName);
 		VertexClass vertexClass = fsQuadMesh->vertexClass;
