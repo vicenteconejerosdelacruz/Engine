@@ -2,13 +2,6 @@
 #include <Mesh/Mesh.h>
 #include <Renderer.h>
 #include <Scene.h>
-
-namespace Primitives
-{
-	template<typename T>
-	void DrawPrimitiveAttributes(nlohmann::json&, std::function<void(nlohmann::json)>) {}
-};
-
 #include "Cube.h"
 #include "Decal.h"
 #include "Floor.h"
@@ -46,6 +39,32 @@ namespace Primitives
 		//upload the index buffer to the GPU and create the index buffer view
 		InitializeIndexBufferView(renderer->d3dDevice, commandList, indices.data(), static_cast<unsigned int>(indices.size()), mesh->ibvData);
 	}
+
+	template<
+		typename T,
+		std::map<std::string, JEdvEditorDrawerFunction> GetDrawers(),
+		std::vector<std::pair<std::string, JsonToEditorValueType>> GetAttributes()
+	>
+	void DrawPrimitiveAttributes(nlohmann::json& json, std::function<void(nlohmann::json)> update)
+	{
+		T s(json);
+		std::vector<JObject*> jvec = { &s };
+
+		nlohmann::json source = nlohmann::json::parse(s.dump());
+
+		auto drawers = GetDrawers();
+		auto attributes = GetAttributes();
+		for (auto& [att, _] : attributes)
+		{
+			drawers.at(att)(att, jvec);
+		}
+
+		nlohmann::json target = nlohmann::json::parse(s.dump());
+		if (nlohmann::json::diff(source, target).size() > 0)
+		{
+			update(target);
+		}
+	}
 };
 
 using namespace Primitives;
@@ -64,6 +83,7 @@ static const std::map<std::string, std::function<void(SceneUnitId, const std::un
 
 static const std::map<std::string, std::function<void(nlohmann::json&, std::function<void(nlohmann::json)>)>> DrawPrimitiveAttributesFunctions =
 {
-	{ "sphere", Primitives::DrawPrimitiveAttributes<Sphere> },
-	{ "cone", Primitives::DrawPrimitiveAttributes<Cone> }
+	{ "sphere", Primitives::DrawPrimitiveAttributes<Sphere, Primitives::GetSphereDrawers, Primitives::GetSphereAttributes> },
+	{ "cone", Primitives::DrawPrimitiveAttributes<Cone, Primitives::GetConeDrawers, Primitives::GetConeAttributes> },
+	{ "capsule", Primitives::DrawPrimitiveAttributes<Capsule, Primitives::GetCapsuleDrawers, Primitives::GetCapsuleAttributes> },
 };

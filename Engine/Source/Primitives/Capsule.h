@@ -29,9 +29,6 @@ namespace Primitives
 		static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL_TEXCOORD0;
 		typedef Vertex<VertexClass> VertexType;
 
-		//std::vector<XMFLOAT3> teselationPoints;
-		//std::vector<uint32_t> teselationIndices;
-
 		Capsule(nlohmann::json& json);
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
@@ -40,10 +37,12 @@ namespace Primitives
 
 		std::vector<uint32_t> GetIndices();
 		std::vector<VertexType> GetVertices();
-		/*
+
 		void NormalizePoint(DirectX::XMFLOAT3& p, float factor = 1.0f);
 		void NormalizePoints(std::vector<XMFLOAT3>& points, float factor = 1.0f);
-		void TeselateIcosahedron(std::vector<XMFLOAT3>& points, std::vector<uint32_t>& indices, uint32_t teselationLevel);
-		*/
+		void Teselate(std::vector<XMFLOAT3>& points, std::vector<uint32_t>& indices, uint32_t teselationLevel);
+
+		std::vector<XMFLOAT3> teselationPoints;
+		std::vector<uint32_t> teselationIndices;
 	};
 };

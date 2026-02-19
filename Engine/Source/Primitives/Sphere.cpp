@@ -104,9 +104,9 @@ namespace Primitives
 		}
 	}
 
-	void Sphere::TeselateIcosahedron(std::vector<XMFLOAT3>& points, std::vector<uint32_t>& indices, uint32_t teleselationCount)
+	void Sphere::TeselateIcosahedron(std::vector<XMFLOAT3>& points, std::vector<uint32_t>& indices, uint32_t teselationCount)
 	{
-		while (teleselationCount != 0)
+		while (teselationCount != 0)
 		{
 			std::vector<uint32_t> newIndices;
 			for (unsigned int i = 0U; i < indices.size();)
@@ -142,7 +142,7 @@ namespace Primitives
 
 				i += 3;
 			}
-			teleselationCount--;
+			teselationCount--;
 			indices = newIndices;
 		}
 	}

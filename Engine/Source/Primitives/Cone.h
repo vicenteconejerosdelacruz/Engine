@@ -41,26 +41,4 @@ namespace Primitives
 		std::vector<uint32_t> GetIndices();
 		std::vector<VertexType> GetVertices();
 	};
-
-	template<>
-	inline void DrawPrimitiveAttributes<Cone>(nlohmann::json& json, std::function<void(nlohmann::json new_atts)> update)
-	{
-		Cone s(json);
-		std::vector<JObject*> jvec = { &s };
-
-		nlohmann::json source = nlohmann::json::parse(s.dump());
-
-		auto drawers = GetConeDrawers();
-		auto attributes = GetConeAttributes();
-		for (auto& [att, _] : attributes)
-		{
-			drawers.at(att)(att, jvec);
-		}
-
-		nlohmann::json target = nlohmann::json::parse(s.dump());
-		if (nlohmann::json::diff(source, target).size() > 0)
-		{
-			update(target);
-		}
-	}
 };
