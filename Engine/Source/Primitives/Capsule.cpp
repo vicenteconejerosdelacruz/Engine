@@ -203,6 +203,13 @@ namespace Primitives
 			indices.insert(indices.end(), { i0 + nPoints, i1 + nPoints, i0 });
 		}
 
+		//scale by radius and it's done
+		for (auto& p : points)
+		{
+			XMVECTOR sp = XMVectorScale(XMVector3Normalize(XMLoadFloat3(&p)), radius());
+			XMStoreFloat3(&p, sp);
+		}
+
 		//apply the halfheight to all vertices
 		for (unsigned int i = 0; i < nPoints; i++)
 		{
@@ -210,12 +217,6 @@ namespace Primitives
 			points.at(i + nPoints).y -= halfHeight();
 		}
 
-		//scale by radius and it's done
-		for (auto& p : points)
-		{
-			XMVECTOR sp = XMVectorScale(XMLoadFloat3(&p), radius());
-			XMStoreFloat3(&p, sp);
-		}
 	}
 
 	std::vector<Capsule::VertexType> Capsule::GetVertices()
