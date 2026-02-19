@@ -201,11 +201,14 @@ namespace Editor
 		JUUID camera = *GetSwapChainCameras(id).begin();
 		nlohmann::json jbox = nlohmann::json(
 			{
-				{ "meshMaterials",
+				{
+					"meshMaterial",
 					{
-						{
-							{ "material", GetMaterialUUIDByName("BoundingBox") },
-							{ "mesh", GetMeshUUIDByName("boxlines") }
+						{ "material", GetMaterialUUIDByName("BoundingBox") },
+						{ "mesh",
+							{
+								{ "primitive", GetMeshUUIDByName("boxlines") }
+							}
 						}
 					}
 				},
@@ -2537,11 +2540,14 @@ namespace Editor
 		JUUID uuid = getUUID();
 		nlohmann::json jbillboard = nlohmann::json(
 			{
-				{ "meshMaterials",
+				{
+					"meshMaterial",
 					{
-						{
-							{ "material", GetMaterialUUIDByName(material) },
-							{ "mesh", GetMeshUUIDByName("decal") }
+						{ "material", GetMaterialUUIDByName(material) },
+						{ "mesh",
+							{
+								{ "primitive", GetMeshUUIDByName("decal") }
+							}
 						}
 					}
 				},
