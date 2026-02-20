@@ -256,6 +256,20 @@ namespace Templates
 				{ "systemCreated" , true},
 				{ "uuid" , "e32c5e9c-26a5-4f2b-8d0c-5899c67f1def"},
 				{ "type" , ShaderTypeToStr.at(ShaderType::PIXEL_SHADER)}
+			},
+			{
+				{ "name","Translucent_vs"},
+				{ "path" , "Translucent.hlsl"},
+				{ "systemCreated" , true},
+				{ "uuid" , "5231b6af-fc5a-4d77-ba71-5dc40cfd0da5"},
+				{ "type" , ShaderTypeToStr.at(ShaderType::VERTEX_SHADER)}
+			},
+			{
+				{ "name","Translucent_ps"},
+				{ "path" , "Translucent.hlsl"},
+				{ "systemCreated" , true},
+				{ "uuid" , "bc666a1e-97b4-4b01-979f-af4857e0d4b7"},
+				{ "type" , ShaderTypeToStr.at(ShaderType::PIXEL_SHADER)}
 			}
 		}
 	);
@@ -803,6 +817,186 @@ namespace Templates
 						{ "DepthBiasClamp", 0.0},
 						{ "SlopeScaledDepthBias", 0.0},
 						{ "DepthClipEnable", true},
+						{ "MultisampleEnable", false},
+						{ "AntialiasedLineEnable", false},
+						{ "ForcedSampleCount", 0},
+						{ "ConservativeRaster", "OFF" }
+					}
+				}
+			},
+			{
+				{ "name", "Translucent" },
+				{ "shader_ps", "bc666a1e-97b4-4b01-979f-af4857e0d4b7" },
+				{ "shader_vs", "5231b6af-fc5a-4d77-ba71-5dc40cfd0da5" },
+				{ "systemCreated" , true},
+				{ "mappedValues",
+					{
+						{
+							{ "value", 0.5 },
+							{ "variable", "alpha" },
+							{ "variableType", "FLOAT" }
+						},
+						{
+							{ "value", { 1.0, 0.431, 0.78 } },
+							{ "variable", "baseColor" },
+							{ "variableType", "FLOAT3" }
+						}
+					}
+				},
+				{ "textures", { } },
+				{ "uuid", "e241b072-3aea-4c22-afee-b3887732ea89" },
+				{ "rasterizerState",
+					{
+						{ "FillMode", "SOLID" },
+						{ "CullMode", "NONE" },
+						{ "FrontCounterClockwise", false},
+						{ "DepthBias", 0},
+						{ "DepthBiasClamp", 0.0},
+						{ "SlopeScaledDepthBias", 0.0},
+						{ "DepthClipEnable", false },
+						{ "MultisampleEnable", false},
+						{ "AntialiasedLineEnable", false},
+						{ "ForcedSampleCount", 0},
+						{ "ConservativeRaster", "OFF" }
+					}
+				},
+				{ "blendState",
+					{
+						{"AlphaToCoverageEnable", 0 },
+						{"IndependentBlendEnable", 0 },
+						{ "RenderTarget" ,
+							{
+								{
+									{ "BlendEnable", true },
+									{ "BlendOp", "ADD" },
+									{ "BlendOpAlpha", "ADD" },
+									{ "DestBlend", "INV_SRC_ALPHA" },
+									{ "DestBlendAlpha", "ZERO" },
+									{ "LogicOp", "NOOP" },
+									{ "LogicOpEnable", false },
+									{ "RenderTargetWriteMask", 15 },
+									{ "SrcBlend", "SRC_ALPHA" },
+									{ "SrcBlendAlpha", "ONE" }
+								},
+								{
+									{ "BlendEnable", 0},
+									{ "BlendOp", "ADD"},
+									{ "BlendOpAlpha", "ADD"},
+									{ "DestBlend", "ZERO"},
+									{ "DestBlendAlpha", "ZERO"},
+									{ "LogicOp", "NOOP"},
+									{ "LogicOpEnable", 0},
+									{ "RenderTargetWriteMask", 15},
+									{ "SrcBlend", "ONE"},
+									{ "SrcBlendAlpha", "ONE" }
+								},
+								{
+									{ "BlendEnable", 0},
+									{ "BlendOp" , "ADD"},
+									{ "BlendOpAlpha" , "ADD"},
+									{ "DestBlend" , "ZERO"},
+									{ "DestBlendAlpha" , "ZERO"},
+									{ "LogicOp" , "NOOP"},
+									{ "LogicOpEnable" , 0},
+									{ "RenderTargetWriteMask" , 15},
+									{ "SrcBlend" , "ONE"},
+									{ "SrcBlendAlpha" , "ONE" }
+								},
+								{
+									{ "BlendEnable", 0},
+									{ "BlendOp" , "ADD"},
+									{ "BlendOpAlpha" , "ADD"},
+									{ "DestBlend" , "ZERO"},
+									{ "DestBlendAlpha" , "ZERO"},
+									{ "LogicOp" , "NOOP"},
+									{ "LogicOpEnable" , 0},
+									{ "RenderTargetWriteMask" , 15},
+									{ "SrcBlend" , "ONE"},
+									{ "SrcBlendAlpha" , "ONE"}
+								},
+								{
+									{ "BlendEnable", 0},
+									{ "BlendOp" , "ADD"},
+									{ "BlendOpAlpha" , "ADD"},
+									{ "DestBlend" , "ZERO"},
+									{ "DestBlendAlpha" , "ZERO"},
+									{ "LogicOp" , "NOOP"},
+									{ "LogicOpEnable" , 0},
+									{ "RenderTargetWriteMask" , 15},
+									{ "SrcBlend" , "ONE"},
+									{ "SrcBlendAlpha" , "ONE"}
+								},
+								{
+									{ "BlendEnable", 0},
+									{ "BlendOp" , "ADD"},
+									{ "BlendOpAlpha" , "ADD"},
+									{ "DestBlend" , "ZERO"},
+									{ "DestBlendAlpha" , "ZERO"},
+									{ "LogicOp" , "NOOP"},
+									{ "LogicOpEnable" , 0},
+									{ "RenderTargetWriteMask" , 15},
+									{ "SrcBlend" , "ONE"},
+									{ "SrcBlendAlpha" , "ONE" }
+								},
+								{
+									{ "BlendEnable", 0},
+									{ "BlendOp" , "ADD"},
+									{ "BlendOpAlpha" , "ADD"},
+									{ "DestBlend" , "ZERO"},
+									{ "DestBlendAlpha" , "ZERO"},
+									{ "LogicOp" , "NOOP"},
+									{ "LogicOpEnable" , 0},
+									{ "RenderTargetWriteMask" , 15},
+									{ "SrcBlend" , "ONE"},
+									{ "SrcBlendAlpha" , "ONE" }
+								},
+								{
+									{ "BlendEnable", 0},
+									{ "BlendOp" , "ADD"},
+									{ "BlendOpAlpha" , "ADD"},
+									{ "DestBlend" , "ZERO"},
+									{ "DestBlendAlpha" , "ZERO"},
+									{ "LogicOp" , "NOOP"},
+									{ "LogicOpEnable" , 0},
+									{ "RenderTargetWriteMask" , 15},
+									{ "SrcBlend" , "ONE"},
+									{ "SrcBlendAlpha" , "ONE" }
+								}
+							}
+						}
+					}
+				}
+			},
+			{
+				{ "name", "Translucent_wired" },
+				{ "shader_ps", "bc666a1e-97b4-4b01-979f-af4857e0d4b7" },
+				{ "shader_vs", "5231b6af-fc5a-4d77-ba71-5dc40cfd0da5" },
+				{ "systemCreated" , true},
+				{ "mappedValues",
+					{
+						{
+							{ "value", 1.0 },
+							{ "variable", "alpha" },
+							{ "variableType", "FLOAT" }
+						},
+						{
+							{ "value", { 1.0, 1.0, 1.0 } },
+							{ "variable", "baseColor" },
+							{ "variableType", "FLOAT3" }
+						}
+					}
+				},
+				{ "textures", { } },
+				{ "uuid", "1d7630c4-86b0-49eb-88f5-40bacb02a652" },
+				{ "rasterizerState",
+					{
+						{ "FillMode", "WIREFRAME" },
+						{ "CullMode", "NONE" },
+						{ "FrontCounterClockwise", false},
+						{ "DepthBias", 0},
+						{ "DepthBiasClamp", 0.0},
+						{ "SlopeScaledDepthBias", 0.0},
+						{ "DepthClipEnable", false },
 						{ "MultisampleEnable", false},
 						{ "AntialiasedLineEnable", false},
 						{ "ForcedSampleCount", 0},
