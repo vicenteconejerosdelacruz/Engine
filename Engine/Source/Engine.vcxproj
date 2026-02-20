@@ -510,6 +510,7 @@
     <ClInclude Include="pch\Application.h" />
     <ClInclude Include="Templates\JTemplate.h" />
     <ClInclude Include="Templates\Material\BlendDesc.h" />
+    <ClInclude Include="Templates\Material\DepthStencilDesc.h" />
     <ClInclude Include="Templates\Material\Material.h" />
     <ClInclude Include="Templates\Material\MeshMaterial.h" />
     <ClInclude Include="Templates\Material\RasterizerDesc.h" />

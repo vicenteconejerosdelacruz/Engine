@@ -64,6 +64,10 @@ namespace Templates
 #endif
 	};
 
+#if defined(_EDITOR)
+	nlohmann::json GetCapsuleAttributes();
+#endif
+
 	struct PhysicGeometryInstance;
 	std::unique_ptr<PhysicGeometryInstance>& CreatePhysicGeometryInstance(JUUID instanceId, std::function<std::unique_ptr<PhysicGeometryInstance>()> newRefCallback);
 	std::unique_ptr<PhysicGeometryInstance>& GetPhysicGeometryInstance(JUUID instanceId);
@@ -85,7 +89,7 @@ namespace Templates
 
 		PhysicGeometryInstance(JUUID uuid) { assert(!!!"do not use"); }
 		PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, RenderableID renderable, Model3DJsonID model3D, JUUID instance, PhysicsBehavior behavior);
-		PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, RenderableID renderable, JUUID mesh, JUUID instance, PhysicsBehavior behavior);
+		PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, RenderableID renderable, nlohmann::json& attributes, JUUID mesh, JUUID instance, PhysicsBehavior behavior);
 		~PhysicGeometryInstance();
 	};
 }
@@ -93,3 +97,10 @@ namespace Templates
 using namespace Templates;
 DEF_TEMPLATE_ID_HASH(PhysicGeometryJson);
 DEF_TEMPLATE_ID_HASH(PhysicGeometryInstance);
+
+#if defined(_EDITOR)
+static std::map<std::string, std::function<nlohmann::json()>> GetPxGeometryAttributes =
+{
+	{ "capsule", GetCapsuleAttributes }
+};
+#endif

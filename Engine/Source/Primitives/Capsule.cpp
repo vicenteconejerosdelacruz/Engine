@@ -6,11 +6,11 @@ const float t = (1.0f + std::sqrt(5.0f)) / 2.0f;
 
 //non normalized points, don't use directly
 static std::vector<XMFLOAT3> capsuleBasePoints = {
+	XMFLOAT3(1.0f,0.0f,0.0f),
 	XMFLOAT3(0.0f,1.0f,0.0f),
 	XMFLOAT3(0.0f,0.0f,1.0f),
-	XMFLOAT3(1.0f,0.0f,0.0f),
+	XMFLOAT3(0.0f,-1.0f,0.0f),
 	XMFLOAT3(0.0f,0.0f,-1.0f),
-	XMFLOAT3(-1.0f,0.0f,0.0f),
 };
 
 static std::vector<uint32_t> capsuleBaseIndices = {
@@ -136,7 +136,7 @@ namespace Primitives
 			XMFLOAT3 v1 = points.at(i1);
 			XMFLOAT3 v2 = points.at(i2);
 
-			if ((v0.y == 0.0f && v1.y == 0.0f) || (v1.y == 0.0f && v2.y == 0.0f) || (v0.y == 0.0f && v2.y == 0.0f))
+			if ((v0.x == 0.0f && v1.x == 0.0f) || (v1.x == 0.0f && v2.x == 0.0f) || (v0.x == 0.0f && v2.x == 0.0f))
 			{
 				bottomFaces.insert(i / 3);
 			}
@@ -145,12 +145,12 @@ namespace Primitives
 		}
 
 		//flip the y coord
-		int nIndices = indices.size();
-		int nPoints = points.size();
+		unsigned int nIndices = static_cast<unsigned int>(indices.size());
+		unsigned int nPoints = static_cast<unsigned int>(points.size());
 		std::vector<XMFLOAT3> bottomPoints;
 		std::transform(points.begin(), points.end(), std::back_inserter(bottomPoints), [](XMFLOAT3 p)
 			{
-				p.y *= -1.0f;
+				p.x *= -1.0f;
 				return p;
 			}
 		);
@@ -171,15 +171,15 @@ namespace Primitives
 				XMFLOAT3 v1 = points.at(i1);
 				XMFLOAT3 v2 = points.at(i2);
 
-				if (v0.y == 0.0f && v1.y == 0.0f)
+				if (v0.x == 0.0f && v1.x == 0.0f)
 				{
 					return std::make_tuple(i0, i1);
 				}
-				else if (v1.y == 0.0f && v2.y == 0.0f)
+				else if (v1.x == 0.0f && v2.x == 0.0f)
 				{
 					return std::make_tuple(i1, i2);
 				}
-				else if (v0.y == 0.0f && v2.y == 0.0f)
+				else if (v0.x == 0.0f && v2.x == 0.0f)
 				{
 					return std::make_tuple(i0, i2);
 				}
@@ -213,8 +213,10 @@ namespace Primitives
 		//apply the halfheight to all vertices
 		for (unsigned int i = 0; i < nPoints; i++)
 		{
-			points.at(i).y += halfHeight();
-			points.at(i + nPoints).y -= halfHeight();
+			//points.at(i).y += halfHeight();
+			//points.at(i + nPoints).y -= halfHeight();
+			points.at(i).x += halfHeight();
+			points.at(i + nPoints).x -= halfHeight();
 		}
 
 	}

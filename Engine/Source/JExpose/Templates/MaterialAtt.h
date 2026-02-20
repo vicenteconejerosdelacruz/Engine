@@ -9,3 +9,5 @@ JEXPOSE_VECTOR_TRANSFORM(MaterialInitialValuePair, mappedValues, ToMaterialIniti
 JEXPOSE_MAP_TRANSFORM(TextureShaderUsage, std::string, textures, ToTextureShaderUsagePair, FromTextureShaderUsagePair, {}, jedv_t_map, 1, false)
 JEXPOSE_TRANSFORM(RasterizerDesc, rasterizerState, ToRasterizerDesc, FromRasterizerDesc, RasterizerDesc(), jedv_t_object, 1, false)
 JEXPOSE_TRANSFORM(BlendDesc, blendState, ToBlendDesc, FromBlendDesc, BlendDesc(), jedv_t_object, 1, false)
+JEXPOSE(bool, overrideDepthStencil, false, jedv_t_boolean, 0, false)
+JEXPOSE_TRANSFORM(DepthStencilDesc, depthStencil, ToDepthStencilDesc, FromDepthStencilDesc, DepthStencilDesc(), jedv_t_object, 1, false)

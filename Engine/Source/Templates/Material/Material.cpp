@@ -120,7 +120,10 @@ namespace Templates
 					mat->dirty(MaterialJson::Update_shader_ps) ||
 					mat->dirty(MaterialJson::Update_samplers) ||
 					mat->dirty(MaterialJson::Update_rasterizerState) ||
-					mat->dirty(MaterialJson::Update_blendState);
+					mat->dirty(MaterialJson::Update_blendState) ||
+					mat->dirty(MaterialJson::Update_overrideDepthStencil) ||
+					mat->dirty(MaterialJson::Update_depthStencil)
+					;
 			}
 		);
 
@@ -135,6 +138,8 @@ namespace Templates
 				mat->clean(MaterialJson::Update_samplers);
 				mat->clean(MaterialJson::Update_rasterizerState);
 				mat->clean(MaterialJson::Update_blendState);
+				mat->clean(MaterialJson::Update_overrideDepthStencil);
+				mat->clean(MaterialJson::Update_depthStencil);
 			}
 		);
 	}

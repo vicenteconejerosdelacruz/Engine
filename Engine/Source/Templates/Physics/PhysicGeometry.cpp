@@ -6,6 +6,7 @@
 #include <Pentahedron.h>
 #include <Sphere.h>
 #include <Cone.h>
+#include <Capsule.h>
 #include <PxPhysicsAPI.h>
 #include <extensions/PxCudaHelpersExt.h>
 #include <gpu/PxGpu.h>
@@ -182,14 +183,22 @@ PxGeometryHolder LoadSphereIntoPxGeometry(XMFLOAT3 scale)
 	return PxSphereGeometry(scale.x * 0.5f);
 }
 
-using namespace Primitives;
-std::map<JNAME, std::function<PxGeometryHolder(RenderableID renderable, bool sdf)>> PxGeometryPrimitiveBuilder =
+PxGeometryHolder LoadCapsuleIntoPxGeometry(nlohmann::json& atts)
 {
-	{ "cube", [](auto r, bool sdf) { return LoadCubeIntoPxGeometry(r->scale()); } },
-	{ "pyramid",[](auto r, bool sdf) { return LoadMeshIntoPxGeometry<Pentahedron>(GetMeshUUIDByName("pyramid"), r->scale(), sdf); }},
-	{ "floor",[](auto r, bool sdf) { return LoadMeshIntoPxGeometry<Floor>(GetMeshUUIDByName("floor"), r->scale(), false); }},
-	{ "sphere",[](auto r, bool sdf) { return LoadSphereIntoPxGeometry(r->scale()); } },
-	{ "cone",[](auto r, bool sdf) { return LoadMeshIntoPxGeometry<Cone>(GetMeshUUIDByName("cone"), r->scale(), sdf); }},
+	using namespace Primitives;
+	Capsule capsule(atts);
+	return PxCapsuleGeometry(capsule.at("radius"), capsule.at("halfHeight"));
+}
+
+using namespace Primitives;
+std::map<JNAME, std::function<PxGeometryHolder(RenderableID renderable, nlohmann::json& attributes, bool sdf)>> PxGeometryPrimitiveBuilder =
+{
+	{ "cube", [](auto r, nlohmann::json& atts, bool sdf) { return LoadCubeIntoPxGeometry(r->scale()); } },
+	{ "pyramid",[](auto r, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Pentahedron>(GetMeshUUIDByName("pyramid"), r->scale(), sdf); }},
+	{ "floor",[](auto r, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Floor>(GetMeshUUIDByName("floor"), r->scale(), false); }},
+	{ "sphere",[](auto r, nlohmann::json& atts, bool sdf) { return LoadSphereIntoPxGeometry(r->scale()); } },
+	{ "cone",[](auto r, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Cone>(GetMeshUUIDByName("cone"), r->scale(), sdf); }},
+	{ "capsule",[](auto r, nlohmann::json& atts, bool sdf) { return LoadCapsuleIntoPxGeometry(atts); }},
 };
 
 PxGeometryHolder LoadAssimpIntoPxGeometry(RenderableID renderable, Model3DJsonID model3D, bool sdf)
@@ -251,6 +260,33 @@ namespace Templates
 #include <PhysicGeometryAtt.h>
 #include <JEnd.h>
 	}
+
+	nlohmann::json GetCapsuleAttributes()
+	{
+		using namespace Primitives;
+
+		std::set<std::string> atts = { "radius", "halfHeight" };
+
+		nlohmann::json ph;
+		Capsule capsule(ph);
+
+		nlohmann::json ret;
+
+		for (auto att : atts)
+		{
+			if (!capsule.contains(att))
+			{
+				assert(!!!"attribute not present");
+				continue;
+			}
+
+			nlohmann::json patch = { {att,capsule.at(att)} };
+			ret.merge_patch(patch);
+		}
+
+		return ret;
+	}
+
 #endif
 
 	PhysicGeometryInstance::PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, RenderableID renderable, Model3DJsonID model3D, JUUID instance, PhysicsBehavior behavior)
@@ -263,7 +299,7 @@ namespace Templates
 		geometry = LoadAssimpIntoPxGeometry(renderable, model3D, behavior == PB_Dynamic);
 	}
 
-	PhysicGeometryInstance::PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, RenderableID renderable, JUUID mesh, JUUID instance, PhysicsBehavior behavior)
+	PhysicGeometryInstance::PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, RenderableID renderable, nlohmann::json& attributes, JUUID mesh, JUUID instance, PhysicsBehavior behavior)
 	{
 		this->geometryTemplate = geometryTemplate;
 		this->renderable = renderable;
@@ -271,7 +307,7 @@ namespace Templates
 		this->instance = instance;
 
 		JNAME name = GetMeshName(mesh);
-		geometry = PxGeometryPrimitiveBuilder.at(name)(renderable, behavior == PB_Dynamic);
+		geometry = PxGeometryPrimitiveBuilder.at(name)(renderable, attributes, behavior == PB_Dynamic);
 	}
 
 	PhysicGeometryInstance::~PhysicGeometryInstance()

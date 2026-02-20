@@ -1766,10 +1766,11 @@ template<> inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_phys
 inline void DrawResourceSelection(
 	std::string attribute,
 	std::vector<JObject*>& json,
-	std::function<std::string(std::string)> ResourceUUIDToName,
+	std::function<std::string(JUUID)> ResourceUUIDToName,
 	std::function<std::vector<JUUIDName>()> GetResourcesUUIDsNames,
 	const char* iconCode,
-	bool readOnly = false
+	bool readOnly = false,
+	std::function<void(JUUID)> updateCb = [](JUUID) {}
 )
 {
 	std::vector<JUUIDName> selectables;
@@ -1784,8 +1785,9 @@ inline void DrawResourceSelection(
 			}
 			return true;
 		};
-	auto update = [attribute, &json](auto value)
+	auto update = [attribute, &json, updateCb](auto value)
 		{
+			updateCb(value);
 			for (auto& j : json)
 			{
 				nlohmann::json patch = { {attribute,value} };
@@ -1911,7 +1913,54 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_physycgeometry>
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
-			DrawResourceSelection(attribute, json, Templates::GetPhysicGeometryName, SortUUIDNameByName(Templates::GetPhysicGeometrysUUIDsNames), ICON_FA_IMAGE);
+			auto removeGeomAttributes = [](auto& j, JUUID geom)
+				{
+					PhysicGeometryJsonID pg = geom;
+					if (!pg->model().empty()) return;
+
+					JNAME meshName = GetMeshName(pg->mesh());
+					if (!GetPxGeometryAttributes.contains(meshName)) return;
+
+					nlohmann::json atts = GetPxGeometryAttributes.at(meshName)();
+					for (auto& item : atts.items())
+					{
+						if (j->contains(item.key()))
+							j->erase(item.key());
+					}
+				};
+			auto addGeomAttributes = [](auto& j, JUUID geom)
+				{
+					PhysicGeometryJsonID pg = geom;
+					if (!pg->model().empty()) return;
+
+					JNAME meshName = GetMeshName(pg->mesh());
+					if (!GetPxGeometryAttributes.contains(meshName)) return;
+
+					nlohmann::json atts = GetPxGeometryAttributes.at(meshName)();
+					j->merge_patch(atts);
+				};
+			auto onChangeGeometry = [&](auto& j, JUUID oldGeom, JUUID newGeom)
+				{
+					if (!oldGeom.empty())
+					{
+						removeGeomAttributes(j, oldGeom);
+					}
+					if (!newGeom.empty())
+					{
+						addGeomAttributes(j, newGeom);
+					}
+				};
+			DrawResourceSelection(
+				attribute, json, Templates::GetPhysicGeometryName,
+				SortUUIDNameByName(Templates::GetPhysicGeometrysUUIDsNames), ICON_FA_IMAGE,
+				false, [&](JUUID uuid)
+				{
+					for (auto& j : json)
+					{
+						onChangeGeometry(j, j->contains(attribute) ? JUUID(j->at(attribute)) : "", uuid);
+					}
+				}
+			);
 		};
 }
 
@@ -4035,7 +4084,7 @@ inline JEdvEditorDrawerFunction DrawValue<MeshMaterial, jedv_t_mesh_material>()
 
 					if (!DrawPrimitiveAttributesFunctions.contains(name)) return;
 
-					DrawPrimitiveAttributesFunctions.at(name)(json.at(0)->at("meshMaterial").at("mesh"), rebuildPrimitive);
+					DrawPrimitiveAttributesFunctions.at(name)(json.at(0)->at("meshMaterial").at("mesh"), {}, rebuildPrimitive);
 				};
 
 			std::string tableName = "mesh-materials";
@@ -4465,6 +4514,202 @@ inline JEdvEditorDrawerFunction DrawValue<BlendDesc, jedv_t_object>()
 			}
 		};
 }
+
+struct DepthStencilDesc;
+template<>
+inline JEdvEditorDrawerFunction DrawValue<DepthStencilDesc, jedv_t_object>()
+{
+	return [](std::string attribute, std::vector<JObject*>& json)
+		{
+			ImGui::Separator();
+			ImGui::Text("DepthStencil Desc");
+
+			auto valueEqual = [attribute, &json](std::string key)
+				{
+					std::set<size_t> hashes;
+					for (auto& j : json)
+					{
+						auto& att = j->at(attribute).at(key);
+						hashes.insert(std::hash<nlohmann::json>{}(att));
+						if (hashes.size() > 1ULL) return false;
+					}
+					return true;
+				};
+			auto update = [attribute, &json](std::string key, auto value)
+				{
+					for (auto& j : json)
+					{
+						nlohmann::json cpy = j->at(attribute);
+						cpy.at(key) = value;
+						nlohmann::json patch = { {attribute,cpy} };
+						j->JUpdate(patch);
+					};
+				};
+			auto drawFromSelectables = [valueEqual, update, attribute, &json](std::string key, auto& strKeysMap)
+				{
+					std::vector<std::string> selectables = {};
+					std::string selected = " ";
+
+					if (!valueEqual(key)) selectables.push_back(" ");
+					else selected = json[0]->at(attribute).at(key);
+
+					std::vector<std::string> keysStr = nostd::GetKeysFromMap(strKeysMap);
+					nostd::AppendToVector(selectables, keysStr);
+
+					ImGui::DrawComboSelection(selected, selectables, [update, key](std::string value)
+						{
+							if (value != " ") update(key, value);
+						}
+					);
+				};
+			auto drawFromCheckBox = [valueEqual, update, attribute, &json](std::string key)
+				{
+					bool value = (valueEqual(key)) ? (static_cast<bool>(json[0]->at(attribute).at(key))) : false;
+					if (ImGui::Checkbox("##", &value))
+					{
+						update(key, value);
+					}
+				};
+			auto drawFromInt = [valueEqual, update, attribute, &json](std::string key)
+				{
+					int value = (valueEqual(key)) ? (static_cast<int>(json[0]->at(attribute).at(key))) : 0;
+					if (ImGui::InputInt("##", &value))
+					{
+						update(key, value);
+					}
+				};
+			auto drawFromUInt = [valueEqual, update, attribute, &json](std::string key)
+				{
+					int value = (valueEqual(key)) ? (static_cast<int>(json[0]->at(attribute).at(key))) : 0;
+					if (ImGui::InputInt("##", &value))
+					{
+						update(key, std::max(0, value));
+					}
+				};
+			auto drawFromFloat = [valueEqual, update, attribute, &json](std::string key)
+				{
+					float value = (valueEqual(key)) ? (static_cast<float>(json[0]->at(attribute).at(key))) : 0;
+					if (ImGui::InputFloat("##", &value))
+					{
+						update(key, value);
+					}
+				};
+
+			std::string tableName = attribute;
+			if (ImGui::BeginTable(tableName.c_str(), 2, ImGuiTableFlags_NoSavedSettings))
+			{
+				ImGui::TableSetupColumn("attribute", ImGuiTableColumnFlags_WidthFixed);
+				ImGui::TableSetupColumn("value", ImGuiTableColumnFlags_WidthStretch);
+
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::TableHeader("attribute");
+				ImGui::TableSetColumnIndex(1);
+				ImGui::TableHeader("value");
+
+				std::map<std::string, std::function<void()>> drawDepthStencilDesc = {
+					{ "DepthEnable", [&] { drawFromCheckBox("DepthEnable"); }},
+					{ "DepthWriteMask", [&] { drawFromSelectables("DepthWriteMask", StringToD3D12_DEPTH_WRITE_MASK); }},
+					{ "DepthFunc", [&] { drawFromSelectables("DepthFunc", StringToD3D12_COMPARISON_FUNC); }},
+					{ "StencilEnable", [&] { drawFromCheckBox("StencilEnable"); }},
+					{ "StencilReadMask",[drawFromUInt] { drawFromUInt("StencilReadMask"); }},
+					{ "StencilWriteMask",[drawFromUInt] { drawFromUInt("StencilWriteMask"); }},
+				};
+
+				for (auto& [att, drawer] : drawDepthStencilDesc)
+				{
+					ImGui::TableNextRow();
+
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text(att.c_str());
+					if (!drawer) continue;
+
+					ImGui::TableSetColumnIndex(1);
+					ImGui::PushID(att.c_str());
+					drawer();
+					ImGui::PopID();
+				}
+
+				auto drawFromStencilOpSelectables = [&](std::string attName, std::string key, auto& strKeysMap, auto update)
+					{
+						std::set<std::string> selectedValues;
+						for (auto& j : json)
+						{
+							selectedValues.insert(j->at(attribute).at(attName).at(key));
+						}
+
+						std::vector<std::string> selectables = {};
+						std::string selected = selectedValues.size() > 1 ? " " : *selectedValues.begin();
+						if (selectedValues.size() > 1)
+						{
+							selectables.push_back(" ");
+						}
+
+						std::vector<std::string> keysStr = nostd::GetKeysFromMap(strKeysMap);
+						nostd::AppendToVector(selectables, keysStr);
+
+						ImGui::PushID(std::string(attName + key).c_str());
+						ImGui::DrawComboSelection(selected, selectables, [update, key](std::string value)
+							{
+								if (value != " ") update(key, value);
+							}
+						);
+						ImGui::PopID();
+					};
+				auto drawDepthStencilOp = [&](std::string att)
+					{
+						auto update = [att, &json](std::string key, std::string value)
+							{
+								nlohmann::json patch = {
+									{ att, { {key, value} } }
+								};
+								for (auto& j : json)
+								{
+									j->merge_patch(patch);
+								}
+							};
+						std::map<std::string, std::function<void(std::string attName)>> stencilOpsParams = {
+							{ "StencilFailOp", [&](std::string attName) { drawFromStencilOpSelectables(attName, "StencilFailOp", StringToD3D12_STENCIL_OP, update); }},
+							{ "StencilDepthFailOp", [&](std::string attName) { drawFromStencilOpSelectables(attName, "StencilDepthFailOp", StringToD3D12_STENCIL_OP,update); }},
+							{ "StencilPassOp", [&](std::string attName) { drawFromStencilOpSelectables(attName, "StencilPassOp", StringToD3D12_STENCIL_OP, update); }},
+							{ "StencilFunc", [&](std::string attName) { drawFromStencilOpSelectables(attName, "StencilFunc", StringToD3D12_COMPARISON_FUNC, update); }},
+						};
+
+						ImGui::TableNextRow();
+
+						ImGui::TableSetColumnIndex(0);
+						ImGui::Text(att.c_str());
+
+						for (auto [key, drawer] : stencilOpsParams)
+						{
+							ImGui::TableNextRow();
+
+							ImGui::TableSetColumnIndex(0);
+							ImGui::Text(key.c_str());
+
+							ImGui::TableSetColumnIndex(1);
+							ImGui::PushID(att.c_str());
+							drawer(att);
+							ImGui::PopID();
+						}
+					};
+
+				std::map<std::string, std::function<void()>> drawDepthStencilOps = {
+					{ "FrontFace", [&] { drawDepthStencilOp("FrontFace"); }},
+					{ "BackFace", [&] { drawDepthStencilOp("BackFace"); }},
+				};
+
+				for (auto& [att, drawer] : drawDepthStencilOps)
+				{
+					if (!drawer) continue;
+					drawer();
+				}
+
+				ImGui::EndTable();
+			}
+		};
+}
+
 
 template<>
 inline JEdvEditorDrawerFunction DrawMap<TextureShaderUsage, std::string>() {
@@ -4994,6 +5239,14 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
 			bool addPressed = false;
 			bool removePressed = false;
 
+			auto rebuildPrimitive = [&](nlohmann::json new_atts)
+				{
+					std::string physicObjectUUID = json.at(0)->at(attribute).at(0);
+					auto& physicObject = GetPhysicObject(physicObjectUUID);
+					physicObject->JUpdate(new_atts);
+					physicObject->DestroyPhisicsBehavior();
+					physicObject->CreatePhysicsBehavior();
+				};
 			auto addPhysicsBehavior = [&]()
 				{
 					nlohmann::json placeholder;
@@ -5065,6 +5318,27 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
 						drawers.at(att)(att, jvec);
 					}
 				};
+			auto drawPhysicGeometryAttributes = [&]()
+				{
+					std::string physicObjectUUID = json.at(0)->at(attribute).at(0);
+					auto& physicObject = GetPhysicObject(physicObjectUUID);
+					if (physicObject->physicGeometryInstance.empty())
+						return;
+
+					JNAME meshName = GetMeshName(physicObject->physicGeometryInstance->geometryTemplate->mesh());
+
+					if (!GetPxGeometryAttributes.contains(meshName) || !DrawPrimitiveAttributesFunctions.contains(meshName))
+						return;
+
+					auto pxAtts = GetPxGeometryAttributes.at(meshName)();
+					std::set<std::string> enabledAtts;
+					for (auto& el : pxAtts.items())
+					{
+						enabledAtts.insert(el.key());
+					}
+
+					DrawPrimitiveAttributesFunctions.at(meshName)(*physicObject.get(), enabledAtts, rebuildPrimitive);
+				};
 
 			if (json.at(0)->at(attribute).size() == 0ULL)
 			{
@@ -5074,6 +5348,7 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
 			{
 				drawRemovePhysicBehavior();
 				drawPhysicBehavior();
+				drawPhysicGeometryAttributes();
 			}
 
 			if (addPressed)

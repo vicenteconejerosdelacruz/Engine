@@ -74,6 +74,7 @@ namespace Templates
 		MaterialJsonID material = fsQuadMaterial();
 		BlendDesc blendDesc = material->blendState();
 		RasterizerDesc rasterizerDesc = material->rasterizerState();
+		DepthStencilDesc depthStencil = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE primitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
@@ -81,8 +82,12 @@ namespace Templates
 		auto& renderPass = GetRenderPassTemplate(renderPassTemplate);
 		auto rtf = renderPass->renderTargetFormats();
 		auto df = renderPass->depthStencilFormat();
+		if (df == DXGI_FORMAT_UNKNOWN)
+		{
+			depthStencil.DepthEnable = false;
+		}
 
-		pipelineState = CreateGraphicsPipelineState(plName, vsLayout, vsByteCode, psByteCode, rootSignature, blendDesc, rasterizerDesc, primitiveTopologyType, rtf, df);
+		pipelineState = CreateGraphicsPipelineState(plName, vsLayout, vsByteCode, psByteCode, rootSignature, blendDesc, rasterizerDesc, depthStencil, primitiveTopologyType, rtf, df);
 	}
 
 	RenderPassInstanceID OverridePass::GetPrevRenderPass()

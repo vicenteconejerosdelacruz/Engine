@@ -187,3 +187,9 @@ inline PxQuat ToPxQuat(XMVECTOR Q)
 {
 	return PxQuat(Q.m128_f32[0], Q.m128_f32[1], Q.m128_f32[2], Q.m128_f32[3]);
 }
+inline PxQuat ToPxQuat(XMFLOAT3 euler)
+{
+	float roll, pitch, yaw;
+	pitch = euler.x; yaw = euler.y; roll = euler.z;
+	return ToPxQuat(XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll)));
+}

@@ -19,6 +19,7 @@ namespace DeviceUtils
 		CComPtr<ID3D12RootSignature>& rootSignature,
 		D3D12_BLEND_DESC& BlendState,
 		D3D12_RASTERIZER_DESC& RasterizerState,
+		D3D12_DEPTH_STENCIL_DESC& DepthStencilState,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE& PrimitiveTopologyType,
 		std::vector<DXGI_FORMAT>& renderTargetsFormats,
 		DXGI_FORMAT& depthStencilFormat
@@ -41,9 +42,12 @@ namespace DeviceUtils
 		state.BlendState = BlendState;
 		state.SampleDesc.Count = 1;
 
+		//depth stencil
+		state.DepthStencilState = DepthStencilState;
+
 		//render target based
-		state.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-		if (depthStencilFormat == DXGI_FORMAT_UNKNOWN) { state.DepthStencilState.DepthEnable = false; }
+		//state.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+		//if (depthStencilFormat == DXGI_FORMAT_UNKNOWN) { state.DepthStencilState.DepthEnable = false; }
 		state.SampleMask = UINT_MAX;
 		state.PrimitiveTopologyType = PrimitiveTopologyType;
 		state.NumRenderTargets = static_cast<UINT>(std::max(1ULL, renderTargetsFormats.size()));

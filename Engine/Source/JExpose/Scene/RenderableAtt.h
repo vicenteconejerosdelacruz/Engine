@@ -25,6 +25,7 @@ JEXPOSE_ENUM(D3D_PRIMITIVE_TOPOLOGY, topology, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELI
 JEXPOSE(bool, uniqueMaterialInstance, false, jedv_t_boolean, 1, false)
 JEXPOSE(bool, visible, true, jedv_t_boolean, 0, false)
 JEXPOSE(bool, checkBoundingBox, true, jedv_t_boolean, 0, false)
+JEXPOSE_TRANSFORM(DepthStencilDesc, depthStencil, ToDepthStencilDesc, FromDepthStencilDesc, DepthStencilDesc(), jedv_t_object, 1, false)
 JEXPOSE_VECTOR(std::string, cameras, {}, jedv_t_so_camera_vector, 1, true)
 JEXPOSE_VECTOR_TRANSFORM(PassMaterialOverride, passMaterialOverrides, ToPassMaterialOverride, FromPassMaterialOverride, {}, jedv_t_vector, 1, false)
 JEXPOSE_VECTOR(std::string, renderNext, {}, jedv_t_so_renderable_vector, 1, false)

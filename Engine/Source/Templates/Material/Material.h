@@ -5,6 +5,7 @@
 #include "SamplerDesc.h"
 #include "RasterizerDesc.h"
 #include "BlendDesc.h"
+#include "DepthStencilDesc.h"
 #include <wrl/client.h>
 #include <atlbase.h>
 #include <TemplateDecl.h>

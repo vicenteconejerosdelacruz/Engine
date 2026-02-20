@@ -30,6 +30,29 @@ namespace Physics
 #include <Attributes/JUpdate.h>
 #include <PhysicObjectAtt.h>
 #include <JEnd.h>
+
+		InheritGeometryAttributes();
+	}
+
+	void PhysicObject::InheritGeometryAttributes()
+	{
+		if (geometry().empty())
+			return;
+		PhysicGeometryJsonID pg = geometry();
+		if (pg->mesh().empty())
+			return;
+
+		JNAME meshName = GetMeshName(pg->mesh());
+		if (!GetPxGeometryAttributes.contains(meshName)) return;
+
+		nlohmann::json atts = GetPxGeometryAttributes.at(meshName)();
+		for (auto& el : atts.items())
+		{
+			if (contains(el.key()))
+				continue;
+			nlohmann::json patch = { {el.key(), el.value()} };
+			merge_patch(patch);
+		}
 	}
 
 	void PhysicObject::CreatePhysicsBehavior()
@@ -47,9 +70,10 @@ namespace Physics
 		physicGeometryInstance = getUUID();
 		if (!jg->mesh().empty())
 		{
+			nlohmann::json atts = nlohmann::json::parse(dump());
 			CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
 				{
-					return std::make_unique<PhysicGeometryInstance>(jg, renderable, jg->mesh(), physicGeometryInstance(), behavior());
+					return std::make_unique<PhysicGeometryInstance>(jg, renderable, atts, jg->mesh(), physicGeometryInstance(), behavior());
 				}
 			);
 		}
@@ -70,7 +94,7 @@ namespace Physics
 			//create the PxActor & the PxShape
 			actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(renderable->position())));
 			shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
-			shape->setLocalPose(PxTransform(PxIdentity));
+			shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
 
 			//set the actor position and rotation
 			actor->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
@@ -82,7 +106,7 @@ namespace Physics
 
 			//create the PxShape
 			shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
-			shape->setLocalPose(PxTransform(PxIdentity));
+			shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
 
 			//set the actor position and rotation
 			actor->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
@@ -159,7 +183,11 @@ namespace Physics
 
 	std::vector<std::string> PhysicObject::GetPhysicBehaviorAttributes()
 	{
-		std::vector<std::string> atts = { "behavior", "staticFriction", "dynamicFriction", "restitution", "geometry" };
+		std::vector<std::string> atts = {
+			"behavior", "staticFriction", "dynamicFriction",
+			"restitution", "geometry", "localPosition",
+			"localRotation"
+		};
 
 		if (behavior() == PB_Dynamic)
 		{
@@ -228,6 +256,8 @@ namespace Physics
 
 	void CreatePhysicsObjectsBehaviors(SceneUnitId id)
 	{
+		if (!physicObjectsBySceneUnitId.contains(id)) return;
+
 		for (auto& uuid : physicObjectsBySceneUnitId.at(id))
 		{
 			physicObjectsUUIDs.at(uuid)->CreatePhysicsBehavior();
@@ -250,12 +280,19 @@ namespace Physics
 
 		for (PhysicObjectID phO : physicObjectsBySceneUnitId.at(id))
 		{
-			if (phO->dirty(PhysicObject::Update_behavior) || phO->dirty(PhysicObject::Update_geometry))
+			if (phO->dirty(PhysicObject::Update_behavior) ||
+				phO->dirty(PhysicObject::Update_geometry) ||
+				phO->dirty(PhysicObject::Update_localPosition) ||
+				phO->dirty(PhysicObject::Update_localRotation)
+				)
 			{
+
 				phO->DestroyPhisicsBehavior();
 				phO->CreatePhysicsBehavior();
 				phO->clean(PhysicObject::Update_behavior);
 				phO->clean(PhysicObject::Update_geometry);
+				phO->clean(PhysicObject::Update_localPosition);
+				phO->clean(PhysicObject::Update_localRotation);
 			}
 
 			if (phO->dirty(PhysicObject::Update_linearVelocity))

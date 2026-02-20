@@ -45,7 +45,7 @@ namespace Primitives
 		std::map<std::string, JEdvEditorDrawerFunction> GetDrawers(),
 		std::vector<std::pair<std::string, JsonToEditorValueType>> GetAttributes()
 	>
-	void DrawPrimitiveAttributes(nlohmann::json& json, std::function<void(nlohmann::json)> update)
+	void DrawPrimitiveAttributes(nlohmann::json& json, std::set<std::string> enabledAtts, std::function<void(nlohmann::json)> update)
 	{
 		T s(json);
 		std::vector<JObject*> jvec = { &s };
@@ -56,13 +56,24 @@ namespace Primitives
 		auto attributes = GetAttributes();
 		for (auto& [att, _] : attributes)
 		{
+			if (enabledAtts.size() > 0 && !enabledAtts.contains(att))
+				continue;
 			drawers.at(att)(att, jvec);
 		}
 
 		nlohmann::json target = nlohmann::json::parse(s.dump());
-		if (nlohmann::json::diff(source, target).size() > 0)
+		nlohmann::json diff = nlohmann::json::diff(source, target);
+		if (diff.size() > 0)
 		{
-			update(target);
+			nlohmann::json patch = {};
+			for (unsigned int i = 0; i < diff.size(); i++)
+			{
+				std::string att = diff.at(i).at("path");
+				att.erase(0, 1);
+				patch[att] = nullptr;
+			}
+			patch.patch_inplace(diff);
+			update(patch);
 		}
 	}
 };
@@ -81,7 +92,7 @@ static const std::map<std::string, std::function<void(SceneUnitId, const std::un
 	{ "capsule", Primitives::LoadPrimitiveIntoMesh<Capsule> },
 };
 
-static const std::map<std::string, std::function<void(nlohmann::json&, std::function<void(nlohmann::json)>)>> DrawPrimitiveAttributesFunctions =
+static const std::map<std::string, std::function<void(nlohmann::json&, std::set<std::string>, std::function<void(nlohmann::json)>)>> DrawPrimitiveAttributesFunctions =
 {
 	{ "sphere", Primitives::DrawPrimitiveAttributes<Sphere, Primitives::GetSphereDrawers, Primitives::GetSphereAttributes> },
 	{ "cone", Primitives::DrawPrimitiveAttributes<Cone, Primitives::GetConeDrawers, Primitives::GetConeAttributes> },

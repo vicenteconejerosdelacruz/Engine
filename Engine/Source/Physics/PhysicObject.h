@@ -56,6 +56,7 @@ namespace Physics
 
 		virtual ~PhysicObject() {};
 		PhysicObject(nlohmann::json& json);
+		void InheritGeometryAttributes();
 		void CreatePhysicsBehavior();
 		void DestroyPhisicsBehavior();
 		void SetInitialConditions();

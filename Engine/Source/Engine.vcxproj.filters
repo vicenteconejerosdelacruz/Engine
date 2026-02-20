@@ -618,6 +618,9 @@
     <ClInclude Include="JExpose\Primitives\CapsuleAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Templates\Material\DepthStencilDesc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">

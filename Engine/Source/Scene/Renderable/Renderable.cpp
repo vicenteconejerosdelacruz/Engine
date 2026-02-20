@@ -498,12 +498,17 @@ namespace Scene
 				auto& material = mi->materialUUID;
 				BlendDesc blendDesc = material->blendState();
 				RasterizerDesc rasterizerDesc = material->rasterizerState();
+				DepthStencilDesc depthStencilDesc = material->overrideDepthStencil() ? material->depthStencil() : depthStencil();
+				if (depthFormat == DXGI_FORMAT_UNKNOWN)
+				{
+					depthStencilDesc.DepthEnable = false;
+				}
 
 				D3D12_PRIMITIVE_TOPOLOGY_TYPE primitiveTopologyType = D3D_PRIMITIVE_TOPOLOGYToD3D12_PRIMITIVE_TOPOLOGY_TYPE.at(topology());
 
 				std::string plName = "pipelineState:" + name() + ":" + std::to_string(i);
 
-				pipelineStates[rp][i] = CreateGraphicsPipelineState(plName, vsLayout, vsByteCode, psByteCode, rootSignature, blendDesc, rasterizerDesc, primitiveTopologyType, rtFormats, depthFormat);
+				pipelineStates[rp][i] = CreateGraphicsPipelineState(plName, vsLayout, vsByteCode, psByteCode, rootSignature, blendDesc, rasterizerDesc, depthStencilDesc, primitiveTopologyType, rtFormats, depthFormat);
 			};
 
 		pipelineStates[rp].resize(meshes.size(), nullptr);
@@ -896,6 +901,42 @@ namespace Scene
 			scene->PushLoadingExecutionCallback([=]
 				{
 					for (auto o : rMeshMaterial)
+					{
+						o->visible(true);
+					}
+				}
+			);
+		}
+
+		std::set<RenderableID> rDepthStencil;
+		std::copy_if(r.begin(), r.end(), std::inserter(rDepthStencil, rDepthStencil.begin()), [](auto& o)
+			{
+				return o->dirty(Renderable::Update_depthStencil);
+			}
+		);
+
+		if (rDepthStencil.size() > 0)
+		{
+			for (auto o : rDepthStencil)
+			{
+				o->clean(Renderable::Update_depthStencil);
+				o->visible(false);
+			}
+			auto& scene = GetSceneUnit(unit);
+			scene->SubmitForLoading([=]
+				{
+					for (auto o : rDepthStencil)
+					{
+						for (auto cam : o->bindedCameras)
+						{
+							o->CreatePipelineStates(cam);
+						}
+					}
+				}
+			);
+			scene->PushLoadingExecutionCallback([=]
+				{
+					for (auto o : rDepthStencil)
 					{
 						o->visible(true);
 					}
