@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "PhysicGeometry.h"
+#include <Primitives.h>
+/*
 #include <Mesh/Mesh.h>
 #include <Cube.h>
 #include <Floor.h>
@@ -7,6 +9,7 @@
 #include <Sphere.h>
 #include <Cone.h>
 #include <Capsule.h>
+*/
 #include <PxPhysicsAPI.h>
 #include <extensions/PxCudaHelpersExt.h>
 #include <gpu/PxGpu.h>
@@ -154,7 +157,8 @@ PxGeometryHolder LoadMeshIntoPxGeometry(JNAME uuid, XMFLOAT3 scale, bool sdf)
 	if (!pxTrianglesMeshes.contains(std::make_tuple(uuid, sdf)))
 	{
 		nlohmann::json ph;
-		T p(p);
+		T p(ph);
+		p.PrepareMesh();
 
 		std::vector<uint32_t> indices = p.GetIndices();
 		std::vector<Vertex<T::VertexClass>> vertices = p.GetVertices();
@@ -191,17 +195,17 @@ PxGeometryHolder LoadCapsuleIntoPxGeometry(nlohmann::json& atts)
 }
 
 using namespace Primitives;
-std::map<JNAME, std::function<PxGeometryHolder(RenderableID renderable, nlohmann::json& attributes, bool sdf)>> PxGeometryPrimitiveBuilder =
+std::map<JNAME, std::function<PxGeometryHolder(XMFLOAT3 scale, nlohmann::json& attributes, bool sdf)>> PxGeometryPrimitiveBuilder =
 {
-	{ "cube", [](auto r, nlohmann::json& atts, bool sdf) { return LoadCubeIntoPxGeometry(r->scale()); } },
-	{ "pyramid",[](auto r, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Pentahedron>(GetMeshUUIDByName("pyramid"), r->scale(), sdf); }},
-	{ "floor",[](auto r, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Floor>(GetMeshUUIDByName("floor"), r->scale(), false); }},
-	{ "sphere",[](auto r, nlohmann::json& atts, bool sdf) { return LoadSphereIntoPxGeometry(r->scale()); } },
-	{ "cone",[](auto r, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Cone>(GetMeshUUIDByName("cone"), r->scale(), sdf); }},
-	{ "capsule",[](auto r, nlohmann::json& atts, bool sdf) { return LoadCapsuleIntoPxGeometry(atts); }},
+	{ "cube", [](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadCubeIntoPxGeometry(s); } },
+	{ "pyramid",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Pentahedron>(GetMeshUUIDByName("pyramid"), s, sdf); }},
+	{ "floor",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Floor>(GetMeshUUIDByName("floor"), s, false); }},
+	{ "sphere",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadSphereIntoPxGeometry(s); } },
+	{ "cone",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Cone>(GetMeshUUIDByName("cone"), s, sdf); }},
+	{ "capsule",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadCapsuleIntoPxGeometry(atts); }},
 };
 
-PxGeometryHolder LoadAssimpIntoPxGeometry(RenderableID renderable, Model3DJsonID model3D, bool sdf)
+PxGeometryHolder LoadAssimpIntoPxGeometry(XMFLOAT3 scale, Model3DJsonID model3D, bool sdf)
 {
 	if (!pxTrianglesMeshes.contains(std::make_tuple(model3D(), sdf)))
 	{
@@ -212,8 +216,7 @@ PxGeometryHolder LoadAssimpIntoPxGeometry(RenderableID renderable, Model3DJsonID
 	}
 
 	PxTriangleMesh* triangleMesh = pxTrianglesMeshes.at(std::make_tuple(model3D(), sdf));
-	XMFLOAT3 scale = renderable->scale();
-	PxMeshScale pxScale(PxVec3(scale.x, scale.y, scale.z));
+	PxMeshScale pxScale(ToPxVec3(scale));
 	return PxTriangleMeshGeometry(triangleMesh, pxScale);
 }
 
@@ -287,6 +290,19 @@ namespace Templates
 		return ret;
 	}
 
+	std::vector<JUUIDName> GetPhysicGeometrysTriggerUUIDsNames()
+	{
+		static std::vector<std::string> geometries = { "cube", "sphere", "capsule" };
+		std::vector<JUUIDName> uuidNames;
+
+		std::transform(geometries.begin(), geometries.end(), std::back_inserter(uuidNames), [](auto& g)
+			{
+				return std::make_tuple(GetPhysicGeometryUUIDByName(g), g);
+			}
+		);
+		return uuidNames;
+	}
+
 #endif
 
 	PhysicGeometryInstance::PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, RenderableID renderable, Model3DJsonID model3D, JUUID instance, PhysicsBehavior behavior)
@@ -296,7 +312,17 @@ namespace Templates
 		this->model3D = model3D;
 		this->instance = instance;
 
-		geometry = LoadAssimpIntoPxGeometry(renderable, model3D, behavior == PB_Dynamic);
+		geometry = LoadAssimpIntoPxGeometry(renderable->scale(), model3D, behavior == PB_Dynamic);
+	}
+
+	PhysicGeometryInstance::PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, TriggerID trigger, Model3DJsonID model3D, JUUID instance, PhysicsBehavior behavior)
+	{
+		this->geometryTemplate = geometryTemplate;
+		this->trigger = trigger;
+		this->model3D = model3D;
+		this->instance = instance;
+
+		geometry = LoadAssimpIntoPxGeometry(trigger->scale(), model3D, false);
 	}
 
 	PhysicGeometryInstance::PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, RenderableID renderable, nlohmann::json& attributes, JUUID mesh, JUUID instance, PhysicsBehavior behavior)
@@ -307,7 +333,18 @@ namespace Templates
 		this->instance = instance;
 
 		JNAME name = GetMeshName(mesh);
-		geometry = PxGeometryPrimitiveBuilder.at(name)(renderable, attributes, behavior == PB_Dynamic);
+		geometry = PxGeometryPrimitiveBuilder.at(name)(renderable->scale(), attributes, behavior == PB_Dynamic);
+	}
+
+	PhysicGeometryInstance::PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, TriggerID trigger, nlohmann::json& attributes, JUUID mesh, JUUID instance, PhysicsBehavior behavior)
+	{
+		this->geometryTemplate = geometryTemplate;
+		this->trigger = trigger;
+		this->mesh = mesh;
+		this->instance = instance;
+
+		JNAME name = GetMeshName(mesh);
+		geometry = PxGeometryPrimitiveBuilder.at(name)(trigger->scale(), attributes, false);
 	}
 
 	PhysicGeometryInstance::~PhysicGeometryInstance()

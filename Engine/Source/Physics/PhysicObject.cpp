@@ -57,6 +57,8 @@ namespace Physics
 
 	void PhysicObject::CreatePhysicsBehavior()
 	{
+		if (built) return;
+
 		if (geometry().empty())
 			return;
 		PhysicGeometryJsonID jg = geometry();
@@ -73,7 +75,16 @@ namespace Physics
 			nlohmann::json atts = nlohmann::json::parse(dump());
 			CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
 				{
-					return std::make_unique<PhysicGeometryInstance>(jg, renderable, atts, jg->mesh(), physicGeometryInstance(), behavior());
+					if (!renderable.empty())
+					{
+						return std::make_unique<PhysicGeometryInstance>(jg, renderable, atts, jg->mesh(), physicGeometryInstance(), behavior());
+					}
+					else if (!trigger.empty())
+					{
+						return std::make_unique<PhysicGeometryInstance>(jg, trigger, atts, jg->mesh(), physicGeometryInstance(), behavior());
+					}
+					assert(!!!"no renderable or trigger for primitive physic geometry instance");
+					return std::make_unique<PhysicGeometryInstance>("2BAD505AD");
 				}
 			);
 		}
@@ -82,24 +93,62 @@ namespace Physics
 			Model3DJsonID modelJ = jg->model();
 			CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
 				{
-					return std::make_unique<PhysicGeometryInstance>(jg, renderable, modelJ, physicGeometryInstance(), behavior());
+					if (!renderable.empty())
+					{
+						return std::make_unique<PhysicGeometryInstance>(jg, renderable, modelJ, physicGeometryInstance(), behavior());
+					}
+					else if (!trigger.empty())
+					{
+						return std::make_unique<PhysicGeometryInstance>(jg, trigger, modelJ, physicGeometryInstance(), behavior());
+					}
+					assert(!!!"no renderable or trigger for 3d model physic geometry instance");
+					return std::make_unique<PhysicGeometryInstance>("2BAD505AD");
 				}
 			);
 		}
 
-		material = gPhysics->createMaterial(staticFriction(), dynamicFriction(), restitution());
+		if (!renderable.empty())
+		{
+			material = gPhysics->createMaterial(staticFriction(), dynamicFriction(), restitution());
+		}
+		else if (!trigger.empty())
+		{
+			material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+		}
+		else
+		{
+			assert(!!!"no renderable or trigger for material");
+		}
+
+		XMFLOAT3 pos;
+		XMVECTOR rot;
+
+		if (!renderable.empty())
+		{
+			pos = renderable->position();
+			rot = renderable->rotationQ();
+		}
+		else if (!trigger.empty())
+		{
+			pos = trigger->position();
+			rot = trigger->rotationQ();
+		}
+		else
+		{
+			assert(!!!"no renderable or trigger for 3d transformation");
+		}
 
 		if (behavior() == PB_Static)
 		{
 			//create the PxActor & the PxShape
-			actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(renderable->position())));
+			actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
 			shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
 			shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
 
 			//set the actor position and rotation
-			actor->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+			actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
 		}
-		else
+		else if (behavior() == PB_Dynamic)
 		{
 			//create the PxActor
 			actor = gPhysics->createRigidDynamic(PxTransform(PxIdentity));
@@ -109,7 +158,7 @@ namespace Physics
 			shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
 
 			//set the actor position and rotation
-			actor->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+			actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
 
 			//set the body(actor) density and compute it's inertia
 			PxRigidBody* pxBody = (PxRigidBody*)actor;
@@ -120,10 +169,39 @@ namespace Physics
 			pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
 			pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
 		}
+		else if (behavior() == PB_Trigger)
+		{
+			//create the PxActor
+			actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
+
+			//create the PxShape
+			shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material, PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION);
+			shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
+
+			//set the actor position and rotation
+			actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+		}
+
+		//assign user data to this physic object
+		shape->userData = this;
 
 		//add the actor to the pxScene
-		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		PhysicSceneID scene;
+		if (!renderable.empty())
+		{
+			scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		}
+		else if (!trigger.empty())
+		{
+			scene = MAKESUUUID(trigger.unit(), *GetPhysicScenes(trigger.unit()).begin());
+		}
+		else
+		{
+			assert(!!!"no renderable or trigger for physic scene retrieval");
+		}
+
 		scene->pxScene->addActor(*actor);
+		built = true;
 	}
 
 	void PhysicObject::DestroyPhisicsBehavior()
@@ -145,6 +223,7 @@ namespace Physics
 			PX_RELEASE(actor);
 		}
 		//PX_RELEASE(shape);
+		built = false;
 	}
 
 	void PhysicObject::SetInitialConditions()
@@ -161,15 +240,21 @@ namespace Physics
 	{
 		if (behavior() == PB_Static) return;
 
-		PxTransform pxT = actor->getGlobalPose();
-		renderable->position(*((XMFLOAT3*)&pxT.p.x));
-		renderable->rotationQ(*((XMFLOAT4*)&pxT.q.x));
+		if (!renderable.empty())
+		{
+			PxTransform pxT = actor->getGlobalPose();
+			renderable->position(*((XMFLOAT3*)&pxT.p.x));
+			renderable->rotationQ(*((XMFLOAT4*)&pxT.q.x));
+		}
 	}
 
 	void PhysicObject::UpdateGlobalPoseFromRenderable()
 	{
-		PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
-		pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+		if (!renderable.empty())
+		{
+			PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
+			pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+		}
 	}
 
 #if defined(_EDITOR)
@@ -183,19 +268,41 @@ namespace Physics
 
 	std::vector<std::string> PhysicObject::GetPhysicBehaviorAttributes()
 	{
-		std::vector<std::string> atts = {
-			"behavior", "staticFriction", "dynamicFriction",
-			"restitution", "geometry", "localPosition",
-			"localRotation"
-		};
+		std::vector<std::string> atts = { "behavior" };
 
-		if (behavior() == PB_Dynamic)
+		switch (behavior())
+		{
+		case PB_Static:
 		{
 			atts.insert(atts.end(),
 				{
+					"staticFriction", "dynamicFriction", "restitution",
+					"geometry", "localPosition", "localRotation",
+					"density"
+				}
+			);
+		}
+		break;
+		case PB_Dynamic:
+		{
+			atts.insert(atts.end(),
+				{
+					"staticFriction", "dynamicFriction", "restitution",
+					"geometry", "localPosition", "localRotation",
 					"density", "linearVelocity", "angularVelocity"
 				}
 			);
+		}
+		break;
+		case PB_Trigger:
+		{
+			atts.insert(atts.end(),
+				{
+					"geometry", "localPosition", "localRotation"
+				}
+			);
+		}
+		break;
 		}
 
 		return atts;
@@ -209,6 +316,7 @@ namespace Physics
 
 	void DestroyPhysicObject(JUUID uuid)
 	{
+		physicObjectsUUIDs.at(uuid)->DestroyPhisicsBehavior();
 		physicObjectsUUIDs.erase(uuid);
 		for (auto it = physicObjectsBySceneUnitId.begin(); it != physicObjectsBySceneUnitId.end();)
 		{
@@ -241,7 +349,17 @@ namespace Physics
 	{
 		JUUID uuid = getUUID();
 		std::unique_ptr<PhysicObject> physicObject = std::make_unique<PhysicObject>(json);
-		physicObject->renderable = sceneObject;
+
+		switch (GetSceneObjectType(FROMSUUUID(sceneObject)))
+		{
+		case SO_Renderables:
+			physicObject->renderable = sceneObject;
+			break;
+		case SO_Triggers:
+			physicObject->trigger = sceneObject;
+			break;
+		}
+
 		(*physicObject)["uuid"] = uuid;
 		physicObjectsUUIDs.insert_or_assign(uuid, std::move(physicObject));
 		SceneUnitId id = std::get<0>(sceneObject);

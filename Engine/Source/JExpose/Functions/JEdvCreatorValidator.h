@@ -125,6 +125,14 @@ inline JEdvCreatorValidatorFunction CreatorValidValue<std::string, jedv_t_te_mod
 }
 
 template<>
+inline JEdvCreatorValidatorFunction CreatorValidValue<std::string, jedv_t_te_physycgeometry>() {
+	return[](std::string attribute, nlohmann::json& json)
+		{
+			return json.at(attribute) != "";
+		};
+}
+
+template<>
 inline JEdvCreatorValidatorFunction CreatorValidValue<std::string, jedv_t_shaders_filepath>() {
 	return[](std::string attribute, nlohmann::json& json)
 		{

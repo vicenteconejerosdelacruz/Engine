@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _PRIMITIVE_PENTAHEDRON_H
+#define _PRIMITIVE_PENTAHEDRON_H
+
 #include "Primitive.h"
 #include <VertexFormats.h>
 
@@ -14,3 +16,5 @@ namespace Primitives
 		std::vector<VertexType> GetVertices();
 	};
 };
+
+#endif

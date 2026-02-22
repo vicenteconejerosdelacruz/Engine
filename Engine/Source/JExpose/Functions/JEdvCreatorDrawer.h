@@ -250,6 +250,22 @@ inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_texture
 }
 
 template<>
+inline JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_physycgeometry>()
+{
+	return [](std::string attribute, nlohmann::json& json, nlohmann::json& modalProperties)
+		{
+			if (!json.contains("trigger"))
+			{
+				EditorCreatorDrawTemplateSelector(attribute, json, Templates::GetPhysicGeometryName, Templates::GetPhysicGeometrysUUIDsNames);
+			}
+			else if (json.at("trigger") == true)
+			{
+				EditorCreatorDrawTemplateSelector(attribute, json, Templates::GetPhysicGeometryName, Templates::GetPhysicGeometrysTriggerUUIDsNames);
+			}
+		};
+}
+
+template<>
 inline JEdvCreatorDrawerFunction DrawCreatorValue<MeshMaterial, jedv_t_mesh_material>()
 {
 	return [](std::string attribute, nlohmann::json& json, nlohmann::json& modalProperties)

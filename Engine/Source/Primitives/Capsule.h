@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _PRIMITIVE_CAPSULE_H
+#define _PRIMITIVE_CAPSULE_H
+
 #include "Primitive.h"
 #include <VertexFormats.h>
 
@@ -46,3 +48,5 @@ namespace Primitives
 		std::vector<uint32_t> teselationIndices;
 	};
 };
+
+#endif

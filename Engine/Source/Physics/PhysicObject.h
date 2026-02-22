@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _PHYSICS_PHYSIC_OBJECT_H
+#define _PHYSICS_PHYSIC_OBJECT_H
+
 #include <set>
 #include <UUID.h>
 #include <JObject.h>
@@ -6,26 +8,43 @@
 #include <PxPhysicsAPI.h>
 using namespace physx;
 
+namespace Scene
+{
+	DEF_SCENEOBJECT_ID_DEP(Renderable);
+	DEF_SCENEOBJECT_ID_DEP(Trigger);
+};
+
+namespace Templates
+{
+	DEF_TEMPLATE_ID_DEP(PhysicGeometryInstance, GetPhysicGeometryInstance);
+}
+
 enum PhysicsBehavior
 {
 	PB_Static,
-	PB_Dynamic
+	PB_Dynamic,
+	PB_Trigger
 };
 
 inline std::unordered_map<PhysicsBehavior, std::string> PhysicsBehaviorToString =
 {
 	{ PB_Static, "Static" },
 	{ PB_Dynamic, "Dynamic" },
+	{ PB_Trigger, "Trigger" }
 };
 
 inline std::unordered_map<std::string, PhysicsBehavior> StringToPhysicsBehavior =
 {
 	{ "Static", PB_Static },
 	{ "Dynamic", PB_Dynamic },
+	{ "Trigger", PB_Trigger },
 };
 
 namespace Physics
 {
+	using namespace Scene;
+	using namespace Templates;
+
 	namespace Cooking
 	{
 		inline static const std::string cookingFolder = "Assets/cooking";
@@ -70,11 +89,13 @@ namespace Physics
 		std::vector<std::string> GetPhysicBehaviorAttributes();
 #endif
 		RenderableID renderable;
+		TriggerID trigger;
 
 		PhysicGeometryInstanceID physicGeometryInstance;
 		PxMaterial* material = nullptr;
 		PxRigidActor* actor = nullptr;
 		PxShape* shape = nullptr;
+		bool built = false;
 	};
 
 	std::unique_ptr<PhysicObject>& GetPhysicObject(JUUID uuid);
@@ -91,3 +112,5 @@ namespace Physics
 
 using namespace Physics;
 DEF_TEMPLATE_ID_HASH(PhysicObject);
+
+#endif

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _TEMPLATES_TEXTURE_H
+#define _TEMPLATES_TEXTURE_H
+
 #include <string>
 #include <tuple>
 #include <map>
@@ -160,3 +162,5 @@ inline auto ToTextureJson(std::vector<JObject*>& json)
 	);
 	return textures;
 }
+
+#endif

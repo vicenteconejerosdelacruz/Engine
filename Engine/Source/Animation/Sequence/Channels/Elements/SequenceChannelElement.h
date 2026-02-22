@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _SEQUENCE_CHANNE_LELEMENT_H
+#define _SEQUENCE_CHANNE_LELEMENT_H
 
 struct SequenceChannelElement
 {
@@ -10,3 +11,4 @@ struct SequenceChannelElement
 	int frameStart;
 	int frameEnd;
 };
+#endif

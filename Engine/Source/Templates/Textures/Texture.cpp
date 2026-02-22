@@ -527,10 +527,11 @@ namespace Templates
 #endif
 		std::string pathS = path.string();
 		CreateTextureResource(commandList, pathS, tex->format(), tex->type(), tex->numFrames(), tex->mipLevels(), startFrame);
+		//SI CREO UN CRATE DESDE EL CREADOR ESTO SE CAE
 		PushTextureUploadFreeResourceCallback(2U, [&]
 			{
-				OutputDebugStringA(std::string("off-loading:" + tex->name() + "\n").c_str());
-				upload = nullptr;
+				//OutputDebugStringA(std::string("off-loading:" + tex->name() + "\n").c_str());
+				//upload = nullptr;
 			}
 		);
 	}
@@ -564,10 +565,11 @@ namespace Templates
 		auto& scene = GetSceneUnit(id);
 		auto& commandList = scene->GetLoadingCommandList();
 		CreateTextureResource(commandList, pathS, tex->format(), tex->type(), tex->numFrames(), tex->mipLevels(), startFrame);
+		//SI CREO UN CRATE DESDE EL CREADOR ESTO SE CAE
 		PushTextureUploadFreeResourceCallback(2U, [&]
 			{
-				OutputDebugStringA(std::string("off-loading:" + tex->name() + "\n").c_str());
-				upload = nullptr;
+				//OutputDebugStringA(std::string("off-loading:" + tex->name() + "\n").c_str());
+				//upload = nullptr;
 			}
 		);
 	}

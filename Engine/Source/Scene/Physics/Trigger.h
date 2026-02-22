@@ -7,9 +7,15 @@
 
 enum SceneObjectType;
 
+namespace Physics
+{
+	DEF_TEMPLATE_ID_DEP(PhysicObject, GetPhysicObject);
+}
+
 namespace Scene
 {
 	using namespace physx;
+	using namespace Physics;
 
 #if defined(_EDITOR)
 
@@ -62,11 +68,22 @@ namespace Scene
 		virtual void UnbindFromScene();
 
 		void Destroy();
+
+		void CreatePhysicObject();
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
+		nlohmann::json CreateRenderableTrigger(std::string name, JUUID uuid, JUUID camId, std::string material);
+		void CreateRenderableTrigger();
+		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
+		BoundingBox GetBoundingBox();
 #endif
 
 		bool markedForDelete = false;
+		PhysicObjectID physicObject;
+#if defined(_EDITOR)
+		RenderableID renderableShape;
+		RenderableID renderableLines;
+#endif
 	};
 
 	SODECL_FULL(Trigger);
@@ -75,6 +92,7 @@ namespace Scene
 #include <TriggerAtt.h>
 #include <JEnd.h>
 
+	void TriggersStep(SceneUnitId id, float dt);
 	void DestroyTriggers();
 	void DestroyTrigger(SceneUnitId id);
 	void DeleteTrigger(SceneUnitId id, JUUID uuid);

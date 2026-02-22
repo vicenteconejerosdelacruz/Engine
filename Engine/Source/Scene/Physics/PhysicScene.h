@@ -4,12 +4,14 @@
 #include <SceneObject.h>
 #include <SceneUnitId.h>
 #include <PxPhysicsAPI.h>
+#include <Physics/ContactCallback.h>
 
 enum SceneObjectType;
 
 namespace Scene
 {
 	using namespace physx;
+	using namespace Physics;
 
 #if defined(_EDITOR)
 
@@ -42,7 +44,6 @@ namespace Scene
 #include <JEnd.h>
 
 #endif
-
 	struct PhysicScene : SceneObject
 	{
 		inline static const SceneObjectType sceneObjectType = SO_PhysicScenes;
@@ -68,6 +69,7 @@ namespace Scene
 
 		bool markedForDelete = false;
 		PxScene* pxScene = nullptr;
+		std::unique_ptr<ContactCallback> contactCallback;
 	};
 
 	SODECL_FULL(PhysicScene);

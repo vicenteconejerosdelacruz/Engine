@@ -62,6 +62,8 @@ namespace Physics
 		sceneDesc.cudaContextManager = gCudaContextManager;
 		sceneDesc.flags |= PxSceneFlag::eENABLE_GPU_DYNAMICS;
 		sceneDesc.broadPhaseType = PxBroadPhaseType::eGPU;
+		physicScene->contactCallback = std::make_unique<ContactCallback>(physicScene);
+		sceneDesc.simulationEventCallback = physicScene->contactCallback.get();
 		physicScene->pxScene = gPhysics->createScene(sceneDesc);
 	}
 };

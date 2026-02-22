@@ -70,12 +70,12 @@ namespace Scene
 			assert(!!!"creation collision");
 		}
 
-		//build
-		std::unique_ptr<J> jT = std::make_unique<J>(id, json);
-
 		//track
 		uuidSet.insert(uuid);
 		unitTypesMap.insert_or_assign(uuid, T);
+
+		//build
+		std::unique_ptr<J> jT = std::make_unique<J>(id, json);
 
 		//store and initialize
 		sceneObjects.insert_or_assign(uuid, std::make_tuple(name, std::move(jT)));

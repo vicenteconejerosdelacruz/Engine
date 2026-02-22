@@ -120,7 +120,9 @@ namespace Scene::Level
 			CreateSceneUnitBillboards(scene->Id());
 		}
 #endif
-		scene->ResetLoadingCommandList();
+
+		if (!scene->IsLoading())
+			scene->ResetLoadingCommandList();
 		scene->SetLoading(true);
 		scene->SetCanSubmitLoading(false);
 

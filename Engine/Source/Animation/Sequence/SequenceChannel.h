@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _SEQUENCE_CHANNEL_H
+#define _SEQUENCE_CHANNEL_H
 
 #include "Channels/Elements/SequenceChannelElementAnimation.h"
 #include "Channels/Elements/SequenceChannelElementTransformation.h"
@@ -43,3 +44,5 @@ struct SequenceChannel
 	//elements should be sorted ok?
 	std::vector<ChannelElement> elements;
 };
+
+#endif

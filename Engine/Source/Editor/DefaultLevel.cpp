@@ -89,7 +89,7 @@ namespace Editor::DefaultLevel {
 						{ "spinyaw", {} }
 					}
 				}
-			}*/,
+			}*//*,
 			{
 				{ "castShadows", false },
 				{ "shadowed", false },
@@ -183,108 +183,108 @@ namespace Editor::DefaultLevel {
 						{ "StencilWriteMask", 255 }
 					}
 				}
-			}
-		/*,
-		{
-			{ "castShadows", true },
-			{ "shadowed", true },
+			}*/
+			/*,
 			{
-				"meshMaterial",
+				{ "castShadows", true },
+				{ "shadowed", true },
 				{
-					{ "material", "c50c40b7-9e17-42fb-a6bc-c3d15d72310f"},
-					{ "mesh",
+					"meshMaterial",
+					{
+						{ "material", "c50c40b7-9e17-42fb-a6bc-c3d15d72310f"},
+						{ "mesh",
+							{
+								{ "primitive", "d76b3bd8-0f53-4128-974e-2d6d5062bc00"}
+							}
+						}
+					}
+				},
+				{ "name", "pyramid" },
+				{ "position", { 0.0, -1.0, 4.0 } },
+				{ "rotation", { 0.0, 0.0f, 0.0f } },
+				{ "scale", { 1.0, 1.0, 1.0} },
+				{ "uuid", "40f3fd66-0729-4f98-bb6b-5f94d7461f86" },
+				{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } },
+				{ "physicObject",
+					{
 						{
-							{ "primitive", "d76b3bd8-0f53-4128-974e-2d6d5062bc00"}
+							{ "behavior", "Dynamic" },
+							{ "geometry", "36c75d6d-970f-43dc-97bd-9bc13a035a3a" }
 						}
 					}
 				}
-			},
-			{ "name", "pyramid" },
-			{ "position", { 0.0, -1.0, 4.0 } },
-			{ "rotation", { 0.0, 0.0f, 0.0f } },
-			{ "scale", { 1.0, 1.0, 1.0} },
-			{ "uuid", "40f3fd66-0729-4f98-bb6b-5f94d7461f86" },
-			{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } },
-			{ "physicObject",
-				{
-					{
-						{ "behavior", "Dynamic" },
-						{ "geometry", "36c75d6d-970f-43dc-97bd-9bc13a035a3a" }
-					}
-				}
-			}
-		}*//*,
-		{
-			{ "castShadows", true },
-			{ "shadowed", true },
-			{ "name", "building_row" },
-			{ "position", {  -3.693021297454834, -0.034743160009384155, 5.449404716491699 } },
-			{ "rotation", { -90.0, -54.384132385253906, 0.0 } },
-			{ "scale", { 0.1, 0.1, 0.1} },
-			{ "uuid", "387d34eb-b705-40ad-b460-7a75634c0aad" },
-			{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } },
-			{ "model", "379011d0-8ea6-41bd-9c4e-59bfc11412d2" },
-			{ "physicObject",
-				{
-					{
-						{ "behavior", "Static" },
-						{ "geometry", "5d85bf6d-4570-46db-a632-40976a685374" }
-					}
-				}
-			}
-		}*//*,
-		{
-			{ "castShadows", true },
-			{ "shadowed", true },
+			}*//*,
 			{
-				"meshMaterial",
-				{
-					{ "material", "4a5a2cb8-f2ea-4e15-8584-22bb675ae1bc"},
-					{ "mesh",
+				{ "castShadows", true },
+				{ "shadowed", true },
+				{ "name", "building_row" },
+				{ "position", {  -3.693021297454834, -0.034743160009384155, 5.449404716491699 } },
+				{ "rotation", { -90.0, -54.384132385253906, 0.0 } },
+				{ "scale", { 0.1, 0.1, 0.1} },
+				{ "uuid", "387d34eb-b705-40ad-b460-7a75634c0aad" },
+				{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } },
+				{ "model", "379011d0-8ea6-41bd-9c4e-59bfc11412d2" },
+				{ "physicObject",
+					{
 						{
-							{"primitive", "4d1174b2-8225-4c09-9db6-ff09718ae0f5"}
+							{ "behavior", "Static" },
+							{ "geometry", "5d85bf6d-4570-46db-a632-40976a685374" }
 						}
 					}
 				}
-			},
-			{ "name", "sphere" },
-			{ "position", { 0.0, 5.5706214904785156, 2.5761494636535645 } },
-			{ "rotation", { 0, 0.0f, 0.0f } },
-			{ "scale", { 1.0, 1.0, 1.0} },
-			{ "uuid", "4c582e2a-66df-4c9a-af8d-ee2504a5d18b" },
-			{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } }
-		}*//*,
-		{
-			{ "castShadows", true },
-			{ "shadowed", true },
+			}*//*,
 			{
-				"meshMaterial",
+				{ "castShadows", true },
+				{ "shadowed", true },
 				{
-					{ "material", "4a5a2cb8-f2ea-4e15-8584-22bb675ae1bc"},
-					{ "mesh",
+					"meshMaterial",
+					{
+						{ "material", "4a5a2cb8-f2ea-4e15-8584-22bb675ae1bc"},
+						{ "mesh",
+							{
+								{"primitive", "4d1174b2-8225-4c09-9db6-ff09718ae0f5"}
+							}
+						}
+					}
+				},
+				{ "name", "sphere" },
+				{ "position", { 0.0, 5.5706214904785156, 2.5761494636535645 } },
+				{ "rotation", { 0, 0.0f, 0.0f } },
+				{ "scale", { 1.0, 1.0, 1.0} },
+				{ "uuid", "4c582e2a-66df-4c9a-af8d-ee2504a5d18b" },
+				{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } }
+			}*//*,
+			{
+				{ "castShadows", true },
+				{ "shadowed", true },
+				{
+					"meshMaterial",
+					{
+						{ "material", "4a5a2cb8-f2ea-4e15-8584-22bb675ae1bc"},
+						{ "mesh",
+							{
+								{"primitive", "ad73990a-c59d-45d2-8ec3-807b1f52f5b9"}
+							}
+						}
+					}
+				},
+				{ "name", "cone" },
+				{ "position", { 0.0, 2.5706214904785156, 2.5761494636535645 } },
+				{ "rotation", { 0, 0.0f, 0.0f } },
+				{ "scale", { 1.0, 1.0, 1.0} },
+				{ "uuid", "91629983-c901-4126-bf21-e388ab6f6e16" },
+				{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } },
+				{ "physicObject",
+					{
 						{
-							{"primitive", "ad73990a-c59d-45d2-8ec3-807b1f52f5b9"}
+							{ "behavior", "Dynamic" },
+							{ "geometry", "8a41c342-e388-4e1f-8ba9-8b0a41b1c975" }
 						}
 					}
 				}
-			},
-			{ "name", "cone" },
-			{ "position", { 0.0, 2.5706214904785156, 2.5761494636535645 } },
-			{ "rotation", { 0, 0.0f, 0.0f } },
-			{ "scale", { 1.0, 1.0, 1.0} },
-			{ "uuid", "91629983-c901-4126-bf21-e388ab6f6e16" },
-			{ "cameras", { "06de4a6c-0393-42b1-91ab-1d2389cb2cbd" } },
-			{ "physicObject",
-				{
-					{
-						{ "behavior", "Dynamic" },
-						{ "geometry", "8a41c342-e388-4e1f-8ba9-8b0a41b1c975" }
-					}
-				}
-			}
-		}*/
-	}
-	}
+			}*/
+		}
+		}
 	};
 
 	nlohmann::json cameras = {

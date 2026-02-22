@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _ANIMATION_ANIMATED_H
+#define _ANIMATION_ANIMATED_H
 
 #include <queue>
 #include <map>
@@ -85,3 +86,4 @@ namespace Animation
 	void TraverseMultiplycationQueue(float time, MultiplyCmdQueue& cmds, BonesKeysMap& boneKeys, BonesTransformations& bonesTransformation, BonesTransformations& bonesOffsets, XMMATRIX& rootNodeInverseTransform, XMMATRIX parentTransformation);
 }
 
+#endif

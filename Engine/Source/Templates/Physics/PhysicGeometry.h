@@ -3,6 +3,7 @@
 #include <Templates.h>
 #include <JTemplate.h>
 #include <UUID.h>
+#include <Physics/Trigger.h>
 #include <PxPhysicsAPI.h>
 
 enum PhysicsBehavior;
@@ -66,6 +67,7 @@ namespace Templates
 
 #if defined(_EDITOR)
 	nlohmann::json GetCapsuleAttributes();
+	std::vector<JUUIDName> GetPhysicGeometrysTriggerUUIDsNames();
 #endif
 
 	struct PhysicGeometryInstance;
@@ -84,12 +86,15 @@ namespace Templates
 		Model3DJsonID model3D;
 		JUUID mesh;
 		RenderableID renderable;
+		TriggerID trigger;
 
 		PxGeometryHolder geometry;
 
 		PhysicGeometryInstance(JUUID uuid) { assert(!!!"do not use"); }
 		PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, RenderableID renderable, Model3DJsonID model3D, JUUID instance, PhysicsBehavior behavior);
+		PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, TriggerID trigger, Model3DJsonID model3D, JUUID instance, PhysicsBehavior behavior);
 		PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, RenderableID renderable, nlohmann::json& attributes, JUUID mesh, JUUID instance, PhysicsBehavior behavior);
+		PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, TriggerID trigger, nlohmann::json& attributes, JUUID mesh, JUUID instance, PhysicsBehavior behavior);
 		~PhysicGeometryInstance();
 	};
 }

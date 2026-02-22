@@ -2093,6 +2093,11 @@ namespace Editor
 		ToggleSceneObjectFromSelection(FROMSUUUID(soundfx()));
 	}
 
+	void SelectTrigger(TriggerID trigger)
+	{
+		ToggleSceneObjectFromSelection(FROMSUUUID(trigger()));
+	}
+
 	void ToggleSceneObjectFromSelection(SceneUnitId unit, JUUID uuid)
 	{
 		if (!sceneObjectEdition.at(unit).selected.contains(uuid))
@@ -2404,7 +2409,9 @@ namespace Editor
 		if (io.WantCaptureMouse) return;
 
 		if (camera.empty() ||
+#if !defined(_EDITOR_PICKINGPASS_EVERY_FRAME)
 			!mousePicking.doPicking ||
+#endif
 			!mousePicking.pickingPass.contains(id) ||
 			mousePicking.pickingPass.at(id).empty() ||
 			currentSceneUnitId != id

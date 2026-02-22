@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _SEQUENCE_CHANNEL_ELEMENT_SOUND_FX_H
+#define _SEQUENCE_CHANNEL_ELEMENT_SOUND_FX_H
+
 #include "SequenceChannelElement.h"
 #include <UUID.h>
 
@@ -21,3 +23,4 @@ struct SequenceChannelElementSoundFX : SequenceChannelElement
 	float volume;
 	bool loop;
 };
+#endif

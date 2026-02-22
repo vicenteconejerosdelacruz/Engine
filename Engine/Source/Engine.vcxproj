@@ -484,6 +484,7 @@
     <ClInclude Include="Scene\Level.h" />
     <ClInclude Include="Scene\Light\Light.h" />
     <ClInclude Include="Scene\Light\ShadowMap.h" />
+    <ClInclude Include="Templates\Physics\ContactCallback.h" />
     <ClInclude Include="Scene\Physics\PhysicScene.h" />
     <ClInclude Include="Scene\Physics\Trigger.h" />
     <ClInclude Include="Scene\Renderable\Renderable.h" />
@@ -604,6 +605,7 @@
     <ClCompile Include="Scene\Level.cpp" />
     <ClCompile Include="Scene\Light\Light.cpp" />
     <ClCompile Include="Scene\Light\ShadowMap.cpp" />
+    <ClCompile Include="Templates\Physics\ContactCallback.cpp" />
     <ClCompile Include="Scene\Physics\PhysicScene.cpp" />
     <ClCompile Include="Scene\Physics\Trigger.cpp" />
     <ClCompile Include="Scene\Renderable\Renderable.cpp" />

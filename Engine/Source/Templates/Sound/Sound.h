@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _TEMPLATES_SOUND_H
+#define _TEMPLATES_SOUND_H
+
 #include <memory>
 #include <string>
 #include <Audio.h>
@@ -86,3 +88,5 @@ namespace Templates
 };
 using namespace Templates;
 DEF_TEMPLATE_ID_HASH(SoundJson);
+
+#endif

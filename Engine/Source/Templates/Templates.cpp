@@ -825,6 +825,39 @@ namespace Templates
 				}
 			},
 			{
+				{ "name", "TriggerPicking" },
+				{ "shader_ps", "e32c5e9c-26a5-4f2b-8d0c-5899c67f1def" },
+				{ "shader_vs", "79568541-34c8-4464-bec1-77debde975e0" },
+				{ "systemCreated" , true},
+				{ "mappedValues",
+					{
+						{
+							{ "value", 1.0 },
+							{ "variable", "alphaCut" },
+							{ "variableType", "FLOAT" }
+						}
+					}
+				},
+				{ "textures", {} },
+				{ "uuid", "5d14b58e-44b4-4d71-9d28-c758e055ecf3" },
+				{ "rasterizerState",
+					{
+						{ "FillMode", "SOLID" },
+						{ "CullMode", "NONE" },
+						{ "FrontCounterClockwise", false},
+						{ "DepthBias", 0},
+						{ "DepthBiasClamp", 0.0},
+						{ "SlopeScaledDepthBias", 0.0},
+						{ "DepthClipEnable", true},
+						{ "MultisampleEnable", false},
+						{ "AntialiasedLineEnable", false},
+						{ "ForcedSampleCount", 0},
+						{ "ConservativeRaster", "OFF" }
+					}
+				}/*,
+				{ "overrideDepthStencil", true}*/
+			},
+			{
 				{ "name", "Translucent" },
 				{ "shader_ps", "bc666a1e-97b4-4b01-979f-af4857e0d4b7" },
 				{ "shader_vs", "5231b6af-fc5a-4d77-ba71-5dc40cfd0da5" },
@@ -837,7 +870,8 @@ namespace Templates
 							{ "variableType", "FLOAT" }
 						},
 						{
-							{ "value", { 1.0, 0.431, 0.78 } },
+							//{ "value", { 1.0, 0.431, 0.78 } },
+							{ "value", { 0.2, 1.0, 0.78 } },
 							{ "variable", "baseColor" },
 							{ "variableType", "FLOAT3" }
 						}
@@ -848,7 +882,7 @@ namespace Templates
 				{ "rasterizerState",
 					{
 						{ "FillMode", "SOLID" },
-						{ "CullMode", "NONE" },
+						{ "CullMode", "BACK" },
 						{ "FrontCounterClockwise", false},
 						{ "DepthBias", 0},
 						{ "DepthBiasClamp", 0.0},

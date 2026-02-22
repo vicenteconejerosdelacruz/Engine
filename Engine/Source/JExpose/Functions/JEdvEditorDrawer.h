@@ -1950,17 +1950,35 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_physycgeometry>
 						addGeomAttributes(j, newGeom);
 					}
 				};
-			DrawResourceSelection(
-				attribute, json, Templates::GetPhysicGeometryName,
-				SortUUIDNameByName(Templates::GetPhysicGeometrysUUIDsNames), ICON_FA_IMAGE,
-				false, [&](JUUID uuid)
-				{
-					for (auto& j : json)
+
+			if (json.at(0)->at("behavior") != PhysicsBehaviorToString.at(PB_Trigger))
+			{
+				DrawResourceSelection(
+					attribute, json, Templates::GetPhysicGeometryName,
+					SortUUIDNameByName(Templates::GetPhysicGeometrysUUIDsNames), ICON_FA_IMAGE,
+					false, [&](JUUID uuid)
 					{
-						onChangeGeometry(j, j->contains(attribute) ? JUUID(j->at(attribute)) : "", uuid);
+						for (auto& j : json)
+						{
+							onChangeGeometry(j, j->contains(attribute) ? JUUID(j->at(attribute)) : "", uuid);
+						}
 					}
-				}
-			);
+				);
+			}
+			else
+			{
+				DrawResourceSelection(
+					attribute, json, Templates::GetPhysicGeometryName,
+					SortUUIDNameByName(Templates::GetPhysicGeometrysTriggerUUIDsNames), ICON_FA_IMAGE,
+					false, [&](JUUID uuid)
+					{
+						for (auto& j : json)
+						{
+							onChangeGeometry(j, j->contains(attribute) ? JUUID(j->at(attribute)) : "", uuid);
+						}
+					}
+				);
+			}
 		};
 }
 
@@ -5477,5 +5495,63 @@ inline JEdvEditorDrawerFunction DrawPreview<jedv_cook_physx_mesh>()
 			{
 
 			}
+		};
+}
+
+template<>
+inline JEdvEditorDrawerFunction DrawEnum<PhysicsBehavior, jedv_t_physic_behavior>(
+	std::unordered_map<PhysicsBehavior, std::string>& EtoS,
+	std::unordered_map<std::string, PhysicsBehavior>& StoE
+) {
+	return [&EtoS, &StoE](std::string attribute, std::vector<JObject*>& json)
+		{
+			auto allSame = [attribute, &json]()
+				{
+					std::set<std::string> s;
+					for (auto& j : json)
+					{
+						s.insert(j->at(attribute));
+						if (s.size() > 1) return false;
+					}
+					return true;
+				};
+			auto update = [attribute, &json](auto value)
+				{
+					nlohmann::json patch = { {attribute,value}, {"geometry",""} };//reset the geometry when updating the behavior to avoid triggers using meshes
+					for (auto& j : json)
+					{
+						j->JUpdate(patch);
+					}
+				};
+			bool allEq = allSame();
+			ImGui::PushID(attribute.c_str());
+
+			std::vector<std::string> options{};
+			std::string selected = "";
+			if (!allEq)
+			{
+				options.push_back("");
+			}
+			else
+			{
+				selected = json.at(0)->at(attribute);
+			}
+			std::transform(StoE.begin(), StoE.end(), std::back_inserter(options), [](auto& p) { return p.first; });
+
+			std::string tableName = "tables-" + attribute + "-table";
+			if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+			{
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text(attribute.c_str());
+				ImGui::TableSetColumnIndex(1);
+				ImGui::DrawComboSelection(selected, options, [update](std::string newOption)
+					{
+						update(newOption);
+					}
+				);
+				ImGui::EndTable();
+			}
+			ImGui::PopID();
 		};
 }

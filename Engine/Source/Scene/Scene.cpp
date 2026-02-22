@@ -490,6 +490,7 @@ namespace Scene
 			if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
 				dt = 0.0f;
 #endif
+			TriggersStep(unit, dt);
 			PhysicSceneStep(unit, dt);
 			SoundFXsStep(unit, dt);
 			RenderablesStep(unit, dt);
@@ -1044,7 +1045,7 @@ namespace Scene
 			{ SO_Cameras, CreateCameraJson },
 			{ SO_SoundEffects, CreateSoundFXJson },
 			{ SO_PhysicScenes, CreatePhysicSceneJson },
-			{ SO_Triggers, CreateTriggerJson },
+			{ SO_Triggers, [] { auto json = CreateTriggerJson(); json["trigger"] = true; return json; } }, //inject this att to handle no trigger with meshes
 		};
 		return GetSOJson.at(so)();
 	}

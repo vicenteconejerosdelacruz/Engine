@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _RENDERER_H
+#define _RENDERER_H
 
 #include <dxgi1_6.h>
 #include <RenderPass/RenderPass.h>
@@ -65,3 +66,4 @@ struct Renderer
 	RenderPassInstanceID swapChainPass;
 };
 
+#endif

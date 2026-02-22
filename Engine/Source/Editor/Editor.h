@@ -10,6 +10,10 @@
 #define _EDITOR_PICKINGPASS
 #define _EDITOR_BILLBOARD
 
+#if defined(_EDITOR_PICKINGPASS)
+//#define _EDITOR_PICKINGPASS_EVERY_FRAME
+#endif
+
 enum SceneObjectType;
 enum TemplateType;
 
@@ -20,6 +24,7 @@ namespace Scene
 	struct Camera;
 	struct Renderable;
 	struct Light;
+	struct Trigger;
 };
 
 namespace DirectX
@@ -136,6 +141,7 @@ namespace Editor {
 	void SelectLight(LightID light);
 	void SelectCamera(CameraID camera);
 	void SelectSoundEffect(SoundFXID soundfx);
+	void SelectTrigger(TriggerID trigger);
 	void ToggleSceneObjectFromSelection(SceneUnitId unit, JUUID uuid);
 	void SetSceneObjectSelection(SceneUnitId unit, JUUID uuid, bool selected);
 	void InsertSceneObjectToSelection(SceneUnitId unit, JUUID uuid);

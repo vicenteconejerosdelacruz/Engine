@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _GAME_CONTROLLER_H
+#define _GAME_CONTROLLER_H
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -61,3 +63,4 @@ namespace Game
 		return controller;
 	}
 };
+#endif
