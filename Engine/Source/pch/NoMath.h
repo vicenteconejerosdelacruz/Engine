@@ -33,6 +33,16 @@ inline nlohmann::json FromXMFLOAT3(XMFLOAT3 f3)
 	return nlohmann::json::array({ f3.x,f3.y,f3.z });
 }
 
+inline XMFLOAT4 ToXMFLOAT4(nlohmann::json f4)
+{
+	return XMFLOAT4(f4.at(0), f4.at(1), f4.at(2), f4.at(3));
+}
+
+inline nlohmann::json FromXMFLOAT4(XMFLOAT4 f4)
+{
+	return nlohmann::json::array({ f4.x,f4.y,f4.z,f4.w });
+}
+
 inline BoundingBox GetContainedBoundingBox(auto objects)
 {
 	BoundingBox bb;

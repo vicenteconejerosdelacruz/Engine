@@ -1524,6 +1524,48 @@ inline JEdvEditorDrawerFunction DrawValue<XMFLOAT3, jedv_t_color_float3>()
 }
 
 template<>
+inline JEdvEditorDrawerFunction DrawValue<XMFLOAT4, jedv_t_color_float4>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			auto updateValues = [&json, attribute](XMFLOAT4 value)
+				{
+					for (auto& j : json)
+					{
+						nlohmann::json patch = { { attribute, FromXMFLOAT4(value) } };
+						j->JUpdate(patch);
+					}
+				};
+
+			ImGui::PushID((std::string(json[0]->at("uuid")) + "-" + attribute).c_str());
+			std::string tableName = "tables-" + attribute + "-table";
+			if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+			{
+				XMFLOAT4 color;
+				for (unsigned int i = 0; i < 4; i++)
+				{
+					(&color.x)[i] = json.at(0)->at(attribute).at(i);
+				}
+
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text(attribute.c_str());
+
+				ImGui::TableSetColumnIndex(1);
+				ImGui::PushID((std::string(json.at(0)->at("uuid")) + "-" + attribute).c_str());
+				if (ImGui::ColorEdit4("##", &color.x))
+				{
+					updateValues(color);
+				}
+				ImGui::PopID();
+
+				ImGui::EndTable();
+			}
+			ImGui::PopID();
+		};
+}
+
+template<>
 inline JEdvEditorDrawerFunction DrawValue<float, jedv_t_float_angle>()
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
@@ -4059,24 +4101,36 @@ inline JEdvEditorDrawerFunction DrawValue<MeshMaterial, jedv_t_mesh_material>()
 			auto getSelectedMesh = [&]
 				{
 					std::set<JUUIDName> uuidNames;
+					bool isModel = false;
 					for (auto& j : json)
 					{
+						if (!j->at("model").empty())
+						{
+							isModel = true;
+							break;
+						}
 						MeshMaterial m = ToMeshMaterial(j->at(attribute));
 						if (!m.mesh.empty() && m.mesh.contains("primitive") && !m.mesh.at("primitive").empty())
 							uuidNames.insert(std::make_tuple(m.mesh.at("primitive"), GetMeshName(m.mesh.at("primitive"))));
 					}
-					return (uuidNames.size() == 1) ? *uuidNames.begin() : JUUIDName();
+					return (uuidNames.size() == 1 && !isModel) ? *uuidNames.begin() : JUUIDName();
 				};
 			auto getSelectedMaterial = [&]
 				{
 					std::set<JUUIDName> uuidNames;
+					bool isModel = false;
 					for (auto& j : json)
 					{
+						if (!j->at("model").empty())
+						{
+							isModel = true;
+							break;
+						}
 						MeshMaterial m = ToMeshMaterial(j->at(attribute));
 						if (!m.materialUUID.empty())
 							uuidNames.insert(std::make_tuple(m.materialUUID, GetMaterialName(m.materialUUID)));
 					}
-					return (uuidNames.size() == 1) ? *uuidNames.begin() : JUUIDName();
+					return (uuidNames.size() == 1 && !isModel) ? *uuidNames.begin() : JUUIDName();
 				};
 			auto rebuildPrimitive = [&](nlohmann::json new_atts)
 				{

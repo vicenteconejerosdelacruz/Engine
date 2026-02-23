@@ -8,6 +8,9 @@ namespace Editor
 {
 	extern void BindRenderableToPickingPass(RenderableID r);
 	extern void SelectTrigger(TriggerID trigger);
+	extern bool TriggersShouldDraw(SceneUnitId id);
+	extern void RegisterTrigger(TriggerID trigger);
+	extern void UnRegisterTrigger(TriggerID trigger);
 }
 #endif
 
@@ -61,6 +64,7 @@ namespace Scene
 #include <Attributes/JUpdate.h>
 #include <TriggerAtt.h>
 #include <JEnd.h>
+		(*this)["behavior"] = PhysicsBehaviorToString.at(PB_Trigger);
 	}
 
 #if defined(_EDITOR)
@@ -115,10 +119,21 @@ namespace Scene
 		physicObject->CreatePhysicsBehavior();
 	}
 
+	void Trigger::visible(bool value)
+	{
+		at("visible") = value;
+#if defined(_EDITOR)
+		renderableLines->visible(value);
+		renderableShape->visible(value);
+#endif
+	}
+
 #if defined(_EDITOR)
 	nlohmann::json Trigger::CreateRenderableTrigger(std::string name, JUUID uuid, JUUID camId, std::string material)
 	{
 		PhysicGeometryJsonID pg = geometry();
+
+		bool visible = Editor::TriggersShouldDraw(unit);
 
 		nlohmann::json jrentrigger = nlohmann::json(
 			{
@@ -142,7 +157,7 @@ namespace Scene
 				{ "rotation" , { 0.0, 0.0, 0.0 } },
 				{ "scale" , { 1.0f, 1.0f, 1.0f } },
 				{ "skipMeshes" , {}},
-				{ "visible" , true},
+				{ "visible" , visible },
 				{ "hidden" , true},
 				{ "cameras", { camId }},
 				{ "passMaterialOverrides",
@@ -194,8 +209,8 @@ namespace Scene
 		renderableShape = MAKESUUUID(unit, getUUID());
 		CameraID camera = MAKESUUUID(unit, *GetSwapChainCameras(unit).begin());
 
-		nlohmann::json lines = CreateRenderableTrigger(name() + "-lines", renderableLines.uuid(), camera.uuid(), "Translucent");
-		nlohmann::json shape = CreateRenderableTrigger(name() + "-shape", renderableShape.uuid(), camera.uuid(), "Translucent_wired");
+		nlohmann::json lines = CreateRenderableTrigger(name() + "-lines", renderableLines.uuid(), camera.uuid(), "Translucent_wired");
+		nlohmann::json shape = CreateRenderableTrigger(name() + "-shape", renderableShape.uuid(), camera.uuid(), "Translucent");
 
 		shape["renderNext"] = { renderableLines.uuid() };
 
@@ -216,6 +231,7 @@ namespace Scene
 				BindRenderableToPickingPass(renderableShape);
 				renderableLines->OnPick = [&] {Editor::SelectTrigger(SUuuid()); };
 				renderableShape->OnPick = [&] {Editor::SelectTrigger(SUuuid()); };
+				RegisterTrigger(SUuuid());
 			}
 		);
 	}
@@ -229,6 +245,9 @@ namespace Scene
 
 	void TriggersStep(SceneUnitId unit, float dt)
 	{
+#if defined(_EDITOR)
+		using namespace Editor;
+#endif
 		auto& Triggers = GetTriggers(unit);
 		std::set<TriggerID> tr;
 		std::transform(Triggers.begin(), Triggers.end(), std::inserter(tr, tr.begin()), [&](auto o) { return MAKESUUUID(unit, o); });
@@ -245,6 +264,7 @@ namespace Scene
 #if defined(_EDITOR)
 			DeleteRenderable(FROMSUUUID(trg->renderableShape()));
 			DeleteRenderable(FROMSUUUID(trg->renderableLines()));
+			UnRegisterTrigger(trg);
 #endif
 			DestroyPhysicObject(trg->physicObject());
 			EraseTriggerFromTriggers(FROMSUUUID(trg()));
@@ -270,6 +290,13 @@ namespace Scene
 			}
 		);
 
+		std::set<TriggerID> trColor;
+		std::copy_if(tr.begin(), tr.end(), std::inserter(trColor, trColor.begin()), [](auto trg)
+			{
+				return !trg->renderableShape.empty() && trg->dirty(Trigger::Update_color);
+			}
+		);
+
 		for (auto trg : trCreateRenderables)
 		{
 			trg->CreateRenderableTrigger();
@@ -286,6 +313,21 @@ namespace Scene
 			trg->clean(Trigger::Update_position);
 			trg->clean(Trigger::Update_rotation);
 			trg->clean(Trigger::Update_scale);
+		}
+
+		for (auto trg : trColor)
+		{
+			XMFLOAT4 color = trg->color();
+			XMFLOAT3 baseColor = { color.x,color.y,color.z };
+			XMFLOAT3 lineBaseColor = baseColor * 1.3f;
+			float alpha = color.w;
+			for (unsigned int i = 0; i < Renderer::numFrames; i++)
+			{
+				trg->renderableShape->WriteConstantsBuffer("baseColor", baseColor, i);
+				trg->renderableShape->WriteConstantsBuffer("alpha", alpha, i);
+				trg->renderableLines->WriteConstantsBuffer("baseColor", lineBaseColor, i);
+			}
+			trg->clean(Trigger::Update_color);
 		}
 #endif
 	}

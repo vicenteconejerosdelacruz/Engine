@@ -15,6 +15,9 @@ namespace Editor
 	extern RenderableID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
 	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
+	extern bool TriggersShouldDraw(SceneUnitId id);
+	extern bool IsPlaying(SceneUnitId id);
+	extern std::set<TriggerID> GetTriggers(SceneUnitId id);
 }
 #endif
 namespace Scene
@@ -549,6 +552,20 @@ namespace Scene
 
 		auto draw = [&](SceneUnitId unit, auto& rpi)
 			{
+#if defined(_EDITOR)
+				using namespace Editor;
+
+				bool drawTriggers = TriggersShouldDraw(unit);
+				std::set<TriggerID> triggers;
+				if (drawTriggers)
+				{
+					triggers = Editor::GetTriggers(unit);
+					for (auto trg : triggers)
+					{
+						trg->visible(false);
+					}
+				}
+#endif
 				for (auto it = renVecSet.begin(); it != renVecSet.end(); it++)
 				{
 					RenderableID renderable = *it;
@@ -556,6 +573,24 @@ namespace Scene
 						continue;
 					renderable->Render(unit, rpi, SUuuid());
 				}
+
+#if defined(_EDITOR)
+				if (drawTriggers)
+				{
+					for (auto trg : triggers)
+					{
+						trg->visible(true);
+						if (IsPlaying(unit))
+							continue;
+						RenderableID shape = trg->renderableShape;
+						RenderableID lines = trg->renderableLines;
+						if (shape->checkBoundingBox() && boundingFrustum.Contains(shape->GetBoundingBox()) == ContainmentType::DISJOINT)
+							continue;
+						shape->Render(unit, rpi, SUuuid());
+						lines->Render(unit, rpi, SUuuid());
+					}
+				}
+#endif
 			};
 
 		std::vector<RenderPassInstanceID> rpiv = renderPassesUUID;

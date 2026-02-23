@@ -870,7 +870,6 @@ namespace Templates
 							{ "variableType", "FLOAT" }
 						},
 						{
-							//{ "value", { 1.0, 0.431, 0.78 } },
 							{ "value", { 0.2, 1.0, 0.78 } },
 							{ "variable", "baseColor" },
 							{ "variableType", "FLOAT3" }
@@ -999,6 +998,33 @@ namespace Templates
 							}
 						}
 					}
+				},
+				{ "overrideDepthStencil", true },
+				{ "depthStencil",
+					{
+						{ "BackFace",
+							{
+								{ "StencilDepthFailOp", "KEEP"},
+								{ "StencilFailOp", "KEEP"},
+								{ "StencilFunc", "ALWAYS"},
+								{ "StencilPassOp", "KEEP" }
+							}
+						},
+						{ "DepthEnable", true },
+						{ "DepthFunc", "LESS_EQUAL" },
+						{ "DepthWriteMask", "ZERO" },
+						{ "FrontFace",
+							{
+								{ "StencilDepthFailOp", "KEEP"},
+								{ "StencilFailOp", "KEEP"},
+								{ "StencilFunc", "ALWAYS"},
+								{ "StencilPassOp", "KEEP" }
+							}
+						},
+						{ "StencilEnable", false},
+						{ "StencilReadMask", 255},
+						{ "StencilWriteMask", 255 }
+					}
 				}
 			},
 			{
@@ -1014,7 +1040,7 @@ namespace Templates
 							{ "variableType", "FLOAT" }
 						},
 						{
-							{ "value", { 1.0, 1.0, 1.0 } },
+							{ "value", { 0.2 * 1.3, 1.3, 0.78 * 1.3 } },
 							{ "variable", "baseColor" },
 							{ "variableType", "FLOAT3" }
 						}
@@ -1025,9 +1051,9 @@ namespace Templates
 				{ "rasterizerState",
 					{
 						{ "FillMode", "WIREFRAME" },
-						{ "CullMode", "NONE" },
+						{ "CullMode", "BACK" },
 						{ "FrontCounterClockwise", false},
-						{ "DepthBias", 0},
+						{ "DepthBias", -100},
 						{ "DepthBiasClamp", 0.0},
 						{ "SlopeScaledDepthBias", 0.0},
 						{ "DepthClipEnable", false },
@@ -1035,6 +1061,33 @@ namespace Templates
 						{ "AntialiasedLineEnable", false},
 						{ "ForcedSampleCount", 0},
 						{ "ConservativeRaster", "OFF" }
+					}
+				},
+				{ "overrideDepthStencil", true },
+				{ "depthStencil",
+					{
+						{ "BackFace",
+							{
+								{ "StencilDepthFailOp", "KEEP"},
+								{ "StencilFailOp", "KEEP"},
+								{ "StencilFunc", "ALWAYS"},
+								{ "StencilPassOp", "KEEP" }
+							}
+						},
+						{ "DepthEnable", true },
+						{ "DepthFunc", "LESS" },
+						{ "DepthWriteMask", "ALL" },
+						{ "FrontFace",
+							{
+								{ "StencilDepthFailOp", "KEEP"},
+								{ "StencilFailOp", "KEEP"},
+								{ "StencilFunc", "ALWAYS"},
+								{ "StencilPassOp", "KEEP" }
+							}
+						},
+						{ "StencilEnable", false},
+						{ "StencilReadMask", 255},
+						{ "StencilWriteMask", 255 }
 					}
 				}
 			}

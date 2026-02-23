@@ -162,6 +162,9 @@ namespace Editor
 	std::unordered_map<SceneUnitId, CameraID> editorCameraUUID;
 	//Billboards
 	std::unordered_map<SceneUnitId, BillboardRegistry> billboards;
+	//Physics
+	std::unordered_map<SceneUnitId, bool> drawTriggers;
+	std::unordered_map<SceneUnitId, std::set<TriggerID>> levelTriggers;
 
 	RightPanelComponent templateEdition("templates", { "hidden", "uuid" }, { "Templates", "Details" }, { "Templates" });
 
@@ -187,6 +190,12 @@ namespace Editor
 		isPlaying.insert_or_assign(id, false);
 		isPaused.insert_or_assign(id, false);
 		editorPrePlayDump.insert_or_assign(id, "");
+	}
+
+	void CreateSceneUnitPhysicsController(SceneUnitId id)
+	{
+		drawTriggers.insert_or_assign(id, true);
+		levelTriggers.insert_or_assign(id, std::set<TriggerID>());
 	}
 
 	void CreateSceneUnitBoundingBox(SceneUnitId id)
@@ -314,6 +323,12 @@ namespace Editor
 		isPlaying.erase(id);
 		isPaused.erase(id);
 		editorPrePlayDump.erase(id);
+	}
+
+	void DeleteSceneUnitPhysicsController(SceneUnitId id)
+	{
+		drawTriggers.erase(id);
+		levelTriggers.erase(id);
 	}
 
 	void DeleteSceneUnitBoundingBox(SceneUnitId id)
@@ -466,6 +481,7 @@ namespace Editor
 		CreateSceneUnitGizmos(id);
 		CreateSceneUnitSelection(id);
 		CreateSceneUnitGameController(id);
+		CreateSceneUnitPhysicsController(id);
 		loadingProgress.Reset();
 	}
 
@@ -801,6 +817,7 @@ namespace Editor
 		DrawApplicationBar();
 		DrawLevelSelectorModal();
 		DrawGameController();
+		DrawPhysicsController();
 		DrawLevelsTabs();
 
 		if (!!currentSceneUnitId && !IsPlaying(currentSceneUnitId))
@@ -1223,7 +1240,6 @@ namespace Editor
 
 	void DrawGameController()
 	{
-		//if (!showGameController) return;
 		if (!currentSceneUnitId) return;
 
 		RECT r = GetGameControllerRect();
@@ -1281,6 +1297,54 @@ namespace Editor
 				},
 				IsPlaying(currentSceneUnitId)
 			);
+		}
+		ImGui::End();
+		ImGui::PopStyleColor(2);
+		ImGui::PopStyleVar(3);
+	}
+
+	static ImVec2 physicsControllerSize(100, 18);
+	RECT GetPhysicsControllerRect()
+	{
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImVec2 panPos = ImVec2(viewport->WorkSize.x - panW, viewport->WorkPos.y);
+
+		RECT r;
+		r.right = static_cast<LONG>(panPos.x - 1);
+		r.left = static_cast<LONG>(r.right - physicsControllerSize.x);
+		r.top = static_cast<LONG>(panPos.y);
+		r.bottom = r.top + static_cast<LONG>(physicsControllerSize.y);
+		return r;
+	}
+
+	void DrawPhysicsController()
+	{
+		if (!currentSceneUnitId) return;
+
+		RECT r = GetPhysicsControllerRect();
+		ImVec2 controllerPos(static_cast<float>(r.left), static_cast<float>(r.top));
+		ImVec2 controllerSize(static_cast<float>(r.right - r.left), static_cast<float>(r.bottom - r.top));
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, controllerSize);
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_Border, 0);
+		ImGui::SetNextWindowPos(controllerPos, ImGuiCond_Always);
+		ImGui::SetNextWindowSize(controllerSize, ImGuiCond_Always);
+		ImGui::Begin(
+			"physicscontroller",
+			(bool*)1,
+			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
+			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings
+		);
+		{
+			bool value = drawTriggers.at(currentSceneUnitId);
+			if (ImGui::Checkbox("Triggers", &value))
+			{
+				SwitchTriggersDrawing(currentSceneUnitId);
+			}
 		}
 		ImGui::End();
 		ImGui::PopStyleColor(2);
@@ -2821,6 +2885,36 @@ namespace Editor
 		{
 			DeleteSceneObjectFromEditor(id, uuid);
 		}
+	}
+
+	bool TriggersShouldDraw(SceneUnitId id)
+	{
+		return drawTriggers.at(id);
+	}
+
+	void SwitchTriggersDrawing(SceneUnitId id)
+	{
+		bool value = !drawTriggers.at(id);
+		drawTriggers.at(id) = value;
+		for (auto trg : levelTriggers.at(id))
+		{
+			trg->visible(value);
+		}
+	}
+
+	void RegisterTrigger(TriggerID trigger)
+	{
+		levelTriggers.at(trigger.unit()).insert(trigger);
+	}
+
+	void UnRegisterTrigger(TriggerID trigger)
+	{
+		levelTriggers.at(trigger.unit()).erase(trigger);
+	}
+
+	std::set<TriggerID> GetTriggers(SceneUnitId id)
+	{
+		return levelTriggers.at(id);
 	}
 };
 

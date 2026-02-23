@@ -30,6 +30,7 @@ namespace Editor
 	extern void DeleteSceneUnitGizmos(SceneUnitId id);
 	extern void DeleteSceneUnitSelection(SceneUnitId id);
 	extern void DeleteSceneUnitGameController(SceneUnitId id);
+	extern void DeleteSceneUnitPhysicsController(SceneUnitId id);
 	extern void DeleteSceneUnitBoundingBox(SceneUnitId id);
 	extern void DeleteSceneUnitBillboards(SceneUnitId id);
 	extern void DeleteSceneUnitEditorIndependentCamera(SceneUnitId id);
@@ -153,6 +154,7 @@ namespace Scene
 		DeleteSceneUnitGizmos(id);
 		DeleteSceneUnitSelection(id);
 		DeleteSceneUnitGameController(id);
+		DeleteSceneUnitPhysicsController(id);
 		DeleteSceneUnitBoundingBox(id);
 		DeleteSceneUnitBillboards(id);
 		DeleteSceneUnitEditorIndependentCamera(id);

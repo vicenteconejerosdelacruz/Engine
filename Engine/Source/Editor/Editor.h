@@ -53,6 +53,7 @@ namespace Editor {
 	void CreateSceneUnitGizmos(SceneUnitId id);
 	void CreateSceneUnitSelection(SceneUnitId id);
 	void CreateSceneUnitGameController(SceneUnitId id);
+	void CreateSceneUnitPhysicsController(SceneUnitId id);
 	void CreateSceneUnitBoundingBox(SceneUnitId id);
 	void CreateSceneUnitBillboards(SceneUnitId id);
 	void CreateSceneUnitEditorIndependentCamera(SceneUnitId id);
@@ -60,6 +61,7 @@ namespace Editor {
 	void DeleteSceneUnitGizmos(SceneUnitId id);
 	void DeleteSceneUnitSelection(SceneUnitId id);
 	void DeleteSceneUnitGameController(SceneUnitId id);
+	void DeleteSceneUnitPhysicsController(SceneUnitId id);
 	void DeleteSceneUnitBoundingBox(SceneUnitId id);
 	void DeleteSceneUnitBillboards(SceneUnitId id);
 	void DeleteSceneUnitEditorIndependentCamera(SceneUnitId id);
@@ -96,6 +98,8 @@ namespace Editor {
 	void HandleApplicationDragTitleBar(RECT& dragRect);
 	RECT GetGameControllerRect();
 	void DrawGameController();
+	RECT GetPhysicsControllerRect();
+	void DrawPhysicsController();
 	void DrawLevelsTabs();
 	void SaveLevelAs();
 	bool SaveFileDialog(std::wstring& path, std::wstring defaultDirectory = L"", std::wstring defaultFileName = L"", std::pair<COMDLG_FILTERSPEC*, int>* pFilterInfo = nullptr);
@@ -190,4 +194,11 @@ namespace Editor {
 	void SwitchToPauseMode(SceneUnitId id);
 	void SwitchToUnPausedMode(SceneUnitId id);
 	void SwitchToNonPlayMode(SceneUnitId id);
+
+	//Physics Drawing
+	bool TriggersShouldDraw(SceneUnitId id);
+	void SwitchTriggersDrawing(SceneUnitId id);
+	void RegisterTrigger(TriggerID trigger);
+	void UnRegisterTrigger(TriggerID trigger);
+	std::set<TriggerID> GetTriggers(SceneUnitId id);
 }
