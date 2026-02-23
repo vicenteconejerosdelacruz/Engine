@@ -107,6 +107,7 @@ return creatorValidator; }
 #undef JCLASS
 #undef JTYPE
 #undef JEXPOSE
+#undef JEXPOSE_CALLBACK
 #undef JEXPOSE_TRANSFORM
 #undef JEXPOSE_ENUM
 #undef JEXPOSE_VECTOR
