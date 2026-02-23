@@ -100,6 +100,15 @@ namespace Scene
 #include <Attributes/JDestroy.h>
 #include <PhysicSceneAtt.h>
 #include <JEnd.h>
+
+		if (pxControllerManager)
+		{
+			PX_RELEASE(pxControllerManager);
+		}
+		if (pxScene)
+		{
+			PX_RELEASE(pxScene);
+		}
 	}
 
 	void PhysicSceneStep(SceneUnitId id, float step)

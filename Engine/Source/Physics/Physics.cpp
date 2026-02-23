@@ -8,6 +8,7 @@
 //Physx
 #include <PxPhysicsAPI.h>
 #include <extensions/PxDefaultAllocator.h>
+#include <characterkinematic/PxControllerManager.h>
 
 using namespace physx;
 #define PVD_HOST "127.0.0.1"
@@ -65,5 +66,6 @@ namespace Physics
 		physicScene->contactCallback = std::make_unique<ContactCallback>(physicScene);
 		sceneDesc.simulationEventCallback = physicScene->contactCallback.get();
 		physicScene->pxScene = gPhysics->createScene(sceneDesc);
+		physicScene->pxControllerManager = PxCreateControllerManager(*physicScene->pxScene);
 	}
 };

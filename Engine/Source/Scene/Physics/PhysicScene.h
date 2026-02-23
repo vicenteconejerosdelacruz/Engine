@@ -69,6 +69,7 @@ namespace Scene
 
 		bool markedForDelete = false;
 		PxScene* pxScene = nullptr;
+		PxControllerManager* pxControllerManager = nullptr;
 		std::unique_ptr<ContactCallback> contactCallback;
 	};
 
