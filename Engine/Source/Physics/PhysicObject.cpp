@@ -238,19 +238,19 @@ namespace Physics
 
 	void PhysicObject::UpdateRenderableFromGlobalPose()
 	{
-		if (behavior() == PB_Static) return;
+		if (behavior() != PB_Dynamic) return;
 
-		if (!renderable.empty())
+		if (!renderable.empty() && actor)
 		{
 			PxTransform pxT = actor->getGlobalPose();
 			renderable->position(*((XMFLOAT3*)&pxT.p.x));
-			renderable->rotationQ(*((XMFLOAT4*)&pxT.q.x));
+			renderable->rotationQuaternion = XMLoadFloat4((XMFLOAT4*)&pxT.q.x);
 		}
 	}
 
 	void PhysicObject::UpdateGlobalPoseFromRenderable()
 	{
-		if (!renderable.empty())
+		if (!renderable.empty() && actor)
 		{
 			PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
 			pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));

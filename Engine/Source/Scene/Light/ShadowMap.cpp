@@ -553,10 +553,10 @@ namespace Scene
 
 	void Light::UpdateDirectionalShadowMapCameraTransformation()
 	{
-		XMFLOAT3 rot = rotation();
+		XMVECTOR rot = rotationQ();
 		std::for_each(shadowMapCameras.begin(), shadowMapCameras.end(), [&rot](CameraID cam)
 			{
-				cam->rotation(rot);
+				cam->rotationQ(rot);
 			}
 		);
 	}
@@ -564,7 +564,7 @@ namespace Scene
 	void Light::UpdateSpotShadowMapCameraTransformation()
 	{
 		auto& cam = shadowMapCameras.at(0);
-		cam->rotation(rotation());
+		cam->rotationQ(rotationQ());
 		cam->position(position());
 	}
 

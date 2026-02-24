@@ -85,8 +85,11 @@ namespace Scene {
 
 		Camera(SceneUnitId id, nlohmann::json& json);
 		~Camera() { Destroy(); }
+
 		XMVECTOR positionV();
+		void updateRotationQ();
 		XMVECTOR rotationQ();
+		void rotationQ(XMVECTOR q);
 		XMVECTOR forward();
 		XMVECTOR up();
 		XMVECTOR right();
@@ -116,6 +119,7 @@ namespace Scene {
 		void UpdateProjection();
 
 		virtual void Initialize();
+		virtual void SetInitialConditions();
 		virtual void BindToScene();
 		virtual void Bind(JUUID uuid);
 		void BindRenderable(RenderableID renderable);
@@ -132,12 +136,7 @@ namespace Scene {
 		void RenderReady(bool value);
 		void Render();
 
-		//projection
-		CameraProjections::Perspective perspectiveProjection;
-		CameraProjections::Orthographic orthographicProjection;
-
 		//Bounding Frustum
-		BoundingFrustum boundingFrustum;
 		void CalculateBoundingFrustum();
 
 		void Destroy();
@@ -189,8 +188,10 @@ namespace Scene {
 		virtual void WriteJson(nlohmann::json& j);
 #endif
 
-		//Destroy
+		//State
 		bool markedForDelete = false;
+		//Transformation
+		XMVECTOR rotationQuaternion;
 		//Render
 		bool renderReady = false;
 		//render passes instances
@@ -205,6 +206,11 @@ namespace Scene {
 		//lights shadowmaps
 		ConstantsBufferID shadowMapsCB;
 		std::set<LightID> lightsWithShadowMaps;
+		//projection
+		CameraProjections::Perspective perspectiveProjection;
+		CameraProjections::Orthographic orthographicProjection;
+		//Bounding Frustum
+		BoundingFrustum boundingFrustum;
 #if defined(_EDITOR)
 		unsigned int previewRenderPassIndex = 0U;
 		unsigned int previewRenderToTextureIndex = 0U;

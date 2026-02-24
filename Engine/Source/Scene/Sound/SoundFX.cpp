@@ -70,6 +70,20 @@ namespace Scene
 #include <JEnd.h>
 	}
 
+	void SoundFX::create_rotation(XMFLOAT3 v)
+	{
+		if (!contains("rotation"))
+		{
+			rotation(v);
+		}
+	}
+
+	void SoundFX::rotation(XMFLOAT3 v)
+	{
+		(*this)["rotation"] = FromXMFLOAT3(v);
+		updateRotationQ();
+	}
+
 #if defined(_EDITOR)
 	void SoundFX::WriteJson(nlohmann::json& j)
 	{
@@ -94,6 +108,12 @@ namespace Scene
 			RegisterBillboard(unit, uuid());
 		}
 #endif
+		SetInitialConditions();
+	}
+
+	void SoundFX::SetInitialConditions()
+	{
+		updateRotationQ();
 	}
 
 	void SoundFX::BindToScene()
@@ -209,20 +229,26 @@ namespace Scene
 #include <JEnd.h>
 	}
 
+	void SoundFX::updateRotationQ()
+	{
+		XMFLOAT3 v = rotation();
+		rotationQuaternion = XMQuaternionRotationRollPitchYaw(
+			XMConvertToRadians(v.x),
+			XMConvertToRadians(v.y),
+			XMConvertToRadians(v.z)
+		);
+	}
+
 	XMVECTOR SoundFX::rotationQ()
 	{
-		XMFLOAT3 rotV = rotation();
-		float roll, pitch, yaw;
-		pitch = rotV.x; yaw = rotV.y; roll = rotV.z;
-		XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll));
-		return rotQ;
+		return rotationQuaternion;
 	}
 
 	XMMATRIX SoundFX::world()
 	{
 		XMFLOAT3 posV = position();
 		XMMATRIX rotationM = XMMatrixRotationQuaternion(rotationQ());
-		XMMATRIX positionM = XMMatrixTranslationFromVector({ posV.x, posV.y, posV.z });
+		XMMATRIX positionM = XMMatrixTranslationFromVector(XMLoadFloat3(&posV));
 		return XMMatrixMultiply(rotationM, positionM);
 	}
 
@@ -295,6 +321,16 @@ namespace Scene
 		auto& SoundFxs = SoundEffects.at(id);
 		std::set<SoundFXID> sfxs;
 		std::transform(SoundFxs.begin(), SoundFxs.end(), std::inserter(sfxs, sfxs.end()), [&](auto o) { return MAKESUUUID(id, o); });
+
+		//update the rotation quaternion if the rotation attribute is dirty
+		for (auto sfx : sfxs)
+		{
+			if (sfx->dirty(SoundFX::Update_rotation))
+			{
+				sfx->updateRotationQ();
+				sfx->clean(SoundFX::Update_rotation);
+			}
+		}
 
 		std::for_each(sfxs.begin(), sfxs.end(), [step](auto sfx)
 			{

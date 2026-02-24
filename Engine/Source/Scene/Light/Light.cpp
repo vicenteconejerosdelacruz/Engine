@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Light.h"
 #include <Scene.h>
+#include <NoMath.h>
 
 #if defined(_EDITOR)
 namespace Editor
@@ -57,6 +58,20 @@ namespace Scene
 #include <JEnd.h>
 	}
 
+	void Light::create_rotation(XMFLOAT3 v)
+	{
+		if (!contains("rotation"))
+		{
+			rotation(v);
+		}
+	}
+
+	void Light::rotation(XMFLOAT3 v)
+	{
+		(*this)["rotation"] = FromXMFLOAT3(v);
+		updateRotationQ();
+	}
+
 #if defined(_EDITOR)
 	void Light::WriteJson(nlohmann::json& j)
 	{
@@ -86,6 +101,12 @@ namespace Scene
 			RegisterBillboard(unit, uuid());
 		}
 #endif
+		SetInitialConditions();
+	}
+
+	void Light::SetInitialConditions()
+	{
+		updateRotationQ();
 	}
 
 	void Light::BindToScene()
@@ -154,26 +175,51 @@ namespace Scene
 #include <JEnd.h>
 	}
 
+	XMVECTOR Light::positionV()
+	{
+		XMFLOAT3 pos = position();
+		return XMLoadFloat3(&pos);
+	}
+
+	void Light::updateRotationQ()
+	{
+		XMFLOAT3 v = rotation();
+		rotationQuaternion = XMQuaternionRotationRollPitchYaw(
+			XMConvertToRadians(v.x),
+			XMConvertToRadians(v.y),
+			XMConvertToRadians(v.z)
+		);
+		for (auto c : shadowMapCameras)
+		{
+			c->rotationQ(rotationQuaternion);
+		}
+	}
+
+	XMVECTOR Light::rotationQ()
+	{
+		return rotationQuaternion;
+	}
+
+	void Light::rotationQ(XMVECTOR q)
+	{
+		rotationQuaternion = q;
+		for (auto c : shadowMapCameras)
+		{
+			c->rotationQ(rotationQuaternion);
+		}
+	}
+
 	XMMATRIX Light::world()
 	{
-		XMFLOAT3 posV = position();
-		XMFLOAT3 rotV = rotation();
-		float roll, pitch, yaw;
-		pitch = rotV.x; yaw = rotV.y; roll = rotV.z;
-		XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll));
-		XMMATRIX rotationM = XMMatrixRotationQuaternion(rotQ);
-		XMMATRIX positionM = XMMatrixTranslationFromVector({ posV.x, posV.y, posV.z });
+		XMMATRIX rotationM = XMMatrixRotationQuaternion(rotationQ());
+		XMMATRIX positionM = XMMatrixTranslationFromVector(positionV());
 		return XMMatrixMultiply(rotationM, positionM);
 	}
 
 	XMVECTOR Light::fw()
 	{
 		FXMVECTOR dir = { 0.0f, 0.0f, 1.0f,0.0f };
-		XMFLOAT3 rotV = rotation();
-		float roll, pitch, yaw;
-		pitch = rotV.x; yaw = rotV.y; roll = rotV.z;
-		XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll));
-		XMVECTOR fw = XMVector3Normalize(XMVector3Rotate(dir, rotQ));
+		XMVECTOR fw = XMVector3Normalize(XMVector3Rotate(dir, rotationQ()));
 		return fw;
 	}
 
@@ -420,6 +466,7 @@ namespace Scene
 			}
 			for (auto l : lightsToUpdateTransformation)
 			{
+				l->updateRotationQ();
 				l->UpdateShadowMapCameraTransformation();
 			}
 		}

@@ -162,7 +162,7 @@ namespace Scene
 		bool RenderReady();
 		void RenderReady(bool value);
 
-		void rotationQ(XMFLOAT4 q);
+		void updateRotationQ();
 		XMVECTOR rotationQ();
 		XMMATRIX world();
 
@@ -173,11 +173,12 @@ namespace Scene
 		virtual void WriteJson(nlohmann::json& j);
 #endif
 
-		//Destroy
+		//State
 		bool markedForDelete = false;
-		//Render
 		bool renderReady = false;
 		bool renderException = false;
+		//Transformation
+		XMVECTOR rotationQuaternion;
 		//Model3D
 		Model3DInstanceID model3D;
 		//Meshes

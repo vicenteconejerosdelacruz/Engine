@@ -5,6 +5,7 @@
 #include <DeviceUtils/RootSignature/RootSignature.h>
 #include <DeviceUtils/PipelineState/PipelineState.h>
 #include <Renderable/RenderableBoundingBox.h>
+#include <NoMath.h>
 
 extern std::unique_ptr<Renderer> renderer;
 
@@ -62,6 +63,20 @@ namespace Scene
 #include <JEnd.h>
 	}
 
+	void Renderable::create_rotation(XMFLOAT3 v)
+	{
+		if (!contains("rotation"))
+		{
+			rotation(v);
+		}
+	}
+
+	void Renderable::rotation(XMFLOAT3 v)
+	{
+		(*this)["rotation"] = FromXMFLOAT3(v);
+		updateRotationQ();
+	}
+
 #if defined(_EDITOR)
 	void Renderable::WriteJson(nlohmann::json& j)
 	{
@@ -106,6 +121,8 @@ namespace Scene
 			SetCurrentAnimation(animationSequence(), animationTime(), animationTimeFactor(), animationPlay(), animationLoop());
 			StepAnimation(0.0f); //take an empty T-Pose step so the skinning can be performed
 		}
+
+		updateRotationQ();
 	}
 
 	void Renderable::BindToScene()
@@ -215,27 +232,28 @@ namespace Scene
 		Scene::UnbindFromScene(unit, uuid(), cuuid);
 	}
 
-	void Renderable::rotationQ(XMFLOAT4 q)
+	void Renderable::updateRotationQ()
 	{
-		rotation(Quaternion2Euler(XMLoadFloat4(&q)));
+		XMFLOAT3 v = rotation();
+		rotationQuaternion = XMQuaternionRotationRollPitchYaw(
+			XMConvertToRadians(v.x),
+			XMConvertToRadians(v.y),
+			XMConvertToRadians(v.z)
+		);
 	}
 
 	XMVECTOR Renderable::rotationQ()
 	{
-		XMFLOAT3 rotV = rotation();
-		float roll, pitch, yaw;
-		pitch = rotV.x; yaw = rotV.y; roll = rotV.z;
-		XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll));
-		return rotQ;
+		return rotationQuaternion;
 	}
 
 	XMMATRIX Renderable::world()
 	{
 		XMFLOAT3 posV = position();
 		XMFLOAT3 scaleV = scale();
-		XMMATRIX rotationM = XMMatrixRotationQuaternion(rotationQ());
-		XMMATRIX scaleM = XMMatrixScalingFromVector({ scaleV.x, scaleV.y, scaleV.z });
-		XMMATRIX positionM = XMMatrixTranslationFromVector({ posV.x, posV.y, posV.z });
+		XMMATRIX rotationM = XMMatrixRotationQuaternion(rotationQuaternion);
+		XMMATRIX scaleM = XMMatrixScalingFromVector(XMLoadFloat3(&scaleV));
+		XMMATRIX positionM = XMMatrixTranslationFromVector(XMLoadFloat3(&posV));
 		XMMATRIX worldM = XMMatrixMultiply(XMMatrixMultiply(scaleM, rotationM), positionM);
 		return (!animationUseTransformation()) ? worldM : XMMatrixMultiply(animationTransformation, worldM);
 	}
@@ -835,18 +853,29 @@ namespace Scene
 		std::set<RenderableID> r;
 		std::transform(Renderables.begin(), Renderables.end(), std::inserter(r, r.begin()), [&](auto o) { return MAKESUUUID(unit, o); });
 
+		std::set<RenderableID> cleanRot;
+		std::for_each(r.begin(), r.end(), [&](auto& o)
+			{
+				if (o->dirty(Renderable::Update_rotation))
+				{
+					o->updateRotationQ();
+					cleanRot.insert(o);
+				}
+			}
+		);
+
 		std::set<RenderableID> rGPose;
 		std::copy_if(r.begin(), r.end(), std::inserter(rGPose, rGPose.begin()), [](auto& o)
 			{
 				bool updated = o->dirty(Renderable::Update_position) || o->dirty(Renderable::Update_rotation);
-				o->clean(Renderable::Update_position);
-				o->clean(Renderable::Update_rotation);
 				return updated && !o->at("physicObject").empty();
 			}
 		);
 
 		for (auto& rp : rGPose)
 		{
+			rp->clean(Renderable::Update_position);
+			rp->clean(Renderable::Update_rotation);
 			for (PhysicObjectID phO : GetPhysicsObjectsBySceneObjectUUID(rp->SUuuid()))
 			{
 				phO->UpdateGlobalPoseFromRenderable();
@@ -942,6 +971,11 @@ namespace Scene
 					}
 				}
 			);
+		}
+
+		for (auto o : cleanRot)
+		{
+			o->clean(Renderable::Update_rotation);
 		}
 
 		std::set<RenderableID> todelete;

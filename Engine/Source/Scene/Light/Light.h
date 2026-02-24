@@ -174,11 +174,16 @@ namespace Scene {
 
 		void Destroy();
 
+		XMVECTOR positionV();
+		void updateRotationQ();
+		XMVECTOR rotationQ();
+		void rotationQ(XMVECTOR q);
 		XMMATRIX world();
 		XMVECTOR fw();
 
 		//CREATE
 		virtual void Initialize();
+		virtual void SetInitialConditions();
 		virtual void BindToScene();
 		void BindCameras();
 		void BindCamera(CameraID camera);
@@ -238,6 +243,8 @@ namespace Scene {
 
 		bool markedForDelete = false;
 		bool renderReady = false;
+		//Transformation
+		XMVECTOR rotationQuaternion;
 		//Camera
 		unsigned int shadowMapIndex = 0xFFFFFFFF;
 		std::vector<CameraID> shadowMapCameras;

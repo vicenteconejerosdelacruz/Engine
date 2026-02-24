@@ -159,9 +159,9 @@ inline void EditorDrawFloatArray(std::string attribute, std::vector<JObject*>& j
 	ImGui::PopID();
 }
 
-inline void EditorDrawFloatAngleArray(std::string attribute, std::vector<JObject*>& json, std::vector<std::string> labels, const char* format = "%.3f")
+inline void EditorDrawFloatAngleArray(std::string attribute, std::vector<JObject*>& json, std::vector<std::string> labels, const char* format = "%.3f", std::function<void(JObject*)> onUpdate = [](JObject*) {})
 {
-	auto updateValues = [&json, attribute](unsigned int i, float value)
+	auto updateValues = [&json, attribute, onUpdate](unsigned int i, float value)
 		{
 			for (auto& j : json)
 			{
@@ -169,6 +169,7 @@ inline void EditorDrawFloatAngleArray(std::string attribute, std::vector<JObject
 				cpy.at(i) = XMConvertToDegrees(value);
 				nlohmann::json patch = { { attribute, cpy } };
 				j->JUpdate(patch);
+				onUpdate(j);
 			}
 		};
 
@@ -688,7 +689,13 @@ inline JEdvEditorDrawerFunction DrawEnum<LightType, jedv_t_lighttype>(
 			auto drawRotation = [](auto& light)
 				{
 					std::vector<JObject*> lightV = { light };
-					EditorDrawFloatAngleArray("rotation", lightV, { "pitch","yaw","roll" });
+					EditorDrawFloatAngleArray("rotation", lightV, { "pitch","yaw","roll" }, "%.3f",
+						[&](JObject*)
+						{
+							light->updateRotationQ();
+							Editor::WriteSceneUnitDirectionalShadowMapAttributes(Editor::currentSceneUnitId);
+						}
+					);
 				};
 			auto drawColor = [](auto& light)
 				{

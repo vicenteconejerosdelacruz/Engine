@@ -52,11 +52,13 @@ namespace Scene
 		SoundFX(SceneUnitId id, nlohmann::json& json);
 		~SoundFX() { Destroy(); }
 		virtual void Initialize();
+		virtual void SetInitialConditions();
 		virtual void BindToScene();
 		virtual void UnbindFromScene();
 
 		void Destroy();
 
+		void updateRotationQ();
 		XMVECTOR rotationQ();
 		XMMATRIX world();
 		XMVECTOR fw();
@@ -89,7 +91,8 @@ namespace Scene
 		bool markedForDelete = false;
 		float time = 0.0f;
 		bool hasStarted = false;
-		//3D
+		//Transformation
+		XMVECTOR rotationQuaternion;
 		AudioEmitter audioEmitter;
 		SoundInstance soundEffectInstance;
 	};

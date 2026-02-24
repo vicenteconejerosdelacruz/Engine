@@ -63,6 +63,20 @@ namespace Scene
 #include <JEnd.h>
 	}
 
+	void Camera::create_rotation(XMFLOAT3 v)
+	{
+		if (!contains("rotation"))
+		{
+			rotation(v);
+		}
+	}
+
+	void Camera::rotation(XMFLOAT3 v)
+	{
+		(*this)["rotation"] = FromXMFLOAT3(v);
+		updateRotationQ();
+	}
+
 #if defined(_EDITOR)
 	void Camera::WriteJson(nlohmann::json& j)
 	{
@@ -97,21 +111,38 @@ namespace Scene
 			CreateLightsConstantsBuffer();
 			CreateShadowMapsConstantsBuffer();
 		}
+		SetInitialConditions();
+	}
+
+	void Camera::SetInitialConditions()
+	{
+		updateRotationQ();
 	}
 
 	XMVECTOR Camera::positionV()
 	{
 		XMFLOAT3 pos = position();
-		return { pos.x,pos.y,pos.z,0.0f };
+		return XMLoadFloat3(&pos);
+	}
+
+	void Camera::updateRotationQ()
+	{
+		XMFLOAT3 v = rotation();
+		rotationQuaternion = XMQuaternionRotationRollPitchYaw(
+			XMConvertToRadians(v.x),
+			XMConvertToRadians(v.y),
+			XMConvertToRadians(v.z)
+		);
 	}
 
 	XMVECTOR Camera::rotationQ()
 	{
-		XMFLOAT3 rotV = rotation();
-		float roll, pitch, yaw;
-		pitch = rotV.x; yaw = rotV.y; roll = rotV.z;
-		XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll));
-		return rotQ;
+		return rotationQuaternion;
+	}
+
+	void Camera::rotationQ(XMVECTOR q)
+	{
+		rotationQuaternion = q;
 	}
 
 	XMVECTOR Camera::forward()
@@ -164,13 +195,8 @@ namespace Scene
 
 	XMMATRIX Camera::world()
 	{
-		XMFLOAT3 posV = position();
-		XMFLOAT3 rotV = rotation();
-		float roll, pitch, yaw;
-		pitch = rotV.x; yaw = rotV.y; roll = rotV.z;
-		XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll));
-		XMMATRIX rotationM = XMMatrixRotationQuaternion(rotQ);
-		XMMATRIX positionM = XMMatrixTranslationFromVector({ posV.x, posV.y, posV.z });
+		XMMATRIX rotationM = XMMatrixRotationQuaternion(rotationQ());
+		XMMATRIX positionM = XMMatrixTranslationFromVector(positionV());
 		return XMMatrixMultiply(rotationM, positionM);
 	}
 
@@ -664,7 +690,12 @@ namespace Scene
 
 	void Camera::Rotate(float dx, float dy)
 	{
-		rotation(rotation() + XMFLOAT3{ dy, dx, 0.0f });
+		XMVECTOR upV = { 0.0f,1.0f,0.0f,0.0f }; // we just use the up vecetor in order to avoid roll rotations
+		XMVECTOR rightV = -right();
+		XMVECTOR rotQYaw = XMQuaternionRotationAxis(upV, XMConvertToRadians(dx));
+		XMVECTOR rotQPitch = XMQuaternionRotationAxis(rightV, XMConvertToRadians(dy));
+		rotationQuaternion = XMQuaternionMultiply(rotationQuaternion, XMQuaternionMultiply(rotQPitch, rotQYaw));
+
 		UdateLightRotation();
 	}
 
@@ -705,20 +736,18 @@ namespace Scene
 
 		LightID lcam = MAKESUUUID(unit, shadowMapLight());
 
-		XMFLOAT3 rot = rotation();
-
 		switch (lcam->lightType())
 		{
 		case LT_Directional:
 		{
-			lcam->rotation(rot);
+			lcam->rotationQ(rotationQ());
 			XMVECTOR camPos = XMVectorScale(XMVector3Normalize(forward()), lcam->dirDist());
 			position(*(XMFLOAT3*)camPos.m128_f32);
 		}
 		break;
 		case LT_Spot:
 		{
-			lcam->rotation(rot);
+			lcam->rotationQ(rotationQ());
 		}
 		break;
 		}
@@ -950,6 +979,16 @@ namespace Scene
 		auto& Cameras = GetCameras(id);
 		std::set<CameraID> cams;
 		std::transform(Cameras.begin(), Cameras.end(), std::inserter(cams, cams.begin()), [&](auto o) { return MAKESUUUID(id, o); });
+
+		//update rotation quaternion
+		for (auto cam : cams)
+		{
+			if (cam->dirty(Camera::Update_rotation))
+			{
+				cam->updateRotationQ();
+				cam->clean(Camera::Update_rotation);
+			}
+		}
 
 		//we construct the set of cameras with dirty render passes
 		std::set<CameraID> dirtyPassesCams;

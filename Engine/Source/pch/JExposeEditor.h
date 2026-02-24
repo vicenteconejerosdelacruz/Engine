@@ -43,6 +43,7 @@ namespace Editor
 	extern void MarkScenePanelAssetsAsDirty();
 	extern void MarkSceneUnitAsModified(SceneUnitId id);
 	extern void OpenAnimationSequencer(std::string uuid);
+	extern void WriteSceneUnitDirectionalShadowMapAttributes(SceneUnitId id);
 };
 
 namespace Game
