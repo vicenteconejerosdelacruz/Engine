@@ -165,7 +165,7 @@ namespace Game
 		right = XMVectorScale(right, -leftStick.m128_f32[0]);
 
 		XMVECTOR disp = fw + right;
-		disp += {0.0f, -0.01f + downSpeed * delta, 0.0f};
+		disp += {0.0f, fixedDownDisplacement() + downSpeed * delta, 0.0f};
 		disp *= speed();
 		PxControllerCollisionFlags colFlag = physicObject->MoveCharacter(disp, delta);
 		touchingDown = !!(colFlag & PxControllerCollisionFlag::Enum::eCOLLISION_DOWN);
