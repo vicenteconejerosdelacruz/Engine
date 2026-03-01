@@ -109,8 +109,10 @@ namespace Scene::Level
 		}
 	}
 
+	static std::mutex loadLevelMutex;
 	void LoadLevel(std::unique_ptr<SceneUnit>& scene, std::string filename, nlohmann::json data, std::function<void(std::string, unsigned int, unsigned int)> progress)
 	{
+		std::lock_guard<std::mutex> lock(loadLevelMutex);
 		using namespace Scene;
 #if defined(_EDITOR)
 		using namespace Editor;

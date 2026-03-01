@@ -362,10 +362,8 @@ namespace Scene
 	}
 
 
-	static std::mutex bindMutex;
 	void BindSceneObjects(SceneUnitId id)
 	{
-		std::lock_guard<std::mutex> lock(bindMutex);
 		std::unordered_map<SceneObjectType, std::function<void(SceneUnitId, JUUID)>> typeBinder =
 		{
 			{
