@@ -52,5 +52,5 @@ namespace DeviceUtils
 	::CD3DX12_GPU_DESCRIPTOR_HANDLE GetGpuDescriptorHandle(ConstantsBufferID constantsBuffer, unsigned int index);
 };
 
-using namespace DeviceUtils;
-DEF_TEMPLATE_ID_HASH(ConstantsBuffer);
+//using namespace DeviceUtils;
+//DEF_TEMPLATE_ID_HASH(ConstantsBuffer);

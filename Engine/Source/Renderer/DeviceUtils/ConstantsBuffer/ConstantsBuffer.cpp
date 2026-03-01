@@ -11,7 +11,8 @@ extern std::unique_ptr<Renderer> renderer;
 namespace DeviceUtils
 {
 	std::unique_ptr<DescriptorHeap> csuDescriptorHeap;
-	static std::unordered_map<ConstantsBufferID, std::unique_ptr<ConstantsBuffer>> constantsBuffers;
+	//static std::unordered_map<ConstantsBufferID, std::unique_ptr<ConstantsBuffer>> constantsBuffers;
+	static std::map<ConstantsBufferID, std::unique_ptr<ConstantsBuffer>> constantsBuffers;
 
 	void CreateCSUDescriptorHeap(unsigned int numFrames) {
 		csuDescriptorHeap = std::make_unique<DescriptorHeap>();
@@ -108,9 +109,9 @@ namespace DeviceUtils
 		return constantsBuffer->gpu_xhandle[index];
 	}
 
-	std::unique_ptr<ConstantsBuffer>& GetConstantsBuffer(JUUID ConstantsBufferID)
+	std::unique_ptr<ConstantsBuffer>& GetConstantsBuffer(JUUID uuid)
 	{
-		return constantsBuffers.at(ConstantsBufferID);
+		return constantsBuffers.at(uuid);
 	}
 
 	void ConstantsBuffer::SetRootDescriptorTable(CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int& cbvSlot, unsigned int backBufferIndex)
