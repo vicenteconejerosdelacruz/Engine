@@ -117,5 +117,6 @@ return creatorValidator; }
 #undef JEXPOSE_MAP_TRANSFORM
 #undef JEXPOSE_MAP_OBJECT
 #undef JEXPOSE_VECTOR_OBJECT
+#undef JEXPOSE_FLAG
 #undef JPREVIEW
 #undef JTRACKUUID

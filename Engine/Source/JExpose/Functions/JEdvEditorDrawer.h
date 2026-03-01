@@ -15,6 +15,104 @@ JEdvEditorDrawerFunction DrawVector() { return nullptr; }
 template<typename Ta, typename Tb>
 JEdvEditorDrawerFunction DrawMap() { return nullptr; }
 
+inline JEdvEditorDrawerFunction DrawFlags(std::vector<std::string> flags)
+{
+	return[=](std::string attribute, std::vector<JObject*>& json)
+		{
+			enum flagValues
+			{
+				FV_On,
+				FV_Off,
+				FV_Diff
+			};
+			auto turnOffFlag = [&](unsigned int flag)
+				{
+					unsigned int notFlag = ~flag;
+					for (auto& j : json)
+					{
+						unsigned int value = notFlag & j->at(attribute);
+						nlohmann::json patch = { {attribute,value} };
+						j->JUpdate(patch);
+					}
+				};
+			auto turnOnFlag = [&](unsigned int flag)
+				{
+					for (auto& j : json)
+					{
+						unsigned int value = flag | j->at(attribute);
+						nlohmann::json patch = { {attribute,value} };
+						j->JUpdate(patch);
+					}
+				};
+			auto getFlagValue = [&](unsigned int flag)
+				{
+					unsigned int offValues = 0U;
+					unsigned int onValues = 0U;
+					for (auto& j : json)
+					{
+						unsigned int value = flag & j->at(attribute);
+						if (value)
+							onValues++;
+						else
+							offValues++;
+					}
+					if (offValues != 0 && onValues != 0) return FV_Diff;
+					if (offValues == 0) return FV_On;
+					if (onValues == 0) return FV_Off;
+				};
+
+			ImGui::PushID(attribute.c_str());
+			if (ImGui::CollapsingHeader(attribute.c_str()))
+			{
+				std::string tableName = "tables-" + attribute + "-table";
+				if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+				{
+					unsigned int flagV = 1;
+					for (unsigned int i = 0; i < flags.size(); i++)
+					{
+						ImGui::TableNextRow();
+						ImGui::TableSetColumnIndex(0);
+						ImGui::Text(flags.at(i).c_str());
+
+						ImGui::TableSetColumnIndex(1);
+						ImGui::PushID(std::string(attribute + "-" + std::to_string(i)).c_str());
+						flagValues value = getFlagValue(flagV);
+						if (value == FV_On)
+						{
+							bool vtrue = true;
+							if (ImGui::Checkbox("", &vtrue))
+							{
+								turnOffFlag(flagV);
+							}
+						}
+						else if (value == FV_Off)
+						{
+							bool vfalse = false;
+							if (ImGui::Checkbox("", &vfalse))
+							{
+								turnOnFlag(flagV);
+							}
+						}
+						else if (value == FV_Diff)
+						{
+							bool vfalse = false;
+							if (ImGui::Checkbox("(*)", &vfalse))
+							{
+								turnOnFlag(flagV);
+							}
+						}
+						ImGui::PopID();
+						flagV <<= 1;
+					}
+
+
+					ImGui::EndTable();
+				}
+			}
+			ImGui::PopID();
+		};
+}
+
 template<typename E, JsonToEditorValueType J>
 JEdvEditorDrawerFunction DrawEnum(
 	std::unordered_map<E, std::string>& EtoS,
