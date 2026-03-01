@@ -1173,9 +1173,9 @@ namespace Editor
 
 			cursorPos.x += 55.0f;
 			ImGui::SetCursorPos(cursorPos);
-			if (ImGui::Button("Open"))
-			{
-				ImGui::DrawItemWithEnabledState([&]
+			ImGui::DrawItemWithEnabledState([&]
+				{
+					if (ImGui::Button("Open"))
 					{
 						ImGui::OpenFile([&](std::filesystem::path p)
 							{
@@ -1186,10 +1186,8 @@ namespace Editor
 								SaveWorkbench(workbenchSelectedLevel);
 								LoadLevelIntoSceneUnit(workbenchSelectedLevel, [&]() { return GetLevelFromFile(workbenchSelectedLevel); }, OnLevelLoaded, LevelLoadingProgress);
 							}, defaultLevelsFolder);
-					},
-					!loadingProgress.loading
-				);
-			}
+					}
+				}, !loadingProgress.loading);
 
 			ImGui::SameLine();
 			ImGui::DrawItemWithEnabledState([&]
