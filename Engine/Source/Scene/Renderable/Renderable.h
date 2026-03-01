@@ -74,6 +74,12 @@ namespace Scene
 		//lifecycle
 		Renderable(SceneUnitId id, nlohmann::json& json);
 		~Renderable() { Destroy(); }
+
+		XMVECTOR positionV();
+		void updateRotationQ();
+		XMVECTOR rotationQ();
+		XMMATRIX world();
+
 		virtual void Initialize();
 		virtual void SetInitialConditions();
 		virtual void BindToScene();
@@ -162,9 +168,6 @@ namespace Scene
 		bool RenderReady();
 		void RenderReady(bool value);
 
-		void updateRotationQ();
-		XMVECTOR rotationQ();
-		XMMATRIX world();
 
 #if defined(_EDITOR)
 		std::function<void()> OnPick;

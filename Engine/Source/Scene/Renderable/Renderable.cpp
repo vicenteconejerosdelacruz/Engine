@@ -232,6 +232,12 @@ namespace Scene
 		Scene::UnbindFromScene(unit, uuid(), cuuid);
 	}
 
+	XMVECTOR Renderable::positionV()
+	{
+		XMFLOAT3 pos = position();
+		return XMLoadFloat3(&pos);
+	}
+
 	void Renderable::updateRotationQ()
 	{
 		XMFLOAT3 v = rotation();
