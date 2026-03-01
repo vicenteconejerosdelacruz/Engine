@@ -16,8 +16,10 @@ namespace Editor
 	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 	extern bool TriggersShouldDraw(SceneUnitId id);
+	extern bool CharactersShouldDraw(SceneUnitId id);
 	extern bool IsPlaying(SceneUnitId id);
 	extern std::set<TriggerID> GetTriggers(SceneUnitId id);
+	extern std::set<PhysicObjectID> GetPhysicsObjects(SceneUnitId id);
 }
 #endif
 namespace Scene
@@ -123,6 +125,13 @@ namespace Scene
 	{
 		XMFLOAT3 pos = position();
 		return XMLoadFloat3(&pos);
+	}
+
+	void Camera::positionV(XMVECTOR v)
+	{
+		XMFLOAT3 pos;
+		XMStoreFloat3(&pos, v);
+		position(pos);
 	}
 
 	void Camera::updateRotationQ()
@@ -583,14 +592,25 @@ namespace Scene
 
 				bool drawTriggers = TriggersShouldDraw(unit);
 				std::set<TriggerID> triggers;
-				if (drawTriggers)
+				//if (drawTriggers)
+				//{
+				triggers = Editor::GetTriggers(unit);
+				for (auto trg : triggers)
 				{
-					triggers = Editor::GetTriggers(unit);
-					for (auto trg : triggers)
-					{
-						trg->visible(false);
-					}
+					trg->visible(false);
 				}
+				//}
+
+				bool drawCharacters = CharactersShouldDraw(unit);
+				std::set<PhysicObjectID> physicObjects;
+				//if (drawCharacters)
+				//{
+				physicObjects = Editor::GetPhysicsObjects(unit);
+				for (auto phO : physicObjects)
+				{
+					phO->visible_character(false);
+				}
+				//}
 #endif
 				for (auto it = renVecSet.begin(); it != renVecSet.end(); it++)
 				{
@@ -601,20 +621,32 @@ namespace Scene
 				}
 
 #if defined(_EDITOR)
-				if (drawTriggers)
+				for (auto trg : triggers)
 				{
-					for (auto trg : triggers)
-					{
-						trg->visible(true);
-						if (IsPlaying(unit))
-							continue;
-						RenderableID shape = trg->renderableShape;
-						RenderableID lines = trg->renderableLines;
-						if (shape->checkBoundingBox() && boundingFrustum.Contains(shape->GetBoundingBox()) == ContainmentType::DISJOINT)
-							continue;
-						shape->Render(unit, rpi, SUuuid());
-						lines->Render(unit, rpi, SUuuid());
-					}
+					trg->visible(true);
+					if (!drawTriggers) continue;
+					//if (IsPlaying(unit))
+					//	continue;
+					RenderableID shape = trg->renderableShape;
+					RenderableID lines = trg->renderableLines;
+					if (shape->checkBoundingBox() && boundingFrustum.Contains(shape->GetBoundingBox()) == ContainmentType::DISJOINT)
+						continue;
+					shape->Render(unit, rpi, SUuuid());
+					lines->Render(unit, rpi, SUuuid());
+				}
+
+				for (auto phO : physicObjects)
+				{
+					phO->visible_character(true);
+					if (!drawCharacters) continue;
+					//if (IsPlaying(unit))
+					//	continue;
+					RenderableID shape = phO->controllerRenderableShape;
+					RenderableID lines = phO->controllerRenderableLines;
+					if (shape->checkBoundingBox() && boundingFrustum.Contains(shape->GetBoundingBox()) == ContainmentType::DISJOINT)
+						continue;
+					shape->Render(unit, rpi, SUuuid());
+					lines->Render(unit, rpi, SUuuid());
 				}
 #endif
 			};
@@ -690,13 +722,13 @@ namespace Scene
 
 	void Camera::Rotate(float dx, float dy)
 	{
-		XMVECTOR upV = { 0.0f,1.0f,0.0f,0.0f }; // we just use the up vecetor in order to avoid roll rotations
+		XMVECTOR upV = { 0.0f,1.0f,0.0f,0.0f }; // we just use the up vector in order to avoid roll rotations
 		XMVECTOR rightV = -right();
 		XMVECTOR rotQYaw = XMQuaternionRotationAxis(upV, XMConvertToRadians(dx));
 		XMVECTOR rotQPitch = XMQuaternionRotationAxis(rightV, XMConvertToRadians(dy));
 		rotationQuaternion = XMQuaternionMultiply(rotationQuaternion, XMQuaternionMultiply(rotQPitch, rotQYaw));
 
-		UdateLightRotation();
+		UpdateLightRotation();
 	}
 
 	void Camera::UpdateLightPosition()
@@ -727,7 +759,7 @@ namespace Scene
 		}
 	}
 
-	void Camera::UdateLightRotation()
+	void Camera::UpdateLightRotation()
 	{
 		using namespace Scene;
 

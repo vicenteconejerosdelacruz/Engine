@@ -87,6 +87,7 @@ namespace Scene {
 		~Camera() { Destroy(); }
 
 		XMVECTOR positionV();
+		void positionV(XMVECTOR v);
 		void updateRotationQ();
 		XMVECTOR rotationQ();
 		void rotationQ(XMVECTOR q);
@@ -147,7 +148,7 @@ namespace Scene {
 		void MovePerpendicularFwAxis(float dx, float dy);
 		void Rotate(float dx, float dy);
 		void UpdateLightPosition();
-		void UdateLightRotation();
+		void UpdateLightRotation();
 		void MoveForward(float step);
 		void MoveBack(float step);
 		void MoveLeft(float step);
