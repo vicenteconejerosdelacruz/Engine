@@ -193,13 +193,46 @@ inline PxVec3 ToPxVec3(XMFLOAT3 v)
 	return PxVec3(v.x, v.y, v.z);
 }
 
+inline PxVec3 ToPxVec3(XMVECTOR v)
+{
+	return PxVec3(v.m128_f32[0], v.m128_f32[1], v.m128_f32[2]);
+}
+
+inline PxVec3d ToPxVec3d(XMFLOAT3 v)
+{
+	PxVec3d vd;
+	vd.x = v.x;
+	vd.y = v.y;
+	vd.z = v.z;
+	return vd;
+}
+
 inline PxQuat ToPxQuat(XMVECTOR Q)
 {
 	return PxQuat(Q.m128_f32[0], Q.m128_f32[1], Q.m128_f32[2], Q.m128_f32[3]);
 }
+
 inline PxQuat ToPxQuat(XMFLOAT3 euler)
 {
 	float roll, pitch, yaw;
 	pitch = euler.x; yaw = euler.y; roll = euler.z;
 	return ToPxQuat(XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll)));
+}
+
+inline XMVECTOR XMQuatFromDegrees(float pitch, float yaw, float roll)
+{
+	return XMQuaternionRotationRollPitchYaw(
+		XMConvertToRadians(pitch),
+		XMConvertToRadians(yaw),
+		XMConvertToRadians(roll)
+	);
+}
+
+inline XMVECTOR XMQuatFromDegrees(XMVECTOR Euler)
+{
+	return XMQuaternionRotationRollPitchYaw(
+		XMConvertToRadians(Euler.m128_f32[0]),
+		XMConvertToRadians(Euler.m128_f32[1]),
+		XMConvertToRadians(Euler.m128_f32[2])
+	);
 }
