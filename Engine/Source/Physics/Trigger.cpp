@@ -103,6 +103,11 @@ namespace Scene
 
 	void Trigger::Destroy()
 	{
+		if (!physicObject.empty())
+		{
+			DestroyPhysicObject(physicObject());
+		}
+
 #include <Attributes/JDestroy.h>
 #include <TriggerAtt.h>
 #include <JEnd.h>
@@ -357,13 +362,27 @@ namespace Scene
 
 	void DestroyTriggers()
 	{
+		for (auto& [id, container] : TriggerSUsceneObjects)
+		{
+			for (auto& [uuid, _] : container)
+			{
+				TriggerID t = MAKESUUUID(id, uuid);
+				DeleteTriggerSceneObject(t);
+			}
+		}
 #include <TrackUUID/JClear.h>
 #include <TriggerAtt.h>
 #include <JEnd.h>
 	}
 
-	void DestroyTrigger(SceneUnitId id)
+	void DestroyTriggers(SceneUnitId id)
 	{
+		std::set<JUUID> uuids;
+		std::transform(TriggerSUsceneObjects.at(id).begin(), TriggerSUsceneObjects.at(id).end(), std::inserter(uuids, uuids.begin()), [](auto& pair) { return pair.first; });
+		for (auto& uuid : uuids)
+		{
+			DeleteTriggerSceneObject(MAKESUUUID(id, uuid));
+		}
 #include <TrackUUID/JClearUnit.h>
 #include <TriggerAtt.h>
 #include <JEnd.h>

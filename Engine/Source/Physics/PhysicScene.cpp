@@ -127,13 +127,27 @@ namespace Scene
 
 	void DestroyPhysicScenes()
 	{
+		for (auto& [id, container] : PhysicSceneSUsceneObjects)
+		{
+			for (auto& [uuid, _] : container)
+			{
+				PhysicSceneID ps = MAKESUUUID(id, uuid);
+				DeletePhysicSceneSceneObject(ps);
+			}
+		}
 #include <TrackUUID/JClear.h>
 #include <PhysicSceneAtt.h>
 #include <JEnd.h>
 	}
 
-	void DestroyPhysicScene(SceneUnitId id)
+	void DestroyPhysicScenes(SceneUnitId id)
 	{
+		std::set<JUUID> uuids;
+		std::transform(PhysicSceneSUsceneObjects.at(id).begin(), PhysicSceneSUsceneObjects.at(id).end(), std::inserter(uuids, uuids.begin()), [](auto& pair) { return pair.first; });
+		for (auto& uuid : uuids)
+		{
+			DeletePhysicSceneSceneObject(MAKESUUUID(id, uuid));
+		}
 #include <TrackUUID/JClearUnit.h>
 #include <PhysicSceneAtt.h>
 #include <JEnd.h>

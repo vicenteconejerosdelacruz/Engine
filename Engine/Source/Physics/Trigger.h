@@ -94,7 +94,7 @@ namespace Scene
 
 	void TriggersStep(SceneUnitId id, float dt);
 	void DestroyTriggers();
-	void DestroyTrigger(SceneUnitId id);
+	void DestroyTriggers(SceneUnitId id);
 	void DeleteTrigger(SceneUnitId id, JUUID uuid);
 #if defined(_EDITOR)
 	void WriteTriggersJson(SceneUnitId id, nlohmann::json& json);

@@ -395,7 +395,16 @@ namespace Physics
 
 	void PhysicObject::DestroyPhisicsBehavior()
 	{
-		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		PhysicSceneID scene;
+		if (!renderable.empty())
+		{
+			scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		}
+		if (!trigger.empty())
+		{
+			scene = MAKESUUUID(trigger.unit(), *GetPhysicScenes(trigger.unit()).begin());
+		}
+
 		if (actor)
 		{
 			actor->detachShape(*shape);

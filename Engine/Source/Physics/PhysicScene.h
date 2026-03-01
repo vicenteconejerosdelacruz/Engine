@@ -81,7 +81,7 @@ namespace Scene
 
 	void PhysicSceneStep(SceneUnitId id, float step);
 	void DestroyPhysicScenes();
-	void DestroyPhysicScene(SceneUnitId id);
+	void DestroyPhysicScenes(SceneUnitId id);
 	void DeletePhysicScene(SceneUnitId id, JUUID uuid);
 #if defined(_EDITOR)
 	void WritePhysicSceneJson(SceneUnitId id, nlohmann::json& json);

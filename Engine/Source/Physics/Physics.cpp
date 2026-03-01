@@ -43,6 +43,7 @@ namespace Physics
 	void DestroyPhysics()
 	{
 		//PX_RELEASE(gDispatcher);
+//		PX_RELEASE(gCudaContextManager);
 		PX_RELEASE(gPhysics);
 		if (gPvd)
 		{

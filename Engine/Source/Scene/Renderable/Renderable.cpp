@@ -727,6 +727,12 @@ namespace Scene
 				boundingBoxCompute.clear();
 			}
 		}
+
+		if (at("physicObject").is_string())
+		{
+			DestroyPhysicObject(at("physicObject"));
+		}
+
 #include <Attributes/JDestroy.h>
 #include <RenderableAtt.h>
 #include <JEnd.h>
