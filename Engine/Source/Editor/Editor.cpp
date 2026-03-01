@@ -1171,8 +1171,27 @@ namespace Editor
 				QuitEditor();
 			}
 
-			cursorPos.x += 100.0f;
+			cursorPos.x += 55.0f;
 			ImGui::SetCursorPos(cursorPos);
+			if (ImGui::Button("Open"))
+			{
+				ImGui::DrawItemWithEnabledState([&]
+					{
+						ImGui::OpenFile([&](std::filesystem::path p)
+							{
+								std::filesystem::path absfilepath = std::filesystem::current_path().append(defaultLevelsFolder);
+								std::filesystem::path rel = std::filesystem::relative(p, absfilepath);
+								workbenchSelectedLevel = rel.generic_string();
+								loadingProgress.LoadLevel(false, workbenchSelectedLevel);
+								SaveWorkbench(workbenchSelectedLevel);
+								LoadLevelIntoSceneUnit(workbenchSelectedLevel, [&]() { return GetLevelFromFile(workbenchSelectedLevel); }, OnLevelLoaded, LevelLoadingProgress);
+							}, defaultLevelsFolder);
+					},
+					!loadingProgress.loading
+				);
+			}
+
+			ImGui::SameLine();
 			ImGui::DrawItemWithEnabledState([&]
 				{
 					if (ImGui::Button("Default Level"))
