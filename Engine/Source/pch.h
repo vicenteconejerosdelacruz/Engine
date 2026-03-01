@@ -104,7 +104,7 @@ enum SceneObjectType {
 #include <locale>
 
 #if defined(_EDITOR)
-//#include <ShlObj.h>
+#include <ShlObj.h>
 #include <imgui.h>
 #include "misc/cpp/imgui_stdlib.h"
 #include "imgui_internal.h"
