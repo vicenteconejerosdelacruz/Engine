@@ -4,14 +4,26 @@
 //Physx
 #include <PxPhysicsAPI.h>
 
+#if defined(_EDITOR)
+namespace Editor
+{
+	extern bool CharactersShouldDraw(SceneUnitId id);
+	extern void RegisterCharacter(PhysicObjectID phO);
+	extern void UnRegisterCharacter(PhysicObjectID phO);
+	extern bool CharactersSceneUnitRegistered(SceneUnitId id);
+}
+#endif
+
 using namespace physx;
 extern PxPhysics* gPhysics;
 
 namespace Physics
 {
-	std::unordered_map<JUUID, std::unique_ptr<PhysicObject>> physicObjectsUUIDs;
-	std::unordered_map<SceneUnitId, std::set<JUUID>> physicObjectsBySceneUnitId;
-	std::unordered_map<SUUUID, std::set<JUUID>> physicObjectsUUIDBySUUUID;
+	std::map<JUUID, std::unique_ptr<PhysicObject>> physicObjectsUUIDs;
+	std::map<SceneUnitId, std::set<JUUID>> physicObjectsBySceneUnitId;
+	std::map<SUUUID, std::set<JUUID>> physicObjectsUUIDBySUUUID;
+	std::map<SUUUID, JUUID> physicCharacterUUIDBySUUID;
+	std::map<PhysicsBehavior, std::map<JUUID, std::function<void(JUUID, unsigned int)>>> physicContactSubscribers;
 
 #if defined(_EDITOR)
 
@@ -32,6 +44,25 @@ namespace Physics
 #include <JEnd.h>
 
 		InheritGeometryAttributes();
+	}
+
+	SceneUnitId PhysicObject::unit()
+	{
+		if (!renderable.empty())
+		{
+			return renderable.unit();
+		}
+		if (!trigger.empty())
+		{
+			trigger.unit();
+		}
+		assert("bad Physic Object");
+		return 0x2BAD5005AD;
+	}
+
+	JUUID PhysicObject::uuid()
+	{
+		return at("uuid");
 	}
 
 	void PhysicObject::InheritGeometryAttributes()
@@ -66,142 +97,300 @@ namespace Physics
 		if (jg->mesh().empty() && jg->model().empty())
 			return;
 
-		//why using physicGeometryInstance instead of the mesh/model as key?
-		//basically because as the scale of the geometries are built-in in the geometry bulding time
-		//we cannot split from the instancing, so instances are unique but what we can put in a cache is the mesh soup
+		std::map<std::tuple<PhysicsBehavior, bool>, std::function<void()>> builders =
+		{
+			{ std::tuple(PB_Static,false), [&] {CreateStaticMeshBehavior(); } },
+			{ std::tuple(PB_Dynamic,false), [&] {CreateDynamicMeshBehavior(); } },
+			{ std::tuple(PB_Trigger,false), [&] {CreateTriggerMeshBehavior(); } },
+			{ std::tuple(PB_Character,false), [&] {CreateCharacterMeshBehavior(); } },
+			{ std::tuple(PB_Static,true), [&] {CreateStaticModel3DBehavior(); } },
+			{ std::tuple(PB_Dynamic,true), [&] {CreateDynamicModel3DBehavior(); } },
+			{ std::tuple(PB_Trigger,true), [&] {CreateTriggerModel3DBehavior(); } },
+			{ std::tuple(PB_Character,true), [&] {CreateCharacterModel3DBehavior(); } },
+		};
+
+		builders.at(std::tuple(behavior(), jg->mesh().empty()))();
+		built = true;
+	}
+
+	void PhysicObject::CreateStaticMeshBehavior()
+	{
+		PhysicGeometryJsonID jg = geometry();
 		physicGeometryInstance = getUUID();
-		if (!jg->mesh().empty())
-		{
-			nlohmann::json atts = nlohmann::json::parse(dump());
-			CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
-				{
-					if (!renderable.empty())
-					{
-						return std::make_unique<PhysicGeometryInstance>(jg, renderable, atts, jg->mesh(), physicGeometryInstance(), behavior());
-					}
-					else if (!trigger.empty())
-					{
-						return std::make_unique<PhysicGeometryInstance>(jg, trigger, atts, jg->mesh(), physicGeometryInstance(), behavior());
-					}
-					assert(!!!"no renderable or trigger for primitive physic geometry instance");
-					return std::make_unique<PhysicGeometryInstance>("2BAD505AD");
-				}
-			);
-		}
-		else if (!jg->model().empty())
-		{
-			Model3DJsonID modelJ = jg->model();
-			CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
-				{
-					if (!renderable.empty())
-					{
-						return std::make_unique<PhysicGeometryInstance>(jg, renderable, modelJ, physicGeometryInstance(), behavior());
-					}
-					else if (!trigger.empty())
-					{
-						return std::make_unique<PhysicGeometryInstance>(jg, trigger, modelJ, physicGeometryInstance(), behavior());
-					}
-					assert(!!!"no renderable or trigger for 3d model physic geometry instance");
-					return std::make_unique<PhysicGeometryInstance>("2BAD505AD");
-				}
-			);
-		}
+		nlohmann::json atts = nlohmann::json::parse(dump());
+		CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
+			{
+				return std::make_unique<PhysicGeometryInstance>(jg, renderable, atts, jg->mesh(), physicGeometryInstance(), behavior());
+			}
+		);
+		material = gPhysics->createMaterial(staticFriction(), dynamicFriction(), restitution());
 
-		if (!renderable.empty())
-		{
-			material = gPhysics->createMaterial(staticFriction(), dynamicFriction(), restitution());
-		}
-		else if (!trigger.empty())
-		{
-			material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
-		}
-		else
-		{
-			assert(!!!"no renderable or trigger for material");
-		}
+		XMFLOAT3 pos = renderable->position();
+		XMVECTOR rot = renderable->rotationQ();
 
-		XMFLOAT3 pos;
-		XMVECTOR rot;
+		XMFLOAT3 localRot = localRotation();
+		JNAME meshName = GetMeshName(jg->mesh());
+		PxQuat localRotQ = (ApplyGeometryLocalPoseTransformation.contains(meshName)) ?
+			ApplyGeometryLocalPoseTransformation.at(meshName)(localRot) : ToPxQuat(localRot);
 
-		if (!renderable.empty())
-		{
-			pos = renderable->position();
-			rot = renderable->rotationQ();
-		}
-		else if (!trigger.empty())
-		{
-			pos = trigger->position();
-			rot = trigger->rotationQ();
-		}
-		else
-		{
-			assert(!!!"no renderable or trigger for 3d transformation");
-		}
+		//create the PxActor & the PxShape
+		actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
+		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
+		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), localRotQ));
 
-		if (behavior() == PB_Static)
-		{
-			//create the PxActor & the PxShape
-			actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
-			shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
-			shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
+		//set the actor position and rotation
+		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
 
-			//set the actor position and rotation
-			actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
-		}
-		else if (behavior() == PB_Dynamic)
-		{
-			//create the PxActor
-			actor = gPhysics->createRigidDynamic(PxTransform(PxIdentity));
-
-			//create the PxShape
-			shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
-			shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
-
-			//set the actor position and rotation
-			actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
-
-			//set the body(actor) density and compute it's inertia
-			PxRigidBody* pxBody = (PxRigidBody*)actor;
-			PxRigidBodyExt::updateMassAndInertia(*pxBody, density());
-
-			//set the velocity and acceleration
-			PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
-			pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
-			pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
-		}
-		else if (behavior() == PB_Trigger)
-		{
-			//create the PxActor
-			actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
-
-			//create the PxShape
-			shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material, PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION);
-			shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
-
-			//set the actor position and rotation
-			actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
-		}
+		//add the actor to the scene
+		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		scene->pxScene->addActor(*actor);
 
 		//assign user data to this physic object
 		shape->userData = this;
+	}
+
+	void PhysicObject::CreateDynamicMeshBehavior()
+	{
+		PhysicGeometryJsonID jg = geometry();
+		physicGeometryInstance = getUUID();
+		nlohmann::json atts = nlohmann::json::parse(dump());
+		CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
+			{
+				return std::make_unique<PhysicGeometryInstance>(jg, renderable, atts, jg->mesh(), physicGeometryInstance(), behavior());
+			}
+		);
+		material = gPhysics->createMaterial(staticFriction(), dynamicFriction(), restitution());
+
+		XMFLOAT3 pos = renderable->position();
+		XMVECTOR rot = renderable->rotationQ();
+
+		XMFLOAT3 localRot = localRotation();
+		JNAME meshName = GetMeshName(jg->mesh());
+		PxQuat localRotQ = (ApplyGeometryLocalPoseTransformation.contains(meshName)) ?
+			ApplyGeometryLocalPoseTransformation.at(meshName)(localRot) : ToPxQuat(localRot);
+
+		//create the PxActor
+		actor = gPhysics->createRigidDynamic(PxTransform(PxIdentity));
+
+		//create the PxShape
+		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
+		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), localRotQ));
+
+		//set the actor position and rotation
+		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+
+		//set the body(actor) density and compute it's inertia
+		PxRigidBody* pxBody = (PxRigidBody*)actor;
+		PxRigidBodyExt::updateMassAndInertia(*pxBody, density());
+
+		//set the velocity and acceleration
+		PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
+		pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
+		pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
+
+		//add the actor to the scene
+		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		scene->pxScene->addActor(*actor);
+
+		//assign user data to this physic object
+		shape->userData = this;
+	}
+
+	void PhysicObject::CreateTriggerMeshBehavior()
+	{
+		PhysicGeometryJsonID jg = geometry();
+		physicGeometryInstance = getUUID();
+		nlohmann::json atts = nlohmann::json::parse(dump());
+		CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
+			{
+				return std::make_unique<PhysicGeometryInstance>(jg, trigger, atts, jg->mesh(), physicGeometryInstance(), behavior());
+			}
+		);
+		material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+
+		XMFLOAT3 pos = trigger->position();
+		XMVECTOR rot = trigger->rotationQ();
+
+		XMFLOAT3 localRot = localRotation();
+		JNAME meshName = GetMeshName(jg->mesh());
+		PxQuat localRotQ = (ApplyGeometryLocalPoseTransformation.contains(meshName)) ?
+			ApplyGeometryLocalPoseTransformation.at(meshName)(localRot) : ToPxQuat(localRot);
+
+		//create the PxActor
+		actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
+
+		//create the PxShape
+		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material, PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION);
+		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), localRotQ));
+
+		//set the actor position and rotation
+		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
 
 		//add the actor to the pxScene
-		PhysicSceneID scene;
-		if (!renderable.empty())
-		{
-			scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
-		}
-		else if (!trigger.empty())
-		{
-			scene = MAKESUUUID(trigger.unit(), *GetPhysicScenes(trigger.unit()).begin());
-		}
-		else
-		{
-			assert(!!!"no renderable or trigger for physic scene retrieval");
-		}
-
+		PhysicSceneID scene = MAKESUUUID(trigger.unit(), *GetPhysicScenes(trigger.unit()).begin());
 		scene->pxScene->addActor(*actor);
-		built = true;
+
+		//assign user data to this physic object
+		shape->userData = this;
+	}
+
+	void PhysicObject::CreateCharacterMeshBehavior()
+	{
+		PhysicGeometryJsonID jg = geometry();
+		JNAME controllerType = GetMeshName(jg->mesh());
+
+		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		PxControllerManager* manager = scene->pxControllerManager;
+
+		material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+
+		auto buildAABB = [&]
+			{
+				PxBoxControllerDesc desc;
+				XMFLOAT3 halfDimensions = ToXMFLOAT3(at("halfDimensions"));
+				desc.halfHeight = halfDimensions.y;			// Half-height in the "up" direction
+				desc.halfSideExtent = halfDimensions.x;		// Half-extent in the "side" direction
+				desc.halfForwardExtent = halfDimensions.z;	// Half-extent in the "forward" direction
+				desc.material = material;
+				desc.position = ToPxVec3d(renderable->position());
+				desc.userData = this;
+				controller = manager->createController(desc);
+			};
+
+		auto buildCapsule = [&]
+			{
+				PxCapsuleControllerDesc desc;
+				desc.radius = 1.0f * static_cast<float>(at("radius"));
+				desc.height = 2.0f * static_cast<float>(at("halfHeight"));
+				desc.material = material;
+				desc.position = ToPxVec3d(renderable->position());
+				desc.userData = this;
+				controller = manager->createController(desc);
+			};
+
+		std::map<std::string, std::function<void()>> builder =
+		{
+			{ "cube", buildAABB },
+			{ "capsule", buildCapsule }
+		};
+
+		builder.at(controllerType)();
+
+		controller->setUserData(this);
+		controller->getActor()->userData = this;
+
+		physicCharacterUUIDBySUUID[renderable()] = at("uuid");
+	}
+
+	void PhysicObject::CreateStaticModel3DBehavior()
+	{
+		PhysicGeometryJsonID jg = geometry();
+		physicGeometryInstance = getUUID();
+		Model3DJsonID modelJ = jg->model();
+		CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
+			{
+				return std::make_unique<PhysicGeometryInstance>(jg, renderable, modelJ, physicGeometryInstance(), behavior());
+			}
+		);
+		material = gPhysics->createMaterial(staticFriction(), dynamicFriction(), restitution());
+
+		XMFLOAT3 pos = renderable->position();
+		XMVECTOR rot = renderable->rotationQ();
+
+		//create the PxActor & the PxShape
+		actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
+		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
+		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
+
+		//set the actor position and rotation
+		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+
+		//add the actor to the scene
+		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		scene->pxScene->addActor(*actor);
+
+		//assign user data to this physic object
+		shape->userData = this;
+	}
+
+	void PhysicObject::CreateDynamicModel3DBehavior()
+	{
+		PhysicGeometryJsonID jg = geometry();
+		physicGeometryInstance = getUUID();
+		Model3DJsonID modelJ = jg->model();
+		CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
+			{
+				return std::make_unique<PhysicGeometryInstance>(jg, renderable, modelJ, physicGeometryInstance(), behavior());
+			}
+		);
+		material = gPhysics->createMaterial(staticFriction(), dynamicFriction(), restitution());
+
+		XMFLOAT3 pos = renderable->position();
+		XMVECTOR rot = renderable->rotationQ();
+
+		//create the PxActor
+		actor = gPhysics->createRigidDynamic(PxTransform(PxIdentity));
+
+		//create the PxShape
+		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
+		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
+
+		//set the actor position and rotation
+		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+
+		//set the body(actor) density and compute it's inertia
+		PxRigidBody* pxBody = (PxRigidBody*)actor;
+		PxRigidBodyExt::updateMassAndInertia(*pxBody, density());
+
+		//set the velocity and acceleration
+		PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
+		pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
+		pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
+
+		//add the actor to the scene
+		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		scene->pxScene->addActor(*actor);
+
+		//assign user data to this physic object
+		shape->userData = this;
+	}
+
+	void PhysicObject::CreateTriggerModel3DBehavior()
+	{
+		PhysicGeometryJsonID jg = geometry();
+		physicGeometryInstance = getUUID();
+		Model3DJsonID modelJ = jg->model();
+		CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
+			{
+				return std::make_unique<PhysicGeometryInstance>(jg, trigger, modelJ, physicGeometryInstance(), behavior());
+			}
+		);
+		material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+
+		XMFLOAT3 pos = trigger->position();
+		XMVECTOR rot = trigger->rotationQ();
+
+		//create the PxActor
+		actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
+
+		//create the PxShape
+		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material, PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION);
+		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
+
+		//set the actor position and rotation
+		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+
+		//add the actor to the pxScene
+		PhysicSceneID scene = MAKESUUUID(trigger.unit(), *GetPhysicScenes(trigger.unit()).begin());
+		scene->pxScene->addActor(*actor);
+
+		//assign user data to this physic object
+		shape->userData = this;
+	}
+
+	void PhysicObject::CreateCharacterModel3DBehavior()
+	{
+		assert(!!!"do not implement");
 	}
 
 	void PhysicObject::DestroyPhisicsBehavior()
@@ -222,39 +411,122 @@ namespace Physics
 		{
 			PX_RELEASE(actor);
 		}
+		if (controller)
+		{
+			PX_RELEASE(controller);
+		}
 		//PX_RELEASE(shape);
+		if (physicCharacterUUIDBySUUID.contains(renderable()))
+		{
+			physicCharacterUUIDBySUUID.erase(renderable());
+		}
+
 		built = false;
 	}
 
 	void PhysicObject::SetInitialConditions()
 	{
-		if (behavior() == PB_Static) return;
-
-		PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
-		pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
-		pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
-		pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
+		if (!renderable.empty())
+		{
+			if (behavior() == PB_Dynamic && actor)
+			{
+				PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
+				pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+				pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
+				pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
+			}
+			else if (behavior() == PB_Character && controller)
+			{
+				controller->setPosition(ToPxVec3d(renderable->position()));
+#if defined(_EDITOR)
+				if (!controllerRenderableShape.empty())
+				{
+					controllerRenderableShape->position(renderable->position());
+				}
+				if (!controllerRenderableLines.empty())
+				{
+					controllerRenderableLines->position(renderable->position());
+				}
+#endif
+			}
+		}
 	}
 
 	void PhysicObject::UpdateRenderableFromGlobalPose()
 	{
-		if (behavior() != PB_Dynamic) return;
-
-		if (!renderable.empty() && actor)
+		if (!renderable.empty())
 		{
-			PxTransform pxT = actor->getGlobalPose();
-			renderable->position(*((XMFLOAT3*)&pxT.p.x));
-			renderable->rotationQuaternion = XMLoadFloat4((XMFLOAT4*)&pxT.q.x);
+			if (behavior() == PB_Dynamic && actor)
+			{
+				PxTransform pxT = actor->getGlobalPose();
+				renderable->position(*((XMFLOAT3*)&pxT.p.x));
+				renderable->rotationQuaternion = XMLoadFloat4((XMFLOAT4*)&pxT.q.x);
+			}
+			else if (behavior() == PB_Character && controller)
+			{
+				PxVec3d pos = controller->getPosition();
+				XMFLOAT3 xmpos = {
+					static_cast<float>(pos.x),
+					static_cast<float>(pos.y),
+					static_cast<float>(pos.z)
+				};
+				renderable->position(xmpos);
+#if defined(_EDITOR)
+				if (!controllerRenderableShape.empty())
+				{
+					controllerRenderableShape->position(xmpos);
+				}
+				if (!controllerRenderableLines.empty())
+				{
+					controllerRenderableLines->position(xmpos);
+				}
+#endif
+			}
 		}
 	}
 
 	void PhysicObject::UpdateGlobalPoseFromRenderable()
 	{
-		if (!renderable.empty() && actor)
+		if (!renderable.empty())
 		{
-			PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
-			pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+			if (behavior() == PB_Static && actor)
+			{
+				actor->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+			}
+			else if (behavior() == PB_Dynamic && actor)
+			{
+				PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
+				pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+			}
+			else if (behavior() == PB_Character && controller)
+			{
+				controller->setPosition(ToPxVec3d(renderable->position()));
+#if defined(_EDITOR)
+				if (!controllerRenderableShape.empty())
+				{
+					controllerRenderableShape->position(renderable->position());
+				}
+				if (!controllerRenderableLines.empty())
+				{
+					controllerRenderableLines->position(renderable->position());
+				}
+#endif
+			}
 		}
+	}
+
+	void PhysicObject::UpdateGlobalPoseFromTrigger()
+	{
+		actor->setGlobalPose(PxTransform(ToPxVec3(trigger->position()), ToPxQuat(trigger->rotationQ())));
+	}
+
+	PxControllerCollisionFlags  PhysicObject::MoveCharacter(XMVECTOR disp, float delta)
+	{
+		if (!controller || !built) return (PxControllerCollisionFlags)0U;
+
+		PxVec3 pxdisp = ToPxVec3(disp);
+		PxControllerFilters filters;
+		return controller->move(pxdisp, 0.01f, delta, filters);
 	}
 
 #if defined(_EDITOR)
@@ -270,42 +542,146 @@ namespace Physics
 	{
 		std::vector<std::string> atts = { "behavior" };
 
-		switch (behavior())
+		std::vector<std::string> staticAtts =
 		{
-		case PB_Static:
-		{
-			atts.insert(atts.end(),
-				{
-					"staticFriction", "dynamicFriction", "restitution",
-					"geometry", "localPosition", "localRotation",
-					"density"
-				}
-			);
-		}
-		break;
-		case PB_Dynamic:
-		{
-			atts.insert(atts.end(),
-				{
-					"staticFriction", "dynamicFriction", "restitution",
-					"geometry", "localPosition", "localRotation",
-					"density", "linearVelocity", "angularVelocity"
-				}
-			);
-		}
-		break;
-		case PB_Trigger:
-		{
-			atts.insert(atts.end(),
-				{
-					"geometry", "localPosition", "localRotation"
-				}
-			);
-		}
-		break;
-		}
+			"staticFriction", "dynamicFriction", "restitution",
+			"geometry", "localPosition", "localRotation",
+			"density"
+		};
 
+		std::vector<std::string> dynamicAtts =
+		{
+			"staticFriction", "dynamicFriction", "restitution",
+			"geometry", "localPosition", "localRotation",
+			"density", "linearVelocity", "angularVelocity"
+		};
+
+		std::vector<std::string> triggerAtts =
+		{
+			"geometry", "localPosition", "localRotation"
+		};
+
+		std::vector<std::string> characterAtts =
+		{
+			"geometry"
+		};
+
+		std::unordered_map<PhysicsBehavior, std::vector<std::string>&> attsToAdd =
+		{
+			{ PB_Static, staticAtts },
+			{ PB_Dynamic, dynamicAtts },
+			{ PB_Trigger, triggerAtts },
+			{ PB_Character, characterAtts }
+		};
+
+		nostd::AppendToVector(atts, attsToAdd.at(behavior()));
 		return atts;
+	}
+
+	nlohmann::json PhysicObject::CreateRenderableCharacter(std::string name, JUUID uuid, JUUID camId, std::string material)
+	{
+		PhysicGeometryJsonID pg = geometry();
+
+		bool visible = Editor::CharactersShouldDraw(unit());
+
+		nlohmann::json jrencharacter = nlohmann::json(
+			{
+				{
+					"meshMaterial",
+					{
+						{ "material", GetMaterialUUIDByName(material) },
+						{ "mesh",
+							{
+								{ "primitive", pg->mesh() }
+							}
+						}
+					}
+				},
+				{ "castShadows", false },
+				{ "shadowed", false },
+				{ "name" , name },
+				{ "uuid" , uuid },
+				{ "position" , FromXMFLOAT3(renderable->position()) },
+				{ "topology", "TRIANGLELIST" },
+				{ "rotation" , { 0.0, 0.0, 0.0 } },
+				{ "scale" , { 1.0f, 1.0f, 1.0f } },
+				{ "skipMeshes" , {}},
+				{ "visible" , visible },
+				{ "hidden" , true},
+				{ "cameras", { camId }},
+				{ "depthStencil",
+					{
+						{ "BackFace",
+							{
+								{ "StencilDepthFailOp", "KEEP"},
+								{ "StencilFailOp", "KEEP"},
+								{ "StencilFunc", "ALWAYS"},
+								{ "StencilPassOp", "KEEP" }
+							}
+						},
+						{ "DepthEnable", false },
+						{ "DepthFunc", "NONE" },
+						{ "DepthWriteMask", "ZERO" },
+						{ "FrontFace",
+							{
+								{ "StencilDepthFailOp", "KEEP"},
+								{ "StencilFailOp", "KEEP"},
+								{ "StencilFunc", "ALWAYS"},
+								{ "StencilPassOp", "KEEP" }
+							}
+						},
+						{ "StencilEnable", false},
+						{ "StencilReadMask", 255},
+						{ "StencilWriteMask", 255 }
+					}
+				}
+			}
+		);
+		return jrencharacter;
+	}
+
+	void PhysicObject::CreateRenderableCharacter()
+	{
+		if (geometry().empty())
+			return;
+
+		controllerRenderableLines = MAKESUUUID(unit(), getUUID());
+		controllerRenderableShape = MAKESUUUID(unit(), getUUID());
+		CameraID camera = MAKESUUUID(unit(), *GetSwapChainCameras(unit()).begin());
+
+		nlohmann::json lines = CreateRenderableCharacter(renderable->name() + "-char-lines", controllerRenderableLines.uuid(), camera.uuid(), "Translucent_wired");
+		nlohmann::json shape = CreateRenderableCharacter(renderable->name() + "-char-shape", controllerRenderableShape.uuid(), camera.uuid(), "Translucent");
+
+		shape["renderNext"] = { controllerRenderableLines.uuid() };
+
+		nlohmann::json data =
+		{
+			{ "renderables",
+				{
+					lines,
+					shape
+				}
+			}
+		};
+
+		AttachLevelIntoScene(unit(), "characters", data, [&](SceneUnitId id)
+			{
+				using namespace Editor;
+				RegisterCharacter(uuid());
+			}
+		);
+	}
+
+	void PhysicObject::visible_character(bool v)
+	{
+		if (!controllerRenderableShape.empty())
+		{
+			controllerRenderableShape->visible(v);
+		}
+		if (!controllerRenderableLines.empty())
+		{
+			controllerRenderableLines->visible(v);
+		}
 	}
 #endif
 
@@ -328,7 +704,7 @@ namespace Physics
 			else
 				it++;
 		}
-		for (auto it = physicObjectsUUIDBySUUUID.begin(); it != physicObjectsUUIDBySUUUID.end(); it++)
+		for (auto it = physicObjectsUUIDBySUUUID.begin(); it != physicObjectsUUIDBySUUUID.end(); )
 		{
 			if (it->second.contains(uuid))
 				it->second.erase(uuid);
@@ -337,6 +713,15 @@ namespace Physics
 				it = physicObjectsUUIDBySUUUID.erase(it);
 			else
 				it++;
+		}
+		for (auto it = physicCharacterUUIDBySUUID.begin(); it != physicCharacterUUIDBySUUID.end();)
+		{
+			if (it->second == uuid)
+			{
+				physicCharacterUUIDBySUUID.erase(it);
+				break;
+			}
+			it++;
 		}
 	}
 
@@ -392,9 +777,27 @@ namespace Physics
 		}
 	}
 
-	void UpdatePhysicObjects(SceneUnitId id)
+	void UpdatePhysicObjects(SceneUnitId id, float step)
 	{
+#if defined(_EDITOR)
+		using namespace Editor;
+#endif
 		if (!physicObjectsBySceneUnitId.contains(id)) return;
+
+#if defined(_EDITOR)
+		if (CharactersSceneUnitRegistered(id))
+		{
+			for (auto [suuuid, juuid] : physicCharacterUUIDBySUUID)
+			{
+				if (std::get<0>(suuuid) != id) continue;
+				PhysicObjectID phO = juuid;
+
+				if (!phO->built || !phO->controllerRenderableShape.empty())
+					continue;
+				phO->CreateRenderableCharacter();
+			}
+		}
+#endif
 
 		for (PhysicObjectID phO : physicObjectsBySceneUnitId.at(id))
 		{
@@ -415,17 +818,42 @@ namespace Physics
 
 			if (phO->dirty(PhysicObject::Update_linearVelocity))
 			{
-				PxRigidDynamic* pxDynamic = (PxRigidDynamic*)phO->actor;
-				pxDynamic->setLinearVelocity(ToPxVec3(phO->linearVelocity()));
+				if (phO->built)
+				{
+					PxRigidDynamic* pxDynamic = (PxRigidDynamic*)phO->actor;
+					pxDynamic->setLinearVelocity(ToPxVec3(phO->linearVelocity()));
+				}
 				phO->clean(PhysicObject::Update_linearVelocity);
 			}
 
 			if (phO->dirty(PhysicObject::Update_angularVelocity))
 			{
-				PxRigidDynamic* pxDynamic = (PxRigidDynamic*)phO->actor;
-				pxDynamic->setAngularVelocity(ToPxVec3(phO->angularVelocity()));
+				if (phO->built)
+				{
+					PxRigidDynamic* pxDynamic = (PxRigidDynamic*)phO->actor;
+					pxDynamic->setAngularVelocity(ToPxVec3(phO->angularVelocity()));
+				}
 				phO->clean(PhysicObject::Update_angularVelocity);
 			}
 		}
+	}
+
+	void RegisterContactCallback(PhysicsBehavior behavior, JUUID object, std::function<void(JUUID, unsigned int)> callback)
+	{
+		physicContactSubscribers[behavior][object] = callback;
+	}
+
+	void UnregisterContactCallback(PhysicsBehavior behavior, JUUID object)
+	{
+		if (!physicContactSubscribers.contains(behavior) || !physicContactSubscribers.at(behavior).contains(object)) return;
+
+		physicContactSubscribers.at(behavior).erase(object);
+	}
+
+	void CallRegisteredCallbacks(PhysicsBehavior behavior, JUUID destObject, JUUID srcObject, unsigned int event)
+	{
+		if (!physicContactSubscribers.contains(behavior) || !physicContactSubscribers.at(behavior).contains(destObject)) return;
+
+		physicContactSubscribers.at(behavior).at(destObject)(srcObject, event);
 	}
 };

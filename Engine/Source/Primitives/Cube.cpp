@@ -54,6 +54,35 @@ static std::vector<Cube::VertexType> vertices =
 
 namespace Primitives
 {
+#if defined(_EDITOR)
+
+#include <Editor/JDrawersDef.h>
+#include <CubeAtt.h>
+#include <JEnd.h>
+
+#endif
+
+	Cube::Cube(nlohmann::json& json) : Primitive(json)
+	{
+#include <Attributes/JInit.h>
+#include <CubeAtt.h>
+#include <JEnd.h>
+
+#include <Attributes/JUpdate.h>
+#include <CubeAtt.h>
+#include <JEnd.h>
+	}
+
+#if defined(_EDITOR)
+	void Cube::WriteJson(nlohmann::json& j)
+	{
+#include <Editor/JWriteJson.h>
+#include <CubeAtt.h>
+#include <JEnd.h>
+		j.erase("uuid");
+	}
+#endif
+
 	std::vector<uint32_t> Cube::GetIndices()
 	{
 		return indices;

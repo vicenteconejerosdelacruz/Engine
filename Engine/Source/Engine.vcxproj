@@ -366,6 +366,7 @@
     <ClInclude Include="JExpose\Physics\PhysicObjectAtt.h" />
     <ClInclude Include="JExpose\Primitives\CapsuleAtt.h" />
     <ClInclude Include="JExpose\Primitives\ConeAtt.h" />
+    <ClInclude Include="JExpose\Primitives\CubeAtt.h" />
     <ClInclude Include="JExpose\Primitives\SphereAtt.h" />
     <ClInclude Include="JExpose\Scene\PhysicSceneAtt.h" />
     <ClInclude Include="JExpose\Scene\TriggerAtt.h" />
@@ -484,9 +485,9 @@
     <ClInclude Include="Scene\Level.h" />
     <ClInclude Include="Scene\Light\Light.h" />
     <ClInclude Include="Scene\Light\ShadowMap.h" />
-    <ClInclude Include="Templates\Physics\ContactCallback.h" />
-    <ClInclude Include="Scene\Physics\PhysicScene.h" />
-    <ClInclude Include="Scene\Physics\Trigger.h" />
+    <ClInclude Include="Physics\ContactCallback.h" />
+    <ClInclude Include="Physics\PhysicScene.h" />
+    <ClInclude Include="Physics\Trigger.h" />
     <ClInclude Include="Scene\Renderable\Renderable.h" />
     <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="Scene\SceneObject.h" />
@@ -519,7 +520,7 @@
     <ClInclude Include="Templates\Material\Variables.h" />
     <ClInclude Include="Templates\Mesh\Mesh.h" />
     <ClInclude Include="Templates\Model3D\Model3D.h" />
-    <ClInclude Include="Templates\Physics\PhysicGeometry.h" />
+    <ClInclude Include="Physics\PhysicGeometry.h" />
     <ClInclude Include="Templates\RenderPass\Override\MinMaxChainPass.h" />
     <ClInclude Include="Templates\RenderPass\Override\MinMaxChainResultPass.h" />
     <ClInclude Include="Templates\RenderPass\Override\OverridePass.h" />
@@ -605,9 +606,9 @@
     <ClCompile Include="Scene\Level.cpp" />
     <ClCompile Include="Scene\Light\Light.cpp" />
     <ClCompile Include="Scene\Light\ShadowMap.cpp" />
-    <ClCompile Include="Templates\Physics\ContactCallback.cpp" />
-    <ClCompile Include="Scene\Physics\PhysicScene.cpp" />
-    <ClCompile Include="Scene\Physics\Trigger.cpp" />
+    <ClCompile Include="Physics\ContactCallback.cpp" />
+    <ClCompile Include="Physics\PhysicScene.cpp" />
+    <ClCompile Include="Physics\Trigger.cpp" />
     <ClCompile Include="Scene\Renderable\Renderable.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
     <ClCompile Include="Scene\SceneObject.cpp" />
@@ -627,7 +628,7 @@
     <ClCompile Include="Templates\Material\Variables.cpp" />
     <ClCompile Include="Templates\Mesh\Mesh.cpp" />
     <ClCompile Include="Templates\Model3D\Model3D.cpp" />
-    <ClCompile Include="Templates\Physics\PhysicGeometry.cpp" />
+    <ClCompile Include="Physics\PhysicGeometry.cpp" />
     <ClCompile Include="Templates\RenderPass\Override\MinMaxChainPass.cpp" />
     <ClCompile Include="Templates\RenderPass\Override\MinMaxChainResultPass.cpp" />
     <ClCompile Include="Templates\RenderPass\Override\OverridePass.cpp" />

@@ -264,6 +264,32 @@ namespace Templates
 #include <JEnd.h>
 	}
 
+	nlohmann::json GetCubeAttributes()
+	{
+		using namespace Primitives;
+
+		std::set<std::string> atts = { "halfDimensions" };
+
+		nlohmann::json ph;
+		Cube cube(ph);
+
+		nlohmann::json ret;
+
+		for (auto att : atts)
+		{
+			if (!cube.contains(att))
+			{
+				assert(!!!"attribute not present");
+				continue;
+			}
+
+			nlohmann::json patch = { {att,cube.at(att)} };
+			ret.merge_patch(patch);
+		}
+
+		return ret;
+	}
+
 	nlohmann::json GetCapsuleAttributes()
 	{
 		using namespace Primitives;
@@ -293,6 +319,19 @@ namespace Templates
 	std::vector<JUUIDName> GetPhysicGeometrysTriggerUUIDsNames()
 	{
 		static std::vector<std::string> geometries = { "cube", "sphere", "capsule" };
+		std::vector<JUUIDName> uuidNames;
+
+		std::transform(geometries.begin(), geometries.end(), std::back_inserter(uuidNames), [](auto& g)
+			{
+				return std::make_tuple(GetPhysicGeometryUUIDByName(g), g);
+			}
+		);
+		return uuidNames;
+	}
+
+	std::vector<JUUIDName> GetPhysicGeometrysCharacterUUIDsNames()
+	{
+		static std::vector<std::string> geometries = { "cube", "capsule" };
 		std::vector<JUUIDName> uuidNames;
 
 		std::transform(geometries.begin(), geometries.end(), std::back_inserter(uuidNames), [](auto& g)

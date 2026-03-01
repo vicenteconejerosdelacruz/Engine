@@ -11,6 +11,8 @@ namespace Editor
 	extern bool TriggersShouldDraw(SceneUnitId id);
 	extern void RegisterTrigger(TriggerID trigger);
 	extern void UnRegisterTrigger(TriggerID trigger);
+	extern bool TriggersSceneUnitRegistered(SceneUnitId id);
+	extern CameraID GetLevelCamera(SceneUnitId id);
 }
 #endif
 
@@ -152,10 +154,10 @@ namespace Scene
 				{ "shadowed", false },
 				{ "name" , name },
 				{ "uuid" , uuid },
-				{ "position" , { 0.0f, 0.0f, 0.0f} },
+				{ "position", FromXMFLOAT3(position()) },
 				{ "topology", "TRIANGLELIST" },
-				{ "rotation" , { 0.0, 0.0, 0.0 } },
-				{ "scale" , { 1.0f, 1.0f, 1.0f } },
+				{ "rotation" , FromXMFLOAT3(rotation()) },
+				{ "scale" , FromXMFLOAT3(scale()) },
 				{ "skipMeshes" , {}},
 				{ "visible" , visible },
 				{ "hidden" , true},
@@ -207,7 +209,16 @@ namespace Scene
 
 		renderableLines = MAKESUUUID(unit, getUUID());
 		renderableShape = MAKESUUUID(unit, getUUID());
-		CameraID camera = MAKESUUUID(unit, *GetSwapChainCameras(unit).begin());
+		CameraID camera;
+#if defined(_EDITOR)
+		camera = Editor::GetLevelCamera(unit);
+#else
+		if (GetCountFromMouseCameras(unit) > 0ULL)
+		{
+			camera = MAKESUUUID(unit, *GetSwapChainCameras(unit).begin());
+		}
+#endif
+		//CameraID camera = MAKESUUUID(unit, *GetSwapChainCameras(unit).begin());
 
 		nlohmann::json lines = CreateRenderableTrigger(name() + "-lines", renderableLines.uuid(), camera.uuid(), "Translucent_wired");
 		nlohmann::json shape = CreateRenderableTrigger(name() + "-shape", renderableShape.uuid(), camera.uuid(), "Translucent");
@@ -297,9 +308,12 @@ namespace Scene
 			}
 		);
 
-		for (auto trg : trCreateRenderables)
+		if (TriggersSceneUnitRegistered(unit))
 		{
-			trg->CreateRenderableTrigger();
+			for (auto trg : trCreateRenderables)
+			{
+				trg->CreateRenderableTrigger();
+			}
 		}
 
 		for (auto trg : trTransformation)
@@ -307,9 +321,18 @@ namespace Scene
 			trg->renderableShape->position(trg->position());
 			trg->renderableShape->rotation(trg->rotation());
 			trg->renderableShape->scale(trg->scale());
-			trg->renderableLines->position(trg->position());;
-			trg->renderableLines->rotation(trg->rotation());;
-			trg->renderableLines->scale(trg->scale());;
+			trg->renderableLines->position(trg->position());
+			trg->renderableLines->rotation(trg->rotation());
+			trg->renderableLines->scale(trg->scale());
+			if (trg->dirty(Trigger::Update_scale))
+			{
+				trg->physicObject->DestroyPhisicsBehavior();
+				trg->physicObject->CreatePhysicsBehavior();
+			}
+			else
+			{
+				trg->physicObject->UpdateGlobalPoseFromTrigger();
+			}
 			trg->clean(Trigger::Update_position);
 			trg->clean(Trigger::Update_rotation);
 			trg->clean(Trigger::Update_scale);

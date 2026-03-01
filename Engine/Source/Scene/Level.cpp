@@ -212,9 +212,10 @@ namespace Scene::Level
 		}
 #endif
 
-		MapControllers(scene->Id());
 		BindSceneObjects(scene->Id());
 		CreatePhysicsObjectsBehaviors(scene->Id());
+		//leave this to last
+		MapControllers(scene->Id());
 #if defined(_EDITOR)
 		if (!scene->IsIsolated())
 		{

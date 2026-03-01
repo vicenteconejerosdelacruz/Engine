@@ -113,7 +113,7 @@ namespace Scene
 
 	void PhysicSceneStep(SceneUnitId id, float step)
 	{
-		UpdatePhysicObjects(id);
+		UpdatePhysicObjects(id, step);
 
 		if (step == 0.0f) return;
 

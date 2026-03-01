@@ -1,5 +1,4 @@
-#ifndef _PHYSICS_PHYSIC_OBJECT_H
-#define _PHYSICS_PHYSIC_OBJECT_H
+#pragma once
 
 #include <set>
 #include <UUID.h>
@@ -23,14 +22,16 @@ enum PhysicsBehavior
 {
 	PB_Static,
 	PB_Dynamic,
-	PB_Trigger
+	PB_Trigger,
+	PB_Character
 };
 
 inline std::unordered_map<PhysicsBehavior, std::string> PhysicsBehaviorToString =
 {
 	{ PB_Static, "Static" },
 	{ PB_Dynamic, "Dynamic" },
-	{ PB_Trigger, "Trigger" }
+	{ PB_Trigger, "Trigger" },
+	{ PB_Character, "Character" },
 };
 
 inline std::unordered_map<std::string, PhysicsBehavior> StringToPhysicsBehavior =
@@ -38,6 +39,7 @@ inline std::unordered_map<std::string, PhysicsBehavior> StringToPhysicsBehavior 
 	{ "Static", PB_Static },
 	{ "Dynamic", PB_Dynamic },
 	{ "Trigger", PB_Trigger },
+	{ "Character", PB_Character },
 };
 
 namespace Physics
@@ -75,18 +77,33 @@ namespace Physics
 
 		virtual ~PhysicObject() {};
 		PhysicObject(nlohmann::json& json);
+		SceneUnitId unit();
+		JUUID uuid();
 		void InheritGeometryAttributes();
 		void CreatePhysicsBehavior();
+		void CreateStaticMeshBehavior();
+		void CreateDynamicMeshBehavior();
+		void CreateTriggerMeshBehavior();
+		void CreateCharacterMeshBehavior();
+		void CreateStaticModel3DBehavior();
+		void CreateDynamicModel3DBehavior();
+		void CreateTriggerModel3DBehavior();
+		void CreateCharacterModel3DBehavior();
 		void DestroyPhisicsBehavior();
 		void SetInitialConditions();
 
-		//dynamics
+		//dynamics & characters
 		void UpdateRenderableFromGlobalPose();
 		void UpdateGlobalPoseFromRenderable();
+		void UpdateGlobalPoseFromTrigger();
+		PxControllerCollisionFlags MoveCharacter(XMVECTOR disp, float delta);
 
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 		std::vector<std::string> GetPhysicBehaviorAttributes();
+		nlohmann::json CreateRenderableCharacter(std::string name, JUUID uuid, JUUID camId, std::string material);
+		void CreateRenderableCharacter();
+		void visible_character(bool v);
 #endif
 		RenderableID renderable;
 		TriggerID trigger;
@@ -95,6 +112,11 @@ namespace Physics
 		PxMaterial* material = nullptr;
 		PxRigidActor* actor = nullptr;
 		PxShape* shape = nullptr;
+		PxController* controller = nullptr;
+#if defined(_EDITOR)
+		RenderableID controllerRenderableShape;
+		RenderableID controllerRenderableLines;
+#endif
 		bool built = false;
 	};
 
@@ -105,12 +127,16 @@ namespace Physics
 
 	void CreatePhysicsObjectsBehaviors(SceneUnitId id);
 	void UpdateRenderablesFromGlobalPose(SceneUnitId id);
-	void UpdatePhysicObjects(SceneUnitId id);
+	void UpdatePhysicObjects(SceneUnitId id, float step);
+
+	//Contact callbacks
+	void RegisterContactCallback(PhysicsBehavior behavior, JUUID object, std::function<void(JUUID, unsigned int)> callback);
+	void UnregisterContactCallback(PhysicsBehavior behavior, JUUID object);
+	void CallRegisteredCallbacks(PhysicsBehavior behavior, JUUID destObject, JUUID srcObject, unsigned int event);
 
 	DEF_TEMPLATE_ID(PhysicObject, GetPhysicObject);
 };
 
-using namespace Physics;
-DEF_TEMPLATE_ID_HASH(PhysicObject);
+//using namespace Physics;
+//DEF_TEMPLATE_ID_HASH(PhysicObject);
 
-#endif

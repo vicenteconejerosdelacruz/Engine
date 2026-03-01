@@ -57,6 +57,7 @@ namespace Editor {
 	void CreateSceneUnitBoundingBox(SceneUnitId id);
 	void CreateSceneUnitBillboards(SceneUnitId id);
 	void CreateSceneUnitEditorIndependentCamera(SceneUnitId id);
+	CameraID GetLevelCamera(SceneUnitId id);
 	void DeleteSceneUnitLevel(SceneUnitId id);
 	void DeleteSceneUnitGizmos(SceneUnitId id);
 	void DeleteSceneUnitSelection(SceneUnitId id);
@@ -197,9 +198,16 @@ namespace Editor {
 	void SwitchToNonPlayMode(SceneUnitId id);
 
 	//Physics Drawing
+	bool TriggersSceneUnitRegistered(SceneUnitId id);
 	bool TriggersShouldDraw(SceneUnitId id);
 	void SwitchTriggersDrawing(SceneUnitId id);
 	void RegisterTrigger(TriggerID trigger);
 	void UnRegisterTrigger(TriggerID trigger);
 	std::set<TriggerID> GetTriggers(SceneUnitId id);
+	bool CharactersSceneUnitRegistered(SceneUnitId id);
+	bool CharactersShouldDraw(SceneUnitId id);
+	void SwitchCharactersDrawing(SceneUnitId id);
+	void RegisterCharacter(PhysicObjectID phO);
+	void UnRegisterCharacter(PhysicObjectID phO);
+	std::set<PhysicObjectID> GetPhysicsObjects(SceneUnitId id);
 }

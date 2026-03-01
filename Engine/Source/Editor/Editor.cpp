@@ -164,7 +164,11 @@ namespace Editor
 	std::unordered_map<SceneUnitId, BillboardRegistry> billboards;
 	//Physics
 	std::unordered_map<SceneUnitId, bool> drawTriggers;
+	std::unordered_map<SceneUnitId, bool> drawTriggersPlayState;
 	std::unordered_map<SceneUnitId, std::set<TriggerID>> levelTriggers;
+	std::unordered_map<SceneUnitId, bool> drawCharacters;
+	std::unordered_map<SceneUnitId, bool> drawCharactersPlayState;
+	std::unordered_map<SceneUnitId, std::set<PhysicObjectID>> levelCharacters;
 
 	RightPanelComponent templateEdition("templates", { "hidden", "uuid" }, { "Templates", "Details" }, { "Templates" });
 
@@ -196,6 +200,8 @@ namespace Editor
 	{
 		drawTriggers.insert_or_assign(id, true);
 		levelTriggers.insert_or_assign(id, std::set<TriggerID>());
+		drawCharacters.insert_or_assign(id, true);
+		levelCharacters.insert_or_assign(id, std::set<PhysicObjectID>());
 	}
 
 	void CreateSceneUnitBoundingBox(SceneUnitId id)
@@ -293,6 +299,11 @@ namespace Editor
 		}
 	}
 
+	CameraID GetLevelCamera(SceneUnitId id)
+	{
+		return levelCameraUUID.at(id);
+	}
+
 	void DeleteSceneUnitLevel(SceneUnitId id)
 	{
 		for (auto it = currentLevelName.begin(); it != currentLevelName.end();)
@@ -329,6 +340,7 @@ namespace Editor
 	{
 		drawTriggers.erase(id);
 		levelTriggers.erase(id);
+		drawCharacters.erase(id);
 	}
 
 	void DeleteSceneUnitBoundingBox(SceneUnitId id)
@@ -1128,8 +1140,19 @@ namespace Editor
 					if (!loadingProgress.loading && ImGui::IsItemClicked() && ImGui::IsMouseDoubleClicked(ImGuiPopupFlags_MouseButtonLeft))
 					{
 						loadingProgress.LoadLevel(false, workbenchSelectedLevel);
-						SaveWorkbench(workbenchSelectedLevel);
-						LoadLevelIntoSceneUnit(workbenchSelectedLevel, [&]() { return GetLevelFromFile(workbenchSelectedLevel); }, OnLevelLoaded, LevelLoadingProgress);
+
+						LoadLevelIntoSceneUnit(workbenchSelectedLevel,
+							[&]()
+							{
+								return GetLevelFromFile(workbenchSelectedLevel);
+							},
+							[=](SceneUnitId id)
+							{
+								SaveWorkbench(workbenchSelectedLevel);
+								OnLevelLoaded(id);
+							},
+							LevelLoadingProgress
+						);
 					}
 				}
 				ImGui::EndListBox();
@@ -1303,7 +1326,7 @@ namespace Editor
 		ImGui::PopStyleVar(3);
 	}
 
-	static ImVec2 physicsControllerSize(100, 18);
+	static ImVec2 physicsControllerSize(100, 45);
 	RECT GetPhysicsControllerRect()
 	{
 		const ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -1340,10 +1363,15 @@ namespace Editor
 			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings
 		);
 		{
-			bool value = drawTriggers.at(currentSceneUnitId);
-			if (ImGui::Checkbox("Triggers", &value))
+			bool valueTriggers = drawTriggers.at(currentSceneUnitId);
+			if (ImGui::Checkbox("Triggers", &valueTriggers))
 			{
 				SwitchTriggersDrawing(currentSceneUnitId);
+			}
+			bool valueCharacters = drawCharacters.at(currentSceneUnitId);
+			if (ImGui::Checkbox("Characters", &valueCharacters))
+			{
+				SwitchCharactersDrawing(currentSceneUnitId);
 			}
 		}
 		ImGui::End();
@@ -2799,6 +2827,10 @@ namespace Editor
 		editorPrePlayDump.at(id) = GetLevelString(id);
 		HideBillboards(id);
 		PlaySounds(id);
+		drawTriggersPlayState[id] = drawTriggers[id];
+		drawCharactersPlayState[id] = drawCharacters[id];
+		drawTriggers[id] = false;
+		drawCharacters[id] = false;
 	}
 
 	void SwitchToPauseMode(SceneUnitId id)
@@ -2885,6 +2917,14 @@ namespace Editor
 		{
 			DeleteSceneObjectFromEditor(id, uuid);
 		}
+
+		drawTriggers[id] = drawTriggersPlayState[id];
+		drawCharacters[id] = drawCharactersPlayState[id];
+	}
+
+	bool TriggersSceneUnitRegistered(SceneUnitId id)
+	{
+		return drawTriggers.contains(id);
 	}
 
 	bool TriggersShouldDraw(SceneUnitId id)
@@ -2915,6 +2955,41 @@ namespace Editor
 	std::set<TriggerID> GetTriggers(SceneUnitId id)
 	{
 		return levelTriggers.at(id);
+	}
+
+	bool CharactersSceneUnitRegistered(SceneUnitId id)
+	{
+		return drawCharacters.contains(id);
+	}
+
+	bool CharactersShouldDraw(SceneUnitId id)
+	{
+		return drawCharacters.at(id);
+	}
+
+	void SwitchCharactersDrawing(SceneUnitId id)
+	{
+		bool value = !drawCharacters.at(id);
+		drawCharacters.at(id) = value;
+		for (auto phO : levelCharacters.at(id))
+		{
+			phO->visible_character(value);
+		}
+	}
+
+	void RegisterCharacter(PhysicObjectID phO)
+	{
+		levelCharacters.at(phO->unit()).insert(phO);
+	}
+
+	void UnRegisterCharacter(PhysicObjectID phO)
+	{
+		levelCharacters.at(phO->unit()).erase(phO);
+	}
+
+	std::set<PhysicObjectID> GetPhysicsObjects(SceneUnitId id)
+	{
+		return levelCharacters.at(id);
 	}
 };
 

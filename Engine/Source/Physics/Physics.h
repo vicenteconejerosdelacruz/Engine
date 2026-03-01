@@ -4,7 +4,7 @@
 #include <SceneUnitId.h>
 #include <UUID.h>
 #include <JObject.h>
-#include <Physics/PhysicScene.h>
+#include <PhysicScene.h>
 
 namespace Physics
 {

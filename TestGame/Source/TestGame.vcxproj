@@ -439,6 +439,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="GameControllers\SpinYawController.h" />
+    <ClInclude Include="GameControllers\ThirdPersonController.h" />
     <ClInclude Include="GameControllers\VenomController.h" />
     <ClInclude Include="GameStates\GameStates.h" />
     <ClInclude Include="GameStates\Game\BootScreen.h">
@@ -451,6 +452,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="JExpose\Controllers\SpinYawControllerAtt.h" />
+    <ClInclude Include="JExpose\Controllers\ThirdPersonControllerAtt.h" />
     <ClInclude Include="JExpose\Controllers\VenomControllerAtt.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
@@ -460,6 +462,7 @@
   <ItemGroup>
     <ClCompile Include="GameControllers\GameControllers.cpp" />
     <ClCompile Include="GameControllers\SpinYawController.cpp" />
+    <ClCompile Include="GameControllers\ThirdPersonController.cpp" />
     <ClCompile Include="GameControllers\VenomController.cpp" />
     <ClCompile Include="GameStates\Game\BootScreen.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>

@@ -119,7 +119,7 @@ inline void EditorDrawFloatArray(std::string attribute, std::vector<JObject*>& j
 		for (unsigned int i = 0; i < labels.size(); i++)
 			fs[i].insert(float(j->at(attribute).at(i)));
 
-	ImGui::PushID((std::string(json[0]->at("uuid")) + "-" + attribute).c_str());
+	ImGui::PushID(attribute.c_str());
 	std::string tableName = "tables-" + attribute + "-table";
 	if (ImGui::BeginTable(tableName.c_str(), static_cast<int>(labels.size()), defaultTableFlags))
 	{
@@ -2000,34 +2000,60 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_physycgeometry>
 					}
 				};
 
-			if (json.at(0)->at("behavior") != PhysicsBehaviorToString.at(PB_Trigger))
-			{
-				DrawResourceSelection(
-					attribute, json, Templates::GetPhysicGeometryName,
-					SortUUIDNameByName(Templates::GetPhysicGeometrysUUIDsNames), ICON_FA_IMAGE,
-					false, [&](JUUID uuid)
-					{
-						for (auto& j : json)
+			auto buildFromGeometry = [&]
+				{
+					DrawResourceSelection(
+						attribute, json, Templates::GetPhysicGeometryName,
+						SortUUIDNameByName(Templates::GetPhysicGeometrysUUIDsNames), ICON_FA_IMAGE,
+						false, [&](JUUID uuid)
 						{
-							onChangeGeometry(j, j->contains(attribute) ? JUUID(j->at(attribute)) : "", uuid);
+							for (auto& j : json)
+							{
+								onChangeGeometry(j, j->contains(attribute) ? JUUID(j->at(attribute)) : "", uuid);
+							}
 						}
-					}
-				);
-			}
-			else
-			{
-				DrawResourceSelection(
-					attribute, json, Templates::GetPhysicGeometryName,
-					SortUUIDNameByName(Templates::GetPhysicGeometrysTriggerUUIDsNames), ICON_FA_IMAGE,
-					false, [&](JUUID uuid)
-					{
-						for (auto& j : json)
+					);
+				};
+
+			auto buildFromTrigger = [&]
+				{
+					DrawResourceSelection(
+						attribute, json, Templates::GetPhysicGeometryName,
+						SortUUIDNameByName(Templates::GetPhysicGeometrysTriggerUUIDsNames), ICON_FA_IMAGE,
+						false, [&](JUUID uuid)
 						{
-							onChangeGeometry(j, j->contains(attribute) ? JUUID(j->at(attribute)) : "", uuid);
+							for (auto& j : json)
+							{
+								onChangeGeometry(j, j->contains(attribute) ? JUUID(j->at(attribute)) : "", uuid);
+							}
 						}
-					}
-				);
-			}
+					);
+				};
+
+			auto buildFromCharacter = [&]
+				{
+					DrawResourceSelection(
+						attribute, json, Templates::GetPhysicGeometryName,
+						SortUUIDNameByName(Templates::GetPhysicGeometrysCharacterUUIDsNames), ICON_FA_IMAGE,
+						false, [&](JUUID uuid)
+						{
+							for (auto& j : json)
+							{
+								onChangeGeometry(j, j->contains(attribute) ? JUUID(j->at(attribute)) : "", uuid);
+							}
+						}
+					);
+				};
+
+			std::map<PhysicsBehavior, std::function<void()>> geometrySelector =
+			{
+				{ PB_Static, buildFromGeometry },
+				{ PB_Dynamic, buildFromGeometry },
+				{ PB_Trigger, buildFromTrigger },
+				{ PB_Character, buildFromCharacter }
+			};
+
+			geometrySelector.at(StringToPhysicsBehavior.at(json.at(0)->at("behavior")))();
 		};
 }
 
@@ -5418,6 +5444,27 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
 
 					DrawPrimitiveAttributesFunctions.at(meshName)(*physicObject.get(), enabledAtts, rebuildPrimitive);
 				};
+			auto drawPhysicCharacterAttributes = [&]()
+				{
+					std::string physicObjectUUID = json.at(0)->at(attribute).at(0);
+					auto& physicObject = GetPhysicObject(physicObjectUUID);
+					if (/*!physicObject->controller || */physicObject->geometry().empty())
+						return;
+
+					PhysicGeometryJsonID jg = physicObject->geometry();
+					JNAME meshName = GetMeshName(jg->mesh());
+					if (!GetPxGeometryAttributes.contains(meshName) || !DrawPrimitiveAttributesFunctions.contains(meshName))
+						return;
+
+					auto pxAtts = GetPxGeometryAttributes.at(meshName)();
+					std::set<std::string> enabledAtts;
+					for (auto& el : pxAtts.items())
+					{
+						enabledAtts.insert(el.key());
+					}
+
+					DrawPrimitiveAttributesFunctions.at(meshName)(*physicObject.get(), enabledAtts, rebuildPrimitive);
+				};
 
 			if (json.at(0)->at(attribute).size() == 0ULL)
 			{
@@ -5428,6 +5475,7 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
 				drawRemovePhysicBehavior();
 				drawPhysicBehavior();
 				drawPhysicGeometryAttributes();
+				drawPhysicCharacterAttributes();
 			}
 
 			if (addPressed)

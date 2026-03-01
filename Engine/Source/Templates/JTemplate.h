@@ -93,6 +93,6 @@ namespace Templates
 #include <Sound/Sound.h>
 #include <Textures/Texture.h>
 #include <Mesh/Mesh.h>
-#include <Physics/PhysicGeometry.h>
+#include <PhysicGeometry.h>
 
 #endif

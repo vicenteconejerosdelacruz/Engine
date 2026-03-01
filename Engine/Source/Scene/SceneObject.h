@@ -126,5 +126,5 @@ namespace Scene
 #include <Light/Light.h>
 #include <Camera/Camera.h>
 #include <Sound/SoundFX.h>
-#include <Physics/PhysicScene.h>
-#include <Physics/Trigger.h>
+#include <PhysicScene.h>
+#include <Trigger.h>

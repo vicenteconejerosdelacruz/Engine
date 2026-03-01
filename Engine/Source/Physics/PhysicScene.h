@@ -4,7 +4,7 @@
 #include <SceneObject.h>
 #include <SceneUnitId.h>
 #include <PxPhysicsAPI.h>
-#include <Physics/ContactCallback.h>
+#include <ContactCallback.h>
 
 enum SceneObjectType;
 

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "VenomController.h"
 #include "SpinYawController.h"
+#include "ThirdPersonController.h"
 
 namespace Game
 {
@@ -8,7 +9,8 @@ namespace Game
 	std::unordered_map<std::string, std::function<std::map<std::string, JEdvEditorDrawerFunction>()>> controllerDrawers =
 	{
 		{ "venom", [] { return Game::GetVenomControllerDrawers(); }},
-		{ "spinyaw", [] { return Game::GetSpinYawControllerDrawers(); }}
+		{ "spinyaw", [] { return Game::GetSpinYawControllerDrawers(); }},
+		{ "thirdperson", [] { return Game::GetThirdPersonControllerDrawers(); }},
 	};
 #endif
 
@@ -16,6 +18,7 @@ namespace Game
 	{
 		{ "venom", [](nlohmann::json& json) { return std::make_unique<Game::VenomController>(json); }},
 		{ "spinyaw", [](nlohmann::json& json) { return std::make_unique<Game::SpinYawController>(json); }},
+		{ "thirdperson", [](nlohmann::json& json) { return std::make_unique<Game::ThirdPersonController>(json); }},
 	};
 
 	std::vector<std::string> GetControllers()

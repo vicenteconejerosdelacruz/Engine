@@ -96,6 +96,7 @@ static const std::map<std::string, std::function<void(SceneUnitId, const std::un
 
 static const std::map<std::string, std::function<void(nlohmann::json&, std::set<std::string>, std::function<void(nlohmann::json)>)>> DrawPrimitiveAttributesFunctions =
 {
+	{ "cube", Primitives::DrawPrimitiveAttributes<Cube, Primitives::GetCubeDrawers, Primitives::GetCubeAttributes> },
 	{ "sphere", Primitives::DrawPrimitiveAttributes<Sphere, Primitives::GetSphereDrawers, Primitives::GetSphereAttributes> },
 	{ "cone", Primitives::DrawPrimitiveAttributes<Cone, Primitives::GetConeDrawers, Primitives::GetConeAttributes> },
 	{ "capsule", Primitives::DrawPrimitiveAttributes<Capsule, Primitives::GetCapsuleDrawers, Primitives::GetCapsuleAttributes> },

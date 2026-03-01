@@ -3,7 +3,7 @@
 #include <Templates.h>
 #include <JTemplate.h>
 #include <UUID.h>
-#include <Physics/Trigger.h>
+#include <Trigger.h>
 #include <PxPhysicsAPI.h>
 
 enum PhysicsBehavior;
@@ -66,8 +66,10 @@ namespace Templates
 	};
 
 #if defined(_EDITOR)
+	nlohmann::json GetCubeAttributes();
 	nlohmann::json GetCapsuleAttributes();
 	std::vector<JUUIDName> GetPhysicGeometrysTriggerUUIDsNames();
+	std::vector<JUUIDName> GetPhysicGeometrysCharacterUUIDsNames();
 #endif
 
 	struct PhysicGeometryInstance;
@@ -106,6 +108,19 @@ DEF_TEMPLATE_ID_HASH(PhysicGeometryInstance);
 #if defined(_EDITOR)
 static std::map<std::string, std::function<nlohmann::json()>> GetPxGeometryAttributes =
 {
-	{ "capsule", GetCapsuleAttributes }
+	{ "cube", GetCubeAttributes },
+	{ "capsule", GetCapsuleAttributes },
 };
 #endif
+
+static std::map<std::string, std::function<PxQuat(XMFLOAT3)>> ApplyGeometryLocalPoseTransformation =
+{
+	{ "capsule",[](XMFLOAT3 rot)
+	{
+		XMVECTOR rroll = XMQuaternionRotationAxis({ 0.0f,0.0f,1.0f,0.0f }, XM_PIDIV2);
+		XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(rot.x), XMConvertToRadians(rot.y), XMConvertToRadians(rot.z));
+		rotQ = XMQuaternionMultiply(rotQ, rroll);
+		return ToPxQuat(rotQ);
+	}
+	},
+};
