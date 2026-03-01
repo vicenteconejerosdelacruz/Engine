@@ -10,6 +10,7 @@ enum SceneObjectType;
 namespace Physics
 {
 	DEF_TEMPLATE_ID_DEP(PhysicObject, GetPhysicObject);
+	extern std::vector<std::string> GetCollisionMasks();
 }
 
 namespace Scene

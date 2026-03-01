@@ -57,6 +57,9 @@
     <ClInclude Include="GameControllers\ThirdPersonController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GamePhysics\GamePhysics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TestGame.cpp">
@@ -84,6 +87,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameControllers\ThirdPersonController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePhysics\GamePhysics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
