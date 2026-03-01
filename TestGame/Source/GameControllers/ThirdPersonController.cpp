@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ThirdPersonController.h"
+#include <GamePhysics.h>
 #include <GamePad.h>
 #include <Scene.h>
 #if defined(_EDITOR)
@@ -181,13 +182,17 @@ namespace Game
 
 	void ThirdPersonController::OnTriggerEvent(JUUID triggerPhysicObject, unsigned int event)
 	{
-		if (event & PxPairFlag::eNOTIFY_TOUCH_FOUND)
+		PhysicObjectID physicObject = triggerPhysicObject;
+		if (physicObject->trigger->collisionMask() & CF_WallGrabArea)
 		{
-			canJump = true;
-		}
-		if (event & PxPairFlag::eNOTIFY_TOUCH_LOST)
-		{
-			canJump = false;
+			if (event & PxPairFlag::eNOTIFY_TOUCH_FOUND)
+			{
+				canJump = true;
+			}
+			if (event & PxPairFlag::eNOTIFY_TOUCH_LOST)
+			{
+				canJump = false;
+			}
 		}
 	}
 }
