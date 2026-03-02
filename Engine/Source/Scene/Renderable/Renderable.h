@@ -78,6 +78,7 @@ namespace Scene
 		XMVECTOR positionV();
 		void updateRotationQ();
 		XMVECTOR rotationQ();
+		void rotationQ(XMVECTOR Q);
 		XMMATRIX world();
 
 		virtual void Initialize();

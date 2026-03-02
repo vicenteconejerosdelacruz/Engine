@@ -15,11 +15,19 @@ namespace Editor
 	extern RenderableID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
 	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
-	extern bool TriggersShouldDraw(SceneUnitId id);
-	extern bool CharactersShouldDraw(SceneUnitId id);
 	extern bool IsPlaying(SceneUnitId id);
-	extern std::set<TriggerID> GetTriggers(SceneUnitId id);
-	extern std::set<PhysicObjectID> GetPhysicsObjects(SceneUnitId id);
+
+	//Should Draw
+	extern bool StaticBodiesShouldDraw(SceneUnitId id);
+	extern bool DynamicBodiesShouldDraw(SceneUnitId id);
+	extern bool CharactersShouldDraw(SceneUnitId id);
+	extern bool TriggersShouldDraw(SceneUnitId id);
+
+	//Physics Objects list
+	extern std::set<PhysicObjectID> GetStaticBodies(SceneUnitId id);
+	extern std::set<PhysicObjectID> GetDynamicBodies(SceneUnitId id);
+	extern std::set<PhysicObjectID> GetCharacters(SceneUnitId id);
+	extern std::set<PhysicObjectID> GetTriggers(SceneUnitId id);
 }
 #endif
 namespace Scene
@@ -590,27 +598,21 @@ namespace Scene
 #if defined(_EDITOR)
 				using namespace Editor;
 
-				bool drawTriggers = TriggersShouldDraw(unit);
-				std::set<TriggerID> triggers;
-				//if (drawTriggers)
-				//{
-				triggers = Editor::GetTriggers(unit);
-				for (auto trg : triggers)
-				{
-					trg->visible(false);
-				}
-				//}
+				//Physics Objects list
+				std::vector<std::tuple<bool, std::set<PhysicObjectID>>> drawPhysicsObjects;
+				drawPhysicsObjects.push_back(std::make_tuple(StaticBodiesShouldDraw(unit), GetStaticBodies(unit)));
+				drawPhysicsObjects.push_back(std::make_tuple(DynamicBodiesShouldDraw(unit), GetDynamicBodies(unit)));
+				drawPhysicsObjects.push_back(std::make_tuple(CharactersShouldDraw(unit), GetCharacters(unit)));
+				drawPhysicsObjects.push_back(std::make_tuple(TriggersShouldDraw(unit), Editor::GetTriggers(unit)));
 
-				bool drawCharacters = CharactersShouldDraw(unit);
-				std::set<PhysicObjectID> physicObjects;
-				//if (drawCharacters)
-				//{
-				physicObjects = Editor::GetPhysicsObjects(unit);
-				for (auto phO : physicObjects)
+				for (auto& [draw, list] : drawPhysicsObjects)
 				{
-					phO->visible_character(false);
+					for (auto phO : list)
+					{
+						phO->visible(false);
+					}
 				}
-				//}
+
 #endif
 				for (auto it = renVecSet.begin(); it != renVecSet.end(); it++)
 				{
@@ -621,32 +623,20 @@ namespace Scene
 				}
 
 #if defined(_EDITOR)
-				for (auto trg : triggers)
+				for (auto& [draw, list] : drawPhysicsObjects)
 				{
-					trg->visible(true);
-					if (!drawTriggers) continue;
-					//if (IsPlaying(unit))
-					//	continue;
-					RenderableID shape = trg->renderableShape;
-					RenderableID lines = trg->renderableLines;
-					if (shape->checkBoundingBox() && boundingFrustum.Contains(shape->GetBoundingBox()) == ContainmentType::DISJOINT)
-						continue;
-					shape->Render(unit, rpi, SUuuid());
-					lines->Render(unit, rpi, SUuuid());
-				}
+					for (auto phO : list)
+					{
+						phO->visible(true);
+						if (!draw) continue;
 
-				for (auto phO : physicObjects)
-				{
-					phO->visible_character(true);
-					if (!drawCharacters) continue;
-					//if (IsPlaying(unit))
-					//	continue;
-					RenderableID shape = phO->controllerRenderableShape;
-					RenderableID lines = phO->controllerRenderableLines;
-					if (shape->checkBoundingBox() && boundingFrustum.Contains(shape->GetBoundingBox()) == ContainmentType::DISJOINT)
-						continue;
-					shape->Render(unit, rpi, SUuuid());
-					lines->Render(unit, rpi, SUuuid());
+						RenderableID shape = phO->renderableShape;
+						RenderableID lines = phO->renderableLines;
+						if (shape->checkBoundingBox() && boundingFrustum.Contains(shape->GetBoundingBox()) == ContainmentType::DISJOINT)
+							continue;
+						shape->Render(unit, rpi, SUuuid());
+						lines->Render(unit, rpi, SUuuid());
+					}
 				}
 #endif
 			};
@@ -1011,6 +1001,17 @@ namespace Scene
 		auto& Cameras = GetCameras(id);
 		std::set<CameraID> cams;
 		std::transform(Cameras.begin(), Cameras.end(), std::inserter(cams, cams.begin()), [&](auto o) { return MAKESUUUID(id, o); });
+
+		//is this(hack) or fix the loading system
+		auto& scene = GetSceneUnit(id);
+		for (auto& c : cams)
+		{
+			if (!c->RenderReady() && scene->IsBound(c.uuid()))
+			{
+				c->RenderReady(true);
+				scene->EraseCameraFromLoadingPool(c);
+			}
+		}
 
 		//update rotation quaternion
 		for (auto cam : cams)

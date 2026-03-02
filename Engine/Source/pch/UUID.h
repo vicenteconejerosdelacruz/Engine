@@ -184,13 +184,11 @@ struct TSUUUID {
 	}
 	JUUID uuid() const
 	{
-		JUUID& uuid = std::get<1>(SUuuid);
-		return uuid;
+		return std::get<1>(SUuuid);
 	}
 	JUUID uuid()
 	{
-		JUUID& uuid = std::get<1>(SUuuid);
-		return uuid;
+		return std::get<1>(SUuuid);
 	}
 };
 

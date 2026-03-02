@@ -59,6 +59,7 @@ inline JEdvEditorDrawerFunction DrawFlags(std::vector<std::string> flags)
 					if (offValues != 0 && onValues != 0) return FV_Diff;
 					if (offValues == 0) return FV_On;
 					if (onValues == 0) return FV_Off;
+					return FV_Diff;
 				};
 
 			ImGui::PushID(attribute.c_str());

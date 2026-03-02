@@ -82,7 +82,7 @@ namespace Scene
 	struct SceneObject : JObject
 	{
 		//lifecycle
-		SceneObject(SceneUnitId id, nlohmann::json& json) :JObject(json) { unit = id; }
+		SceneObject(SceneUnitId id, nlohmann::json& json) :JObject(json) { unit = id; soName = json.at("name"); }
 		virtual void Initialize() {};
 		virtual void SetInitialConditions() {};
 		virtual void BindToScene() {};
@@ -119,6 +119,7 @@ namespace Scene
 #endif
 		//scene unit for which this scene object belongs
 		SceneUnitId unit;
+		std::string soName;
 	};
 };
 

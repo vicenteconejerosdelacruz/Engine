@@ -47,6 +47,9 @@ namespace Scene
 		void ClearRenderablesLoadingPool();
 		void ClearCamerasLoadingPool();
 		void ClearLightsLoadingPool();
+		void EraseRenderableFromLoadingPool(RenderableID r);
+		void EraseCameraFromLoadingPool(CameraID c);
+		void EraseLightFromLoadingPool(LightID l);
 		void InitLoadingProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t id, size_t capacity);
 		void InitFrame2FrameProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t id, size_t capacity);
 		void InitComputeProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t id, size_t capacity);
@@ -61,6 +64,7 @@ namespace Scene
 		void Unbind(JUUID uuidA, JUUID uuidB);
 		bool IsBound(JUUID uuid);
 		void AddSceneObjectToUnboundPool(JUUID uuid);
+		void RemoveSceneObjectFromUnboundPool(JUUID uuid);
 		bool LoadingCommandListIsOpen();
 		CComPtr<ID3D12GraphicsCommandList2>& GetLoadingCommandList(bool OpenIfClosed = true);
 		void ResetLoadingCommandList();

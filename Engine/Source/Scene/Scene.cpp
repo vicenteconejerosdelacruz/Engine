@@ -361,7 +361,6 @@ namespace Scene
 		renderableSceneUnits.erase(id);
 	}
 
-
 	void BindSceneObjects(SceneUnitId id)
 	{
 		std::unordered_map<SceneObjectType, std::function<void(SceneUnitId, JUUID)>> typeBinder =

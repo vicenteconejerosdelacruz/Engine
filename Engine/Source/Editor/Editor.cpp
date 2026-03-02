@@ -110,6 +110,40 @@ struct GizmoInteraction
 	XMFLOAT3 gizmoScale;
 };
 
+struct PhysicsDrawState
+{
+	PhysicsDrawState()
+	{
+		draw = true;
+		drawPlayState = true;
+	}
+
+	void PlayMode()
+	{
+		drawPlayState = draw;
+		draw = false;
+	}
+
+	void EditorMode()
+	{
+		draw = drawPlayState;
+	}
+
+	void SwitchDraw()
+	{
+		bool value = !draw;
+		draw = value;
+		for (auto phO : levelPhysicObjects)
+		{
+			phO->visible(value);
+		}
+	}
+
+	bool draw;
+	bool drawPlayState;
+	std::set<PhysicObjectID> levelPhysicObjects;
+};
+
 namespace Editor
 {
 	ImGui_ImplDX12_InitInfo init_info = {};
@@ -162,13 +196,11 @@ namespace Editor
 	std::unordered_map<SceneUnitId, CameraID> editorCameraUUID;
 	//Billboards
 	std::unordered_map<SceneUnitId, BillboardRegistry> billboards;
-	//Physics
-	std::unordered_map<SceneUnitId, bool> drawTriggers;
-	std::unordered_map<SceneUnitId, bool> drawTriggersPlayState;
-	std::unordered_map<SceneUnitId, std::set<TriggerID>> levelTriggers;
-	std::unordered_map<SceneUnitId, bool> drawCharacters;
-	std::unordered_map<SceneUnitId, bool> drawCharactersPlayState;
-	std::unordered_map<SceneUnitId, std::set<PhysicObjectID>> levelCharacters;
+	//Physics Objects Draw
+	std::unordered_map<SceneUnitId, PhysicsDrawState> drawStaticBodies;
+	std::unordered_map<SceneUnitId, PhysicsDrawState> drawDynamicBodies;
+	std::unordered_map<SceneUnitId, PhysicsDrawState> drawCharacters;
+	std::unordered_map<SceneUnitId, PhysicsDrawState> drawTriggers;
 
 	RightPanelComponent templateEdition("templates", { "hidden", "uuid" }, { "Templates", "Details" }, { "Templates" });
 
@@ -198,10 +230,10 @@ namespace Editor
 
 	void CreateSceneUnitPhysicsController(SceneUnitId id)
 	{
-		drawTriggers.insert_or_assign(id, true);
-		levelTriggers.insert_or_assign(id, std::set<TriggerID>());
-		drawCharacters.insert_or_assign(id, true);
-		levelCharacters.insert_or_assign(id, std::set<PhysicObjectID>());
+		drawStaticBodies.insert_or_assign(id, PhysicsDrawState());
+		drawDynamicBodies.insert_or_assign(id, PhysicsDrawState());
+		drawCharacters.insert_or_assign(id, PhysicsDrawState());
+		drawTriggers.insert_or_assign(id, PhysicsDrawState());
 	}
 
 	void CreateSceneUnitBoundingBox(SceneUnitId id)
@@ -338,9 +370,10 @@ namespace Editor
 
 	void DeleteSceneUnitPhysicsController(SceneUnitId id)
 	{
-		drawTriggers.erase(id);
-		levelTriggers.erase(id);
+		drawStaticBodies.erase(id);
+		drawDynamicBodies.erase(id);
 		drawCharacters.erase(id);
+		drawTriggers.erase(id);
 	}
 
 	void DeleteSceneUnitBoundingBox(SceneUnitId id)
@@ -1343,11 +1376,11 @@ namespace Editor
 		ImGui::PopStyleVar(3);
 	}
 
-	static ImVec2 physicsControllerSize(100, 45);
+	static ImVec2 physicsControllerSize(100, 90);
 	RECT GetPhysicsControllerRect()
 	{
 		const ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImVec2 panPos = ImVec2(viewport->WorkSize.x - panW, viewport->WorkPos.y);
+		ImVec2 panPos = ImVec2(viewport->WorkSize.x - (IsPlaying(currentSceneUnitId) ? 0 : panW), viewport->WorkPos.y);
 
 		RECT r;
 		r.right = static_cast<LONG>(panPos.x - 1);
@@ -1380,15 +1413,25 @@ namespace Editor
 			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings
 		);
 		{
-			bool valueTriggers = drawTriggers.at(currentSceneUnitId);
-			if (ImGui::Checkbox("Triggers", &valueTriggers))
+			bool valueStaticBodies = drawStaticBodies.at(currentSceneUnitId).draw;
+			if (ImGui::Checkbox("Static", &valueStaticBodies))
 			{
-				SwitchTriggersDrawing(currentSceneUnitId);
+				SwitchStaticBodiesDrawing(currentSceneUnitId);
 			}
-			bool valueCharacters = drawCharacters.at(currentSceneUnitId);
+			bool valueDynamicBodies = drawDynamicBodies.at(currentSceneUnitId).draw;
+			if (ImGui::Checkbox("Dynamic", &valueDynamicBodies))
+			{
+				SwitchDynamicBodiesDrawing(currentSceneUnitId);
+			}
+			bool valueCharacters = drawCharacters.at(currentSceneUnitId).draw;
 			if (ImGui::Checkbox("Characters", &valueCharacters))
 			{
 				SwitchCharactersDrawing(currentSceneUnitId);
+			}
+			bool valueTriggers = drawTriggers.at(currentSceneUnitId).draw;
+			if (ImGui::Checkbox("Triggers", &valueTriggers))
+			{
+				SwitchTriggersDrawing(currentSceneUnitId);
 			}
 		}
 		ImGui::End();
@@ -2844,10 +2887,10 @@ namespace Editor
 		editorPrePlayDump.at(id) = GetLevelString(id);
 		HideBillboards(id);
 		PlaySounds(id);
-		drawTriggersPlayState[id] = drawTriggers[id];
-		drawCharactersPlayState[id] = drawCharacters[id];
-		drawTriggers[id] = false;
-		drawCharacters[id] = false;
+		drawStaticBodies.at(id).PlayMode();
+		drawDynamicBodies.at(id).PlayMode();
+		drawCharacters.at(id).PlayMode();
+		drawTriggers.at(id).PlayMode();
 	}
 
 	void SwitchToPauseMode(SceneUnitId id)
@@ -2935,78 +2978,119 @@ namespace Editor
 			DeleteSceneObjectFromEditor(id, uuid);
 		}
 
-		drawTriggers[id] = drawTriggersPlayState[id];
-		drawCharacters[id] = drawCharactersPlayState[id];
+		drawStaticBodies.at(id).EditorMode();
+		drawDynamicBodies.at(id).EditorMode();
+		drawCharacters.at(id).EditorMode();
+		drawTriggers.at(id).EditorMode();
 	}
 
+	//Physics Objects drawing
+	//Register
+	bool StaticBodiesSceneUnitRegistered(SceneUnitId id)
+	{
+		return drawStaticBodies.contains(id);
+	}
+	bool DynamicBodiesSceneUnitRegistered(SceneUnitId id)
+	{
+		return drawDynamicBodies.contains(id);
+	}
+	bool CharactersSceneUnitRegistered(SceneUnitId id)
+	{
+		return drawCharacters.contains(id);
+	}
 	bool TriggersSceneUnitRegistered(SceneUnitId id)
 	{
 		return drawTriggers.contains(id);
 	}
 
+	//Should Draw
 	bool TriggersShouldDraw(SceneUnitId id)
 	{
-		return drawTriggers.at(id);
+		return drawTriggers.at(id).draw;
 	}
-
-	void SwitchTriggersDrawing(SceneUnitId id)
+	bool StaticBodiesShouldDraw(SceneUnitId id)
 	{
-		bool value = !drawTriggers.at(id);
-		drawTriggers.at(id) = value;
-		for (auto trg : levelTriggers.at(id))
-		{
-			trg->visible(value);
-		}
+		return drawStaticBodies.at(id).draw;
 	}
-
-	void RegisterTrigger(TriggerID trigger)
+	bool DynamicBodiesShouldDraw(SceneUnitId id)
 	{
-		levelTriggers.at(trigger.unit()).insert(trigger);
+		return drawDynamicBodies.at(id).draw;
 	}
-
-	void UnRegisterTrigger(TriggerID trigger)
-	{
-		levelTriggers.at(trigger.unit()).erase(trigger);
-	}
-
-	std::set<TriggerID> GetTriggers(SceneUnitId id)
-	{
-		return levelTriggers.at(id);
-	}
-
-	bool CharactersSceneUnitRegistered(SceneUnitId id)
-	{
-		return drawCharacters.contains(id);
-	}
-
 	bool CharactersShouldDraw(SceneUnitId id)
 	{
-		return drawCharacters.at(id);
+		return drawCharacters.at(id).draw;
 	}
 
+	//Switch drawing state
+	void SwitchStaticBodiesDrawing(SceneUnitId id)
+	{
+		drawStaticBodies.at(id).SwitchDraw();
+	}
+	void SwitchDynamicBodiesDrawing(SceneUnitId id)
+	{
+		drawDynamicBodies.at(id).SwitchDraw();
+	}
 	void SwitchCharactersDrawing(SceneUnitId id)
 	{
-		bool value = !drawCharacters.at(id);
-		drawCharacters.at(id) = value;
-		for (auto phO : levelCharacters.at(id))
-		{
-			phO->visible_character(value);
-		}
+		drawCharacters.at(id).SwitchDraw();
+	}
+	void SwitchTriggersDrawing(SceneUnitId id)
+	{
+		drawTriggers.at(id).SwitchDraw();
 	}
 
+	//Physics Objects registration
+	void RegisterStaticBody(PhysicObjectID phO)
+	{
+		drawStaticBodies.at(phO->unit()).levelPhysicObjects.insert(phO);
+	}
+	void RegisterDynamicBody(PhysicObjectID phO)
+	{
+		drawDynamicBodies.at(phO->unit()).levelPhysicObjects.insert(phO);
+	}
 	void RegisterCharacter(PhysicObjectID phO)
 	{
-		levelCharacters.at(phO->unit()).insert(phO);
+		drawCharacters.at(phO->unit()).levelPhysicObjects.insert(phO);
+	}
+	void RegisterTrigger(PhysicObjectID phO)
+	{
+		drawTriggers.at(phO->unit()).levelPhysicObjects.insert(phO);
 	}
 
+	//Physics Objects unregistration
+	void UnRegisterStaticBody(PhysicObjectID phO)
+	{
+		drawStaticBodies.at(phO->unit()).levelPhysicObjects.erase(phO);
+	}
+	void UnRegisterDynamicBody(PhysicObjectID phO)
+	{
+		drawDynamicBodies.at(phO->unit()).levelPhysicObjects.erase(phO);
+	}
 	void UnRegisterCharacter(PhysicObjectID phO)
 	{
-		levelCharacters.at(phO->unit()).erase(phO);
+		drawCharacters.at(phO->unit()).levelPhysicObjects.erase(phO);
+	}
+	void UnRegisterTrigger(PhysicObjectID phO)
+	{
+		drawTriggers.at(phO->unit()).levelPhysicObjects.erase(phO);
 	}
 
-	std::set<PhysicObjectID> GetPhysicsObjects(SceneUnitId id)
+	//Physics Objects list
+	std::set<PhysicObjectID> GetStaticBodies(SceneUnitId id)
 	{
-		return levelCharacters.at(id);
+		return drawStaticBodies.at(id).levelPhysicObjects;
+	}
+	std::set<PhysicObjectID> GetDynamicBodies(SceneUnitId id)
+	{
+		return drawDynamicBodies.at(id).levelPhysicObjects;
+	}
+	std::set<PhysicObjectID> GetCharacters(SceneUnitId id)
+	{
+		return drawCharacters.at(id).levelPhysicObjects;
+	}
+	std::set<PhysicObjectID> GetTriggers(SceneUnitId id)
+	{
+		return drawTriggers.at(id).levelPhysicObjects;
 	}
 };
 

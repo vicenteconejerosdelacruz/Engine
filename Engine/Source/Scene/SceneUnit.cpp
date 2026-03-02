@@ -181,6 +181,24 @@ namespace Scene
 		lightsInLoadingPool.clear();
 	}
 
+	void SceneUnit::EraseRenderableFromLoadingPool(RenderableID r)
+	{
+		if (renderablesInLoadingPool.contains(r))
+			renderablesInLoadingPool.erase(r);
+	}
+
+	void SceneUnit::EraseCameraFromLoadingPool(CameraID c)
+	{
+		if (camerasInLoadingPool.erase(c))
+			camerasInLoadingPool.erase(c);
+	}
+
+	void SceneUnit::EraseLightFromLoadingPool(LightID l)
+	{
+		if (lightsInLoadingPool.contains(l))
+			lightsInLoadingPool.erase(l);
+	}
+
 	void SceneUnit::InitLoadingProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t id, size_t capacity)
 	{
 		loadingProcessor.Init(d3dDevice, id, capacity);
@@ -250,6 +268,12 @@ namespace Scene
 	void SceneUnit::AddSceneObjectToUnboundPool(JUUID uuid)
 	{
 		unboundedSceneObjects.insert(uuid);
+	}
+
+	void SceneUnit::RemoveSceneObjectFromUnboundPool(JUUID uuid)
+	{
+		if (unboundedSceneObjects.contains(uuid))
+			unboundedSceneObjects.insert(uuid);
 	}
 
 	bool SceneUnit::LoadingCommandListIsOpen()

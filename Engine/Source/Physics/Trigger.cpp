@@ -3,19 +3,6 @@
 #include <Scene.h>
 #include <Physics.h>
 
-#if defined(_EDITOR)
-namespace Editor
-{
-	extern void BindRenderableToPickingPass(RenderableID r);
-	extern void SelectTrigger(TriggerID trigger);
-	extern bool TriggersShouldDraw(SceneUnitId id);
-	extern void RegisterTrigger(TriggerID trigger);
-	extern void UnRegisterTrigger(TriggerID trigger);
-	extern bool TriggersSceneUnitRegistered(SceneUnitId id);
-	extern CameraID GetLevelCamera(SceneUnitId id);
-}
-#endif
-
 namespace Scene
 {
 	SODEF_FULL(Trigger);
@@ -126,132 +113,7 @@ namespace Scene
 		physicObject->CreatePhysicsBehavior();
 	}
 
-	void Trigger::visible(bool value)
-	{
-		at("visible") = value;
 #if defined(_EDITOR)
-		renderableLines->visible(value);
-		renderableShape->visible(value);
-#endif
-	}
-
-#if defined(_EDITOR)
-	nlohmann::json Trigger::CreateRenderableTrigger(std::string name, JUUID uuid, JUUID camId, std::string material)
-	{
-		PhysicGeometryJsonID pg = geometry();
-
-		bool visible = Editor::TriggersShouldDraw(unit);
-
-		nlohmann::json jrentrigger = nlohmann::json(
-			{
-				{
-					"meshMaterial",
-					{
-						{ "material", GetMaterialUUIDByName(material) },
-						{ "mesh",
-							{
-								{ "primitive", pg->mesh() }
-							}
-						}
-					}
-				},
-				{ "castShadows", false },
-				{ "shadowed", false },
-				{ "name" , name },
-				{ "uuid" , uuid },
-				{ "position", FromXMFLOAT3(position()) },
-				{ "topology", "TRIANGLELIST" },
-				{ "rotation" , FromXMFLOAT3(rotation()) },
-				{ "scale" , FromXMFLOAT3(scale()) },
-				{ "skipMeshes" , {}},
-				{ "visible" , visible },
-				{ "hidden" , true},
-				{ "cameras", { camId }},
-				{ "passMaterialOverrides",
-					{
-						{
-							{ "meshIndex", 0 },
-							{ "renderPass", GetRenderPassUUIDByName("PickingPass") },
-							{ "material", GetMaterialUUIDByName("TriggerPicking") }
-						}
-					}
-				},
-				{ "depthStencil",
-					{
-						{ "BackFace",
-							{
-								{ "StencilDepthFailOp", "KEEP"},
-								{ "StencilFailOp", "KEEP"},
-								{ "StencilFunc", "ALWAYS"},
-								{ "StencilPassOp", "KEEP" }
-							}
-						},
-						{ "DepthEnable", false },
-						{ "DepthFunc", "NONE" },
-						{ "DepthWriteMask", "ZERO" },
-						{ "FrontFace",
-							{
-								{ "StencilDepthFailOp", "KEEP"},
-								{ "StencilFailOp", "KEEP"},
-								{ "StencilFunc", "ALWAYS"},
-								{ "StencilPassOp", "KEEP" }
-							}
-						},
-						{ "StencilEnable", false},
-						{ "StencilReadMask", 255},
-						{ "StencilWriteMask", 255 }
-					}
-				}
-			}
-		);
-		return jrentrigger;
-	}
-
-	void Trigger::CreateRenderableTrigger()
-	{
-		if (geometry().empty())
-			return;
-
-		renderableLines = MAKESUUUID(unit, getUUID());
-		renderableShape = MAKESUUUID(unit, getUUID());
-		CameraID camera;
-#if defined(_EDITOR)
-		camera = Editor::GetLevelCamera(unit);
-#else
-		if (GetCountFromMouseCameras(unit) > 0ULL)
-		{
-			camera = MAKESUUUID(unit, *GetSwapChainCameras(unit).begin());
-		}
-#endif
-		//CameraID camera = MAKESUUUID(unit, *GetSwapChainCameras(unit).begin());
-
-		nlohmann::json lines = CreateRenderableTrigger(name() + "-lines", renderableLines.uuid(), camera.uuid(), "Translucent_wired");
-		nlohmann::json shape = CreateRenderableTrigger(name() + "-shape", renderableShape.uuid(), camera.uuid(), "Translucent");
-
-		shape["renderNext"] = { renderableLines.uuid() };
-
-		nlohmann::json data =
-		{
-			{ "renderables",
-				{
-					lines,
-					shape
-				}
-			}
-		};
-
-		AttachLevelIntoScene(unit, "triggers", data, [&](SceneUnitId id)
-			{
-				using namespace Editor;
-				BindRenderableToPickingPass(renderableLines);
-				BindRenderableToPickingPass(renderableShape);
-				renderableLines->OnPick = [&] {Editor::SelectTrigger(SUuuid()); };
-				renderableShape->OnPick = [&] {Editor::SelectTrigger(SUuuid()); };
-				RegisterTrigger(SUuuid());
-			}
-		);
-	}
-
 	BoundingBox Trigger::GetBoundingBox()
 	{
 		return BoundingBox(position(), { 0.1f,0.1f,0.1f });
@@ -278,9 +140,6 @@ namespace Scene
 		for (auto trg : tr2Del)
 		{
 #if defined(_EDITOR)
-			DeleteRenderable(FROMSUUUID(trg->renderableShape()));
-			DeleteRenderable(FROMSUUUID(trg->renderableLines()));
-			UnRegisterTrigger(trg);
 #endif
 			DestroyPhysicObject(trg->physicObject());
 			EraseTriggerFromTriggers(FROMSUUUID(trg()));
@@ -288,47 +147,27 @@ namespace Scene
 		}
 
 #if defined(_EDITOR)
-		std::set<TriggerID> trCreateRenderables;
-		std::copy_if(tr.begin(), tr.end(), std::inserter(trCreateRenderables, trCreateRenderables.begin()), [](auto trg)
-			{
-				return trg->renderableShape.empty();
-			}
-		);
 
 		std::set<TriggerID> trTransformation;
 		std::copy_if(tr.begin(), tr.end(), std::inserter(trTransformation, trTransformation.begin()), [](auto trg)
 			{
-				return !trg->renderableShape.empty() && (
+				return
 					trg->dirty(Trigger::Update_position) ||
 					trg->dirty(Trigger::Update_rotation) ||
-					trg->dirty(Trigger::Update_scale)
-					);
+					trg->dirty(Trigger::Update_scale);
 			}
 		);
 
 		std::set<TriggerID> trColor;
 		std::copy_if(tr.begin(), tr.end(), std::inserter(trColor, trColor.begin()), [](auto trg)
 			{
-				return !trg->renderableShape.empty() && trg->dirty(Trigger::Update_color);
+				return trg->dirty(Trigger::Update_color);
 			}
 		);
 
-		if (TriggersSceneUnitRegistered(unit))
-		{
-			for (auto trg : trCreateRenderables)
-			{
-				trg->CreateRenderableTrigger();
-			}
-		}
 
 		for (auto trg : trTransformation)
 		{
-			trg->renderableShape->position(trg->position());
-			trg->renderableShape->rotation(trg->rotation());
-			trg->renderableShape->scale(trg->scale());
-			trg->renderableLines->position(trg->position());
-			trg->renderableLines->rotation(trg->rotation());
-			trg->renderableLines->scale(trg->scale());
 			if (trg->dirty(Trigger::Update_scale))
 			{
 				trg->physicObject->DestroyPhisicsBehavior();
@@ -345,16 +184,7 @@ namespace Scene
 
 		for (auto trg : trColor)
 		{
-			XMFLOAT4 color = trg->color();
-			XMFLOAT3 baseColor = { color.x,color.y,color.z };
-			XMFLOAT3 lineBaseColor = baseColor * 1.3f;
-			float alpha = color.w;
-			for (unsigned int i = 0; i < Renderer::numFrames; i++)
-			{
-				trg->renderableShape->WriteConstantsBuffer("baseColor", baseColor, i);
-				trg->renderableShape->WriteConstantsBuffer("alpha", alpha, i);
-				trg->renderableLines->WriteConstantsBuffer("baseColor", lineBaseColor, i);
-			}
+			trg->physicObject->UpdateRenderableColor(trg->color());
 			trg->clean(Trigger::Update_color);
 		}
 #endif

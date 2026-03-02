@@ -197,17 +197,40 @@ namespace Editor {
 	void SwitchToUnPausedMode(SceneUnitId id);
 	void SwitchToNonPlayMode(SceneUnitId id);
 
-	//Physics Drawing
-	bool TriggersSceneUnitRegistered(SceneUnitId id);
-	bool TriggersShouldDraw(SceneUnitId id);
-	void SwitchTriggersDrawing(SceneUnitId id);
-	void RegisterTrigger(TriggerID trigger);
-	void UnRegisterTrigger(TriggerID trigger);
-	std::set<TriggerID> GetTriggers(SceneUnitId id);
+	//Physics Objects Drawing
+	//Register
+	bool StaticBodiesSceneUnitRegistered(SceneUnitId id);
+	bool DynamicBodiesSceneUnitRegistered(SceneUnitId id);
 	bool CharactersSceneUnitRegistered(SceneUnitId id);
+	bool TriggersSceneUnitRegistered(SceneUnitId id);
+
+	//Should Draw
+	bool StaticBodiesShouldDraw(SceneUnitId id);
+	bool DynamicBodiesShouldDraw(SceneUnitId id);
 	bool CharactersShouldDraw(SceneUnitId id);
+	bool TriggersShouldDraw(SceneUnitId id);
+
+	//Switch drawing state
+	void SwitchStaticBodiesDrawing(SceneUnitId id);
+	void SwitchDynamicBodiesDrawing(SceneUnitId id);
 	void SwitchCharactersDrawing(SceneUnitId id);
+	void SwitchTriggersDrawing(SceneUnitId id);
+
+	//Physics Objects registration
+	void RegisterStaticBody(PhysicObjectID phO);
+	void RegisterDynamicBody(PhysicObjectID phO);
 	void RegisterCharacter(PhysicObjectID phO);
+	void RegisterTrigger(PhysicObjectID phO);
+
+	//Physics Objects unregistration
+	void UnRegisterStaticBody(PhysicObjectID phO);
+	void UnRegisterDynamicBody(PhysicObjectID phO);
 	void UnRegisterCharacter(PhysicObjectID phO);
-	std::set<PhysicObjectID> GetPhysicsObjects(SceneUnitId id);
+	void UnRegisterTrigger(PhysicObjectID phO);
+
+	//Physics Objects list
+	std::set<PhysicObjectID> GetStaticBodies(SceneUnitId id);
+	std::set<PhysicObjectID> GetDynamicBodies(SceneUnitId id);
+	std::set<PhysicObjectID> GetCharacters(SceneUnitId id);
+	std::set<PhysicObjectID> GetTriggers(SceneUnitId id);
 }

@@ -83,12 +83,12 @@ namespace Physics
 		void CreatePhysicsBehavior();
 		void CreateStaticMeshBehavior();
 		void CreateDynamicMeshBehavior();
-		void CreateTriggerMeshBehavior();
 		void CreateCharacterMeshBehavior();
+		void CreateTriggerMeshBehavior();
 		void CreateStaticModel3DBehavior();
 		void CreateDynamicModel3DBehavior();
-		void CreateTriggerModel3DBehavior();
 		void CreateCharacterModel3DBehavior();
+		void CreateTriggerModel3DBehavior();
 		void DestroyPhisicsBehavior();
 		void SetInitialConditions();
 
@@ -101,9 +101,17 @@ namespace Physics
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 		std::vector<std::string> GetPhysicBehaviorAttributes();
-		nlohmann::json CreateRenderableCharacter(std::string name, JUUID uuid, JUUID camId, std::string material);
+		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
+
+		//Renderable representation
+		void visible(bool value);
+		void UpdateRenderableColor(XMFLOAT4 color);
+		void CreateRenderableStatic();
+		void CreateRenderableDynamic();
 		void CreateRenderableCharacter();
-		void visible_character(bool v);
+		void CreateRenderableTrigger();
+		nlohmann::json CreateFromRenderable(std::string name, JUUID uuid, JUUID camId, std::string material, bool visible, XMFLOAT3 position, XMFLOAT3 rotation, XMFLOAT3 scale);
+		nlohmann::json CreateFromTrigger(std::string name, JUUID uuid, JUUID camId, std::string material);
 #endif
 		RenderableID renderable;
 		TriggerID trigger;
@@ -114,8 +122,8 @@ namespace Physics
 		PxShape* shape = nullptr;
 		PxController* controller = nullptr;
 #if defined(_EDITOR)
-		RenderableID controllerRenderableShape;
-		RenderableID controllerRenderableLines;
+		RenderableID renderableShape;
+		RenderableID renderableLines;
 #endif
 		bool built = false;
 	};

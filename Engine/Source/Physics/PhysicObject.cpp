@@ -7,10 +7,33 @@
 #if defined(_EDITOR)
 namespace Editor
 {
-	extern bool CharactersShouldDraw(SceneUnitId id);
-	extern void RegisterCharacter(PhysicObjectID phO);
-	extern void UnRegisterCharacter(PhysicObjectID phO);
+	extern CameraID GetLevelCamera(SceneUnitId id);
+	extern void BindRenderableToPickingPass(RenderableID r);
+	extern void SelectTrigger(TriggerID trigger);
+
+	//Scene Unit Registered
+	extern bool StaticBodiesSceneUnitRegistered(SceneUnitId id);
+	extern bool DynamicBodiesSceneUnitRegistered(SceneUnitId id);
 	extern bool CharactersSceneUnitRegistered(SceneUnitId id);
+	extern bool TriggersSceneUnitRegistered(SceneUnitId id);
+
+	//Should Draw
+	extern bool StaticBodiesShouldDraw(SceneUnitId id);
+	extern bool DynamicBodiesShouldDraw(SceneUnitId id);
+	extern bool CharactersShouldDraw(SceneUnitId id);
+	extern bool TriggersShouldDraw(SceneUnitId id);
+
+	//Register
+	extern void RegisterStaticBody(PhysicObjectID phO);
+	extern void RegisterDynamicBody(PhysicObjectID phO);
+	extern void RegisterCharacter(PhysicObjectID phO);
+	extern void RegisterTrigger(PhysicObjectID trigger);
+
+	//UnRegister
+	extern void UnRegisterStaticBody(PhysicObjectID phO);
+	extern void UnRegisterDynamicBody(PhysicObjectID phO);
+	extern void UnRegisterCharacter(PhysicObjectID phO);
+	extern void UnRegisterTrigger(PhysicObjectID trigger);
 }
 #endif
 
@@ -22,7 +45,10 @@ namespace Physics
 	std::map<JUUID, std::unique_ptr<PhysicObject>> physicObjectsUUIDs;
 	std::map<SceneUnitId, std::set<JUUID>> physicObjectsBySceneUnitId;
 	std::map<SUUUID, std::set<JUUID>> physicObjectsUUIDBySUUUID;
+	std::map<SUUUID, JUUID> physicStaticBodyUUIDBySUUID;
+	std::map<SUUUID, JUUID> physicDynamicBodyUUIDBySUUID;
 	std::map<SUUUID, JUUID> physicCharacterUUIDBySUUID;
+	std::map<SUUUID, JUUID> physicTriggerUUIDBySUUID;
 	std::map<PhysicsBehavior, std::map<JUUID, std::function<void(JUUID, unsigned int)>>> physicContactSubscribers;
 
 #if defined(_EDITOR)
@@ -54,9 +80,9 @@ namespace Physics
 		}
 		if (!trigger.empty())
 		{
-			trigger.unit();
+			return trigger.unit();
 		}
-		assert("bad Physic Object");
+		assert(!!!"bad Physic Object");
 		return 0x2BAD5005AD;
 	}
 
@@ -147,6 +173,9 @@ namespace Physics
 
 		//assign user data to this physic object
 		shape->userData = this;
+		actor->userData = this;
+
+		physicStaticBodyUUIDBySUUID[renderable()] = at("uuid");
 	}
 
 	void PhysicObject::CreateDynamicMeshBehavior()
@@ -193,45 +222,10 @@ namespace Physics
 		scene->pxScene->addActor(*actor);
 
 		//assign user data to this physic object
+		actor->userData = this;
 		shape->userData = this;
-	}
 
-	void PhysicObject::CreateTriggerMeshBehavior()
-	{
-		PhysicGeometryJsonID jg = geometry();
-		physicGeometryInstance = getUUID();
-		nlohmann::json atts = nlohmann::json::parse(dump());
-		CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
-			{
-				return std::make_unique<PhysicGeometryInstance>(jg, trigger, atts, jg->mesh(), physicGeometryInstance(), behavior());
-			}
-		);
-		material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
-
-		XMFLOAT3 pos = trigger->position();
-		XMVECTOR rot = trigger->rotationQ();
-
-		XMFLOAT3 localRot = localRotation();
-		JNAME meshName = GetMeshName(jg->mesh());
-		PxQuat localRotQ = (ApplyGeometryLocalPoseTransformation.contains(meshName)) ?
-			ApplyGeometryLocalPoseTransformation.at(meshName)(localRot) : ToPxQuat(localRot);
-
-		//create the PxActor
-		actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
-
-		//create the PxShape
-		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material, PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION);
-		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), localRotQ));
-
-		//set the actor position and rotation
-		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
-
-		//add the actor to the pxScene
-		PhysicSceneID scene = MAKESUUUID(trigger.unit(), *GetPhysicScenes(trigger.unit()).begin());
-		scene->pxScene->addActor(*actor);
-
-		//assign user data to this physic object
-		shape->userData = this;
+		physicDynamicBodyUUIDBySUUID[renderable()] = at("uuid");
 	}
 
 	void PhysicObject::CreateCharacterMeshBehavior()
@@ -282,6 +276,47 @@ namespace Physics
 		physicCharacterUUIDBySUUID[renderable()] = at("uuid");
 	}
 
+	void PhysicObject::CreateTriggerMeshBehavior()
+	{
+		PhysicGeometryJsonID jg = geometry();
+		physicGeometryInstance = getUUID();
+		nlohmann::json atts = nlohmann::json::parse(dump());
+		CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
+			{
+				return std::make_unique<PhysicGeometryInstance>(jg, trigger, atts, jg->mesh(), physicGeometryInstance(), behavior());
+			}
+		);
+		material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+
+		XMFLOAT3 pos = trigger->position();
+		XMVECTOR rot = trigger->rotationQ();
+
+		XMFLOAT3 localRot = localRotation();
+		JNAME meshName = GetMeshName(jg->mesh());
+		PxQuat localRotQ = (ApplyGeometryLocalPoseTransformation.contains(meshName)) ?
+			ApplyGeometryLocalPoseTransformation.at(meshName)(localRot) : ToPxQuat(localRot);
+
+		//create the PxActor
+		actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
+
+		//create the PxShape
+		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material, PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION);
+		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), localRotQ));
+
+		//set the actor position and rotation
+		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+
+		//add the actor to the pxScene
+		PhysicSceneID scene = MAKESUUUID(trigger.unit(), *GetPhysicScenes(trigger.unit()).begin());
+		scene->pxScene->addActor(*actor);
+
+		//assign user data to this physic object
+		actor->userData = this;
+		shape->userData = this;
+
+		physicTriggerUUIDBySUUID[trigger()] = at("uuid");
+	}
+
 	void PhysicObject::CreateStaticModel3DBehavior()
 	{
 		PhysicGeometryJsonID jg = geometry();
@@ -310,7 +345,10 @@ namespace Physics
 		scene->pxScene->addActor(*actor);
 
 		//assign user data to this physic object
+		actor->userData = this;
 		shape->userData = this;
+
+		physicStaticBodyUUIDBySUUID[renderable()] = at("uuid");
 	}
 
 	void PhysicObject::CreateDynamicModel3DBehavior()
@@ -352,7 +390,15 @@ namespace Physics
 		scene->pxScene->addActor(*actor);
 
 		//assign user data to this physic object
+		actor->userData = this;
 		shape->userData = this;
+
+		physicDynamicBodyUUIDBySUUID[renderable()] = at("uuid");
+	}
+
+	void PhysicObject::CreateCharacterModel3DBehavior()
+	{
+		assert(!!!"do not implement");
 	}
 
 	void PhysicObject::CreateTriggerModel3DBehavior()
@@ -385,12 +431,10 @@ namespace Physics
 		scene->pxScene->addActor(*actor);
 
 		//assign user data to this physic object
+		actor->userData = this;
 		shape->userData = this;
-	}
 
-	void PhysicObject::CreateCharacterModel3DBehavior()
-	{
-		assert(!!!"do not implement");
+		physicTriggerUUIDBySUUID[trigger()] = at("uuid");
 	}
 
 	void PhysicObject::DestroyPhisicsBehavior()
@@ -425,10 +469,17 @@ namespace Physics
 			PX_RELEASE(controller);
 		}
 		//PX_RELEASE(shape);
-		if (physicCharacterUUIDBySUUID.contains(renderable()))
-		{
-			physicCharacterUUIDBySUUID.erase(renderable());
-		}
+		auto eraseUUIDFromSUUID = [](auto& SUUIDs, SUUUID uuid)
+			{
+				if (SUUIDs.contains(uuid))
+				{
+					SUUIDs.erase(uuid);
+				}
+			};
+		eraseUUIDFromSUUID(physicStaticBodyUUIDBySUUID, renderable());
+		eraseUUIDFromSUUID(physicDynamicBodyUUIDBySUUID, renderable());
+		eraseUUIDFromSUUID(physicCharacterUUIDBySUUID, renderable());
+		eraseUUIDFromSUUID(physicTriggerUUIDBySUUID, trigger());
 
 		built = false;
 	}
@@ -443,18 +494,30 @@ namespace Physics
 				pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
 				pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
 				pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
+#if defined(_EDITOR)
+				if (!renderableShape.empty())
+				{
+					renderableShape->position(renderable->position());
+					renderableShape->rotationQ(renderable->rotationQ());
+				}
+				if (!renderableLines.empty())
+				{
+					renderableLines->position(renderable->position());
+					renderableLines->rotationQ(renderable->rotationQ());
+				}
+#endif
 			}
 			else if (behavior() == PB_Character && controller)
 			{
 				controller->setPosition(ToPxVec3d(renderable->position()));
 #if defined(_EDITOR)
-				if (!controllerRenderableShape.empty())
+				if (!renderableShape.empty())
 				{
-					controllerRenderableShape->position(renderable->position());
+					renderableShape->position(renderable->position());
 				}
-				if (!controllerRenderableLines.empty())
+				if (!renderableLines.empty())
 				{
-					controllerRenderableLines->position(renderable->position());
+					renderableLines->position(renderable->position());
 				}
 #endif
 			}
@@ -470,6 +533,18 @@ namespace Physics
 				PxTransform pxT = actor->getGlobalPose();
 				renderable->position(*((XMFLOAT3*)&pxT.p.x));
 				renderable->rotationQuaternion = XMLoadFloat4((XMFLOAT4*)&pxT.q.x);
+#if defined(_EDITOR)
+				if (!renderableShape.empty())
+				{
+					renderableShape->position(renderable->position());
+					renderableShape->rotationQ(renderable->rotationQ());
+				}
+				if (!renderableLines.empty())
+				{
+					renderableLines->position(renderable->position());
+					renderableLines->rotationQ(renderable->rotationQ());
+				}
+#endif
 			}
 			else if (behavior() == PB_Character && controller)
 			{
@@ -481,13 +556,13 @@ namespace Physics
 				};
 				renderable->position(xmpos);
 #if defined(_EDITOR)
-				if (!controllerRenderableShape.empty())
+				if (!renderableShape.empty())
 				{
-					controllerRenderableShape->position(xmpos);
+					renderableShape->position(xmpos);
 				}
-				if (!controllerRenderableLines.empty())
+				if (!renderableLines.empty())
 				{
-					controllerRenderableLines->position(xmpos);
+					renderableLines->position(xmpos);
 				}
 #endif
 			}
@@ -506,18 +581,30 @@ namespace Physics
 			{
 				PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
 				pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+#if defined(_EDITOR)
+				if (!renderableShape.empty())
+				{
+					renderableShape->position(renderable->position());
+					renderableShape->rotationQ(renderable->rotationQ());
+				}
+				if (!renderableLines.empty())
+				{
+					renderableLines->position(renderable->position());
+					renderableLines->rotationQ(renderable->rotationQ());
+				}
+#endif
 			}
 			else if (behavior() == PB_Character && controller)
 			{
 				controller->setPosition(ToPxVec3d(renderable->position()));
 #if defined(_EDITOR)
-				if (!controllerRenderableShape.empty())
+				if (!renderableShape.empty())
 				{
-					controllerRenderableShape->position(renderable->position());
+					renderableShape->position(renderable->position());
 				}
-				if (!controllerRenderableLines.empty())
+				if (!renderableLines.empty())
 				{
-					controllerRenderableLines->position(renderable->position());
+					renderableLines->position(renderable->position());
 				}
 #endif
 			}
@@ -587,13 +674,156 @@ namespace Physics
 		return atts;
 	}
 
-	nlohmann::json PhysicObject::CreateRenderableCharacter(std::string name, JUUID uuid, JUUID camId, std::string material)
+	//Renderable representation
+	void PhysicObject::visible(bool v)
+	{
+		if (!renderableShape.empty())
+		{
+			renderableShape->visible(v);
+		}
+		if (!renderableLines.empty())
+		{
+			renderableLines->visible(v);
+		}
+	}
+
+	void PhysicObject::UpdateRenderableColor(XMFLOAT4 color)
+	{
+		if (renderableShape.empty()) return;
+
+		XMFLOAT3 baseColor = { color.x,color.y,color.z };
+		XMFLOAT3 lineBaseColor = baseColor * 1.3f;
+		float alpha = color.w;
+		for (unsigned int i = 0; i < Renderer::numFrames; i++)
+		{
+			renderableShape->WriteConstantsBuffer("baseColor", baseColor, i);
+			renderableShape->WriteConstantsBuffer("alpha", alpha, i);
+			renderableLines->WriteConstantsBuffer("baseColor", lineBaseColor, i);
+		}
+	}
+
+	void PhysicObject::CreateRenderableStatic()
+	{
+		if (geometry().empty())
+			return;
+
+		renderableLines = MAKESUUUID(unit(), getUUID());
+		renderableShape = MAKESUUUID(unit(), getUUID());
+		CameraID camera = Editor::GetLevelCamera(unit());
+		bool visible = Editor::StaticBodiesShouldDraw(unit());
+
+		nlohmann::json lines = CreateFromRenderable(renderable->name() + "-dynamic-body-lines", renderableLines.uuid(), camera.uuid(), "Translucent_wired", visible, renderable->position(), renderable->rotation(), renderable->scale());
+		nlohmann::json shape = CreateFromRenderable(renderable->name() + "-dynamic-body-shape", renderableShape.uuid(), camera.uuid(), "Translucent", visible, renderable->position(), renderable->rotation(), renderable->scale());
+
+		shape["renderNext"] = { renderableLines.uuid() };
+
+		nlohmann::json data =
+		{
+			{ "renderables", { lines, shape } }
+		};
+
+		AttachLevelIntoScene(unit(), "dynamic-body", data, [&](SceneUnitId id)
+			{
+				using namespace Editor;
+				RegisterStaticBody(uuid());
+			}
+		);
+	}
+	void PhysicObject::CreateRenderableDynamic()
+	{
+		if (geometry().empty())
+			return;
+
+		renderableLines = MAKESUUUID(unit(), getUUID());
+		renderableShape = MAKESUUUID(unit(), getUUID());
+		CameraID camera = Editor::GetLevelCamera(unit());
+		bool visible = Editor::DynamicBodiesShouldDraw(unit());
+
+		nlohmann::json lines = CreateFromRenderable(renderable->name() + "-dynamic-body-lines", renderableLines.uuid(), camera.uuid(), "Translucent_wired", visible, renderable->position(), renderable->rotation(), renderable->scale());
+		nlohmann::json shape = CreateFromRenderable(renderable->name() + "-dynamic-body-shape", renderableShape.uuid(), camera.uuid(), "Translucent", visible, renderable->position(), renderable->rotation(), renderable->scale());
+
+		shape["renderNext"] = { renderableLines.uuid() };
+
+		nlohmann::json data =
+		{
+			{ "renderables", { lines, shape } }
+		};
+
+		AttachLevelIntoScene(unit(), "dynamic-body", data, [&](SceneUnitId id)
+			{
+				using namespace Editor;
+				RegisterDynamicBody(uuid());
+			}
+		);
+	}
+	void PhysicObject::CreateRenderableCharacter()
+	{
+		if (geometry().empty())
+			return;
+
+		renderableLines = MAKESUUUID(unit(), getUUID());
+		renderableShape = MAKESUUUID(unit(), getUUID());
+		CameraID camera = Editor::GetLevelCamera(unit());
+		bool visible = Editor::CharactersShouldDraw(unit());
+
+		nlohmann::json lines = CreateFromRenderable(renderable->name() + "-char-lines", renderableLines.uuid(), camera.uuid(), "Translucent_wired", visible, renderable->position(), { 0.0f,0.0f,0.0f }, { 1.0f,1.0f,1.0f });
+		nlohmann::json shape = CreateFromRenderable(renderable->name() + "-char-shape", renderableShape.uuid(), camera.uuid(), "Translucent", visible, renderable->position(), { 0.0f,0.0f,0.0f }, { 1.0f,1.0f,1.0f });
+
+		shape["renderNext"] = { renderableLines.uuid() };
+
+		nlohmann::json data =
+		{
+			{ "renderables", { lines, shape } }
+		};
+
+		AttachLevelIntoScene(unit(), "characters", data, [&](SceneUnitId id)
+			{
+				using namespace Editor;
+				RegisterCharacter(uuid());
+			}
+		);
+	}
+	void PhysicObject::CreateRenderableTrigger()
+	{
+		if (geometry().empty())
+			return;
+
+		renderableLines = MAKESUUUID(unit(), getUUID());
+		renderableShape = MAKESUUUID(unit(), getUUID());
+		CameraID camera = Editor::GetLevelCamera(unit());
+
+		nlohmann::json lines = CreateFromTrigger(trigger->name() + "-lines", renderableLines.uuid(), camera.uuid(), "Translucent_wired");
+		nlohmann::json shape = CreateFromTrigger(trigger->name() + "-shape", renderableShape.uuid(), camera.uuid(), "Translucent");
+
+		shape["renderNext"] = { renderableLines.uuid() };
+
+		nlohmann::json data =
+		{
+			{ "renderables",
+				{
+					lines,
+					shape
+				}
+			}
+		};
+
+		AttachLevelIntoScene(unit(), "triggers", data, [&](SceneUnitId id)
+			{
+				using namespace Editor;
+				BindRenderableToPickingPass(renderableLines);
+				BindRenderableToPickingPass(renderableShape);
+				renderableLines->OnPick = [&] {Editor::SelectTrigger(trigger->SUuuid()); };
+				renderableShape->OnPick = [&] {Editor::SelectTrigger(trigger->SUuuid()); };
+				RegisterTrigger(uuid());
+			}
+		);
+	}
+
+	nlohmann::json PhysicObject::CreateFromRenderable(std::string name, JUUID uuid, JUUID camId, std::string material, bool visible, XMFLOAT3 position, XMFLOAT3 rotation, XMFLOAT3 scale)
 	{
 		PhysicGeometryJsonID pg = geometry();
 
-		bool visible = Editor::CharactersShouldDraw(unit());
-
-		nlohmann::json jrencharacter = nlohmann::json(
+		nlohmann::json jrenderable = nlohmann::json(
 			{
 				{
 					"meshMaterial",
@@ -610,10 +840,10 @@ namespace Physics
 				{ "shadowed", false },
 				{ "name" , name },
 				{ "uuid" , uuid },
-				{ "position" , FromXMFLOAT3(renderable->position()) },
+				{ "position" , FromXMFLOAT3(position) },
 				{ "topology", "TRIANGLELIST" },
-				{ "rotation" , { 0.0, 0.0, 0.0 } },
-				{ "scale" , { 1.0f, 1.0f, 1.0f } },
+				{ "rotation" , FromXMFLOAT3(rotation) },
+				{ "scale" , FromXMFLOAT3(scale) },
 				{ "skipMeshes" , {}},
 				{ "visible" , visible },
 				{ "hidden" , true},
@@ -646,52 +876,79 @@ namespace Physics
 				}
 			}
 		);
-		return jrencharacter;
+		return jrenderable;
 	}
-
-	void PhysicObject::CreateRenderableCharacter()
+	nlohmann::json PhysicObject::CreateFromTrigger(std::string name, JUUID uuid, JUUID camId, std::string material)
 	{
-		if (geometry().empty())
-			return;
+		PhysicGeometryJsonID pg = geometry();
 
-		controllerRenderableLines = MAKESUUUID(unit(), getUUID());
-		controllerRenderableShape = MAKESUUUID(unit(), getUUID());
-		CameraID camera = MAKESUUUID(unit(), *GetSwapChainCameras(unit()).begin());
+		bool visible = Editor::TriggersShouldDraw(unit());
 
-		nlohmann::json lines = CreateRenderableCharacter(renderable->name() + "-char-lines", controllerRenderableLines.uuid(), camera.uuid(), "Translucent_wired");
-		nlohmann::json shape = CreateRenderableCharacter(renderable->name() + "-char-shape", controllerRenderableShape.uuid(), camera.uuid(), "Translucent");
-
-		shape["renderNext"] = { controllerRenderableLines.uuid() };
-
-		nlohmann::json data =
-		{
-			{ "renderables",
+		nlohmann::json jrentrigger = nlohmann::json(
+			{
 				{
-					lines,
-					shape
+					"meshMaterial",
+					{
+						{ "material", GetMaterialUUIDByName(material) },
+						{ "mesh",
+							{
+								{ "primitive", pg->mesh() }
+							}
+						}
+					}
+				},
+				{ "castShadows", false },
+				{ "shadowed", false },
+				{ "name" , name },
+				{ "uuid" , uuid },
+				{ "position", FromXMFLOAT3(trigger->position()) },
+				{ "topology", "TRIANGLELIST" },
+				{ "rotation" , FromXMFLOAT3(trigger->rotation()) },
+				{ "scale" , FromXMFLOAT3(trigger->scale()) },
+				{ "skipMeshes" , {}},
+				{ "visible" , visible },
+				{ "hidden" , true},
+				{ "cameras", { camId }},
+				{ "passMaterialOverrides",
+					{
+						{
+							{ "meshIndex", 0 },
+							{ "renderPass", GetRenderPassUUIDByName("PickingPass") },
+							{ "material", GetMaterialUUIDByName("TriggerPicking") }
+						}
+					}
+				},
+				{ "depthStencil",
+					{
+						{ "BackFace",
+							{
+								{ "StencilDepthFailOp", "KEEP"},
+								{ "StencilFailOp", "KEEP"},
+								{ "StencilFunc", "ALWAYS"},
+								{ "StencilPassOp", "KEEP" }
+							}
+						},
+						{ "DepthEnable", false },
+						{ "DepthFunc", "NONE" },
+						{ "DepthWriteMask", "ZERO" },
+						{ "FrontFace",
+							{
+								{ "StencilDepthFailOp", "KEEP"},
+								{ "StencilFailOp", "KEEP"},
+								{ "StencilFunc", "ALWAYS"},
+								{ "StencilPassOp", "KEEP" }
+							}
+						},
+						{ "StencilEnable", false},
+						{ "StencilReadMask", 255},
+						{ "StencilWriteMask", 255 }
+					}
 				}
 			}
-		};
-
-		AttachLevelIntoScene(unit(), "characters", data, [&](SceneUnitId id)
-			{
-				using namespace Editor;
-				RegisterCharacter(uuid());
-			}
 		);
+		return jrentrigger;
 	}
 
-	void PhysicObject::visible_character(bool v)
-	{
-		if (!controllerRenderableShape.empty())
-		{
-			controllerRenderableShape->visible(v);
-		}
-		if (!controllerRenderableLines.empty())
-		{
-			controllerRenderableLines->visible(v);
-		}
-	}
 #endif
 
 	std::unique_ptr<PhysicObject>& GetPhysicObject(JUUID uuid)
@@ -723,15 +980,25 @@ namespace Physics
 			else
 				it++;
 		}
-		for (auto it = physicCharacterUUIDBySUUID.begin(); it != physicCharacterUUIDBySUUID.end();)
-		{
-			if (it->second == uuid)
+
+		auto eraseUUUIDFromSUUID = [](auto& UUIDBySUUID, auto uuid)
 			{
-				physicCharacterUUIDBySUUID.erase(it);
-				break;
-			}
-			it++;
-		}
+				for (auto it = UUIDBySUUID.begin(); it != UUIDBySUUID.end();)
+				{
+					if (it->second == uuid)
+					{
+						UUIDBySUUID.erase(it);
+						break;
+					}
+					it++;
+				}
+
+			};
+
+		eraseUUUIDFromSUUID(physicStaticBodyUUIDBySUUID, uuid);
+		eraseUUUIDFromSUUID(physicDynamicBodyUUIDBySUUID, uuid);
+		eraseUUUIDFromSUUID(physicCharacterUUIDBySUUID, uuid);
+		eraseUUUIDFromSUUID(physicTriggerUUIDBySUUID, uuid);
 	}
 
 	std::set<JUUID> GetPhysicsObjectsBySceneObjectUUID(SUUUID uuid)
@@ -794,18 +1061,24 @@ namespace Physics
 		if (!physicObjectsBySceneUnitId.contains(id)) return;
 
 #if defined(_EDITOR)
-		if (CharactersSceneUnitRegistered(id))
-		{
-			for (auto [suuuid, juuid] : physicCharacterUUIDBySUUID)
+		auto createRenderables = [](SceneUnitId id, auto checker, auto& UUIDbySUUUID, auto build)
 			{
-				if (std::get<0>(suuuid) != id) continue;
-				PhysicObjectID phO = juuid;
+				if (!checker(id)) return;
+				for (auto [suuuid, juuid] : UUIDbySUUUID)
+				{
+					if (std::get<0>(suuuid) != id) continue;
+					PhysicObjectID phO = juuid;
 
-				if (!phO->built || !phO->controllerRenderableShape.empty())
-					continue;
-				phO->CreateRenderableCharacter();
-			}
-		}
+					if (!phO->built || !phO->renderableShape.empty())
+						continue;
+					build(phO);
+				}
+			};
+
+		createRenderables(id, StaticBodiesSceneUnitRegistered, physicStaticBodyUUIDBySUUID, [](auto& phO) {phO->CreateRenderableStatic(); });
+		createRenderables(id, DynamicBodiesSceneUnitRegistered, physicDynamicBodyUUIDBySUUID, [](auto& phO) {phO->CreateRenderableDynamic(); });
+		createRenderables(id, CharactersSceneUnitRegistered, physicCharacterUUIDBySUUID, [](auto& phO) {phO->CreateRenderableCharacter(); });
+		createRenderables(id, TriggersSceneUnitRegistered, physicTriggerUUIDBySUUID, [](auto& phO) {phO->CreateRenderableTrigger(); });
 #endif
 
 		for (PhysicObjectID phO : physicObjectsBySceneUnitId.at(id))

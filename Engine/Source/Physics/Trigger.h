@@ -73,18 +73,12 @@ namespace Scene
 		void CreatePhysicObject();
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
-		nlohmann::json CreateRenderableTrigger(std::string name, JUUID uuid, JUUID camId, std::string material);
-		void CreateRenderableTrigger();
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
 		BoundingBox GetBoundingBox();
 #endif
 
 		bool markedForDelete = false;
 		PhysicObjectID physicObject;
-#if defined(_EDITOR)
-		RenderableID renderableShape;
-		RenderableID renderableLines;
-#endif
 	};
 
 	SODECL_FULL(Trigger);
