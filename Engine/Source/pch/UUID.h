@@ -63,6 +63,22 @@ struct TUUID {
 	{
 		return uuid;
 	}
+	bool operator!() const
+	{
+		return empty();
+	}
+	bool operator!()
+	{
+		return empty();
+	}
+	explicit operator bool() const
+	{
+		return !empty();
+	}
+	explicit operator bool()
+	{
+		return !empty();
+	}
 	JUUID operator+()
 	{
 		return uuid;
@@ -160,6 +176,22 @@ struct TSUUUID {
 	SUUUID operator+()
 	{
 		return SUuuid;
+	}
+	bool operator!() const
+	{
+		return empty();
+	}
+	bool operator!()
+	{
+		return empty();
+	}
+	explicit operator bool() const
+	{
+		return !empty();
+	}
+	explicit operator bool()
+	{
+		return !empty();
 	}
 	bool empty()
 	{
