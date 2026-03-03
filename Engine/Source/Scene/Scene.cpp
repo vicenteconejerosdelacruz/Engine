@@ -297,6 +297,11 @@ namespace Scene
 		return scenesUnits.at(id)->GetSceneObjectTypes().contains(uuid);
 	}
 
+	bool SceneObjectExists(SUUUID suuuid)
+	{
+		return scenesUnits.at(std::get<0>(suuuid))->GetSceneObjectTypes().contains(std::get<1>(suuuid));
+	}
+
 	void MoveSceneObjectUnit(JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
 	{
 		auto mover = [](auto mvfn, auto uuid, auto fromId, auto toId)

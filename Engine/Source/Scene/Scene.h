@@ -48,6 +48,7 @@ namespace Scene
 	void CreateSceneObject(SceneUnitId id, SceneObjectType so, nlohmann::json json);
 
 	bool SceneObjectExists(SceneUnitId unit, JUUID uuid);
+	bool SceneObjectExists(SUUUID suuuid);
 
 	void MoveSceneObjectUnit(JUUID uuid, SceneUnitId fromId, SceneUnitId toId);
 
