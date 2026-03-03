@@ -632,7 +632,7 @@ namespace Scene
 
 						RenderableID shape = phO->renderableShape;
 						RenderableID lines = phO->renderableLines;
-						if (shape->checkBoundingBox() && boundingFrustum.Contains(shape->GetBoundingBox()) == ContainmentType::DISJOINT)
+						if (!shape || (shape->checkBoundingBox() && boundingFrustum.Contains(shape->GetBoundingBox()) == ContainmentType::DISJOINT))
 							continue;
 						shape->Render(unit, rpi, SUuuid());
 						lines->Render(unit, rpi, SUuuid());
