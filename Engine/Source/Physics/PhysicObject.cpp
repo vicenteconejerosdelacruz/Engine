@@ -34,8 +34,13 @@ namespace Editor
 	extern void UnRegisterDynamicBody(PhysicObjectID phO);
 	extern void UnRegisterCharacter(PhysicObjectID phO);
 	extern void UnRegisterTrigger(PhysicObjectID trigger);
-}
+};
 #endif
+
+namespace Scene
+{
+	extern bool SceneObjectExists(SUUUID suuuid);
+};
 
 using namespace physx;
 extern PxPhysics* gPhysics;
@@ -74,14 +79,8 @@ namespace Physics
 
 	SceneUnitId PhysicObject::unit()
 	{
-		if (!renderable.empty())
-		{
-			return renderable.unit();
-		}
-		if (!trigger.empty())
-		{
-			return trigger.unit();
-		}
+		if (renderable) { return renderable.unit(); }
+		if (trigger) { return trigger.unit(); }
 		assert(!!!"bad Physic Object");
 		return 0x2BAD5005AD;
 	}
@@ -246,7 +245,7 @@ namespace Physics
 				desc.halfSideExtent = halfDimensions.x;		// Half-extent in the "side" direction
 				desc.halfForwardExtent = halfDimensions.z;	// Half-extent in the "forward" direction
 				desc.material = material;
-				desc.position = ToPxVec3d(renderable->position());
+				desc.position = ToPxVec3d(renderable->position() + localPosition());
 				desc.userData = this;
 				controller = manager->createController(desc);
 			};
@@ -257,7 +256,7 @@ namespace Physics
 				desc.radius = 1.0f * static_cast<float>(at("radius"));
 				desc.height = 2.0f * static_cast<float>(at("halfHeight"));
 				desc.material = material;
-				desc.position = ToPxVec3d(renderable->position());
+				desc.position = ToPxVec3d(renderable->position() + localPosition());
 				desc.userData = this;
 				controller = manager->createController(desc);
 			};
@@ -440,11 +439,11 @@ namespace Physics
 	void PhysicObject::DestroyPhisicsBehavior()
 	{
 		PhysicSceneID scene;
-		if (!renderable.empty())
+		if (renderable)
 		{
 			scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
 		}
-		if (!trigger.empty())
+		if (trigger)
 		{
 			scene = MAKESUUUID(trigger.unit(), *GetPhysicScenes(trigger.unit()).begin());
 		}
@@ -480,134 +479,114 @@ namespace Physics
 		eraseUUIDFromSUUID(physicDynamicBodyUUIDBySUUID, renderable());
 		eraseUUIDFromSUUID(physicCharacterUUIDBySUUID, renderable());
 		eraseUUIDFromSUUID(physicTriggerUUIDBySUUID, trigger());
+		if (renderableShape && SceneObjectExists(renderableShape())) { renderableShape->markedForDelete = true; renderableShape.clear(); }
+		if (renderableLines && SceneObjectExists(renderableLines())) { renderableLines->markedForDelete = true; renderableLines.clear(); }
 
 		built = false;
 	}
 
 	void PhysicObject::SetInitialConditions()
 	{
-		if (!renderable.empty())
+		if (!renderable)
+			return;
+
+		if (behavior() == PB_Dynamic && actor)
 		{
-			if (behavior() == PB_Dynamic && actor)
-			{
-				PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
-				pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
-				pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
-				pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
+			PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
+			pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+			pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
+			pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
 #if defined(_EDITOR)
-				if (!renderableShape.empty())
-				{
-					renderableShape->position(renderable->position());
-					renderableShape->rotationQ(renderable->rotationQ());
-				}
-				if (!renderableLines.empty())
-				{
-					renderableLines->position(renderable->position());
-					renderableLines->rotationQ(renderable->rotationQ());
-				}
-#endif
-			}
-			else if (behavior() == PB_Character && controller)
+			if (renderableShape)
 			{
-				controller->setPosition(ToPxVec3d(renderable->position()));
-#if defined(_EDITOR)
-				if (!renderableShape.empty())
-				{
-					renderableShape->position(renderable->position());
-				}
-				if (!renderableLines.empty())
-				{
-					renderableLines->position(renderable->position());
-				}
-#endif
+				renderableShape->position(renderable->position());
+				renderableShape->rotationQ(renderable->rotationQ());
 			}
+			if (renderableLines)
+			{
+				renderableLines->position(renderable->position());
+				renderableLines->rotationQ(renderable->rotationQ());
+			}
+#endif
+		}
+		else if (behavior() == PB_Character && controller)
+		{
+			controller->setPosition(ToPxVec3d(renderable->position() + localPosition()));
+#if defined(_EDITOR)
+			if (renderableShape) { renderableShape->position(renderable->position() + localPosition()); }
+			if (renderableLines) { renderableLines->position(renderable->position() + localPosition()); }
+#endif
 		}
 	}
 
 	void PhysicObject::UpdateRenderableFromGlobalPose()
 	{
-		if (!renderable.empty())
+		if (!renderable)
+			return;
+
+		if (behavior() == PB_Dynamic && actor)
 		{
-			if (behavior() == PB_Dynamic && actor)
-			{
-				PxTransform pxT = actor->getGlobalPose();
-				renderable->position(*((XMFLOAT3*)&pxT.p.x));
-				renderable->rotationQuaternion = XMLoadFloat4((XMFLOAT4*)&pxT.q.x);
+			PxTransform pxT = actor->getGlobalPose();
+			renderable->position(*((XMFLOAT3*)&pxT.p.x));
+			renderable->rotationQuaternion = XMLoadFloat4((XMFLOAT4*)&pxT.q.x);
 #if defined(_EDITOR)
-				if (!renderableShape.empty())
-				{
-					renderableShape->position(renderable->position());
-					renderableShape->rotationQ(renderable->rotationQ());
-				}
-				if (!renderableLines.empty())
-				{
-					renderableLines->position(renderable->position());
-					renderableLines->rotationQ(renderable->rotationQ());
-				}
-#endif
-			}
-			else if (behavior() == PB_Character && controller)
+			if (renderableShape)
 			{
-				PxVec3d pos = controller->getPosition();
-				XMFLOAT3 xmpos = {
-					static_cast<float>(pos.x),
-					static_cast<float>(pos.y),
-					static_cast<float>(pos.z)
-				};
-				renderable->position(xmpos);
-#if defined(_EDITOR)
-				if (!renderableShape.empty())
-				{
-					renderableShape->position(xmpos);
-				}
-				if (!renderableLines.empty())
-				{
-					renderableLines->position(xmpos);
-				}
-#endif
+				renderableShape->position(renderable->position() + localPosition());
+				renderableShape->rotationQ(renderable->rotationQ() + localRotation());
 			}
+			if (renderableLines)
+			{
+				renderableLines->position(renderable->position() + localPosition());
+				renderableLines->rotationQ(renderable->rotationQ() + localRotation());
+			}
+#endif
+		}
+		else if (behavior() == PB_Character && controller && updateFromCharacterPosition())
+		{
+			XMFLOAT3 renPos = ToXMFLOAT3(useFootPosition() ? controller->getFootPosition() : controller->getPosition());
+			renderable->position(renPos);
+#if defined(_EDITOR)
+			XMFLOAT3 shapePos = ToXMFLOAT3(controller->getPosition());
+			if (renderableShape) { renderableShape->position(shapePos); }
+			if (renderableLines) { renderableLines->position(shapePos); }
+#endif
 		}
 	}
 
 	void PhysicObject::UpdateGlobalPoseFromRenderable()
 	{
-		if (!renderable.empty())
+		if (!renderable)
+			return;
+
+		if (behavior() == PB_Static && actor)
 		{
-			if (behavior() == PB_Static && actor)
-			{
-				actor->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
-			}
-			else if (behavior() == PB_Dynamic && actor)
-			{
-				PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
-				pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+			actor->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+		}
+		else if (behavior() == PB_Dynamic && actor)
+		{
+			PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
+			pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
 #if defined(_EDITOR)
-				if (!renderableShape.empty())
-				{
-					renderableShape->position(renderable->position());
-					renderableShape->rotationQ(renderable->rotationQ());
-				}
-				if (!renderableLines.empty())
-				{
-					renderableLines->position(renderable->position());
-					renderableLines->rotationQ(renderable->rotationQ());
-				}
-#endif
-			}
-			else if (behavior() == PB_Character && controller)
+			if (renderableShape)
 			{
-				controller->setPosition(ToPxVec3d(renderable->position()));
-#if defined(_EDITOR)
-				if (!renderableShape.empty())
-				{
-					renderableShape->position(renderable->position());
-				}
-				if (!renderableLines.empty())
-				{
-					renderableLines->position(renderable->position());
-				}
-#endif
+				renderableShape->position(renderable->position());
+				renderableShape->rotationQ(renderable->rotationQ());
 			}
+			if (renderableLines)
+			{
+				renderableLines->position(renderable->position());
+				renderableLines->rotationQ(renderable->rotationQ());
+			}
+#endif
+		}
+		else if (behavior() == PB_Character && controller)
+		{
+			controller->setPosition(ToPxVec3d(renderable->position() + localPosition()));
+#if defined(_EDITOR)
+			if (renderableShape) { renderableShape->position(renderable->position() + localPosition()); }
+			if (renderableLines) { renderableLines->position(renderable->position() + localPosition()); }
+#endif
 		}
 	}
 
@@ -659,7 +638,7 @@ namespace Physics
 
 		std::vector<std::string> characterAtts =
 		{
-			"geometry"
+			"geometry", "localPosition", "localRotation", "updateFromCharacterPosition", "useFootPosition"
 		};
 
 		std::unordered_map<PhysicsBehavior, std::vector<std::string>&> attsToAdd =
@@ -677,19 +656,13 @@ namespace Physics
 	//Renderable representation
 	void PhysicObject::visible(bool v)
 	{
-		if (!renderableShape.empty())
-		{
-			renderableShape->visible(v);
-		}
-		if (!renderableLines.empty())
-		{
-			renderableLines->visible(v);
-		}
+		if (renderableShape) { renderableShape->visible(v); }
+		if (renderableLines) { renderableLines->visible(v); }
 	}
 
 	void PhysicObject::UpdateRenderableColor(XMFLOAT4 color)
 	{
-		if (renderableShape.empty()) return;
+		if (!renderableShape) return;
 
 		XMFLOAT3 baseColor = { color.x,color.y,color.z };
 		XMFLOAT3 lineBaseColor = baseColor * 1.3f;
@@ -766,8 +739,16 @@ namespace Physics
 		CameraID camera = Editor::GetLevelCamera(unit());
 		bool visible = Editor::CharactersShouldDraw(unit());
 
-		nlohmann::json lines = CreateFromRenderable(renderable->name() + "-char-lines", renderableLines.uuid(), camera.uuid(), "Translucent_wired", visible, renderable->position(), { 0.0f,0.0f,0.0f }, { 1.0f,1.0f,1.0f });
-		nlohmann::json shape = CreateFromRenderable(renderable->name() + "-char-shape", renderableShape.uuid(), camera.uuid(), "Translucent", visible, renderable->position(), { 0.0f,0.0f,0.0f }, { 1.0f,1.0f,1.0f });
+		nlohmann::json lines = CreateFromRenderable(
+			renderable->name() + "-char-lines", renderableLines.uuid(), camera.uuid(),
+			"Translucent_wired", visible, renderable->position() + localPosition(),
+			{ 0.0f,0.0f,0.0f }, { 1.0f,1.0f,1.0f }
+		);
+		nlohmann::json shape = CreateFromRenderable(
+			renderable->name() + "-char-shape", renderableShape.uuid(), camera.uuid(),
+			"Translucent", visible, renderable->position() + localPosition(),
+			{ 0.0f,0.0f,0.0f }, { 1.0f,1.0f,1.0f }
+		);
 
 		shape["renderNext"] = { renderableLines.uuid() };
 
