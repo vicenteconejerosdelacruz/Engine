@@ -615,7 +615,7 @@ namespace Physics
 
 	std::vector<std::string> PhysicObject::GetPhysicBehaviorAttributes()
 	{
-		std::vector<std::string> atts = { "behavior" };
+		std::vector<std::string> atts = { "behavior", "color" };
 
 		std::vector<std::string> staticAtts =
 		{
@@ -660,13 +660,12 @@ namespace Physics
 		if (renderableLines) { renderableLines->visible(v); }
 	}
 
-	void PhysicObject::UpdateRenderableColor(XMFLOAT4 color)
+	void PhysicObject::UpdateRenderableColor()
 	{
-		if (!renderableShape) return;
-
-		XMFLOAT3 baseColor = { color.x,color.y,color.z };
+		XMFLOAT4 rgba = color();
+		XMFLOAT3 baseColor = { rgba.x,rgba.y,rgba.z };
 		XMFLOAT3 lineBaseColor = baseColor * 1.3f;
-		float alpha = color.w;
+		float alpha = rgba.w;
 		for (unsigned int i = 0; i < Renderer::numFrames; i++)
 		{
 			renderableShape->WriteConstantsBuffer("baseColor", baseColor, i);
@@ -1064,6 +1063,17 @@ namespace Physics
 
 		for (PhysicObjectID phO : physicObjectsBySceneUnitId.at(id))
 		{
+			if (/*phO->dirty(PhysicObject::Update_color) &&*/
+				phO->renderableShape &&
+				phO->renderableLines &&
+				SceneObjectExists(phO->renderableShape()) &&
+				SceneObjectExists(phO->renderableLines())
+				)
+			{
+				phO->UpdateRenderableColor();
+				//phO->clean(PhysicObject::Update_color);
+			}
+
 			if (phO->dirty(PhysicObject::Update_behavior) ||
 				phO->dirty(PhysicObject::Update_geometry) ||
 				phO->dirty(PhysicObject::Update_localPosition) ||

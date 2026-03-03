@@ -184,7 +184,8 @@ namespace Scene
 
 		for (auto trg : trColor)
 		{
-			trg->physicObject->UpdateRenderableColor(trg->color());
+			trg->physicObject->color(trg->color());
+			trg->physicObject->flag(PhysicObject::Update_color);
 			trg->clean(Trigger::Update_color);
 		}
 #endif

@@ -36,10 +36,10 @@ inline std::unordered_map<PhysicsBehavior, std::string> PhysicsBehaviorToString 
 
 inline std::unordered_map<std::string, PhysicsBehavior> StringToPhysicsBehavior =
 {
-	{ "Static", PB_Static },
-	{ "Dynamic", PB_Dynamic },
-	{ "Trigger", PB_Trigger },
-	{ "Character", PB_Character },
+		{ "Static", PB_Static },
+		{ "Dynamic", PB_Dynamic },
+		{ "Trigger", PB_Trigger },
+		{ "Character", PB_Character },
 };
 
 namespace Physics
@@ -105,7 +105,7 @@ namespace Physics
 
 		//Renderable representation
 		void visible(bool value);
-		void UpdateRenderableColor(XMFLOAT4 color);
+		void UpdateRenderableColor();
 		void CreateRenderableStatic();
 		void CreateRenderableDynamic();
 		void CreateRenderableCharacter();

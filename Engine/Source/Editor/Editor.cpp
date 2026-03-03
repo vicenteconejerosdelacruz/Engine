@@ -1376,7 +1376,7 @@ namespace Editor
 		ImGui::PopStyleVar(3);
 	}
 
-	static ImVec2 physicsControllerSize(100, 90);
+	static ImVec2 physicsControllerSize(120, 90);
 	RECT GetPhysicsControllerRect()
 	{
 		const ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -1392,7 +1392,7 @@ namespace Editor
 
 	void DrawPhysicsController()
 	{
-		if (!currentSceneUnitId) return;
+		if (!currentSceneUnitId || GetCountFromPhysicScenes(currentSceneUnitId) == 0ULL) return;
 
 		RECT r = GetPhysicsControllerRect();
 		ImVec2 controllerPos(static_cast<float>(r.left), static_cast<float>(r.top));
@@ -1413,26 +1413,28 @@ namespace Editor
 			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings
 		);
 		{
-			bool valueStaticBodies = drawStaticBodies.at(currentSceneUnitId).draw;
-			if (ImGui::Checkbox("Static", &valueStaticBodies))
-			{
-				SwitchStaticBodiesDrawing(currentSceneUnitId);
-			}
-			bool valueDynamicBodies = drawDynamicBodies.at(currentSceneUnitId).draw;
-			if (ImGui::Checkbox("Dynamic", &valueDynamicBodies))
-			{
-				SwitchDynamicBodiesDrawing(currentSceneUnitId);
-			}
-			bool valueCharacters = drawCharacters.at(currentSceneUnitId).draw;
-			if (ImGui::Checkbox("Characters", &valueCharacters))
-			{
-				SwitchCharactersDrawing(currentSceneUnitId);
-			}
-			bool valueTriggers = drawTriggers.at(currentSceneUnitId).draw;
-			if (ImGui::Checkbox("Triggers", &valueTriggers))
-			{
-				SwitchTriggersDrawing(currentSceneUnitId);
-			}
+			PhysicSceneID scene = MAKESUUUID(currentSceneUnitId, *(GetPhysicScenes(currentSceneUnitId).begin()));
+			auto drawToggle = [&](auto& drawHolder, std::string title, auto& toggle, std::string attribute, size_t updateFlag)
+				{
+					XMFLOAT4 color = ToXMFLOAT4(scene->at(attribute));
+					ImGui::PushID(attribute.c_str());
+					if (ImGui::ColorEdit4("##", &color.x, ImGuiColorEditFlags_NoInputs))
+					{
+						scene->at(attribute) = FromXMFLOAT4(color);
+						scene->flag(updateFlag);
+					}
+					ImGui::PopID();
+					ImGui::SameLine();
+					bool value = drawHolder.at(currentSceneUnitId).draw;
+					if (ImGui::Checkbox(title.c_str(), &value))
+					{
+						toggle(currentSceneUnitId);
+					}
+				};
+			drawToggle(drawStaticBodies, "Static", SwitchStaticBodiesDrawing, "staticColor", PhysicScene::Update_staticColor);
+			drawToggle(drawDynamicBodies, "Dynamic", SwitchDynamicBodiesDrawing, "dynamicColor", PhysicScene::Update_dynamicColor);
+			drawToggle(drawCharacters, "Characters", SwitchCharactersDrawing, "characterColor", PhysicScene::Update_characterColor);
+			drawToggle(drawTriggers, "Triggers", SwitchTriggersDrawing, "triggerColor", PhysicScene::Update_triggerColor);
 		}
 		ImGui::End();
 		ImGui::PopStyleColor(2);

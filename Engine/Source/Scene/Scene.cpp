@@ -995,6 +995,8 @@ namespace Scene
 		{
 			for (auto& uuid : uuids)
 			{
+				if (!SceneObjectExists(id, uuid))
+					continue;
 				JUUIDName uuidName = getJUUIDName.at(type)(id, uuid);
 				if (!std::get<0>(uuidName).empty())
 					sceneObjectsTypeList.push_back(uuidName);

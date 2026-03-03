@@ -13,6 +13,7 @@ namespace DirectX
 	static const XMVECTORF32 g_vZero = { 0.0f, 0.0f, 0.0f, 0.0f };
 }
 using namespace DirectX;
+using namespace physx;
 
 inline bool IsPowerOfTwo(unsigned int n) { return (n > 0) && ((n & (n - 1)) == 0); }
 inline unsigned int PrevPowerOfTwo(unsigned int x) { x = x | (x >> 1); x = x | (x >> 2); x = x | (x >> 4); x = x | (x >> 8); x = x | (x >> 16); return x - (x >> 1); }
@@ -30,13 +31,12 @@ inline XMFLOAT3 ToXMFLOAT3(nlohmann::json f3)
 
 inline XMFLOAT3 ToXMFLOAT3(PxVec3 v)
 {
-	return { v.x, v.y, v.z };
+	return XMFLOAT3(v.x, v.y, v.z);
 }
-
 
 inline XMFLOAT3 ToXMFLOAT3(PxVec3d v)
 {
-	return { static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z) };
+	return XMFLOAT3(static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z));
 }
 
 inline nlohmann::json FromXMFLOAT3(XMFLOAT3 f3)
@@ -198,7 +198,6 @@ inline XMFLOAT3 Quaternion2Euler(XMVECTOR Q)
 	return angles;
 }
 
-using namespace physx;
 inline PxVec3 ToPxVec3(XMFLOAT3 v)
 {
 	return PxVec3(v.x, v.y, v.z);
