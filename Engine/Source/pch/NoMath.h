@@ -28,6 +28,17 @@ inline XMFLOAT3 ToXMFLOAT3(nlohmann::json f3)
 	return XMFLOAT3(f3.at(0), f3.at(1), f3.at(2));
 }
 
+inline XMFLOAT3 ToXMFLOAT3(PxVec3 v)
+{
+	return { v.x, v.y, v.z };
+}
+
+
+inline XMFLOAT3 ToXMFLOAT3(PxVec3d v)
+{
+	return { static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z) };
+}
+
 inline nlohmann::json FromXMFLOAT3(XMFLOAT3 f3)
 {
 	return nlohmann::json::array({ f3.x,f3.y,f3.z });
