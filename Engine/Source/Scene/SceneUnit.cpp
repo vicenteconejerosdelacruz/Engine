@@ -50,6 +50,16 @@ namespace Scene
 		return markedForDelete;
 	}
 
+	unsigned int SceneUnit::DeleteFrames()
+	{
+		return deleteFrames;
+	}
+
+	void SceneUnit::DecreaseDeleteFrames()
+	{
+		deleteFrames--;
+	}
+
 	void SceneUnit::CallDeleteCallback()
 	{
 		if (deleteCallback)

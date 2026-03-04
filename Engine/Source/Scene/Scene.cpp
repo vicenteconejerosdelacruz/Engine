@@ -185,7 +185,14 @@ namespace Scene
 		{
 			if (scene->MarkedForDelete())
 			{
-				scenesToDelete.insert(unit);
+				if (scene->DeleteFrames() > 0)
+				{
+					scene->DecreaseDeleteFrames();
+				}
+				else if (scene->DeleteFrames() == 0)
+				{
+					scenesToDelete.insert(unit);
+				}
 			}
 		}
 

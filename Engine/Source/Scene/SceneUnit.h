@@ -23,6 +23,8 @@ namespace Scene
 		SceneUnitId Id();
 		void MarkForDelete(std::function<void()> cb = nullptr);
 		bool MarkedForDelete();
+		unsigned int DeleteFrames();
+		void DecreaseDeleteFrames();
 		void CallDeleteCallback();
 		void SetIsolated(bool value);
 		bool IsIsolated();
@@ -116,6 +118,7 @@ namespace Scene
 		SceneUnitId id;
 		std::string unitName;
 		bool markedForDelete;
+		unsigned int deleteFrames = Renderer::numFrames;
 		std::function<void()> deleteCallback;
 		bool isolated;
 
