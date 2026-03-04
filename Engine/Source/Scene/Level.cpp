@@ -18,6 +18,7 @@ namespace Editor {
 	extern void CreateSceneUnitEditorIndependentCamera(SceneUnitId id);
 	extern void CopySceneUnitEditorCameraRenderPasses(SceneUnitId id);
 	extern void CreatePickingPass(SceneUnitId id);
+	extern void CreateSceneUnitPhysicsController(SceneUnitId id);
 	extern void SwitchToSceneUnitEditorCamera(SceneUnitId id);
 }
 #endif
@@ -211,6 +212,7 @@ namespace Scene::Level
 			CreateSceneUnitBoundingBox(scene->Id());
 			CreateSceneUnitEditorIndependentCamera(scene->Id());
 			CreateRegisteredBillboards(scene->Id());
+			CreateSceneUnitPhysicsController(scene->Id());
 		}
 #endif
 
