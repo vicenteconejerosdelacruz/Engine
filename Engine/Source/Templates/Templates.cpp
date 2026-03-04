@@ -883,7 +883,7 @@ namespace Templates
 						{ "FillMode", "SOLID" },
 						{ "CullMode", "BACK" },
 						{ "FrontCounterClockwise", false},
-						{ "DepthBias", 0},
+						{ "DepthBias", -100},
 						{ "DepthBiasClamp", 0.0},
 						{ "SlopeScaledDepthBias", 0.0},
 						{ "DepthClipEnable", false },
