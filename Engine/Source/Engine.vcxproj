@@ -371,6 +371,7 @@
     <ClInclude Include="JExpose\Scene\PhysicSceneAtt.h" />
     <ClInclude Include="JExpose\Scene\TriggerAtt.h" />
     <ClInclude Include="JExpose\Templates\PhysicGeometryAtt.h" />
+    <ClInclude Include="pch\DeleteHook.h" />
     <ClInclude Include="pch\GameEngineState.h" />
     <ClInclude Include="Game\GameEngineStates\GameEngineBoot.h" />
     <ClInclude Include="JExpose\Attributes\JDestroy.h" />
