@@ -230,10 +230,10 @@ namespace Editor
 
 	void CreateSceneUnitPhysicsController(SceneUnitId id)
 	{
-		drawStaticBodies.insert_or_assign(id, PhysicsDrawState());
-		drawDynamicBodies.insert_or_assign(id, PhysicsDrawState());
-		drawCharacters.insert_or_assign(id, PhysicsDrawState());
-		drawTriggers.insert_or_assign(id, PhysicsDrawState());
+		if (!drawStaticBodies.contains(id)) drawStaticBodies.insert_or_assign(id, PhysicsDrawState());
+		if (!drawDynamicBodies.contains(id)) drawDynamicBodies.insert_or_assign(id, PhysicsDrawState());
+		if (!drawCharacters.contains(id)) drawCharacters.insert_or_assign(id, PhysicsDrawState());
+		if (!drawTriggers.contains(id)) drawTriggers.insert_or_assign(id, PhysicsDrawState());
 	}
 
 	void CreateSceneUnitBoundingBox(SceneUnitId id)
@@ -526,7 +526,6 @@ namespace Editor
 		CreateSceneUnitGizmos(id);
 		CreateSceneUnitSelection(id);
 		CreateSceneUnitGameController(id);
-		CreateSceneUnitPhysicsController(id);
 		loadingProgress.Reset();
 	}
 
@@ -2530,11 +2529,13 @@ namespace Editor
 		}
 	}
 
+	static std::mutex pickPassBinding;
 	void BindRenderableToPickingPass(RenderableID r)
 	{
 #if !defined(_EDITOR_PICKINGPASS)
 		return;
 #endif
+		std::lock_guard<std::mutex> lock(pickPassBinding);
 		auto pass = mousePicking.pickingPass.at(r.unit());
 		r->CreateRenderPassMaterialsInstances(pass);
 		r->CreateRenderPassConstantsBuffersInstances(pass);
