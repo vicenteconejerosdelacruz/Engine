@@ -143,11 +143,12 @@ using namespace DirectX::SimpleMath;
 #include "pch/ShaderMaterials.h"
 #include "pch/RefTracker.h"
 #include "pch/NoMath.h"
+#include "pch/GameStateMachine.h"
+#include "pch/GameEngineState.h"
+#include "pch/DeleteHook.h"
 #if defined(_EDITOR)
 #include "pch/JExposeEditor.h"
 #endif
-#include "pch/GameStateMachine.h"
-#include "pch/GameEngineState.h"
 
 template<>
 struct std::hash<SUUUID>
