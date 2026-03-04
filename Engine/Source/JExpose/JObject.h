@@ -63,6 +63,11 @@ struct JObject : nlohmann::json
 		return !!(updateFlag & (1 << flag));
 	}
 
+	bool dirty(std::vector<size_t> flags)
+	{
+		return std::any_of(flags.begin(), flags.end(), [&](size_t flag) { return dirty(flag); });
+	}
+
 	void flag(size_t flag)
 	{
 		updateFlag |= (1 << flag);
@@ -71,6 +76,11 @@ struct JObject : nlohmann::json
 	void clean(size_t flag)
 	{
 		updateFlag &= ~(1 << flag);
+	}
+
+	void clean(std::vector<size_t> flags)
+	{
+		std::for_each(flags.begin(), flags.end(), [&](size_t flag) { clean(flag); });
 	}
 
 	void clear()
