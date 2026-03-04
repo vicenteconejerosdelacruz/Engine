@@ -178,7 +178,7 @@ namespace Scene
 #endif
 
 		//State
-		bool markedForDelete = false;
+		DeleteHook markedForDelete;
 		bool renderReady = false;
 		bool renderException = false;
 		//Transformation

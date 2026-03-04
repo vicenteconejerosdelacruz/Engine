@@ -79,6 +79,7 @@ namespace Physics
 		PhysicObject(nlohmann::json& json);
 		SceneUnitId unit();
 		JUUID uuid();
+		bool CanBuild();
 		void InheritGeometryAttributes();
 		void CreatePhysicsBehavior();
 		void CreateStaticMeshBehavior();
@@ -104,8 +105,11 @@ namespace Physics
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
 
 		//Renderable representation
+		void CreatePhysicsAvatar();
+		void DestroyPhysicsAvatar();
+		void UpdatePhysicsAvatarTransformation();
 		void visible(bool value);
-		void UpdateRenderableColor();
+		void UpdatePhysicsAvatarColor(unsigned int frame, XMFLOAT4 rgba);
 		void CreateRenderableStatic();
 		void CreateRenderableDynamic();
 		void CreateRenderableCharacter();
@@ -124,6 +128,7 @@ namespace Physics
 #if defined(_EDITOR)
 		RenderableID renderableShape;
 		RenderableID renderableLines;
+		bool avatarBuilt = false;
 #endif
 		bool built = false;
 	};

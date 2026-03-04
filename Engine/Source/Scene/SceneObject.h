@@ -73,7 +73,7 @@ inline const std::unordered_map<std::string, std::string> StringToJsonContainer 
 };
 
 template <typename T>
-using SceneObjectsContainer = std::unordered_map<JUUID, T>;
+using SceneObjectsContainer = std::map<JUUID, T>;
 
 namespace Scene
 {

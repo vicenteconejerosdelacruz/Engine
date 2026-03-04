@@ -83,3 +83,10 @@
 	SODEF_EXIST(SOClass);\
 	SODEF_RENAME(SOClass);\
 	SODEF_DELETE(SOClass)
+
+#define RENAME_ON_DELETION(SOClass) \
+markedForDelete.Hook([&]\
+	{\
+		Rename##SOClass##SceneObject(SUuuid(), "delete-" + uuid());\
+	}\
+)

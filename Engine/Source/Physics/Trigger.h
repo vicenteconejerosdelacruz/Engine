@@ -77,7 +77,7 @@ namespace Scene
 		BoundingBox GetBoundingBox();
 #endif
 
-		bool markedForDelete = false;
+		DeleteHook markedForDelete;
 		PhysicObjectID physicObject;
 	};
 

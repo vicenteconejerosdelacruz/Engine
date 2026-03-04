@@ -69,6 +69,7 @@ namespace Scene
 #include <Attributes/JUpdate.h>
 #include <PhysicSceneAtt.h>
 #include <JEnd.h>
+		RENAME_ON_DELETION(PhysicScene);
 	}
 
 #if defined(_EDITOR)
@@ -127,29 +128,9 @@ namespace Scene
 
 		UpdatePhysicObjects(id, step);
 
-		PhysicSceneID scene = MAKESUUUID(id, *GetPhysicScenes(id).begin());
-		auto updateColors = [&](bool run, size_t flag, XMFLOAT4 color, auto& getPhOs)
-			{
-				if (!run || !scene->dirty(flag))
-					return;
-
-				auto phOs = getPhOs(id);
-				for (auto& phO : phOs)
-				{
-					if (phO->overrideColor()) continue;
-					phO->color(color);
-					phO->UpdateRenderableColor();
-				}
-
-				scene->clean(flag);
-			};
-		updateColors(Editor::StaticBodiesSceneUnitRegistered(id), PhysicScene::Update_staticColor, scene->staticColor(), Editor::GetStaticBodies);
-		updateColors(Editor::DynamicBodiesSceneUnitRegistered(id), PhysicScene::Update_dynamicColor, scene->dynamicColor(), Editor::GetDynamicBodies);
-		updateColors(Editor::CharactersSceneUnitRegistered(id), PhysicScene::Update_characterColor, scene->characterColor(), Editor::GetCharacters);
-		updateColors(Editor::TriggersSceneUnitRegistered(id), PhysicScene::Update_triggerColor, scene->triggerColor(), Editor::GetTriggers);
-
 		if (step == 0.0f) return;
 
+		PhysicSceneID scene = MAKESUUUID(id, *GetPhysicScenes(id).begin());
 		scene->pxScene->simulate(1.0f / 60.0f);
 		scene->pxScene->fetchResults(true);
 		UpdateRenderablesFromGlobalPose(id);

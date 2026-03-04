@@ -67,7 +67,7 @@ namespace Scene
 		virtual void WriteJson(nlohmann::json& j);
 #endif
 
-		bool markedForDelete = false;
+		DeleteHook markedForDelete;
 		PxScene* pxScene = nullptr;
 		PxControllerManager* pxControllerManager = nullptr;
 		std::unique_ptr<ContactCallback> contactCallback;

@@ -5,6 +5,7 @@ JEXPOSE_TRANSFORM(XMFLOAT4, color, ToXMFLOAT4, FromXMFLOAT4, XMFLOAT4(0.2f, 1.0f
 JEXPOSE(bool, overrideColor, false, jedv_t_boolean, 1, false)
 JEXPOSE_TRANSFORM(XMFLOAT3, localPosition, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(0.0f, 0.0f, 0.0f), jedv_t_float3, 1, false)
 JEXPOSE_TRANSFORM(XMFLOAT3, localRotation, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(0.0f, 0.0f, 0.0f), jedv_t_float3_angle, 1, false)
+JEXPOSE_TRANSFORM(XMFLOAT3, localScale, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(1.0f, 1.0f, 1.0f), jedv_t_float3, 1, false)
 JEXPOSE(float, staticFriction, 0.5f, jedv_t_float, 1, false)
 JEXPOSE(float, dynamicFriction, 0.5f, jedv_t_float, 1, false)
 JEXPOSE(float, restitution, 0.1f, jedv_t_float, 1, false)

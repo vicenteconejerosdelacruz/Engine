@@ -68,6 +68,7 @@ namespace Scene
 #include <Attributes/JUpdate.h>
 #include <SoundFXAtt.h>
 #include <JEnd.h>
+		RENAME_ON_DELETION(SoundFX);
 	}
 
 	void SoundFX::create_rotation(XMFLOAT3 v)

@@ -241,7 +241,7 @@ namespace Scene {
 		virtual void WriteJson(nlohmann::json& j);
 #endif
 
-		bool markedForDelete = false;
+		DeleteHook markedForDelete;
 		bool renderReady = false;
 		//Transformation
 		XMVECTOR rotationQuaternion;

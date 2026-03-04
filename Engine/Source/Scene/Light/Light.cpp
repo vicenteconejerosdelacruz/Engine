@@ -56,6 +56,7 @@ namespace Scene
 #include <Attributes/JUpdate.h>
 #include <LightAtt.h>
 #include <JEnd.h>
+		RENAME_ON_DELETION(Light);
 	}
 
 	void Light::create_rotation(XMFLOAT3 v)

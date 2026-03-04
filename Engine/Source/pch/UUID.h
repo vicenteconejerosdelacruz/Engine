@@ -216,6 +216,7 @@ struct TSUUUID {
 		JUUID& uuid = std::get<1>(SUuuid);
 		unit = 0;
 		uuid = "";
+		validator = nullptr;
 	}
 	SceneUnitId unit() const
 	{

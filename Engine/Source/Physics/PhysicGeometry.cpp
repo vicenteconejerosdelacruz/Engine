@@ -1,15 +1,6 @@
 #include "pch.h"
 #include "PhysicGeometry.h"
 #include <Primitives.h>
-/*
-#include <Mesh/Mesh.h>
-#include <Cube.h>
-#include <Floor.h>
-#include <Pentahedron.h>
-#include <Sphere.h>
-#include <Cone.h>
-#include <Capsule.h>
-*/
 #include <PxPhysicsAPI.h>
 #include <extensions/PxCudaHelpersExt.h>
 #include <gpu/PxGpu.h>
@@ -152,7 +143,7 @@ PxTriangleMesh* LoadPxTriangleMeshFromCookedAssimp(bool sdf, Model3DJsonID model
 }
 
 template<typename T>
-PxGeometryHolder LoadMeshIntoPxGeometry(JNAME uuid, XMFLOAT3 scale, bool sdf)
+PxGeometryHolder LoadMeshIntoPxGeometry(JNAME uuid, XMFLOAT3 scale, nlohmann::json& atts, bool sdf)
 {
 	if (!pxTrianglesMeshes.contains(std::make_tuple(uuid, sdf)))
 	{
@@ -173,7 +164,12 @@ PxGeometryHolder LoadMeshIntoPxGeometry(JNAME uuid, XMFLOAT3 scale, bool sdf)
 	}
 
 	PxTriangleMesh* triangleMesh = pxTrianglesMeshes.at(std::make_tuple(uuid, sdf));
-	PxMeshScale pxScale(PxVec3(scale.x, scale.y, scale.z));
+	XMFLOAT3 localScale(1.0f, 1.0f, 1.0f);
+	if (atts.contains("localScale"))
+	{
+		localScale = ToXMFLOAT3(atts.at("localScale"));
+	}
+	PxMeshScale pxScale(PxVec3(scale.x * localScale.x, scale.y * localScale.y, scale.z * localScale.z));
 	return PxTriangleMeshGeometry(triangleMesh, pxScale);
 }
 
@@ -198,10 +194,10 @@ using namespace Primitives;
 std::map<JNAME, std::function<PxGeometryHolder(XMFLOAT3 scale, nlohmann::json& attributes, bool sdf)>> PxGeometryPrimitiveBuilder =
 {
 	{ "cube", [](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadCubeIntoPxGeometry(s); } },
-	{ "pyramid",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Pentahedron>(GetMeshUUIDByName("pyramid"), s, sdf); }},
-	{ "floor",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Floor>(GetMeshUUIDByName("floor"), s, false); }},
+	{ "pyramid",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Pentahedron>(GetMeshUUIDByName("pyramid"), s, atts, sdf); }},
+	{ "floor",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Floor>(GetMeshUUIDByName("floor"), s, atts, false); }},
 	{ "sphere",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadSphereIntoPxGeometry(s); } },
-	{ "cone",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Cone>(GetMeshUUIDByName("cone"), s, sdf); }},
+	{ "cone",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Cone>(GetMeshUUIDByName("cone"), s, atts, sdf); }},
 	{ "capsule",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadCapsuleIntoPxGeometry(atts); }},
 };
 

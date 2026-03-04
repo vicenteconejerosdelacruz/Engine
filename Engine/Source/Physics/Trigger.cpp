@@ -54,6 +54,7 @@ namespace Scene
 #include <TriggerAtt.h>
 #include <JEnd.h>
 		(*this)["behavior"] = PhysicsBehaviorToString.at(PB_Trigger);
+		RENAME_ON_DELETION(Trigger);
 	}
 
 #if defined(_EDITOR)
@@ -106,11 +107,16 @@ namespace Scene
 		{
 			{ "behavior", "Trigger" },
 			{ "geometry", geometry() },
+			{ "color", FromXMFLOAT4(color()) },
+			{ "overrideColor", overrideColor() }
 		};
 
 		std::string pOname = name() + "-physicObject";
 		physicObject = Physics::CreatePhysicObject(pOname, SUuuid(), data);
 		physicObject->CreatePhysicsBehavior();
+#if defined(_EDITOR)
+		physicObject->CreatePhysicsAvatar();
+#endif
 	}
 
 #if defined(_EDITOR)
@@ -130,64 +136,51 @@ namespace Scene
 		std::set<TriggerID> tr;
 		std::transform(Triggers.begin(), Triggers.end(), std::inserter(tr, tr.begin()), [&](auto o) { return MAKESUUUID(unit, o); });
 
-		std::set<TriggerID> tr2Del;
-		std::copy_if(tr.begin(), tr.end(), std::inserter(tr2Del, tr2Del.begin()), [](auto trg)
+		auto checkForDelete = [](TriggerID t)
 			{
-				return trg->markedForDelete;
-			}
-		);
+				if (!t->markedForDelete) return;
 
-		for (auto trg : tr2Del)
-		{
+				DestroyPhysicObject(t->physicObject());
+				EraseTriggerFromTriggers(FROMSUUUID(t()));
+				DeleteTriggerSceneObject(t);
+			};
+		auto checkForPosRot = [](TriggerID t)
+			{
+				if (!t->dirty({ Trigger::Update_position,Trigger::Update_rotation })) return;
+
+				t->physicObject->UpdateGlobalPoseFromTrigger();
 #if defined(_EDITOR)
+				t->physicObject->UpdatePhysicsAvatarTransformation();
 #endif
-			DestroyPhysicObject(trg->physicObject());
-			EraseTriggerFromTriggers(FROMSUUUID(trg()));
-			DeleteTriggerSceneObject(trg);
-		}
-
+				t->clean({ Trigger::Update_position,Trigger::Update_rotation });
+			};
+		auto checkForScale = [](TriggerID t)
+			{
+				if (!t->dirty(Trigger::Update_scale)) return;
+				t->physicObject->DestroyPhisicsBehavior();
+				t->physicObject->CreatePhysicsBehavior();
 #if defined(_EDITOR)
-
-		std::set<TriggerID> trTransformation;
-		std::copy_if(tr.begin(), tr.end(), std::inserter(trTransformation, trTransformation.begin()), [](auto trg)
+				t->physicObject->UpdatePhysicsAvatarTransformation();
+#endif
+				t->clean(Trigger::Update_scale);
+			};
+#if defined(_EDITOR)
+		auto checkForColor = [](TriggerID t)
 			{
-				return
-					trg->dirty(Trigger::Update_position) ||
-					trg->dirty(Trigger::Update_rotation) ||
-					trg->dirty(Trigger::Update_scale);
-			}
-		);
+				if (!t->dirty({ Trigger::Update_overrideColor, Trigger::Update_color })) return;
 
-		std::set<TriggerID> trColor;
-		std::copy_if(tr.begin(), tr.end(), std::inserter(trColor, trColor.begin()), [](auto trg)
-			{
-				return trg->dirty(Trigger::Update_color);
-			}
-		);
+				t->physicObject->color(t->color());
+				t->physicObject->overrideColor(t->overrideColor());
 
+				t->clean({ Trigger::Update_overrideColor, Trigger::Update_color });
+			};
+#endif
 
-		for (auto trg : trTransformation)
-		{
-			if (trg->dirty(Trigger::Update_scale))
-			{
-				trg->physicObject->DestroyPhisicsBehavior();
-				trg->physicObject->CreatePhysicsBehavior();
-			}
-			else
-			{
-				trg->physicObject->UpdateGlobalPoseFromTrigger();
-			}
-			trg->clean(Trigger::Update_position);
-			trg->clean(Trigger::Update_rotation);
-			trg->clean(Trigger::Update_scale);
-		}
-
-		for (auto trg : trColor)
-		{
-			trg->physicObject->color(trg->color());
-			trg->physicObject->flag(PhysicObject::Update_color);
-			trg->clean(Trigger::Update_color);
-		}
+		std::for_each(tr.begin(), tr.end(), checkForDelete);
+		std::for_each(tr.begin(), tr.end(), checkForPosRot);
+		std::for_each(tr.begin(), tr.end(), checkForScale);
+#if defined(_EDITOR)
+		std::for_each(tr.begin(), tr.end(), checkForColor);
 #endif
 	}
 

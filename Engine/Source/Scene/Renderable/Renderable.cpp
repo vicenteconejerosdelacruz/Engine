@@ -61,6 +61,7 @@ namespace Scene
 #include <Attributes/JUpdate.h>
 #include <RenderableAtt.h>
 #include <JEnd.h>
+		RENAME_ON_DELETION(Renderable);
 	}
 
 	void Renderable::create_rotation(XMFLOAT3 v)
@@ -924,8 +925,9 @@ namespace Scene
 			for (JUUID p0 : GetPhysicsObjectsBySceneObjectUUID(rp->SUuuid()))
 			{
 				auto& phO = GetPhysicObject(p0);
-				phO->DestroyPhisicsBehavior();
-				phO->CreatePhysicsBehavior();
+				//phO->RebuildPhysicsBehavior();
+				//phO->DestroyPhisicsBehavior();
+				//phO->CreatePhysicsBehavior();
 			}
 		}
 

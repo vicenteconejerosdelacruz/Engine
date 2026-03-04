@@ -88,7 +88,7 @@ namespace Scene
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation);
 		virtual void WriteJson(nlohmann::json& j);
 #endif
-		bool markedForDelete = false;
+		DeleteHook markedForDelete;
 		float time = 0.0f;
 		bool hasStarted = false;
 		//Transformation

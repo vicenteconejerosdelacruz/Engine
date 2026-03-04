@@ -71,6 +71,7 @@ namespace Scene
 #include <Attributes/JUpdate.h>
 #include <CameraAtt.h>
 #include <JEnd.h>
+		RENAME_ON_DELETION(Camera);
 	}
 
 	void Camera::create_rotation(XMFLOAT3 v)
@@ -573,11 +574,31 @@ namespace Scene
 			}
 		}
 
+#if defined(_EDITOR)
+		using namespace Editor;
+
+		//Physics Objects list
+		std::vector<std::tuple<bool, std::set<PhysicObjectID>>> drawPhysicsObjects;
+		drawPhysicsObjects.push_back(std::make_tuple(StaticBodiesShouldDraw(unit), GetStaticBodies(unit)));
+		drawPhysicsObjects.push_back(std::make_tuple(DynamicBodiesShouldDraw(unit), GetDynamicBodies(unit)));
+		drawPhysicsObjects.push_back(std::make_tuple(CharactersShouldDraw(unit), GetCharacters(unit)));
+		drawPhysicsObjects.push_back(std::make_tuple(TriggersShouldDraw(unit), Editor::GetTriggers(unit)));
+
+		for (auto& [draw, list] : drawPhysicsObjects)
+		{
+			for (auto phO : list)
+			{
+				phO->visible(false);
+			}
+		}
+#endif
+
 		//create the renderable set recursivelly
 		nostd::VectorSet<RenderableID> renVecSet;
 		std::function<void(RenderableID)> addToRenderablesVecSet;
 		addToRenderablesVecSet = [&](RenderableID r)
 			{
+				if (!r->visible()) return;
 				renVecSet.insert(r);
 				for (auto& uuid : r->renderNext())
 				{
@@ -595,47 +616,32 @@ namespace Scene
 
 		auto draw = [&](SceneUnitId unit, auto& rpi)
 			{
-#if defined(_EDITOR)
-				using namespace Editor;
 
-				//Physics Objects list
-				std::vector<std::tuple<bool, std::set<PhysicObjectID>>> drawPhysicsObjects;
-				drawPhysicsObjects.push_back(std::make_tuple(StaticBodiesShouldDraw(unit), GetStaticBodies(unit)));
-				drawPhysicsObjects.push_back(std::make_tuple(DynamicBodiesShouldDraw(unit), GetDynamicBodies(unit)));
-				drawPhysicsObjects.push_back(std::make_tuple(CharactersShouldDraw(unit), GetCharacters(unit)));
-				drawPhysicsObjects.push_back(std::make_tuple(TriggersShouldDraw(unit), Editor::GetTriggers(unit)));
-
-				for (auto& [draw, list] : drawPhysicsObjects)
-				{
-					for (auto phO : list)
-					{
-						phO->visible(false);
-					}
-				}
-
-#endif
 				for (auto it = renVecSet.begin(); it != renVecSet.end(); it++)
 				{
 					RenderableID renderable = *it;
 					if (renderable->checkBoundingBox() && boundingFrustum.Contains(renderable->GetBoundingBox()) == ContainmentType::DISJOINT)
 						continue;
+					//OutputDebugStringA(std::string(rpi->renderPassTemplate->name() + ":" + renderable->name() + "\n").c_str());
 					renderable->Render(unit, rpi, SUuuid());
 				}
 
 #if defined(_EDITOR)
 				for (auto& [draw, list] : drawPhysicsObjects)
 				{
+					if (!draw) continue;
 					for (auto phO : list)
 					{
-						phO->visible(true);
-						if (!draw) continue;
 
 						RenderableID shape = phO->renderableShape;
 						RenderableID lines = phO->renderableLines;
 						if (!shape || (shape->checkBoundingBox() && boundingFrustum.Contains(shape->GetBoundingBox()) == ContainmentType::DISJOINT))
 							continue;
+						phO->visible(true);
 						shape->Render(unit, rpi, SUuuid());
 						lines->Render(unit, rpi, SUuuid());
+						//triggers can be picked
+						if (phO->behavior() != PB_Trigger) { phO->visible(false); }
 					}
 				}
 #endif
