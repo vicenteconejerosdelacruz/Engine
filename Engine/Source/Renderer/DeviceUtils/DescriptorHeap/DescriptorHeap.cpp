@@ -32,8 +32,10 @@ namespace DeviceUtils
 		AllocGPUDescriptor(gpuHandle);
 	}
 
+	static std::mutex allocCPUMutex;
 	void DescriptorHeap::AllocCPUDescriptor(CD3DX12_CPU_DESCRIPTOR_HANDLE& cpuHandle)
 	{
+		std::lock_guard<std::mutex> lock(allocCPUMutex);
 		UINT slotIndex = 0U;
 		for (; slotIndex < size; slotIndex++) {
 			if (!usedCpuDescriptorHandle.contains(slotIndex)) break;
@@ -46,8 +48,10 @@ namespace DeviceUtils
 		cpuHandle.Offset(slotIndex, GetDescriptorSize());
 	}
 
+	static std::mutex allocGPUMutex;
 	void DescriptorHeap::AllocGPUDescriptor(CD3DX12_GPU_DESCRIPTOR_HANDLE& gpuHandle)
 	{
+		std::lock_guard<std::mutex> lock(allocGPUMutex);
 		UINT slotIndex = 0U;
 		for (; slotIndex < size; slotIndex++) {
 			if (!usedGpuDescriptorHandle.contains(slotIndex)) break;
