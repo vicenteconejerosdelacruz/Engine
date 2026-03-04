@@ -11,8 +11,7 @@ extern std::unique_ptr<Renderer> renderer;
 namespace DeviceUtils
 {
 	std::unique_ptr<DescriptorHeap> csuDescriptorHeap;
-	//static std::unordered_map<ConstantsBufferID, std::unique_ptr<ConstantsBuffer>> constantsBuffers;
-	static std::map<ConstantsBufferID, std::unique_ptr<ConstantsBuffer>> constantsBuffers;
+	static std::map<JUUID, std::unique_ptr<ConstantsBuffer>> constantsBuffers;
 
 	void CreateCSUDescriptorHeap(unsigned int numFrames) {
 		csuDescriptorHeap = std::make_unique<DescriptorHeap>();
@@ -85,13 +84,14 @@ namespace DeviceUtils
 		DX::ThrowIfFailed(cbvData->constantBuffer->Map(0, &readRange, reinterpret_cast<void**>(&cbvData->mappedConstantBuffer)));
 		ZeroMemory(cbvData->mappedConstantBuffer, numDescriptors * cbvData->alignedConstantBufferSize);
 
-		constantsBuffers.insert_or_assign(constantsBufferID, std::move(cbvData));
+		assert(!constantsBuffers.contains(constantsBufferID()));
+		constantsBuffers.insert_or_assign(constantsBufferID(), std::move(cbvData));
 		return constantsBufferID;
 	}
 
 	void DestroyConstantsBuffer(ConstantsBufferID ConstantsBufferID)
 	{
-		constantsBuffers.erase(ConstantsBufferID);
+		constantsBuffers.erase(ConstantsBufferID());
 	}
 
 	void DestroyConstantsBuffer()
