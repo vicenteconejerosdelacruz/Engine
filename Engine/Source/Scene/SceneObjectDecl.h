@@ -2,7 +2,7 @@
 
 #define SODECL_TUPLE(SOClass) typedef std::tuple<JNAME, std::unique_ptr<SOClass>> SOClass##Tuple;\
 typedef SceneObjectsContainer<SOClass##Tuple> SOClass##SceneObjects;\
-typedef std::unordered_map<SceneUnitId, SOClass##SceneObjects> SOClass##SUSceneObjects
+typedef std::map<SceneUnitId, SOClass##SceneObjects> SOClass##SUSceneObjects
 
 #define SODECL_CREATESCENEOBJECTS(SOClass) void Create##SOClass##SceneObjects(SceneUnitId id)
 #define SODECL_GETSCENEOBJECTS(SOClass) SOClass##SceneObjects& Get##SOClass##sSceneObjects(SceneUnitId id)
