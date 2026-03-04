@@ -122,18 +122,31 @@ struct std::hash<TYPE##ID>\
 template<typename T, std::unique_ptr<T>& F(SceneUnitId, JUUID)>
 struct TSUUUID {
 	SUUUID SUuuid;
+	std::function<bool()> validator = nullptr;
 	TSUUUID() {}
 	TSUUUID(const TSUUUID& other)
 	{
 		SUuuid = other.SUuuid;
+		validator = other.validator;
+	}
+	TSUUUID(const TSUUUID& other, std::function<bool()> validator)
+	{
+		SUuuid = other.SUuuid;
+		this->validator = validator;
 	}
 	TSUUUID(const SUUUID& nSUuuid)
 	{
 		SUuuid = nSUuuid;
 	}
+	TSUUUID(const SUUUID& nSUuuid, std::function<bool()> validator)
+	{
+		SUuuid = nSUuuid;
+		this->validator = validator;
+	}
 	TSUUUID operator=(TSUUUID other)
 	{
 		SUuuid = other.SUuuid;
+		validator = other.validator;
 		return *this;
 	}
 	TSUUUID operator=(SUUUID nSUuuid)
@@ -187,11 +200,11 @@ struct TSUUUID {
 	}
 	explicit operator bool() const
 	{
-		return !empty();
+		return validator ? (validator() && !empty()) : !empty();
 	}
 	explicit operator bool()
 	{
-		return !empty();
+		return validator ? (validator() && !empty()) : !empty();
 	}
 	bool empty()
 	{
