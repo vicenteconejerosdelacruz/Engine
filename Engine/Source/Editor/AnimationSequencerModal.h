@@ -37,6 +37,7 @@ struct AnimationSequencerModal
 
 	void Initialize(JUUID uuid);
 	nlohmann::json GetModalLevelJson();
+	void DestroyStep();
 	void DestroySceneObjects();
 	void Step();
 	void DrawLoading();
@@ -62,6 +63,7 @@ struct AnimationSequencerModal
 	bool showing = false;
 	bool initializing = false;
 	bool destroying = false;
+	unsigned int destructionFrames = 0;
 	Model3DInstanceID model3dUUID;
 	JUUID renderableUUID;
 	RenderableID renderable;
