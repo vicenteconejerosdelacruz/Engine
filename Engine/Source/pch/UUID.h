@@ -383,4 +383,19 @@ inline std::vector<JUUIDName> GetUUIDsNames(auto& items)
 	return uuidsNames;
 }
 
+inline std::vector<JUUIDName> GetNonHiddenUUIDsNames(auto& items)
+{
+	std::vector<JUUIDName> uuidsNames;
+	for (auto& pair : items)
+	{
+		auto& obj = std::get<1>(pair.second);
+		if (obj->contains("hidden") && obj->at("hidden") == true)
+			continue;
+
+		uuidsNames.push_back(std::make_tuple(pair.first, std::get<0>(pair.second)));
+	}
+	SortUUIDByName(uuidsNames);
+	return uuidsNames;
+}
+
 #endif
