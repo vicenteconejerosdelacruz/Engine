@@ -311,7 +311,8 @@ namespace Editor
 				{ "hidden", true },
 				{ "systemCreated", true },
 				{ "mouseController", true },
-				{ "renderPasses", {} }
+				{ "renderPasses", {} },
+				{ "controllers", {} }
 			};
 			CloneSceneObject(id, levelCameraUUID[id].uuid(), parameters);
 
@@ -400,7 +401,8 @@ namespace Editor
 
 	void MarkSceneUnitAsModified(SceneUnitId id)
 	{
-		levelModified.at(id) = true;
+		if (levelModified.contains(id))
+			levelModified.at(id) = true;
 	}
 
 	//Editor LifeCycle
@@ -1815,6 +1817,9 @@ namespace Editor
 		using namespace Scene;
 		for (auto& [id, panel] : sceneObjectEdition)
 		{
+			if (!SceneUnitRenderingExists(id))
+				continue;
+
 			panel.BuildAssetsTree(
 				[&]() {return GetSceneObjectsTypesList(id); },
 				[&](JUUID uuid) {return GetSceneObjectPointer(id, uuid); }
