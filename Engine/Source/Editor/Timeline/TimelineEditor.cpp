@@ -198,6 +198,7 @@ void TimelineEditor::DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2
 
 	if (deleteChannelId != -1)
 	{
+		setTransformationKeyFrame(nullptr, -1);
 		DeleteChannel(sequence, deleteChannelId, timelinePos, timelineSize);
 	}
 	if (expandChannelId != -1)
