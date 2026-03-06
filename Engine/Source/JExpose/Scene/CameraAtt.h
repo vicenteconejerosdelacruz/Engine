@@ -22,6 +22,7 @@ JEXPOSE_VECTOR(std::string, renderPasses, {}, jedv_t_te_renderpass_vector, 1, fa
 JEXPOSE(std::string, shadowMapLight, "", jedv_t_so_light, 1, false)
 JEXPOSE(bool, mouseController, false, jedv_t_boolean, 1, false)
 JEXPOSE(bool, useSwapChain, false, jedv_t_boolean, 1, false)
+JEXPOSE_MAP_OBJECT(Controller, controllers, nlohmann::json::object({}), jedv_t_controller_vector, 1, false)
 JPREVIEW(renderPassPreview, jedv_draw_renderpass_vector)
 JTRACKUUID(Camera, Cameras, 0, true)
 JTRACKUUID(Camera, WindowCameras, 0, fitWindow())
