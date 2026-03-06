@@ -25,9 +25,12 @@
 	return ptr;\
 }
 
-#define SODEF_GETIDNAMES(SOClass) std::vector<JUUIDName> Get##SOClass##sIDsNames(SceneUnitId id)\
+#define SODEF_GETIDNAMES(SOClass) std::vector<JUUIDName> Get##SOClass##sIDsNames(SceneUnitId id, bool getHidden)\
 {\
-	return GetUUIDsNames(SOClass##SUsceneObjects.at(id));\
+	if(getHidden)\
+		return GetUUIDsNames(SOClass##SUsceneObjects.at(id));\
+	else\
+		return GetNonHiddenUUIDsNames(SOClass##SUsceneObjects.at(id));\
 }
 
 #define SODEF_GETNAMES(SOClass) std::vector<JNAME> Get##SOClass##sNames(SceneUnitId id)\
