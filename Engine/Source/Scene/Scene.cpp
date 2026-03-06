@@ -373,6 +373,11 @@ namespace Scene
 		renderableSceneUnits.erase(id);
 	}
 
+	bool SceneUnitRenderingExists(SceneUnitId id)
+	{
+		return renderableSceneUnits.contains(id);
+	}
+
 	void BindSceneObjects(SceneUnitId id)
 	{
 		std::unordered_map<SceneObjectType, std::function<void(SceneUnitId, JUUID)>> typeBinder =

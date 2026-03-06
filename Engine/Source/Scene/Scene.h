@@ -105,6 +105,7 @@ namespace Scene
 	void ResetRenderableScenes();
 	void EnableSceneUnitRendering(SceneUnitId id);
 	void RemoveSceneUnitRendering(SceneUnitId id);
+	bool SceneUnitRenderingExists(SceneUnitId id);
 
 	void BindSceneObjects(SceneUnitId id);
 	JUUID CloneSceneObject(SceneUnitId id, JUUID, nlohmann::json parameters = {});
