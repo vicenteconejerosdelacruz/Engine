@@ -16,8 +16,6 @@ namespace Scene
 	class SceneUnit
 	{
 	public:
-		static const unsigned int framesUntilDeletion = 2U;
-
 		SceneUnit(SceneUnitId unit, std::string name);
 		~SceneUnit();
 		SceneUnitId Id();
