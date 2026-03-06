@@ -17,6 +17,11 @@ namespace Editor
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 	extern bool IsPlaying(SceneUnitId id);
 
+	extern bool StaticBodiesSceneUnitRegistered(SceneUnitId id);
+	extern bool DynamicBodiesSceneUnitRegistered(SceneUnitId id);
+	extern bool CharactersSceneUnitRegistered(SceneUnitId id);
+	extern bool TriggersSceneUnitRegistered(SceneUnitId id);
+
 	//Should Draw
 	extern bool StaticBodiesShouldDraw(SceneUnitId id);
 	extern bool DynamicBodiesShouldDraw(SceneUnitId id);
@@ -579,10 +584,10 @@ namespace Scene
 
 		//Physics Objects list
 		std::vector<std::tuple<bool, std::set<PhysicObjectID>>> drawPhysicsObjects;
-		drawPhysicsObjects.push_back(std::make_tuple(StaticBodiesShouldDraw(unit), GetStaticBodies(unit)));
-		drawPhysicsObjects.push_back(std::make_tuple(DynamicBodiesShouldDraw(unit), GetDynamicBodies(unit)));
-		drawPhysicsObjects.push_back(std::make_tuple(CharactersShouldDraw(unit), GetCharacters(unit)));
-		drawPhysicsObjects.push_back(std::make_tuple(TriggersShouldDraw(unit), Editor::GetTriggers(unit)));
+		if (StaticBodiesSceneUnitRegistered(unit)) drawPhysicsObjects.push_back(std::make_tuple(StaticBodiesShouldDraw(unit), GetStaticBodies(unit)));
+		if (DynamicBodiesSceneUnitRegistered(unit)) drawPhysicsObjects.push_back(std::make_tuple(DynamicBodiesShouldDraw(unit), GetDynamicBodies(unit)));
+		if (CharactersSceneUnitRegistered(unit)) drawPhysicsObjects.push_back(std::make_tuple(CharactersShouldDraw(unit), GetCharacters(unit)));
+		if (TriggersSceneUnitRegistered(unit)) drawPhysicsObjects.push_back(std::make_tuple(TriggersShouldDraw(unit), Editor::GetTriggers(unit)));
 
 		for (auto& [draw, list] : drawPhysicsObjects)
 		{
