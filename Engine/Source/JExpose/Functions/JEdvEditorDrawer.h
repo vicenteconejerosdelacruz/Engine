@@ -2005,8 +2005,8 @@ inline JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_renderable>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
-			auto getName = [](JUUID uuid) { return Scene::GetCameraName(MAKESUUUID(Editor::currentSceneUnitId, uuid)); };
-			DrawResourceSelection(attribute, json, getName, SortUUIDSUNameByName(Editor::currentSceneUnitId, Scene::GetRenderablesIDsNames), ICON_FA_SNOWMAN);
+			auto getName = [](JUUID uuid) { return Scene::GetRenderableName(MAKESUUUID(Editor::currentSceneUnitId, uuid)); };
+			DrawResourceSelection(attribute, json, getName, SortUUIDSUNameByName(Editor::currentSceneUnitId, [](auto unit) { return Scene::GetRenderablesIDsNames(unit, false); }), ICON_FA_SNOWMAN);
 		};
 }
 
@@ -5457,7 +5457,7 @@ inline JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
 					JUUID sceneObject = json.at(0)->at("uuid");
 					JUUID uuid = CreatePhysicObject(attribute, MAKESUUUID(Editor::currentSceneUnitId, sceneObject), placeholder);
 					json.at(0)->at(attribute).push_back(uuid);
-					GetPhysicObject(uuid)->CreatePhysicsBehavior();
+					//GetPhysicObject(uuid)->CreatePhysicsBehavior();
 				};
 			auto removePhysicsBehavior = [&]()
 				{
