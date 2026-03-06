@@ -6,6 +6,7 @@
 namespace Editor
 {
 	extern bool IsPlaying(SceneUnitId id);
+	extern void MarkSceneUnitAsModified(SceneUnitId id);
 };
 
 namespace Game
@@ -14,6 +15,22 @@ namespace Game
 	std::unordered_map<SUUUID, std::set<JUUID>> controllerUUIDBySUUUID;
 
 	Controller::Controller(nlohmann::json& json) :JObject(json) { (*this)["uuid"] = getUUID(); }
+
+	void Controller::JUpdate(nlohmann::json p)
+	{
+#if defined(_EDITOR)
+		Editor::MarkSceneUnitAsModified(unit);
+#endif
+		JObject::JUpdate(p);
+	}
+
+	void Controller::JPatch(nlohmann::json p)
+	{
+#if defined(_EDITOR)
+		Editor::MarkSceneUnitAsModified(unit);
+#endif
+		JObject::JPatch(p);
+	}
 
 	void Controller::Map(SUUUID so) { unit = std::get<0>(so); sceneObject = so; }
 

@@ -16,6 +16,8 @@ namespace Game
 	{
 		virtual ~Controller() = default;
 		Controller(nlohmann::json& json);
+		virtual void JUpdate(nlohmann::json p);
+		virtual void JPatch(nlohmann::json p);
 		virtual void SetInitialConditions() {};
 		virtual void Map(SUUUID so);
 		virtual void Unmap();
