@@ -427,9 +427,9 @@ void AppStep()
 	timer.Tick([&]()
 		{
 			TemplatesStep(timer);
-			StepControllers(timer);
 			GameStep();
 			SceneObjectsStep(timer);
+			StepControllers(timer);
 #if defined(_EDITOR)
 			EditorStep();
 #endif
