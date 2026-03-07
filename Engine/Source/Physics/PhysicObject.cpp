@@ -77,6 +77,22 @@ namespace Physics
 		InheritGeometryAttributes();
 	}
 
+	void PhysicObject::JUpdate(nlohmann::json p)
+	{
+#if defined(_EDITOR)
+		Editor::MarkSceneUnitAsModified(unit());
+#endif
+		JObject::JUpdate(p);
+	}
+
+	void PhysicObject::JPatch(nlohmann::json p)
+	{
+#if defined(_EDITOR)
+		Editor::MarkSceneUnitAsModified(unit());
+#endif
+		JObject::JPatch(p);
+	}
+
 	SceneUnitId PhysicObject::unit()
 	{
 		if (renderable) { return renderable.unit(); }

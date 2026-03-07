@@ -77,6 +77,8 @@ namespace Physics
 
 		virtual ~PhysicObject() {};
 		PhysicObject(nlohmann::json& json);
+		virtual void JUpdate(nlohmann::json p);
+		virtual void JPatch(nlohmann::json p);
 		SceneUnitId unit();
 		JUUID uuid();
 		bool CanBuild();
