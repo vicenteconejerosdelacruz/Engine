@@ -22,6 +22,7 @@ extern std::unique_ptr<DirectX::GamePad> gamePad;
 extern DirectX::GamePad::ButtonStateTracker buttons;
 //Timer
 extern DX::StepTimer timer;
+extern float gameUpdateFrequency;
 
 namespace Game
 {
@@ -34,9 +35,6 @@ namespace Game
 #include <JEnd.h>
 
 #endif
-	//Scene Bounds(for now)
-	static XMFLOAT2 zBounds = { -6.8f ,0.90f };
-
 	//JS Module
 	static std::map<JUUID, std::unique_ptr<v8pp::module>> v8ppModule;
 
@@ -60,12 +58,12 @@ namespace Game
 				{ VS_Running, [&](auto* sm, VenomStates prevState) { EnterRunning(); }},
 				{ VS_Jumping, [&](auto* sm, VenomStates prevState) { EnterJumping(); }},
 				{ VS_RunningJump, [&](auto* sm, VenomStates prevState) { EnterRunningJump(); }},
-				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { EnterAttack1(); }}
+				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { EnterAttack1(); }},
+				{ VS_JumpKick,[&](auto* sm, VenomStates prevState) { EnterJumpKick(); }},
+				{ VS_JumpDash,[&](auto* sm, VenomStates prevState) { EnterJumpDash(); }},
 			},
 			.onLeave = {
 				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { LeaveAttack1(); }},
-				{ VS_Jumping, [&](auto* sm, VenomStates prevState) { LeaveJumping(); }},
-				{ VS_Jumping, [&](auto* sm, VenomStates prevState) { LeaveRunningJumping(); }}
 			},
 			.onStep = {
 				{ VS_None, [&](auto* sm) { venomScale = venom->scale(); vsm.ChangeState(VS_Intro); }},
@@ -74,7 +72,9 @@ namespace Game
 				{ VS_Running, [&](auto* sm) { Running(); }},
 				{ VS_Jumping, [&](auto* sm) { Jumping(); }},
 				{ VS_RunningJump, [&](auto* sm) { RunningJump(); }},
-				{ VS_Attack_1, [&](auto* sm) { Attacking1(); }}
+				{ VS_Attack_1, [&](auto* sm) { Attacking1(); }},
+				{ VS_JumpKick, [&](auto* sm) { JumpKick(); } },
+				{ VS_JumpDash, [&](auto* sm) { JumpDash(); } },
 			}
 		};
 		SetInitialConditions();
@@ -86,14 +86,13 @@ namespace Game
 		venomScale = { 0.0f,0.0f,0.0f };
 		leftStick = XMVectorZero();
 		runningJumpLeftStick = XMVectorZero();
-		lastAnimPos = XMVectorZero();
-		lastAnimPosDelta = XMVectorZero();
-		lastAnimPosDelta2 = XMVectorZero();
+		downSpeed = 0.0f;
+		touchingDown = true;
+		canJump = false;
+		jumping = false;
 		attack1Window = false;
 		newAttack1 = false;
-		JumpingStateData.jumping = false;
-		JumpingStateData.falling = false;
-		JumpingStateData.kicking = false;
+		currentAttack1Animation = 0;
 	}
 
 #if defined(_EDITOR)
@@ -120,7 +119,11 @@ namespace Game
 		{
 			camera = MAKESUUUID(unit, *GetMouseCameras(unit).begin());
 		}
+		physicScene = MAKESUUUID(unit, *GetPhysicScenes(unit).begin());
+		physicObject = venom->at("physicObject").at(0);
+
 		BindV8Module();
+		SetInitialConditions();
 	}
 
 	void VenomController::Unmap()
@@ -128,6 +131,8 @@ namespace Game
 		Controller::Unmap();
 		venom.clear();
 		camera.clear();
+		physicScene.clear();
+		physicObject.clear();
 	}
 
 	//Step
@@ -153,17 +158,9 @@ namespace Game
 		XMVECTOR XMpos, XMrot, XMscl;
 		XMMatrixDecompose(&XMscl, &XMrot, &XMpos, venom->animationTransformation);
 
-		lastAnimPosDelta2 = lastAnimPosDelta;
-		lastAnimPosDelta = XMVectorSubtract(XMpos, lastAnimPos);
-		lastAnimPos = XMpos;
-
 		UpdateLeftStickVector();
 		UpdateLookTo();
 		vsm.Step();
-		XMFLOAT3 vpos = venom->position();
-		XMFLOAT3 cpos = camera->position();
-		cpos.x = vpos.x;
-		camera->position(cpos);
 	}
 
 	//JS binding
@@ -234,141 +231,10 @@ namespace Game
 		context.value("uuid", v8_string);
 	}
 
-	void VenomController::VenomReady()
-	{
-		vsm.ChangeState(VS_Idle);
-	}
-
-	void VenomController::StartVenomNextPunchWindow()
-	{
-		attack1Window = true;
-	}
-
-	void VenomController::EvaluateVenomNextPunch()
-	{
-		std::vector<std::pair<std::function<bool()>, std::function<void()>>> postAttackActions = {
-			{
-				[&]() { return ShouldRun(); },
-				[&]() { vsm.ChangeState(VS_Running); }
-			},
-			{
-				[&]() { return ShouldWalk(); },
-				[&]() { vsm.ChangeState(VS_Walking); }
-			},
-			{
-				[&]() { return ShouldIdle(); },
-				[&]() { vsm.ChangeState(VS_Idle); }
-			}
-		};
-
-		if (newAttack1)
-		{
-			EnterAttack1();
-		}
-		else
-		{
-			for (auto& [cond, action] : postAttackActions)
-			{
-				if (cond())
-				{
-					action();
-					break;
-				}
-			}
-		}
-		newAttack1 = false;
-		attack1Window = false;
-	}
-
-	void VenomController::VenomBeginRunJump()
-	{
-		venom->SetCurrentAnimation("RunJumpLoop");
-	}
-
-	void VenomController::VenomRunJumpLanding()
-	{
-		vsm.ChangeState(VS_Running);
-	}
-
-	void VenomController::VenomBeginJump()
-	{
-		JumpingStateData.jumping = true;
-		JumpingStateData.falling = false;
-		JumpingStateData.jumpTween = std::make_unique<tween>(tween(0.0f, jumpHeight(), jumpTime(), tween::easing::sine_ease_out));
-		venom->SetCurrentAnimation("JumpLoop", 0.0f, 1.0f, true, true);
-	}
-
-	void VenomController::VenomBeginFall()
-	{
-		JumpingStateData.jumping = false;
-		JumpingStateData.falling = true;
-		JumpingStateData.fallTween = std::make_unique<tween>(tween(jumpHeight(), 0.0f, jumpTime(), tween::easing::sine_ease_in));
-	}
-
-	void VenomController::VenomEndJumpLanding()
-	{
-		vsm.ChangeState(VS_Idle);
-	}
-
-	//Scene Object
-	void VenomController::MoveForward(float step)
-	{
-		float delta = static_cast<float>(timer.GetElapsedSeconds() * step);
-
-		XMFLOAT3 scale = venom->scale();
-		XMVECTOR move = XMVector3Normalize(leftStick);
-		move = XMVectorScale(move, delta);
-		float dz = -lastAnimPosDelta.m128_f32[2];
-		if (dz > 0.0f)
-		{
-			move.m128_f32[0] = scale.z * std::max(-lastAnimPosDelta.m128_f32[2], 0.0f);
-		}
-		else
-		{
-			move.m128_f32[0] = scale.z * std::max(-lastAnimPosDelta2.m128_f32[2], 0.0f);
-		}
-		XMFLOAT3 p = venom->position();
-		XMVECTOR pos = XMLoadFloat3(&p);
-		pos = XMVectorAdd(pos, move);
-		XMStoreFloat3(&p, pos);
-		p.z = std::clamp(p.z, zBounds.x, zBounds.y);
-		venom->position(p);
-	}
-
-	void VenomController::JumpingMoveForward(float step)
-	{
-		float delta = static_cast<float>(timer.GetElapsedSeconds() * step);
-
-		XMFLOAT3 scale = venom->scale();
-		XMVECTOR move = XMVector3Normalize(leftStick);
-		move = XMVectorScale(move, delta);
-		XMFLOAT3 p = venom->position();
-		XMVECTOR pos = XMLoadFloat3(&p);
-		pos = XMVectorAdd(pos, move);
-		XMStoreFloat3(&p, pos);
-		p.z = std::clamp(p.z, zBounds.x, zBounds.y);
-		venom->position(p);
-	}
-
-	void VenomController::RunningJumpMoveForward(float step)
-	{
-		float delta = static_cast<float>(timer.GetElapsedSeconds() * step);
-
-		XMFLOAT3 scale = venom->scale();
-		XMVECTOR move = XMVector3Normalize(runningJumpLeftStick);
-		move = XMVectorScale(move, delta);
-		XMFLOAT3 p = venom->position();
-		XMVECTOR pos = XMLoadFloat3(&p);
-		pos = XMVectorAdd(pos, move);
-		XMStoreFloat3(&p, pos);
-		p.z = std::clamp(p.z, zBounds.x, zBounds.y);
-		venom->position(p);
-	}
-
 	//Joystick
 	void VenomController::UpdateLeftStickVector()
 	{
-		std::set<VenomStates> noUpdateStates = { VS_RunningJump };
+		std::set<VenomStates> noUpdateStates = { VS_RunningJump, VS_JumpDash };
 
 		if (noUpdateStates.contains(vsm.currentState)) return; //maybe Vec0?
 
@@ -411,8 +277,47 @@ namespace Game
 		}
 	}
 
-	//States handling
-	//Shoulds
+	//Movement
+	void VenomController::CharacterMove(XMVECTOR stickDisplacement, float dt, float sideSpeed, XMFLOAT3 gravity)
+	{
+		XMVECTOR downDisp = { 0.0f, fixedDownDisplacement() + downSpeed * dt, 0.0f };
+		XMFLOAT3 scale = venom->scale();
+		XMVECTOR move = XMVector3Normalize(stickDisplacement) * sideSpeed * dt;
+		//move = XMVectorScale(move, delta) + downDisp;
+		move += downDisp;
+		PxControllerCollisionFlags colFlag = physicObject->MoveCharacter(move, dt);
+		touchingDown = !!(colFlag & PxControllerCollisionFlag::Enum::eCOLLISION_DOWN);
+		downSpeed = (touchingDown) ? 0.0f : (downSpeed + gravity.y * dt);
+	}
+
+	void VenomController::MoveForward(float sideSpeed)
+	{
+		CharacterMove(leftStick, gameUpdateFrequency, sideSpeed, physicScene->gravity());
+	}
+
+	void VenomController::JumpingMoveForward(float sideSpeed)
+	{
+		CharacterMove(leftStick, gameUpdateFrequency, sideSpeed, physicScene->gravity());
+	}
+
+	void VenomController::RunningJumpMoveForward(float sideSpeed)
+	{
+		CharacterMove(runningJumpLeftStick, gameUpdateFrequency, sideSpeed, physicScene->gravity());
+	}
+
+	//Intro
+	void VenomController::EnterIntro()
+	{
+		venom->animationUseTransformation(true);
+		venom->SetCurrentAnimation("Intro", 0.0f, 1.0f, true, false);
+	}
+
+	void VenomController::VenomReady()
+	{
+		vsm.ChangeState(VS_Idle);
+	}
+
+	//Idle
 	bool VenomController::ShouldIdle()
 	{
 		XMVECTOR len = XMVector3Length(leftStick);
@@ -420,76 +325,13 @@ namespace Game
 		return l < walkThreshold();
 	}
 
-	bool VenomController::ShouldWalk()
-	{
-		XMVECTOR len = XMVector3Length(leftStick);
-		float l = len.m128_f32[0];
-		return l > walkThreshold() && l < runThreshold();
-	}
-
-	bool VenomController::ShouldRun()
-	{
-		XMVECTOR len = XMVector3Length(leftStick);
-		float l = len.m128_f32[0];
-		return l > runThreshold();
-	}
-
-	bool VenomController::ShouldJump()
-	{
-		return (buttons.a == GamePad::ButtonStateTracker::PRESSED);
-	}
-
-	bool VenomController::ShouldAttackX()
-	{
-		return (buttons.x == GamePad::ButtonStateTracker::PRESSED);
-	}
-	//Enter
-	void VenomController::EnterIntro()
-	{
-		venom->animationUseTransformation(true);
-		venom->SetCurrentAnimation("Intro", 0.0f, 1.0f, true, false);
-	}
-
 	void VenomController::EnterIdle()
 	{
+		canJump = true;
 		venom->animationUseTransformation(false);
-		venom->SetCurrentAnimation("Idle_C", 0.0f, 1.0f, true, true);
+		venom->SetCurrentAnimation("Idle", 0.0f, 1.0f, true, true);
 	}
 
-	void VenomController::EnterWalking()
-	{
-		venom->animationUseTransformation(false);
-		venom->SetCurrentAnimation("Walk", 0.0f, 1.0f, true, true);
-	}
-
-	void VenomController::EnterRunning()
-	{
-		venom->animationUseTransformation(false);
-		venom->SetCurrentAnimation("Run", 0.0f, 1.0f, true, true);
-	}
-
-	void VenomController::EnterJumping()
-	{
-		venom->animationUseTransformation(true);
-		venom->SetCurrentAnimation("JumpBegin");
-	}
-
-	void VenomController::EnterRunningJump()
-	{
-		runningJumpLeftStick = leftStick;
-		venom->animationUseTransformation(true);
-		venom->SetCurrentAnimation("RunJumpBegin");
-		RunningJumpStateData.jumpTween = std::make_unique<tween>(tween(0.0f, 1.0f, runningJumpTime(), tween::easing::linear));
-		RunningJumpStateData.dash = false;
-	}
-
-	void VenomController::EnterAttack1()
-	{
-		auto animation = Attack1Animations.at(currentAttack1Animation);
-		venom->SetCurrentAnimation(animation);
-		currentAttack1Animation = (currentAttack1Animation + 1) % Attack1Animations.size();
-	}
-	//Steps
 	void VenomController::Idle()
 	{
 		if (ShouldAttackX())
@@ -508,6 +350,19 @@ namespace Game
 		{
 			vsm.ChangeState(VS_Walking);
 		}
+	}
+
+	//Walking
+	bool VenomController::ShouldWalk()
+	{
+		XMVECTOR len = XMVector3Length(leftStick);
+		float l = len.m128_f32[0];
+		return l > walkThreshold() && l < runThreshold();
+	}
+
+	void VenomController::EnterWalking()
+	{
+		venom->SetCurrentAnimation("Walk", 0.0f, 1.0f, true, true);
 	}
 
 	void VenomController::Walking()
@@ -534,6 +389,19 @@ namespace Game
 		}
 	}
 
+	//Running
+	bool VenomController::ShouldRun()
+	{
+		XMVECTOR len = XMVector3Length(leftStick);
+		float l = len.m128_f32[0];
+		return l > runThreshold();
+	}
+
+	void VenomController::EnterRunning()
+	{
+		venom->SetCurrentAnimation("Run", 0.0f, 1.0f, true, true);
+	}
+
 	void VenomController::Running()
 	{
 		if (ShouldAttackX())
@@ -557,77 +425,101 @@ namespace Game
 		}
 	}
 
+	//Jumping
+	bool VenomController::ShouldJump()
+	{
+		return (buttons.a == GamePad::ButtonStateTracker::PRESSED) && touchingDown && canJump && !jumping;
+	}
+
+	void VenomController::EnterJumping()
+	{
+		venom->animationUseTransformation(true);
+		venom->SetCurrentAnimation("JumpBegin");
+	}
+
+	void VenomController::VenomBeginJump()
+	{
+		venom->SetCurrentAnimation("JumpLoop", 0.0f, 1.0f, true, true);
+		jumping = true;
+		canJump = false;
+		downSpeed += jumpSpeed();
+		touchingDown = false;
+	}
+
 	void VenomController::Jumping()
 	{
-		if (JumpingStateData.jumping)
+		if (ShouldJumpKick())
 		{
-			float height = JumpingStateData.jumpTween->step();
-			if (height == jumpHeight())
-			{
-				VenomBeginFall();
-				JumpingStateData.jumping = false;
-			}
-			XMFLOAT3 pos = venom->position();
-			pos.y = height;
-			venom->position(pos);
-		}
-		else if (JumpingStateData.falling)
-		{
-			float height = JumpingStateData.fallTween->step();
-			if (height == 0.0f)
-			{
-				venom->SetCurrentAnimation("JumpLanding");
-				JumpingStateData.falling = false;
-			}
-			XMFLOAT3 pos = venom->position();
-			pos.y = height;
-			venom->position(pos);
-		}
-
-		if (!JumpingStateData.jumping && !JumpingStateData.falling) return;
-
-		if (!JumpingStateData.kicking && ShouldAttackX())
-		{
-			JumpingStateData.kicking = true;
-			venom->SetCurrentAnimation("JumpKick");
+			vsm.ChangeState(VS_JumpKick);
+			return;
 		}
 
 		XMVECTOR len = XMVector3Length(leftStick);
 		float l = XMVectorGetX(len);
 		JumpingMoveForward(walkSpeed() * l);
+		if (touchingDown && jumping && !canJump)
+		{
+			jumping = false;
+			canJump = true;
+			vsm.ChangeState(VS_Idle);
+		}
+	}
+
+	//RunningJump
+	void VenomController::EnterRunningJump()
+	{
+		runningJumpLeftStick = leftStick;
+		venom->animationUseTransformation(true);
+		venom->SetCurrentAnimation("RunJumpBegin");
+	}
+
+	void VenomController::VenomBeginRunJump()
+	{
+		venom->SetCurrentAnimation("RunJumpLoop");
+		runningJumpTimeLeft = runningJumpTime();
 	}
 
 	void VenomController::RunningJump()
 	{
-		if (RunningJumpStateData.jumpTween)
+		if (ShouldJumpDash())
 		{
-			float t = RunningJumpStateData.jumpTween->step();
-			if (t == 1.0f)
+			vsm.ChangeState(VS_JumpDash);
+			return;
+		}
+
+		if (runningJumpTimeLeft != 0.0f)
+		{
+			float dt = static_cast<float>(timer.GetElapsedSeconds());
+			runningJumpTimeLeft = std::max(runningJumpTimeLeft - dt, 0.0f);
+			if (runningJumpTimeLeft == 0.0f)
 			{
-				RunningJumpStateData.jumpTween = nullptr;
-				if (!RunningJumpStateData.dash)
-				{
-					venom->animationUseTransformation(true);
-					venom->SetCurrentAnimation("RunJumpLanding");
-				}
-				else
-				{
-					std::string dashLandingAnim = DashLandingAnimations.at(RunningJumpStateData.dashAnimationIdx);
-					venom->SetCurrentAnimation(dashLandingAnim);
-				}
-			}
-			else if (!RunningJumpStateData.dash && ShouldAttackX())
-			{
-				std::srand(static_cast<int>(std::time(0)));
-				RunningJumpStateData.dashAnimationIdx = std::rand() % DashAnimations.size();
-				std::string dashAnim = DashAnimations.at(RunningJumpStateData.dashAnimationIdx);
-				venom->animationUseTransformation(true);
-				venom->SetCurrentAnimation(dashAnim);
-				RunningJumpStateData.jumpTween = std::make_unique<tween>(tween(0.0f, 1.0f, runningJumpAttackTime(), tween::easing::linear));
-				RunningJumpStateData.dash = true;
+				venom->SetCurrentAnimation("RunJumpLanding");
 			}
 		}
 		RunningJumpMoveForward(runSpeed());
+	}
+
+	void VenomController::VenomRunJumpLanding()
+	{
+		vsm.ChangeState(VS_Running);
+	}
+
+	void VenomController::VenomEndJumpLanding()
+	{
+		vsm.ChangeState(VS_Idle);
+	}
+
+	//Attack1
+	bool VenomController::ShouldAttackX()
+	{
+		return (buttons.x == GamePad::ButtonStateTracker::PRESSED);
+	}
+
+	void VenomController::EnterAttack1()
+	{
+		auto animation = Attack1Animations.at(currentAttack1Animation);
+		venom->SetCurrentAnimation(animation);
+		currentAttack1Animation = (currentAttack1Animation + 1) % Attack1Animations.size();
 	}
 
 	void VenomController::Attacking1()
@@ -638,7 +530,46 @@ namespace Game
 		}
 	}
 
-	//Leaves
+	void VenomController::StartVenomNextPunchWindow()
+	{
+		attack1Window = true;
+	}
+
+	void VenomController::EvaluateVenomNextPunch()
+	{
+		std::vector<std::pair<std::function<bool()>, std::function<void()>>> postAttackActions = {
+			{
+				[&]() { return ShouldRun(); },
+				[&]() { vsm.ChangeState(VS_Running); }
+			},
+			{
+				[&]() { return ShouldWalk(); },
+				[&]() { vsm.ChangeState(VS_Walking); }
+			},
+			{
+				[&]() { return ShouldIdle(); },
+				[&]() { vsm.ChangeState(VS_Idle); }
+			}
+		};
+		if (newAttack1)
+		{
+			EnterAttack1();
+		}
+		else
+		{
+			for (auto& [cond, action] : postAttackActions)
+			{
+				if (cond())
+				{
+					action();
+					break;
+				}
+			}
+		}
+		newAttack1 = false;
+		attack1Window = false;
+	}
+
 	void VenomController::LeaveAttack1()
 	{
 		attack1Window = false;
@@ -646,17 +577,59 @@ namespace Game
 		currentAttack1Animation = 0;
 	}
 
-	void VenomController::LeaveJumping()
+	//JuumpKick
+	bool VenomController::ShouldJumpKick()
 	{
-		JumpingStateData.jumping = false;
-		JumpingStateData.falling = false;
-		JumpingStateData.kicking = false;
+		return jumping && (buttons.x == GamePad::ButtonStateTracker::PRESSED);
 	}
 
-	void VenomController::LeaveRunningJumping()
+	void VenomController::EnterJumpKick()
 	{
-		RunningJumpStateData.jumpTween = nullptr;
-		RunningJumpStateData.dash = false;
+		venom->animationUseTransformation(true);
+		venom->SetCurrentAnimation("JumpKick");
+	}
+
+	void VenomController::JumpKick()
+	{
+		XMVECTOR len = XMVector3Length(leftStick);
+		float l = XMVectorGetX(len);
+		JumpingMoveForward(walkSpeed() * l);
+		if (touchingDown && jumping && !canJump)
+		{
+			jumping = false;
+			canJump = true;
+			vsm.ChangeState(VS_Idle);
+		}
+	}
+
+	//JumpDash
+	bool VenomController::ShouldJumpDash()
+	{
+		return (buttons.x == GamePad::ButtonStateTracker::PRESSED);
+	}
+
+	void VenomController::EnterJumpDash()
+	{
+		std::srand(static_cast<int>(std::time(0)));
+		jumpDashTimeLeft = jumpDashTime();
+		jumpDashAnimationIdx = std::rand() % DashAnimations.size();
+		std::string dashAnim = DashAnimations.at(jumpDashAnimationIdx);
+		venom->animationUseTransformation(true);
+		venom->SetCurrentAnimation(dashAnim);
+	}
+
+	void VenomController::JumpDash()
+	{
+		if (jumpDashTimeLeft != 0.0f)
+		{
+			float dt = static_cast<float>(timer.GetElapsedSeconds());
+			jumpDashTimeLeft = std::max(jumpDashTimeLeft - dt, 0.0f);
+			if (jumpDashTimeLeft == 0.0f)
+			{
+				venom->SetCurrentAnimation(DashLandingAnimations.at(jumpDashAnimationIdx));
+			}
+		}
+		RunningJumpMoveForward(runSpeed());
 	}
 }
 

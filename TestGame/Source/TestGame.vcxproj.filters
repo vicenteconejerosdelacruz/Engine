@@ -60,6 +60,12 @@
     <ClInclude Include="GamePhysics\GamePhysics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="JExpose\Controllers\BrawlerCameraControllerAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameControllers\BrawlerCameraController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TestGame.cpp">
@@ -90,6 +96,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GamePhysics\GamePhysics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameControllers\BrawlerCameraController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

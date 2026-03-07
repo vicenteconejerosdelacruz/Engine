@@ -17,7 +17,9 @@ enum VenomStates
 	VS_Running,
 	VS_Jumping,
 	VS_RunningJump,
-	VS_Attack_1
+	VS_Attack_1,
+	VS_JumpKick,
+	VS_JumpDash,
 };
 
 inline static std::unordered_map<std::string, VenomStates> stringToVenomStates =
@@ -28,7 +30,10 @@ inline static std::unordered_map<std::string, VenomStates> stringToVenomStates =
 	{ "Walking", VS_Walking },
 	{ "Running", VS_Running },
 	{ "Jumping", VS_Jumping },
-	{ "Attack_1", VS_Attack_1 }
+	{ "RunningJump", VS_RunningJump },
+	{ "Attack_1", VS_Attack_1 },
+	{ "JumpKick", VS_JumpKick },
+	{ "JumpDash", VS_JumpDash },
 };
 
 namespace Game
@@ -66,13 +71,15 @@ namespace Game
 			"Punch1", "Punch1",
 			"Punch2",
 		};
+
 		static inline std::vector<std::string> DashAnimations =
 		{
-			"RunJumpAttack1","RunJumpAttack2"
+			"JumpDash1","JumpDash2"
 		};
+
 		static inline std::vector<std::string> DashLandingAnimations =
 		{
-			"RunJumpAttack1Landing","RunJumpAttack2Landing"
+			"JumpDash1Landing","RunDash2Landing"
 		};
 
 		//Constructor and Binding
@@ -80,8 +87,7 @@ namespace Game
 		virtual void SetInitialConditions();
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
-		virtual std::map<std::string, JEdvEditorDrawerFunction> GetControllerDrawers() { return GetVenomControllerDrawers(); }
-		virtual std::vector<std::pair<std::string, JsonToEditorValueType>> GetControllerAttributes() { return GetVenomControllerAttributes(); }
+		DECL_CONTROLLER_DRAWER(VenomController, Controller);
 #endif
 		virtual void Map(SUUUID so);
 		virtual void Unmap();
@@ -92,53 +98,67 @@ namespace Game
 		//JS binding
 		virtual void BindV8Module();
 		virtual void BindToV8Context(v8pp::context& context);
-		void VenomReady();
-		void StartVenomNextPunchWindow();
-		void EvaluateVenomNextPunch();
-		void VenomBeginRunJump();
-		void VenomRunJumpLanding();
-		void VenomBeginJump();
-		void VenomBeginFall();
-		void VenomEndJumpLanding();
-
-		//Scene Object
-		void MoveForward(float step);
-		void JumpingMoveForward(float step);
-		void RunningJumpMoveForward(float step);
 
 		//Joystick
 		void UpdateLeftStickVector();
 		void UpdateLookTo();
 
-		//States handling
-		//Shoulds
-		bool ShouldIdle();
-		bool ShouldWalk();
-		bool ShouldRun();
-		bool ShouldJump();
-		bool ShouldAttackX();
-		//Enter
-		void EnterIntro();
-		void EnterIdle();
-		void EnterWalking();
-		void EnterRunning();
-		void EnterJumping();
-		void EnterRunningJump();
-		void EnterAttack1();
-		//Steps
-		void Idle();
-		void Walking();
-		void Running();
-		void Jumping();
-		void RunningJump();
-		void Attacking1();
-		//Leaves
-		void LeaveAttack1();
-		void LeaveJumping();
-		void LeaveRunningJumping();
+		//Movement
+		void CharacterMove(XMVECTOR stickDisplacement, float dt, float sideSpeed, XMFLOAT3 gravity);
+		void MoveForward(float sideSpeed);
+		void JumpingMoveForward(float sideSpeed);
+		void RunningJumpMoveForward(float sideSpeed);
 
-		//JS Binding
-		//std::unique_ptr<v8pp::module> v8ppModule;
+		//Intro
+		void EnterIntro();
+		void VenomReady();
+
+		//Idle
+		bool ShouldIdle();
+		void EnterIdle();
+		void Idle();
+
+		//Walking
+		bool ShouldWalk();
+		void EnterWalking();
+		void Walking();
+
+		//Running
+		bool ShouldRun();
+		void EnterRunning();
+		void Running();
+
+		//Jumping
+		bool ShouldJump();
+		void EnterJumping();
+		void VenomBeginJump();
+		void Jumping();
+		//void LeaveJumping();
+
+		//RunningJump
+		void EnterRunningJump();
+		void VenomBeginRunJump();
+		void RunningJump();
+		void VenomRunJumpLanding();
+		void VenomEndJumpLanding();
+
+		//Attack1
+		bool ShouldAttackX();
+		void EnterAttack1();
+		void Attacking1();
+		void StartVenomNextPunchWindow();
+		void EvaluateVenomNextPunch();
+		void LeaveAttack1();
+
+		//JuumpKick
+		bool ShouldJumpKick();
+		void EnterJumpKick();
+		void JumpKick();
+
+		//JumpDash
+		bool ShouldJumpDash();
+		void EnterJumpDash();
+		void JumpDash();
 
 		//State machine
 		GameStatesMachine<VenomStates> vsm;
@@ -150,37 +170,29 @@ namespace Game
 		//SceneObjects
 		RenderableID venom;
 		CameraID camera;
+		PhysicSceneID physicScene;
+		PhysicObjectID physicObject;
 
 		//Joystick
 		XMVECTOR leftStick;
 		XMVECTOR runningJumpLeftStick;
-
-		//Movement encoding
-		XMVECTOR lastAnimPos;
-		XMVECTOR lastAnimPosDelta;
-		XMVECTOR lastAnimPosDelta2;
 
 		//Attack controllers
 		bool attack1Window = false;
 		bool newAttack1 = false;
 		int currentAttack1Animation = 0;
 
-		//jumping
-		struct
-		{
-			bool jumping;
-			bool falling;
-			bool kicking;
-			std::unique_ptr<tween> jumpTween;
-			std::unique_ptr<tween> fallTween;
-		} JumpingStateData;
+		//Jumping
+		float downSpeed = 0.0f;
+		bool touchingDown = true;
+		bool canJump = false;
+		bool jumping = false;
 
-		//runningJump
-		struct
-		{
-			bool dash;
-			int dashAnimationIdx;
-			std::unique_ptr<tween> jumpTween;
-		} RunningJumpStateData;
+		//RunningJump
+		float runningJumpTimeLeft = 0.0f;
+
+		//JumpDash
+		int jumpDashAnimationIdx;
+		float jumpDashTimeLeft = 0.0f;
 	};
 }

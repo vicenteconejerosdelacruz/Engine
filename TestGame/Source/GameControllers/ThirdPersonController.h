@@ -29,8 +29,7 @@ namespace Game
 		virtual void SetInitialConditions();
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
-		virtual std::map<std::string, JEdvEditorDrawerFunction> GetControllerDrawers() { return GetThirdPersonControllerDrawers(); }
-		virtual std::vector<std::pair<std::string, JsonToEditorValueType>> GetControllerAttributes() { return GetThirdPersonControllerAttributes(); }
+		DECL_CONTROLLER_DRAWER(ThirdPersonController, Controller);
 #endif
 
 		virtual void Map(SUUUID so);

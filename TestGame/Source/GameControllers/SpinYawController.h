@@ -28,10 +28,8 @@ namespace Game
 		SpinYawController(nlohmann::json& json);
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
-		virtual std::map<std::string, JEdvEditorDrawerFunction> GetControllerDrawers() { return GetSpinYawControllerDrawers(); }
-		virtual std::vector<std::pair<std::string, JsonToEditorValueType>> GetControllerAttributes() { return GetSpinYawControllerAttributes(); }
+		DECL_CONTROLLER_DRAWER(SpinYawController, Controller);
 #endif
-
 		virtual void Step(float delta);
 	};
 }
