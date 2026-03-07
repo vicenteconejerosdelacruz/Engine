@@ -267,6 +267,7 @@ namespace Physics
 				desc.halfHeight = halfDimensions.y;			// Half-height in the "up" direction
 				desc.halfSideExtent = halfDimensions.x;		// Half-extent in the "side" direction
 				desc.halfForwardExtent = halfDimensions.z;	// Half-extent in the "forward" direction
+				desc.contactOffset = static_cast<float>(at("contactOffset"));
 				desc.material = material;
 				desc.position = ToPxVec3d(renderable->position() + localPosition());
 				desc.userData = this;
@@ -278,6 +279,7 @@ namespace Physics
 				PxCapsuleControllerDesc desc;
 				desc.radius = 1.0f * static_cast<float>(at("radius"));
 				desc.height = 2.0f * static_cast<float>(at("halfHeight"));
+				desc.contactOffset = static_cast<float>(at("contactOffset"));
 				desc.material = material;
 				desc.position = ToPxVec3d(renderable->position() + localPosition());
 				desc.userData = this;
@@ -671,7 +673,7 @@ namespace Physics
 
 		std::vector<std::string> characterAtts =
 		{
-			"geometry", "localPosition", "localRotation", "updateFromCharacterPosition", "useFootPosition"
+			"geometry", "localPosition", "localRotation", "updateFromCharacterPosition", "useFootPosition", "contactOffset"
 		};
 
 		std::unordered_map<PhysicsBehavior, std::vector<std::string>&> attsToAdd =

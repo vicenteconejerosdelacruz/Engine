@@ -68,5 +68,7 @@ namespace Physics
 		sceneDesc.simulationEventCallback = physicScene->contactCallback.get();
 		physicScene->pxScene = gPhysics->createScene(sceneDesc);
 		physicScene->pxControllerManager = PxCreateControllerManager(*physicScene->pxScene);
+		physicScene->pxControllerManager->setOverlapRecoveryModule(true);
+		physicScene->pxControllerManager->setTessellation(true, 2.0f);
 	}
 };
