@@ -1817,7 +1817,7 @@ namespace Editor
 		using namespace Scene;
 		for (auto& [id, panel] : sceneObjectEdition)
 		{
-			if (!SceneUnitRenderingExists(id))
+			if (IsPlaying(id) || !SceneUnitRenderingExists(id))
 				continue;
 
 			panel.BuildAssetsTree(
