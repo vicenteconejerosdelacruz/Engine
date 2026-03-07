@@ -1128,7 +1128,7 @@ namespace Physics
 		}
 	}
 
-	void UpdatePhysicObjects(SceneUnitId id, float step)
+	void UpdatePhysicObjects(SceneUnitId id)
 	{
 #if defined(_EDITOR)
 		using namespace Editor;

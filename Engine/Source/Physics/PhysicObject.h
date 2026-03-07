@@ -142,7 +142,7 @@ namespace Physics
 
 	void CreatePhysicsObjectsBehaviors(SceneUnitId id);
 	void UpdateRenderablesFromGlobalPose(SceneUnitId id);
-	void UpdatePhysicObjects(SceneUnitId id, float step);
+	void UpdatePhysicObjects(SceneUnitId id);
 
 	//Contact callbacks
 	void RegisterContactCallback(PhysicsBehavior behavior, JUUID object, std::function<void(JUUID, unsigned int)> callback);

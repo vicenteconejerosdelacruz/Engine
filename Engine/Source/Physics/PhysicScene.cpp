@@ -3,6 +3,8 @@
 #include <Scene.h>
 #include <Physics.h>
 
+extern float gameUpdateFrequency;
+
 #if defined(_EDITOR)
 namespace Editor
 {
@@ -128,12 +130,12 @@ namespace Scene
 	{
 		if (GetCountFromPhysicScenes(id) == 0ULL) return;
 
-		UpdatePhysicObjects(id, step);
+		UpdatePhysicObjects(id);
 
 		if (step == 0.0f) return;
 
 		PhysicSceneID scene = MAKESUUUID(id, *GetPhysicScenes(id).begin());
-		scene->pxScene->simulate(1.0f / 60.0f);
+		scene->pxScene->simulate(gameUpdateFrequency);
 		scene->pxScene->fetchResults(true);
 		UpdateRenderablesFromGlobalPose(id);
 	}

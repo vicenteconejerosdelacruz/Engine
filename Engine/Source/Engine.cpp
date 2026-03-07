@@ -56,6 +56,7 @@ bool inFullScreen = false;
 bool editorPlayMode = false;
 #endif
 extern std::string gameAppTitle;
+extern float gameUpdateFrequency;
 
 std::unique_ptr<Renderer> renderer;
 
@@ -126,6 +127,9 @@ int EngineConsoleMain()
 
 int APIENTRY EngineWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
+	timer.SetFixedTimeStep(true);
+	timer.SetTargetElapsedSeconds(gameUpdateFrequency);
+
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
