@@ -52,8 +52,11 @@ namespace DeviceUtils
 
 	void CommandsProcessor::CloseCommandList()
 	{
-		auto& commandList = commandLists[frame];
-		DX::ThrowIfFailed(commandList->Close());
+		if (IsOpen())
+		{
+			auto& commandList = commandLists[frame];
+			DX::ThrowIfFailed(commandList->Close());
+		}
 		open.at(frame) = false;
 	}
 }
