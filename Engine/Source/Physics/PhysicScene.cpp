@@ -120,6 +120,8 @@ namespace Scene
 		{
 			PX_RELEASE(pxScene);
 		}
+
+		SceneObject::Destroy();
 	}
 
 	void PhysicSceneStep(SceneUnitId id, float step)

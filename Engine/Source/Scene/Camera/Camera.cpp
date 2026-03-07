@@ -674,6 +674,8 @@ namespace Scene
 #include <Attributes/JDestroy.h>
 #include <CameraAtt.h>
 #include <JEnd.h>
+
+		SceneObject::Destroy();
 	}
 
 	void Camera::CreateConstantsBuffer()

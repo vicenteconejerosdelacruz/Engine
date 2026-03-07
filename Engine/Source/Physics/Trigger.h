@@ -68,7 +68,7 @@ namespace Scene
 		virtual void BindToScene();
 		virtual void UnbindFromScene();
 
-		void Destroy();
+		virtual void Destroy();
 
 		void CreatePhysicObject();
 #if defined(_EDITOR)

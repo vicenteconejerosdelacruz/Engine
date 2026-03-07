@@ -35,4 +35,12 @@ namespace Scene
 	{
 		Game::BindToV8Context(context, SUuuid());
 	}
+
+	void SceneObject::Destroy()
+	{
+		for (auto& cb : destroyCallbacks)
+		{
+			cb();
+		}
+	}
 }

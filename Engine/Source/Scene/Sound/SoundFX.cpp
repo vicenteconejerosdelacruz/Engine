@@ -228,6 +228,7 @@ namespace Scene
 #include <Attributes/JDestroy.h>
 #include <SoundFXAtt.h>
 #include <JEnd.h>
+		SceneObject::Destroy();
 	}
 
 	void SoundFX::updateRotationQ()

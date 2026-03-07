@@ -742,6 +742,8 @@ namespace Scene
 #include <Attributes/JDestroy.h>
 #include <RenderableAtt.h>
 #include <JEnd.h>
+
+		SceneObject::Destroy();
 	}
 
 	//RENDER

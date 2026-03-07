@@ -174,6 +174,8 @@ namespace Scene
 #include <Attributes/JDestroy.h>
 #include <LightAtt.h>
 #include <JEnd.h>
+
+		SceneObject::Destroy();
 	}
 
 	XMVECTOR Light::positionV()

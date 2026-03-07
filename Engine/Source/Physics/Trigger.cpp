@@ -99,6 +99,8 @@ namespace Scene
 #include <Attributes/JDestroy.h>
 #include <TriggerAtt.h>
 #include <JEnd.h>
+
+		SceneObject::Destroy();
 	}
 
 	void Trigger::CreatePhysicObject()

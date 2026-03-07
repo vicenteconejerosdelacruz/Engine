@@ -89,6 +89,7 @@ namespace Scene
 		virtual void Bind(JUUID uuid) {}
 		virtual void UnbindFromScene() {};
 		virtual void Unbind(JUUID uuid) {}
+		virtual void Destroy();
 
 		//transformations
 		virtual XMVECTOR rotationQ() { return XMQuaternionIdentity(); }
@@ -120,6 +121,7 @@ namespace Scene
 		//scene unit for which this scene object belongs
 		SceneUnitId unit;
 		std::string soName;
+		std::vector<std::function<void()>> destroyCallbacks;
 	};
 };
 

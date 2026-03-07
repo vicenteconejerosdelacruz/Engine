@@ -62,7 +62,7 @@ namespace Scene
 		virtual void BindToScene();
 		virtual void UnbindFromScene();
 
-		void Destroy();
+		virtual void Destroy();
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 #endif
