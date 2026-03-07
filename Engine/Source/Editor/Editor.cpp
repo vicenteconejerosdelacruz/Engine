@@ -2928,48 +2928,184 @@ namespace Editor
 		nlohmann::json current = json::parse(GetLevelString(id));
 		nlohmann::json initial = json::parse(editorPrePlayDump.at(id));
 
-		json diff = json::diff(current, initial);
-
-		std::unordered_map<JUUID, nlohmann::json> toReplace;
-		std::set<JUUID> toDelete;
-
-		std::unordered_map<std::string, std::function<void(nlohmann::json&)>> diffOp =
+		//initial vs current
+		std::map<SceneObjectType, std::set<JUUID>> initialObjects =
 		{
-			{ "replace", [&](auto& j)
-			{
-				std::vector<std::string> splitParts = nostd::split(j.at("path"), "/");
-				std::string& type = splitParts.at(1);
-				unsigned int index = std::stoi(splitParts.at(2));
-				JUUID uuid = current.at(type).at(index).at("uuid");
-				std::string& attribute = splitParts.at(3);
-				nlohmann::json patch;
-				if (toReplace.contains(uuid))
-				{
-					patch = toReplace.at(uuid);
-				}
-				patch[attribute] = initial.at(type).at(index).at(attribute);
-				toReplace.insert_or_assign(uuid, patch);
-			}
-			},
-			{ "remove", [&](auto& j)
-			{
-				std::vector<std::string> splitParts = nostd::split(j.at("path"), "/");
-				std::string& type = splitParts.at(1);
-				unsigned int index = std::stoi(splitParts.at(2));
-				toDelete.insert(current.at(type).at(index).at("uuid"));
-			}
-			}
+			{ SO_Renderables, std::set<JUUID>() },
+			{ SO_Lights, std::set<JUUID>() },
+			{ SO_Cameras, std::set<JUUID>() },
+			{ SO_SoundEffects, std::set<JUUID>() },
+			{ SO_PhysicScenes, std::set<JUUID>() },
+			{ SO_Triggers, std::set<JUUID>() },
+		};
+		std::map<SceneObjectType, std::set<JUUID>> currentObjects =
+		{
+			{ SO_Renderables, std::set<JUUID>() },
+			{ SO_Lights, std::set<JUUID>() },
+			{ SO_Cameras, std::set<JUUID>() },
+			{ SO_SoundEffects, std::set<JUUID>() },
+			{ SO_PhysicScenes, std::set<JUUID>() },
+			{ SO_Triggers, std::set<JUUID>() },
+		};
+		//delete
+		std::map<SceneObjectType, std::set<JUUID>> toDelete =
+		{
+			{ SO_Renderables, std::set<JUUID>() },
+			{ SO_Lights, std::set<JUUID>() },
+			{ SO_Cameras, std::set<JUUID>() },
+			{ SO_SoundEffects, std::set<JUUID>() },
+			{ SO_PhysicScenes, std::set<JUUID>() },
+			{ SO_Triggers, std::set<JUUID>() },
+		};
+		//create
+		std::map<SceneObjectType, std::set<JUUID>> toCreate =
+		{
+			{ SO_Renderables, std::set<JUUID>() },
+			{ SO_Lights, std::set<JUUID>() },
+			{ SO_Cameras, std::set<JUUID>() },
+			{ SO_SoundEffects, std::set<JUUID>() },
+			{ SO_PhysicScenes, std::set<JUUID>() },
+			{ SO_Triggers, std::set<JUUID>() },
+		};
+		std::map<SceneObjectType, std::map<JUUID, nlohmann::json&>> toCreateRefs =
+		{
+			{ SO_Renderables, std::map<JUUID,nlohmann::json&>() },
+			{ SO_Lights, std::map<JUUID,nlohmann::json&>() },
+			{ SO_Cameras, std::map<JUUID,nlohmann::json&>() },
+			{ SO_SoundEffects, std::map<JUUID,nlohmann::json&>() },
+			{ SO_PhysicScenes, std::map<JUUID,nlohmann::json&>() },
+			{ SO_Triggers, std::map<JUUID,nlohmann::json&>() },
+		};
+		//replacement
+		std::map<SceneObjectType, std::map<JUUID, nlohmann::json&>> initialRefs =
+		{
+			{ SO_Renderables, std::map<JUUID,nlohmann::json&>() },
+			{ SO_Lights, std::map<JUUID,nlohmann::json&>() },
+			{ SO_Cameras, std::map<JUUID,nlohmann::json&>() },
+			{ SO_SoundEffects, std::map<JUUID,nlohmann::json&>() },
+			{ SO_PhysicScenes, std::map<JUUID,nlohmann::json&>() },
+			{ SO_Triggers, std::map<JUUID,nlohmann::json&>() },
+		};
+		std::map<SceneObjectType, std::map<JUUID, nlohmann::json&>> currentRefs =
+		{
+			{ SO_Renderables, std::map<JUUID,nlohmann::json&>() },
+			{ SO_Lights, std::map<JUUID,nlohmann::json&>() },
+			{ SO_Cameras, std::map<JUUID,nlohmann::json&>() },
+			{ SO_SoundEffects, std::map<JUUID,nlohmann::json&>() },
+			{ SO_PhysicScenes, std::map<JUUID,nlohmann::json&>() },
+			{ SO_Triggers, std::map<JUUID,nlohmann::json&>() },
 		};
 
-		for (auto i = 0; i < diff.size(); i++)
+		auto gatherUUIDs = [](nlohmann::json& j, std::string so_type_name, std::set<JUUID>& uuids)
+			{
+				if (!j.contains(so_type_name)) return;
+
+				nlohmann::json& jarr = j.at(so_type_name);
+				for (unsigned int i = 0; i < jarr.size(); i++)
+				{
+					uuids.insert(jarr.at(i).at("uuid"));
+				}
+			};
+		auto gatherUUIDsNotPresentInSecond = [](auto& first, auto& second, auto& uuidset)
+			{
+				for (auto uuid : first)
+				{
+					if (!second.contains(uuid))
+						uuidset.insert(uuid);
+				}
+			};
+		auto gatherRefs = [&](nlohmann::json& j, SceneObjectType type, std::string so_type_name, std::map<JUUID, nlohmann::json&>& refs, std::function<bool(JUUID)> reject)
+			{
+				if (!j.contains(so_type_name)) return;
+
+				nlohmann::json& jarr = j.at(so_type_name);
+				for (unsigned int i = 0; i < jarr.size(); i++)
+				{
+					JUUID uuid = jarr.at(i).at("uuid");
+					if (reject(uuid))
+						continue;
+					refs.insert_or_assign(uuid, jarr.at(i));
+				}
+			};
+		auto dump = [](std::map<JUUID, nlohmann::json&>& objects)
+			{
+				nlohmann::json arr = nlohmann::json::array();
+				for (auto& [_, ref] : objects)
+				{
+					arr.push_back(ref);
+				}
+				return arr;
+			};
+
+		for (auto [type, name] : SceneObjectTypeJsonContainer)
 		{
-			auto& j = diff.at(i);
-			diffOp.at(j.at("op"))(j);
+			gatherUUIDs(current, name, currentObjects.at(type));
+			gatherUUIDs(initial, name, initialObjects.at(type));
 		}
 
+		//create the delete list
+		for (auto& [type, uuidset] : toDelete)
+		{
+			gatherUUIDsNotPresentInSecond(currentObjects.at(type), initialObjects.at(type), uuidset);
+		}
+
+		//create the create list
+		for (auto& [type, uuidset] : toCreate)
+		{
+			gatherUUIDsNotPresentInSecond(initialObjects.at(type), currentObjects.at(type), uuidset);
+		}
+		for (auto& [type, refMap] : toCreateRefs)
+		{
+			gatherRefs(initial, type, SceneObjectTypeJsonContainer.at(type), refMap, [&](JUUID uuid) { return !toCreate.at(type).contains(uuid); });
+		}
+
+		//create the replace list
+		for (auto& [type, refMap] : initialRefs)
+		{
+			gatherRefs(initial, type, SceneObjectTypeJsonContainer.at(type), refMap, [&](JUUID uuid) {return toCreate.at(type).contains(uuid) || toDelete.at(type).contains(uuid); });
+		}
+		for (auto& [type, refMap] : currentRefs)
+		{
+			gatherRefs(current, type, SceneObjectTypeJsonContainer.at(type), refMap, [&](JUUID uuid) {return toCreate.at(type).contains(uuid) || toDelete.at(type).contains(uuid); });
+		}
+
+		//make the replacements patches
+		std::map<JUUID, nlohmann::json> toReplace;
+		for (auto& [type, initialRefMap] : initialRefs)
+		{
+			auto& currentRefMap = currentRefs.at(type);
+			for (auto& [uuid, initialJ] : initialRefMap)
+			{
+				assert(currentRefMap.contains(uuid));
+
+				auto& currentJ = currentRefMap.at(uuid);
+
+				json diff = json::diff(currentJ, initialJ);
+
+				if (diff.size() == 0ULL) continue;
+
+				for (int i = 0; i < diff.size(); i++)
+				{
+					nlohmann::json& j = diff.at(i);
+					assert(j.at("op") == "replace");
+					std::string attribute = nostd::split(j.at("path"), "/").at(1);
+
+					nlohmann::json patch;
+					if (toReplace.contains(uuid))
+					{
+						patch = toReplace.at(uuid);
+					}
+					patch[attribute] = initialJ.at(attribute);
+					toReplace.insert_or_assign(uuid, patch);
+				}
+			}
+		}
+
+		//no more sounds and now we can display the billboards again
 		StopSounds(id);
 		ShowBillboards(id);
 
+		//apply the replacements and reset the controllers and physic objects states
 		for (auto& [uuid, patch] : toReplace)
 		{
 			SceneObject* so = GetSceneObjectPointer(id, uuid);
@@ -2985,9 +3121,25 @@ namespace Editor
 			}
 		}
 
-		for (auto& uuid : toDelete)
+		//delete the scene objects
+		for (auto& [type, uuidset] : toDelete)
 		{
-			DeleteSceneObjectFromEditor(id, uuid);
+			for (auto& uuid : uuidset)
+			{
+				DeleteSceneObjectFromEditor(id, uuid);
+			}
+		}
+
+		//create the missing objects
+		if (std::any_of(toCreate.begin(), toCreate.end(), [](auto& pair) { return pair.second.size() != 0; }))
+		{
+			nlohmann::json level = {};
+			for (auto& [type, _] : toCreateRefs)
+			{
+				level[SceneObjectTypeJsonContainer.at(type)] = dump(toCreateRefs.at(type));
+			}
+
+			AttachLevelIntoScene(id, "restore-objects-to-editor", level, [](SceneUnitId) {});
 		}
 
 		drawStaticBodies.at(id).EditorMode();
