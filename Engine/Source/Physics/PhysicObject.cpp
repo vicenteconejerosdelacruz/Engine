@@ -522,10 +522,7 @@ namespace Physics
 
 	void PhysicObject::SetInitialConditions()
 	{
-		if (!renderable || boundary)
-			return;
-
-		if (behavior() == PB_Dynamic && actor)
+		if (behavior() == PB_Dynamic && actor && renderable)
 		{
 			PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
 			pxDynamic->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
@@ -544,7 +541,7 @@ namespace Physics
 			}
 #endif
 		}
-		else if (behavior() == PB_Character && controller)
+		else if (behavior() == PB_Character && controller && renderable)
 		{
 			controller->setPosition(ToPxVec3d(renderable->position() + localPosition()));
 #if defined(_EDITOR)
@@ -556,10 +553,7 @@ namespace Physics
 
 	void PhysicObject::UpdateRenderableFromGlobalPose()
 	{
-		if (!renderable || boundary)
-			return;
-
-		if (behavior() == PB_Dynamic && actor)
+		if (behavior() == PB_Dynamic && actor && renderable)
 		{
 			PxTransform pxT = actor->getGlobalPose();
 			renderable->position(*((XMFLOAT3*)&pxT.p.x));
@@ -577,7 +571,7 @@ namespace Physics
 			}
 #endif
 		}
-		else if (behavior() == PB_Character && controller && updateFromCharacterPosition())
+		else if (behavior() == PB_Character && controller && updateFromCharacterPosition() && renderable)
 		{
 			XMFLOAT3 renPos = ToXMFLOAT3(useFootPosition() ? controller->getFootPosition() : controller->getPosition());
 			renderable->position(renPos);
@@ -591,7 +585,7 @@ namespace Physics
 
 	void PhysicObject::UpdateGlobalPoseFromRenderable()
 	{
-		if (!renderable || !boundary)
+		if (!renderable && !boundary)
 			return;
 
 		if (behavior() == PB_Static && actor)
