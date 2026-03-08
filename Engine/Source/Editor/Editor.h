@@ -114,6 +114,8 @@ namespace Editor {
 	void PromptTemplateDeletion(std::vector<nlohmann::json> references, std::function<void(std::vector<nlohmann::json>)> OnDelete, std::function<void()> OnCancel);
 	void CloseDeletionPrompt();
 	void BuildAssetsTree();
+	void OpenPopupForSceneObject(SceneUnitId id, JUUID uuid);
+	void OpenPopupForTemplate(JUUID uuid);
 
 	//SceneObjects Panel
 	void OnChangeSceneObjectTab(std::string newTab);

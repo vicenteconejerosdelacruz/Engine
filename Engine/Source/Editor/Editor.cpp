@@ -17,11 +17,12 @@
 #include <MousePicking.h>
 #include <EditorMouseCamera.h>
 #include <RightPanelComponent.h>
-//Modals
+//Modals & Popus
 #include <CreatorModal.h>
 #include <DeletePrompt.h>
 #include <AnimationSequencerModal.h>
 #include <YesNoCancelModal.h>
+#include <SceneObjectPopup.h>
 
 extern HWND hWnd;
 extern RECT hWndRect;
@@ -210,6 +211,7 @@ namespace Editor
 	DeletePrompt deletePrompt;
 	AnimationSequencerModal animationSequencer;
 	YesNoCancelModal yesNoCancelModal;
+	SceneObjectPopup sceneObjectPopup;
 
 	void CreateSceneUnitGizmos(SceneUnitId id)
 	{
@@ -897,6 +899,7 @@ namespace Editor
 			{
 				animationSequencer.DrawLoading();
 			}
+			sceneObjectPopup.Draw();
 		}
 		if (yesNoCancelModal.Showing())
 		{
@@ -1766,7 +1769,8 @@ namespace Editor
 					[](JUUID uuid, bool selected) { SetSceneObjectSelection(currentSceneUnitId, uuid, selected); },
 					[](JUUID uuid) { SendEditorPreview(uuid, [](JUUID uuid) { return GetSceneObjectPointer(currentSceneUnitId, uuid); }, sceneObjectEdition.at(currentSceneUnitId).drawers); },
 					[](SceneObjectType type) { StartSceneObjectCreation(type); },
-					[](JUUID uuid) { DeleteSceneObjectFromEditor(Editor::currentSceneUnitId, uuid); }
+					[](JUUID uuid) { DeleteSceneObjectFromEditor(Editor::currentSceneUnitId, uuid); },
+					[](JUUID uuid) { OpenPopupForSceneObject(Editor::currentSceneUnitId, uuid); }
 				);
 			}
 
@@ -1794,7 +1798,8 @@ namespace Editor
 				[](JUUID uuid, bool selected) {},
 				[](JUUID uuid) { SendEditorPreview(uuid, GetJTemplatePointer, templateEdition.drawers); },
 				[](TemplateType type) { StartTemplateCreation(type); },
-				[](JUUID uuid) { DeleteTemplate(uuid); }
+				[](JUUID uuid) { DeleteTemplate(uuid); },
+				[](JUUID uuid) { OpenPopupForTemplate(uuid); }
 			);
 		}
 		ImGui::End();
@@ -1828,6 +1833,24 @@ namespace Editor
 			);
 		}
 		templateEdition.BuildAssetsTree(GetTemplatesTypesList, GetJTemplatePointer);
+	}
+
+	void OpenPopupForSceneObject(SceneUnitId id, JUUID uuid)
+	{
+		SceneObjectType type = GetSceneObjectType(id, uuid);
+		SceneObject* object = GetSceneObjectPointer(id, uuid);
+
+		sceneObjectPopup.show = true;
+		sceneObjectPopup.pos = ImGui::GetMousePos();
+		sceneObjectPopup.pos.x -= 200;
+		sceneObjectPopup.name = std::string(object->at("name")) + "_copy";
+		sceneObjectPopup.id = id;
+		sceneObjectPopup.uuid = uuid;
+		sceneObjectPopup.type = type;
+	}
+
+	void OpenPopupForTemplate(JUUID uuid)
+	{
 	}
 
 	//SceneObjects Panel

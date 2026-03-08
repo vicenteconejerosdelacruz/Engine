@@ -356,6 +356,7 @@
     <ClInclude Include="Editor\ImEditor.h" />
     <ClInclude Include="Editor\MousePicking.h" />
     <ClInclude Include="Editor\RightPanelComponent.h" />
+    <ClInclude Include="Editor\SceneObjectPopup.h" />
     <ClInclude Include="Editor\Timeline\TimelineChannel.h" />
     <ClInclude Include="Editor\Timeline\TimelineEditor.h" />
     <ClInclude Include="Editor\Timeline\TimelinePopups.h" />
@@ -562,6 +563,7 @@
     <ClCompile Include="Editor\ImEditor.cpp" />
     <ClCompile Include="Editor\MousePicking.cpp" />
     <ClCompile Include="Editor\RightPanelComponent.cpp" />
+    <ClCompile Include="Editor\SceneObjectPopup.cpp" />
     <ClCompile Include="Editor\Timeline\TimelineChannel.cpp" />
     <ClCompile Include="Editor\Timeline\TimelineEditor.cpp" />
     <ClCompile Include="Editor\Timeline\TimelinePopups.cpp" />
