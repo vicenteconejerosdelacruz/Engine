@@ -10,4 +10,6 @@ JEXPOSE_TRANSFORM(XMFLOAT4, color, ToXMFLOAT4, FromXMFLOAT4, XMFLOAT4(0.2f, 1.0f
 JEXPOSE(bool, overrideColor, false, jedv_t_boolean, 1, false)
 JEXPOSE(std::string, geometry, "", jedv_t_te_physycgeometry, 1, true)
 JEXPOSE_FLAG(collisionMask, 0U, GetCollisionMasks, 0, false)
+JEXPOSE(std::string, onEnter, "", jedv_t_script, 1, false)
+JEXPOSE(std::string, onLeave, "", jedv_t_script, 1, false)
 JTRACKUUID(Trigger, Triggers, 0, true)
