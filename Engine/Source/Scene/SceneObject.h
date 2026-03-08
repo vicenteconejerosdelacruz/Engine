@@ -20,6 +20,7 @@ inline const std::unordered_map<SceneObjectType, std::string> SceneObjectTypeToS
 	{ SO_SoundEffects, "SoundEffects" },
 	{ SO_PhysicScenes, "PhysicScenes" },
 	{ SO_Triggers, "Triggers" },
+	{ SO_Boundaries, "Boundaries" },
 };
 
 inline const std::unordered_map<std::string, SceneObjectType> StringToSceneObjectType = {
@@ -29,6 +30,7 @@ inline const std::unordered_map<std::string, SceneObjectType> StringToSceneObjec
 	{ "SoundEffects", SO_SoundEffects },
 	{ "PhysicScenes", SO_PhysicScenes },
 	{ "Triggers", SO_Triggers },
+	{ "Boundaries", SO_Boundaries },
 };
 
 #if defined(_EDITOR)
@@ -39,6 +41,7 @@ inline const std::unordered_map<SceneObjectType, const char*> SceneObjectsTypePa
 	{ SO_SoundEffects, ICON_FA_MUSIC "SoundEffects" },
 	{ SO_PhysicScenes, ICON_FA_IGLOO "PhysicScenes" },
 	{ SO_Triggers, ICON_FA_IGLOO "Triggers" },
+	{ SO_Boundaries, ICON_FA_IGLOO "Boundaries" },
 };
 #endif
 
@@ -50,6 +53,7 @@ inline const std::unordered_map<SceneObjectType, std::string> SceneObjectTypeJso
 	{ SO_SoundEffects, "sounds" },
 	{ SO_PhysicScenes, "physicScenes" },
 	{ SO_Triggers, "triggers" },
+	{ SO_Boundaries, "boundaries" },
 };
 
 inline const std::unordered_map<std::string, std::string> JsonContainerToString =
@@ -60,6 +64,7 @@ inline const std::unordered_map<std::string, std::string> JsonContainerToString 
 	{ "sounds", "SoundEffects" },
 	{ "physicScenes", "PhysicScenes" },
 	{ "triggers", "Triggers" },
+	{ "boundaries", "Boundaries" },
 };
 
 inline const std::unordered_map<std::string, std::string> StringToJsonContainer =
@@ -70,6 +75,7 @@ inline const std::unordered_map<std::string, std::string> StringToJsonContainer 
 	{ "SoundEffects", "sounds" },
 	{ "PhysicScenes", "physicScenes" },
 	{ "Triggers", "triggers" },
+	{ "Boundaries", "boundaries" },
 };
 
 template <typename T>
@@ -131,3 +137,4 @@ namespace Scene
 #include <Sound/SoundFX.h>
 #include <PhysicScene.h>
 #include <Trigger.h>
+#include <Boundary.h>

@@ -89,6 +89,7 @@ namespace Templates
 		JUUID mesh;
 		RenderableID renderable;
 		TriggerID trigger;
+		BoundaryID boundary;
 
 		PxGeometryHolder geometry;
 
@@ -97,6 +98,7 @@ namespace Templates
 		PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, TriggerID trigger, Model3DJsonID model3D, JUUID instance, PhysicsBehavior behavior);
 		PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, RenderableID renderable, nlohmann::json& attributes, JUUID mesh, JUUID instance, PhysicsBehavior behavior);
 		PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, TriggerID trigger, nlohmann::json& attributes, JUUID mesh, JUUID instance, PhysicsBehavior behavior);
+		PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, BoundaryID boundary, nlohmann::json& attributes, JUUID mesh, JUUID instance, PhysicsBehavior behavior);
 		~PhysicGeometryInstance();
 	};
 }

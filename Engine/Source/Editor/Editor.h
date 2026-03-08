@@ -148,6 +148,7 @@ namespace Editor {
 	void SelectCamera(CameraID camera);
 	void SelectSoundEffect(SoundFXID soundfx);
 	void SelectTrigger(TriggerID trigger);
+	void SelectBoundary(BoundaryID boundary);
 	void ToggleSceneObjectFromSelection(SceneUnitId unit, JUUID uuid);
 	void SetSceneObjectSelection(SceneUnitId unit, JUUID uuid, bool selected);
 	void InsertSceneObjectToSelection(SceneUnitId unit, JUUID uuid);

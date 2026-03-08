@@ -1630,19 +1630,21 @@ namespace Editor
 
 		nlohmann::json level;
 
-		level["renderables"] = json::array();
-		level["lights"] = json::array();
-		level["cameras"] = json::array();
-		level["sounds"] = json::array();
-		level["physicScenes"] = json::array();
-		level["triggers"] = json::array();
+		level[SceneObjectTypeJsonContainer.at(SO_Renderables)] = json::array();
+		level[SceneObjectTypeJsonContainer.at(SO_Lights)] = json::array();
+		level[SceneObjectTypeJsonContainer.at(SO_Cameras)] = json::array();
+		level[SceneObjectTypeJsonContainer.at(SO_SoundEffects)] = json::array();
+		level[SceneObjectTypeJsonContainer.at(SO_PhysicScenes)] = json::array();
+		level[SceneObjectTypeJsonContainer.at(SO_Triggers)] = json::array();
+		level[SceneObjectTypeJsonContainer.at(SO_Boundaries)] = json::array();
 
-		WriteRenderablesJson(id, level["renderables"]);
-		WriteLightsJson(id, level["lights"]);
-		WriteCamerasJson(id, level["cameras"]);
-		WriteSoundFXsJson(id, level["sounds"]);
-		WritePhysicSceneJson(id, level["physicScenes"]);
-		WriteTriggersJson(id, level["triggers"]);
+		WriteRenderablesJson(id, level[SceneObjectTypeJsonContainer.at(SO_Renderables)]);
+		WriteLightsJson(id, level[SceneObjectTypeJsonContainer.at(SO_Lights)]);
+		WriteCamerasJson(id, level[SceneObjectTypeJsonContainer.at(SO_Cameras)]);
+		WriteSoundFXsJson(id, level[SceneObjectTypeJsonContainer.at(SO_SoundEffects)]);
+		WritePhysicSceneJson(id, level[SceneObjectTypeJsonContainer.at(SO_PhysicScenes)]);
+		WriteTriggersJson(id, level[SceneObjectTypeJsonContainer.at(SO_Triggers)]);
+		WriteBoundariesJson(id, level[SceneObjectTypeJsonContainer.at(SO_Boundaries)]);
 
 		std::string levelString = level.dump(4);
 		return levelString;
@@ -2232,6 +2234,7 @@ namespace Editor
 		}
 
 		RenderableID r = MAKESUUUID(id, uuid);
+		OutputDebugStringA(std::string("picked:" + r->name() + "\n").c_str());
 		r->OnPick();
 	}
 
@@ -2258,6 +2261,11 @@ namespace Editor
 	void SelectTrigger(TriggerID trigger)
 	{
 		ToggleSceneObjectFromSelection(FROMSUUUID(trigger()));
+	}
+
+	void SelectBoundary(BoundaryID boundary)
+	{
+		ToggleSceneObjectFromSelection(FROMSUUUID(boundary()));
 	}
 
 	void ToggleSceneObjectFromSelection(SceneUnitId unit, JUUID uuid)
@@ -2597,7 +2605,7 @@ namespace Editor
 				for (JUUID uuid : GetRenderables(id))
 				{
 					RenderableID r = MAKESUUUID(id, uuid);
-					//OutputDebugStringA(("RenderPickingPass:" + r->name() + ":" + std::to_string(objectId) + "\n").c_str());
+					OutputDebugStringA(("RenderPickingPass:" + r->name() + ":" + std::to_string(objectId) + "\n").c_str());
 					if (!r->visible()
 #if defined(_EDITOR_BOUNDINGBOX)
 						|| boundingBox.at(id).uuid() == r->uuid()
@@ -2937,6 +2945,7 @@ namespace Editor
 			{ SO_SoundEffects, std::set<JUUID>() },
 			{ SO_PhysicScenes, std::set<JUUID>() },
 			{ SO_Triggers, std::set<JUUID>() },
+			{ SO_Boundaries, std::set<JUUID>() },
 		};
 		std::map<SceneObjectType, std::set<JUUID>> currentObjects =
 		{
@@ -2946,6 +2955,7 @@ namespace Editor
 			{ SO_SoundEffects, std::set<JUUID>() },
 			{ SO_PhysicScenes, std::set<JUUID>() },
 			{ SO_Triggers, std::set<JUUID>() },
+			{ SO_Boundaries, std::set<JUUID>() },
 		};
 		//delete
 		std::map<SceneObjectType, std::set<JUUID>> toDelete =
@@ -2956,6 +2966,7 @@ namespace Editor
 			{ SO_SoundEffects, std::set<JUUID>() },
 			{ SO_PhysicScenes, std::set<JUUID>() },
 			{ SO_Triggers, std::set<JUUID>() },
+			{ SO_Boundaries, std::set<JUUID>() },
 		};
 		//create
 		std::map<SceneObjectType, std::set<JUUID>> toCreate =
@@ -2966,6 +2977,7 @@ namespace Editor
 			{ SO_SoundEffects, std::set<JUUID>() },
 			{ SO_PhysicScenes, std::set<JUUID>() },
 			{ SO_Triggers, std::set<JUUID>() },
+			{ SO_Boundaries, std::set<JUUID>() },
 		};
 		std::map<SceneObjectType, std::map<JUUID, nlohmann::json&>> toCreateRefs =
 		{
@@ -2975,6 +2987,7 @@ namespace Editor
 			{ SO_SoundEffects, std::map<JUUID,nlohmann::json&>() },
 			{ SO_PhysicScenes, std::map<JUUID,nlohmann::json&>() },
 			{ SO_Triggers, std::map<JUUID,nlohmann::json&>() },
+			{ SO_Boundaries, std::map<JUUID,nlohmann::json&>() },
 		};
 		//replacement
 		std::map<SceneObjectType, std::map<JUUID, nlohmann::json&>> initialRefs =
@@ -2985,6 +2998,7 @@ namespace Editor
 			{ SO_SoundEffects, std::map<JUUID,nlohmann::json&>() },
 			{ SO_PhysicScenes, std::map<JUUID,nlohmann::json&>() },
 			{ SO_Triggers, std::map<JUUID,nlohmann::json&>() },
+			{ SO_Boundaries, std::map<JUUID,nlohmann::json&>() },
 		};
 		std::map<SceneObjectType, std::map<JUUID, nlohmann::json&>> currentRefs =
 		{
@@ -2994,6 +3008,7 @@ namespace Editor
 			{ SO_SoundEffects, std::map<JUUID,nlohmann::json&>() },
 			{ SO_PhysicScenes, std::map<JUUID,nlohmann::json&>() },
 			{ SO_Triggers, std::map<JUUID,nlohmann::json&>() },
+			{ SO_Boundaries, std::map<JUUID,nlohmann::json&>() },
 		};
 
 		auto gatherUUIDs = [](nlohmann::json& j, std::string so_type_name, std::set<JUUID>& uuids)

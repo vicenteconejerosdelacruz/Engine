@@ -382,6 +382,17 @@ namespace Templates
 		geometry = PxGeometryPrimitiveBuilder.at(name)(trigger->scale(), attributes, false);
 	}
 
+	PhysicGeometryInstance::PhysicGeometryInstance(PhysicGeometryJsonID geometryTemplate, BoundaryID boundary, nlohmann::json& attributes, JUUID mesh, JUUID instance, PhysicsBehavior behavior)
+	{
+		this->geometryTemplate = geometryTemplate;
+		this->boundary = boundary;
+		this->mesh = mesh;
+		this->instance = instance;
+
+		JNAME name = GetMeshName(mesh);
+		geometry = PxGeometryPrimitiveBuilder.at(name)(boundary->scale(), attributes, false);
+	}
+
 	PhysicGeometryInstance::~PhysicGeometryInstance()
 	{
 	}

@@ -129,7 +129,7 @@ namespace Scene
 
 #endif
 
-	void TriggersStep(SceneUnitId unit, float dt)
+	void TriggersStep(SceneUnitId unit)
 	{
 #if defined(_EDITOR)
 		using namespace Editor;

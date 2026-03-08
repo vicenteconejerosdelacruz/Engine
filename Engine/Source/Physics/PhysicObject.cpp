@@ -10,6 +10,7 @@ namespace Editor
 	extern CameraID GetLevelCamera(SceneUnitId id);
 	extern void BindRenderableToPickingPass(RenderableID r);
 	extern void SelectTrigger(TriggerID trigger);
+	extern void SelectBoundary(BoundaryID boundary);
 
 	//Scene Unit Registered
 	extern bool StaticBodiesSceneUnitRegistered(SceneUnitId id);
@@ -97,6 +98,7 @@ namespace Physics
 	{
 		if (renderable) { return renderable.unit(); }
 		if (trigger) { return trigger.unit(); }
+		if (boundary) { return boundary.unit(); }
 		assert(!!!"bad Physic Object");
 		return 0x2BAD5005AD;
 	}
@@ -168,13 +170,18 @@ namespace Physics
 		nlohmann::json atts = nlohmann::json::parse(dump());
 		CreatePhysicGeometryInstance(physicGeometryInstance(), [&]
 			{
-				return std::make_unique<PhysicGeometryInstance>(jg, renderable, atts, jg->mesh(), physicGeometryInstance(), behavior());
+				if (renderable)
+					return std::make_unique<PhysicGeometryInstance>(jg, renderable, atts, jg->mesh(), physicGeometryInstance(), behavior());
+				else if (boundary)
+					return std::make_unique<PhysicGeometryInstance>(jg, boundary, atts, jg->mesh(), physicGeometryInstance(), behavior());
+				assert(!!!"bad parent scene object");
+				return std::make_unique<PhysicGeometryInstance>(physicGeometryInstance());
 			}
 		);
 		material = gPhysics->createMaterial(staticFriction(), dynamicFriction(), restitution());
 
-		XMFLOAT3 pos = renderable->position();
-		XMVECTOR rot = renderable->rotationQ();
+		XMFLOAT3 pos = renderable ? renderable->position() : boundary->position();
+		XMVECTOR rot = renderable ? renderable->rotationQ() : boundary->rotationQ();
 
 		XMFLOAT3 localRot = localRotation();
 		JNAME meshName = GetMeshName(jg->mesh());
@@ -190,14 +197,14 @@ namespace Physics
 		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
 
 		//add the actor to the scene
-		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		PhysicSceneID scene = MAKESUUUID((renderable ? renderable.unit() : boundary.unit()), *GetPhysicScenes((renderable ? renderable.unit() : boundary.unit())).begin());
 		scene->pxScene->addActor(*actor);
 
 		//assign user data to this physic object
 		shape->userData = this;
 		actor->userData = this;
 
-		physicStaticBodyUUIDBySUUID[renderable()] = at("uuid");
+		physicStaticBodyUUIDBySUUID[(renderable ? renderable() : boundary())] = at("uuid");
 	}
 
 	void PhysicObject::CreateDynamicMeshBehavior()
@@ -472,6 +479,10 @@ namespace Physics
 		{
 			scene = MAKESUUUID(trigger.unit(), *GetPhysicScenes(trigger.unit()).begin());
 		}
+		if (boundary)
+		{
+			scene = MAKESUUUID(boundary.unit(), *GetPhysicScenes(boundary.unit()).begin());
+		}
 
 		if (actor)
 		{
@@ -501,6 +512,7 @@ namespace Physics
 				}
 			};
 		eraseUUIDFromSUUID(physicStaticBodyUUIDBySUUID, renderable());
+		eraseUUIDFromSUUID(physicStaticBodyUUIDBySUUID, boundary());
 		eraseUUIDFromSUUID(physicDynamicBodyUUIDBySUUID, renderable());
 		eraseUUIDFromSUUID(physicCharacterUUIDBySUUID, renderable());
 		eraseUUIDFromSUUID(physicTriggerUUIDBySUUID, trigger());
@@ -510,7 +522,7 @@ namespace Physics
 
 	void PhysicObject::SetInitialConditions()
 	{
-		if (!renderable)
+		if (!renderable || boundary)
 			return;
 
 		if (behavior() == PB_Dynamic && actor)
@@ -544,7 +556,7 @@ namespace Physics
 
 	void PhysicObject::UpdateRenderableFromGlobalPose()
 	{
-		if (!renderable)
+		if (!renderable || boundary)
 			return;
 
 		if (behavior() == PB_Dynamic && actor)
@@ -579,22 +591,25 @@ namespace Physics
 
 	void PhysicObject::UpdateGlobalPoseFromRenderable()
 	{
-		if (!renderable)
+		if (!renderable || !boundary)
 			return;
 
 		if (behavior() == PB_Static && actor)
 		{
-			actor->setGlobalPose(PxTransform(ToPxVec3(renderable->position()), ToPxQuat(renderable->rotationQ())));
+			XMFLOAT3 pos = renderable ? renderable->position() : boundary->position();
+			XMVECTOR rot = renderable ? renderable->rotationQ() : boundary->rotationQ();
+			actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
 #if defined(_EDITOR)
+			XMFLOAT3 shapePos = pos + localPosition();
 			if (renderableShape)
 			{
-				renderableShape->position(renderable->position() + localPosition());
-				renderableShape->rotationQ(renderable->rotationQ());
+				renderableShape->position(pos);
+				renderableShape->rotationQ(rot);
 			}
 			if (renderableLines)
 			{
-				renderableLines->position(renderable->position() + localPosition());
-				renderableLines->rotationQ(renderable->rotationQ());
+				renderableLines->position(pos);
+				renderableLines->rotationQ(rot);
 			}
 #endif
 		}
@@ -724,12 +739,16 @@ namespace Physics
 
 		if (std::set<PhysicsBehavior>({ PB_Static,PB_Dynamic }).contains(behavior()))
 		{
-			renderableLines->position(renderable->position() + localPosition());
-			renderableLines->rotation(renderable->rotation() + localRotation());
-			renderableLines->scale(renderable->scale() * localScale());
-			renderableShape->position(renderable->position() + localPosition());
-			renderableShape->rotation(renderable->rotation() + localRotation());
-			renderableShape->scale(renderable->scale() * localScale());
+			XMFLOAT3 pos = localPosition() + (renderable ? renderable->position() : boundary->position());
+			XMFLOAT3 rot = localRotation() + (renderable ? renderable->rotation() : boundary->rotation());
+			XMFLOAT3 scl = localScale() * (renderable ? renderable->scale() : boundary->scale());
+
+			renderableLines->position(pos);
+			renderableLines->rotation(rot);
+			renderableLines->scale(scl);
+			renderableShape->position(pos);
+			renderableShape->rotation(rot);
+			renderableShape->scale(scl);
 		}
 		else if (std::set<PhysicsBehavior>({ PB_Character }).contains(behavior()))
 		{
@@ -771,12 +790,13 @@ namespace Physics
 		CameraID camera = Editor::GetLevelCamera(unit());
 		bool visible = Editor::StaticBodiesShouldDraw(unit());
 
-		XMFLOAT3 renScale = renderable->scale() * localScale();
-		XMFLOAT3 renPosition = renderable->position() + localPosition();
-		XMFLOAT3 renRotation = renderable->rotation() + localRotation();
+		XMFLOAT3 renPosition = localPosition() + (renderable ? renderable->position() : boundary->position());
+		XMFLOAT3 renRotation = localRotation() + (renderable ? renderable->rotation() : boundary->rotation());
+		XMFLOAT3 renScale = localScale() * (renderable ? renderable->scale() : boundary->scale());
+		std::string name = renderable ? renderable->name() : boundary->name();
 
-		nlohmann::json lines = CreateFromRenderable(renderable->name() + "-static-body-lines", renderableLines.uuid(), camera.uuid(), "Translucent_wired", visible, renPosition, renRotation, renScale);
-		nlohmann::json shape = CreateFromRenderable(renderable->name() + "-static-body-shape", renderableShape.uuid(), camera.uuid(), "Translucent", visible, renPosition, renRotation, renScale);
+		nlohmann::json lines = CreateFromRenderable(name + "-static-body-lines", renderableLines.uuid(), camera.uuid(), "Translucent_wired", visible, renPosition, renRotation, renScale);
+		nlohmann::json shape = CreateFromRenderable(name + "-static-body-shape", renderableShape.uuid(), camera.uuid(), "Translucent", visible, renPosition, renRotation, renScale);
 
 		shape["renderNext"] = { renderableLines.uuid() };
 
@@ -785,9 +805,16 @@ namespace Physics
 			{ "renderables", { lines, shape } }
 		};
 
-		AttachLevelIntoScene(unit(), "dynamic-body", data, [&](SceneUnitId id)
+		AttachLevelIntoScene(unit(), "static-body", data, [&](SceneUnitId id)
 			{
 				using namespace Editor;
+				if (boundary)
+				{
+					BindRenderableToPickingPass(renderableLines);
+					BindRenderableToPickingPass(renderableShape);
+					renderableLines->OnPick = [&] {Editor::SelectTrigger(boundary->SUuuid()); };
+					renderableShape->OnPick = [&] {Editor::SelectTrigger(boundary->SUuuid()); };
+				}
 				RegisterStaticBody(uuid());
 				avatarBuilt = true;
 			}
@@ -1082,11 +1109,20 @@ namespace Physics
 		switch (GetSceneObjectType(FROMSUUUID(sceneObject)))
 		{
 		case SO_Renderables:
+		{
 			physicObject->renderable = sceneObject;
-			break;
+		}
+		break;
 		case SO_Triggers:
+		{
 			physicObject->trigger = sceneObject;
-			break;
+		}
+		break;
+		case SO_Boundaries:
+		{
+			physicObject->boundary = sceneObject;
+		}
+		break;
 		}
 
 		(*physicObject)["uuid"] = uuid;

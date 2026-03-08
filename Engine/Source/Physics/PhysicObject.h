@@ -11,6 +11,7 @@ namespace Scene
 {
 	DEF_SCENEOBJECT_ID_DEP(Renderable);
 	DEF_SCENEOBJECT_ID_DEP(Trigger);
+	DEF_SCENEOBJECT_ID_DEP(Boundary);
 };
 
 namespace Templates
@@ -121,6 +122,7 @@ namespace Physics
 #endif
 		RenderableID renderable;
 		TriggerID trigger;
+		BoundaryID boundary;
 
 		PhysicGeometryInstanceID physicGeometryInstance;
 		PxMaterial* material = nullptr;

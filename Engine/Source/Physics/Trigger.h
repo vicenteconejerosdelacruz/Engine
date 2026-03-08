@@ -87,7 +87,7 @@ namespace Scene
 #include <TriggerAtt.h>
 #include <JEnd.h>
 
-	void TriggersStep(SceneUnitId id, float dt);
+	void TriggersStep(SceneUnitId id);
 	void DestroyTriggers();
 	void DestroyTriggers(SceneUnitId id);
 	void DeleteTrigger(SceneUnitId id, JUUID uuid);

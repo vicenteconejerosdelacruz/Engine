@@ -646,7 +646,7 @@ namespace Scene
 						shape->Render(unit, rpi, SUuuid());
 						lines->Render(unit, rpi, SUuuid());
 						//triggers can be picked
-						if (phO->behavior() != PB_Trigger) { phO->visible(false); }
+						if (phO->behavior() != PB_Trigger && !phO->boundary) { phO->visible(false); }
 					}
 				}
 #endif

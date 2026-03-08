@@ -369,6 +369,7 @@
     <ClInclude Include="JExpose\Primitives\ConeAtt.h" />
     <ClInclude Include="JExpose\Primitives\CubeAtt.h" />
     <ClInclude Include="JExpose\Primitives\SphereAtt.h" />
+    <ClInclude Include="JExpose\Scene\BoundaryAtt.h" />
     <ClInclude Include="JExpose\Scene\PhysicSceneAtt.h" />
     <ClInclude Include="JExpose\Scene\TriggerAtt.h" />
     <ClInclude Include="JExpose\Templates\PhysicGeometryAtt.h" />

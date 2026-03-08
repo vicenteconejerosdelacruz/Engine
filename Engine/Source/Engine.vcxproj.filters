@@ -636,6 +636,9 @@
     <ClInclude Include="JExpose\Controllers\ControllerAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="JExpose\Scene\BoundaryAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">

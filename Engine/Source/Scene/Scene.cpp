@@ -352,6 +352,11 @@ namespace Scene
 				mover(GetTriggersSceneObjects,uuid,fromId,toId);
 			}
 			},
+			{ SO_Boundaries, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
+			{
+				mover(GetBoundarysSceneObjects,uuid,fromId,toId);
+			}
+			},
 		};
 
 		SceneObjectType type = GetSceneObjectType(fromId, uuid);
@@ -396,7 +401,8 @@ namespace Scene
 					so->BindToScene();
 				}
 			},
-			{ SO_Lights, [](SceneUnitId id, JUUID uuid)
+			{
+				SO_Lights, [](SceneUnitId id, JUUID uuid)
 				{
 					auto& so = GetLightSceneObject(id, uuid);
 					so->BindToScene();
@@ -420,6 +426,13 @@ namespace Scene
 				SO_Triggers, [](SceneUnitId id, JUUID uuid)
 				{
 					auto& so = GetTriggerSceneObject(id, uuid);
+					so->BindToScene();
+				}
+			},
+			{
+				SO_Boundaries, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& so = GetBoundarySceneObject(id, uuid);
 					so->BindToScene();
 				}
 			}
@@ -480,6 +493,11 @@ namespace Scene
 			CreateTrigger(id, data);
 		}
 		break;
+		case SO_Boundaries:
+		{
+			CreateBoundary(id, data);
+		}
+		break;
 		}
 		return uuid;
 	}
@@ -511,7 +529,8 @@ namespace Scene
 			if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
 				dt = 0.0f;
 #endif
-			TriggersStep(unit, dt);
+			TriggersStep(unit);
+			BoundariesStep(unit);
 			PhysicSceneStep(unit, dt);
 			SoundFXsStep(unit, dt);
 			RenderablesStep(unit, dt);
@@ -795,6 +814,12 @@ namespace Scene
 					auto& o = GetTriggerSceneObject(id, uuid);
 					return static_cast<SceneObject*>(o.get());
 				}
+			},
+			{ SO_Boundaries, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetBoundarySceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
 			}
 		};
 
@@ -859,6 +884,13 @@ namespace Scene
 							TriggerID o = MAKESUUUID(id,uuid);
 							if (o->hidden()) return JUUIDName();
 							return str2JUUIDName(SceneObjectTypeToString.at(SO_Triggers), o->uuid(),o->name());
+						}
+					},
+					{ SO_Boundaries, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+						{
+							BoundaryID o = MAKESUUUID(id,uuid);
+							if (o->hidden()) return JUUIDName();
+							return str2JUUIDName(SceneObjectTypeToString.at(SO_Boundaries), o->uuid(),o->name());
 						}
 					}
 				};
@@ -930,6 +962,13 @@ namespace Scene
 					if (o->hidden()) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Triggers), o->uuid(),o->name());
 				}
+			},
+			{ SO_Boundaries, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					BoundaryID o = MAKESUUUID(id,uuid);
+					if (o->hidden()) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_Boundaries), o->uuid(),o->name());
+				}
 			}
 		};
 
@@ -999,6 +1038,13 @@ namespace Scene
 					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Triggers), o->uuid(),o->name());
 				}
+			},
+			{ SO_Boundaries, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					BoundaryID o = MAKESUUUID(id,uuid);
+					if (o->hidden() || o->markedForDelete) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_Boundaries), o->uuid(),o->name());
+				}
 			}
 		};
 
@@ -1027,6 +1073,7 @@ namespace Scene
 			{ SO_SoundEffects, GetSoundFXAttributes },
 			{ SO_PhysicScenes, GetPhysicSceneAttributes },
 			{ SO_Triggers, GetTriggerAttributes },
+			{ SO_Boundaries, GetBoundaryAttributes },
 		};
 		return GetSOAtts.at(so)();
 	}
@@ -1041,6 +1088,7 @@ namespace Scene
 			{ SO_SoundEffects, GetSoundFXDrawers },
 			{ SO_PhysicScenes, GetPhysicSceneDrawers },
 			{ SO_Triggers, GetTriggerDrawers },
+			{ SO_Boundaries, GetBoundaryDrawers },
 		};
 		return GetSODrawers.at(so)();
 	}
@@ -1055,6 +1103,7 @@ namespace Scene
 			{ SO_SoundEffects, GetSoundFXPreviewers },
 			{ SO_PhysicScenes, GetPhysicScenePreviewers },
 			{ SO_Triggers, GetTriggerPreviewers },
+			{ SO_Boundaries, GetBoundaryPreviewers },
 		};
 		return GetSOPreviewers.at(so)();
 	}
@@ -1069,6 +1118,7 @@ namespace Scene
 			{ SO_SoundEffects, CreateSoundFXJson },
 			{ SO_PhysicScenes, CreatePhysicSceneJson },
 			{ SO_Triggers, [] { auto json = CreateTriggerJson(); json["trigger"] = true; return json; } }, //inject this att to handle no trigger with meshes
+			{ SO_Boundaries, [] { auto json = CreateBoundaryJson(); json["boundary"] = true; return json; } }, //inject this att to handle no boundary with meshes
 		};
 		return GetSOJson.at(so)();
 	}
@@ -1083,6 +1133,7 @@ namespace Scene
 			{ SO_SoundEffects, GetSoundFXRequiredAttributes },
 			{ SO_PhysicScenes, GetPhysicSceneRequiredAttributes },
 			{ SO_Triggers, GetTriggerRequiredAttributes },
+			{ SO_Boundaries, GetBoundaryRequiredAttributes },
 
 		};
 		return GetSORequiredAtts.at(so)();
@@ -1098,6 +1149,7 @@ namespace Scene
 			{ SO_SoundEffects, GetSoundFXCreatorDrawers },
 			{ SO_PhysicScenes, GetPhysicSceneCreatorDrawers },
 			{ SO_Triggers, GetTriggerCreatorDrawers },
+			{ SO_Boundaries, GetBoundaryCreatorDrawers },
 		};
 		return GetSODrawers.at(so)();
 	}
@@ -1112,6 +1164,7 @@ namespace Scene
 			{ SO_SoundEffects, GetSoundFXCreatorValidator },
 			{ SO_PhysicScenes, GetPhysicSceneCreatorValidator },
 			{ SO_Triggers, GetTriggerCreatorValidator },
+			{ SO_Boundaries, GetBoundaryCreatorValidator },
 		};
 		return GetSOValidators.at(so)();
 	}
@@ -1129,6 +1182,7 @@ namespace Scene
 			{ SO_SoundEffects, DeleteSoundFX },
 			{ SO_PhysicScenes, DeletePhysicScene },
 			{ SO_Triggers, DeleteTrigger },
+			{ SO_Boundaries, DeleteBoundary },
 		};
 		EraseSceneObjectFromSelection(id, uuid);
 		DeleteSO.at(type)(id, uuid);
