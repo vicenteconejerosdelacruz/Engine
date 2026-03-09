@@ -404,11 +404,11 @@ namespace Scene
 			LightID l = MAKESUUUID(id, uuid);
 
 			//is this(hack) or fix the loading system
-			if (!l->RenderReady() && scene->IsBound(uuid))
-			{
-				l->RenderReady(true);
-				scene->EraseLightFromLoadingPool(l);
-			}
+			//if (!l->RenderReady() && scene->IsBound(uuid))
+			//{
+			//	l->RenderReady(true);
+			//	scene->EraseLightFromLoadingPool(l);
+			//}
 
 			if (l->lightType() != LT_Ambient)
 			{
@@ -494,6 +494,7 @@ namespace Scene
 		if (lightToRecreateCameras.size() > 0)
 		{
 			auto& scene = GetSceneUnit(id);
+			/*
 			scene->PushLoadingExecutionCallback([=]
 				{
 					for (auto& l : lightToRecreateCameras)
@@ -519,6 +520,7 @@ namespace Scene
 					}
 				}
 			);
+			*/
 		}
 	}
 

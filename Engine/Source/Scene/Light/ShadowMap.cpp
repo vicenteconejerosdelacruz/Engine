@@ -78,6 +78,7 @@ namespace Scene
 	void Light::LoadShadowMap()
 	{
 		InsertLightIntoShadowMapLights(unit, uuid());
+		/*
 		auto& scene = GetSceneUnit(unit);
 		scene->ResetLoadingCommandList();
 		scene->SetLoading(true);
@@ -93,7 +94,7 @@ namespace Scene
 			cam->BindLightWithShadowMap(SUuuid());
 		}
 		scene->SetCanSubmitLoading(true);
-
+		*/
 #if defined(_EDITOR)
 		EditorPreview(1 << Light::Update_hasShadowMaps);
 #endif
@@ -582,15 +583,15 @@ namespace Scene
 
 	void Light::CreateShadowMapMinMaxChain()
 	{
-		auto& scene = GetSceneUnit(unit);
-		bool doSubmit = false;
-		if (!scene->LoadingCommandListIsOpen())
-		{
-			scene->ResetLoadingCommandList();
-			scene->SetLoading(true);
-			scene->SetCanSubmitLoading(false);
-			doSubmit = true;
-		}
+		//auto& scene = GetSceneUnit(unit);
+		//bool doSubmit = false;
+		//if (!scene->LoadingCommandListIsOpen())
+		//{
+		//	scene->ResetLoadingCommandList();
+		//	scene->SetLoading(true);
+		//	scene->SetCanSubmitLoading(false);
+		//	doSubmit = true;
+		//}
 
 		//pick the gpu handles for the final shadowmap and copies for the min/max chain initial calculation
 		CD3DX12_GPU_DESCRIPTOR_HANDLE shadowMapChainGpuHandle = GetShadowMapGpuDescriptorHandle(unit, shadowMapIndex);
@@ -662,10 +663,10 @@ namespace Scene
 		resultPass->shadowMapChainGpuHandle2 = last->renderToTexturePass->renderToTexture.at(1)->gpuTextureHandle;
 		resultPass->CreateFSQuad((lightType() != LT_Spot) ? "DepthMinMaxToRGBA" : "DepthMinMaxToRGBASpot");
 
-		if (doSubmit)
-		{
-			scene->SetCanSubmitLoading(true);
-		}
+		//if (doSubmit)
+		//{
+		//	scene->SetCanSubmitLoading(true);
+		//}
 	}
 
 	void Light::DestroyShadowMapMinMaxChain()

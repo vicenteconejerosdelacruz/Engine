@@ -62,11 +62,11 @@ namespace ComputeShader
 		renderer->d3dDevice->CreateUnorderedAccessView(resource, nullptr, &uavDesc, resultCpuHandle);
 
 		//create a srv desc/view for reading the envmap but as a cube texture
-		commandsProcessor.Init(renderer->d3dDevice, 0x000fff, 1);
-		commandsProcessor.ResetCommandList();
+		commandsProcessor = std::make_unique<CommandsProcessor>(renderer->d3dDevice, 1, 0x000fff);
+		commandsProcessor->ResetCommandList();
 		CreateTextureInstance(envMap, [this]
 			{
-				return std::make_unique<TextureInstance>(commandsProcessor.GetCommandList(), envMap);
+				return std::make_unique<TextureInstance>(commandsProcessor->GetCommandList(), envMap);
 			}
 		);
 

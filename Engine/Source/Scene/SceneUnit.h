@@ -11,7 +11,7 @@ enum SceneObjectType;
 
 namespace Scene
 {
-	DEF_SCENEOBJECT_ID_DEP(Light);
+	//DEF_SCENEOBJECT_ID_DEP(Light);
 
 	class SceneUnit
 	{
@@ -32,55 +32,57 @@ namespace Scene
 		std::set<JUUID>& GetUnboundedSceneObjects();
 
 		//Loading
-		void InsertRenderableIntoLoadingPool(RenderableID uuid);
-		void InsertCameraIntoLoadingPool(CameraID uuid);
-		void InsertLightIntoLoadingPool(LightID uuid);
-		std::set<RenderableID>& GetRenderablesInLoadingPool();
-		std::set<CameraID>& GetCamerasInLoadingPool();
-		std::set<LightID>& GetLightsInLoadingPool();
-		size_t GetRenderablesLoadingPoolSize();
-		size_t GetCamerasLoadingPoolSize();
-		size_t GetLightsLoadingPoolSize();
-		void MarkRenderablesInLoadingPoolAsReady();
-		void MarkCamerasInLoadingPoolAsReady();
-		void MarkLightsInLoadingPoolAsReady();
-		void ClearRenderablesLoadingPool();
-		void ClearCamerasLoadingPool();
-		void ClearLightsLoadingPool();
-		void EraseRenderableFromLoadingPool(RenderableID r);
-		void EraseCameraFromLoadingPool(CameraID c);
-		void EraseLightFromLoadingPool(LightID l);
-		void InitLoadingProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t id, size_t capacity);
-		void InitFrame2FrameProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t id, size_t capacity);
-		void InitComputeProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t id, size_t capacity);
-		void SetLoading(bool value);
-		bool IsLoading();
-		void SetCanSubmitLoading(bool value);
-		bool IsReadyToSubmitLoading();
-		void SetLoadingComplete(bool value);
-		bool IsLoadingComplete();
+		//void InsertRenderableIntoLoadingPool(RenderableID uuid);
+		//void InsertCameraIntoLoadingPool(CameraID uuid);
+		//void InsertLightIntoLoadingPool(LightID uuid);
+		//std::set<RenderableID>& GetRenderablesInLoadingPool();
+		//std::set<CameraID>& GetCamerasInLoadingPool();
+		//std::set<LightID>& GetLightsInLoadingPool();
+		//size_t GetRenderablesLoadingPoolSize();
+		//size_t GetCamerasLoadingPoolSize();
+		//size_t GetLightsLoadingPoolSize();
+		//void MarkRenderablesInLoadingPoolAsReady();
+		//void MarkCamerasInLoadingPoolAsReady();
+		//void MarkLightsInLoadingPoolAsReady();
+		//void ClearRenderablesLoadingPool();
+		//void ClearCamerasLoadingPool();
+		//void ClearLightsLoadingPool();
+		//void EraseRenderableFromLoadingPool(RenderableID r);
+		//void EraseCameraFromLoadingPool(CameraID c);
+		//void EraseLightFromLoadingPool(LightID l);
+		//void InitLoadingProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t id, size_t capacity);
+		//void SetLoading(bool value);
+		//bool IsLoading();
+		//void SetCanSubmitLoading(bool value);
+		//bool IsReadyToSubmitLoading();
+		//void SetLoadingComplete(bool value);
+		//bool IsLoadingComplete();
+
+		//bool LoadingCommandListIsOpen();
+		//CComPtr<ID3D12GraphicsCommandList2>& GetLoadingCommandList(bool OpenIfClosed = true);
+		//void ResetLoadingCommandList();
+		//void CloseLoadingCommandList();
+		//void SubmitLoadingCommandList();
+		//void PushLoadingExecutionCallback(std::function<void()> cb);
+		//void CloseSubmitLoadingCommandList()
+		//{
+		//	CloseLoadingCommandList();
+		//	SubmitLoadingCommandList();
+		//}
+		//void Loading();
+		//void SubmitForLoading(std::function<void()> loader);
+
+		//Scene
 		void Bind(JUUID uuidA, JUUID uuidB);
 		void Unbind(JUUID uuid);
 		void Unbind(JUUID uuidA, JUUID uuidB);
 		bool IsBound(JUUID uuid);
 		void AddSceneObjectToUnboundPool(JUUID uuid);
 		void RemoveSceneObjectFromUnboundPool(JUUID uuid);
-		bool LoadingCommandListIsOpen();
-		CComPtr<ID3D12GraphicsCommandList2>& GetLoadingCommandList(bool OpenIfClosed = true);
-		void ResetLoadingCommandList();
-		void CloseLoadingCommandList();
-		void SubmitLoadingCommandList();
-		void PushLoadingExecutionCallback(std::function<void()> cb);
-		void CloseSubmitLoadingCommandList()
-		{
-			CloseLoadingCommandList();
-			SubmitLoadingCommandList();
-		}
-		void Loading();
-		void SubmitForLoading(std::function<void()> loader);
 
 		//Frame2Frame
-		CComPtr<ID3D12GraphicsCommandList2>& GetCommandList(bool OpenIfClosed = true);
+		void InitFrame2FrameProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t capacity, size_t id);
+		CComPtr<ID3D12GraphicsCommandList2>& GetCommandList();
 		void ResetCommandList();
 		void CloseCommandList();
 		void SubmitCommandList();
@@ -98,7 +100,9 @@ namespace Scene
 		void PostRender();
 
 		//Compute
-		CComPtr<ID3D12GraphicsCommandList2>& GetComputeCommandList(bool OpenIfClosed = true);
+		void InitComputeProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t capacity, size_t id);
+		bool HasComputeProcessor() { return computeProcessor != nullptr; }
+		CComPtr<ID3D12GraphicsCommandList2>& GetComputeCommandList();
 		void CloseSubmitAndNextComputeCommandList()
 		{
 			CloseComputeCommandList();
@@ -127,17 +131,17 @@ namespace Scene
 		std::unordered_map<JUUID, SceneObjectType> sceneObjectsTypes;
 
 		//loading
-		CommandsProcessor loadingProcessor;
-		std::unique_ptr<std::atomic_bool> loading;
-		std::unique_ptr<std::atomic_bool> canSubmitLoading;
-		std::unique_ptr<std::atomic_bool> loadingComplete;
-		std::set<RenderableID> renderablesInLoadingPool;
-		std::set<CameraID> camerasInLoadingPool;
-		std::set<LightID> lightsInLoadingPool;
-		std::vector<std::function<void()>> postLoadingExecutionCallbacks;
+		//CommandsProcessor loadingProcessor;
+		//std::unique_ptr<std::atomic_bool> loading;
+		//std::unique_ptr<std::atomic_bool> canSubmitLoading;
+		//std::unique_ptr<std::atomic_bool> loadingComplete;
+		//std::set<RenderableID> renderablesInLoadingPool;
+		//std::set<CameraID> camerasInLoadingPool;
+		//std::set<LightID> lightsInLoadingPool;
+		//std::vector<std::function<void()>> postLoadingExecutionCallbacks;
 
 		//f2f
-		CommandsProcessor commandsProcessor;
-		CommandsProcessor computeProcessor;
+		std::unique_ptr<CommandsProcessor> commandsProcessor;
+		std::unique_ptr<CommandsProcessor> computeProcessor;
 	};
 };

@@ -148,8 +148,8 @@ struct PhysicsDrawState
 namespace Editor
 {
 	ImGui_ImplDX12_InitInfo init_info = {};
-	CommandsProcessor commandListProcessor;
-	CommandsProcessor commandListPickingPassProcessor;
+	std::unique_ptr<CommandsProcessor> commandListProcessor;
+	std::unique_ptr<CommandsProcessor> commandListPickingPassProcessor;
 
 	//workbench & loading
 	nlohmann::json workbench;
@@ -278,7 +278,7 @@ namespace Editor
 		);
 		CreateRenderable(id, jbox);
 		boundingBox[id]->BindToScene();
-		GetSceneUnit(id)->InsertRenderableIntoLoadingPool(boundingBox[id]);
+		GetLoadingProcessor(id).LoadingPoolInsert(SO_Renderables, boundingBox[id]());
 	}
 
 	void CreateSceneUnitBillboards(SceneUnitId id)
@@ -414,8 +414,8 @@ namespace Editor
 		loadingProgress.loadSceneUnitModal = true;
 		LoadWorkbench();
 
-		commandListProcessor.Init(renderer->d3dDevice, 0xed1704, Renderer::numFrames);
-		commandListPickingPassProcessor.Init(renderer->d3dDevice, 0x91c39455, Renderer::numFrames);
+		commandListProcessor = std::make_unique<CommandsProcessor>(renderer->d3dDevice, Renderer::numFrames, 0xed1704);
+		commandListPickingPassProcessor = std::make_unique<CommandsProcessor>(renderer->d3dDevice, Renderer::numFrames, 0x91c39455);
 
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
@@ -827,8 +827,8 @@ namespace Editor
 		RenderPassInstanceID renderPass = renderer->swapChainPass;
 		SwapChainPassID pass = renderPass->swapChainPass;
 		auto backBuffer = pass->renderTargets[backBufferIndex];
-		commandListProcessor.ResetCommandList();
-		auto commandList = commandListProcessor.GetCommandList();
+		commandListProcessor->ResetCommandList();
+		auto& commandList = commandListProcessor->GetCommandList();
 		TransitionResource(commandList, backBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 		commandList->RSSetViewports(1, &renderer->screenViewport);
@@ -914,15 +914,16 @@ namespace Editor
 
 		TransitionResource(commandList, backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
-		commandListProcessor.CloseCommandList();
-		renderer->ExecuteCommands(commandList);
-		commandListProcessor.Next();
+		commandListProcessor->CloseCommandList();
+		commandListProcessor->ExecuteCommandList();
+		commandListProcessor->Next();
 	}
 
-	void WriteSceneUnitEditorPlayCameraConstantsBuffer(SceneUnitId unit)
+	void WriteSceneUnitEditorPlayCameraConstantsBuffer(SceneUnitId id)
 	{
-		auto& scene = GetSceneUnit(unit);
-		levelCameraUUID[unit]->WriteConstantsBuffer(scene->Frame());
+		if (!levelCameraUUID.contains(id)) return;
+		auto& scene = GetSceneUnit(id);
+		levelCameraUUID[id]->WriteConstantsBuffer(scene->Frame());
 	}
 
 	void WriteSceneUnitDirectionalShadowMapAttributes(SceneUnitId id)
@@ -946,6 +947,8 @@ namespace Editor
 
 	void SwitchToSceneUnitEditorCamera(SceneUnitId id)
 	{
+		if (!levelCameraUUID.contains(id) || !editorCameraUUID.contains(id)) return;
+
 		auto& scene = GetSceneUnit(id);
 		editorCameraUUID[id]->renderables = levelCameraUUID[id]->renderables;
 		editorCameraUUID[id]->iblTextures = levelCameraUUID[id]->iblTextures;
@@ -964,6 +967,7 @@ namespace Editor
 
 	void SwitchToSceneUnitEditorPlayCamera(SceneUnitId id)
 	{
+		if (!levelCameraUUID.contains(id) || !editorCameraUUID.contains(id)) return;
 		EraseCameraFromMouseCameras(id, editorCameraUUID[id].uuid());
 		EraseCameraFromSwapChainCameras(id, editorCameraUUID[id].uuid());
 		InsertCameraIntoMouseCameras(id, levelCameraUUID[id].uuid());
@@ -2613,10 +2617,10 @@ namespace Editor
 			) return;
 
 		unsigned int backBufferIndex = renderer->GetBackBufferIndex();
-		commandListPickingPassProcessor.frame = backBufferIndex;
+		commandListPickingPassProcessor->frame = backBufferIndex;
 
-		commandListPickingPassProcessor.ResetCommandList();
-		auto& commandList = commandListPickingPassProcessor.GetCommandList();
+		commandListPickingPassProcessor->ResetCommandList();
+		auto& commandList = commandListPickingPassProcessor->GetCommandList();
 
 #if defined(_DEVELOPMENT)
 		PIXBeginEvent(commandList.p, 0, L"Scene Picker");
@@ -2645,9 +2649,9 @@ namespace Editor
 #if defined(_DEVELOPMENT)
 		PIXEndEvent(commandList.p);
 #endif
-		commandListPickingPassProcessor.CloseCommandList();
-		renderer->ExecuteCommands(commandList);
-		commandListPickingPassProcessor.Next();
+		commandListPickingPassProcessor->CloseCommandList();
+		commandListPickingPassProcessor->ExecuteCommandList();
+		commandListPickingPassProcessor->Next();
 	}
 
 	void PickFromScene(SceneUnitId id)
@@ -2778,7 +2782,7 @@ namespace Editor
 		);
 		CreateRenderable(id, jbillboard);
 		RenderableID renderable = MAKESUUUID(id, uuid);
-		GetSceneUnit(id)->InsertRenderableIntoLoadingPool(renderable);
+		GetLoadingProcessor(id).LoadingPoolInsert(SO_Renderables, renderable());
 		return renderable;
 	}
 

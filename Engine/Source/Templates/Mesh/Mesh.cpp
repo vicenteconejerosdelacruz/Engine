@@ -60,7 +60,7 @@ namespace Templates {
 				std::unique_ptr<MeshInstance> instance = std::make_unique<MeshInstance>();
 				instance->uuid = uuid;
 				instance->vertexClass = vertexClass;
-				auto& commandList = GetSceneUnit(id)->GetLoadingCommandList();
+				auto& commandList = GetLoadingProcessor().GetCommandList();
 				InitializeVertexBufferView(renderer->d3dDevice, commandList, vertexData, vertexSize, verticesCount, instance->vbvData);
 				InitializeIndexBufferView(renderer->d3dDevice, commandList, indices, indicesCount, instance->ibvData);
 				return instance;

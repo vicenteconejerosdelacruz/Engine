@@ -136,7 +136,7 @@ namespace Templates
 	struct TexturePreview
 	{
 		bool processorInitialized = false;
-		CommandsProcessor loadingProcessor;
+		std::unique_ptr<CommandsProcessor> loadingProcessor;
 		std::unique_ptr<std::atomic_bool> previewLoaded;
 		std::vector<TextureInstanceID> textures;
 		int frame;

@@ -10,16 +10,16 @@ extern std::unique_ptr<Renderer> renderer;
 #if defined(_EDITOR)
 namespace Editor
 {
-	extern bool IsPlaying(SceneUnitId unit);
-	extern bool IsPaused(SceneUnitId unit);
+	extern bool IsPlaying(SceneUnitId id);
+	extern bool IsPaused(SceneUnitId id);
 	extern void DrawEditor();
 	extern void EraseSceneObjectFromSelection(SceneUnitId unit, JUUID uuid);
 	extern void MarkSceneUnitAsModified(SceneUnitId id);
 	extern void MarkScenePanelAssetsAsDirty();
-	extern void UpdateBoundingBox(SceneUnitId unit);
-	extern void WriteSceneUnitEditorPlayCameraConstantsBuffer(SceneUnitId unit);
-	extern void SwitchToSceneUnitEditorCamera(SceneUnitId unit);
-	extern void SwitchToSceneUnitEditorPlayCamera(SceneUnitId unit);
+	extern void UpdateBoundingBox(SceneUnitId id);
+	extern void WriteSceneUnitEditorPlayCameraConstantsBuffer(SceneUnitId id);
+	extern void SwitchToSceneUnitEditorCamera(SceneUnitId id);
+	extern void SwitchToSceneUnitEditorPlayCamera(SceneUnitId id);
 	extern void RemoveSceneUnitEditorCameraFromWindowCameras(SceneUnitId id);
 	extern void AddSceneUnitEditorCameraToWindowCameras(SceneUnitId id);
 	extern void HandleEditorMouseMovements(SceneUnitId id);
@@ -47,6 +47,26 @@ namespace Scene
 	std::map<SceneUnitId, std::unique_ptr<SceneUnit>> scenesUnits;
 	std::map<SceneUnitId, SceneUnitId> attachedUnits; //<Attached, Destination>
 	std::set<SceneUnitId> renderableSceneUnits;
+	std::map<size_t, CommandsProcessor> loadingProcessor;
+
+	std::tuple<size_t, CommandsProcessor&> CreateLoadingProcessor()
+	{
+		size_t thread_id = nostd::threadIdHash();
+		loadingProcessor.insert_or_assign(thread_id, CommandsProcessor(renderer->d3dDevice, 1));
+		return std::tie(thread_id, loadingProcessor.at(thread_id));
+	}
+
+	CommandsProcessor& GetLoadingProcessor(size_t id)
+	{
+		id = id ? id : nostd::threadIdHash();
+		return loadingProcessor.at(id);
+	}
+
+	void DestroyLoadingProcessor(size_t id)
+	{
+		id = id ? id : nostd::threadIdHash();
+		loadingProcessor.erase(id);
+	}
 
 	void CreateSceneLevelAsync(std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 	{
@@ -55,22 +75,12 @@ namespace Scene
 		std::thread levelThread([](std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 			{
 				SceneUnitId id = nostd::threadIdHash();
-				auto& scene = CreateScene(id, filename, Renderer::numFrames);
 
-				scene->PushLoadingExecutionCallback([=]
-					{
-						auto& sceneU = GetSceneUnit(id);
-						sceneU->SetLoadingComplete(true);
-					}
-				);
+				auto& scene = CreateScene(id, filename, Renderer::numFrames);
+				auto [lid, _] = CreateLoadingProcessor();
 
 				LoadLevel(scene, filename, data, progress);
-
 				levelLoaded(id);
-
-				scene->SetCanSubmitLoading(true);
-				scene->SetLoadingComplete(true);
-
 			}, filename, data, levelLoaded, progress
 		);
 		levelThread.detach();
@@ -85,17 +95,9 @@ namespace Scene
 				SceneUnitId unit = nostd::threadIdHash();
 				auto& scene = CreateScene(unit, filename);
 				scene->SetIsolated(true);
+				auto [lid, _] = CreateLoadingProcessor();
 
-				scene->PushLoadingExecutionCallback([=]
-					{
-						auto& sceneU = GetSceneUnit(unit);
-						sceneU->SetLoadingComplete(true);
-					}
-				);
 				LoadLevel(scene, filename, data, progress);
-
-				scene->SetCanSubmitLoading(true);
-
 				levelLoaded(unit);
 			}, filename, data, levelLoaded, progress
 		);
@@ -109,19 +111,10 @@ namespace Scene
 		std::thread levelThread([](SceneUnitId parentUnit, std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 			{
 				auto& scene = GetSceneUnit(parentUnit);
-
-				scene->PushLoadingExecutionCallback([=]
-					{
-						auto& sceneU = GetSceneUnit(parentUnit);
-						sceneU->SetLoadingComplete(true);
-					}
-				);
+				auto [lid, _] = CreateLoadingProcessor();
 
 				LoadLevel(scene, filename, data, progress);
-
 				levelLoaded(parentUnit);
-
-				scene->SetCanSubmitLoading(true);
 			}, parentUnit, filename, data, levelLoaded, progress
 		);
 		levelThread.detach();
@@ -130,13 +123,24 @@ namespace Scene
 	std::unique_ptr<SceneUnit>& CreateScene(SceneUnitId unit, std::string unitName, unsigned int numProcessors)
 	{
 		scenesUnits.insert_or_assign(unit, std::make_unique<SceneUnit>(unit, unitName));
-		scenesUnits.at(unit)->InitLoadingProcessor(renderer->d3dDevice, unit, 1U);
+		//scenesUnits.at(unit)->InitLoadingProcessor(renderer->d3dDevice, unit, 1U);
 		if (numProcessors > 0U)
 		{
-			scenesUnits.at(unit)->InitFrame2FrameProcessor(renderer->d3dDevice, unit, numProcessors);
-			scenesUnits.at(unit)->InitComputeProcessor(renderer->d3dDevice, unit, numProcessors);
+			scenesUnits.at(unit)->InitFrame2FrameProcessor(renderer->d3dDevice, numProcessors, unit);
+			scenesUnits.at(unit)->InitComputeProcessor(renderer->d3dDevice, numProcessors, unit);
 		}
 		return scenesUnits.at(unit);
+	}
+
+	void CreateSceneUnitSceneObjects(SceneUnitId unit)
+	{
+		CreateRenderableSceneObjects(unit);
+		CreateCameraSceneObjects(unit);
+		CreateLightSceneObjects(unit);
+		CreateSoundFXSceneObjects(unit);
+		CreatePhysicSceneSceneObjects(unit);
+		CreateTriggerSceneObjects(unit);
+		CreateBoundarySceneObjects(unit);
 	}
 
 	void DestroyScene(SceneUnitId id)
@@ -450,8 +454,10 @@ namespace Scene
 	{
 		SceneObject* sceneObjectO = GetSceneObjectPointer(id, sceneObject);
 		SceneObjectType type = sceneObjectO->JType();
-		std::string dump = sceneObjectO->dump();
-		nlohmann::json data = nlohmann::json::parse(dump);
+		//std::string dump = sceneObjectO->dump();
+		//nlohmann::json data = nlohmann::json::parse(dump);
+		nlohmann::json data;
+		sceneObjectO->WriteJson(data);
 
 		JUUID uuid = getUUID();
 		std::string name = data.at("name");
@@ -710,28 +716,25 @@ namespace Scene
 		using namespace Editor;
 		UpdateBillboards();
 #endif
-		for (auto& [unit, scene] : scenesUnits)
+		for (auto& [id, scene] : scenesUnits)
 		{
-			if (!SceneUnitExits(unit)) continue;
+			if (!SceneUnitExits(id) || !SceneUnitRenderingExists(id) || scene->MarkedForDelete()) continue;
 
-			if (scene->MarkedForDelete()) continue;
-
-			scene->Loading();
-
-			if (!renderableSceneUnits.contains(unit) || !scene->IsLoadingComplete()) continue;
-
+			//scene->Loading();
+			//
+			//if (!renderableSceneUnits.contains(unit) || !scene->IsLoadingComplete()) continue;
 #if defined(_EDITOR)
-			if (!Editor::IsPlaying(unit) && !scene->IsIsolated())
+			if (!Editor::IsPlaying(id) && !scene->IsIsolated())
 			{
-				WriteSceneUnitEditorPlayCameraConstantsBuffer(unit);
-				SwitchToSceneUnitEditorCamera(unit);
+				WriteSceneUnitEditorPlayCameraConstantsBuffer(id);
+				SwitchToSceneUnitEditorCamera(id);
 			}
 #endif
 			scene->Render();
 #if defined(_EDITOR)
-			if (!Editor::IsPlaying(unit) && !scene->IsIsolated())
+			if (!Editor::IsPlaying(id) && !scene->IsIsolated())
 			{
-				SwitchToSceneUnitEditorPlayCamera(unit);
+				SwitchToSceneUnitEditorPlayCamera(id);
 			}
 #endif
 		}
@@ -747,7 +750,7 @@ namespace Scene
 #endif
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->MarkedForDelete() || !scene->IsLoadingComplete() || (!renderableSceneUnits.contains(unit))) continue;
+			//if (scene->MarkedForDelete() || !scene->IsLoadingComplete() || (!renderableSceneUnits.contains(unit))) continue;
 
 			scene->PostRender();
 		}
@@ -758,7 +761,8 @@ namespace Scene
 	{
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->MarkedForDelete() || !scene->IsLoadingComplete()) continue;
+			//if (scene->MarkedForDelete() || !scene->IsLoadingComplete()) continue;
+			if (scene->MarkedForDelete() || !scene->HasComputeProcessor()) continue;
 			computeRunners.insert(unit);
 			scene->RunComputeShaders();
 		}
@@ -768,7 +772,7 @@ namespace Scene
 	{
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->MarkedForDelete() || !scene->IsLoadingComplete()) continue;
+			//if (scene->MarkedForDelete() || !scene->IsLoadingComplete()) continue;
 			if (!computeRunners.contains(unit)) continue;
 			scene->SolveComputeShaders();
 		}

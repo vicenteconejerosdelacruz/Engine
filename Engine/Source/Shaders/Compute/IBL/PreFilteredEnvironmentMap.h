@@ -25,7 +25,7 @@ namespace ComputeShader
 		virtual void Solution(SceneUnitId unit);
 		void WriteFile(std::vector<Image>& imgs) const;
 
-		CommandsProcessor commandsProcessor;
+		std::unique_ptr<CommandsProcessor> commandsProcessor;
 		std::filesystem::path outputFile;
 
 		JUUID envMap;

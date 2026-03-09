@@ -408,27 +408,24 @@ namespace Templates
 		preview->timeFactor = 1.0f;
 		if (!preview->processorInitialized)
 		{
-			preview->loadingProcessor.Init(renderer->d3dDevice, 0x10AD3D, 1);
+			preview->loadingProcessor = std::make_unique<CommandsProcessor>(renderer->d3dDevice, 1, 0x10AD3D);
 			preview->processorInitialized = true;
 		}
 
-		preview->loadingProcessor.ResetCommandList();
+		preview->loadingProcessor->ResetCommandList();
 		for (unsigned int i = 0U; i < std::max(numFrames(), 1U); i++)
 		{
 			JUUID previewUUID = uuid() + "-preview-" + std::to_string(i);
 			CreateTextureInstance(previewUUID, [&]
 				{
-					return std::make_unique<TextureInstance>(preview->loadingProcessor.GetCommandList(), uuid(), i);
+					return std::make_unique<TextureInstance>(preview->loadingProcessor->GetCommandList(), uuid(), i);
 				}
 			);
 			preview->textures.push_back(previewUUID);
 		}
-		preview->loadingProcessor.CloseCommandList();
-		renderer->ExecuteCommands(preview->loadingProcessor.GetCommandList(false), [&]
-			{
-				preview->previewLoaded->store(true);
-			}
-		);
+		preview->loadingProcessor->CloseCommandList();
+		preview->loadingProcessor->RunPostExecution([&] { preview->previewLoaded->store(true); });
+		preview->loadingProcessor->ExecuteCommandList();
 	}
 
 	void TextureJsonsStep()
@@ -562,16 +559,15 @@ namespace Templates
 		}
 #endif
 		std::string pathS = path.string();
-		auto& scene = GetSceneUnit(id);
-		auto& commandList = scene->GetLoadingCommandList();
+		auto& commandList = GetLoadingProcessor().GetCommandList();
 		CreateTextureResource(commandList, pathS, tex->format(), tex->type(), tex->numFrames(), tex->mipLevels(), startFrame);
-		//SI CREO UN CRATE DESDE EL CREADOR ESTO SE CAE
-		PushTextureUploadFreeResourceCallback(2U, [&]
-			{
-				//OutputDebugStringA(std::string("off-loading:" + tex->name() + "\n").c_str());
-				//upload = nullptr;
-			}
-		);
+		////SI CREO UN CRATE DESDE EL CREADOR ESTO SE CAE
+		//PushTextureUploadFreeResourceCallback(2U, [&]
+		//	{
+		//		//OutputDebugStringA(std::string("off-loading:" + tex->name() + "\n").c_str());
+		//		//upload = nullptr;
+		//	}
+		//);
 	}
 
 	void TextureInstance::CreateTextureResource(CComPtr<ID3D12GraphicsCommandList2>& commandList, std::string& path, DXGI_FORMAT format, TextureType type, unsigned int numFrames, unsigned int nMipMaps, unsigned int firstArraySlice)

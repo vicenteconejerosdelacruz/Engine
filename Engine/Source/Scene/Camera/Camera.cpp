@@ -1015,16 +1015,16 @@ namespace Scene
 		std::set<CameraID> cams;
 		std::transform(Cameras.begin(), Cameras.end(), std::inserter(cams, cams.begin()), [&](auto o) { return MAKESUUUID(id, o); });
 
-		//is this(hack) or fix the loading system
-		auto& scene = GetSceneUnit(id);
-		for (auto& c : cams)
-		{
-			if (!c->RenderReady() && scene->IsBound(c.uuid()))
-			{
-				c->RenderReady(true);
-				scene->EraseCameraFromLoadingPool(c);
-			}
-		}
+		//is this(hack) or fix the loading system. that's what i'm doing now
+		//auto& scene = GetSceneUnit(id);
+		//for (auto& c : cams)
+		//{
+		//	if (!c->RenderReady() && scene->IsBound(c.uuid()))
+		//	{
+		//		c->RenderReady(true);
+		//		scene->EraseCameraFromLoadingPool(c);
+		//	}
+		//}
 
 		//update rotation quaternion
 		for (auto cam : cams)
@@ -1185,15 +1185,15 @@ namespace Scene
 
 		for (auto& [id, cams] : camerasToRebind)
 		{
-			auto& scene = GetSceneUnit(id);
-			scene->ResetLoadingCommandList();
-			scene->SetLoading(true);
-			scene->SetCanSubmitLoading(false);
-			for (auto& cam : cams)
-			{
-				rebindCam(cam);
-			}
-			scene->CloseSubmitLoadingCommandList();
+			//auto& scene = GetSceneUnit(id);
+			//scene->ResetLoadingCommandList();
+			//scene->SetLoading(true);
+			//scene->SetCanSubmitLoading(false);
+			//for (auto& cam : cams)
+			//{
+			//	rebindCam(cam);
+			//}
+			//scene->CloseSubmitLoadingCommandList();
 		}
 
 		std::set<CameraID> dirtyProjectionCams;

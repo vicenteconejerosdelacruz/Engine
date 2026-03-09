@@ -118,48 +118,32 @@ namespace Scene::Level
 #if defined(_EDITOR)
 		using namespace Editor;
 
+		SceneUnitId id = scene->Id();
+
 		if (!scene->IsIsolated())
 		{
-			CreateSceneUnitBillboards(scene->Id());
+			CreateSceneUnitBillboards(id);
 		}
 #endif
 
-		if (!scene->IsLoading())
-			scene->ResetLoadingCommandList();
-		scene->SetLoading(true);
-		scene->SetCanSubmitLoading(false);
+		auto& loading = GetLoadingProcessor();
+		loading.ResetCommandList();
 
-		CreateRenderableSceneObjects(scene->Id());
-		CreateCameraSceneObjects(scene->Id());
-		CreateLightSceneObjects(scene->Id());
-		CreateSoundFXSceneObjects(scene->Id());
-		CreatePhysicSceneSceneObjects(scene->Id());
-		CreateTriggerSceneObjects(scene->Id());
-		CreateBoundarySceneObjects(scene->Id());
+		CreateSceneUnitSceneObjects(id);
 
-		std::vector<std::string> types =
-		{
-			SceneObjectTypeJsonContainer.at(SO_Renderables),
-			SceneObjectTypeJsonContainer.at(SO_Cameras),
-			SceneObjectTypeJsonContainer.at(SO_Lights),
-			SceneObjectTypeJsonContainer.at(SO_SoundEffects),
-			SceneObjectTypeJsonContainer.at(SO_PhysicScenes),
-			SceneObjectTypeJsonContainer.at(SO_Triggers),
-			SceneObjectTypeJsonContainer.at(SO_Boundaries),
-		};
-
-		unsigned int total = std::accumulate(types.begin(), types.end(), 0U, [&](unsigned int sum, std::string type)
+		unsigned int total = std::accumulate(SceneObjectTypeJsonContainer.begin(), SceneObjectTypeJsonContainer.end(), 0U, [&](unsigned int sum, auto& pair)
 			{
-				return sum + (data.contains(type) ? static_cast<unsigned int>(data.at(type).size()) : 0U);
+				return sum + (data.contains(pair.second) ? static_cast<unsigned int>(data.at(pair.second).size()) : 0U);
 			}
 		);
+
 		unsigned int count = 0U;
 
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Renderables), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateRenderable(scene->Id(), json);
-				scene->InsertRenderableIntoLoadingPool(MAKESUUUID(scene->Id(), JUUID(json.at("uuid"))));
+				CreateRenderable(id, json);
+				loading.LoadingPoolInsert(SO_Renderables, MAKESUUUID(id, JUUID(json.at("uuid"))));
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -167,8 +151,8 @@ namespace Scene::Level
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Cameras), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateCamera(scene->Id(), json);
-				scene->InsertCameraIntoLoadingPool(MAKESUUUID(scene->Id(), JUUID(json.at("uuid"))));
+				CreateCamera(id, json);
+				loading.LoadingPoolInsert(SO_Cameras, MAKESUUUID(id, JUUID(json.at("uuid"))));
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -176,8 +160,8 @@ namespace Scene::Level
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Lights), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateLight(scene->Id(), json);
-				scene->InsertLightIntoLoadingPool(MAKESUUUID(scene->Id(), JUUID(json.at("uuid"))));
+				CreateLight(id, json);
+				loading.LoadingPoolInsert(SO_Lights, MAKESUUUID(id, JUUID(json.at("uuid"))));
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -185,7 +169,7 @@ namespace Scene::Level
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_SoundEffects), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateSoundFX(scene->Id(), json);
+				CreateSoundFX(id, json);
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -193,7 +177,7 @@ namespace Scene::Level
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_PhysicScenes), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreatePhysicScene(scene->Id(), json);
+				CreatePhysicScene(id, json);
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -201,7 +185,7 @@ namespace Scene::Level
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Triggers), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateTrigger(scene->Id(), json);
+				CreateTrigger(id, json);
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -209,7 +193,7 @@ namespace Scene::Level
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Boundaries), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateBoundary(scene->Id(), json);
+				CreateBoundary(id, json);
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -218,23 +202,25 @@ namespace Scene::Level
 #if defined(_EDITOR)
 		if (!scene->IsIsolated())
 		{
-			CreatePickingPass(scene->Id());
-			CreateSceneUnitBoundingBox(scene->Id());
-			CreateSceneUnitEditorIndependentCamera(scene->Id());
-			CreateRegisteredBillboards(scene->Id());
-			CreateSceneUnitPhysicsController(scene->Id());
+			CreatePickingPass(id);
+			CreateSceneUnitBoundingBox(id);
+			CreateSceneUnitEditorIndependentCamera(id);
+			CreateRegisteredBillboards(id);
+			CreateSceneUnitPhysicsController(id);
 		}
 #endif
 
-		BindSceneObjects(scene->Id());
-		CreatePhysicsObjectsBehaviors(scene->Id());
+		BindSceneObjects(id);
+		CreatePhysicsObjectsBehaviors(id);
 		//leave this to last
-		MapControllers(scene->Id());
+		MapControllers(id);
 #if defined(_EDITOR)
 		if (!scene->IsIsolated())
 		{
-			CopySceneUnitEditorCameraRenderPasses(scene->Id());
+			CopySceneUnitEditorCameraRenderPasses(id);
 		}
 #endif
+		loading.CloseCommandList();
+		loading.ExecuteCommandList();
 	}
 }

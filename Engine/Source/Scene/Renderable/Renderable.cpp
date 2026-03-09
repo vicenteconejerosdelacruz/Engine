@@ -874,15 +874,15 @@ namespace Scene
 		std::transform(Renderables.begin(), Renderables.end(), std::inserter(r, r.begin()), [&](auto o) { return MAKESUUUID(unit, o); });
 
 		//is this(hack) or fix the loading system
-		auto& scene = GetSceneUnit(unit);
-		for (auto& ren : r)
-		{
-			if (!ren->RenderReady() && scene->IsBound(ren.uuid()))
-			{
-				ren->RenderReady(true);
-				scene->EraseRenderableFromLoadingPool(ren);
-			}
-		}
+		//auto& scene = GetSceneUnit(unit);
+		//for (auto& ren : r)
+		//{
+		//	if (!ren->RenderReady() && scene->IsBound(ren.uuid()))
+		//	{
+		//		ren->RenderReady(true);
+		//		scene->EraseRenderableFromLoadingPool(ren);
+		//	}
+		//}
 
 		std::set<RenderableID> cleanRot;
 		std::for_each(r.begin(), r.end(), [&](auto& o)
@@ -924,12 +924,10 @@ namespace Scene
 
 		for (auto& rp : rGeom)
 		{
-			for (JUUID p0 : GetPhysicsObjectsBySceneObjectUUID(rp->SUuuid()))
+			for (PhysicObjectID phO : GetPhysicsObjectsBySceneObjectUUID(rp->SUuuid()))
 			{
-				auto& phO = GetPhysicObject(p0);
-				//phO->RebuildPhysicsBehavior();
-				//phO->DestroyPhisicsBehavior();
-				//phO->CreatePhysicsBehavior();
+				phO->DestroyPhisicsBehavior();
+				phO->CreatePhysicsBehavior();
 			}
 		}
 
@@ -947,26 +945,26 @@ namespace Scene
 				o->clean(Renderable::Update_meshMaterial);
 				o->visible(false);
 			}
-			auto& scene = GetSceneUnit(unit);
-			scene->SubmitForLoading([=]
-				{
-					auto destroyMeshInstance = [](auto& vec) { for (auto& mesh : vec) { DestroyMeshInstance(mesh()); } };
-					for (auto o : rMeshMaterial)
-					{
-						destroyMeshInstance(o->meshes);
-						o->meshes.clear();
-						o->CreateMeshInstances();
-					}
-				}
-			);
-			scene->PushLoadingExecutionCallback([=]
-				{
-					for (auto o : rMeshMaterial)
-					{
-						o->visible(true);
-					}
-				}
-			);
+			//auto& scene = GetSceneUnit(unit);
+			//scene->SubmitForLoading([=]
+			//	{
+			//		auto destroyMeshInstance = [](auto& vec) { for (auto& mesh : vec) { DestroyMeshInstance(mesh()); } };
+			//		for (auto o : rMeshMaterial)
+			//		{
+			//			destroyMeshInstance(o->meshes);
+			//			o->meshes.clear();
+			//			o->CreateMeshInstances();
+			//		}
+			//	}
+			//);
+			//scene->PushLoadingExecutionCallback([=]
+			//	{
+			//		for (auto o : rMeshMaterial)
+			//		{
+			//			o->visible(true);
+			//		}
+			//	}
+			//);
 		}
 
 		std::set<RenderableID> rDepthStencil;
@@ -983,26 +981,26 @@ namespace Scene
 				o->clean(Renderable::Update_depthStencil);
 				o->visible(false);
 			}
-			auto& scene = GetSceneUnit(unit);
-			scene->SubmitForLoading([=]
-				{
-					for (auto o : rDepthStencil)
-					{
-						for (auto cam : o->bindedCameras)
-						{
-							o->CreatePipelineStates(cam);
-						}
-					}
-				}
-			);
-			scene->PushLoadingExecutionCallback([=]
-				{
-					for (auto o : rDepthStencil)
-					{
-						o->visible(true);
-					}
-				}
-			);
+			//auto& scene = GetSceneUnit(unit);
+			//scene->SubmitForLoading([=]
+			//	{
+			//		for (auto o : rDepthStencil)
+			//		{
+			//			for (auto cam : o->bindedCameras)
+			//			{
+			//				o->CreatePipelineStates(cam);
+			//			}
+			//		}
+			//	}
+			//);
+			//scene->PushLoadingExecutionCallback([=]
+			//	{
+			//		for (auto o : rDepthStencil)
+			//		{
+			//			o->visible(true);
+			//		}
+			//	}
+			//);
 		}
 
 		for (auto o : cleanRot)

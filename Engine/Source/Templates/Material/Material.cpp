@@ -145,20 +145,20 @@ namespace Templates
 	}
 
 	static bool updateTexturesProcessorInitialized = false;
-	static CommandsProcessor updateTexturesProcessor;
+	static std::unique_ptr<CommandsProcessor> updateTexturesProcessor;
 	void UpdateMaterialTextures(std::unordered_map<TextureJsonID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceID>>> changes)
 	{
 		using namespace Templates::Texture;
 
 		if (!updateTexturesProcessorInitialized)
 		{
-			updateTexturesProcessor.Init(renderer->d3dDevice, 0x10AD3D, 1);
+			updateTexturesProcessor = std::make_unique<CommandsProcessor>(renderer->d3dDevice, 1, 0x10AD3D);
 			updateTexturesProcessorInitialized = true;
 		}
 
 		std::thread updateTexThread([](std::unordered_map<TextureJsonID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceID>>> changes)
 			{
-				updateTexturesProcessor.ResetCommandList();
+				updateTexturesProcessor->ResetCommandList();
 
 				std::unordered_map<TextureJsonID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceID>>> postChanges;
 				std::transform(changes.begin(), changes.end(), std::inserter(postChanges, postChanges.begin()), [](auto& pair)
@@ -196,12 +196,12 @@ namespace Templates
 
 					CreateTextureInstance(texUUID(), [&]
 						{
-							return std::make_unique<TextureInstance>(updateTexturesProcessor.GetCommandList(), texUUID());
+							return std::make_unique<TextureInstance>(updateTexturesProcessor->GetCommandList(), texUUID());
 						}
 					);
 				}
-				updateTexturesProcessor.CloseCommandList();
-				renderer->ExecuteCommands(updateTexturesProcessor.GetCommandList(false), [=]
+				updateTexturesProcessor->CloseCommandList();
+				updateTexturesProcessor->RunPostExecution([=]
 					{
 						for (auto& [texUUID, usageMapSet] : postChanges)
 						{
@@ -212,6 +212,7 @@ namespace Templates
 						}
 					}
 				);
+				updateTexturesProcessor->ExecuteCommandList();
 			}, changes
 		);
 		updateTexThread.detach();

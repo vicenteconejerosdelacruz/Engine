@@ -18,11 +18,16 @@ using namespace DeviceUtils;
 
 namespace Scene
 {
+	std::tuple<size_t, CommandsProcessor&> CreateLoadingProcessor();
+	CommandsProcessor& GetLoadingProcessor(size_t id = 0ULL);
+	void DestroyLoadingProcessor(size_t id = 0ULL);
+
 	void CreateSceneLevelAsync(std::string filename, nlohmann::json level, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress = [](std::string, unsigned int, unsigned int) {});
 	void CreateIsolatedSceneLevelAsync(std::string filename, nlohmann::json level, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress = [](std::string, unsigned int, unsigned int) {});
 	void AttachLevelIntoScene(SceneUnitId parentUnit, std::string filename, nlohmann::json level, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress = [](std::string, unsigned int, unsigned int) {});
 
 	std::unique_ptr<SceneUnit>& CreateScene(SceneUnitId unit, std::string unitName = std::to_string(nostd::threadIdHash()), unsigned int numProcessors = Renderer::numFrames);
+	void CreateSceneUnitSceneObjects(SceneUnitId unit);
 	void DestroyScene(SceneUnitId unit);
 	void DestroyScenes(bool inmediate = false);
 	bool SceneUnitExits(SceneUnitId unit);

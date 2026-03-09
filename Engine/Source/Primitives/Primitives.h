@@ -32,8 +32,8 @@ namespace Primitives
 
 		BoundingBox::CreateFromPoints(mesh->boundingBox, vertices.size(), &vertices.at(0).Position, sizeof(T::VertexType));
 
-		auto& scene = GetSceneUnit(id);
-		auto& commandList = scene->GetLoadingCommandList();
+		auto& processor = GetLoadingProcessor();
+		auto& commandList = processor.GetCommandList();
 
 		//upload the vertex buffer to the GPU and create the vertex buffer view
 		InitializeVertexBufferView(renderer->d3dDevice, commandList, vertices.data(), sizeof(T::VertexType), static_cast<unsigned int>(vertices.size()), mesh->vbvData);
