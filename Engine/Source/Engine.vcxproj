@@ -571,6 +571,9 @@
     <ClCompile Include="Game\BootLevel\BootLevel.cpp" />
     <ClCompile Include="Game\Game.cpp" />
     <ClCompile Include="Game\GameEngineStates\GameEngineBoot.cpp" />
+    <ClCompile Include="JExpose\Functions\JEdvCreatorDrawer.cpp" />
+    <ClCompile Include="JExpose\Functions\JEdvCreatorValidator.cpp" />
+    <ClCompile Include="JExpose\Functions\JEdvEditorDrawer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">Create</PrecompiledHeader>

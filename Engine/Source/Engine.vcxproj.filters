@@ -938,6 +938,15 @@
     <ClCompile Include="Editor\SceneObjectPopup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="JExpose\Functions\JEdvEditorDrawer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JExpose\Functions\JEdvCreatorValidator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JExpose\Functions\JEdvCreatorDrawer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CulpeoEngine.rc">
