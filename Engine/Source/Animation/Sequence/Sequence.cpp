@@ -153,7 +153,7 @@ void Sequence::RunScriptAtFrame(int frame, RenderableID renderable)
 	{
 		SequenceChannelElementScript* script = channel.GetScriptToRunAtFrame(frame);
 		if (script == nullptr) continue;
-		RunScript(script->script, renderable);
+		RunScript(script->script, renderable());
 	}
 }
 

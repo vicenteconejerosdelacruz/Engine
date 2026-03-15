@@ -1,5 +1,11 @@
 #pragma once
 #include <UUID.h>
+#include <v8.h>
+#include <libplatform/libplatform.h>
+#include <v8pp/context.hpp>
+#include <v8pp/module.hpp>
+
+using namespace v8;
 
 namespace Scene
 {
@@ -10,7 +16,7 @@ namespace Scripting
 {
 	void InitScripting(const char* path);
 	void ShutdownScripting();
-	v8::Isolate* GetIsolate();
-	void BindModule(std::function<void(v8::Isolate*)>);
-	void RunScript(std::string script, RenderableID renderable);
+	Isolate* GetIsolate();
+	void BindModule(std::function<void(Isolate*)>);
+	void RunScript(std::string script, SUUUID suuuid);
 }

@@ -642,6 +642,9 @@
     <ClInclude Include="Editor\SceneObjectPopup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Scripting\NoV8.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -945,6 +948,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="JExpose\Functions\JEdvCreatorDrawer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scripting\NoV8.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

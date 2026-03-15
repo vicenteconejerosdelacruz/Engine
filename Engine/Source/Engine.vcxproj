@@ -583,6 +583,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Editor_Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Scripting\NoV8.cpp" />
+    <ClInclude Include="Scripting\NoV8.h" />
     <ClCompile Include="Physics\Boundary.cpp" />
     <ClCompile Include="Physics\PhysicObject.cpp" />
     <ClCompile Include="Physics\Physics.cpp" />
