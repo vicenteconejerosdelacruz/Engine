@@ -1074,6 +1074,7 @@ namespace Scene
 
 	void RunBoundingBoxComputeShaders(SceneUnitId id)
 	{
+		if (!RenderableSUsceneObjects.contains(id)) return;
 		for (auto& [uuid, _] : RenderableSUsceneObjects.at(id))
 		{
 			RenderableID renderable = MAKESUUUID(id, uuid);
@@ -1087,6 +1088,7 @@ namespace Scene
 
 	void RunBoundingBoxComputeShadersSolution(SceneUnitId id)
 	{
+		if (!RenderableSUsceneObjects.contains(id)) return;
 		for (auto& [uuid, _] : RenderableSUsceneObjects.at(id))
 		{
 			RenderableID renderable = MAKESUUUID(id, uuid);
