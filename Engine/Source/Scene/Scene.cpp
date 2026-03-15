@@ -779,6 +779,11 @@ namespace Scene
 		computeRunners.clear();
 	}
 
+	SceneObject* GetSceneObjectPointer(SUUUID suuid)
+	{
+		return GetSceneObjectPointer(FROMSUUUID(suuid));
+	}
+
 	SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid)
 	{
 		std::map<SceneObjectType, std::function<SceneObject* (SceneUnitId id, JUUID uuid)>> getP =

@@ -129,6 +129,7 @@ namespace Scene
 	void SolveComputeShaders();
 
 	SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid);
+	SceneObject* GetSceneObjectPointer(SUUUID suuid);
 
 #if defined(_EDITOR)
 	//for drawing the panel
