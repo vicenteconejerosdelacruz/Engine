@@ -57,35 +57,33 @@ namespace Scripting
 		binder(isolate);
 	}
 
-	struct v8_att_context
-	{
-		v8_att_idx_handlers att_idx_handlers;
-		v8_att_accessors att_accessors;
-	};
-
 	Local<Context> CreateSceneObjectScriptContext(Isolate* isolate, SceneObject* so, v8_att_context& att_context)
 	{
 		Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
 
+		v8_att_idx_handlers& att_idx_handlers = att_context.att_idx_handlers;
+		v8_att_accessors& att_accessors = att_context.att_accessors;
+		v8_att_to_json& att_to_jsons = att_context.att_to_jsons;
+
+		AddToJsonToTemplate(isolate, global, att_to_jsons, so);
+
 		Local<Context> context = Context::New(isolate, nullptr, global);
 		v8::Context::Scope context_scope(context);
 		AddConsoleToContext(isolate, context);
-
-		v8_att_idx_handlers& att_idx_handlers = att_context.att_idx_handlers;
-		v8_att_accessors& att_accessors = att_context.att_accessors;
 
 		att_accessors.insert_or_assign("name", v8_create_accessor<std::string>(so, "name"));
 		context->Global()->SetAccessor(context, v8_name(isolate, "name"), v8_getter, v8_setter,
 			v8_external(isolate, &att_accessors.at("name"))
 		);
 
+
 		att_idx_handlers.insert_or_assign("position", v8_create_idx_handler<XMFLOAT3>(so, "position"));
 		Local<ObjectTemplate> position_idx_tmpl = ObjectTemplate::New(isolate);
 		position_idx_tmpl->SetIndexedPropertyHandler(v8_idx_getter, v8_idx_setter, v8_idx_query, nullptr, v8_idx_enumerator, v8_external(isolate, &att_idx_handlers.at("position")));
 		position_idx_tmpl->SetAccessor(v8_name(isolate, "length"),
-			[](v8::Local<v8::Name>, const v8::PropertyCallbackInfo<v8::Value>& info) { info.GetReturnValue().Set(3); }
+			[](v8::Local<v8::Name>, const PropertyCallbackInfo<Value>& info) { info.GetReturnValue().Set(3); }
 		);
-		//position_idx_tmpl->Set(isolate, "toJSON", v8::FunctionTemplate::New(isolate, PositionToJSON));
+		AddToJsonToTemplate(isolate, position_idx_tmpl, att_to_jsons, so, "position");
 
 		Local<Object> position_inst = position_idx_tmpl->NewInstance(context).ToLocalChecked();
 		Local<Array> position_dummyArray = Array::New(isolate, 0);

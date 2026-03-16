@@ -36,14 +36,71 @@ namespace nov8
 
 	std::string v8_name(Isolate* isolate, Local<Name> name)
 	{
-		v8::Local<v8::String> v8String = name->ToString(isolate->GetCurrentContext()).ToLocalChecked();
-		v8::String::Utf8Value utf8(isolate, v8String);
+		Local<String> v8String = name->ToString(isolate->GetCurrentContext()).ToLocalChecked();
+		String::Utf8Value utf8(isolate, v8String);
 		return *utf8;
+	}
+
+	Local<String> v8_string(Isolate* isolate, std::string str)
+	{
+		return String::NewFromUtf8(isolate, str.c_str()).ToLocalChecked();
 	}
 
 	Local<External> v8_external(Isolate* isolate, void* value)
 	{
 		return External::New(isolate, value);
+	}
+
+	Local<Value> v8_json_parse(Isolate* isolate, nlohmann::json& json)
+	{
+		Local<String> v8_json_str = v8_string(isolate, json.dump());
+		Local<Value> json_object;
+		if (JSON::Parse(isolate->GetCurrentContext(), v8_json_str).ToLocal(&json_object))
+			return json_object;
+		return Null(isolate);
+	}
+
+	//json
+	void v8_toJSON(const FunctionCallbackInfo<Value>& args)
+	{
+		Isolate* isolate = args.GetIsolate();
+		Local<Value> data = args.Data();
+		if (!data.IsEmpty() && data->IsExternal()) {
+			Local<External> external = data.As<External>();
+			auto& toJSON = *static_cast<v8_to_json*>(external->Value());
+			toJSON(args);
+		}
+	}
+
+	v8_to_json v8_toJSON(nlohmann::json* json)
+	{
+		return [=](const FunctionCallbackInfo<Value>& args)
+			{
+				Isolate* isolate = args.GetIsolate();
+
+				args.GetReturnValue().Set(v8_json_parse(isolate, *json));
+			};
+	}
+
+	v8_to_json v8_toJSON(nlohmann::json* json, std::string attribute) {
+		return [=](const FunctionCallbackInfo<Value>& args)
+			{
+				Isolate* isolate = args.GetIsolate();
+
+				args.GetReturnValue().Set(v8_json_parse(isolate, json->at(attribute)));
+			};
+	}
+
+	void AddToJsonToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_to_json& att_to_jsons, nlohmann::json* json)
+	{
+		att_to_jsons.insert_or_assign("toJSON", v8_toJSON(json));
+		tmpl->Set(isolate, "toJSON", FunctionTemplate::New(isolate, v8_toJSON, v8_external(isolate, &att_to_jsons.at("toJSON"))));
+	}
+
+	void AddToJsonToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_to_json& att_to_jsons, nlohmann::json* json, std::string attribute)
+	{
+		att_to_jsons.insert_or_assign(attribute, v8_toJSON(json, attribute));
+		tmpl->Set(isolate, "toJSON", FunctionTemplate::New(isolate, v8_toJSON, v8_external(isolate, &att_to_jsons.at(attribute))));
 	}
 
 	//indexed
@@ -81,7 +138,7 @@ namespace nov8
 	template<>
 	v8_idx_set v8_idx_set_json<XMFLOAT3>(nlohmann::json* json, std::string attribute)
 	{
-		return [=](uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& info)
+		return [=](uint32_t index, Local<Value> value, const PropertyCallbackInfo<Value>& info)
 			{
 				if (index >= 3) return;
 				json->at(attribute).at(index) = static_cast<float>(value->NumberValue(info.GetIsolate()->GetCurrentContext()).ToChecked());
@@ -99,7 +156,7 @@ namespace nov8
 	}
 	template<>
 	v8_idx_enum v8_idx_enumerator_json<XMFLOAT3>(nlohmann::json* json, std::string attribute) {
-		return [=](const v8::PropertyCallbackInfo<Array>& info)
+		return [=](const PropertyCallbackInfo<Array>& info)
 			{
 				Isolate* isolate = info.GetIsolate();
 				Local<Array> arr = Array::New(isolate, 3);
@@ -137,7 +194,7 @@ namespace nov8
 		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
 			{
 				if (value->IsString()) {
-					v8::String::Utf8Value utf8(info.GetIsolate(), value);
+					String::Utf8Value utf8(info.GetIsolate(), value);
 					json->at(attribute) = std::string(*utf8);
 				}
 				info.GetReturnValue().Set(value);
@@ -156,14 +213,14 @@ namespace nov8
 	template<>
 	v8_set v8_set_json<XMFLOAT3>(nlohmann::json* json, std::string attribute)
 	{
-		return [=](v8::Local<v8::Name> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info)
+		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
 			{
 				if (!value->IsArray()) return;
 
 				nlohmann::json& jarr = json->at(attribute);
 				Local<Array> arr = value.As<Array>();
 				for (uint32_t i = 0; i < 3 && i < arr->Length(); i++) {
-					v8::Local<v8::Value> item;
+					Local<Value> item;
 					if (arr->Get(info.GetIsolate()->GetCurrentContext(), i).ToLocal(&item)) {
 						jarr.at(i) = static_cast<float>(item->NumberValue(info.GetIsolate()->GetCurrentContext()).ToChecked());
 					}

@@ -11,9 +11,22 @@ namespace nov8
 	void ConsoleLog(const FunctionCallbackInfo<Value>& info);
 	void AddConsoleToContext(Isolate* isolate, Local<Context> context);
 
+	//utils
 	Local<Name> v8_name(Isolate* isolate, std::string name);
 	std::string v8_name(Isolate* isolate, Local<Name> name);
+	Local<String> v8_string(Isolate* isolate, std::string str);
 	Local<External> v8_external(Isolate* isolate, void* value);
+	Local<Value> v8_json_parse(Isolate* isolate, nlohmann::json& json);
+
+	//json
+	using v8_to_json = std::function<void(const FunctionCallbackInfo<Value>&)>;
+	using v8_att_to_json = std::map<std::string, v8_to_json>;
+
+	void v8_toJSON(const FunctionCallbackInfo<Value>&);
+	v8_to_json v8_toJSON(nlohmann::json* json);
+	v8_to_json v8_toJSON(nlohmann::json* json, std::string attribute);
+	void AddToJsonToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_to_json& att_to_jsons, nlohmann::json* json);
+	void AddToJsonToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_to_json& att_to_jsons, nlohmann::json* json, std::string attribute);
 
 	//indexed
 	using v8_idx_get = std::function<void(uint32_t, const PropertyCallbackInfo<Value>&)>;
@@ -92,4 +105,11 @@ namespace nov8
 	v8_get v8_get_json<XMFLOAT3>(nlohmann::json* json, std::string attribute);
 	template<>
 	v8_set v8_set_json<XMFLOAT3>(nlohmann::json* json, std::string attribute);
+
+	struct v8_att_context
+	{
+		v8_att_idx_handlers att_idx_handlers;
+		v8_att_accessors att_accessors;
+		v8_att_to_json att_to_jsons;
+	};
 };
