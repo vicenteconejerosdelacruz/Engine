@@ -4,6 +4,7 @@
 #include <v8pp/module.hpp>
 #include <nlohmann/json.hpp>
 
+struct MeshMaterial;
 using namespace v8;
 namespace nov8
 {
@@ -20,13 +21,13 @@ namespace nov8
 
 	//json
 	using v8_to_json = std::function<void(const FunctionCallbackInfo<Value>&)>;
-	using v8_att_to_json = std::map<std::string, v8_to_json>;
+	using v8_att_to_jsons = std::map<std::string, v8_to_json>;
 
 	void v8_toJSON(const FunctionCallbackInfo<Value>&);
 	v8_to_json v8_toJSON(nlohmann::json* json);
 	v8_to_json v8_toJSON(nlohmann::json* json, std::string attribute);
-	void AddToJsonToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_to_json& att_to_jsons, nlohmann::json* json);
-	void AddToJsonToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_to_json& att_to_jsons, nlohmann::json* json, std::string attribute);
+	void AddToJsonToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, std::string path, v8_att_to_jsons& att_to_jsons, nlohmann::json& json);
+	void AddToJsonToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, std::string path, v8_att_to_jsons& att_to_jsons, nlohmann::json& json, std::string attribute);
 
 	//indexed
 	using v8_idx_get = std::function<void(uint32_t, const PropertyCallbackInfo<Value>&)>;
@@ -100,16 +101,43 @@ namespace nov8
 	v8_get v8_get_json<std::string>(nlohmann::json* json, std::string attribute);
 	template<>
 	v8_set v8_set_json<std::string>(nlohmann::json* json, std::string attribute);
+	//bool
+	template<>
+	v8_get v8_get_json<bool>(nlohmann::json* json, std::string attribute);
+	template<>
+	v8_set v8_set_json<bool>(nlohmann::json* json, std::string attribute);
+	//int
+	template<>
+	v8_get v8_get_json<int>(nlohmann::json* json, std::string attribute);
+	template<>
+	v8_set v8_set_json<int>(nlohmann::json* json, std::string attribute);
+	//unsigned int
+	template<>
+	v8_get v8_get_json<unsigned int>(nlohmann::json* json, std::string attribute);
+	template<>
+	v8_set v8_set_json<unsigned int>(nlohmann::json* json, std::string attribute);
+	//float
+	template<>
+	v8_get v8_get_json<float>(nlohmann::json* json, std::string attribute);
+	template<>
+	v8_set v8_set_json<float>(nlohmann::json* json, std::string attribute);
 	//accessors XMFLOAT3
 	template<>
 	v8_get v8_get_json<XMFLOAT3>(nlohmann::json* json, std::string attribute);
 	template<>
 	v8_set v8_set_json<XMFLOAT3>(nlohmann::json* json, std::string attribute);
+	//accessors MeshMaterial
+	template<>
+	v8_get v8_get_json<MeshMaterial>(nlohmann::json* json, std::string attribute);
+	template<>
+	v8_set v8_set_json<MeshMaterial>(nlohmann::json* json, std::string attribute);
 
+	using v8_att_templates = std::map<std::string, Local<ObjectTemplate>>;
 	struct v8_att_context
 	{
 		v8_att_idx_handlers att_idx_handlers;
 		v8_att_accessors att_accessors;
-		v8_att_to_json att_to_jsons;
+		v8_att_to_jsons att_to_jsons;
+		v8_att_templates att_templates;
 	};
 };
