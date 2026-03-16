@@ -108,6 +108,7 @@ namespace Scene
 		virtual SceneObjectType JType() { return SO_None; }
 		JUUID Juuid() { return JUUID(at("uuid")); }
 		SUUUID SUuuid() { return std::make_tuple(unit, Juuid()); }
+		std::string SUuuid_str() { return std::to_string(unit) + "/" + Juuid(); }
 
 		//json patching
 		virtual void JUpdate(nlohmann::json p);
