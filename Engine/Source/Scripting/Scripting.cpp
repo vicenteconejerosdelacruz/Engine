@@ -114,8 +114,6 @@ namespace Scripting
 	{
 		Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
 
-		v8_att_idx_handlers& att_idx_handlers = att_context.att_idx_handlers;
-		v8_att_accessors& att_accessors = att_context.att_accessors;
 		v8_att_to_jsons& att_to_jsons = att_context.att_to_jsons;
 
 		std::string suuuid_str = so->SUuuid_str();
