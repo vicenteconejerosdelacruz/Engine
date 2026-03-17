@@ -57,69 +57,6 @@ namespace Scripting
 		binder(isolate);
 	}
 
-	using v8_template_attribute = std::function<void(Isolate*, Local<ObjectTemplate>&, v8_att_context&, nlohmann::json&, std::string, std::string)>;
-	using v8_context_attribute = std::function<void(Isolate* isolate, v8_att_context& att_context, nlohmann::json& json, std::string path, std::string attribute)>;
-
-	template<typename T>
-	void v8_template_json_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, nlohmann::json& json, std::string path, std::string attribute)
-	{
-		v8_att_accessors& att_accessors = att_context.att_accessors;
-		std::string jptr = path + "/" + attribute;
-		att_accessors.insert_or_assign(jptr, v8_create_accessor<T>(&json, attribute));
-		tmpl->SetAccessor(v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
-	};
-
-	template<>
-	void v8_template_json_attribute<XMFLOAT3>(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, nlohmann::json& json, std::string path, std::string attribute)
-	{
-		v8_att_idx_handlers& att_idx_handlers = att_context.att_idx_handlers;
-		v8_att_to_jsons& att_to_jsons = att_context.att_to_jsons;
-		v8_att_templates& att_templates = att_context.att_templates;
-
-		std::string jptr = path + "/" + attribute;
-
-		att_idx_handlers.insert_or_assign(jptr, v8_create_idx_handler<XMFLOAT3>(&json, attribute));
-		Local<ObjectTemplate> xmf3_idx_tmpl = ObjectTemplate::New(isolate);
-		xmf3_idx_tmpl->SetIndexedPropertyHandler(v8_idx_getter, v8_idx_setter, v8_idx_query, nullptr, v8_idx_enumerator, v8_external(isolate, &att_idx_handlers.at(jptr)));
-		xmf3_idx_tmpl->SetAccessor(v8_name(isolate, "length"),
-			[](v8::Local<v8::Name>, const PropertyCallbackInfo<Value>& info) { info.GetReturnValue().Set(3); }
-		);
-		AddToJsonToTemplate(isolate, xmf3_idx_tmpl, path, att_to_jsons, json, attribute);
-		att_templates.insert_or_assign(jptr, xmf3_idx_tmpl);
-	}
-
-	template<>
-	void v8_template_json_attribute<MeshMaterial>(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, nlohmann::json& json, std::string path, std::string attribute)
-	{
-		v8_att_templates& att_templates = att_context.att_templates;
-		v8_att_accessors& att_accessors = att_context.att_accessors;
-		v8_att_to_jsons& att_to_jsons = att_context.att_to_jsons;
-
-		//:/meshMaterial
-		std::string jptr = path + "/" + attribute;
-		Local<ObjectTemplate> meshMaterial_tmpl = ObjectTemplate::New(isolate);
-		att_templates.insert_or_assign(jptr, meshMaterial_tmpl);
-		att_accessors.insert_or_assign(jptr, v8_create_accessor<MeshMaterial>(&json, attribute));
-
-		//:/meshMaterial/material
-		std::string material_jptr = jptr + "/material";
-		att_accessors.insert_or_assign(material_jptr, v8_create_accessor<MeshMaterial>(&json.at(attribute), "material"));
-		meshMaterial_tmpl->SetAccessor(v8_name(isolate, "material"), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(material_jptr)));
-		AddToJsonToTemplate(isolate, meshMaterial_tmpl, jptr, att_to_jsons, json.at(attribute), "material");
-
-		//:/meshMaterial/mesh
-		std::string mesh_jptr = jptr + "/mesh";
-		Local<ObjectTemplate> meshMaterial_mesh_tmpl = ObjectTemplate::New(isolate);
-		att_templates.insert_or_assign(mesh_jptr, meshMaterial_mesh_tmpl);
-		att_accessors.insert_or_assign(mesh_jptr, v8_create_accessor<MeshMaterial>(&json.at(attribute), "mesh"));
-
-		//:/meshMaterial/mesh/primitive
-		std::string primitive_jptr = mesh_jptr + "/primitive";
-		att_accessors.insert_or_assign(primitive_jptr, v8_create_accessor<MeshMaterial>(&json.at(attribute).at("mesh"), "primitive"));
-		meshMaterial_mesh_tmpl->SetAccessor(v8_name(isolate, "primitive"), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(primitive_jptr)));
-		AddToJsonToTemplate(isolate, meshMaterial_mesh_tmpl, mesh_jptr, att_to_jsons, json.at(attribute).at("mesh"), "primitive");
-	}
-
 	void AddTemplateJsonAttributes(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, nlohmann::json& json, std::string path)
 	{
 		std::map<std::string, v8_template_attribute> attributeCreator =
@@ -154,42 +91,6 @@ namespace Scripting
 			attributeCreator.at(elem.key())(isolate, tmpl, att_context, json, path, elem.key());
 		}
 	}
-
-	template<typename T>
-	void v8_context_json_attribute(Isolate* isolate, v8_att_context& att_context, nlohmann::json& json, std::string path, std::string attribute) {}
-	template<>
-	void v8_context_json_attribute<XMFLOAT3>(Isolate* isolate, v8_att_context& att_context, nlohmann::json& json, std::string path, std::string attribute)
-	{
-		v8_att_templates& att_templates = att_context.att_templates;
-		v8_att_accessors& att_accessors = att_context.att_accessors;
-		std::string jptr = path + "/" + attribute;
-
-		Local<Object> inst = att_templates.at(jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
-		Local<Array> dummyArray = Array::New(isolate, 0);
-		inst->SetPrototype(isolate->GetCurrentContext(), dummyArray);
-
-		att_accessors.insert_or_assign(jptr, v8_create_accessor<XMFLOAT3>(&json, attribute, inst));
-		isolate->GetCurrentContext()->Global()->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
-	}
-	template<>
-	void v8_context_json_attribute<MeshMaterial>(Isolate* isolate, v8_att_context& att_context, nlohmann::json& json, std::string path, std::string attribute)
-	{
-		v8_att_templates& att_templates = att_context.att_templates;
-		v8_att_accessors& att_accessors = att_context.att_accessors;
-
-		//:/meshMaterial
-		std::string jptr = path + "/" + attribute;
-		Local<Object> inst = att_templates.at(jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
-		att_accessors.insert_or_assign(jptr, v8_create_accessor<MeshMaterial>(&json, attribute, inst));
-		isolate->GetCurrentContext()->Global()->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
-
-		//:/meshMaterial/mesh
-		std::string mesh_jptr = jptr + "/mesh";
-		Local<Object> mesh_inst = att_templates.at(mesh_jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
-		att_accessors.insert_or_assign(mesh_jptr, v8_create_accessor<MeshMaterial>(&json, attribute, mesh_inst));
-		inst->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, "mesh"), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(mesh_jptr)));
-	}
-
 
 	void AddContextJsonAttributes(Isolate* isolate, Local<Context> context, v8_att_context& att_context, nlohmann::json& json, std::string path)
 	{
