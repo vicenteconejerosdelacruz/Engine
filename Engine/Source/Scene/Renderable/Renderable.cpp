@@ -868,6 +868,47 @@ namespace Scene
 		renderReady = value;
 	}
 
+	//Scripting
+	v8_templates_creators Renderable::GetV8TemplatesCreators()
+	{
+		return {
+			{ "uuid", v8_template_json_attribute<std::string> },
+			{ "name", v8_template_json_attribute<std::string> },
+			{ "castShadows" , v8_template_json_attribute<bool> },
+			{ "shadowed" , v8_template_json_attribute<bool> },
+			{ "hidden", v8_template_json_attribute<bool> },
+			{ "ibl", v8_template_json_attribute<bool> },
+			{ "meshMaterial", v8_template_json_attribute<MeshMaterial> },
+			{ "model", v8_template_json_attribute<std::string> },
+			{ "animationSequence", v8_template_json_attribute<std::string> },
+			{ "animation", v8_template_json_attribute<std::string> },
+			{ "animationTime", v8_template_json_attribute<float> },
+			{ "animationTimeFactor", v8_template_json_attribute<float> },
+			{ "animationLoop", v8_template_json_attribute<bool> },
+			{ "animationPlay" , v8_template_json_attribute<bool> },
+			{ "animationFrame", v8_template_json_attribute<int> },
+			{ "animationUseTransformation", v8_template_json_attribute<bool> },
+			{ "position", v8_template_json_attribute<XMFLOAT3> },
+			{ "rotation", v8_template_json_attribute<XMFLOAT3> },
+			{ "scale", v8_template_json_attribute<XMFLOAT3> },
+			{ "skipMeshes", v8_template_json_set_attribute<int> },
+			{ "topology", v8_template_json_enum_attribute<D3D_PRIMITIVE_TOPOLOGY> },
+			{ "checkBoundingBox" , v8_template_json_attribute<bool> },
+			{ "uniqueMaterialInstance", v8_template_json_attribute<bool> },
+			{ "visible", v8_template_json_attribute<bool> },
+		};
+	}
+
+	v8_context_creators Renderable::GetV8ContextCreators()
+	{
+		return {
+			{ "meshMaterial", v8_context_json_attribute<MeshMaterial> },
+			{ "position", v8_context_json_attribute<XMFLOAT3> },
+			{ "rotation", v8_context_json_attribute<XMFLOAT3> },
+			{ "scale", v8_context_json_attribute<XMFLOAT3> },
+		};
+	}
+
 	void RenderablesStep(SceneUnitId unit, float dt)
 	{
 		auto& Renderables = GetRenderables(unit);

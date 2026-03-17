@@ -9,6 +9,7 @@
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <Renderable/RenderableBoundingBox.h>
 #include <PhysicObject.h>
+#include <NoV8.h>
 
 typedef std::vector<MeshInstanceID> RenderableMeshes;
 typedef std::unordered_map<RenderPassInstanceID, std::vector<MaterialInstanceID>> RenderableMaterials; //RenderPassInstanceID -> MaterialInstanceID
@@ -23,6 +24,7 @@ static nlohmann::json defaultPickingShaderAttributes = { { "uniqueMaterialInstan
 
 using namespace Game;
 using namespace Physics;
+using namespace nov8;
 
 namespace Scene
 {
@@ -169,6 +171,9 @@ namespace Scene
 		bool RenderReady();
 		void RenderReady(bool value);
 
+		//Scripting
+		v8_templates_creators GetV8TemplatesCreators();
+		v8_context_creators GetV8ContextCreators();
 
 #if defined(_EDITOR)
 		std::function<void()> OnPick;

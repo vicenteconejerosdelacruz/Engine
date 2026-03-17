@@ -5,8 +5,10 @@
 #include <v8pp/context.hpp>
 #include <v8pp/module.hpp>
 #include <nlohmann/json.hpp>
+#include <set>
 
 struct MeshMaterial;
+struct JObject;
 using namespace v8;
 namespace nov8
 {
@@ -47,7 +49,7 @@ namespace nov8
 	template<typename T>
 	inline v8_idx_get v8_idx_get_json(nlohmann::json* json, std::string attribute) { return nullptr; }
 	template<typename T>
-	inline v8_idx_set v8_idx_set_json(nlohmann::json* json, std::string attribute) { return nullptr; }
+	inline v8_idx_set v8_idx_set_json(JObject* jobject, nlohmann::json* json, std::string attribute) { return nullptr; }
 	template<typename T>
 	inline v8_idx_qry v8_idx_query_json(nlohmann::json* json, std::string attribute) { return nullptr; }
 	template<typename T>
@@ -64,7 +66,7 @@ namespace nov8
 			};
 	}
 	template<>
-	inline v8_idx_set v8_idx_set_json<XMFLOAT3>(nlohmann::json* json, std::string attribute)
+	inline v8_idx_set v8_idx_set_json<XMFLOAT3>(JObject* jobject, nlohmann::json* json, std::string attribute)
 	{
 		return [=](uint32_t index, Local<Value> value, const PropertyCallbackInfo<Value>& info)
 			{
@@ -107,7 +109,7 @@ namespace nov8
 	template<typename T>
 	inline v8_get v8_get_json(nlohmann::json* json, std::string attribute) { return nullptr; }
 	template<typename T>
-	inline v8_set v8_set_json(nlohmann::json* json, std::string attribute) { return nullptr; }
+	inline v8_set v8_set_json(JObject* jobject, nlohmann::json* json, std::string attribute) { return nullptr; }
 
 	//accessors std::string
 	template<>
@@ -119,7 +121,7 @@ namespace nov8
 			};
 	}
 	template<>
-	inline v8_set v8_set_json<std::string>(nlohmann::json* json, std::string attribute)
+	inline v8_set v8_set_json<std::string>(JObject* jobject, nlohmann::json* json, std::string attribute)
 	{
 		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
 			{
@@ -140,7 +142,7 @@ namespace nov8
 			};
 	}
 	template<>
-	inline v8_set v8_set_json<bool>(nlohmann::json* json, std::string attribute)
+	inline v8_set v8_set_json<bool>(JObject* jobject, nlohmann::json* json, std::string attribute)
 	{
 		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
 			{
@@ -157,11 +159,44 @@ namespace nov8
 			};
 	}
 	template<>
-	inline v8_set v8_set_json<int>(nlohmann::json* json, std::string attribute)
+	inline v8_set v8_set_json<int>(JObject* jobject, nlohmann::json* json, std::string attribute)
 	{
 		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
 			{
 				json->at(attribute) = value->Int32Value(info.GetIsolate()->GetCurrentContext()).ToChecked();
+			};
+	}
+	//accessors std::set<int>
+	template<>
+	inline v8_get v8_get_json<std::set<int>>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, const PropertyCallbackInfo<Value>& info)
+			{
+				info.GetReturnValue().Set(v8_json_parse(info.GetIsolate(), json->at(attribute)));
+			};
+	}
+	template<>
+	inline v8_set v8_set_json<std::set<int>>(JObject* jobject, nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
+			{
+				if (!value->IsArray()) return;
+
+				nlohmann::json& jarr = json->at(attribute);
+				jarr.clear();
+				Local<Array> arr = value.As<Array>();
+				std::set<int> values;
+				for (uint32_t i = 0; i < arr->Length(); i++) {
+					Local<Value> item;
+					if (arr->Get(info.GetIsolate()->GetCurrentContext(), i).ToLocal(&item)) {
+						int value = static_cast<int>(item->Int32Value(info.GetIsolate()->GetCurrentContext()).ToChecked());
+						if (!values.contains(value))
+						{
+							jarr.at(i) = value;
+							values.insert(value);
+						}
+					}
+				}
 			};
 	}
 	//accessors unsigned int
@@ -174,7 +209,7 @@ namespace nov8
 			};
 	}
 	template<>
-	inline v8_set v8_set_json<unsigned int>(nlohmann::json* json, std::string attribute)
+	inline v8_set v8_set_json<unsigned int>(JObject* jobject, nlohmann::json* json, std::string attribute)
 	{
 		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
 			{
@@ -191,7 +226,7 @@ namespace nov8
 			};
 	}
 	template<>
-	inline v8_set v8_set_json<float>(nlohmann::json* json, std::string attribute)
+	inline v8_set v8_set_json<float>(JObject* jobject, nlohmann::json* json, std::string attribute)
 	{
 		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
 			{
@@ -209,7 +244,7 @@ namespace nov8
 			};
 	}
 	template<>
-	inline v8_set v8_set_json<XMFLOAT3>(nlohmann::json* json, std::string attribute)
+	inline v8_set v8_set_json<XMFLOAT3>(JObject* jobject, nlohmann::json* json, std::string attribute)
 	{
 		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
 			{
@@ -241,7 +276,7 @@ namespace nov8
 			};
 	}
 	template<>
-	inline v8_set v8_set_json<MeshMaterial>(nlohmann::json* json, std::string attribute)
+	inline v8_set v8_set_json<MeshMaterial>(JObject* jobject, nlohmann::json* json, std::string attribute)
 	{
 		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
 			{
@@ -259,37 +294,37 @@ namespace nov8
 	};
 
 	template<typename T>
-	inline v8_idx_handler v8_create_idx_handler(nlohmann::json* json, std::string attribute)
+	inline v8_idx_handler v8_create_idx_handler(JObject* jobject, nlohmann::json* json, std::string attribute)
 	{
 		return std::make_tuple(
 			v8_idx_get_json<T>(json, attribute),
-			v8_idx_set_json<T>(json, attribute),
+			v8_idx_set_json<T>(jobject, json, attribute),
 			v8_idx_query_json<T>(json, attribute),
 			v8_idx_enumerator_json<T>(json, attribute)
 		);
 	}
 
 	template<typename T>
-	inline v8_accessor v8_create_accessor(nlohmann::json* json, std::string attribute, Local<Object> object = Local<Object>())
+	inline v8_accessor v8_create_accessor(JObject* jobject, nlohmann::json* json, std::string attribute, Local<Object> object = Local<Object>())
 	{
 		return std::make_tuple(
 			v8_get_json<T>(json, attribute),
-			v8_set_json<T>(json, attribute),
+			v8_set_json<T>(jobject, json, attribute),
 			object
 		);
 	}
 
-	using v8_template_attribute = std::function<void(Isolate*, Local<ObjectTemplate>&, v8_att_context&, nlohmann::json&, std::string, std::string)>;
+	using v8_template_attribute = std::function<void(Isolate*, Local<ObjectTemplate>&, v8_att_context&, JObject&, std::string, std::string)>;
 	template<typename T>
-	inline void v8_template_json_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, nlohmann::json& json, std::string path, std::string attribute)
+	inline void v8_template_json_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 	{
 		v8_att_accessors& att_accessors = att_context.att_accessors;
 		std::string jptr = path + "/" + attribute;
-		att_accessors.insert_or_assign(jptr, v8_create_accessor<T>(&json, attribute));
+		att_accessors.insert_or_assign(jptr, v8_create_accessor<T>(&json, &json, attribute));
 		tmpl->SetAccessor(v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
 	};
 	template<>
-	inline void v8_template_json_attribute<XMFLOAT3>(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, nlohmann::json& json, std::string path, std::string attribute)
+	inline void v8_template_json_attribute<XMFLOAT3>(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 	{
 		v8_att_idx_handlers& att_idx_handlers = att_context.att_idx_handlers;
 		v8_att_to_jsons& att_to_jsons = att_context.att_to_jsons;
@@ -297,7 +332,7 @@ namespace nov8
 
 		std::string jptr = path + "/" + attribute;
 
-		att_idx_handlers.insert_or_assign(jptr, v8_create_idx_handler<XMFLOAT3>(&json, attribute));
+		att_idx_handlers.insert_or_assign(jptr, v8_create_idx_handler<XMFLOAT3>(&json, &json, attribute));
 		Local<ObjectTemplate> xmf3_idx_tmpl = ObjectTemplate::New(isolate);
 		xmf3_idx_tmpl->SetIndexedPropertyHandler(v8_idx_getter, v8_idx_setter, v8_idx_query, nullptr, v8_idx_enumerator, v8_external(isolate, &att_idx_handlers.at(jptr)));
 		xmf3_idx_tmpl->SetAccessor(v8_name(isolate, "length"),
@@ -307,7 +342,7 @@ namespace nov8
 		att_templates.insert_or_assign(jptr, xmf3_idx_tmpl);
 	}
 	template<>
-	inline void v8_template_json_attribute<MeshMaterial>(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, nlohmann::json& json, std::string path, std::string attribute)
+	inline void v8_template_json_attribute<MeshMaterial>(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 	{
 		v8_att_templates& att_templates = att_context.att_templates;
 		v8_att_accessors& att_accessors = att_context.att_accessors;
@@ -317,11 +352,11 @@ namespace nov8
 		std::string jptr = path + "/" + attribute;
 		Local<ObjectTemplate> meshMaterial_tmpl = ObjectTemplate::New(isolate);
 		att_templates.insert_or_assign(jptr, meshMaterial_tmpl);
-		att_accessors.insert_or_assign(jptr, v8_create_accessor<MeshMaterial>(&json, attribute));
+		att_accessors.insert_or_assign(jptr, v8_create_accessor<MeshMaterial>(&json, &json, attribute));
 
 		//:/meshMaterial/material
 		std::string material_jptr = jptr + "/material";
-		att_accessors.insert_or_assign(material_jptr, v8_create_accessor<MeshMaterial>(&json.at(attribute), "material"));
+		att_accessors.insert_or_assign(material_jptr, v8_create_accessor<MeshMaterial>(&json, &json.at(attribute), "material"));
 		meshMaterial_tmpl->SetAccessor(v8_name(isolate, "material"), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(material_jptr)));
 		AddToJsonToTemplate(isolate, meshMaterial_tmpl, jptr, att_to_jsons, json.at(attribute), "material");
 
@@ -329,20 +364,33 @@ namespace nov8
 		std::string mesh_jptr = jptr + "/mesh";
 		Local<ObjectTemplate> meshMaterial_mesh_tmpl = ObjectTemplate::New(isolate);
 		att_templates.insert_or_assign(mesh_jptr, meshMaterial_mesh_tmpl);
-		att_accessors.insert_or_assign(mesh_jptr, v8_create_accessor<MeshMaterial>(&json.at(attribute), "mesh"));
+		att_accessors.insert_or_assign(mesh_jptr, v8_create_accessor<MeshMaterial>(&json, &json.at(attribute), "mesh"));
 
 		//:/meshMaterial/mesh/primitive
 		std::string primitive_jptr = mesh_jptr + "/primitive";
-		att_accessors.insert_or_assign(primitive_jptr, v8_create_accessor<MeshMaterial>(&json.at(attribute).at("mesh"), "primitive"));
+		att_accessors.insert_or_assign(primitive_jptr, v8_create_accessor<MeshMaterial>(&json, &json.at(attribute).at("mesh"), "primitive"));
 		meshMaterial_mesh_tmpl->SetAccessor(v8_name(isolate, "primitive"), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(primitive_jptr)));
 		AddToJsonToTemplate(isolate, meshMaterial_mesh_tmpl, mesh_jptr, att_to_jsons, json.at(attribute).at("mesh"), "primitive");
 	}
-
-	using v8_context_attribute = std::function<void(Isolate* isolate, v8_att_context& att_context, nlohmann::json& json, std::string path, std::string attribute)>;
 	template<typename T>
-	inline void v8_context_json_attribute(Isolate* isolate, v8_att_context& att_context, nlohmann::json& json, std::string path, std::string attribute) {}
+	inline void v8_template_json_enum_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+	{
+		v8_template_json_attribute<std::string>(isolate, tmpl, att_context, json, path, attribute);
+	}
+	template<typename T>
+	inline void v8_template_json_set_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+	{
+		v8_att_accessors& att_accessors = att_context.att_accessors;
+		std::string jptr = path + "/" + attribute;
+		att_accessors.insert_or_assign(jptr, v8_create_accessor<std::set<T>>(&json, &json, attribute));
+		tmpl->SetAccessor(v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
+	}
+
+	using v8_context_attribute = std::function<void(Isolate* isolate, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)>;
+	template<typename T>
+	inline void v8_context_json_attribute(Isolate* isolate, v8_att_context& att_context, JObject& json, std::string path, std::string attribute) {}
 	template<>
-	inline void v8_context_json_attribute<XMFLOAT3>(Isolate* isolate, v8_att_context& att_context, nlohmann::json& json, std::string path, std::string attribute)
+	inline void v8_context_json_attribute<XMFLOAT3>(Isolate* isolate, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 	{
 		v8_att_templates& att_templates = att_context.att_templates;
 		v8_att_accessors& att_accessors = att_context.att_accessors;
@@ -352,11 +400,11 @@ namespace nov8
 		Local<Array> dummyArray = Array::New(isolate, 0);
 		inst->SetPrototype(isolate->GetCurrentContext(), dummyArray);
 
-		att_accessors.insert_or_assign(jptr, v8_create_accessor<XMFLOAT3>(&json, attribute, inst));
+		att_accessors.insert_or_assign(jptr, v8_create_accessor<XMFLOAT3>(&json, &json, attribute, inst));
 		isolate->GetCurrentContext()->Global()->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
 	}
 	template<>
-	inline void v8_context_json_attribute<MeshMaterial>(Isolate* isolate, v8_att_context& att_context, nlohmann::json& json, std::string path, std::string attribute)
+	inline void v8_context_json_attribute<MeshMaterial>(Isolate* isolate, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 	{
 		v8_att_templates& att_templates = att_context.att_templates;
 		v8_att_accessors& att_accessors = att_context.att_accessors;
@@ -364,13 +412,16 @@ namespace nov8
 		//:/meshMaterial
 		std::string jptr = path + "/" + attribute;
 		Local<Object> inst = att_templates.at(jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
-		att_accessors.insert_or_assign(jptr, v8_create_accessor<MeshMaterial>(&json, attribute, inst));
+		att_accessors.insert_or_assign(jptr, v8_create_accessor<MeshMaterial>(&json, &json, attribute, inst));
 		isolate->GetCurrentContext()->Global()->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
 
 		//:/meshMaterial/mesh
 		std::string mesh_jptr = jptr + "/mesh";
 		Local<Object> mesh_inst = att_templates.at(mesh_jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
-		att_accessors.insert_or_assign(mesh_jptr, v8_create_accessor<MeshMaterial>(&json, attribute, mesh_inst));
+		att_accessors.insert_or_assign(mesh_jptr, v8_create_accessor<MeshMaterial>(&json, &json, attribute, mesh_inst));
 		inst->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, "mesh"), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(mesh_jptr)));
 	}
+
+	using v8_templates_creators = std::map<std::string, v8_template_attribute>;
+	using v8_context_creators = std::map<std::string, v8_context_attribute>;
 };

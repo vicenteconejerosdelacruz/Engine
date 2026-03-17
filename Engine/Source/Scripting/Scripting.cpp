@@ -57,33 +57,9 @@ namespace Scripting
 		binder(isolate);
 	}
 
-	void AddTemplateJsonAttributes(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, nlohmann::json& json, std::string path)
+	void AddTemplateJsonAttributes(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, SceneObject& json, std::string path)
 	{
-		std::map<std::string, v8_template_attribute> attributeCreator =
-		{
-			{ "uuid", v8_template_json_attribute<std::string> },
-			{ "name", v8_template_json_attribute<std::string> },
-			{ "castShadows" , v8_template_json_attribute<bool> },
-			{ "shadowed" , v8_template_json_attribute<bool> },
-			{ "hidden", v8_template_json_attribute<bool> },
-			{ "ibl", v8_template_json_attribute<bool> },
-			{ "meshMaterial", v8_template_json_attribute<MeshMaterial> },
-			{ "model", v8_template_json_attribute<std::string> },
-			{ "animationSequence", v8_template_json_attribute<std::string> },
-			{ "animation", v8_template_json_attribute<std::string> },
-			{ "animationTime", v8_template_json_attribute<float> },
-			{ "animationTimeFactor", v8_template_json_attribute<float> },
-			{ "animationLoop", v8_template_json_attribute<bool> },
-			{ "animationPlay" , v8_template_json_attribute<bool> },
-			{ "animationFrame", v8_template_json_attribute<int> },
-			{ "animationUseTransformation", v8_template_json_attribute<bool> },
-			{ "position", v8_template_json_attribute<XMFLOAT3> },
-			{ "rotation", v8_template_json_attribute<XMFLOAT3> },
-			{ "scale", v8_template_json_attribute<XMFLOAT3> },
-			{ "checkBoundingBox" , v8_template_json_attribute<bool> },
-			{ "uniqueMaterialInstance", v8_template_json_attribute<bool> },
-			{ "visible", v8_template_json_attribute<bool> },
-		};
+		v8_templates_creators attributeCreator = GetSceneObjectV8TemplatesCreators(json.SUuuid());
 
 		for (auto& elem : json.items())
 		{
@@ -92,16 +68,9 @@ namespace Scripting
 		}
 	}
 
-	void AddContextJsonAttributes(Isolate* isolate, Local<Context> context, v8_att_context& att_context, nlohmann::json& json, std::string path)
+	void AddContextJsonAttributes(Isolate* isolate, Local<Context> context, v8_att_context& att_context, SceneObject& json, std::string path)
 	{
-
-		std::map<std::string, v8_context_attribute> attributeCreator =
-		{
-			{ "meshMaterial", v8_context_json_attribute<MeshMaterial> },
-			{ "position", v8_context_json_attribute<XMFLOAT3> },
-			{ "rotation", v8_context_json_attribute<XMFLOAT3> },
-			{ "scale", v8_context_json_attribute<XMFLOAT3> },
-		};
+		v8_context_creators attributeCreator = GetSceneObjectV8ContextCreators(json.SUuuid());
 
 		for (auto& elem : json.items())
 		{

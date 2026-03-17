@@ -11,10 +11,12 @@
 #include <Templates.h>
 #include <SceneUnit.h>
 #include <SceneObject.h>
+#include <NoV8.h>
 
 namespace DX { class StepTimer; }
 
 using namespace DeviceUtils;
+using namespace nov8;
 
 namespace Scene
 {
@@ -130,6 +132,9 @@ namespace Scene
 
 	SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid);
 	SceneObject* GetSceneObjectPointer(SUUUID suuid);
+
+	v8_templates_creators GetSceneObjectV8TemplatesCreators(SUUUID suuuid);
+	v8_context_creators GetSceneObjectV8ContextCreators(SUUUID suuuid);
 
 #if defined(_EDITOR)
 	//for drawing the panel

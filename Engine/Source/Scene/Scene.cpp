@@ -784,6 +784,114 @@ namespace Scene
 		return GetSceneObjectPointer(FROMSUUUID(suuid));
 	}
 
+	v8_templates_creators GetSceneObjectV8TemplatesCreators(SUUUID suuuid)
+	{
+		std::map<SceneObjectType, std::function<v8_templates_creators(SceneUnitId id, JUUID uuid)>> getP =
+		{
+			{ SO_Renderables, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetRenderableSceneObject(id, uuid);
+					return o->GetV8TemplatesCreators();
+				}
+			}
+			/*,
+			{ SO_Cameras, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetCameraSceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			},
+			{ SO_Lights, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetLightSceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			},
+			{ SO_SoundEffects, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetSoundFXSceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			},
+			{ SO_PhysicScenes, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetPhysicSceneSceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			},
+			{ SO_Triggers, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetTriggerSceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			},
+			{ SO_Boundaries, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetBoundarySceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			}
+			*/
+		};
+
+		SceneObjectType type = GetSceneObjectType(FROMSUUUID(suuuid));
+		return getP.at(type)(FROMSUUUID(suuuid));
+	}
+
+	v8_context_creators GetSceneObjectV8ContextCreators(SUUUID suuuid)
+	{
+		std::map<SceneObjectType, std::function<v8_context_creators(SceneUnitId id, JUUID uuid)>> getP =
+		{
+			{ SO_Renderables, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetRenderableSceneObject(id, uuid);
+					return o->GetV8ContextCreators();
+				}
+			}
+			/*,
+			{ SO_Cameras, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetCameraSceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			},
+			{ SO_Lights, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetLightSceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			},
+			{ SO_SoundEffects, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetSoundFXSceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			},
+			{ SO_PhysicScenes, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetPhysicSceneSceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			},
+			{ SO_Triggers, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetTriggerSceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			},
+			{ SO_Boundaries, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetBoundarySceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			}
+			*/
+		};
+
+		SceneObjectType type = GetSceneObjectType(FROMSUUUID(suuuid));
+		return getP.at(type)(FROMSUUUID(suuuid));
+	}
+
 	SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid)
 	{
 		std::map<SceneObjectType, std::function<SceneObject* (SceneUnitId id, JUUID uuid)>> getP =
