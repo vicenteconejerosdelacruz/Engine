@@ -7,8 +7,6 @@
 #include <UUID.h>
 #include <v8-context.h>
 
-struct JObject;
-
 struct JObject : nlohmann::json
 {
 	virtual ~JObject() = default;
@@ -91,8 +89,9 @@ struct JObject : nlohmann::json
 		updateFlag = 0ULL;
 	}
 
+#if defined(_EDITOR)
 	virtual std::function<bool(JObject*)> GetAssetsConditioner() { return [](JObject*) { return true; }; }
-
 	virtual void EditorPreview(size_t flags) {}
 	virtual void DestroyEditorPreview() {}
+#endif
 };
