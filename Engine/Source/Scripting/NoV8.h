@@ -45,34 +45,55 @@ namespace nov8
 	void v8_idx_enumerator(const PropertyCallbackInfo<Array>& info);
 
 	template<typename T>
-	v8_idx_get v8_idx_get_json(nlohmann::json* json, std::string attribute) { return nullptr; }
+	inline v8_idx_get v8_idx_get_json(nlohmann::json* json, std::string attribute) { return nullptr; }
 	template<typename T>
-	v8_idx_set v8_idx_set_json(nlohmann::json* json, std::string attribute) { return nullptr; }
+	inline v8_idx_set v8_idx_set_json(nlohmann::json* json, std::string attribute) { return nullptr; }
 	template<typename T>
-	v8_idx_qry v8_idx_query_json(nlohmann::json* json, std::string attribute) { return nullptr; }
+	inline v8_idx_qry v8_idx_query_json(nlohmann::json* json, std::string attribute) { return nullptr; }
 	template<typename T>
-	v8_idx_enum v8_idx_enumerator_json(nlohmann::json* json, std::string attribute) { return nullptr; }
-
-	template<typename T>
-	v8_idx_handler v8_create_idx_handler(nlohmann::json* json, std::string attribute)
-	{
-		return std::make_tuple(
-			v8_idx_get_json<T>(json, attribute),
-			v8_idx_set_json<T>(json, attribute),
-			v8_idx_query_json<T>(json, attribute),
-			v8_idx_enumerator_json<T>(json, attribute)
-		);
-	}
+	inline v8_idx_enum v8_idx_enumerator_json(nlohmann::json* json, std::string attribute) { return nullptr; }
 
 	//indexed XMFLOAT3
 	template<>
-	v8_idx_get v8_idx_get_json<XMFLOAT3>(nlohmann::json* json, std::string attribute);
+	inline v8_idx_get v8_idx_get_json<XMFLOAT3>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](uint32_t index, const PropertyCallbackInfo<Value>& info)
+			{
+				if (index > 3) return;
+				info.GetReturnValue().Set(Number::New(info.GetIsolate(), static_cast<float>(json->at(attribute).at(index))));
+			};
+	}
 	template<>
-	v8_idx_set v8_idx_set_json<XMFLOAT3>(nlohmann::json* json, std::string attribute);
+	inline v8_idx_set v8_idx_set_json<XMFLOAT3>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](uint32_t index, Local<Value> value, const PropertyCallbackInfo<Value>& info)
+			{
+				if (index >= 3) return;
+				json->at(attribute).at(index) = static_cast<float>(value->NumberValue(info.GetIsolate()->GetCurrentContext()).ToChecked());
+				info.GetReturnValue().Set(value);
+			};
+	}
 	template<>
-	v8_idx_qry v8_idx_query_json<XMFLOAT3>(nlohmann::json* json, std::string attribute);
+	inline v8_idx_qry v8_idx_query_json<XMFLOAT3>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](uint32_t index, const PropertyCallbackInfo<Integer>& info)
+			{
+				if (index > 3) return;
+				info.GetReturnValue().Set(None);
+			};
+	}
 	template<>
-	v8_idx_enum v8_idx_enumerator_json<XMFLOAT3>(nlohmann::json* json, std::string attribute);
+	inline v8_idx_enum v8_idx_enumerator_json<XMFLOAT3>(nlohmann::json* json, std::string attribute) {
+		return [=](const PropertyCallbackInfo<Array>& info)
+			{
+				Isolate* isolate = info.GetIsolate();
+				Local<Array> arr = Array::New(isolate, 3);
+				for (uint32_t i = 0; i < 3; i++) {
+					arr->Set(isolate->GetCurrentContext(), i, Integer::New(isolate, i)).Check();
+				}
+				info.GetReturnValue().Set(arr);
+			};
+	}
 
 	//accessors
 	using v8_get = std::function<void(Local<Name>, const PropertyCallbackInfo<Value>&)>;
@@ -84,55 +105,149 @@ namespace nov8
 	void v8_setter(Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info);
 
 	template<typename T>
-	v8_get v8_get_json(nlohmann::json* json, std::string attribute) { return nullptr; }
+	inline v8_get v8_get_json(nlohmann::json* json, std::string attribute) { return nullptr; }
 	template<typename T>
-	v8_set v8_set_json(nlohmann::json* json, std::string attribute) { return nullptr; }
+	inline v8_set v8_set_json(nlohmann::json* json, std::string attribute) { return nullptr; }
 
-	template<typename T>
-	v8_accessor v8_create_accessor(nlohmann::json* json, std::string attribute, Local<Object> object = Local<Object>())
+	//accessors std::string
+	template<>
+	inline v8_get v8_get_json<std::string>(nlohmann::json* json, std::string attribute)
 	{
-		return std::make_tuple(
-			v8_get_json<T>(json, attribute),
-			v8_set_json<T>(json, attribute),
-			object
-		);
+		return [=](Local<Name> property, const PropertyCallbackInfo<Value>& info)
+			{
+				info.GetReturnValue().Set(String::NewFromUtf8(info.GetIsolate(), std::string(json->at(attribute)).c_str()).ToLocalChecked());
+			};
 	}
-
-	//std::string
 	template<>
-	v8_get v8_get_json<std::string>(nlohmann::json* json, std::string attribute);
+	inline v8_set v8_set_json<std::string>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
+			{
+				if (value->IsString()) {
+					String::Utf8Value utf8(info.GetIsolate(), value);
+					json->at(attribute) = std::string(*utf8);
+				}
+				info.GetReturnValue().Set(value);
+			};
+	}
+	//accessors bool
 	template<>
-	v8_set v8_set_json<std::string>(nlohmann::json* json, std::string attribute);
-	//bool
+	inline v8_get v8_get_json<bool>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, const PropertyCallbackInfo<Value>& info)
+			{
+				info.GetReturnValue().Set(v8::Boolean::New(info.GetIsolate(), static_cast<bool>(json->at(attribute))));
+			};
+	}
 	template<>
-	v8_get v8_get_json<bool>(nlohmann::json* json, std::string attribute);
+	inline v8_set v8_set_json<bool>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
+			{
+				json->at(attribute) = value->BooleanValue(info.GetIsolate());
+			};
+	}
+	//accessors int
 	template<>
-	v8_set v8_set_json<bool>(nlohmann::json* json, std::string attribute);
-	//int
+	inline v8_get v8_get_json<int>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, const PropertyCallbackInfo<Value>& info)
+			{
+				info.GetReturnValue().Set(Integer::New(info.GetIsolate(), static_cast<int>(json->at(attribute))));
+			};
+	}
 	template<>
-	v8_get v8_get_json<int>(nlohmann::json* json, std::string attribute);
+	inline v8_set v8_set_json<int>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
+			{
+				json->at(attribute) = value->Int32Value(info.GetIsolate()->GetCurrentContext()).ToChecked();
+			};
+	}
+	//accessors unsigned int
 	template<>
-	v8_set v8_set_json<int>(nlohmann::json* json, std::string attribute);
-	//unsigned int
+	inline v8_get v8_get_json<unsigned int>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, const PropertyCallbackInfo<Value>& info)
+			{
+				info.GetReturnValue().Set(Integer::NewFromUnsigned(info.GetIsolate(), static_cast<int>(json->at(attribute))));
+			};
+	}
 	template<>
-	v8_get v8_get_json<unsigned int>(nlohmann::json* json, std::string attribute);
+	inline v8_set v8_set_json<unsigned int>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
+			{
+				json->at(attribute) = value->Uint32Value(info.GetIsolate()->GetCurrentContext()).ToChecked();
+			};
+	}
+	//accessors float
 	template<>
-	v8_set v8_set_json<unsigned int>(nlohmann::json* json, std::string attribute);
-	//float
+	inline v8_get v8_get_json<float>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, const PropertyCallbackInfo<Value>& info)
+			{
+				info.GetReturnValue().Set(Number::New(info.GetIsolate(), static_cast<float>(json->at(attribute))));
+			};
+	}
 	template<>
-	v8_get v8_get_json<float>(nlohmann::json* json, std::string attribute);
-	template<>
-	v8_set v8_set_json<float>(nlohmann::json* json, std::string attribute);
+	inline v8_set v8_set_json<float>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
+			{
+				json->at(attribute) = static_cast<float>(value->NumberValue(info.GetIsolate()->GetCurrentContext()).FromMaybe(0.0));
+			};
+	}
 	//accessors XMFLOAT3
 	template<>
-	v8_get v8_get_json<XMFLOAT3>(nlohmann::json* json, std::string attribute);
+	inline v8_get v8_get_json<XMFLOAT3>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, const PropertyCallbackInfo<Value>& info)
+			{
+				Local<Object>& data = std::get<2>(*static_cast<v8_accessor*>(Local<External>::Cast(info.Data())->Value()));
+				info.GetReturnValue().Set(data);
+			};
+	}
 	template<>
-	v8_set v8_set_json<XMFLOAT3>(nlohmann::json* json, std::string attribute);
+	inline v8_set v8_set_json<XMFLOAT3>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
+			{
+				if (!value->IsArray()) return;
+
+				nlohmann::json& jarr = json->at(attribute);
+				Local<Array> arr = value.As<Array>();
+				for (uint32_t i = 0; i < 3 && i < arr->Length(); i++) {
+					Local<Value> item;
+					if (arr->Get(info.GetIsolate()->GetCurrentContext(), i).ToLocal(&item)) {
+						jarr.at(i) = static_cast<float>(item->NumberValue(info.GetIsolate()->GetCurrentContext()).ToChecked());
+					}
+				}
+			};
+	}
 	//accessors MeshMaterial
 	template<>
-	v8_get v8_get_json<MeshMaterial>(nlohmann::json* json, std::string attribute);
+	inline v8_get v8_get_json<MeshMaterial>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, const PropertyCallbackInfo<Value>& info)
+			{
+				Isolate* isolate = info.GetIsolate();
+				Local<String> v8_json_str = v8_string(isolate, json->at(attribute).dump());
+				Local<Value> json_object;
+				if (JSON::Parse(isolate->GetCurrentContext(), v8_json_str).ToLocal(&json_object))
+				{
+					info.GetReturnValue().Set(json_object);
+				}
+			};
+	}
 	template<>
-	v8_set v8_set_json<MeshMaterial>(nlohmann::json* json, std::string attribute);
+	inline v8_set v8_set_json<MeshMaterial>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
+			{
+
+			};
+	}
 
 	using v8_att_templates = std::map<std::string, Local<ObjectTemplate>>;
 	struct v8_att_context
@@ -142,4 +257,25 @@ namespace nov8
 		v8_att_to_jsons att_to_jsons;
 		v8_att_templates att_templates;
 	};
+
+	template<typename T>
+	inline v8_idx_handler v8_create_idx_handler(nlohmann::json* json, std::string attribute)
+	{
+		return std::make_tuple(
+			v8_idx_get_json<T>(json, attribute),
+			v8_idx_set_json<T>(json, attribute),
+			v8_idx_query_json<T>(json, attribute),
+			v8_idx_enumerator_json<T>(json, attribute)
+		);
+	}
+
+	template<typename T>
+	inline v8_accessor v8_create_accessor(nlohmann::json* json, std::string attribute, Local<Object> object = Local<Object>())
+	{
+		return std::make_tuple(
+			v8_get_json<T>(json, attribute),
+			v8_set_json<T>(json, attribute),
+			object
+		);
+	}
 };
