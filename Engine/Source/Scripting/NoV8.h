@@ -69,6 +69,7 @@ namespace nov8
 	}
 	v8_function v8_toJSON(nlohmann::json* json);
 	v8_function v8_toJSON(nlohmann::json* json, std::string attribute);
+	//std::set
 	template<typename T>
 	inline v8_function v8_set_erase(nlohmann::json* json, std::string attribute) { return [=](const FunctionCallbackInfo<Value>&) {}; }
 	template<typename T>
@@ -138,7 +139,62 @@ namespace nov8
 				json->at(attribute).push_back(value);
 			};
 	}
+	//std::vector
+	template<typename T>
+	inline v8_function v8_vector_erase(nlohmann::json* json, std::string attribute) { return [=](const FunctionCallbackInfo<Value>&) {}; }
+	template<typename T>
+	inline v8_function v8_vector_push_back(nlohmann::json* json, std::string attribute) { return [=](const FunctionCallbackInfo<Value>&) {}; }
+	template<typename T>
+	inline v8_function v8_vector_clear(nlohmann::json* json, std::string attribute)
+	{
+		return [=](const FunctionCallbackInfo<Value>& args)
+			{
+				v8::Isolate* isolate = args.GetIsolate();
 
+				if (!json->contains(attribute)) return;
+				json->at(attribute).clear();
+			};
+	}
+	template<typename T>
+	inline v8_function v8_vector_size(nlohmann::json* json, std::string attribute)
+	{
+		return [=](const FunctionCallbackInfo<Value>& args)
+			{
+				if (!json->contains(attribute)) return;
+				v8::Isolate* isolate = args.GetIsolate();
+				args.GetReturnValue().Set(Integer::New(isolate, static_cast<int>(json->at(attribute).size())));
+			};
+	}
+	template<>
+	inline v8_function v8_vector_erase<std::vector<std::string>>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](const FunctionCallbackInfo<Value>& args)
+			{
+				v8::Isolate* isolate = args.GetIsolate();
+
+				if (args.Length() == 0 || !args[0]->IsInt32())
+					return;
+
+				int index = args[0]->Int32Value(isolate->GetCurrentContext()).FromJust();
+
+				if (!json->contains(attribute)) return;
+				json->at(attribute).erase(index);
+			};
+	}
+	template<>
+	inline v8_function v8_vector_push_back<std::vector<std::string>>(nlohmann::json* json, std::string attribute)
+	{
+		return [=](const FunctionCallbackInfo<Value>& args)
+			{
+				v8::Isolate* isolate = args.GetIsolate();
+
+				if (args.Length() == 0 || !args[0]->IsString())
+					return;
+				if (!json->contains(attribute)) return;
+				std::string value = v8_name(isolate, args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
+				json->at(attribute).push_back(value);
+			};
+	}
 	//indexed
 	void v8_idx_getter(uint32_t index, const PropertyCallbackInfo<Value>& info);
 	void v8_idx_setter(uint32_t index, Local<Value> value, const PropertyCallbackInfo<Value>& info);
@@ -169,6 +225,46 @@ namespace nov8
 					json->at(attribute) = std::string(*utf8);
 				}
 				info.GetReturnValue().Set(value);
+			};
+	}
+	//accessors std::vector<std::string>
+	template<>
+	inline v8_get v8_get_json<std::vector<std::string>>(v8_att_context& att_context, std::string path, nlohmann::json* json, std::string attribute)
+	{
+		return [=, &att_context](Local<Name> property, const PropertyCallbackInfo<Value>& info)
+			{
+				v8_att_functions& att_functions = att_context.att_functions;
+
+				Isolate* isolate = info.GetIsolate();
+				Local<Context> context = isolate->GetCurrentContext();
+
+				Local<Array> my_array = Array::New(isolate, 0);
+
+				AddFunctionToObject(isolate, context, att_functions, path, "erase", v8_vector_erase<std::vector<std::string>>(json, attribute), my_array);
+				AddFunctionToObject(isolate, context, att_functions, path, "push_back", v8_vector_push_back<std::vector<std::string>>(json, attribute), my_array);
+				AddFunctionToObject(isolate, context, att_functions, path, "clear", v8_vector_clear<std::vector<std::string>>(json, attribute), my_array);
+				AddFunctionToObject(isolate, context, att_functions, path, "size", v8_vector_size<std::vector<std::string>>(json, attribute), my_array);
+
+				info.GetReturnValue().Set(my_array);
+			};
+	}
+	template<>
+	inline v8_set v8_set_json<std::vector<std::string>>(v8_att_context& att_context, std::string path, JObject* jobject, nlohmann::json* json, std::string attribute)
+	{
+		return [=](Local<Name> property, Local<Value> value, const PropertyCallbackInfo<void>& info)
+			{
+				if (!value->IsArray()) return;
+
+				nlohmann::json& jarr = json->at(attribute);
+				jarr.clear();
+				Local<Array> arr = value.As<Array>();
+				for (uint32_t i = 0; i < arr->Length(); i++) {
+					Local<Value> item;
+					if (arr->Get(info.GetIsolate()->GetCurrentContext(), i).ToLocal(&item)) {
+						std::string s = v8_name(info.GetIsolate(), item->ToString(info.GetIsolate()->GetCurrentContext()).ToLocalChecked());
+						jarr.push_back(s);
+					}
+				}
 			};
 	}
 	//accessors bool
@@ -205,7 +301,6 @@ namespace nov8
 				json->at(attribute) = value->Int32Value(info.GetIsolate()->GetCurrentContext()).ToChecked();
 			};
 	}
-
 	//accessors std::set<int>
 	template<>
 	inline v8_get v8_get_json<std::set<int>>(v8_att_context& att_context, std::string path, nlohmann::json* json, std::string attribute)
@@ -484,6 +579,16 @@ namespace nov8
 
 		std::string jptr = path + "/" + attribute;
 		att_accessors.insert_or_assign(jptr, v8_create_accessor<std::set<T>>(att_context, jptr, &json, &json, attribute));
+		tmpl->SetAccessor(v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
+	}
+	template<typename T>
+	inline void v8_template_json_vector_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+	{
+		v8_att_accessors& att_accessors = att_context.att_accessors;
+		v8_att_functions& att_functions = att_context.att_functions;
+
+		std::string jptr = path + "/" + attribute;
+		att_accessors.insert_or_assign(jptr, v8_create_accessor<std::vector<T>>(att_context, jptr, &json, &json, attribute));
 		tmpl->SetAccessor(v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
 	}
 

@@ -894,8 +894,14 @@ namespace Scene
 			{ "skipMeshes", v8_template_json_set_attribute<int> },
 			{ "topology", v8_template_json_enum_attribute<D3D_PRIMITIVE_TOPOLOGY> },
 			{ "checkBoundingBox" , v8_template_json_attribute<bool> },
+			//JEXPOSE_TRANSFORM(DepthStencilDesc, depthStencil, ToDepthStencilDesc, FromDepthStencilDesc, DepthStencilDesc(), jedv_t_object, 1, false)
 			{ "uniqueMaterialInstance", v8_template_json_attribute<bool> },
 			{ "visible", v8_template_json_attribute<bool> },
+			{ "cameras", v8_template_json_vector_attribute<std::string> },
+			//JEXPOSE_VECTOR_TRANSFORM(PassMaterialOverride, passMaterialOverrides, ToPassMaterialOverride, FromPassMaterialOverride, {}, jedv_t_vector, 1, false)
+			{ "renderNext", v8_template_json_vector_attribute<std::string> },
+			//JEXPOSE_MAP_OBJECT(Controller, controllers, nlohmann::json::object({}), jedv_t_controller_vector, 1, false)
+			//JEXPOSE_VECTOR_OBJECT(PhysicObject, physicObject, nlohmann::json::array({}), jedv_t_physic_object_vector, 1, false)
 		};
 	}
 
