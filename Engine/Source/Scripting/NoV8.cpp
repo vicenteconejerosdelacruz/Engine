@@ -60,49 +60,61 @@ namespace nov8
 		return Null(isolate);
 	}
 
+	v8_get v8_fixed_size(int size)
+	{
+		return [=](Local<Name> property, const PropertyCallbackInfo<Value>& info)
+			{
+				info.GetReturnValue().Set(size);
+			};
+	}
+
 	//json
-	void v8_toJSON(const FunctionCallbackInfo<Value>& args)
+	void v8_call_function(const FunctionCallbackInfo<Value>& args)
 	{
 		Isolate* isolate = args.GetIsolate();
 		Local<Value> data = args.Data();
 		if (!data.IsEmpty() && data->IsExternal()) {
 			Local<External> external = data.As<External>();
-			auto& toJSON = *static_cast<v8_to_json*>(external->Value());
-			toJSON(args);
+			auto& func = *static_cast<v8_function*>(external->Value());
+			func(args);
 		}
 	}
 
-	v8_to_json v8_toJSON(nlohmann::json* json)
+	v8_function v8_toJSON(nlohmann::json* json)
 	{
 		return [=](const FunctionCallbackInfo<Value>& args)
 			{
-				Isolate* isolate = args.GetIsolate();
-
-				args.GetReturnValue().Set(v8_json_parse(isolate, *json));
+				args.GetReturnValue().Set(v8_json_parse(args.GetIsolate(), *json));
 			};
 	}
 
-	v8_to_json v8_toJSON(nlohmann::json* json, std::string attribute) {
+	v8_function v8_toJSON(nlohmann::json* json, std::string attribute) {
 		return [=](const FunctionCallbackInfo<Value>& args)
 			{
-				Isolate* isolate = args.GetIsolate();
-
-				args.GetReturnValue().Set(v8_json_parse(isolate, json->at(attribute)));
+				args.GetReturnValue().Set(v8_json_parse(args.GetIsolate(), json->at(attribute)));
 			};
 	}
 
-	void AddToJsonToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, std::string path, v8_att_to_jsons& att_to_jsons, nlohmann::json& json)
+	v8_function v8_set_size(nlohmann::json* json)
 	{
-		std::string jptr = path;
-		att_to_jsons.insert_or_assign(jptr, v8_toJSON(&json));
-		tmpl->Set(isolate, "toJSON", FunctionTemplate::New(isolate, v8_toJSON, v8_external(isolate, &att_to_jsons.at(jptr))));
+		return [=](const FunctionCallbackInfo<Value>& args)
+			{
+				args.GetReturnValue().Set(Integer::New(args.GetIsolate(), static_cast<int>(json->size())));
+			};
 	}
 
-	void AddToJsonToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, std::string path, v8_att_to_jsons& att_to_jsons, nlohmann::json& json, std::string attribute)
+	void AddFunctionToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_functions& att_functions, std::string path, std::string functionName, v8_function func)
 	{
-		std::string jptr = path + "/" + attribute;
-		att_to_jsons.insert_or_assign(jptr, v8_toJSON(&json, attribute));
-		tmpl->Set(isolate, "toJSON", FunctionTemplate::New(isolate, v8_toJSON, v8_external(isolate, &att_to_jsons.at(jptr))));
+		std::string jptr = path + "." + functionName + "()";
+		att_functions.insert_or_assign(jptr, func);
+		tmpl->Set(isolate, functionName.c_str(), FunctionTemplate::New(isolate, v8_call_function, v8_external(isolate, &att_functions.at(jptr))));
+	}
+
+	void AddFunctionToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_functions& att_functions, std::string path, std::string attribute, std::string functionName, v8_function func)
+	{
+		std::string jptr = path + "/" + attribute + "." + functionName + "()";
+		att_functions.insert_or_assign(jptr, func);
+		tmpl->Set(isolate, functionName.c_str(), FunctionTemplate::New(isolate, v8_call_function, v8_external(isolate, &att_functions.at(jptr))));
 	}
 
 	//indexed

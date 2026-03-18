@@ -83,10 +83,10 @@ namespace Scripting
 	{
 		Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
 
-		v8_att_to_jsons& att_to_jsons = att_context.att_to_jsons;
+		v8_att_functions& att_functions = att_context.att_functions;
 
 		std::string suuuid_str = so->SUuuid_str();
-		AddToJsonToTemplate(isolate, global, suuuid_str, att_to_jsons, *so);
+		AddFunctionToTemplate(isolate, global, att_functions, suuuid_str, "toJSON", v8_toJSON(so));
 
 		AddTemplateJsonAttributes(isolate, global, att_context, *so, suuuid_str);
 
