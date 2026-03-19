@@ -872,34 +872,34 @@ namespace Scene
 	v8_templates_creators Renderable::GetV8TemplatesCreators()
 	{
 		return {
-			{ "uuid", v8_template_json_attribute<std::string> },
-			{ "name", v8_template_json_attribute<std::string> },
-			{ "castShadows" , v8_template_json_attribute<bool> },
-			{ "shadowed" , v8_template_json_attribute<bool> },
-			{ "hidden", v8_template_json_attribute<bool> },
-			{ "ibl", v8_template_json_attribute<bool> },
-			{ "meshMaterial", v8_template_json_attribute<MeshMaterial> },
-			{ "model", v8_template_json_attribute<std::string> },
-			{ "animationSequence", v8_template_json_attribute<std::string> },
-			{ "animation", v8_template_json_attribute<std::string> },
-			{ "animationTime", v8_template_json_attribute<float> },
-			{ "animationTimeFactor", v8_template_json_attribute<float> },
-			{ "animationLoop", v8_template_json_attribute<bool> },
-			{ "animationPlay" , v8_template_json_attribute<bool> },
-			{ "animationFrame", v8_template_json_attribute<int> },
-			{ "animationUseTransformation", v8_template_json_attribute<bool> },
-			{ "position", v8_template_json_attribute<XMFLOAT3> },
-			{ "rotation", v8_template_json_attribute<XMFLOAT3> },
-			{ "scale", v8_template_json_attribute<XMFLOAT3> },
-			{ "skipMeshes", v8_template_json_set_attribute<int> },
-			{ "topology", v8_template_json_enum_attribute<D3D_PRIMITIVE_TOPOLOGY> },
-			{ "checkBoundingBox" , v8_template_json_attribute<bool> },
+			{ "uuid", v8_template<std::string,Update_uuid>::json_attribute },
+			{ "name", v8_template<std::string,Update_name>::json_attribute },
+			{ "castShadows" , v8_template<bool,Update_castShadows>::json_attribute },
+			{ "shadowed" , v8_template<bool,Update_shadowed>::json_attribute },
+			{ "hidden", v8_template<bool,Update_hidden>::json_attribute },
+			{ "ibl", v8_template<bool,Update_ibl>::json_attribute },
+			{ "meshMaterial", v8_template<MeshMaterial,Update_meshMaterial>::json_attribute },
+			{ "model", v8_template<std::string,Update_model>::json_attribute },
+			{ "animationSequence", v8_template<std::string,Update_animationSequence>::json_attribute },
+			{ "animation", v8_template<std::string,Update_animation>::json_attribute },
+			{ "animationTime", v8_template<float,Update_animationTime>::json_attribute },
+			{ "animationTimeFactor", v8_template<float,Update_animationTimeFactor>::json_attribute },
+			{ "animationLoop", v8_template<bool,Update_animationLoop>::json_attribute },
+			{ "animationPlay" , v8_template<bool,Update_animationPlay>::json_attribute },
+			{ "animationFrame", v8_template<int,Update_animationFrame>::json_attribute },
+			{ "animationUseTransformation", v8_template<bool,Update_animationUseTransformation>::json_attribute },
+			{ "position", v8_template<XMFLOAT3,Update_position>::json_attribute },
+			{ "rotation", v8_template<XMFLOAT3,Update_rotation>::json_attribute },
+			{ "scale", v8_template<XMFLOAT3,Update_scale>::json_attribute },
+			{ "skipMeshes", v8_template<int,Update_skipMeshes>::json_set_attribute },
+			{ "topology", v8_template<D3D_PRIMITIVE_TOPOLOGY,Update_topology>::json_enum_attribute },
+			{ "checkBoundingBox" , v8_template<bool,Update_checkBoundingBox>::json_attribute },
 			//JEXPOSE_TRANSFORM(DepthStencilDesc, depthStencil, ToDepthStencilDesc, FromDepthStencilDesc, DepthStencilDesc(), jedv_t_object, 1, false)
-			{ "uniqueMaterialInstance", v8_template_json_attribute<bool> },
-			{ "visible", v8_template_json_attribute<bool> },
-			{ "cameras", v8_template_json_vector_attribute<std::string> },
+			{ "uniqueMaterialInstance", v8_template<bool,Update_uniqueMaterialInstance>::json_attribute },
+			{ "visible", v8_template<bool,Update_visible>::json_attribute },
+			{ "cameras", v8_template<std::string,Update_cameras>::json_vector_attribute },
 			//JEXPOSE_VECTOR_TRANSFORM(PassMaterialOverride, passMaterialOverrides, ToPassMaterialOverride, FromPassMaterialOverride, {}, jedv_t_vector, 1, false)
-			{ "renderNext", v8_template_json_vector_attribute<std::string> },
+			{ "renderNext", v8_template<std::string,Update_renderNext>::json_vector_attribute },
 			//JEXPOSE_MAP_OBJECT(Controller, controllers, nlohmann::json::object({}), jedv_t_controller_vector, 1, false)
 			//JEXPOSE_VECTOR_OBJECT(PhysicObject, physicObject, nlohmann::json::array({}), jedv_t_physic_object_vector, 1, false)
 		};
@@ -908,10 +908,10 @@ namespace Scene
 	v8_context_creators Renderable::GetV8ContextCreators()
 	{
 		return {
-			{ "meshMaterial", v8_context_json_attribute<MeshMaterial> },
-			{ "position", v8_context_json_attribute<XMFLOAT3> },
-			{ "rotation", v8_context_json_attribute<XMFLOAT3> },
-			{ "scale", v8_context_json_attribute<XMFLOAT3> },
+			{ "meshMaterial", v8_context<MeshMaterial,Update_meshMaterial>::json_attribute },
+			{ "position", v8_context<XMFLOAT3,Update_position>::json_attribute },
+			{ "rotation", v8_context<XMFLOAT3,Update_rotation>::json_attribute },
+			{ "scale", v8_context<XMFLOAT3,Update_scale>::json_attribute },
 		};
 	}
 
