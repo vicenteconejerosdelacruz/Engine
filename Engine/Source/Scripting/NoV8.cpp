@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "NoV8.h"
+#include <Controller.h>
 
+using namespace Game;
 namespace nov8
 {
 	void ConsoleLog(const FunctionCallbackInfo<Value>& info)
@@ -27,6 +29,20 @@ namespace nov8
 		Local<Object> console = Object::New(isolate);
 		console->Set(context, String::NewFromUtf8(isolate, "log").ToLocalChecked(), FunctionTemplate::New(isolate, ConsoleLog)->GetFunction(context).ToLocalChecked()).Check();;
 		context->Global()->Set(context, String::NewFromUtf8(isolate, "console").ToLocalChecked(), console).Check();
+	}
+	void AddTemplateJsonAttributes(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, v8_templates_creators& attributeCreator, JObject& json, std::string path)
+	{
+		for (auto& [attribute, creator] : attributeCreator)
+		{
+			creator(isolate, tmpl, att_context, json, path, attribute);
+		}
+	}
+	void AddContextJsonAttributes(Isolate* isolate, Local<Context> context, v8_att_context& att_context, v8_context_creators& attributeCreator, JObject& json, std::string path)
+	{
+		for (auto& [attribute, creator] : attributeCreator)
+		{
+			creator(isolate, att_context, json, path, attribute);
+		}
 	}
 
 	Local<Name> v8_name(Isolate* isolate, std::string name)
@@ -92,6 +108,33 @@ namespace nov8
 		return [=](const FunctionCallbackInfo<Value>& args)
 			{
 				args.GetReturnValue().Set(v8_json_parse(args.GetIsolate(), json->at(attribute)));
+			};
+	}
+
+	v8_get v8_get_json_controller(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, std::string attribute)
+	{
+		return[=](Local<Name> property, const PropertyCallbackInfo<Value>& info) mutable
+			{
+				Isolate* isolate = info.GetIsolate();
+				Local<Context> context = isolate->GetCurrentContext();
+
+				Local<Object> controller_map_obj = Object::New(isolate);
+
+				for (auto& [name, uuid] : json->at(attribute).items())
+				{
+					auto& controller = GetController(uuid);
+					v8_templates_creators template_creators = controller->GetV8TemplatesCreators();
+					v8_context_creators context_creators = controller->GetV8ContextCreators();
+
+					Local<ObjectTemplate> controller_tmpl = ObjectTemplate::New(isolate);
+					std::string controller_path = path + "/" + name;
+					AddTemplateJsonAttributes(isolate, controller_tmpl, att_context, template_creators, *controller.get(), path);
+
+					Local<Object> controller_obj = controller_tmpl->NewInstance(context).ToLocalChecked();
+					controller_map_obj->Set(context, v8_name(isolate, name), controller_obj);
+				}
+
+				info.GetReturnValue().Set(controller_map_obj);
 			};
 	}
 

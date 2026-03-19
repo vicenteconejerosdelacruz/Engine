@@ -96,8 +96,11 @@ namespace Game
 		virtual void Step(float delta);
 
 		//JS binding
-		virtual void BindV8Module();
-		virtual void BindToV8Context(v8pp::context& context);
+		//virtual void BindV8Module();
+		//virtual void BindToV8Context(v8pp::context& context);
+		//virtual void MapControllerToV8Object(Isolate* isolate, Local<Object>& object);
+		virtual v8_templates_creators GetV8TemplatesCreators();
+		virtual v8_context_creators GetV8ContextCreators();
 
 		//Joystick
 		void UpdateLeftStickVector();

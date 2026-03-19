@@ -65,6 +65,24 @@ namespace Game
 
 	void Controller::Unmap() { std::get<0>(sceneObject) = 0; std::get<1>(sceneObject).clear(); }
 
+	v8_templates_creators Controller::GetV8TemplatesCreators()
+	{
+		v8_templates_creators creators;
+#include <Attributes/JV8Templates.h>
+#include <ControllerAtt.h>
+#include <JEnd.h>
+		return creators;
+	}
+
+	v8_context_creators Controller::GetV8ContextCreators()
+	{
+		v8_context_creators creators;
+#include <Attributes/JV8Context.h>
+#include <ControllerAtt.h>
+#include <JEnd.h>
+		return creators;
+	}
+
 	JUUID RegisterController(std::string controllerName, SUUUID sceneObject, std::unique_ptr<Controller>& controller)
 	{
 		JUUID uuid = getUUID();
@@ -155,11 +173,11 @@ namespace Game
 		}
 	}
 
-	void BindToV8Context(v8pp::context& context, SUUUID uuid)
+	/*void BindToV8Context(v8pp::context& context, SUUUID uuid)
 	{
 		for (auto& cuuid : GetControllersBySceneObjectUUID(uuid))
 		{
 			GetController(cuuid)->BindToV8Context(context);
 		}
-	}
+	}*/
 }

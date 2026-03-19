@@ -57,28 +57,6 @@ namespace Scripting
 		binder(isolate);
 	}
 
-	void AddTemplateJsonAttributes(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, SceneObject& json, std::string path)
-	{
-		v8_templates_creators attributeCreator = GetSceneObjectV8TemplatesCreators(json.SUuuid());
-
-		for (auto& elem : json.items())
-		{
-			if (!attributeCreator.contains(elem.key())) continue;
-			attributeCreator.at(elem.key())(isolate, tmpl, att_context, json, path, elem.key());
-		}
-	}
-
-	void AddContextJsonAttributes(Isolate* isolate, Local<Context> context, v8_att_context& att_context, SceneObject& json, std::string path)
-	{
-		v8_context_creators attributeCreator = GetSceneObjectV8ContextCreators(json.SUuuid());
-
-		for (auto& elem : json.items())
-		{
-			if (!attributeCreator.contains(elem.key())) continue;
-			attributeCreator.at(elem.key())(isolate, att_context, json, path, elem.key());
-		}
-	}
-
 	Local<Context> CreateSceneObjectScriptContext(Isolate* isolate, SceneObject* so, v8_att_context& att_context)
 	{
 		Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
@@ -88,12 +66,14 @@ namespace Scripting
 		std::string suuuid_str = so->SUuuid_str();
 		AddFunctionToTemplate(isolate, global, att_functions, suuuid_str, "toJSON", v8_toJSON(so));
 
-		AddTemplateJsonAttributes(isolate, global, att_context, *so, suuuid_str);
+		v8_templates_creators templateAttributeCreator = GetSceneObjectV8TemplatesCreators(so->SUuuid());
+		v8_context_creators contextAttributeCreator = GetSceneObjectV8ContextCreators(so->SUuuid());
 
+		AddTemplateJsonAttributes(isolate, global, att_context, templateAttributeCreator, *so, suuuid_str);
 		Local<Context> context = Context::New(isolate, nullptr, global);
 		v8::Context::Scope context_scope(context);
 		AddConsoleToContext(isolate, context);
-		AddContextJsonAttributes(isolate, context, att_context, *so, suuuid_str);
+		AddContextJsonAttributes(isolate, context, att_context, contextAttributeCreator, *so, suuuid_str);
 
 		return context;
 	}

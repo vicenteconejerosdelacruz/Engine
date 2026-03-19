@@ -364,6 +364,8 @@
     <ClInclude Include="EngineInc.h" />
     <ClInclude Include="Game\BootLevel\BootLevel.h" />
     <ClInclude Include="Game\Game.h" />
+    <ClInclude Include="JExpose\Attributes\JV8Context.h" />
+    <ClInclude Include="JExpose\Attributes\JV8Templates.h" />
     <ClInclude Include="JExpose\Controllers\ControllerAtt.h" />
     <ClInclude Include="JExpose\Physics\PhysicObjectAtt.h" />
     <ClInclude Include="JExpose\Primitives\CapsuleAtt.h" />

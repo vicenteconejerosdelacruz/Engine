@@ -8,10 +8,10 @@ namespace Editor
 };
 #endif
 
-namespace Game
-{
-	extern void BindToV8Context(v8pp::context& context, SUUUID uuid);
-};
+//namespace Game
+//{
+//	extern void BindToV8Context(v8pp::context& context, SUUUID uuid);
+//};
 
 namespace Scene
 {
@@ -31,10 +31,10 @@ namespace Scene
 		JObject::JPatch(p);
 	}
 
-	void SceneObject::BindToV8Context(v8pp::context& context)
-	{
-		Game::BindToV8Context(context, SUuuid());
-	}
+	//void SceneObject::BindToV8Context(v8pp::context& context)
+	//{
+	//	Game::BindToV8Context(context, SUuuid());
+	//}
 
 	void SceneObject::Destroy()
 	{

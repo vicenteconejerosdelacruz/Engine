@@ -7,9 +7,14 @@
 #include <nlohmann/json.hpp>
 #include <set>
 
-struct MeshMaterial;
 struct JObject;
+namespace Game
+{
+	struct Controller;
+};
+struct MeshMaterial;
 using namespace v8;
+using namespace Game;
 namespace nov8
 {
 	using v8_get = std::function<void(Local<Name>, const PropertyCallbackInfo<Value>&)>;
@@ -41,6 +46,8 @@ namespace nov8
 	//console.log
 	void ConsoleLog(const FunctionCallbackInfo<Value>& info);
 	void AddConsoleToContext(Isolate* isolate, Local<Context> context);
+	void AddTemplateJsonAttributes(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, v8_templates_creators& attributeCreator, JObject& json, std::string path);
+	void AddContextJsonAttributes(Isolate* isolate, Local<Context> context, v8_att_context& att_context, v8_context_creators& attributeCreator, JObject& json, std::string path);
 
 	//utils
 	Local<Name> v8_name(Isolate* isolate, std::string name);
@@ -69,6 +76,8 @@ namespace nov8
 	}
 	v8_function v8_toJSON(nlohmann::json* json);
 	v8_function v8_toJSON(nlohmann::json* json, std::string attribute);
+	v8_get v8_get_json_controller(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, std::string attribute);
+
 	//std::set
 	template<typename T>
 	inline v8_function v8_set_erase(size_t flag, JObject* jobject, nlohmann::json* json, std::string attribute) { return [=](const FunctionCallbackInfo<Value>&) {}; }
@@ -444,6 +453,14 @@ namespace nov8
 
 			};
 	}
+	//accessor Controller
+	template<>
+	inline v8_get v8_get_json<Game::Controller>(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, std::string attribute)
+	{
+		return v8_get_json_controller(att_context, path, flag, jobject, json, attribute);
+	}
+	template<>
+	inline v8_set v8_set_json<Game::Controller>(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, std::string attribute) { return nullptr; }
 
 	//accessors creator
 	template<typename T>
@@ -552,6 +569,13 @@ namespace nov8
 			att_accessors.insert_or_assign(jptr, v8_create_accessor<std::vector<T>>(att_context, jptr, flag, &json, &json, attribute));
 			tmpl->SetAccessor(v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
 		}
+		inline static void json_object_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+		{
+			v8_att_accessors& att_accessors = att_context.att_accessors;
+			std::string jptr = path + "/" + attribute;
+			att_accessors.insert_or_assign(jptr, v8_create_accessor<T>(att_context, jptr, flag, &json, &json, attribute));
+			tmpl->SetAccessor(v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
+		}
 	};
 	template<size_t flag>
 	struct v8_template<XMFLOAT3, flag>
@@ -612,12 +636,65 @@ namespace nov8
 			AddFunctionToTemplate(isolate, meshMaterial_tmpl, att_functions, mesh_jptr, "primitive", "toJSON", v8_toJSON(&json.at(attribute).at("mesh"), "primitive"));
 		}
 	};
+	template<size_t flag>
+	struct v8_template<Game::Controller, flag>
+	{
+		inline static void json_object_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+		{
+			v8_att_templates& att_templates = att_context.att_templates;
+			v8_att_accessors& att_accessors = att_context.att_accessors;
+			v8_att_functions& att_functions = att_context.att_functions;
+
+			//:/controllers
+			std::string jptr = path + "/" + attribute;
+			Local<ObjectTemplate> controllers_tmpl = ObjectTemplate::New(isolate);
+			att_templates.insert_or_assign(jptr, controllers_tmpl);
+			att_accessors.insert_or_assign(jptr, v8_create_accessor<Game::Controller>(att_context, jptr, flag, &json, &json, attribute));
+
+			//:/meshMaterial/[controller_name]
+			for (auto& [name, uuid] : json.at(attribute).items())
+			{
+				std::string controller_jptr = jptr + "/" + name;
+				Local<ObjectTemplate> controller_inst_tmpl = ObjectTemplate::New(isolate);
+				att_templates.insert_or_assign(controller_jptr, controller_inst_tmpl);
+				att_accessors.insert_or_assign(controller_jptr, v8_create_accessor<Game::Controller>(att_context, controller_jptr, flag, &json, &json.at(attribute), name));
+
+				//att_accessors.insert_or_assign(controller_jptr, v8_create_accessor<Game::Controller>(att_context, controller_jptr, flag, &json, &json.at(attribute), name));
+				//controllers_tmpl->SetAccessor(v8_name(isolate, name), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(controller_jptr)));
+				//AddFunctionToTemplate(isolate, meshMaterial_tmpl, att_functions, jptr, "material", "toJSON", v8_toJSON(&json, "material"));
+			}
+
+			/*
+			//:/meshMaterial/material
+			std::string material_jptr = jptr + "/material";
+			att_accessors.insert_or_assign(material_jptr, v8_create_accessor<MeshMaterial>(att_context, material_jptr, flag, &json, &json.at(attribute), "material"));
+			meshMaterial_tmpl->SetAccessor(v8_name(isolate, "material"), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(material_jptr)));
+			AddFunctionToTemplate(isolate, meshMaterial_tmpl, att_functions, jptr, "material", "toJSON", v8_toJSON(&json, "material"));
+
+			//:/meshMaterial/mesh
+			std::string mesh_jptr = jptr + "/mesh";
+			Local<ObjectTemplate> meshMaterial_mesh_tmpl = ObjectTemplate::New(isolate);
+			att_templates.insert_or_assign(mesh_jptr, meshMaterial_mesh_tmpl);
+			att_accessors.insert_or_assign(mesh_jptr, v8_create_accessor<MeshMaterial>(att_context, mesh_jptr, flag, &json, &json.at(attribute), "mesh"));
+
+			//:/meshMaterial/mesh/primitive
+			std::string primitive_jptr = mesh_jptr + "/primitive";
+			att_accessors.insert_or_assign(primitive_jptr, v8_create_accessor<MeshMaterial>(att_context, primitive_jptr, flag, &json, &json.at(attribute).at("mesh"), "primitive"));
+			meshMaterial_mesh_tmpl->SetAccessor(v8_name(isolate, "primitive"), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(primitive_jptr)));
+			AddFunctionToTemplate(isolate, meshMaterial_tmpl, att_functions, mesh_jptr, "primitive", "toJSON", v8_toJSON(&json.at(attribute).at("mesh"), "primitive"));
+			*/
+		}
+	};
 
 	//these functions are crafted for JObject derivations for the Local<Object>
 	template<typename T, size_t flag>
 	struct v8_context
 	{
 		inline static void json_attribute(Isolate* isolate, v8_att_context& att_context, JObject& json, std::string path, std::string attribute) {}
+		inline static void json_enum_attribute(Isolate* isolate, v8_att_context& att_context, JObject& json, std::string path, std::string attribute) {}
+		inline static void json_set_attribute(Isolate* isolate, v8_att_context& att_context, JObject& json, std::string path, std::string attribute) {}
+		inline static void json_vector_attribute(Isolate* isolate, v8_att_context& att_context, JObject& json, std::string path, std::string attribute) {}
+		inline static void json_object_attribute(Isolate* isolate, v8_att_context& att_context, JObject& json, std::string path, std::string attribute) {}
 	};
 	template<size_t flag>
 	struct v8_context<XMFLOAT3, flag>
@@ -655,6 +732,38 @@ namespace nov8
 			Local<Object> mesh_inst = att_templates.at(mesh_jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
 			att_accessors.insert_or_assign(mesh_jptr, v8_create_accessor<MeshMaterial>(att_context, mesh_jptr, flag, &json, &json, attribute, mesh_inst));
 			inst->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, "mesh"), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(mesh_jptr)));
+		}
+	};
+
+	template<size_t flag>
+	struct v8_context<Game::Controller, flag>
+	{
+		inline static void json_object_attribute(Isolate* isolate, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+		{
+			v8_att_templates& att_templates = att_context.att_templates;
+			v8_att_accessors& att_accessors = att_context.att_accessors;
+
+			//:/controllers
+			std::string jptr = path + "/" + attribute;
+			Local<Object> inst = att_templates.at(jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
+			att_accessors.insert_or_assign(jptr, v8_create_accessor<Game::Controller>(att_context, jptr, flag, &json, &json, attribute, inst));
+			isolate->GetCurrentContext()->Global()->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
+
+			//:/controllers/[controller_name]
+			for (auto& [name, uuid] : json.at(attribute).items())
+			{
+				std::string controller_jptr = jptr + "/" + name;
+				Local<Object> controller_inst = att_templates.at(controller_jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
+				att_accessors.insert_or_assign(controller_jptr, v8_create_accessor<Game::Controller>(att_context, controller_jptr, flag, &json, &json, attribute, controller_inst));
+				inst->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, name), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(controller_jptr)));
+			}
+			/*
+			//:/meshMaterial/mesh
+			std::string mesh_jptr = jptr + "/mesh";
+			Local<Object> mesh_inst = att_templates.at(mesh_jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
+			att_accessors.insert_or_assign(mesh_jptr, v8_create_accessor<MeshMaterial>(att_context, mesh_jptr, flag, &json, &json, attribute, mesh_inst));
+			inst->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, "mesh"), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(mesh_jptr)));
+			*/
 		}
 	};
 }

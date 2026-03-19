@@ -26,7 +26,7 @@ extern float gameUpdateFrequency;
 
 namespace Game
 {
-	auto* This() { return ContextController<VenomController>(); };
+	//auto* This() { return ContextController<VenomController>(); };
 
 #if defined(_EDITOR)
 
@@ -36,7 +36,7 @@ namespace Game
 
 #endif
 	//JS Module
-	static std::map<JUUID, std::unique_ptr<v8pp::module>> v8ppModule;
+	//static std::map<JUUID, std::unique_ptr<v8pp::module>> v8ppModule;
 
 	//Constructor and Binding
 	VenomController::VenomController(nlohmann::json& json) : Controller(json)
@@ -122,7 +122,7 @@ namespace Game
 		physicScene = MAKESUUUID(unit, *GetPhysicScenes(unit).begin());
 		physicObject = venom->at("physicObject").at(0);
 
-		BindV8Module();
+		//BindV8Module();
 		SetInitialConditions();
 	}
 
@@ -164,6 +164,7 @@ namespace Game
 	}
 
 	//JS binding
+	/*
 	void VenomController::BindV8Module()
 	{
 		JUUID uuid = controller;
@@ -213,7 +214,8 @@ namespace Game
 			);
 		}
 	}
-
+	*/
+	/*
 	void VenomController::BindToV8Context(v8pp::context& context)
 	{
 		context.value("venom", v8ppModule.at(controller)->new_instance());
@@ -229,6 +231,30 @@ namespace Game
 		);
 		v8::Local<v8::String> v8_string = maybe_v8_string.ToLocalChecked();
 		context.value("uuid", v8_string);
+	}
+	*/
+
+	//void VenomController::MapControllerToV8Object(Isolate* isolate, Local<Object>& object)
+	//{
+	//
+	//}
+
+	v8_templates_creators VenomController::GetV8TemplatesCreators()
+	{
+		v8_templates_creators creators = Controller::GetV8TemplatesCreators();
+#include <Attributes/JV8Templates.h>
+#include <VenomControllerAtt.h>
+#include <JEnd.h>
+		return creators;
+	}
+
+	v8_context_creators VenomController::GetV8ContextCreators()
+	{
+		v8_context_creators creators = Controller::GetV8ContextCreators();
+#include <Attributes/JV8Context.h>
+#include <VenomControllerAtt.h>
+#include <JEnd.h>
+		return creators;
 	}
 
 	//Joystick

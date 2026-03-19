@@ -115,7 +115,7 @@ namespace Scene
 		virtual void JPatch(nlohmann::json p);
 
 		//Scripting
-		virtual void BindToV8Context(v8pp::context& context);
+		//virtual void BindToV8Context(v8pp::context& context);
 
 #if defined(_EDITOR)
 		//Billboard
