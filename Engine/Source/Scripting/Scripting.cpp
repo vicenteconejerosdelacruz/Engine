@@ -125,7 +125,7 @@ namespace Scripting
 #if defined(_DEVELOPMENT)
 		//print result if not undefined
 		String::Utf8Value utf8(isolate, result);
-		if (*utf8 != "undefined")
+		if (std::string(*utf8) != "undefined")
 		{
 			std::string resultStr = std::string("result:") + *utf8 + "\n";
 			OutputDebugStringA(resultStr.c_str());
