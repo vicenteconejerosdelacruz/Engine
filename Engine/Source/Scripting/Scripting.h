@@ -2,8 +2,6 @@
 #include <UUID.h>
 #include <v8.h>
 #include <libplatform/libplatform.h>
-#include <v8pp/context.hpp>
-#include <v8pp/module.hpp>
 
 using namespace v8;
 

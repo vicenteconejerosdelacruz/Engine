@@ -37,6 +37,15 @@ namespace nov8
 			creator(isolate, tmpl, att_context, json, path, attribute);
 		}
 	}
+	void AddTemplateFunctions(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, v8_functions_creators& functionsCreator, JObject& json, std::string objectName, std::string path)
+	{
+		v8_att_functions& att_functions = att_context.att_functions;
+		for (auto& [funcName, func] : functionsCreator)
+		{
+			AddFunctionToTemplate(isolate, tmpl, att_functions, path, objectName, funcName, func);
+
+		}
+	}
 	void AddContextJsonAttributes(Isolate* isolate, Local<Context> context, v8_att_context& att_context, v8_context_creators& attributeCreator, JObject& json, std::string path)
 	{
 		for (auto& [attribute, creator] : attributeCreator)
@@ -95,7 +104,10 @@ namespace nov8
 			func(args);
 		}
 	}
-
+	v8_function v8_wrap_call(std::function<void()> func)
+	{
+		return [func](const FunctionCallbackInfo<Value>& info) { func(); };
+	}
 	v8_function v8_toJSON(nlohmann::json* json)
 	{
 		return [=](const FunctionCallbackInfo<Value>& args)
@@ -125,10 +137,13 @@ namespace nov8
 					auto& controller = GetController(uuid);
 					v8_templates_creators template_creators = controller->GetV8TemplatesCreators();
 					v8_context_creators context_creators = controller->GetV8ContextCreators();
+					v8_functions_creators functions_creators = controller->GetV8FunctionsCreators();
 
 					Local<ObjectTemplate> controller_tmpl = ObjectTemplate::New(isolate);
-					std::string controller_path = path + "/" + name;
+					//Add Attributes
 					AddTemplateJsonAttributes(isolate, controller_tmpl, att_context, template_creators, *controller.get(), path);
+					//Add Functions
+					AddTemplateFunctions(isolate, controller_tmpl, att_context, functions_creators, *controller.get(), name, path);
 
 					Local<Object> controller_obj = controller_tmpl->NewInstance(context).ToLocalChecked();
 					controller_map_obj->Set(context, v8_name(isolate, name), controller_obj);

@@ -114,9 +114,6 @@ namespace Scene
 		virtual void JUpdate(nlohmann::json p);
 		virtual void JPatch(nlohmann::json p);
 
-		//Scripting
-		//virtual void BindToV8Context(v8pp::context& context);
-
 #if defined(_EDITOR)
 		//Billboard
 		virtual RenderableID CreateBillboard(CameraID camera) { return RenderableID(); }

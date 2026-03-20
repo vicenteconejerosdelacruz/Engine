@@ -123,9 +123,6 @@ enum SceneObjectType {
 //v8
 #include <v8.h>
 #include <libplatform/libplatform.h>
-//v8pp
-#include <v8pp/context.hpp>
-#include <v8pp/module.hpp>
 
 template<typename... Args> void whatis();
 template<typename T> void whatis(T);

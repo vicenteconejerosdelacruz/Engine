@@ -172,12 +172,4 @@ namespace Game
 			}
 		}
 	}
-
-	/*void BindToV8Context(v8pp::context& context, SUUUID uuid)
-	{
-		for (auto& cuuid : GetControllersBySceneObjectUUID(uuid))
-		{
-			GetController(cuuid)->BindToV8Context(context);
-		}
-	}*/
 }
