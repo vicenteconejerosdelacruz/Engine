@@ -93,7 +93,7 @@ namespace Physics
 		void CreateDynamicModel3DBehavior();
 		void CreateCharacterModel3DBehavior();
 		void CreateTriggerModel3DBehavior();
-		void DestroyPhisicsBehavior();
+		void DestroyPhysicsBehavior();
 		void SetInitialConditions();
 
 		//dynamics & characters
@@ -108,6 +108,7 @@ namespace Physics
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
 
 		//Renderable representation
+		std::tuple<XMFLOAT3, XMVECTOR, XMFLOAT3, XMFLOAT3> GetPhysicsAvatarTransformation();
 		void CreatePhysicsAvatar();
 		void DestroyPhysicsAvatar();
 		void UpdatePhysicsAvatarTransformation();

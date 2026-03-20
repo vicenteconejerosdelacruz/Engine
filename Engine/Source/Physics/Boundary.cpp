@@ -149,7 +149,7 @@ namespace Scene
 				if (!b->markedForDelete) return;
 
 				PhysicObjectID phO = b->physicObject();
-				phO->DestroyPhisicsBehavior();
+				phO->DestroyPhysicsBehavior();
 #if defined(_EDITOR)
 				phO->DestroyPhysicsAvatar();
 #endif
@@ -173,7 +173,7 @@ namespace Scene
 			{
 				if (!b->dirty(Boundary::Update_scale)) return;
 				b->scale(XMClamp(b->scale(), 0.01f, 1000.0f));
-				b->physicObject->DestroyPhisicsBehavior();
+				b->physicObject->DestroyPhysicsBehavior();
 				b->physicObject->CreatePhysicsBehavior();
 #if defined(_EDITOR)
 				b->physicObject->UpdatePhysicsAvatarTransformation();

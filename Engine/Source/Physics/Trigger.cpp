@@ -147,7 +147,7 @@ namespace Scene
 			{
 				if (!t->markedForDelete) return;
 				PhysicObjectID phO = t->physicObject();
-				phO->DestroyPhisicsBehavior();
+				phO->DestroyPhysicsBehavior();
 #if defined(_EDITOR)
 				phO->DestroyPhysicsAvatar();
 #endif
@@ -170,7 +170,7 @@ namespace Scene
 		auto checkForScale = [](TriggerID t)
 			{
 				if (!t->dirty(Trigger::Update_scale)) return;
-				t->physicObject->DestroyPhisicsBehavior();
+				t->physicObject->DestroyPhysicsBehavior();
 				t->physicObject->CreatePhysicsBehavior();
 #if defined(_EDITOR)
 				t->physicObject->UpdatePhysicsAvatarTransformation();

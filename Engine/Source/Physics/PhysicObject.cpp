@@ -3,6 +3,7 @@
 #include <Primitives.h>
 //Physx
 #include <PxPhysicsAPI.h>
+#include <NoMath.h>
 
 #if defined(_EDITOR)
 namespace Editor
@@ -468,7 +469,7 @@ namespace Physics
 		physicTriggerUUIDBySUUID[trigger()] = at("uuid");
 	}
 
-	void PhysicObject::DestroyPhisicsBehavior()
+	void PhysicObject::DestroyPhysicsBehavior()
 	{
 		PhysicSceneID scene;
 		if (renderable)
@@ -590,20 +591,23 @@ namespace Physics
 
 		if (behavior() == PB_Static && actor)
 		{
-			XMFLOAT3 pos = renderable ? renderable->position() : boundary->position();
-			XMVECTOR rot = renderable ? renderable->rotationQ() : boundary->rotationQ();
-			actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+			XMFLOAT3 gpos = renderable ? renderable->position() : boundary->position();
+			XMVECTOR grot = renderable ? renderable->rotationQ() : boundary->rotationQ();
+			actor->setGlobalPose(PxTransform(ToPxVec3(gpos), ToPxQuat(grot)));
 #if defined(_EDITOR)
-			XMFLOAT3 shapePos = pos + localPosition();
+			XMFLOAT3 shapePos = gpos + localPosition();
+			auto [pos, rotQ, rot, scl] = GetPhysicsAvatarTransformation();
 			if (renderableShape)
 			{
 				renderableShape->position(pos);
-				renderableShape->rotationQ(rot);
+				renderableShape->rotation(rot);
+				renderableShape->rotationQ(rotQ);
 			}
 			if (renderableLines)
 			{
 				renderableLines->position(pos);
-				renderableLines->rotationQ(rot);
+				renderableLines->rotation(rot);
+				renderableLines->rotationQ(rotQ);
 			}
 #endif
 		}
@@ -697,6 +701,27 @@ namespace Physics
 		return atts;
 	}
 
+	std::tuple<XMFLOAT3, XMVECTOR, XMFLOAT3, XMFLOAT3> PhysicObject::GetPhysicsAvatarTransformation()
+	{
+		//calculate the scale
+		XMFLOAT3 scl = localScale() * (renderable ? renderable->scale() : boundary->scale());
+
+		XMFLOAT3 rot = localRotation() + (renderable ? renderable->rotation() : boundary->rotation());
+		XMVECTOR rotQ = XMQuatFromDegrees(rot);
+
+		XMVECTOR actorRotQ = XMQuatFromDegrees((renderable ? renderable->rotation() : boundary->rotation()));
+		XMMATRIX actorRotMM = XMMatrixRotationQuaternion(actorRotQ);
+		XMFLOAT3 actorPos = (renderable ? renderable->position() : boundary->position());
+		XMVECTOR actorPosV = XMLoadFloat3(&actorPos);
+		XMFLOAT3 localPos = localPosition();
+		XMVECTOR localPosV = XMLoadFloat3(&localPos);
+		XMVECTOR posV = actorPosV + XMVector3Transform(localPosV, actorRotMM);
+		XMFLOAT3 pos;
+		XMStoreFloat3(&pos, posV);
+
+		return std::make_tuple(pos, rotQ, Quaternion2Euler(rotQ), scl);
+	}
+
 	//Renderable representation
 	void PhysicObject::CreatePhysicsAvatar()
 	{
@@ -746,15 +771,15 @@ namespace Physics
 
 		if (std::set<PhysicsBehavior>({ PB_Static,PB_Dynamic }).contains(behavior()))
 		{
-			XMFLOAT3 pos = localPosition() + (renderable ? renderable->position() : boundary->position());
-			XMFLOAT3 rot = localRotation() + (renderable ? renderable->rotation() : boundary->rotation());
-			XMFLOAT3 scl = localScale() * (renderable ? renderable->scale() : boundary->scale());
+			auto [pos, rotQ, rot, scl] = GetPhysicsAvatarTransformation();
 
 			renderableLines->position(pos);
 			renderableLines->rotation(rot);
+			renderableLines->rotationQ(rotQ);
 			renderableLines->scale(scl);
 			renderableShape->position(pos);
 			renderableShape->rotation(rot);
+			renderableShape->rotationQ(rotQ);
 			renderableShape->scale(scl);
 		}
 		else if (std::set<PhysicsBehavior>({ PB_Character }).contains(behavior()))
@@ -797,13 +822,11 @@ namespace Physics
 		CameraID camera = Editor::GetLevelCamera(unit());
 		bool visible = Editor::StaticBodiesShouldDraw(unit());
 
-		XMFLOAT3 renPosition = localPosition() + (renderable ? renderable->position() : boundary->position());
-		XMFLOAT3 renRotation = localRotation() + (renderable ? renderable->rotation() : boundary->rotation());
-		XMFLOAT3 renScale = localScale() * (renderable ? renderable->scale() : boundary->scale());
+		auto [pos, rotQ, rot, scl] = GetPhysicsAvatarTransformation();
 		std::string name = renderable ? renderable->name() : boundary->name();
 
-		nlohmann::json lines = CreateFromRenderable(name + "-static-body-lines", renderableLines.uuid(), camera.uuid(), "Translucent_wired", visible, renPosition, renRotation, renScale);
-		nlohmann::json shape = CreateFromRenderable(name + "-static-body-shape", renderableShape.uuid(), camera.uuid(), "Translucent", visible, renPosition, renRotation, renScale);
+		nlohmann::json lines = CreateFromRenderable(name + "-static-body-lines", renderableLines.uuid(), camera.uuid(), "Translucent_wired", visible, pos, rot, scl);
+		nlohmann::json shape = CreateFromRenderable(name + "-static-body-shape", renderableShape.uuid(), camera.uuid(), "Translucent", visible, pos, rot, scl);
 
 		shape["renderNext"] = { renderableLines.uuid() };
 
@@ -812,7 +835,7 @@ namespace Physics
 			{ "renderables", { lines, shape } }
 		};
 
-		AttachLevelIntoScene(unit(), "static-body", data, [&](SceneUnitId id)
+		AttachLevelIntoScene(unit(), "static-body", data, [&, rotQ](SceneUnitId id)
 			{
 				using namespace Editor;
 				if (boundary)
@@ -821,6 +844,8 @@ namespace Physics
 					BindRenderableToPickingPass(renderableShape);
 					renderableLines->OnPick = [&] {Editor::SelectTrigger(boundary->SUuuid()); };
 					renderableShape->OnPick = [&] {Editor::SelectTrigger(boundary->SUuuid()); };
+					renderableLines->rotationQ(rotQ);
+					renderableShape->rotationQ(rotQ);
 				}
 				RegisterStaticBody(uuid());
 				avatarBuilt = true;
@@ -1061,7 +1086,7 @@ namespace Physics
 	void DestroyPhysicObject(JUUID uuid)
 	{
 		if (!physicObjectsUUIDs.contains(uuid)) return;
-		physicObjectsUUIDs.at(uuid)->DestroyPhisicsBehavior();
+		physicObjectsUUIDs.at(uuid)->DestroyPhysicsBehavior();
 		physicObjectsUUIDs.erase(uuid);
 		for (auto it = physicObjectsBySceneUnitId.begin(); it != physicObjectsBySceneUnitId.end();)
 		{
@@ -1190,7 +1215,7 @@ namespace Physics
 					return;
 				p->clean(flags);
 				p->localScale(XMClamp(p->localScale(), 0.01f, 1000.0f));
-				p->DestroyPhisicsBehavior();
+				p->DestroyPhysicsBehavior();
 				p->CreatePhysicsBehavior();
 				p->UpdatePhysicsAvatarTransformation();
 			};
@@ -1200,7 +1225,7 @@ namespace Physics
 				if (!p->dirty(flags))
 					return;
 				p->clean(flags);
-				p->DestroyPhisicsBehavior();
+				p->DestroyPhysicsBehavior();
 				p->CreatePhysicsBehavior();
 				p->DestroyPhysicsAvatar();
 				p->CreatePhysicsAvatar();

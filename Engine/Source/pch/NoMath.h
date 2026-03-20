@@ -177,6 +177,15 @@ inline XMVECTOR XMQuatFromDegrees(float pitch, float yaw, float roll)
 	);
 }
 
+inline XMVECTOR XMQuatFromDegrees(XMFLOAT3 Euler)
+{
+	return XMQuaternionRotationRollPitchYaw(
+		XMConvertToRadians(Euler.x),
+		XMConvertToRadians(Euler.y),
+		XMConvertToRadians(Euler.z)
+	);
+}
+
 inline XMVECTOR XMQuatFromDegrees(XMVECTOR Euler)
 {
 	return XMQuaternionRotationRollPitchYaw(

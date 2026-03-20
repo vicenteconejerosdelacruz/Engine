@@ -946,7 +946,7 @@ namespace Scene
 		{
 			for (PhysicObjectID phO : GetPhysicsObjectsBySceneObjectUUID(rp->SUuuid()))
 			{
-				phO->DestroyPhisicsBehavior();
+				phO->DestroyPhysicsBehavior();
 				phO->CreatePhysicsBehavior();
 #if defined(_EDITOR)
 				phO->CreatePhysicsAvatar();
@@ -1003,7 +1003,7 @@ namespace Scene
 			auto list = GetPhysicsObjectsBySceneObjectUUID(renderable->SUuuid());
 			for (PhysicObjectID phO : list)
 			{
-				phO->DestroyPhisicsBehavior();
+				phO->DestroyPhysicsBehavior();
 #if defined(_EDITOR)
 				phO->DestroyPhysicsAvatar();
 #endif
