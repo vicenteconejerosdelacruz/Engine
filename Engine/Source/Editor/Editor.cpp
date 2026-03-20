@@ -2498,6 +2498,8 @@ namespace Editor
 				{
 					//do something like settings.at("camera").at("speed").at("fw");
 					float fwMovement = wheelDelta > 0 ? 1.0f : -1.0f;
+					auto kb = keyboard->GetState();
+					if (kb.LeftShift) fwMovement *= 10.0f;
 					ImGuiIO& io = ImGui::GetIO();
 					if (!io.WantCaptureMouse)
 					{
@@ -2522,6 +2524,12 @@ namespace Editor
 					{
 						float dx = static_cast<float>(mousedx) * 0.3f;
 						float dy = static_cast<float>(mousedy) * 0.3f;
+						auto kb = keyboard->GetState();
+						if (kb.LeftShift)
+						{
+							dx *= 5.0f;
+							dy *= 5.0f;
+						}
 						camera->Rotate(dx, dy);
 						WriteSceneUnitDirectionalShadowMapAttributes(camera.unit());
 					}
@@ -2536,6 +2544,12 @@ namespace Editor
 					{
 						float dx = -static_cast<float>(mousedx) * 0.01f;
 						float dy = -static_cast<float>(mousedy) * 0.01f;
+						auto kb = keyboard->GetState();
+						if (kb.LeftShift)
+						{
+							dx *= 10.0f;
+							dy *= 10.0f;
+						}
 						camera->MovePerpendicularFwAxis(dx, dy);
 						WriteSceneUnitDirectionalShadowMapAttributes(camera.unit());
 					}
@@ -3266,19 +3280,23 @@ namespace Editor
 	//Physics Objects unregistration
 	void UnRegisterStaticBody(PhysicObjectID phO)
 	{
-		drawStaticBodies.at(phO->unit()).levelPhysicObjects.erase(phO);
+		if (drawStaticBodies.at(phO->unit()).levelPhysicObjects.contains(phO))
+			drawStaticBodies.at(phO->unit()).levelPhysicObjects.erase(phO);
 	}
 	void UnRegisterDynamicBody(PhysicObjectID phO)
 	{
-		drawDynamicBodies.at(phO->unit()).levelPhysicObjects.erase(phO);
+		if (drawDynamicBodies.at(phO->unit()).levelPhysicObjects.contains(phO))
+			drawDynamicBodies.at(phO->unit()).levelPhysicObjects.erase(phO);
 	}
 	void UnRegisterCharacter(PhysicObjectID phO)
 	{
-		drawCharacters.at(phO->unit()).levelPhysicObjects.erase(phO);
+		if (drawCharacters.at(phO->unit()).levelPhysicObjects.contains(phO))
+			drawCharacters.at(phO->unit()).levelPhysicObjects.erase(phO);
 	}
 	void UnRegisterTrigger(PhysicObjectID phO)
 	{
-		drawTriggers.at(phO->unit()).levelPhysicObjects.erase(phO);
+		if (drawTriggers.at(phO->unit()).levelPhysicObjects.contains(phO))
+			drawTriggers.at(phO->unit()).levelPhysicObjects.erase(phO);
 	}
 
 	//Physics Objects list

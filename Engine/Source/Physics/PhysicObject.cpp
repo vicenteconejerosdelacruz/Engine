@@ -715,6 +715,8 @@ namespace Physics
 
 	void PhysicObject::DestroyPhysicsAvatar()
 	{
+		using namespace Editor;
+
 		auto destroy = [](RenderableID& r)
 			{
 				if (!r) return;
@@ -724,6 +726,17 @@ namespace Physics
 			};
 		destroy(renderableShape);
 		destroy(renderableLines);
+
+		std::map<PhysicsBehavior, std::function<void()>> unregister =
+		{
+			{PB_Static,[&] {UnRegisterStaticBody(uuid()); }},
+			{PB_Dynamic,[&] {UnRegisterDynamicBody(uuid()); }},
+			{PB_Character,[&] {UnRegisterCharacter(uuid()); }},
+			{PB_Trigger,[&] {UnRegisterTrigger(uuid()); }},
+		};
+
+		unregister.at(behavior())();
+
 		avatarBuilt = false;
 	}
 
@@ -1047,6 +1060,7 @@ namespace Physics
 
 	void DestroyPhysicObject(JUUID uuid)
 	{
+		if (!physicObjectsUUIDs.contains(uuid)) return;
 		physicObjectsUUIDs.at(uuid)->DestroyPhisicsBehavior();
 		physicObjectsUUIDs.erase(uuid);
 		for (auto it = physicObjectsBySceneUnitId.begin(); it != physicObjectsBySceneUnitId.end();)

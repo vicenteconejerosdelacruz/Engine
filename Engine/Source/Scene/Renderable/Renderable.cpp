@@ -965,26 +965,6 @@ namespace Scene
 				o->clean(Renderable::Update_meshMaterial);
 				o->visible(false);
 			}
-			//auto& scene = GetSceneUnit(unit);
-			//scene->SubmitForLoading([=]
-			//	{
-			//		auto destroyMeshInstance = [](auto& vec) { for (auto& mesh : vec) { DestroyMeshInstance(mesh()); } };
-			//		for (auto o : rMeshMaterial)
-			//		{
-			//			destroyMeshInstance(o->meshes);
-			//			o->meshes.clear();
-			//			o->CreateMeshInstances();
-			//		}
-			//	}
-			//);
-			//scene->PushLoadingExecutionCallback([=]
-			//	{
-			//		for (auto o : rMeshMaterial)
-			//		{
-			//			o->visible(true);
-			//		}
-			//	}
-			//);
 		}
 
 		std::set<RenderableID> rDepthStencil;
@@ -1001,26 +981,6 @@ namespace Scene
 				o->clean(Renderable::Update_depthStencil);
 				o->visible(false);
 			}
-			//auto& scene = GetSceneUnit(unit);
-			//scene->SubmitForLoading([=]
-			//	{
-			//		for (auto o : rDepthStencil)
-			//		{
-			//			for (auto cam : o->bindedCameras)
-			//			{
-			//				o->CreatePipelineStates(cam);
-			//			}
-			//		}
-			//	}
-			//);
-			//scene->PushLoadingExecutionCallback([=]
-			//	{
-			//		for (auto o : rDepthStencil)
-			//		{
-			//			o->visible(true);
-			//		}
-			//	}
-			//);
 		}
 
 		for (auto o : cleanRot)
@@ -1037,6 +997,16 @@ namespace Scene
 
 		for (auto renderable : todelete)
 		{
+			auto list = GetPhysicsObjectsBySceneObjectUUID(renderable->SUuuid());
+			for (PhysicObjectID phO : list)
+			{
+				phO->DestroyPhisicsBehavior();
+#if defined(_EDITOR)
+				phO->DestroyPhysicsAvatar();
+#endif
+				DestroyPhysicObject(phO());
+				renderable->clear();
+			}
 			EraseRenderableFromRenderables(renderable->unit, renderable.uuid());
 			EraseRenderableFromAnimables(renderable->unit, renderable.uuid());
 			EraseRenderableFromShadowCasts(renderable->unit, renderable.uuid());

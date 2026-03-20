@@ -3,6 +3,11 @@
 #include <Scene.h>
 #include <Physics.h>
 
+namespace Editor
+{
+	extern void UnRegisterTrigger(PhysicObjectID phO);
+};
+
 namespace Scene
 {
 	SODEF_FULL(Trigger);
@@ -141,8 +146,14 @@ namespace Scene
 		auto checkForDelete = [](TriggerID t)
 			{
 				if (!t->markedForDelete) return;
-
-				DestroyPhysicObject(t->physicObject());
+				PhysicObjectID phO = t->physicObject();
+				phO->DestroyPhisicsBehavior();
+#if defined(_EDITOR)
+				phO->DestroyPhysicsAvatar();
+#endif
+				DestroyPhysicObject(phO());
+				t->physicObject.clear();
+				t->clear();
 				EraseTriggerFromTriggers(FROMSUUUID(t()));
 				DeleteTriggerSceneObject(t);
 			};
@@ -178,12 +189,12 @@ namespace Scene
 			};
 #endif
 
-		std::for_each(tr.begin(), tr.end(), checkForDelete);
 		std::for_each(tr.begin(), tr.end(), checkForPosRot);
 		std::for_each(tr.begin(), tr.end(), checkForScale);
 #if defined(_EDITOR)
 		std::for_each(tr.begin(), tr.end(), checkForColor);
 #endif
+		std::for_each(tr.begin(), tr.end(), checkForDelete);
 	}
 
 	void DestroyTriggers()

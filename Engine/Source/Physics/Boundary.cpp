@@ -2,6 +2,12 @@
 #include "Boundary.h"
 #include <Scene.h>
 #include <Physics.h>
+#include <NoMath.h>
+
+namespace Editor
+{
+	extern void UnRegisterStaticBody(PhysicObjectID phO);
+};
 
 namespace Scene
 {
@@ -142,7 +148,14 @@ namespace Scene
 			{
 				if (!b->markedForDelete) return;
 
-				DestroyPhysicObject(b->physicObject());
+				PhysicObjectID phO = b->physicObject();
+				phO->DestroyPhisicsBehavior();
+#if defined(_EDITOR)
+				phO->DestroyPhysicsAvatar();
+#endif
+				DestroyPhysicObject(phO());
+				b->physicObject.clear();
+				b->clear();
 				EraseBoundaryFromBoundaries(FROMSUUUID(b()));
 				DeleteBoundarySceneObject(b);
 			};
@@ -159,6 +172,7 @@ namespace Scene
 		auto checkForScale = [](BoundaryID b)
 			{
 				if (!b->dirty(Boundary::Update_scale)) return;
+				b->scale(XMClamp(b->scale(), 0.01f, 1000.0f));
 				b->physicObject->DestroyPhisicsBehavior();
 				b->physicObject->CreatePhysicsBehavior();
 #if defined(_EDITOR)
@@ -178,12 +192,12 @@ namespace Scene
 			};
 #endif
 
-		std::for_each(bs.begin(), bs.end(), checkForDelete);
 		std::for_each(bs.begin(), bs.end(), checkForPosRot);
 		std::for_each(bs.begin(), bs.end(), checkForScale);
 #if defined(_EDITOR)
 		std::for_each(bs.begin(), bs.end(), checkForColor);
 #endif
+		std::for_each(bs.begin(), bs.end(), checkForDelete);
 	}
 
 	void DestroyBoundaries()
