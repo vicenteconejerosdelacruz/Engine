@@ -1329,6 +1329,7 @@ namespace Scene
 					BindRenderableToPickingPass(MAKESUUUID(id, uuid));
 				}
 				MarkSceneUnitAsModified(id);
+				MarkScenePanelAssetsAsDirty();
 #endif
 			},
 			[](std::string, unsigned int, unsigned int) {}
