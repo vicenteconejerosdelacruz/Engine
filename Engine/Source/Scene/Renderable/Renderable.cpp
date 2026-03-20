@@ -948,6 +948,9 @@ namespace Scene
 			{
 				phO->DestroyPhisicsBehavior();
 				phO->CreatePhysicsBehavior();
+#if defined(_EDITOR)
+				phO->CreatePhysicsAvatar();
+#endif
 			}
 		}
 
