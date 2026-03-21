@@ -1727,9 +1727,9 @@ namespace Templates
 		return GetT4F.at(file);
 	}
 
-	std::string GetTemplateName(TemplateType t, JUUID uuid)
+	JNAME GetTemplateName(TemplateType t, JUUID uuid)
 	{
-		const std::map<TemplateType, std::function<std::string(std::string)>> GetTName = {
+		const std::map<TemplateType, std::function<JNAME(JUUID)>> GetTName = {
 			{ T_Materials, GetMaterialName },
 			{ T_Models3D, GetModel3DName },
 			{ T_Shaders, GetShaderName },

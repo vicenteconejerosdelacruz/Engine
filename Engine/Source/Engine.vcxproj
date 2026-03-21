@@ -347,6 +347,7 @@
     <ClInclude Include="Audio\AudioSystem.h" />
     <ClInclude Include="Controllers\Controller.h" />
     <ClInclude Include="Editor\AnimationSequencerModal.h" />
+    <ClInclude Include="Editor\AssetsTree.h" />
     <ClInclude Include="Editor\CreatorModal.h" />
     <ClInclude Include="Editor\DefaultLevel.h" />
     <ClInclude Include="Editor\DeletePrompt.h" />
@@ -354,6 +355,7 @@
     <ClInclude Include="Editor\EditorMouseCamera.h" />
     <ClInclude Include="Editor\IconsFontAwesome5.h" />
     <ClInclude Include="Editor\ImEditor.h" />
+    <ClInclude Include="Editor\Modals\ScriptModal.h" />
     <ClInclude Include="Editor\MousePicking.h" />
     <ClInclude Include="Editor\RightPanelComponent.h" />
     <ClInclude Include="Editor\SceneObjectPopup.h" />
@@ -558,11 +560,13 @@
     <ClCompile Include="Audio\AudioSystem.cpp" />
     <ClCompile Include="Controllers\Controller.cpp" />
     <ClCompile Include="Editor\AnimationSequencerModal.cpp" />
+    <ClCompile Include="Editor\AssetsTree.cpp" />
     <ClCompile Include="Editor\DefaultLevel.cpp" />
     <ClCompile Include="Editor\DeletePrompt.cpp" />
     <ClCompile Include="Editor\Editor.cpp" />
     <ClCompile Include="Editor\EditorMouseCamera.cpp" />
     <ClCompile Include="Editor\ImEditor.cpp" />
+    <ClCompile Include="Editor\Modals\ScriptModal.cpp" />
     <ClCompile Include="Editor\MousePicking.cpp" />
     <ClCompile Include="Editor\RightPanelComponent.cpp" />
     <ClCompile Include="Editor\SceneObjectPopup.cpp" />

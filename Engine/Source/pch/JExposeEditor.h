@@ -23,12 +23,12 @@ namespace Templates
 	extern std::vector<JUUIDName> GetSoundsUUIDsNames();
 	extern std::vector<JUUIDName> GetTexturesUUIDsNames();
 	extern std::vector<JUUIDName> GetPhysicGeometrysUUIDsNames();
-	extern std::string GetMeshName(std::string uuid);
-	extern std::string GetModel3DName(std::string uuid);
-	extern std::string GetMaterialName(std::string uuid);
-	extern std::string GetShaderName(std::string uuid);
-	extern std::string GetSoundName(std::string uuid);
-	extern std::string GetTextureName(std::string uuid);
+	extern JNAME GetMeshName(JUUID uuid);
+	extern JNAME GetModel3DName(JUUID uuid);
+	extern JNAME GetMaterialName(JUUID uuid);
+	extern JNAME GetShaderName(JUUID uuid);
+	extern JNAME GetSoundName(JUUID uuid);
+	extern JNAME GetTextureName(JUUID uuid);
 };
 
 namespace Scene
@@ -42,8 +42,9 @@ namespace Editor
 	extern void MarkTemplatesPanelAssetsAsDirty();
 	extern void MarkScenePanelAssetsAsDirty();
 	extern void MarkSceneUnitAsModified(SceneUnitId id);
-	extern void OpenAnimationSequencer(std::string uuid);
+	extern void OpenAnimationSequencer(JUUID uuid);
 	extern void WriteSceneUnitDirectionalShadowMapAttributes(SceneUnitId id);
+	extern void StartScriptEdition(JObject* object, std::string attribute);
 };
 
 namespace Game

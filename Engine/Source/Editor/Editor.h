@@ -236,4 +236,7 @@ namespace Editor {
 	std::set<PhysicObjectID> GetDynamicBodies(SceneUnitId id);
 	std::set<PhysicObjectID> GetCharacters(SceneUnitId id);
 	std::set<PhysicObjectID> GetTriggers(SceneUnitId id);
+
+	//Script Editor
+	void StartScriptEdition(JObject* object, std::string attribute);
 }

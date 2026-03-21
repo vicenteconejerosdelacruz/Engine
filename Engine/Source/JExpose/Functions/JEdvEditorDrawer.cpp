@@ -5688,3 +5688,30 @@ JEdvEditorDrawerFunction DrawEnum<PhysicsBehavior, jedv_t_physic_behavior>(
 			ImGui::PopID();
 		};
 }
+
+template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_script>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			if (json.size() > 1ULL) return;
+
+			ImGui::PushID(attribute.c_str());
+			std::string tableName = "tables-" + attribute + "-table";
+			if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+			{
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text(attribute.c_str());
+				ImGui::TableSetColumnIndex(1);
+				ImGui::Text("Edit");
+				ImGui::SameLine();
+				if (ImGui::Button(ICON_FA_RUNNING))
+				{
+					Editor::StartScriptEdition(json.at(0), attribute);
+				}
+				ImGui::EndTable();
+			}
+			ImGui::PopID();
+		};
+}

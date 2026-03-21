@@ -23,6 +23,7 @@
 #include <AnimationSequencerModal.h>
 #include <YesNoCancelModal.h>
 #include <SceneObjectPopup.h>
+#include <Modals/ScriptModal.h>
 
 extern HWND hWnd;
 extern RECT hWndRect;
@@ -212,6 +213,7 @@ namespace Editor
 	AnimationSequencerModal animationSequencer;
 	YesNoCancelModal yesNoCancelModal;
 	SceneObjectPopup sceneObjectPopup;
+	ScriptModal scriptEditModal;
 
 	void CreateSceneUnitGizmos(SceneUnitId id)
 	{
@@ -900,6 +902,7 @@ namespace Editor
 				animationSequencer.DrawLoading();
 			}
 			sceneObjectPopup.Draw();
+			scriptEditModal.Draw();
 		}
 		if (yesNoCancelModal.Showing())
 		{
@@ -3315,6 +3318,12 @@ namespace Editor
 	std::set<PhysicObjectID> GetTriggers(SceneUnitId id)
 	{
 		return drawTriggers.at(id).levelPhysicObjects;
+	}
+
+	//Script Editor
+	void StartScriptEdition(JObject* object, std::string attribute)
+	{
+		scriptEditModal.Init(object, attribute);
 	}
 };
 
