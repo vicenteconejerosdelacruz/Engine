@@ -172,8 +172,8 @@ namespace Scene
 		void RenderReady(bool value);
 
 		//Scripting
-		v8_templates_creators GetV8TemplatesCreators();
-		v8_context_creators GetV8ContextCreators();
+		virtual v8_templates_creators GetV8TemplatesCreators();
+		virtual v8_context_creators GetV8ContextCreators();
 
 #if defined(_EDITOR)
 		std::function<void()> OnPick;

@@ -11,6 +11,7 @@ namespace Game
 	struct Controller;
 };
 struct MeshMaterial;
+struct ScriptBinding;
 using namespace v8;
 using namespace Game;
 namespace nov8
@@ -78,6 +79,7 @@ namespace nov8
 	v8_function v8_toJSON(nlohmann::json* json);
 	v8_function v8_toJSON(nlohmann::json* json, std::string attribute);
 	v8_get v8_get_json_controller(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, std::string attribute);
+	v8_get v8_get_json_scriptbinding(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, unsigned int idx);
 
 	//std::set
 	template<typename T>
@@ -222,6 +224,10 @@ namespace nov8
 	inline v8_get v8_get_json(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, std::string attribute) { return nullptr; }
 	template<typename T>
 	inline v8_set v8_set_json(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, std::string attribute) { return nullptr; }
+	template<typename T>
+	inline v8_get v8_get_json(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, unsigned int idx) { return nullptr; }
+	template<typename T>
+	inline v8_set v8_set_json(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, unsigned int idx) { return nullptr; }
 	//accessors std::string
 	template<>
 	inline v8_get v8_get_json<std::string>(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, std::string attribute)
@@ -462,6 +468,14 @@ namespace nov8
 	}
 	template<>
 	inline v8_set v8_set_json<Game::Controller>(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, std::string attribute) { return nullptr; }
+	//accessor ScriptBinding
+	template<>
+	inline v8_get v8_get_json<ScriptBinding>(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, unsigned int idx)
+	{
+		return v8_get_json_scriptbinding(att_context, path, flag, jobject, json, idx);
+	}
+	template<>
+	inline v8_set v8_set_json<ScriptBinding>(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, unsigned int idx) { return nullptr; }
 
 	//accessors creator
 	template<typename T>
@@ -470,6 +484,16 @@ namespace nov8
 		return std::make_tuple(
 			v8_get_json<T>(att_context, path, flag, jobject, json, attribute),
 			v8_set_json<T>(att_context, path, flag, jobject, json, attribute),
+			object
+		);
+	}
+
+	template<typename T>
+	inline v8_accessor v8_create_accessor(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, unsigned int idx, Local<Object> object = Local<Object>())
+	{
+		return std::make_tuple(
+			v8_get_json<T>(att_context, path, flag, jobject, json, idx),
+			v8_set_json<T>(att_context, path, flag, jobject, json, idx),
 			object
 		);
 	}
@@ -564,7 +588,6 @@ namespace nov8
 		inline static void json_vector_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 		{
 			v8_att_accessors& att_accessors = att_context.att_accessors;
-			v8_att_functions& att_functions = att_context.att_functions;
 
 			std::string jptr = path + "/" + attribute;
 			att_accessors.insert_or_assign(jptr, v8_create_accessor<std::vector<T>>(att_context, jptr, flag, &json, &json, attribute));
@@ -652,13 +675,32 @@ namespace nov8
 			att_templates.insert_or_assign(jptr, controllers_tmpl);
 			att_accessors.insert_or_assign(jptr, v8_create_accessor<Game::Controller>(att_context, jptr, flag, &json, &json, attribute));
 
-			//:/meshMaterial/[controller_name]
+			//:/controllers/[controller_name]
 			for (auto& [name, uuid] : json.at(attribute).items())
 			{
 				std::string controller_jptr = jptr + "/" + name;
 				Local<ObjectTemplate> controller_inst_tmpl = ObjectTemplate::New(isolate);
 				att_templates.insert_or_assign(controller_jptr, controller_inst_tmpl);
 				att_accessors.insert_or_assign(controller_jptr, v8_create_accessor<Game::Controller>(att_context, controller_jptr, flag, &json, &json.at(attribute), name));
+			}
+		}
+	};
+	template<size_t flag>
+	struct v8_template<ScriptBinding, flag>
+	{
+		inline static void json_vector_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+		{
+			v8_att_templates& att_templates = att_context.att_templates;
+			v8_att_accessors& att_accessors = att_context.att_accessors;
+
+			//:[bindingName]
+			for (unsigned int i = 0; i < json.at(attribute).size(); i++)
+			{
+				ScriptBinding sb(json.at(attribute).at(i));
+				std::string binding_jptr = path + "/" + attribute + "/" + sb.bindingName;
+				Local<ObjectTemplate> binding_tmpl = ObjectTemplate::New(isolate);
+				att_templates.insert_or_assign(binding_jptr, binding_tmpl);
+				att_accessors.insert_or_assign(binding_jptr, v8_create_accessor<ScriptBinding>(att_context, binding_jptr, flag, &json, &json.at(attribute), i));
 			}
 		}
 	};
@@ -733,6 +775,26 @@ namespace nov8
 				Local<Object> controller_inst = att_templates.at(controller_jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
 				att_accessors.insert_or_assign(controller_jptr, v8_create_accessor<Game::Controller>(att_context, controller_jptr, flag, &json, &json, attribute, controller_inst));
 				inst->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, name), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(controller_jptr)));
+			}
+		}
+	};
+	template<size_t flag>
+	struct v8_context<ScriptBinding, flag>
+	{
+		inline static void json_vector_attribute(Isolate* isolate, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+		{
+			v8_att_templates& att_templates = att_context.att_templates;
+			v8_att_accessors& att_accessors = att_context.att_accessors;
+
+			//:/[bindingName]
+			for (unsigned int i = 0; i < json.at(attribute).size(); i++)
+			{
+				ScriptBinding sb(json.at(attribute).at(i));
+				std::string binding_jptr = path + "/" + attribute + "/" + sb.bindingName;
+
+				Local<Object> inst = att_templates.at(binding_jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
+				att_accessors.insert_or_assign(binding_jptr, v8_create_accessor<ScriptBinding>(att_context, binding_jptr, flag, &json, &json.at(attribute), i, inst));
+				isolate->GetCurrentContext()->Global()->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, sb.bindingName), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(binding_jptr)));
 			}
 		}
 	};

@@ -100,6 +100,7 @@ namespace Scene
 		{
 			DestroyPhysicObject(physicObject());
 		}
+		UnregisterTriggerContactCallback(SUuuid());
 
 #include <Attributes/JDestroy.h>
 #include <TriggerAtt.h>
@@ -124,6 +125,7 @@ namespace Scene
 #if defined(_EDITOR)
 		physicObject->CreatePhysicsAvatar();
 #endif
+		RegisterTriggerContactCallback(SUuuid(), [&](SUUUID otherObject, unsigned int event) { OnTriggerEvent(otherObject, event); });
 	}
 
 #if defined(_EDITOR)
@@ -133,6 +135,19 @@ namespace Scene
 	}
 
 #endif
+
+	void Trigger::OnTriggerEvent(SUUUID sceneObject, unsigned int event)
+	{
+		using namespace Scripting;
+		if (event & PxPairFlag::eNOTIFY_TOUCH_FOUND)
+		{
+			Scripting::RunScript(onEnter(), SUuuid());
+		}
+		else if (event & PxPairFlag::eNOTIFY_TOUCH_LOST)
+		{
+			Scripting::RunScript(onLeave(), SUuuid());
+		}
+	}
 
 	//Scripting
 	v8_templates_creators Trigger::GetV8TemplatesCreators()

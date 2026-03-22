@@ -36,8 +36,14 @@ namespace Game
 		virtual void Unmap();
 		virtual void Step(float delta);
 
+		//JS binding
+		virtual v8_templates_creators GetV8TemplatesCreators();
+		virtual v8_context_creators GetV8ContextCreators();
+		virtual v8_functions_creators GetV8FunctionsCreators();
+
 		//object to interact with
 		CameraID camera;
 		RenderableID venomR;
+		bool follow = true;
 	};
 }

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "NoV8.h"
 #include <Controller.h>
+#include <SceneObject.h>
 
 using namespace Game;
 namespace nov8
@@ -136,7 +137,6 @@ namespace nov8
 				{
 					auto& controller = GetController(uuid);
 					v8_templates_creators template_creators = controller->GetV8TemplatesCreators();
-					v8_context_creators context_creators = controller->GetV8ContextCreators();
 					v8_functions_creators functions_creators = controller->GetV8FunctionsCreators();
 
 					Local<ObjectTemplate> controller_tmpl = ObjectTemplate::New(isolate);
@@ -150,6 +150,66 @@ namespace nov8
 				}
 
 				info.GetReturnValue().Set(controller_map_obj);
+			};
+	}
+
+	v8_get v8_get_json_scriptbinding(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, unsigned int idx)
+	{
+		return[=](Local<Name> property, const PropertyCallbackInfo<Value>& info) mutable
+			{
+				using namespace Scene;
+				SceneObject* so = static_cast<SceneObject*>(jobject);
+				ScriptBinding sb(json->at(idx));
+
+				Isolate* isolate = info.GetIsolate();
+				Local<Context> context = isolate->GetCurrentContext();
+				Local<ObjectTemplate> binding_map_tmpl = ObjectTemplate::New(isolate);
+				
+
+				switch (sb.bindingType)
+				{
+				case BT_SceneObject:
+				{
+					SceneObject* binded = GetSceneObjectPointer(so->unit, sb.uuid);
+					v8_templates_creators template_creators = so->GetV8TemplatesCreators();
+					v8_functions_creators functions_creators = so->GetV8FunctionsCreators();
+
+					//Add Attributes
+					AddTemplateJsonAttributes(isolate, binding_map_tmpl, att_context, template_creators, *binded, path);
+					//Add Functions
+					AddTemplateFunctions(isolate, binding_map_tmpl, att_context, functions_creators, *binded, sb.bindingName, path);
+				}
+				break;
+				case BT_Controller:
+				{
+					SceneObject* binded = GetSceneObjectPointer(so->unit, sb.uuid);
+					auto& controller = GetController(binded->at("controllers").at(sb.controllerName));
+					v8_templates_creators template_creators = controller->GetV8TemplatesCreators();
+					v8_functions_creators functions_creators = controller->GetV8FunctionsCreators();
+
+					//Add Attributes
+					AddTemplateJsonAttributes(isolate, binding_map_tmpl, att_context, template_creators, *controller.get(), path);
+					//Add Functions
+					AddTemplateFunctions(isolate, binding_map_tmpl, att_context, functions_creators, *controller.get(), sb.bindingName, path);
+				}
+				break;
+				case BT_PhysicObject:
+				{
+					SceneObject* binded = GetSceneObjectPointer(so->unit, sb.uuid);
+					auto& phO = GetPhysicObject(binded->at("physicObject").at(sb.physicObjectIndex));
+					v8_templates_creators template_creators = phO->GetV8TemplatesCreators();
+					v8_functions_creators functions_creators = phO->GetV8FunctionsCreators();
+
+					//Add Attributes
+					AddTemplateJsonAttributes(isolate, binding_map_tmpl, att_context, template_creators, *phO.get(), path);
+					//Add Functions
+					AddTemplateFunctions(isolate, binding_map_tmpl, att_context, functions_creators, *phO.get(), sb.bindingName, path);
+				}
+				break;
+				}
+
+				Local<Object> binding_map_obj = binding_map_tmpl->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
+				info.GetReturnValue().Set(binding_map_obj);
 			};
 	}
 

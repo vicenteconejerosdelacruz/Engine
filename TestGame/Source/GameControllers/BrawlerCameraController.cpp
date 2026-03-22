@@ -63,9 +63,39 @@ namespace Game
 			return;
 #endif
 
-		XMFLOAT3 p = camera->position();
-		p.x = venomR->position().x;
-		camera->position(p);
+		if (follow)
+		{
+			XMFLOAT3 p = camera->position();
+			p.x = venomR->position().x;
+			camera->position(p);
+		}
+	}
+
+	//JS binding
+	v8_templates_creators BrawlerCameraController::GetV8TemplatesCreators()
+	{
+		v8_templates_creators creators = Controller::GetV8TemplatesCreators();
+#include <Attributes/JV8Templates.h>
+#include <BrawlerCameraControllerAtt.h>
+#include <JEnd.h>
+		return creators;
+	}
+
+	v8_context_creators BrawlerCameraController::GetV8ContextCreators()
+	{
+		v8_context_creators creators = Controller::GetV8ContextCreators();
+#include <Attributes/JV8Context.h>
+#include <BrawlerCameraControllerAtt.h>
+#include <JEnd.h>
+		return creators;
+	}
+
+	v8_functions_creators BrawlerCameraController::GetV8FunctionsCreators()
+	{
+		return {
+			{ "StopCameraFollow", v8_wrap_call([&] { follow = false; }) },
+			{ "StartCameraFollow", v8_wrap_call([&] { follow = true; }) },
+		};
 	}
 }
 

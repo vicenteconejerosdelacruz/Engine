@@ -57,6 +57,7 @@ namespace Physics
 	std::map<SUUUID, JUUID> physicCharacterUUIDBySUUID;
 	std::map<SUUUID, JUUID> physicTriggerUUIDBySUUID;
 	std::map<PhysicsBehavior, std::map<JUUID, std::function<void(JUUID, unsigned int)>>> physicContactSubscribers;
+	std::map<TriggerID, std::function<void(SUUUID, unsigned int)>> triggerContactSubscribers;
 
 #if defined(_EDITOR)
 
@@ -1290,5 +1291,21 @@ namespace Physics
 		if (!physicContactSubscribers.contains(behavior) || !physicContactSubscribers.at(behavior).contains(destObject)) return;
 
 		physicContactSubscribers.at(behavior).at(destObject)(srcObject, event);
+	}
+
+	//Trigger Callback
+	void RegisterTriggerContactCallback(TriggerID trigger, std::function<void(SUUUID, unsigned int)> callback)
+	{
+		triggerContactSubscribers.insert_or_assign(trigger, callback);
+	}
+	void UnregisterTriggerContactCallback(TriggerID trigger)
+	{
+		triggerContactSubscribers.erase(trigger);
+	}
+	void CallTriggerContactCallback(TriggerID trigger, SUUUID sceneObject, unsigned int event)
+	{
+		if (!triggerContactSubscribers.contains(trigger)) return;
+
+		triggerContactSubscribers.at(trigger)(sceneObject, event);
 	}
 };

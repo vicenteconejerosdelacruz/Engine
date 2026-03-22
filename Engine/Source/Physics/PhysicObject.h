@@ -121,6 +121,12 @@ namespace Physics
 		nlohmann::json CreateFromRenderable(std::string name, JUUID uuid, JUUID camId, std::string material, bool visible, XMFLOAT3 position, XMFLOAT3 rotation, XMFLOAT3 scale);
 		nlohmann::json CreateFromTrigger(std::string name, JUUID uuid, JUUID camId, std::string material);
 #endif
+
+		//Scripting
+		virtual v8_templates_creators GetV8TemplatesCreators() { return {}; }
+		virtual v8_context_creators GetV8ContextCreators() { return {}; }
+		virtual v8_functions_creators GetV8FunctionsCreators() { return {}; }
+
 		RenderableID renderable;
 		TriggerID trigger;
 		BoundaryID boundary;
@@ -151,6 +157,10 @@ namespace Physics
 	void RegisterContactCallback(PhysicsBehavior behavior, JUUID object, std::function<void(JUUID, unsigned int)> callback);
 	void UnregisterContactCallback(PhysicsBehavior behavior, JUUID object);
 	void CallRegisteredCallbacks(PhysicsBehavior behavior, JUUID destObject, JUUID srcObject, unsigned int event);
+	//Trigger Callback
+	void RegisterTriggerContactCallback(TriggerID trigger, std::function<void(SUUUID, unsigned int)> callback);
+	void UnregisterTriggerContactCallback(TriggerID trigger);
+	void CallTriggerContactCallback(TriggerID trigger, SUUUID sceneObject, unsigned int event);
 
 	DEF_TEMPLATE_ID(PhysicObject, GetPhysicObject);
 };

@@ -77,8 +77,11 @@ namespace Scene
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
 		BoundingBox GetBoundingBox();
 #endif
-		v8_templates_creators GetV8TemplatesCreators();
-		v8_context_creators GetV8ContextCreators();
+		void OnTriggerEvent(SUUUID sceneObject, unsigned int event);
+
+		//Scripting
+		virtual v8_templates_creators GetV8TemplatesCreators();
+		virtual v8_context_creators GetV8ContextCreators();
 
 		DeleteHook markedForDelete;
 		PhysicObjectID physicObject;
