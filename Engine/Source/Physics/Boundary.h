@@ -70,6 +70,11 @@ namespace Scene
 
 		virtual void Destroy();
 
+		XMVECTOR positionV();
+		void updateRotationQ();
+		XMVECTOR rotationQ();
+		void rotationQ(XMVECTOR Q);
+
 		void CreatePhysicObject();
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
@@ -79,6 +84,8 @@ namespace Scene
 
 		DeleteHook markedForDelete;
 		PhysicObjectID physicObject;
+		//Transformation
+		XMVECTOR rotationQuaternion;
 	};
 
 	SODECL_FULL(Boundary);

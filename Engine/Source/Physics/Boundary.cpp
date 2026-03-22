@@ -63,6 +63,20 @@ namespace Scene
 		RENAME_ON_DELETION(Boundary);
 	}
 
+	void Boundary::create_rotation(XMFLOAT3 v)
+	{
+		if (!contains("rotation"))
+		{
+			rotation(v);
+		}
+	}
+
+	void Boundary::rotation(XMFLOAT3 v)
+	{
+		(*this)["rotation"] = FromXMFLOAT3(v);
+		updateRotationQ();
+	}
+
 #if defined(_EDITOR)
 	void Boundary::WriteJson(nlohmann::json& j)
 	{
@@ -77,6 +91,7 @@ namespace Scene
 #include <TrackUUID/JInsert.h>
 #include <BoundaryAtt.h>
 #include <JEnd.h>
+		updateRotationQ();
 	}
 
 	void Boundary::BindToScene()
@@ -132,8 +147,33 @@ namespace Scene
 	{
 		return BoundingBox(position(), { 0.1f,0.1f,0.1f });
 	}
-
 #endif
+
+	XMVECTOR Boundary::positionV()
+	{
+		XMFLOAT3 pos = position();
+		return XMLoadFloat3(&pos);
+	}
+
+	void Boundary::updateRotationQ()
+	{
+		XMFLOAT3 v = rotation();
+		rotationQuaternion = XMQuaternionRotationRollPitchYaw(
+			XMConvertToRadians(v.x),
+			XMConvertToRadians(v.y),
+			XMConvertToRadians(v.z)
+		);
+	}
+
+	XMVECTOR Boundary::rotationQ()
+	{
+		return rotationQuaternion;
+	}
+
+	void Boundary::rotationQ(XMVECTOR Q)
+	{
+		rotationQuaternion = Q;
+	}
 
 	void BoundariesStep(SceneUnitId unit)
 	{
@@ -163,6 +203,7 @@ namespace Scene
 			{
 				if (!b->dirty({ Boundary::Update_position,Boundary::Update_rotation })) return;
 
+				b->updateRotationQ();
 				b->physicObject->UpdateGlobalPoseFromRenderable();
 #if defined(_EDITOR)
 				b->physicObject->UpdatePhysicsAvatarTransformation();
