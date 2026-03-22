@@ -4,6 +4,12 @@
 #include <string>
 #include <IconsFontAwesome5.h>
 
+namespace Editor
+{
+	extern SceneUnitId currentSceneUnitId;
+	extern void MarkSceneUnitAsModified(SceneUnitId id);
+};
+
 void ScriptEditModal::Init(JObject* j, std::string att)
 {
 	json = j;
@@ -31,6 +37,7 @@ void ScriptEditModal::Draw()
 		{
 			showing = false;
 			json->at(attribute) = script;
+			Editor::MarkSceneUnitAsModified(Editor::currentSceneUnitId);
 		}
 	);
 }
