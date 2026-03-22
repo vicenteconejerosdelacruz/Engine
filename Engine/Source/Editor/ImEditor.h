@@ -35,8 +35,8 @@ inline ImU32 rgba(nlohmann::json f4)
 namespace Editor
 {
 	extern bool NonGameMode;
-	extern void OpenTemplateOnNextFrame(std::string uuid);
-	extern void OpenSceneObjectOnNextFrame(std::string uuid);
+	extern void OpenTemplateOnNextFrame(JUUID uuid);
+	extern void OpenSceneObjectOnNextFrame(JUUID uuid);
 };
 
 namespace ImGui
