@@ -239,4 +239,5 @@ namespace Editor {
 
 	//Script Editor
 	void StartScriptEdition(JObject* object, std::string attribute);
+	void OpenScriptBindingSelector(JObject* object, std::string attribute, int index, ScriptBinding sb);
 }

@@ -24,6 +24,7 @@
 #include <YesNoCancelModal.h>
 #include <SceneObjectPopup.h>
 #include <Modals/ScriptEditModal.h>
+#include <Modals/ScriptBindingModal.h>
 
 extern HWND hWnd;
 extern RECT hWndRect;
@@ -214,6 +215,7 @@ namespace Editor
 	YesNoCancelModal yesNoCancelModal;
 	SceneObjectPopup sceneObjectPopup;
 	ScriptEditModal scriptEditModal;
+	ScripBindingModal scriptBindingModal;
 
 	void CreateSceneUnitGizmos(SceneUnitId id)
 	{
@@ -903,6 +905,7 @@ namespace Editor
 			}
 			sceneObjectPopup.Draw();
 			scriptEditModal.Draw();
+			scriptBindingModal.Draw();
 		}
 		if (yesNoCancelModal.Showing())
 		{
@@ -3324,6 +3327,35 @@ namespace Editor
 	void StartScriptEdition(JObject* object, std::string attribute)
 	{
 		scriptEditModal.Init(object, attribute);
+	}
+
+	void OpenScriptBindingSelector(JObject* object, std::string attribute, int index, ScriptBinding sb)
+	{
+		using namespace Scene;
+
+		JObject* selected = nullptr;
+		if (!sb.uuid.empty())
+		{
+			selected = Scene::GetSceneObjectPointer(Editor::currentSceneUnitId, sb.uuid);
+		}
+		scriptBindingModal.Init(
+			sb,
+			selected,
+			[]() { return GetSceneObjectsTypesList(currentSceneUnitId); },
+			[](JUUID uuid) { return GetSceneObjectPointer(currentSceneUnitId, uuid); },
+			[=](nlohmann::json json)
+			{
+				MarkSceneUnitAsModified(currentSceneUnitId);
+				if (index == -1)
+				{
+					object->at(attribute).push_back(json);
+				}
+				else
+				{
+					object->at(attribute).at(index) = json;
+				}
+			}
+		);
 	}
 };
 

@@ -6,6 +6,7 @@
 #include <map>
 #include <UUID.h>
 #include <v8-context.h>
+#include <ScriptBinding.h>
 
 struct JObject : nlohmann::json
 {
@@ -93,5 +94,6 @@ struct JObject : nlohmann::json
 	virtual std::function<bool(JObject*)> GetAssetsConditioner() { return [](JObject*) { return true; }; }
 	virtual void EditorPreview(size_t flags) {}
 	virtual void DestroyEditorPreview() {}
+	virtual std::map<std::string, ScriptBinding> GetScriptBindingOptions() { return { {"",ScriptBinding()} }; }
 #endif
 };

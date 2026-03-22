@@ -33,4 +33,13 @@ namespace Scene
 			cb();
 		}
 	}
+
+#if defined(_EDITOR)
+	std::map<std::string, ScriptBinding> SceneObject::GetScriptBindingOptions()
+	{
+		return {
+			{ at("name"), ScriptBinding(std::string(at("uuid"))) }
+		};
+	}
+#endif
 }

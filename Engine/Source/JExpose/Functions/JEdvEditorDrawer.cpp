@@ -5714,4 +5714,103 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_script>()
 			}
 			ImGui::PopID();
 		};
-}
+}
+
+
+template<>
+JEdvEditorDrawerFunction DrawVector<ScriptBinding, jedv_t_vector>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			if (json.size() > 1ULL) return;
+
+			JObject* j = json.at(0);
+			int removeIndex = -1;
+
+			auto drawRow = [&](nlohmann::json& jbinding, int index)
+				{
+					ScriptBinding sb(jbinding);
+
+					ImGui::TableSetColumnIndex(0);
+					ImGui::PushID((std::string("DeleteLeft-") + std::to_string(index)).c_str());
+					if (ImGui::Button(ICON_FA_TIMES))
+					{
+						removeIndex = index;
+					}
+					ImGui::PopID();
+					ImGui::TableSetColumnIndex(1);
+					ImGui::DrawJsonInputText(jbinding, "bindingName");
+					ImGui::TableSetColumnIndex(2);
+					if (ImGui::Button(ICON_FA_UMBRELLA))
+					{
+						Editor::OpenScriptBindingSelector(json.at(0), attribute, index, sb);
+					}
+					ImGui::SameLine();
+					SceneObject* so = Scene::GetSceneObjectPointer(Editor::currentSceneUnitId, sb.uuid);
+					std::string resourceName = so->soName;
+					switch (sb.bindingType)
+					{
+					case BT_Controller:
+					{
+						resourceName += "/" + sb.controllerName;
+					}
+					break;
+					case BT_PhysicObject:
+					{
+						resourceName += "/physicObject/ " + std::to_string(sb.physicObjectIndex);
+					}
+					break;
+					}
+					ImGui::Text(resourceName.c_str());
+				};
+			auto erase = [&](int index)
+				{
+					nlohmann::json& bindings = j->at(attribute);
+					bindings.erase(index);
+				};
+
+			ImGui::PushID(attribute.c_str());
+			if (ImGui::CollapsingHeader(attribute.c_str()))
+			{
+				std::string tableName = "tables-" + attribute + "-table";
+				if (ImGui::BeginTable(tableName.c_str(), 3, defaultTableFlags))
+				{
+					ImGui::TableSetupColumn("actions", ImGuiTableColumnFlags_WidthFixed);
+					//ImGui::TableSetupColumn("name", ImGuiTableColumnFlags_WidthFixed);
+					//ImGui::TableSetupColumn("resource", ImGuiTableColumnFlags_WidthStretch);
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::TableHeader("actions");
+					ImGui::TableSetColumnIndex(1);
+					ImGui::TableHeader("name");
+					ImGui::TableSetColumnIndex(2);
+					ImGui::TableHeader("resource");
+
+					nlohmann::json& bindings = j->at(attribute);
+					for (unsigned int i = 0; i < bindings.size(); i++)
+					{
+						ImGui::TableNextRow();
+						ImGui::PushID((std::string("Row-") + std::to_string(i)).c_str());
+						drawRow(bindings.at(i), i);
+						ImGui::PopID();
+					}
+					ImGui::EndTable();
+				}
+
+				ImGui::PushID("PlusBottom");
+				if (ImGui::Button(ICON_FA_PLUS, ImVec2(ImGui::GetContentRegionAvail().x, 20.0f)))
+				{
+					Editor::OpenScriptBindingSelector(json.at(0), attribute, -1, ScriptBinding());
+				}
+				ImGui::PopID();
+
+			}
+			ImGui::PopID();
+
+			if (removeIndex != -1)
+			{
+				erase(removeIndex);
+			}
+		};
+}

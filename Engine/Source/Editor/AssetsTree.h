@@ -45,7 +45,8 @@ struct AssetsTree
 			assets.clear();
 			assetsNames.clear();
 			assetsJsons.clear();
-			for (JUUIDName uuidName : GetObjects())
+			std::vector<JUUIDName> objects = GetObjects();
+			for (JUUIDName uuidName : objects)
 			{
 				std::string uuid = std::get<0>(uuidName);
 				std::string path = std::get<1>(uuidName);
@@ -115,7 +116,8 @@ struct AssetsTree
 
 		for (std::string uuid : orderedLeafs)
 		{
-			DrawItem(uuid);
+			JObject* object = assetsJsons.at(uuid);
+			DrawItem(uuid, object);
 		}
 	}
 

@@ -651,7 +651,19 @@
     <ClInclude Include="JExpose\Attributes\JV8Context.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Scripting\ScriptBinding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Editor\AssetsTree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Modals\ScriptBindingModal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Modals\ScriptEditModal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Modals\SimpleModal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -963,6 +975,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Editor\AssetsTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Modals\ScriptBindingModal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Modals\ScriptEditModal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Modals\SimpleModal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

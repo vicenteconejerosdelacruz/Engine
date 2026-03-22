@@ -355,7 +355,9 @@
     <ClInclude Include="Editor\EditorMouseCamera.h" />
     <ClInclude Include="Editor\IconsFontAwesome5.h" />
     <ClInclude Include="Editor\ImEditor.h" />
-    <ClInclude Include="Editor\Modals\ScriptModal.h" />
+    <ClInclude Include="Editor\Modals\ScriptBindingModal.h" />
+    <ClInclude Include="Editor\Modals\ScriptEditModal.h" />
+    <ClInclude Include="Editor\Modals\SimpleModal.h" />
     <ClInclude Include="Editor\MousePicking.h" />
     <ClInclude Include="Editor\RightPanelComponent.h" />
     <ClInclude Include="Editor\SceneObjectPopup.h" />
@@ -504,6 +506,7 @@
     <ClInclude Include="Scene\SceneObjectDef.h" />
     <ClInclude Include="Scene\SceneUnit.h" />
     <ClInclude Include="Scene\Sound\SoundFX.h" />
+    <ClInclude Include="Scripting\ScriptBinding.h" />
     <ClInclude Include="Scripting\Scripting.h" />
     <ClInclude Include="Shaders\Compiler\CompilerQueue.h" />
     <ClInclude Include="Shaders\Compiler\CustomIncludeHandler.h" />
@@ -566,7 +569,9 @@
     <ClCompile Include="Editor\Editor.cpp" />
     <ClCompile Include="Editor\EditorMouseCamera.cpp" />
     <ClCompile Include="Editor\ImEditor.cpp" />
-    <ClCompile Include="Editor\Modals\ScriptModal.cpp" />
+    <ClCompile Include="Editor\Modals\ScriptBindingModal.cpp" />
+    <ClCompile Include="Editor\Modals\ScriptEditModal.cpp" />
+    <ClCompile Include="Editor\Modals\SimpleModal.cpp" />
     <ClCompile Include="Editor\MousePicking.cpp" />
     <ClCompile Include="Editor\RightPanelComponent.cpp" />
     <ClCompile Include="Editor\SceneObjectPopup.cpp" />

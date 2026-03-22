@@ -304,4 +304,7 @@ JEdvEditorDrawerFunction DrawEnum<PhysicsBehavior, jedv_t_physic_behavior>(
 );
 
 template<>
-JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_script>();
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_script>();
+
+template<>
+JEdvEditorDrawerFunction DrawVector<ScriptBinding, jedv_t_vector>();

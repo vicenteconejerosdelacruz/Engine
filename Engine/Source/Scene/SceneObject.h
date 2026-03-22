@@ -121,6 +121,7 @@ namespace Scene
 
 		//Gizmos
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return false; }
+		virtual std::map<std::string, ScriptBinding> GetScriptBindingOptions();
 #endif
 		//scene unit for which this scene object belongs
 		SceneUnitId unit;

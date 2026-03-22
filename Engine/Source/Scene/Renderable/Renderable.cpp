@@ -85,6 +85,25 @@ namespace Scene
 #include <RenderableAtt.h>
 #include <JEnd.h>
 	}
+
+	std::map<std::string, ScriptBinding> Renderable::GetScriptBindingOptions()
+	{
+		std::map<std::string, ScriptBinding> options = SceneObject::GetScriptBindingOptions();
+
+		for (auto& [key, _] : at("controllers").items())
+		{
+			std::string name = std::string(at("name")) + "/" + std::string(key);
+			options.insert_or_assign(name, ScriptBinding(at("uuid"), key));
+		}
+
+		for (unsigned int i = 0; i < at("physicObject").size(); i++)
+		{
+			std::string name = std::string(at("name")) + "/physicObject/" + std::to_string(i);
+			options.insert_or_assign(name, ScriptBinding(at("uuid"), i));
+		}
+
+		return options;
+	}
 #endif
 
 	void Renderable::Initialize()

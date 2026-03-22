@@ -134,6 +134,25 @@ namespace Scene
 
 #endif
 
+	//Scripting
+	v8_templates_creators Trigger::GetV8TemplatesCreators()
+	{
+		v8_templates_creators creators;
+#include <Attributes/JV8Templates.h>
+#include <TriggerAtt.h>
+#include <JEnd.h>
+		return creators;
+	}
+
+	v8_context_creators Trigger::GetV8ContextCreators()
+	{
+		v8_context_creators creators;
+#include <Attributes/JV8Context.h>
+#include <TriggerAtt.h>
+#include <JEnd.h>
+		return creators;
+	}
+
 	void TriggersStep(SceneUnitId unit)
 	{
 #if defined(_EDITOR)

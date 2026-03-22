@@ -180,6 +180,7 @@ namespace Scene
 		//Gizmo
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
 		virtual void WriteJson(nlohmann::json& j);
+		virtual std::map<std::string, ScriptBinding> GetScriptBindingOptions();
 #endif
 
 		//State

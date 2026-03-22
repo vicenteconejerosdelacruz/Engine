@@ -11,6 +11,7 @@
 #include <JTemplate.h>
 #include <DeviceUtils/RenderPass/RenderToTexturePass.h>
 #include <Primitives.h>
+#include <ScriptBinding.h>
 
 namespace Templates
 {
@@ -35,6 +36,7 @@ namespace Scene
 {
 	extern std::function<std::vector<JUUIDName>()> GetSceneObjectsByType(SceneUnitId id, SceneObjectType typeToGet);
 	extern std::vector<JUUIDName> GetSUSceneObjectsByType(SceneUnitId id, SceneObjectType typeToGet);
+	extern SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid);
 };
 
 namespace Editor
@@ -45,6 +47,7 @@ namespace Editor
 	extern void OpenAnimationSequencer(JUUID uuid);
 	extern void WriteSceneUnitDirectionalShadowMapAttributes(SceneUnitId id);
 	extern void StartScriptEdition(JObject* object, std::string attribute);
+	extern void OpenScriptBindingSelector(JObject* object, std::string attribute, int index, ScriptBinding sb);
 };
 
 namespace Game

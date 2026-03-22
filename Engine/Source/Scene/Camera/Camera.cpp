@@ -100,6 +100,19 @@ namespace Scene
 #include <CameraAtt.h>
 #include <JEnd.h>
 	}
+
+	std::map<std::string, ScriptBinding> Camera::GetScriptBindingOptions()
+	{
+		std::map<std::string, ScriptBinding> options = SceneObject::GetScriptBindingOptions();
+
+		for (auto& [key, _] : at("controllers").items())
+		{
+			std::string name = std::string(at("name")) + "/" + std::string(key);
+			options.insert_or_assign(name, ScriptBinding(at("uuid"), key));
+		}
+
+		return options;
+	}
 #endif
 
 	void Camera::Initialize()
