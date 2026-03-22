@@ -23,7 +23,7 @@
 #include <AnimationSequencerModal.h>
 #include <YesNoCancelModal.h>
 #include <SceneObjectPopup.h>
-#include <Modals/ScriptModal.h>
+#include <Modals/ScriptEditModal.h>
 
 extern HWND hWnd;
 extern RECT hWndRect;
@@ -213,7 +213,7 @@ namespace Editor
 	AnimationSequencerModal animationSequencer;
 	YesNoCancelModal yesNoCancelModal;
 	SceneObjectPopup sceneObjectPopup;
-	ScriptModal scriptEditModal;
+	ScriptEditModal scriptEditModal;
 
 	void CreateSceneUnitGizmos(SceneUnitId id)
 	{
