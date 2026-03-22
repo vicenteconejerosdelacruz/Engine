@@ -5,29 +5,9 @@
 #include <memory>
 #include <functional>
 #include <string>
-//#include "GameStates/GameStates.h"
-//#include "Controller.h"
-//#include "GameControllers/VenomController.h"
-//#include "GameControllers/SpinYawController.h"
-//#include <Renderable/Renderable.h>
-
-//#define _EDITOR
 
 std::string gameAppTitle = "Culpeo Test Game";
-/*
-extern std::unique_ptr<Renderer> renderer;
-CameraUUID levelCameraUUID;
-#if defined(_EDITOR)
-using namespace Editor;
-std::string editorPrePlayDump;
-CameraUUID editorCameraUUID = JUUID("editor-cam-uuid");
-#endif
-*/
-
-namespace Scene
-{
-	//void SceneObjectsStep(DX::StepTimer& timer);
-}
+float gameUpdateFrequency = (1.0f / 60.0f);
 
 #if !defined(_EDITOR) && defined(_DEVELOPMENT)
 int main()

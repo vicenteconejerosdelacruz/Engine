@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "TimelineEditor.h"
 
-void TimelineEditor::Init(RenderableSUUUID renderable, Sequence& sequence)
+void TimelineEditor::Init(RenderableID renderable, Sequence& sequence)
 {
 	this->renderable = renderable;
 	channels.clear();
@@ -198,6 +198,7 @@ void TimelineEditor::DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2
 
 	if (deleteChannelId != -1)
 	{
+		setTransformationKeyFrame(nullptr, -1);
 		DeleteChannel(sequence, deleteChannelId, timelinePos, timelineSize);
 	}
 	if (expandChannelId != -1)
@@ -802,7 +803,7 @@ void TimelineEditor::CreatePopupForItemAt(Sequence& sequence, int channelId, int
 	popupChannelFrame = std::make_tuple(channelId, frame);
 	if (popup == TP_AddElement)
 	{
-		addElementPopup.Init(renderable.unit(), renderable.uuid(), frame);
+		addElementPopup.Init(renderable, frame);
 	}
 }
 

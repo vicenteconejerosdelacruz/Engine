@@ -93,9 +93,6 @@
     <ClInclude Include="pch\ShaderMaterials.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pch\Command.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pch\DDSTextures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -246,18 +243,6 @@
     <ClInclude Include="EngineInc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pch\UUID\SceneObjectUUID.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pch\UUID\TemplateUUID.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pch\UUID\DeviceUtilsUUID.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pch\UUID\ComputeShaderUUID.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="JExpose\Scripting\JExpose.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -295,9 +280,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Templates\Shader\Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Templates\Shader\ShaderInstance.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Templates\JTemplate.h">
@@ -375,7 +357,7 @@
     <ClInclude Include="Primitives\Primitive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Primitives\Primivites.h">
+    <ClInclude Include="Primitives\Primitives.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Primitives\Sphere.h">
@@ -592,6 +574,96 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Editor\YesNoCancelModal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Physics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch\SceneUnitId.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\PhysicScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Scene\PhysicSceneAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Physics\PhysicObjectAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\PhysicObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\PhysicGeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Templates\PhysicGeometryAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Scene\TriggerAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Trigger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Primitives\SphereAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Primitives\Capsule.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Primitives\ConeAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Primitives\CapsuleAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Templates\Material\DepthStencilDesc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\ContactCallback.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Primitives\CubeAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch\DeleteHook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Boundary.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Controllers\ControllerAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Scene\BoundaryAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\SceneObjectPopup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scripting\NoV8.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Attributes\JV8Templates.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Attributes\JV8Context.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scripting\ScriptBinding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\AssetsTree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Modals\ScriptBindingModal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Modals\ScriptEditModal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Modals\SimpleModal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -861,6 +933,57 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Editor\YesNoCancelModal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\Physics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\PhysicScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\PhysicObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\PhysicGeometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\Trigger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Primitives\Capsule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\ContactCallback.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\Boundary.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\SceneObjectPopup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JExpose\Functions\JEdvEditorDrawer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JExpose\Functions\JEdvCreatorValidator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JExpose\Functions\JEdvCreatorDrawer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scripting\NoV8.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\AssetsTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Modals\ScriptBindingModal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Modals\ScriptEditModal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Modals\SimpleModal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

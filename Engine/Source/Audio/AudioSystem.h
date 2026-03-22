@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _AUDIO_SYSTEM_H
+#define _AUDIO_SYSTEM_H
 
 namespace AudioSystem {
 
@@ -10,3 +11,4 @@ namespace AudioSystem {
 	std::unique_ptr<DirectX::AudioEngine>& GetAudioEngine();
 }
 
+#endif

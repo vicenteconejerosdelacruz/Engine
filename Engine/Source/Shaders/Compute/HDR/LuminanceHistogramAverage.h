@@ -22,7 +22,7 @@ namespace ComputeShader
 		CD3DX12_CPU_DESCRIPTOR_HANDLE histogramCpuHandle;
 		CD3DX12_GPU_DESCRIPTOR_HANDLE histogramGpuHandle;
 
-		JUUID constantsBuffers; //LuminanceHistogramAverageBuffer CBV (C0)
+		ConstantsBufferID constantsBuffers; //LuminanceHistogramAverageBuffer CBV (C0)
 
 		//luminance
 		CComPtr<ID3D12Resource> average;

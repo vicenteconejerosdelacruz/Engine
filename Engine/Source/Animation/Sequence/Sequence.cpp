@@ -129,7 +129,7 @@ void Sequence::CreateSoundFXsAtFrame(int frame, SceneUnitId id)
 	std::set<JUUID> soundsUUID;
 	for (auto& sfx : soundfxs)
 	{
-		SoundJsonUUID sjson = sfx->sound();
+		SoundJsonID sjson = sfx->sound();
 		JUUID soundFXUUID = getUUID();
 		soundsUUID.insert(soundFXUUID);
 		nlohmann::json jsound =
@@ -146,14 +146,14 @@ void Sequence::CreateSoundFXsAtFrame(int frame, SceneUnitId id)
 	AttachLevelIntoScene(id, "sfx", sounds, [&](SceneUnitId id) {});
 }
 
-void Sequence::RunScriptAtFrame(int frame, RenderableSUUUID renderable)
+void Sequence::RunScriptAtFrame(int frame, RenderableID renderable)
 {
 	using namespace Scripting;
 	for (SequenceChannel& channel : sequenceChannels)
 	{
 		SequenceChannelElementScript* script = channel.GetScriptToRunAtFrame(frame);
 		if (script == nullptr) continue;
-		RunScript(script->script, renderable);
+		RunScript(script->script, renderable());
 	}
 }
 

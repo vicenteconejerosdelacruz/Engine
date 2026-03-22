@@ -40,11 +40,11 @@ namespace ComputeShader
 		envMap = envMapUUID;
 
 		//create a srv desc/view for reading the envmap but as a cube texture
-		commandsProcessor.Init(renderer->d3dDevice, 0x000fff, 1);
-		commandsProcessor.ResetCommandList();
+		commandsProcessor = std::make_unique<CommandsProcessor>(renderer->d3dDevice, 1, 0x000fff);
+		commandsProcessor->ResetCommandList();
 		CreateTextureInstance(envMap, [this]
 			{
-				return std::make_unique<TextureInstance>(commandsProcessor.GetCommandList(), envMap);
+				return std::make_unique<TextureInstance>(commandsProcessor->GetCommandList(), envMap);
 			}
 		);
 		auto& json = GetTextureTemplate(envMap);
@@ -140,7 +140,7 @@ namespace ComputeShader
 		unsigned int faceH = faceHeight;
 		for (unsigned int i = 0; i < mipsResultsGpuHandle.size(); i++)
 		{
-			auto& mipResCB = GetConstantsBuffer(mipsResultsCB.at(i));
+			auto& mipResCB = mipsResultsCB.at(i);
 			unsigned int threadsX = std::max(faceW / 8, 1U);
 			unsigned int threadsY = std::max(faceH / 8, 1U);
 			float roughness = static_cast<float>(i) / static_cast<float>(numMipMaps);

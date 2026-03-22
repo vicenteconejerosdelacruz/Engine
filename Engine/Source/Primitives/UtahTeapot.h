@@ -1,12 +1,20 @@
-#pragma once
+#ifndef _PRIMITIVE_UTAH_TEAPOH_H
+#define _PRIMITIVE_UTAH_TEAPOH_H
+
 #include "Primitive.h"
 #include <VertexFormats.h>
 
-struct UtahTeapot : public Primitive
+namespace Primitives
 {
-	static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL;
-	typedef Vertex<VertexClass> VertexType;
+	struct UtahTeapot : Primitive
+	{
+		static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL;
+		typedef Vertex<VertexClass> VertexType;
 
-	std::vector<uint32_t> GetIndices();
-	std::vector<VertexType> GetVertices();
+		UtahTeapot(nlohmann::json& json) : Primitive(json) {}
+		std::vector<uint32_t> GetIndices();
+		std::vector<VertexType> GetVertices();
+	};
 };
+
+#endif

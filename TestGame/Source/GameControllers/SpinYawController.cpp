@@ -33,10 +33,10 @@ namespace Game
 #if defined(_EDITOR)
 	void SpinYawController::WriteJson(nlohmann::json& j)
 	{
-		//#include <Editor/JWriteJson.h>
-		//#include <SpinYawControllerAtt.h>
-		//#include <JEnd.h>
-		//		j.erase("uuid");
+#include <Editor/JWriteJson.h>
+#include <SpinYawControllerAtt.h>
+#include <JEnd.h>
+		j.erase("uuid");
 	}
 #endif
 
@@ -46,7 +46,7 @@ namespace Game
 
 		//auto o = GetSceneObjectPointer(sceneObject);
 		SceneUnitId unit = std::get<0>(sceneObject);
-		RenderableSUUUID o = sceneObject;
+		RenderableID o = sceneObject;
 
 		if (!o->contains("rotation"))
 			return;

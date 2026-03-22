@@ -160,7 +160,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;_DEVELOPMENT;HAS_DIRECTXTK12;_EDITOR;DIRECTX_TEX_VERSION=207;TOOL_VERSION=DIRECTX_TEX_VERSION;NOMINMAX;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>pch;JExpose;JExpose/Scene;JExpose/Templates;Effects;Game;Animation;Audio;Primitives;Common;Renderer;Scene;Templates;Controllers;Shaders/Compiler;Shaders/Compute;Scripting;Utils;Editor;GameControllers;../../SDKs/dxc/dxc_2024_07_31/inc;../../SDKs/assimp/assimp-5.4.3/build/include;../../SDKs/assimp/assimp-5.4.3/include;../../SDKs/DirectXTK12/Inc;../../SDKs/imgui;../../SDKs/imgui/backends;../../SDKs/imguizmo;../../SDKs/tween;../../SDKs/DirectXTex/DirectXTex;../../SDKs/DirectXTex/Texconv;../../SDKs/DirectXTex/Texdiag;../../SDKs/DirectXTex/Texassemble;../../SDKs/DirectXTex/Common;../../SDKs/DirectXTex/CmdLineHelpers;../../SDKs/v8pp-2.1.1/packages/v8-v143-x64.9.8.177.4/include;../../SDKs/v8pp-2.1.1;../../SDKs/v8pp-2.1.1/out</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>pch;JExpose;JExpose/Scene;JExpose/Templates;JExpose/Primitives;JExpose/Physics;JExpose/Controllers;Effects;Game;Animation;Audio;Primitives;Common;Renderer;Scene;Templates;Controllers;Shaders/Compiler;Shaders/Compute;Scripting;Physics;Utils;Editor;GameControllers;../../SDKs/dxc/dxc_2024_07_31/inc;../../SDKs/assimp/assimp-5.4.3/build/include;../../SDKs/assimp/assimp-5.4.3/include;../../SDKs/DirectXTK12/Inc;../../SDKs/imgui;../../SDKs/imgui/backends;../../SDKs/imguizmo;../../SDKs/tween;../../SDKs/DirectXTex/DirectXTex;../../SDKs/DirectXTex/Texconv;../../SDKs/DirectXTex/Texdiag;../../SDKs/DirectXTex/Texassemble;../../SDKs/DirectXTex/Common;../../SDKs/DirectXTex/CmdLineHelpers;../../SDKs/v8pp-2.1.1/packages/v8-v143-x64.9.8.177.4/include;../../SDKs/v8pp-2.1.1;../../SDKs/v8pp-2.1.1/out;../../SDKs/PhysX/physx/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -236,9 +236,9 @@
       </FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_DEVELOPMENT;HAS_DIRECTXTK12;_EDITOR;DIRECTX_TEX_VERSION=207;TOOL_VERSION=DIRECTX_TEX_VERSION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_DEVELOPMENT;HAS_DIRECTXTK12;_EDITOR;DIRECTX_TEX_VERSION=207;TOOL_VERSION=DIRECTX_TEX_VERSION;NOMINMAX;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>pch;JExpose;JExpose/Scene;JExpose/Templates;Effects;Animation;Audio;Primitives;Common;Renderer;Scene;Templates;Controllers;Shaders/Compiler;Shaders/Compute;Utils;Editor;../../SDKs/dxc/dxc_2024_07_31/inc;../../SDKs/assimp/assimp-5.4.3/build/include;../../SDKs/assimp/assimp-5.4.3/include;../../SDKs/DirectXTK12/Inc;../../SDKs/imgui;../../SDKs/imgui/backends;../../SDKs/imguizmo;../../SDKs/tween;../../SDKs/DirectXTex/DirectXTex;../../SDKs/DirectXTex/Texconv;../../SDKs/DirectXTex/Texdiag;../../SDKs/DirectXTex/Texassemble;../../SDKs/DirectXTex/Common;../../SDKs/DirectXTex/CmdLineHelpers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>pch;JExpose;JExpose/Scene;JExpose/Templates;JExpose/Primitives;JExpose/Physics;JExpose/Controllers;Effects;Game;Animation;Audio;Primitives;Common;Renderer;Scene;Templates;Controllers;Shaders/Compiler;Shaders/Compute;Scripting;Physics;Utils;Editor;GameControllers;../../SDKs/dxc/dxc_2024_07_31/inc;../../SDKs/assimp/assimp-5.4.3/build/include;../../SDKs/assimp/assimp-5.4.3/include;../../SDKs/DirectXTK12/Inc;../../SDKs/imgui;../../SDKs/imgui/backends;../../SDKs/imguizmo;../../SDKs/tween;../../SDKs/DirectXTex/DirectXTex;../../SDKs/DirectXTex/Texconv;../../SDKs/DirectXTex/Texdiag;../../SDKs/DirectXTex/Texassemble;../../SDKs/DirectXTex/Common;../../SDKs/DirectXTex/CmdLineHelpers;../../SDKs/v8pp-2.1.1/packages/v8-v143-x64.9.8.177.4/include;../../SDKs/v8pp-2.1.1;../../SDKs/v8pp-2.1.1/out;../../SDKs/PhysX/physx/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -304,7 +304,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;_DEVELOPMENT;HAS_DIRECTXTK12;_EDITOR;DIRECTX_TEX_VERSION=207;TOOL_VERSION=DIRECTX_TEX_VERSION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>pch;JExpose;JExpose/Scene;JExpose/Templates;Effects;Animation;Audio;Primitives;Common;Renderer;Scene;Templates;Controllers;Shaders/Compiler;Shaders/Compute;Utils;Editor;../../SDKs/dxc/dxc_2024_07_31/inc;../../SDKs/assimp/assimp-5.4.3/build/include;../../SDKs/assimp/assimp-5.4.3/include;../../SDKs/DirectXTK12/Inc;../../SDKs/imgui;../../SDKs/imgui/backends;../../SDKs/imguizmo;../../SDKs/tween;../../SDKs/DirectXTex/DirectXTex;../../SDKs/DirectXTex/Texconv;../../SDKs/DirectXTex/Texdiag;../../SDKs/DirectXTex/Texassemble;../../SDKs/DirectXTex/Common;../../SDKs/DirectXTex/CmdLineHelpers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>pch;JExpose;JExpose/Scene;JExpose/Templates;JExpose/Primitives;JExpose/Physics;Effects;Game;Animation;Audio;Primitives;Common;Renderer;Scene;Templates;Controllers;Shaders/Compiler;Shaders/Compute;Scripting;Physics;Utils;Editor;GameControllers;../../SDKs/dxc/dxc_2024_07_31/inc;../../SDKs/assimp/assimp-5.4.3/build/include;../../SDKs/assimp/assimp-5.4.3/include;../../SDKs/DirectXTK12/Inc;../../SDKs/imgui;../../SDKs/imgui/backends;../../SDKs/imguizmo;../../SDKs/tween;../../SDKs/DirectXTex/DirectXTex;../../SDKs/DirectXTex/Texconv;../../SDKs/DirectXTex/Texdiag;../../SDKs/DirectXTex/Texassemble;../../SDKs/DirectXTex/Common;../../SDKs/DirectXTex/CmdLineHelpers;../../SDKs/v8pp-2.1.1/packages/v8-v143-x64.9.8.177.4/include;../../SDKs/v8pp-2.1.1;../../SDKs/v8pp-2.1.1/out;../../SDKs/PhysX/physx/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
@@ -347,6 +347,7 @@
     <ClInclude Include="Audio\AudioSystem.h" />
     <ClInclude Include="Controllers\Controller.h" />
     <ClInclude Include="Editor\AnimationSequencerModal.h" />
+    <ClInclude Include="Editor\AssetsTree.h" />
     <ClInclude Include="Editor\CreatorModal.h" />
     <ClInclude Include="Editor\DefaultLevel.h" />
     <ClInclude Include="Editor\DeletePrompt.h" />
@@ -354,8 +355,12 @@
     <ClInclude Include="Editor\EditorMouseCamera.h" />
     <ClInclude Include="Editor\IconsFontAwesome5.h" />
     <ClInclude Include="Editor\ImEditor.h" />
+    <ClInclude Include="Editor\Modals\ScriptBindingModal.h" />
+    <ClInclude Include="Editor\Modals\ScriptEditModal.h" />
+    <ClInclude Include="Editor\Modals\SimpleModal.h" />
     <ClInclude Include="Editor\MousePicking.h" />
     <ClInclude Include="Editor\RightPanelComponent.h" />
+    <ClInclude Include="Editor\SceneObjectPopup.h" />
     <ClInclude Include="Editor\Timeline\TimelineChannel.h" />
     <ClInclude Include="Editor\Timeline\TimelineEditor.h" />
     <ClInclude Include="Editor\Timeline\TimelinePopups.h" />
@@ -363,6 +368,19 @@
     <ClInclude Include="EngineInc.h" />
     <ClInclude Include="Game\BootLevel\BootLevel.h" />
     <ClInclude Include="Game\Game.h" />
+    <ClInclude Include="JExpose\Attributes\JV8Context.h" />
+    <ClInclude Include="JExpose\Attributes\JV8Templates.h" />
+    <ClInclude Include="JExpose\Controllers\ControllerAtt.h" />
+    <ClInclude Include="JExpose\Physics\PhysicObjectAtt.h" />
+    <ClInclude Include="JExpose\Primitives\CapsuleAtt.h" />
+    <ClInclude Include="JExpose\Primitives\ConeAtt.h" />
+    <ClInclude Include="JExpose\Primitives\CubeAtt.h" />
+    <ClInclude Include="JExpose\Primitives\SphereAtt.h" />
+    <ClInclude Include="JExpose\Scene\BoundaryAtt.h" />
+    <ClInclude Include="JExpose\Scene\PhysicSceneAtt.h" />
+    <ClInclude Include="JExpose\Scene\TriggerAtt.h" />
+    <ClInclude Include="JExpose\Templates\PhysicGeometryAtt.h" />
+    <ClInclude Include="pch\DeleteHook.h" />
     <ClInclude Include="pch\GameEngineState.h" />
     <ClInclude Include="Game\GameEngineStates\GameEngineBoot.h" />
     <ClInclude Include="JExpose\Attributes\JDestroy.h" />
@@ -400,9 +418,6 @@
     <ClInclude Include="JExpose\TrackUUID\JInsert.h" />
     <ClInclude Include="JExpose\JTypes.h" />
     <ClInclude Include="JExpose\JObject.h" />
-    <ClInclude Include="pch\UUID\ComputeShaderUUID.h" />
-    <ClInclude Include="pch\UUID\DeviceUtilsUUID.h" />
-    <ClInclude Include="pch\UUID\TemplateUUID.h" />
     <ClInclude Include="pch\GameStateMachine.h" />
     <ClInclude Include="pch\JExposeEditor.h" />
     <ClInclude Include="JExpose\JEnd.h" />
@@ -421,9 +436,9 @@
     <ClInclude Include="JExpose\Templates\ShaderAtt.h" />
     <ClInclude Include="JExpose\Templates\SoundAtt.h" />
     <ClInclude Include="JExpose\Templates\TextureAtt.h" />
-    <ClInclude Include="pch\Command.h" />
     <ClInclude Include="pch\DDSTextures.h" />
     <ClInclude Include="pch\Debug.h" />
+    <ClInclude Include="pch\SceneUnitId.h" />
     <ClInclude Include="pch\ShaderMaterials.h" />
     <ClInclude Include="pch\UUID.h" />
     <ClInclude Include="pch\DXTypes.h" />
@@ -443,14 +458,18 @@
     </ClInclude>
     <ClInclude Include="Common\d3dx12.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Physics\Boundary.h" />
+    <ClInclude Include="Physics\PhysicObject.h" />
+    <ClInclude Include="Physics\Physics.h" />
     <ClInclude Include="Primitives\BoxLines.h" />
+    <ClInclude Include="Primitives\Capsule.h" />
     <ClInclude Include="Primitives\Cone.h" />
     <ClInclude Include="Primitives\Cube.h" />
     <ClInclude Include="Primitives\Decal.h" />
     <ClInclude Include="Primitives\Floor.h" />
     <ClInclude Include="Primitives\Pentahedron.h" />
     <ClInclude Include="Primitives\Primitive.h" />
-    <ClInclude Include="Primitives\Primivites.h" />
+    <ClInclude Include="Primitives\Primitives.h" />
     <ClInclude Include="Primitives\Sphere.h" />
     <ClInclude Include="Primitives\UtahTeapot.h" />
     <ClInclude Include="Renderer\DeviceUtils\CommandsProcessor\CommandsProcessor.h" />
@@ -470,7 +489,6 @@
     <ClInclude Include="Renderer\DeviceUtils\RenderPass\RenderToTexturePass.h" />
     <ClInclude Include="Renderer\VertexFormats.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="pch\UUID\SceneObjectUUID.h" />
     <ClInclude Include="Scene\Binder.h" />
     <ClInclude Include="Scene\Camera\Camera.h" />
     <ClInclude Include="Scene\Camera\Projections\Orthographic.h" />
@@ -478,6 +496,9 @@
     <ClInclude Include="Scene\Level.h" />
     <ClInclude Include="Scene\Light\Light.h" />
     <ClInclude Include="Scene\Light\ShadowMap.h" />
+    <ClInclude Include="Physics\ContactCallback.h" />
+    <ClInclude Include="Physics\PhysicScene.h" />
+    <ClInclude Include="Physics\Trigger.h" />
     <ClInclude Include="Scene\Renderable\Renderable.h" />
     <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="Scene\SceneObject.h" />
@@ -485,6 +506,7 @@
     <ClInclude Include="Scene\SceneObjectDef.h" />
     <ClInclude Include="Scene\SceneUnit.h" />
     <ClInclude Include="Scene\Sound\SoundFX.h" />
+    <ClInclude Include="Scripting\ScriptBinding.h" />
     <ClInclude Include="Scripting\Scripting.h" />
     <ClInclude Include="Shaders\Compiler\CompilerQueue.h" />
     <ClInclude Include="Shaders\Compiler\CustomIncludeHandler.h" />
@@ -502,6 +524,7 @@
     <ClInclude Include="pch\Application.h" />
     <ClInclude Include="Templates\JTemplate.h" />
     <ClInclude Include="Templates\Material\BlendDesc.h" />
+    <ClInclude Include="Templates\Material\DepthStencilDesc.h" />
     <ClInclude Include="Templates\Material\Material.h" />
     <ClInclude Include="Templates\Material\MeshMaterial.h" />
     <ClInclude Include="Templates\Material\RasterizerDesc.h" />
@@ -509,6 +532,7 @@
     <ClInclude Include="Templates\Material\Variables.h" />
     <ClInclude Include="Templates\Mesh\Mesh.h" />
     <ClInclude Include="Templates\Model3D\Model3D.h" />
+    <ClInclude Include="Physics\PhysicGeometry.h" />
     <ClInclude Include="Templates\RenderPass\Override\MinMaxChainPass.h" />
     <ClInclude Include="Templates\RenderPass\Override\MinMaxChainResultPass.h" />
     <ClInclude Include="Templates\RenderPass\Override\OverridePass.h" />
@@ -517,7 +541,6 @@
     <ClInclude Include="Templates\RenderPass\PassMaterialOverride.h" />
     <ClInclude Include="Templates\RenderPass\RenderPass.h" />
     <ClInclude Include="Templates\Shader\Shader.h" />
-    <ClInclude Include="Templates\Shader\ShaderInstance.h" />
     <ClInclude Include="Templates\Sound\Sound.h" />
     <ClInclude Include="Templates\TemplateDecl.h" />
     <ClInclude Include="Templates\TemplateDef.h" />
@@ -540,13 +563,18 @@
     <ClCompile Include="Audio\AudioSystem.cpp" />
     <ClCompile Include="Controllers\Controller.cpp" />
     <ClCompile Include="Editor\AnimationSequencerModal.cpp" />
+    <ClCompile Include="Editor\AssetsTree.cpp" />
     <ClCompile Include="Editor\DefaultLevel.cpp" />
     <ClCompile Include="Editor\DeletePrompt.cpp" />
     <ClCompile Include="Editor\Editor.cpp" />
     <ClCompile Include="Editor\EditorMouseCamera.cpp" />
     <ClCompile Include="Editor\ImEditor.cpp" />
+    <ClCompile Include="Editor\Modals\ScriptBindingModal.cpp" />
+    <ClCompile Include="Editor\Modals\ScriptEditModal.cpp" />
+    <ClCompile Include="Editor\Modals\SimpleModal.cpp" />
     <ClCompile Include="Editor\MousePicking.cpp" />
     <ClCompile Include="Editor\RightPanelComponent.cpp" />
+    <ClCompile Include="Editor\SceneObjectPopup.cpp" />
     <ClCompile Include="Editor\Timeline\TimelineChannel.cpp" />
     <ClCompile Include="Editor\Timeline\TimelineEditor.cpp" />
     <ClCompile Include="Editor\Timeline\TimelinePopups.cpp" />
@@ -554,6 +582,9 @@
     <ClCompile Include="Game\BootLevel\BootLevel.cpp" />
     <ClCompile Include="Game\Game.cpp" />
     <ClCompile Include="Game\GameEngineStates\GameEngineBoot.cpp" />
+    <ClCompile Include="JExpose\Functions\JEdvCreatorDrawer.cpp" />
+    <ClCompile Include="JExpose\Functions\JEdvCreatorValidator.cpp" />
+    <ClCompile Include="JExpose\Functions\JEdvEditorDrawer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">Create</PrecompiledHeader>
@@ -563,7 +594,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Editor_Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Scripting\NoV8.cpp" />
+    <ClInclude Include="Scripting\NoV8.h" />
+    <ClCompile Include="Physics\Boundary.cpp" />
+    <ClCompile Include="Physics\PhysicObject.cpp" />
+    <ClCompile Include="Physics\Physics.cpp" />
     <ClCompile Include="Primitives\BoxLines.cpp" />
+    <ClCompile Include="Primitives\Capsule.cpp" />
     <ClCompile Include="Primitives\Cone.cpp" />
     <ClCompile Include="Primitives\Cube.cpp" />
     <ClCompile Include="Primitives\Decal.cpp" />
@@ -592,6 +629,9 @@
     <ClCompile Include="Scene\Level.cpp" />
     <ClCompile Include="Scene\Light\Light.cpp" />
     <ClCompile Include="Scene\Light\ShadowMap.cpp" />
+    <ClCompile Include="Physics\ContactCallback.cpp" />
+    <ClCompile Include="Physics\PhysicScene.cpp" />
+    <ClCompile Include="Physics\Trigger.cpp" />
     <ClCompile Include="Scene\Renderable\Renderable.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
     <ClCompile Include="Scene\SceneObject.cpp" />
@@ -611,6 +651,7 @@
     <ClCompile Include="Templates\Material\Variables.cpp" />
     <ClCompile Include="Templates\Mesh\Mesh.cpp" />
     <ClCompile Include="Templates\Model3D\Model3D.cpp" />
+    <ClCompile Include="Physics\PhysicGeometry.cpp" />
     <ClCompile Include="Templates\RenderPass\Override\MinMaxChainPass.cpp" />
     <ClCompile Include="Templates\RenderPass\Override\MinMaxChainResultPass.cpp" />
     <ClCompile Include="Templates\RenderPass\Override\OverridePass.cpp" />

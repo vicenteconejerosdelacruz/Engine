@@ -119,48 +119,16 @@ struct BlendDesc : D3D12_BLEND_DESC
 
 	BlendDesc(const BlendDesc& other)
 	{
-		/*
-		auto FromRenderTargetBlendDesc = [](D3D12_RENDER_TARGET_BLEND_DESC& rtDst, D3D12_RENDER_TARGET_BLEND_DESC rtSrc)
-			{
-				rtDst.BlendEnable = rtSrc.BlendEnable;
-				rtDst.LogicOpEnable = rtSrc.LogicOpEnable;
-				rtDst.SrcBlend = rtSrc.SrcBlend;
-				rtDst.DestBlend = rtSrc.DestBlend;
-				rtDst.BlendOp = rtSrc.BlendOp;
-				rtDst.SrcBlendAlpha = rtSrc.SrcBlendAlpha;
-				rtDst.DestBlendAlpha = rtSrc.DestBlendAlpha;
-				rtDst.BlendOpAlpha = rtSrc.BlendOpAlpha;
-				rtDst.LogicOp = rtSrc.LogicOp;
-				rtDst.RenderTargetWriteMask = rtSrc.RenderTargetWriteMask;
-			};
-		*/
-
 		AlphaToCoverageEnable = other.AlphaToCoverageEnable;
 		IndependentBlendEnable = other.IndependentBlendEnable;
 		for (unsigned int i = 0; i < _countof(other.RenderTarget); i++)
 		{
 			RenderTarget[i] = RenderTargetBlendDesc(other.RenderTarget[i]);
-			//FromRenderTargetBlendDesc(RenderTarget[i], other.RenderTarget[i]);
 		}
 	}
 
 	BlendDesc(nlohmann::json& j)
 	{
-		/*
-		auto ToRenderTargetBlendDesc = [](D3D12_RENDER_TARGET_BLEND_DESC& rt, nlohmann::json j)
-			{
-				ReplaceFromJson(rt.BlendEnable, j, "BlendEnable");
-				ReplaceFromJson(rt.LogicOpEnable, j, "LogicOpEnable");
-				nostd::ReplaceFromJsonUsingMap(rt.SrcBlend, StringToD3D12_BLEND, j, "SrcBlend");
-				nostd::ReplaceFromJsonUsingMap(rt.DestBlend, StringToD3D12_BLEND, j, "DestBlend");
-				nostd::ReplaceFromJsonUsingMap(rt.BlendOp, StringToD3D12_BLEND_OP, j, "BlendOp");
-				nostd::ReplaceFromJsonUsingMap(rt.SrcBlendAlpha, StringToD3D12_BLEND, j, "SrcBlendAlpha");
-				nostd::ReplaceFromJsonUsingMap(rt.DestBlendAlpha, StringToD3D12_BLEND, j, "DestBlendAlpha");
-				nostd::ReplaceFromJsonUsingMap(rt.BlendOpAlpha, StringToD3D12_BLEND_OP, j, "BlendOpAlpha");
-				nostd::ReplaceFromJsonUsingMap(rt.LogicOp, StringToD3D12_LOGIC_OP, j, "LogicOp");
-				ReplaceFromJson(rt.RenderTargetWriteMask, j, "RenderTargetWriteMask");
-			};
-		*/
 		ReplaceFromJson(AlphaToCoverageEnable, j, "AlphaToCoverageEnable");
 		ReplaceFromJson(IndependentBlendEnable, j, "IndependentBlendEnable");
 		if (j.contains("RenderTarget") && !j["RenderTarget"].empty())
@@ -168,35 +136,17 @@ struct BlendDesc : D3D12_BLEND_DESC
 			for (unsigned int i = 0U; i < j.count("RenderTarget"); i++)
 			{
 				RenderTarget[i] = RenderTargetBlendDesc(j["RenderTarget"][i]);
-				//ToRenderTargetBlendDesc(RenderTarget[i], j["RenderTarget"][i]);
 			}
 		}
 	}
 
 	BlendDesc(const D3D12_BLEND_DESC& other)
 	{
-		/*
-		auto FromRenderTargetBlendDesc = [](D3D12_RENDER_TARGET_BLEND_DESC& rtDst, D3D12_RENDER_TARGET_BLEND_DESC rtSrc)
-			{
-				rtDst.BlendEnable = rtSrc.BlendEnable;
-				rtDst.LogicOpEnable = rtSrc.LogicOpEnable;
-				rtDst.SrcBlend = rtSrc.SrcBlend;
-				rtDst.DestBlend = rtSrc.DestBlend;
-				rtDst.BlendOp = rtSrc.BlendOp;
-				rtDst.SrcBlendAlpha = rtSrc.SrcBlendAlpha;
-				rtDst.DestBlendAlpha = rtSrc.DestBlendAlpha;
-				rtDst.BlendOpAlpha = rtSrc.BlendOpAlpha;
-				rtDst.LogicOp = rtSrc.LogicOp;
-				rtDst.RenderTargetWriteMask = rtSrc.RenderTargetWriteMask;
-			};
-		*/
-
 		AlphaToCoverageEnable = other.AlphaToCoverageEnable;
 		IndependentBlendEnable = other.IndependentBlendEnable;
 		for (unsigned int i = 0; i < _countof(other.RenderTarget); i++)
 		{
 			RenderTarget[i] = RenderTargetBlendDesc(other.RenderTarget[i]);
-			//FromRenderTargetBlendDesc(RenderTarget[i], other.RenderTarget[i]);
 		}
 	}
 
@@ -225,21 +175,6 @@ struct BlendDesc : D3D12_BLEND_DESC
 
 	nlohmann::json json()
 	{
-		/*
-		auto FromRenderTargetBlendDesc = [](nlohmann::json& j, D3D12_RENDER_TARGET_BLEND_DESC rt)
-			{
-				j["BlendEnable"] = rt.BlendEnable;
-				j["LogicOpEnable"] = rt.LogicOpEnable;
-				j["SrcBlend"] = D3D12_BLENDToString.at(rt.SrcBlend);
-				j["DestBlend"] = D3D12_BLENDToString.at(rt.DestBlend);
-				j["BlendOp"] = D3D12_BLEND_OPToString.at(rt.BlendOp);
-				j["SrcBlendAlpha"] = D3D12_BLENDToString.at(rt.SrcBlendAlpha);
-				j["DestBlendAlpha"] = D3D12_BLENDToString.at(rt.DestBlendAlpha);
-				j["BlendOpAlpha"] = D3D12_BLEND_OPToString.at(rt.BlendOpAlpha);
-				j["LogicOp"] = D3D12_LOGIC_OPToString.at(rt.LogicOp);
-				j["RenderTargetWriteMask"] = rt.RenderTargetWriteMask;
-			};
-		*/
 		nlohmann::json j;
 		j["AlphaToCoverageEnable"] = AlphaToCoverageEnable;
 		j["IndependentBlendEnable"] = IndependentBlendEnable;
@@ -248,10 +183,6 @@ struct BlendDesc : D3D12_BLEND_DESC
 		for (unsigned int i = 0; i < _countof(RenderTarget); i++)
 		{
 			j["RenderTarget"].push_back(RenderTargetBlendDesc(RenderTarget[i]).json());
-			/*
-			j["RenderTarget"].push_back({});
-			FromRenderTargetBlendDesc(j["RenderTarget"].at(i), RenderTarget[i]);
-			*/
 		}
 		return j;
 	}

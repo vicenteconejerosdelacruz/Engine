@@ -8,11 +8,6 @@ namespace Editor
 };
 #endif
 
-namespace Game
-{
-	extern void BindToV8Context(v8pp::context& context, SUUUID uuid);
-};
-
 namespace Scene
 {
 	void SceneObject::JUpdate(nlohmann::json p)
@@ -31,8 +26,20 @@ namespace Scene
 		JObject::JPatch(p);
 	}
 
-	void SceneObject::BindToV8Context(v8pp::context& context)
+	void SceneObject::Destroy()
 	{
-		Game::BindToV8Context(context, SUuuid());
+		for (auto& cb : destroyCallbacks)
+		{
+			cb();
+		}
 	}
+
+#if defined(_EDITOR)
+	std::map<std::string, ScriptBinding> SceneObject::GetScriptBindingOptions()
+	{
+		return {
+			{ at("name"), ScriptBinding(std::string(at("uuid"))) }
+		};
+	}
+#endif
 }

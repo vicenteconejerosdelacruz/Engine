@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _SEQUENCE_H
+#define _SEQUENCE_H
 
 #include <string>
 #include <vector>
@@ -18,7 +19,7 @@ struct Sequence
 	SequenceChannelElementAnimation* GetAnimationElementAtFrame(int frame);
 	XMMATRIX GetTransformationAtFrame(int frame);
 	void CreateSoundFXsAtFrame(int frame, SceneUnitId id);
-	void RunScriptAtFrame(int frame, RenderableSUUUID renderable);
+	void RunScriptAtFrame(int frame, RenderableID renderable);
 	bool Runnable() const;
 
 	int framesPerSecond;
@@ -36,3 +37,4 @@ inline static nlohmann::json FromSequence(Sequence s)
 {
 	return s.json();
 }
+#endif

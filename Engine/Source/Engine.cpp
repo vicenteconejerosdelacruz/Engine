@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include <Renderer.h>
 #include <Scripting.h>
+#include <Physics.h>
 #include <AudioSystem.h>
 #include <ShaderCompiler.h>
 #include <Templates.h>
@@ -19,6 +20,7 @@ using namespace Scene;
 using namespace AudioSystem;
 using namespace ShaderCompiler;
 using namespace Scripting;
+using namespace Physics;
 using namespace Game;
 #if defined(_EDITOR)
 using namespace Editor;
@@ -29,7 +31,6 @@ namespace Scene
 	extern void SceneRender();
 	extern void ScenePostRender();
 	extern void SceneObjectsStep(DX::StepTimer& timer);
-	extern void DeletedScenes();
 	extern void DestroyScenes(bool inmediate);
 };
 
@@ -55,6 +56,7 @@ bool inFullScreen = false;
 bool editorPlayMode = false;
 #endif
 extern std::string gameAppTitle;
+extern float gameUpdateFrequency;
 
 std::unique_ptr<Renderer> renderer;
 
@@ -125,6 +127,9 @@ int EngineConsoleMain()
 
 int APIENTRY EngineWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
+	timer.SetFixedTimeStep(true);
+	timer.SetTargetElapsedSeconds(gameUpdateFrequency);
+
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -147,6 +152,9 @@ int APIENTRY EngineWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevIns
 	//create an isolate and a handle scope for the application lifetime
 	v8::Isolate::Scope isolate_scope(isolate);
 	v8::HandleScope handle_scope(isolate);
+
+	//Initialize the physics
+	InitializePhysics();
 
 	// Main loop
 	while (!appDone)
@@ -248,12 +256,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 #endif
 	return TRUE;
 }
-
-void CreateLightingResourcesMapping()
-{
-}
-
-//READ&GET
 
 //UPDATE
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -425,19 +427,15 @@ void AppStep()
 	timer.Tick([&]()
 		{
 			TemplatesStep(timer);
-			StepControllers(timer);
 			GameStep();
 			SceneObjectsStep(timer);
+			StepControllers(timer);
 #if defined(_EDITOR)
 			EditorStep();
 #endif
 		}
 	);
 	Render();
-
-	//delete scenes which are marked for deletion
-	DeletedScenes();
-
 }
 
 //RENDER
@@ -482,8 +480,10 @@ void DestroyInstance()
 #if defined(_EDITOR)
 	DestroyEditor();
 #endif
+
 	DestroyScenes(true);
 	DestroyControllers();
+	DestroyPhysics();
 	DestroyTemplatesInstances();
 	DestroyTemplates();
 }

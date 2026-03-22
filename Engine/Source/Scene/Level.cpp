@@ -5,6 +5,7 @@
 #include <Application.h>
 #include <fstream>
 #include <SceneObject.h>
+#include <Physics.h>
 #if defined(_EDITOR)
 #include <DefaultLevel.h>
 #include <BootLevel/BootLevel.h>
@@ -17,13 +18,15 @@ namespace Editor {
 	extern void CreateSceneUnitEditorIndependentCamera(SceneUnitId id);
 	extern void CopySceneUnitEditorCameraRenderPasses(SceneUnitId id);
 	extern void CreatePickingPass(SceneUnitId id);
+	extern void CreateSceneUnitPhysicsController(SceneUnitId id);
 	extern void SwitchToSceneUnitEditorCamera(SceneUnitId id);
 }
 #endif
 
-namespace Scene::Level {
-
+namespace Scene::Level
+{
 	using namespace Scene;
+	using namespace Physics;
 
 	std::filesystem::path levelToLoad;
 #if defined(_EDITOR)
@@ -62,6 +65,7 @@ namespace Scene::Level {
 		level.merge_patch(GetDefaultLevelCameras());
 		level.merge_patch(GetDefaultLevelLights());
 		level.merge_patch(GetDefaultLevelSounds());
+		level.merge_patch(GetDefaultLevelPhysicsScenes());
 
 		return level;
 	}
@@ -106,46 +110,40 @@ namespace Scene::Level {
 		}
 	}
 
+	static std::mutex loadLevelMutex;
 	void LoadLevel(std::unique_ptr<SceneUnit>& scene, std::string filename, nlohmann::json data, std::function<void(std::string, unsigned int, unsigned int)> progress)
 	{
+		std::lock_guard<std::mutex> lock(loadLevelMutex);
 		using namespace Scene;
 #if defined(_EDITOR)
 		using namespace Editor;
 
+		SceneUnitId id = scene->Id();
+
 		if (!scene->IsIsolated())
 		{
-			CreateSceneUnitBillboards(scene->Id());
+			CreateSceneUnitBillboards(id);
 		}
 #endif
-		scene->ResetLoadingCommandList();
-		scene->SetLoading(true);
-		scene->SetCanSubmitLoading(false);
 
-		CreateRenderableSUSceneObjects(scene->Id());
-		CreateCameraSUSceneObjects(scene->Id());
-		CreateLightSUSceneObjects(scene->Id());
-		CreateSoundFXSUSceneObjects(scene->Id());
+		auto& loading = GetLoadingProcessor();
+		loading.ResetCommandList();
 
-		std::vector<std::string> types =
-		{
-			SceneObjectTypeJsonContainer.at(SO_Renderables),
-			SceneObjectTypeJsonContainer.at(SO_Cameras),
-			SceneObjectTypeJsonContainer.at(SO_Lights),
-			SceneObjectTypeJsonContainer.at(SO_SoundEffects),
-		};
+		CreateSceneUnitSceneObjects(id);
 
-		unsigned int total = std::accumulate(types.begin(), types.end(), 0U, [&](unsigned int sum, std::string type)
+		unsigned int total = std::accumulate(SceneObjectTypeJsonContainer.begin(), SceneObjectTypeJsonContainer.end(), 0U, [&](unsigned int sum, auto& pair)
 			{
-				return sum + (data.contains(type) ? static_cast<unsigned int>(data.at(type).size()) : 0U);
+				return sum + (data.contains(pair.second) ? static_cast<unsigned int>(data.at(pair.second).size()) : 0U);
 			}
 		);
+
 		unsigned int count = 0U;
 
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Renderables), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateSURenderable(scene->Id(), json);
-				scene->InsertRenderableIntoLoadingPool(json.at("uuid"));
+				CreateRenderable(id, json);
+				loading.LoadingPoolInsert(SO_Renderables, MAKESUUUID(id, JUUID(json.at("uuid"))));
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -153,8 +151,8 @@ namespace Scene::Level {
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Cameras), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateSUCamera(scene->Id(), json);
-				scene->InsertCameraIntoLoadingPool(json.at("uuid"));
+				CreateCamera(id, json);
+				loading.LoadingPoolInsert(SO_Cameras, MAKESUUUID(id, JUUID(json.at("uuid"))));
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -162,8 +160,8 @@ namespace Scene::Level {
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Lights), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateSULight(scene->Id(), json);
-				scene->InsertLightIntoLoadingPool(json.at("uuid"));
+				CreateLight(id, json);
+				loading.LoadingPoolInsert(SO_Lights, MAKESUUUID(id, JUUID(json.at("uuid"))));
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -171,7 +169,31 @@ namespace Scene::Level {
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_SoundEffects), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
-				CreateSUSoundFX(scene->Id(), json);
+				CreateSoundFX(id, json);
+				count++;
+				progress(json.at("name"), count, total);
+			}
+		);
+		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_PhysicScenes), [&](nlohmann::json& json)
+			{
+				progress(json.at("name"), count, total);
+				CreatePhysicScene(id, json);
+				count++;
+				progress(json.at("name"), count, total);
+			}
+		);
+		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Triggers), [&](nlohmann::json& json)
+			{
+				progress(json.at("name"), count, total);
+				CreateTrigger(id, json);
+				count++;
+				progress(json.at("name"), count, total);
+			}
+		);
+		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Boundaries), [&](nlohmann::json& json)
+			{
+				progress(json.at("name"), count, total);
+				CreateBoundary(id, json);
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -180,20 +202,25 @@ namespace Scene::Level {
 #if defined(_EDITOR)
 		if (!scene->IsIsolated())
 		{
-			CreatePickingPass(scene->Id());
-			CreateSceneUnitBoundingBox(scene->Id());
-			CreateSceneUnitEditorIndependentCamera(scene->Id());
-			CreateRegisteredBillboards(scene->Id());
+			CreatePickingPass(id);
+			CreateSceneUnitBoundingBox(id);
+			CreateSceneUnitEditorIndependentCamera(id);
+			CreateRegisteredBillboards(id);
+			CreateSceneUnitPhysicsController(id);
 		}
 #endif
 
-		MapControllers(scene->Id());
-		BindSceneObjects(scene->Id());
+		BindSceneObjects(id);
+		CreatePhysicsObjectsBehaviors(id);
+		//leave this to last
+		MapControllers(id);
 #if defined(_EDITOR)
 		if (!scene->IsIsolated())
 		{
-			CopySceneUnitEditorCameraRenderPasses(scene->Id());
+			CopySceneUnitEditorCameraRenderPasses(id);
 		}
 #endif
+		loading.CloseCommandList();
+		loading.ExecuteCommandList();
 	}
 }

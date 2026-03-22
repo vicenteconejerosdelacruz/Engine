@@ -52,11 +52,13 @@ namespace Scene
 		SoundFX(SceneUnitId id, nlohmann::json& json);
 		~SoundFX() { Destroy(); }
 		virtual void Initialize();
+		virtual void SetInitialConditions();
 		virtual void BindToScene();
 		virtual void UnbindFromScene();
 
 		void Destroy();
 
+		void updateRotationQ();
 		XMVECTOR rotationQ();
 		XMMATRIX world();
 		XMVECTOR fw();
@@ -78,18 +80,19 @@ namespace Scene
 		void UpdateEmmiter();
 
 #if defined(_EDITOR)
-		virtual JUUID CreateBillboard(CameraSUUUID camera);
-		virtual void UpdateBillboard(JUUID billboard);
+		virtual RenderableID CreateBillboard(CameraID camera);
+		virtual void UpdateBillboard(RenderableID renderable);
 		BoundingBox GetBoundingBox();
 
 		//Gizmo
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation);
 		virtual void WriteJson(nlohmann::json& j);
 #endif
-		bool markedForDelete = false;
+		DeleteHook markedForDelete;
 		float time = 0.0f;
 		bool hasStarted = false;
-		//3D
+		//Transformation
+		XMVECTOR rotationQuaternion;
 		AudioEmitter audioEmitter;
 		SoundInstance soundEffectInstance;
 	};
@@ -112,3 +115,6 @@ namespace Scene
 	void WriteSoundFXsJson(SceneUnitId id, nlohmann::json& json);
 #endif
 }
+
+using namespace Scene;
+DEF_SCENEOBJECT_ID_HASH(SoundFX);

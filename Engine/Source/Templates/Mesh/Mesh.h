@@ -3,8 +3,7 @@
 #include <VertexFormats.h>
 #include <DeviceUtils/VertexBuffer/VertexBuffer.h>
 #include <DeviceUtils/IndexBuffer/IndexBuffer.h>
-#include <DirectXCollision.h>
-//#include <Application.h>
+#include <SimpleMath.h>
 
 namespace Templates {
 
@@ -23,20 +22,21 @@ namespace Templates {
 
 	//CREATE
 	void CreatePrimitiveMeshTemplate(JUUID uuid, JNAME name);
-	std::unique_ptr<MeshInstance>& GetMeshInstance(SceneUnitId id, JUUID uuid);
+	std::unique_ptr<MeshInstance>& GetMeshInstance(SceneUnitId id, nlohmann::json& json);
 	std::unique_ptr<MeshInstance>& GetMeshInstance(JUUID uuid);
 	std::unique_ptr<MeshInstance>& GetMeshInstance(SceneUnitId id, JUUID uuid, VertexClass vertexClass, void* vertexData, unsigned int vertexSize, unsigned int verticesCount, const void* indices, unsigned int indicesCount);
+	DEF_TEMPLATE_ID(MeshInstance, GetMeshInstance);
 
 	//READ&GET
 	JNAME GetMeshName(JUUID uuid);
 	std::vector<JUUIDName> GetMeshesUUIDsNames();
 	JUUID GetMeshUUIDByName(JNAME name);
 	bool MeshInstanceExists(JUUID uuid);
-
-	//UPDATE
+	nlohmann::json GetMeshJsonByName(JNAME name);
 
 	//DESTROY
 	void DestroyMeshInstance(JUUID uuid);
-
-	//EDITOR
 };
+
+using namespace Templates;
+DEF_TEMPLATE_ID_HASH(MeshInstance);

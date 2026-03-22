@@ -1,22 +1,10 @@
 #pragma once
 
-//#include <assimp/Importer.hpp>
-//#include <assimp/scene.h>
-//#include <assimp/postprocess.h>
-//#include <assimp/GltfMaterial.h>
-//#include <VertexFormats.h>
-//#include <Mesh/Mesh.h>
-//#include <Material/Material.h>
-//#include <Animated.h>
-//#include <DirectXCollision.h>
 #include <Templates.h>
 #include <JTemplate.h>
-//#include <JTypes.h>
-//#include <TemplateDecl.h>
 #include <Sequence/AnimationSequences.h>
-
-//namespace Animation { struct Animated; };
-//namespace Templates { struct TextureJson; struct MaterialJson; };
+#include <Mesh/Mesh.h>
+#include <UUID.h>
 
 namespace Templates
 {
@@ -78,15 +66,20 @@ namespace Templates
 #endif
 	};
 
-	TEMPDECL_FULL(Model3D);
+	struct Model3DInstance;
 
-	JUUID GetModel3DMeshInstanceUUID(std::string uuid, unsigned int index);
-	JUUID GetModel3DMaterialInstanceUUID(std::string uuid, unsigned int index);
-	JUUID GetModel3DMaterialTemplateName(std::string uuid, unsigned int index);
+	TEMPDECL_FULL(Model3D);
+	TEMPDECL_REFTRACKER(Model3D);
+	DEF_TEMPLATE_ID(Model3DJson, GetModel3DTemplate);
+	DEF_TEMPLATE_ID(Model3DInstance, GetModel3DInstance);
+
+	JUUID GetModel3DMeshInstanceID(JUUID meshInstanceUUID, unsigned int index);
+	JUUID GetModel3DMaterialInstanceID(JUUID materialInstanceUUID, unsigned int index);
+	JUUID GetModel3DMaterialTemplateName(Model3DJsonID mdl, unsigned int index);
 
 	struct Model3DInstance
 	{
-		JUUID model3DUUID;
+		Model3DJsonID model3D;
 
 		Model3DInstance(JUUID uuid) { assert(!!!"do not use"); }
 		explicit Model3DInstance(SceneUnitId id, JUUID uuid, JUUID objectUUID);
@@ -101,11 +94,13 @@ namespace Templates
 		MaterialJson CreateModel3DMaterialJson(JUUID materialUUID, JNAME materialName, JUUID vertexShader, JUUID pixelShader, aiMaterial* material);
 #endif
 		VertexClass vertexClass;
-		std::vector<MeshInstanceUUID> meshes;
-		std::vector<JUUID> materialUUIDs;
+		std::vector<MeshInstanceID> meshes;
+		std::vector<MaterialJsonID> materials;
 		//animation
 		std::unique_ptr<Animation::Animated> animations;
 	};
-
-	TEMPDECL_REFTRACKER(Model3D);
 }
+
+using namespace Templates;
+DEF_TEMPLATE_ID_HASH(Model3DJson);
+DEF_TEMPLATE_ID_HASH(Model3DInstance);

@@ -68,7 +68,7 @@ void Renderer::Initialize(HWND coreHwnd) {
 void Renderer::CreateSwapChainPass()
 {
 	using namespace Templates;
-	swapChainPass = CreateRenderPassInstance(0, "", GetRenderPassUUIDByName("simplePass"), 0);
+	swapChainPass = CreateRenderPassInstance(CameraID(), GetRenderPassUUIDByName("simplePass"), 0);
 }
 
 unsigned int Renderer::GetBackBufferIndex()

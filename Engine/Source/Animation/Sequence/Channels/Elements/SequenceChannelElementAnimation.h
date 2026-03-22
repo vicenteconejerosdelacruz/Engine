@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _SEQUENCE_CHANNEL_ELEMENT_ANIMATION_H
+#define _SEQUENCE_CHANNEL_ELEMENT_ANIMATION_H
+
 #include "SequenceChannelElement.h"
 
 struct SequenceChannelElementAnimation : SequenceChannelElement
@@ -16,3 +18,4 @@ struct SequenceChannelElementAnimation : SequenceChannelElement
 	float endTime;
 	bool forward;
 };
+#endif

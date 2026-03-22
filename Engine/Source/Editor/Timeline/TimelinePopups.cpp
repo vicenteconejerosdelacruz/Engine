@@ -8,9 +8,9 @@ static inline ImGuiWindowFlags popupChildFlag = ImGuiWindowFlags_NoSavedSettings
 ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize |
 ImGuiWindowFlags_NoMove;
 
-void AddElementPopup::Init(SceneUnitId id, JUUID uuid, int frame)
+void AddElementPopup::Init(RenderableID renderable, int frame)
 {
-	renderable = MAKESUUUID(id, uuid);
+	this->renderable = renderable;
 	type = SCET_Animation;
 
 	//animations

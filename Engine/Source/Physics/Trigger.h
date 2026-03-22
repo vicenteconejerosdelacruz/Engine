@@ -1,0 +1,106 @@
+#pragma once
+
+#include <Scene.h>
+#include <SceneObject.h>
+#include <SceneUnitId.h>
+#include <PxPhysicsAPI.h>
+#include <ScriptBinding.h>
+
+enum SceneObjectType;
+
+namespace Physics
+{
+	DEF_TEMPLATE_ID_DEP(PhysicObject, GetPhysicObject);
+	extern std::vector<std::string> GetCollisionMasks();
+}
+
+namespace Scene
+{
+	using namespace physx;
+	using namespace Physics;
+
+#if defined(_EDITOR)
+
+#include <Attributes/JOrder.h>
+#include <TriggerAtt.h>
+#include <JEnd.h>
+
+#include <Editor/JDrawersDecl.h>
+#include <TriggerAtt.h>
+#include <JEnd.h>
+
+#include <Editor/JPreviewDecl.h>
+#include <TriggerAtt.h>
+#include <JEnd.h>
+
+#include <Creator/JRequired.h>
+#include <TriggerAtt.h>
+#include <JEnd.h>
+
+#include <Creator/JJsonDecl.h>
+#include <TriggerAtt.h>
+#include <JEnd.h>
+
+#include <Creator/JDrawersDecl.h>
+#include <TriggerAtt.h>
+#include <JEnd.h>
+
+#include <Creator/JValidatorDecl.h>
+#include <TriggerAtt.h>
+#include <JEnd.h>
+
+#endif
+
+	struct Trigger : SceneObject
+	{
+		inline static const SceneObjectType sceneObjectType = SO_Triggers;
+
+#include <Attributes/JFlags.h>
+#include <TriggerAtt.h>
+#include <JEnd.h>
+
+#include <Attributes/JDecl.h>
+#include <TriggerAtt.h>
+#include <JEnd.h>
+
+		Trigger(SceneUnitId id, nlohmann::json& json);
+		~Trigger() { Destroy(); }
+		virtual void Initialize();
+		virtual void BindToScene();
+		virtual void UnbindFromScene();
+
+		virtual void Destroy();
+
+		void CreatePhysicObject();
+#if defined(_EDITOR)
+		virtual void WriteJson(nlohmann::json& j);
+		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
+		BoundingBox GetBoundingBox();
+#endif
+		void OnTriggerEvent(SUUUID sceneObject, unsigned int event);
+
+		//Scripting
+		virtual v8_templates_creators GetV8TemplatesCreators();
+		virtual v8_context_creators GetV8ContextCreators();
+
+		DeleteHook markedForDelete;
+		PhysicObjectID physicObject;
+	};
+
+	SODECL_FULL(Trigger);
+
+#include <TrackUUID/JDecl.h>
+#include <TriggerAtt.h>
+#include <JEnd.h>
+
+	void TriggersStep(SceneUnitId id);
+	void DestroyTriggers();
+	void DestroyTriggers(SceneUnitId id);
+	void DeleteTrigger(SceneUnitId id, JUUID uuid);
+#if defined(_EDITOR)
+	void WriteTriggersJson(SceneUnitId id, nlohmann::json& json);
+#endif
+}
+
+using namespace Scene;
+DEF_SCENEOBJECT_ID_HASH(Trigger);

@@ -1,13 +1,19 @@
-#pragma once
+#ifndef _PRIMITIVE_FLOOR_H
+#define _PRIMITIVE_FLOOR_H
+
 #include "Primitive.h"
 #include <VertexFormats.h>
 
-struct Floor : public Primitive
+namespace Primitives
 {
-	static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL;
-	typedef Vertex<VertexClass> VertexType;
+	struct Floor : Primitive
+	{
+		static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL;
+		typedef Vertex<VertexClass> VertexType;
 
-	std::vector<uint32_t> GetIndices();
-	std::vector<VertexType> GetVertices();
+		Floor(nlohmann::json& json) : Primitive(json) {}
+		std::vector<uint32_t> GetIndices();
+		std::vector<VertexType> GetVertices();
+	};
 };
-
+#endif

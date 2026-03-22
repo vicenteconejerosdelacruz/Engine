@@ -6,22 +6,30 @@
 #include <set>
 #include <memory>
 #include <nlohmann/json.hpp>
+#include <SceneUnitId.h>
 #include <Renderer.h>
 #include <Templates.h>
 #include <SceneUnit.h>
 #include <SceneObject.h>
+#include <NoV8.h>
 
 namespace DX { class StepTimer; }
 
 using namespace DeviceUtils;
+using namespace nov8;
 
 namespace Scene
 {
+	std::tuple<size_t, CommandsProcessor&> CreateLoadingProcessor();
+	CommandsProcessor& GetLoadingProcessor(size_t id = 0ULL);
+	void DestroyLoadingProcessor(size_t id = 0ULL);
+
 	void CreateSceneLevelAsync(std::string filename, nlohmann::json level, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress = [](std::string, unsigned int, unsigned int) {});
 	void CreateIsolatedSceneLevelAsync(std::string filename, nlohmann::json level, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress = [](std::string, unsigned int, unsigned int) {});
 	void AttachLevelIntoScene(SceneUnitId parentUnit, std::string filename, nlohmann::json level, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress = [](std::string, unsigned int, unsigned int) {});
 
 	std::unique_ptr<SceneUnit>& CreateScene(SceneUnitId unit, std::string unitName = std::to_string(nostd::threadIdHash()), unsigned int numProcessors = Renderer::numFrames);
+	void CreateSceneUnitSceneObjects(SceneUnitId unit);
 	void DestroyScene(SceneUnitId unit);
 	void DestroyScenes(bool inmediate = false);
 	bool SceneUnitExits(SceneUnitId unit);
@@ -47,11 +55,12 @@ namespace Scene
 	void CreateSceneObject(SceneUnitId id, SceneObjectType so, nlohmann::json json);
 
 	bool SceneObjectExists(SceneUnitId unit, JUUID uuid);
+	bool SceneObjectExists(SUUUID suuuid);
 
 	void MoveSceneObjectUnit(JUUID uuid, SceneUnitId fromId, SceneUnitId toId);
 
 	template<SceneObjectType T, typename J>
-	inline void CreateJsonSUSceneObject(SceneUnitId id, nlohmann::json& json, auto getTypesSceneObjects)
+	inline void CreateJsonSceneObject(SceneUnitId id, nlohmann::json& json, auto getTypesSceneObjects)
 	{
 		JUUID uuid = json.at("uuid");
 		JNAME name = json.at("name");
@@ -69,12 +78,12 @@ namespace Scene
 			assert(!!!"creation collision");
 		}
 
-		//build
-		std::unique_ptr<J> jT = std::make_unique<J>(id, json);
-
 		//track
 		uuidSet.insert(uuid);
 		unitTypesMap.insert_or_assign(uuid, T);
+
+		//build
+		std::unique_ptr<J> jT = std::make_unique<J>(id, json);
 
 		//store and initialize
 		sceneObjects.insert_or_assign(uuid, std::make_tuple(name, std::move(jT)));
@@ -82,7 +91,7 @@ namespace Scene
 	}
 
 	template<SceneObjectType T, typename J>
-	inline void DeleteJsonSUSceneObject(SceneUnitId id, JUUID uuid, auto getTypesSceneObjects)
+	inline void DeleteJsonSceneObject(SceneUnitId id, JUUID uuid, auto getTypesSceneObjects)
 	{
 		auto& uuidSet = GetSceneObjects(id, T);
 		auto& typesMap = GetSceneObjectsTypes(id);
@@ -100,14 +109,10 @@ namespace Scene
 		sceneObjects.erase(uuid);
 	}
 
-	inline void WriteSceneObjectsJson(nlohmann::json& json, auto& sceneObjects)
-	{
-
-	}
-
 	void ResetRenderableScenes();
 	void EnableSceneUnitRendering(SceneUnitId id);
 	void RemoveSceneUnitRendering(SceneUnitId id);
+	bool SceneUnitRenderingExists(SceneUnitId id);
 
 	void BindSceneObjects(SceneUnitId id);
 	JUUID CloneSceneObject(SceneUnitId id, JUUID, nlohmann::json parameters = {});
@@ -124,9 +129,12 @@ namespace Scene
 	void ScenePostRender();
 	void RunComputeShaders();
 	void SolveComputeShaders();
-	void DeletedScenes();
 
 	SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid);
+	SceneObject* GetSceneObjectPointer(SUUUID suuid);
+
+	v8_templates_creators GetSceneObjectV8TemplatesCreators(SUUUID suuuid);
+	v8_context_creators GetSceneObjectV8ContextCreators(SUUUID suuuid);
 
 #if defined(_EDITOR)
 	//for drawing the panel

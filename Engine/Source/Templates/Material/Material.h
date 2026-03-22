@@ -5,6 +5,7 @@
 #include "SamplerDesc.h"
 #include "RasterizerDesc.h"
 #include "BlendDesc.h"
+#include "DepthStencilDesc.h"
 #include <wrl/client.h>
 #include <atlbase.h>
 #include <TemplateDecl.h>
@@ -91,7 +92,7 @@ namespace Templates
 #endif
 
 	void MaterialJsonStep();
-	void UpdateMaterialTextures(std::unordered_map<TextureJsonUUID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceUUID>>> changes);
+	void UpdateMaterialTextures(std::unordered_map<TextureJsonID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceID>>> changes);
 
 	namespace Material
 	{
@@ -123,7 +124,14 @@ namespace Templates
 		std::unordered_map<size_t, std::function<void()>> pipelineChangeCallbacks;
 	};
 
+	struct MaterialInstance;
+
 	TEMPDECL_FULL(Material);
+	TEMPDECL_REFTRACKER(Material);
+	DEF_TEMPLATE_ID(MaterialJson, GetMaterialTemplate);
+	DEF_TEMPLATE_ID(MaterialInstance, GetMaterialInstance);
+	DEF_TEMPLATE_ID_DEP(ShaderJson, GetShaderTemplate);
+	DEF_TEMPLATE_ID_DEP(ShaderInstance, GetShaderInstance);
 
 	struct MaterialInstance
 	{
@@ -140,11 +148,11 @@ namespace Templates
 		);
 		~MaterialInstance() { Destroy(); }
 
-		MaterialJsonUUID materialUUID;
-		MaterialInstanceUUID instanceUUID;
+		MaterialJsonID materialUUID;
+		MaterialInstanceID instanceUUID;
 
-		ShaderJsonUUID vertexShaderUUID;
-		ShaderJsonUUID pixelShaderUUID;
+		ShaderJsonID vertexShaderUUID;
+		ShaderJsonID pixelShaderUUID;
 
 		VertexClass vertexClass;
 		bool shadowed;
@@ -154,8 +162,8 @@ namespace Templates
 		std::vector<std::vector<byte>> variablesBuffer;
 
 		std::vector<std::string> defines;
-		ShaderInstanceUUID vertexShaderInstanceUUID;
-		ShaderInstanceUUID pixelShaderInstanceUUID;
+		ShaderInstanceID vertexShaderInstanceID;
+		ShaderInstanceID pixelShaderInstanceID;
 		std::vector<MaterialSamplerDesc> samplers;
 		TextureUsageInstanceMap textures;
 		std::map<unsigned int, ::CD3DX12_GPU_DESCRIPTOR_HANDLE> uav;
@@ -163,14 +171,16 @@ namespace Templates
 		void CreateMaterialShaderDefines();
 		void CreateShaderInstances();
 		void Destroy();
-		bool ShaderInstanceHasRegister(std::function<int(ShaderInstanceUUID)> getRegister);
+		bool ShaderInstanceHasRegister(std::function<int(ShaderInstanceID)> getRegister);
 		void LoadVariablesMapping();
 		void SetUAVRootDescriptorTable(CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int& slot);
 		void SetSRVRootDescriptorTable(CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int& slot);
-		void UpdateTexture(TextureShaderUsage usage, TextureJsonUUID texture);
+		void UpdateTexture(TextureShaderUsage usage, TextureJsonID texture);
 	};
 
 	void DestroyMaterialInstance(JUUID materialInstance);
-
-	TEMPDECL_REFTRACKER(Material);
 };
+
+using namespace Templates;
+DEF_TEMPLATE_ID_HASH(MaterialJson);
+DEF_TEMPLATE_ID_HASH(MaterialInstance);

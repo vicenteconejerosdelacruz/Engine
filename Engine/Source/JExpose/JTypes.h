@@ -48,12 +48,14 @@ enum JsonToEditorValueType
 	jedv_t_string,
 	jedv_t_boolean,
 	jedv_t_animation_sequence,
-	jdev_t_animation,
+	jedv_t_animation,
 	jedv_t_tex_dimension,
 	jedv_t_lighttype,
 	jedv_t_dxgi_format,
 	jedv_t_dxgi_format_vector,
 	jedv_t_dxgi_depth_format,
+	jedv_t_mesh_material,
+	jedv_t_script,
 	jedv_t_so_camera,
 	jedv_t_so_camera_name,
 	jedv_t_so_camera_vector,
@@ -66,6 +68,9 @@ enum JsonToEditorValueType
 	jedv_t_so_soundeffect,
 	jedv_t_so_soundeffect_name,
 	jedv_t_so_soundeffect_vector,
+	jedv_t_so_physicscene_name,
+	jedv_t_so_trigger_name,
+	jedv_t_te_mesh,
 	jedv_t_te_material,
 	jedv_t_te_material_name,
 	jedv_t_te_material_vector,
@@ -84,10 +89,14 @@ enum JsonToEditorValueType
 	jedv_t_te_texture,
 	jedv_t_te_texture_name,
 	jedv_t_te_texture_vector,
-	jedv_t_controller,
+	jedv_t_te_physycgeometry,
+	jedv_t_te_physycgeometry_name,
 	jedv_t_controller_vector,
+	jedv_t_physic_object_vector,
+	jedv_t_physic_behavior,
 	jedv_draw_renderpass_vector,
-	jedv_draw_animator_sequencer
+	jedv_draw_animator_sequencer,
+	jedv_cook_physx_mesh
 };
 
 typedef std::function<void(std::string attribute, std::vector<JObject*>& json)> JEdvEditorDrawerFunction;

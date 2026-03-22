@@ -35,7 +35,12 @@ namespace DeviceUtils
 	//DESTROY
 	void DestroyRenderToTextureDescriptorHeap();
 
-	JUUID CreateRenderToTexture();
 	std::unique_ptr<RenderToTexture>& GetRenderToTexture(JUUID rttUUID);
-	void DeleteRenderToTexture(JUUID rttUUID);
+	DEF_TEMPLATE_ID(RenderToTexture, GetRenderToTexture);
+
+	RenderToTextureID CreateRenderToTexture();
+	void DeleteRenderToTexture(RenderToTextureID rttUUID);
 };
+
+using namespace DeviceUtils;
+DEF_TEMPLATE_ID_HASH(RenderToTexture);

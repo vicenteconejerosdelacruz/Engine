@@ -1,21 +1,51 @@
-#pragma once
+#ifndef _PRIMITIVE_SPHERE_H
+#define _PRIMITIVE_SPHERE_H
+
 #include "Primitive.h"
 #include <VertexFormats.h>
 
-struct Sphere : public Primitive
+namespace Primitives
 {
-	unsigned int teleselationLevel = 4U;
-	static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL;
-	typedef Vertex<VertexClass> VertexType;
+#if defined(_EDITOR)
 
-	std::vector<XMFLOAT3> teselationPoints;
-	std::vector<uint32_t> teselationIndices;
+#include <Attributes/JOrder.h>
+#include <SphereAtt.h>
+#include <JEnd.h>
 
-	std::vector<uint32_t> GetIndices();
-	std::vector<VertexType> GetVertices();
+#include <Editor/JDrawersDecl.h>
+#include <SphereAtt.h>
+#include <JEnd.h>
 
-	Sphere(void* params);
-	void NormalizePoint(DirectX::XMFLOAT3& p, float factor = 1.0f);
-	void NormalizePoints(std::vector<XMFLOAT3>& points, float factor = 1.0f);
-	void TeselateIcosahedron(std::vector<XMFLOAT3>& points, std::vector<uint32_t>& indices, uint32_t teleselationLevel);
+#endif
+
+	struct Sphere : Primitive
+	{
+#include <Attributes/JFlags.h>
+#include <SphereAtt.h>
+#include <JEnd.h>
+
+#include <Attributes/JDecl.h>
+#include <SphereAtt.h>
+#include <JEnd.h>
+
+		static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL_TEXCOORD0;
+		typedef Vertex<VertexClass> VertexType;
+
+		Sphere(nlohmann::json& json);
+#if defined(_EDITOR)
+		virtual void WriteJson(nlohmann::json& j);
+#endif
+		virtual void PrepareMesh();
+
+		std::vector<uint32_t> GetIndices();
+		std::vector<VertexType> GetVertices();
+
+		void NormalizePoint(DirectX::XMFLOAT3& p, float factor = 1.0f);
+		void NormalizePoints(std::vector<XMFLOAT3>& points, float factor = 1.0f);
+		void TeselateIcosahedron(std::vector<XMFLOAT3>& points, std::vector<uint32_t>& indices, uint32_t teselationLevel);
+
+		std::vector<XMFLOAT3> teselationPoints;
+		std::vector<uint32_t> teselationIndices;
+	};
 };
+#endif

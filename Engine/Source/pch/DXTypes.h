@@ -773,3 +773,35 @@ static inline std::unordered_map<std::string, AUDIO_ENGINE_REVERB> StringToAUDIO
 	{ "LargeHall", Reverb_LargeHall },
 	{ "Plate", Reverb_Plate },
 };
+
+static inline std::unordered_map<D3D12_DEPTH_WRITE_MASK, std::string> D3D12_DEPTH_WRITE_MASKToString = {
+	{ D3D12_DEPTH_WRITE_MASK_ZERO , "ZERO" },
+	{ D3D12_DEPTH_WRITE_MASK_ALL , "ALL" },
+};
+
+static inline std::unordered_map<std::string, D3D12_DEPTH_WRITE_MASK> StringToD3D12_DEPTH_WRITE_MASK = {
+	{ "ZERO", D3D12_DEPTH_WRITE_MASK_ZERO },
+	{ "ALL", D3D12_DEPTH_WRITE_MASK_ALL },
+};
+
+static inline std::unordered_map<D3D12_STENCIL_OP, std::string> D3D12_STENCIL_OPToString = {
+	{ D3D12_STENCIL_OP_KEEP , "KEEP" },
+	{ D3D12_STENCIL_OP_ZERO , "ZERO" },
+	{ D3D12_STENCIL_OP_REPLACE , "REPLACE" },
+	{ D3D12_STENCIL_OP_INCR_SAT , "INCR_SAT" },
+	{ D3D12_STENCIL_OP_DECR_SAT , "DECR_SAT" },
+	{ D3D12_STENCIL_OP_INVERT , "INVERT" },
+	{ D3D12_STENCIL_OP_INCR , "INCR" },
+	{ D3D12_STENCIL_OP_DECR , "DECR" },
+};
+
+static inline std::unordered_map<std::string, D3D12_STENCIL_OP> StringToD3D12_STENCIL_OP = {
+	{ "KEEP", D3D12_STENCIL_OP_KEEP },
+	{ "ZERO", D3D12_STENCIL_OP_ZERO },
+	{ "REPLACE", D3D12_STENCIL_OP_REPLACE },
+	{ "INCR_SAT", D3D12_STENCIL_OP_INCR_SAT },
+	{ "DECR_SAT", D3D12_STENCIL_OP_DECR_SAT },
+	{ "INVERT", D3D12_STENCIL_OP_INVERT },
+	{ "INCR", D3D12_STENCIL_OP_INCR },
+	{ "DECR", D3D12_STENCIL_OP_DECR },
+};

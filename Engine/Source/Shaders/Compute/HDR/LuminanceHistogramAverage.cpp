@@ -74,7 +74,7 @@ namespace ComputeShader
 			.timeDelta = timeDelta,
 			.tau = tau
 		};
-		GetConstantsBuffer(constantsBuffers)->push(params, 0);
+		constantsBuffers->push(params, 0);
 	}
 
 	void LuminanceHistogramAverage::Compute(SceneUnitId unit)
@@ -89,7 +89,7 @@ namespace ComputeShader
 		//after clearing the uav we can compute
 		shader.SetComputeState(unit);
 
-		commandList->SetComputeRootDescriptorTable(0, GetConstantsBuffer(constantsBuffers)->gpu_xhandle[0]);
+		commandList->SetComputeRootDescriptorTable(0, constantsBuffers->gpu_xhandle[0]);
 		commandList->SetComputeRootDescriptorTable(1, histogramGpuHandle);
 		commandList->SetComputeRootDescriptorTable(2, averageGpuHandle);
 		commandList->Dispatch(1, 1, 1);

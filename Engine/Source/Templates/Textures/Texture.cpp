@@ -7,10 +7,12 @@
 
 extern std::unique_ptr<Renderer> renderer;
 
+#if defined(_EDITOR)
 namespace Editor {
 	extern SceneUnitId currentSceneUnitId;
 	extern void MarkTemplatesPanelAssetsAsDirty();
 };
+#endif
 
 namespace Templates
 {
@@ -381,14 +383,15 @@ namespace Templates
 
 	void TextureJson::DestroyEditorPreview()
 	{
-		if (preview.previewLoaded != nullptr)
+		if (preview != nullptr && preview->previewLoaded != nullptr)
 		{
-			for (unsigned int i = 0; i < preview.textures.size(); i++)
+			for (unsigned int i = 0; i < preview->textures.size(); i++)
 			{
-				DeleteTextureInstance(preview.textures.at(i)());
+				DeleteTextureInstance(preview->textures.at(i)());
 			}
-			preview.textures.clear();
-			preview.previewLoaded = nullptr;
+			preview->textures.clear();
+			preview->previewLoaded = nullptr;
+			preview = nullptr;
 		}
 	}
 
@@ -396,53 +399,51 @@ namespace Templates
 	{
 		using namespace Texture;
 		DestroyEditorPreview();
-		preview.previewLoaded = std::make_unique<std::atomic_bool>(false);
-		preview.frame = 0U;
-		preview.playing = false;
-		preview.looping = false;
-		preview.time = 0.0f;
-		preview.timeFactor = 1.0f;
-		if (!preview.processorInitialized)
+		preview = std::make_unique<TexturePreview>();
+		preview->previewLoaded = std::make_unique<std::atomic_bool>(false);
+		preview->frame = 0U;
+		preview->playing = false;
+		preview->looping = false;
+		preview->time = 0.0f;
+		preview->timeFactor = 1.0f;
+		if (!preview->processorInitialized)
 		{
-			preview.loadingProcessor.Init(renderer->d3dDevice, 0x10AD3D, 1);
-			preview.processorInitialized = true;
+			preview->loadingProcessor = std::make_unique<CommandsProcessor>(renderer->d3dDevice, 1, 0x10AD3D);
+			preview->processorInitialized = true;
 		}
 
-		preview.loadingProcessor.ResetCommandList();
-		for (unsigned int i = 0U; i < numFrames(); i++)
+		preview->loadingProcessor->ResetCommandList();
+		for (unsigned int i = 0U; i < std::max(numFrames(), 1U); i++)
 		{
 			JUUID previewUUID = uuid() + "-preview-" + std::to_string(i);
 			CreateTextureInstance(previewUUID, [&]
 				{
-					return std::make_unique<TextureInstance>(preview.loadingProcessor.GetCommandList(), uuid(), i);
+					return std::make_unique<TextureInstance>(preview->loadingProcessor->GetCommandList(), uuid(), i);
 				}
 			);
-			preview.textures.push_back(previewUUID);
+			preview->textures.push_back(previewUUID);
 		}
-		preview.loadingProcessor.CloseCommandList();
-		renderer->ExecuteCommands(preview.loadingProcessor.GetCommandList(false), [&]
-			{
-				preview.previewLoaded->store(true);
-			}
-		);
+		preview->loadingProcessor->CloseCommandList();
+		preview->loadingProcessor->RunPostExecution([&] { preview->previewLoaded->store(true); });
+		preview->loadingProcessor->ExecuteCommandList();
 	}
 
 	void TextureJsonsStep()
 	{
-		std::set<TextureJsonUUID> texs;
+		std::set<TextureJsonID> texs;
 		std::transform(Texturetemplates.begin(), Texturetemplates.end(), std::inserter(texs, texs.begin()), [](auto& temps)
 			{
 				return temps.first;
 			}
 		);
 
-		std::set<TextureJsonUUID> rebuildImages;
+		std::set<TextureJsonID> rebuildImages;
 		std::copy_if(texs.begin(), texs.end(), std::inserter(rebuildImages, rebuildImages.begin()), [](auto tex)
 			{
 				return tex->dirty(TextureJson::Update_images);
 			}
 		);
-		std::set<TextureJsonUUID> changedAttributes;
+		std::set<TextureJsonID> changedAttributes;
 		std::copy_if(texs.begin(), texs.end(), std::inserter(changedAttributes, changedAttributes.begin()), [](auto tex)
 			{
 				return tex->dirty(TextureJson::Update_format) || tex->dirty(TextureJson::Update_width) ||
@@ -456,12 +457,12 @@ namespace Templates
 	{
 		float elapsedSeconds = static_cast<FLOAT>(timer.GetElapsedSeconds());
 
-		std::vector<TextureJsonUUID> previewsToPlay;
+		std::vector<TextureJsonID> previewsToPlay;
 
 		for (auto& [uuid, textureTemplate] : Texturetemplates)
 		{
-			TextureJsonUUID tex = uuid;
-			if (tex->preview.previewLoaded == nullptr || !tex->preview.previewLoaded->load()) continue;
+			TextureJsonID tex = uuid;
+			if (tex->preview == nullptr || tex->preview->previewLoaded == nullptr || !tex->preview->previewLoaded->load()) continue;
 
 			previewsToPlay.push_back(tex);
 		}
@@ -469,27 +470,27 @@ namespace Templates
 		auto previewStep = [elapsedSeconds](auto& texture)
 			{
 				float animationLength = texture->numFrames() * (1.0f / 60.0f);
-				float currentAnimationTime = texture->preview.time;
+				float currentAnimationTime = texture->preview->time;
 				unsigned int currentFrame = static_cast<unsigned int>(texture->numFrames() * (currentAnimationTime / animationLength));
 
 				if (animationLength > 0.0f)
 				{
-					currentAnimationTime += (texture->preview.playing) ? texture->preview.timeFactor * elapsedSeconds : 0.0f;
-					if (texture->preview.timeFactor > 0.0f)
+					currentAnimationTime += (texture->preview->playing) ? texture->preview->timeFactor * elapsedSeconds : 0.0f;
+					if (texture->preview->timeFactor > 0.0f)
 					{
 						if (currentAnimationTime >= animationLength)
-							currentAnimationTime = (texture->preview.looping) ? fmodf(currentAnimationTime, animationLength) : animationLength;
+							currentAnimationTime = (texture->preview->looping) ? fmodf(currentAnimationTime, animationLength) : animationLength;
 					}
-					else if (texture->preview.timeFactor < 0.0f)
+					else if (texture->preview->timeFactor < 0.0f)
 					{
 						if (currentAnimationTime < 0.0f)
-							currentAnimationTime = (texture->preview.looping) ? (animationLength - fmodf(currentAnimationTime, animationLength)) : 0.0f;
+							currentAnimationTime = (texture->preview->looping) ? (animationLength - fmodf(currentAnimationTime, animationLength)) : 0.0f;
 					}
-					texture->preview.time = currentAnimationTime;
+					texture->preview->time = currentAnimationTime;
 					unsigned int newFrame = static_cast<unsigned int>(texture->numFrames() * (currentAnimationTime / animationLength));
 					if (currentFrame != newFrame)
 					{
-						texture->preview.frame = std::clamp(newFrame, 0U, texture->numFrames() - 1);
+						texture->preview->frame = std::clamp(newFrame, 0U, texture->numFrames() - 1);
 					}
 				}
 			};
@@ -523,10 +524,11 @@ namespace Templates
 #endif
 		std::string pathS = path.string();
 		CreateTextureResource(commandList, pathS, tex->format(), tex->type(), tex->numFrames(), tex->mipLevels(), startFrame);
+		//SI CREO UN CRATE DESDE EL CREADOR ESTO SE CAE
 		PushTextureUploadFreeResourceCallback(2U, [&]
 			{
-				OutputDebugStringA(std::string("off-loading:" + tex->name() + "\n").c_str());
-				upload = nullptr;
+				//OutputDebugStringA(std::string("off-loading:" + tex->name() + "\n").c_str());
+				//upload = nullptr;
 			}
 		);
 	}
@@ -557,15 +559,15 @@ namespace Templates
 		}
 #endif
 		std::string pathS = path.string();
-		auto& scene = GetSceneUnit(id);
-		auto& commandList = scene->GetLoadingCommandList();
+		auto& commandList = GetLoadingProcessor().GetCommandList();
 		CreateTextureResource(commandList, pathS, tex->format(), tex->type(), tex->numFrames(), tex->mipLevels(), startFrame);
-		PushTextureUploadFreeResourceCallback(2U, [&]
-			{
-				OutputDebugStringA(std::string("off-loading:" + tex->name() + "\n").c_str());
-				upload = nullptr;
-			}
-		);
+		////SI CREO UN CRATE DESDE EL CREADOR ESTO SE CAE
+		//PushTextureUploadFreeResourceCallback(2U, [&]
+		//	{
+		//		//OutputDebugStringA(std::string("off-loading:" + tex->name() + "\n").c_str());
+		//		//upload = nullptr;
+		//	}
+		//);
 	}
 
 	void TextureInstance::CreateTextureResource(CComPtr<ID3D12GraphicsCommandList2>& commandList, std::string& path, DXGI_FORMAT format, TextureType type, unsigned int numFrames, unsigned int nMipMaps, unsigned int firstArraySlice)

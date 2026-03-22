@@ -1,8 +1,10 @@
-#pragma once
+#ifndef _ANIMATION_SEQUENCES_H
+#define _ANIMATION_SEQUENCES_H
+
 #include <unordered_map>
 #include <string>
 #include <nlohmann/json.hpp>
-#include <DirectXMath.h>
+#include <SimpleMath.h>
 #include "Sequence.h"
 
 struct AnimationSequences
@@ -24,3 +26,5 @@ inline static nlohmann::json FromAnimationSequences(AnimationSequences s)
 {
 	return s.json();
 }
+
+#endif

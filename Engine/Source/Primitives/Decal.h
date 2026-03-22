@@ -1,13 +1,19 @@
-#pragma once
+#ifndef _PRIMITIVE_DECAL_H
+#define _PRIMITIVE_DECAL_H
+
 #include "Primitive.h"
 #include <VertexFormats.h>
 
-struct Decal : public Primitive
+namespace Primitives
 {
-	static constexpr VertexClass VertexClass = VertexClass::POS_TEXCOORD0;
-	typedef Vertex<VertexClass> VertexType;
+	struct Decal : Primitive
+	{
+		static constexpr VertexClass VertexClass = VertexClass::POS_TEXCOORD0;
+		typedef Vertex<VertexClass> VertexType;
 
-	std::vector<uint32_t> GetIndices();
-	std::vector<VertexType> GetVertices();
+		Decal(nlohmann::json& json) : Primitive(json) {}
+		std::vector<uint32_t> GetIndices();
+		std::vector<VertexType> GetVertices();
+	};
 };
-
+#endif

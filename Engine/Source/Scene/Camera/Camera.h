@@ -85,15 +85,19 @@ namespace Scene {
 
 		Camera(SceneUnitId id, nlohmann::json& json);
 		~Camera() { Destroy(); }
+
 		XMVECTOR positionV();
+		void positionV(XMVECTOR v);
+		void updateRotationQ();
 		XMVECTOR rotationQ();
+		void rotationQ(XMVECTOR q);
 		XMVECTOR forward();
 		XMVECTOR up();
 		XMVECTOR right();
 		XMMATRIX world();
 		XMMATRIX view();
 		XMMATRIX projection();
-		void CopyProjection(CameraSUUUID cam);
+		void CopyProjection(CameraID cam);
 
 		float projectionWidth();
 		float projectionRight();
@@ -104,11 +108,11 @@ namespace Scene {
 		float projectionfovAngleY();
 
 		void CreateRenderPasses();
-		RenderPassJsonUUID GetRenderPassTemplateFromInstanceIndex(unsigned int passIndex);
-		RenderPassInstanceUUID CreateRenderPass(JUUID passUUID, unsigned int passIndex);
-		void CreateRenderPassAtIndex(JUUID passUUID, unsigned int passIndex);
+		RenderPassJsonID GetRenderPassTemplateFromInstanceIndex(unsigned int passIndex);
+		RenderPassInstanceID CreateRenderPass(RenderPassJsonID pass, unsigned int passIndex);
+		void CreateRenderPassAtIndex(RenderPassJsonID pass, unsigned int passIndex);
 		void DeleteRenderPassAtIndex(unsigned int passIndex);
-		void SwapRenderPassAtIndex(JUUID passUUID, unsigned int passIndex);
+		void SwapRenderPassAtIndex(RenderPassJsonID pass, unsigned int passIndex);
 		void RearrangeRenderPassesAfter(unsigned int passIndex);
 		void DestroyRenderPasses();
 		void ResizeReleasePasses();
@@ -116,28 +120,24 @@ namespace Scene {
 		void UpdateProjection();
 
 		virtual void Initialize();
+		virtual void SetInitialConditions();
 		virtual void BindToScene();
 		virtual void Bind(JUUID uuid);
-		void BindRenderable(RenderableSUUUID renderable);
-		void BindLight(LightSUUUID light);
-		void BindLightWithShadowMap(LightSUUUID light);
+		void BindRenderable(RenderableID renderable);
+		void BindLight(LightID light);
+		void BindLightWithShadowMap(LightID light);
 		virtual void UnbindFromScene();
 		virtual void Unbind(JUUID uuid);
-		void UnbindRenderable(RenderableSUUUID renderable);
-		void UnbindLight(LightSUUUID light);
-		void UnbindLightWithShadowMap(LightSUUUID light);
+		void UnbindRenderable(RenderableID renderable);
+		void UnbindLight(LightID light);
+		void UnbindLightWithShadowMap(LightID light);
 
 		bool ResolvesToSwapChain();
 		bool RenderReady();
 		void RenderReady(bool value);
 		void Render();
 
-		//projection
-		CameraProjections::Perspective perspectiveProjection;
-		CameraProjections::Orthographic orthographicProjection;
-
 		//Bounding Frustum
-		BoundingFrustum boundingFrustum;
 		void CalculateBoundingFrustum();
 
 		void Destroy();
@@ -148,7 +148,7 @@ namespace Scene {
 		void MovePerpendicularFwAxis(float dx, float dy);
 		void Rotate(float dx, float dy);
 		void UpdateLightPosition();
-		void UdateLightRotation();
+		void UpdateLightRotation();
 		void MoveForward(float step);
 		void MoveBack(float step);
 		void MoveLeft(float step);
@@ -157,13 +157,13 @@ namespace Scene {
 		//Lighting
 		void CreateLightsConstantsBuffer();
 		void DestroyLightsConstantsBuffer();
-		ConstantsBufferUUID GetLightsConstantsBuffer() const { return lightsCB; }
+		ConstantsBufferID GetLightsConstantsBuffer() const { return lightsCB; }
 		void WriteLightsConstantsBuffer(unsigned int frame);
 
 		//ShadowMaps
 		void CreateShadowMapsConstantsBuffer();
 		void DestroyShadowMapsConstantsBuffer();
-		ConstantsBufferUUID GetShadowMapsConstantsBuffer() const { return shadowMapsCB; }
+		ConstantsBufferID GetShadowMapsConstantsBuffer() const { return shadowMapsCB; }
 		void WriteShadowMapsConstantsBuffer(unsigned int frame);
 		bool SceneHasShadowMaps() const { return !lightsWithShadowMaps.empty(); }
 
@@ -180,31 +180,39 @@ namespace Scene {
 #if defined(_EDITOR)
 		virtual void EditorPreview(size_t flags);
 		virtual void DestroyEditorPreview();
-		virtual JUUID CreateBillboard(CameraSUUUID camera);
-		virtual void UpdateBillboard(JUUID uuid);
+		virtual RenderableID CreateBillboard(CameraID camera);
+		virtual void UpdateBillboard(RenderableID renderable);
 		BoundingBox GetBoundingBox();
 
 		//Gizmo
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
 		virtual void WriteJson(nlohmann::json& j);
+		virtual std::map<std::string, ScriptBinding> GetScriptBindingOptions();
 #endif
 
-		//Destroy
-		bool markedForDelete = false;
+		//State
+		DeleteHook markedForDelete;
+		//Transformation
+		XMVECTOR rotationQuaternion;
 		//Render
 		bool renderReady = false;
 		//render passes instances
-		std::vector<RenderPassInstanceUUID> renderPassesUUID;
+		std::vector<RenderPassInstanceID> renderPassesUUID;
 		//this camera attributes
-		ConstantsBufferUUID cameraCb;
+		ConstantsBufferID cameraCb;
 		//renderables
-		std::set<RenderableSUUUID> renderables;
+		std::set<RenderableID> renderables;
 		//lights
-		ConstantsBufferUUID lightsCB;
-		std::vector<LightSUUUID> lights;
+		ConstantsBufferID lightsCB;
+		std::vector<LightID> lights;
 		//lights shadowmaps
-		ConstantsBufferUUID shadowMapsCB;
-		std::set<LightSUUUID> lightsWithShadowMaps;
+		ConstantsBufferID shadowMapsCB;
+		std::set<LightID> lightsWithShadowMaps;
+		//projection
+		CameraProjections::Perspective perspectiveProjection;
+		CameraProjections::Orthographic orthographicProjection;
+		//Bounding Frustum
+		BoundingFrustum boundingFrustum;
 #if defined(_EDITOR)
 		unsigned int previewRenderPassIndex = 0U;
 		unsigned int previewRenderToTextureIndex = 0U;
@@ -225,3 +233,6 @@ namespace Scene {
 	void WriteCamerasJson(SceneUnitId id, nlohmann::json& json);
 #endif
 };
+
+using namespace Scene;
+DEF_SCENEOBJECT_ID_HASH(Camera);

@@ -13,10 +13,10 @@ using namespace DeviceUtils;
 
 namespace ComputeShader
 {
-	LuminanceHistogram::LuminanceHistogram(JUUID renderToTextureUUID) : ComputeInterface("LuminanceHistogram_cs")
+	LuminanceHistogram::LuminanceHistogram(JUUID RenderToTextureID) : ComputeInterface("LuminanceHistogram_cs")
 	{
 		//hold a copy to the render to texture used for HDR rendering (T0)
-		rttUUID = renderToTextureUUID;
+		rttUUID = RenderToTextureID;
 
 		//create the luminicance histogram buffer containing the calculation parameters (C0)
 		constantsBuffers = CreateConstantsBuffer(sizeof(LuminanceHistogramBuffer), Renderer::numFrames, "LuminanceHistogramBuffer");
@@ -69,7 +69,7 @@ namespace ComputeShader
 			.minLogLuminance = minLogLuminance,
 			.oneOverLogLuminanceRange = 1.0f / (maxLogLuminance - minLogLuminance)
 		};
-		GetConstantsBuffer(constantsBuffers)->push(params, 0);
+		constantsBuffers->push(params, 0);
 	}
 
 	void LuminanceHistogram::Compute(SceneUnitId unit)
@@ -90,7 +90,7 @@ namespace ComputeShader
 
 		auto& rtt = GetRenderToTexture(rttUUID);
 
-		commandList->SetComputeRootDescriptorTable(0, GetConstantsBuffer(constantsBuffers)->gpu_xhandle[0]);
+		commandList->SetComputeRootDescriptorTable(0, constantsBuffers->gpu_xhandle[0]);
 		commandList->SetComputeRootDescriptorTable(1, resultGpuHandle);
 		commandList->SetComputeRootDescriptorTable(2, rtt->gpuTextureHandle);
 		unsigned int numDispatchX = (rtt->width / 16U) + ((rtt->width % 16U) ? 1U : 0U);

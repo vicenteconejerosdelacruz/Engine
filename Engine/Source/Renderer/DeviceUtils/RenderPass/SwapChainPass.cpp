@@ -15,11 +15,11 @@ extern std::unique_ptr<Renderer> renderer;
 
 namespace DeviceUtils
 {
-	static std::unordered_map<JUUID, std::unique_ptr<SwapChainPass>> swapChainPasses;
+	static std::unordered_map<SwapChainPassID, std::unique_ptr<SwapChainPass>> swapChainPasses;
 
-	JUUID CreateSwapChainPass(const std::string name, std::unique_ptr<DeviceUtils::DescriptorHeap>& descriptorHeap, DXGI_FORMAT depthStencilFormat)
+	SwapChainPassID CreateSwapChainPass(const std::string name, std::unique_ptr<DeviceUtils::DescriptorHeap>& descriptorHeap, DXGI_FORMAT depthStencilFormat)
 	{
-		JUUID uuid = getUUID();
+		SwapChainPassID swapChainPassId = getUUID();
 		auto& d3dDevice = renderer->d3dDevice;
 
 		unsigned int bufferCount = renderer->numFrames;
@@ -52,8 +52,8 @@ namespace DeviceUtils
 			CCNAME_D3D12_OBJECT_N(swapChainPass->depthStencilTexture, name);
 		}
 
-		swapChainPasses.insert_or_assign(uuid, std::move(swapChainPass));
-		return uuid;
+		swapChainPasses.insert_or_assign(swapChainPassId, std::move(swapChainPass));
+		return swapChainPassId;
 	}
 
 	std::unique_ptr<SwapChainPass>& GetSwapChainPass(JUUID uuid)
@@ -61,10 +61,10 @@ namespace DeviceUtils
 		return swapChainPasses.at(uuid);
 	}
 
-	void DeleteSwapChainPass(JUUID uuid)
+	void DeleteSwapChainPass(SwapChainPassID swapChainPassId)
 	{
-		swapChainPasses.at(uuid)->ReleaseResources();
-		swapChainPasses.erase(uuid);
+		swapChainPassId->ReleaseResources();
+		swapChainPasses.erase(swapChainPassId);
 	}
 
 	void SwapChainPass::Pass(SceneUnitId unit, std::function<void(SceneUnitId)> renderCallback, bool clearRTV, XMVECTORF32 clearColor)
@@ -113,7 +113,7 @@ namespace DeviceUtils
 		}
 	}
 
-	void SwapChainPass::CopyFromRenderToTexture(SceneUnitId unit, JUUID renderToTextureUUID)
+	void SwapChainPass::CopyFromRenderToTexture(SceneUnitId unit, JUUID RenderToTextureID)
 	{
 		using namespace Scene;
 		auto& sceneUnit = GetSceneUnit(unit);
@@ -122,7 +122,7 @@ namespace DeviceUtils
 		auto& commandList = sceneUnit->GetCommandList();
 		auto& backBuffer = renderTargets[frame];
 
-		auto& renderToTexture = GetRenderToTexture(renderToTextureUUID);
+		auto& renderToTexture = GetRenderToTexture(RenderToTextureID);
 		auto& rtt = renderToTexture->renderToTexture;
 
 		std::vector<CD3DX12_RESOURCE_BARRIER> hold = {

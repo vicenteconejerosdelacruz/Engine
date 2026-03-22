@@ -33,12 +33,12 @@ namespace Scene
 	{
 		for (JUUID caster : GetShadowCasts(unit))
 		{
-			RenderableSUUUID r = MAKESUUUID(unit, caster);
+			RenderableID r = MAKESUUUID(unit, caster);
 			auto rvCams = r->cameras();
 			auto lvCams = cameras();
-			std::set<CameraSUUUID> rCams;
+			std::set<CameraID> rCams;
 			std::transform(rvCams.begin(), rvCams.end(), std::inserter(rCams, rCams.begin()), [&](JUUID c) { return MAKESUUUID(unit, c); });
-			std::set<CameraSUUUID> lCams;
+			std::set<CameraID> lCams;
 			std::transform(lvCams.begin(), lvCams.end(), std::inserter(lCams, lCams.begin()), [&](JUUID c) { return MAKESUUUID(unit, c); });
 			bool mkbind = std::any_of(rCams.begin(), rCams.end(), [&lCams](auto uuid)
 				{
@@ -66,7 +66,7 @@ namespace Scene
 		}
 	}
 
-	void Light::UnbindRenderableFromShadowMapCamera(RenderableSUUUID r)
+	void Light::UnbindRenderableFromShadowMapCamera(RenderableID r)
 	{
 		for (auto& cam : shadowMapCameras)
 		{
@@ -78,6 +78,7 @@ namespace Scene
 	void Light::LoadShadowMap()
 	{
 		InsertLightIntoShadowMapLights(unit, uuid());
+		/*
 		auto& scene = GetSceneUnit(unit);
 		scene->ResetLoadingCommandList();
 		scene->SetLoading(true);
@@ -89,11 +90,11 @@ namespace Scene
 		auto cams = cameras();
 		for (auto& uuid : cams)
 		{
-			CameraSUUUID cam = MAKESUUUID(unit, uuid);
+			CameraID cam = MAKESUUUID(unit, uuid);
 			cam->BindLightWithShadowMap(SUuuid());
 		}
 		scene->SetCanSubmitLoading(true);
-
+		*/
 #if defined(_EDITOR)
 		EditorPreview(1 << Light::Update_hasShadowMaps);
 #endif
@@ -229,8 +230,8 @@ namespace Scene
 		{
 			nlohmann::json camJ = CreateDirectionalShadowMapCameraJson(i);
 			JUUID uuid = camJ.at("uuid");
-			CreateSUCamera(unit, camJ);
-			CameraSUUUID cam = MAKESUUUID(unit, uuid);
+			CreateCamera(unit, camJ);
+			CameraID cam = MAKESUUUID(unit, uuid);
 			cam->BindToScene();
 			shadowMapCameras.push_back(cam);
 		}
@@ -244,8 +245,8 @@ namespace Scene
 
 		nlohmann::json camJ = CreateSpotShadowMapCameraJson();
 		JUUID uuid = camJ.at("uuid");
-		CreateSUCamera(unit, camJ);
-		CameraSUUUID cam = MAKESUUUID(unit, uuid);
+		CreateCamera(unit, camJ);
+		CameraID cam = MAKESUUUID(unit, uuid);
 		cam->BindToScene();
 		shadowMapCameras.push_back(cam);
 		UpdateShadowMapCameraProperties();
@@ -260,8 +261,8 @@ namespace Scene
 		{
 			nlohmann::json camJ = CreatePointShadowMapCameraJson(i);
 			JUUID uuid = camJ.at("uuid");
-			CreateSUCamera(unit, camJ);
-			CameraSUUUID cam = MAKESUUUID(unit, uuid);
+			CreateCamera(unit, camJ);
+			CameraID cam = MAKESUUUID(unit, uuid);
 			cam->BindToScene();
 			shadowMapCameras.push_back(cam);
 		}
@@ -317,7 +318,7 @@ namespace Scene
 		auto cams = cameras();
 		for (auto& uuid : cams)
 		{
-			CameraSUUUID cam = MAKESUUUID(unit, uuid);
+			CameraID cam = MAKESUUUID(unit, uuid);
 			cam->UnbindLightWithShadowMap(SUuuid());
 		}
 #if defined(_EDITOR)
@@ -343,17 +344,17 @@ namespace Scene
 			if (numHandlesToShift > 0)
 			{
 				//reasign the index of each light which shadow map index is greather than the this light shadow map index to a one less index value
-				std::set<LightSUUUID> lightsToShift;
+				std::set<LightID> lightsToShift;
 				for (JUUID c : cameras())
 				{
-					CameraSUUUID cam = MAKESUUUID(unit, c);
-					for (LightSUUUID light : cam->lightsWithShadowMaps)
+					CameraID cam = MAKESUUUID(unit, c);
+					for (LightID light : cam->lightsWithShadowMaps)
 					{
-						if (!LightSUSceneObjectExist(light->unit, light.uuid()) || light->shadowMapIndex <= shadowMapIndex || light->shadowMapIndex == 0 || light->shadowMapIndex == 0xFFFFFFFF) continue;
+						if (!LightSceneObjectExist(light) || light->shadowMapIndex <= shadowMapIndex || light->shadowMapIndex == 0 || light->shadowMapIndex == 0xFFFFFFFF) continue;
 						lightsToShift.insert(light);
 					}
 				}
-				for (LightSUUUID light : lightsToShift)
+				for (LightID light : lightsToShift)
 				{
 					light->shadowMapIndex--;
 					light->CreateShadowMapShaderResourceView();
@@ -375,8 +376,8 @@ namespace Scene
 		for (auto cam : shadowMapCameras)
 		{
 			cam->DestroyRenderPasses();
-			DestroyConstantsBuffer(cam->cameraCb());
-			DeleteCameraSUSceneObject(cam->unit, cam.uuid());
+			DestroyConstantsBuffer(cam->cameraCb);
+			DeleteCameraSceneObject(cam);
 		}
 		shadowMapCameras.clear();
 	}
@@ -424,7 +425,7 @@ namespace Scene
 		}
 	}
 
-	BoundingFrustum GetCascadeViewCameraBoundingFrustum(std::unique_ptr<Camera>& cam, unsigned int cascadeId, std::vector<std::tuple<float, float>>& shadowMapNearFarPlanes)
+	BoundingFrustum GetCascadeViewCameraBoundingFrustum(CameraID cam, unsigned int cascadeId, std::vector<std::tuple<float, float>>& shadowMapNearFarPlanes)
 	{
 		XMMATRIX camWorld = cam->world();
 		float nearFarRange = cam->projectionFarZ() - cam->projectionNearZ();
@@ -462,8 +463,8 @@ namespace Scene
 		}
 #endif
 
-		auto& viewCamera = GetCameraSUSceneObject(unit, camUUID);
-		auto& lightCamera = GetCameraSUSceneObject(unit, shadowMapCameras.at(0).uuid());
+		CameraID viewCamera = MAKESUUUID(unit, camUUID);
+		CameraID lightCamera = MAKESUUUID(unit, shadowMapCameras.at(0).uuid());
 		XMMATRIX lightViewMatrix = lightCamera->view();
 
 		for (unsigned int i = 0U; i < (ARRAYSIZE(cascadePartitionsZeroToOne) - 1ULL); i++)
@@ -478,7 +479,7 @@ namespace Scene
 			BoundingBox lightSpaceCascadeAABB;
 			BoundingBox::CreateFromPoints(lightSpaceCascadeAABB, ARRAYSIZE(cornersLightViewSpace), cornersLightViewSpace, sizeof(cornersLightViewSpace[0]));
 
-			auto& cascadeLightCamera = GetCameraSUSceneObject(unit, shadowMapCameras.at(i).uuid());
+			CameraID cascadeLightCamera = MAKESUUUID(unit, shadowMapCameras.at(i).uuid());
 			auto& csmProj = cascadeLightCamera->orthographicProjection;
 
 			csmProj.viewLeft = lightSpaceCascadeAABB.Center.x - lightSpaceCascadeAABB.Extents.x;
@@ -553,22 +554,25 @@ namespace Scene
 
 	void Light::UpdateDirectionalShadowMapCameraTransformation()
 	{
-		auto& cam = shadowMapCameras.at(0);
-		cam->position(position());
-		cam->rotation(rotation());
+		XMVECTOR rot = rotationQ();
+		std::for_each(shadowMapCameras.begin(), shadowMapCameras.end(), [&rot](CameraID cam)
+			{
+				cam->rotationQ(rot);
+			}
+		);
 	}
 
 	void Light::UpdateSpotShadowMapCameraTransformation()
 	{
 		auto& cam = shadowMapCameras.at(0);
-		cam->rotation(rotation());
+		cam->rotationQ(rotationQ());
 		cam->position(position());
 	}
 
 	void Light::UpdatePointShadowMapCameraTransformation()
 	{
 		XMFLOAT3 pos = position();
-		std::for_each(shadowMapCameras.begin(), shadowMapCameras.end(), [&pos](CameraSUUUID cam)
+		std::for_each(shadowMapCameras.begin(), shadowMapCameras.end(), [&pos](CameraID cam)
 			{
 				cam->position(pos);
 			}
@@ -579,15 +583,15 @@ namespace Scene
 
 	void Light::CreateShadowMapMinMaxChain()
 	{
-		auto& scene = GetSceneUnit(unit);
-		bool doSubmit = false;
-		if (!scene->LoadingCommandListIsOpen())
-		{
-			scene->ResetLoadingCommandList();
-			scene->SetLoading(true);
-			scene->SetCanSubmitLoading(false);
-			doSubmit = true;
-		}
+		//auto& scene = GetSceneUnit(unit);
+		//bool doSubmit = false;
+		//if (!scene->LoadingCommandListIsOpen())
+		//{
+		//	scene->ResetLoadingCommandList();
+		//	scene->SetLoading(true);
+		//	scene->SetCanSubmitLoading(false);
+		//	doSubmit = true;
+		//}
 
 		//pick the gpu handles for the final shadowmap and copies for the min/max chain initial calculation
 		CD3DX12_GPU_DESCRIPTOR_HANDLE shadowMapChainGpuHandle = GetShadowMapGpuDescriptorHandle(unit, shadowMapIndex);
@@ -622,7 +626,7 @@ namespace Scene
 		do
 		{
 			shadowMapMinMaxChainRenderPass.push_back(
-				CreateRenderPassInstance(unit, "", GetRenderPassUUIDByName("ShadowMapMinMaxChainPass"), renderPassIndex, std::max(2U, width), std::max(2U, height))
+				CreateRenderPassInstance(shadowMapCameras.at(0), GetRenderPassUUIDByName("ShadowMapMinMaxChainPass"), renderPassIndex, std::max(2U, width), std::max(2U, height))
 			);
 			auto& rpInstance = shadowMapMinMaxChainRenderPass.back();
 			MinMaxChainPass* chainPass = static_cast<MinMaxChainPass*>(rpInstance->overridePass.get());
@@ -649,20 +653,20 @@ namespace Scene
 		unsigned int texUWidth = 512U;
 		unsigned int texUHeight = 512U * ((lightType() == LT_Point) ? 6U : 1U);
 		shadowMapMinMaxChainResultRenderPass = CreateRenderPassInstance(
-			unit, "", GetRenderPassUUIDByName("ShadowMapMinMaxChainResultPass"), 0, texUWidth, texUHeight);
+			shadowMapCameras.at(0), GetRenderPassUUIDByName("ShadowMapMinMaxChainResultPass"), 0, texUWidth, texUHeight);
 
 		MinMaxChainResultPass* resultPass = static_cast<MinMaxChainResultPass*>(shadowMapMinMaxChainResultRenderPass->overridePass.get());
 
-		RenderPassInstanceUUID last = shadowMapMinMaxChainRenderPass.back();
+		RenderPassInstanceID last = shadowMapMinMaxChainRenderPass.back();
 		resultPass->depthGpuHandle = shadowMapChainGpuHandle;
 		resultPass->shadowMapChainGpuHandle1 = last->renderToTexturePass->renderToTexture.at(0)->gpuTextureHandle;
 		resultPass->shadowMapChainGpuHandle2 = last->renderToTexturePass->renderToTexture.at(1)->gpuTextureHandle;
 		resultPass->CreateFSQuad((lightType() != LT_Spot) ? "DepthMinMaxToRGBA" : "DepthMinMaxToRGBASpot");
 
-		if (doSubmit)
-		{
-			scene->SetCanSubmitLoading(true);
-		}
+		//if (doSubmit)
+		//{
+		//	scene->SetCanSubmitLoading(true);
+		//}
 	}
 
 	void Light::DestroyShadowMapMinMaxChain()

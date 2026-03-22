@@ -22,11 +22,21 @@ inline ImU32 rgba(auto r, auto g, auto b, auto a)
 	);
 }
 
+inline ImU32 rgba(nlohmann::json f4)
+{
+	return IM_COL32(
+		static_cast<unsigned int>(f4.at(0) * 255),
+		static_cast<unsigned int>(f4.at(1) * 255),
+		static_cast<unsigned int>(f4.at(2) * 255),
+		static_cast<unsigned int>(f4.at(3) * 255)
+	);
+}
+
 namespace Editor
 {
 	extern bool NonGameMode;
-	extern void OpenTemplateOnNextFrame(std::string uuid);
-	extern void OpenSceneObjectOnNextFrame(std::string uuid);
+	extern void OpenTemplateOnNextFrame(JUUID uuid);
+	extern void OpenSceneObjectOnNextFrame(JUUID uuid);
 };
 
 namespace ImGui

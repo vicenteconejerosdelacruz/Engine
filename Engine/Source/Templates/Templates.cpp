@@ -256,6 +256,20 @@ namespace Templates
 				{ "systemCreated" , true},
 				{ "uuid" , "e32c5e9c-26a5-4f2b-8d0c-5899c67f1def"},
 				{ "type" , ShaderTypeToStr.at(ShaderType::PIXEL_SHADER)}
+			},
+			{
+				{ "name","Translucent_vs"},
+				{ "path" , "Translucent.hlsl"},
+				{ "systemCreated" , true},
+				{ "uuid" , "5231b6af-fc5a-4d77-ba71-5dc40cfd0da5"},
+				{ "type" , ShaderTypeToStr.at(ShaderType::VERTEX_SHADER)}
+			},
+			{
+				{ "name","Translucent_ps"},
+				{ "path" , "Translucent.hlsl"},
+				{ "systemCreated" , true},
+				{ "uuid" , "bc666a1e-97b4-4b01-979f-af4857e0d4b7"},
+				{ "type" , ShaderTypeToStr.at(ShaderType::PIXEL_SHADER)}
 			}
 		}
 	);
@@ -809,6 +823,273 @@ namespace Templates
 						{ "ConservativeRaster", "OFF" }
 					}
 				}
+			},
+			{
+				{ "name", "TriggerPicking" },
+				{ "shader_ps", "e32c5e9c-26a5-4f2b-8d0c-5899c67f1def" },
+				{ "shader_vs", "79568541-34c8-4464-bec1-77debde975e0" },
+				{ "systemCreated" , true},
+				{ "mappedValues",
+					{
+						{
+							{ "value", 1.0 },
+							{ "variable", "alphaCut" },
+							{ "variableType", "FLOAT" }
+						}
+					}
+				},
+				{ "textures", {} },
+				{ "uuid", "5d14b58e-44b4-4d71-9d28-c758e055ecf3" },
+				{ "rasterizerState",
+					{
+						{ "FillMode", "SOLID" },
+						{ "CullMode", "NONE" },
+						{ "FrontCounterClockwise", false},
+						{ "DepthBias", 0},
+						{ "DepthBiasClamp", 0.0},
+						{ "SlopeScaledDepthBias", 0.0},
+						{ "DepthClipEnable", true},
+						{ "MultisampleEnable", false},
+						{ "AntialiasedLineEnable", false},
+						{ "ForcedSampleCount", 0},
+						{ "ConservativeRaster", "OFF" }
+					}
+				}/*,
+				{ "overrideDepthStencil", true}*/
+			},
+			{
+				{ "name", "Translucent" },
+				{ "shader_ps", "bc666a1e-97b4-4b01-979f-af4857e0d4b7" },
+				{ "shader_vs", "5231b6af-fc5a-4d77-ba71-5dc40cfd0da5" },
+				{ "systemCreated" , true},
+				{ "mappedValues",
+					{
+						{
+							{ "value", 0.5 },
+							{ "variable", "alpha" },
+							{ "variableType", "FLOAT" }
+						},
+						{
+							{ "value", { 0.2, 1.0, 0.78 } },
+							{ "variable", "baseColor" },
+							{ "variableType", "FLOAT3" }
+						}
+					}
+				},
+				{ "textures", { } },
+				{ "uuid", "e241b072-3aea-4c22-afee-b3887732ea89" },
+				{ "rasterizerState",
+					{
+						{ "FillMode", "SOLID" },
+						{ "CullMode", "BACK" },
+						{ "FrontCounterClockwise", false},
+						{ "DepthBias", -100},
+						{ "DepthBiasClamp", 0.0},
+						{ "SlopeScaledDepthBias", 0.0},
+						{ "DepthClipEnable", false },
+						{ "MultisampleEnable", false},
+						{ "AntialiasedLineEnable", false},
+						{ "ForcedSampleCount", 0},
+						{ "ConservativeRaster", "OFF" }
+					}
+				},
+				{ "blendState",
+					{
+						{"AlphaToCoverageEnable", 0 },
+						{"IndependentBlendEnable", 0 },
+						{ "RenderTarget" ,
+							{
+								{
+									{ "BlendEnable", true },
+									{ "BlendOp", "ADD" },
+									{ "BlendOpAlpha", "ADD" },
+									{ "DestBlend", "INV_SRC_ALPHA" },
+									{ "DestBlendAlpha", "ZERO" },
+									{ "LogicOp", "NOOP" },
+									{ "LogicOpEnable", false },
+									{ "RenderTargetWriteMask", 15 },
+									{ "SrcBlend", "SRC_ALPHA" },
+									{ "SrcBlendAlpha", "ONE" }
+								},
+								{
+									{ "BlendEnable", 0},
+									{ "BlendOp", "ADD"},
+									{ "BlendOpAlpha", "ADD"},
+									{ "DestBlend", "ZERO"},
+									{ "DestBlendAlpha", "ZERO"},
+									{ "LogicOp", "NOOP"},
+									{ "LogicOpEnable", 0},
+									{ "RenderTargetWriteMask", 15},
+									{ "SrcBlend", "ONE"},
+									{ "SrcBlendAlpha", "ONE" }
+								},
+								{
+									{ "BlendEnable", 0},
+									{ "BlendOp" , "ADD"},
+									{ "BlendOpAlpha" , "ADD"},
+									{ "DestBlend" , "ZERO"},
+									{ "DestBlendAlpha" , "ZERO"},
+									{ "LogicOp" , "NOOP"},
+									{ "LogicOpEnable" , 0},
+									{ "RenderTargetWriteMask" , 15},
+									{ "SrcBlend" , "ONE"},
+									{ "SrcBlendAlpha" , "ONE" }
+								},
+								{
+									{ "BlendEnable", 0},
+									{ "BlendOp" , "ADD"},
+									{ "BlendOpAlpha" , "ADD"},
+									{ "DestBlend" , "ZERO"},
+									{ "DestBlendAlpha" , "ZERO"},
+									{ "LogicOp" , "NOOP"},
+									{ "LogicOpEnable" , 0},
+									{ "RenderTargetWriteMask" , 15},
+									{ "SrcBlend" , "ONE"},
+									{ "SrcBlendAlpha" , "ONE"}
+								},
+								{
+									{ "BlendEnable", 0},
+									{ "BlendOp" , "ADD"},
+									{ "BlendOpAlpha" , "ADD"},
+									{ "DestBlend" , "ZERO"},
+									{ "DestBlendAlpha" , "ZERO"},
+									{ "LogicOp" , "NOOP"},
+									{ "LogicOpEnable" , 0},
+									{ "RenderTargetWriteMask" , 15},
+									{ "SrcBlend" , "ONE"},
+									{ "SrcBlendAlpha" , "ONE"}
+								},
+								{
+									{ "BlendEnable", 0},
+									{ "BlendOp" , "ADD"},
+									{ "BlendOpAlpha" , "ADD"},
+									{ "DestBlend" , "ZERO"},
+									{ "DestBlendAlpha" , "ZERO"},
+									{ "LogicOp" , "NOOP"},
+									{ "LogicOpEnable" , 0},
+									{ "RenderTargetWriteMask" , 15},
+									{ "SrcBlend" , "ONE"},
+									{ "SrcBlendAlpha" , "ONE" }
+								},
+								{
+									{ "BlendEnable", 0},
+									{ "BlendOp" , "ADD"},
+									{ "BlendOpAlpha" , "ADD"},
+									{ "DestBlend" , "ZERO"},
+									{ "DestBlendAlpha" , "ZERO"},
+									{ "LogicOp" , "NOOP"},
+									{ "LogicOpEnable" , 0},
+									{ "RenderTargetWriteMask" , 15},
+									{ "SrcBlend" , "ONE"},
+									{ "SrcBlendAlpha" , "ONE" }
+								},
+								{
+									{ "BlendEnable", 0},
+									{ "BlendOp" , "ADD"},
+									{ "BlendOpAlpha" , "ADD"},
+									{ "DestBlend" , "ZERO"},
+									{ "DestBlendAlpha" , "ZERO"},
+									{ "LogicOp" , "NOOP"},
+									{ "LogicOpEnable" , 0},
+									{ "RenderTargetWriteMask" , 15},
+									{ "SrcBlend" , "ONE"},
+									{ "SrcBlendAlpha" , "ONE" }
+								}
+							}
+						}
+					}
+				},
+				{ "overrideDepthStencil", true },
+				{ "depthStencil",
+					{
+						{ "BackFace",
+							{
+								{ "StencilDepthFailOp", "KEEP"},
+								{ "StencilFailOp", "KEEP"},
+								{ "StencilFunc", "ALWAYS"},
+								{ "StencilPassOp", "KEEP" }
+							}
+						},
+						{ "DepthEnable", true },
+						{ "DepthFunc", "LESS_EQUAL" },
+						{ "DepthWriteMask", "ZERO" },
+						{ "FrontFace",
+							{
+								{ "StencilDepthFailOp", "KEEP"},
+								{ "StencilFailOp", "KEEP"},
+								{ "StencilFunc", "ALWAYS"},
+								{ "StencilPassOp", "KEEP" }
+							}
+						},
+						{ "StencilEnable", false},
+						{ "StencilReadMask", 255},
+						{ "StencilWriteMask", 255 }
+					}
+				}
+			},
+			{
+				{ "name", "Translucent_wired" },
+				{ "shader_ps", "bc666a1e-97b4-4b01-979f-af4857e0d4b7" },
+				{ "shader_vs", "5231b6af-fc5a-4d77-ba71-5dc40cfd0da5" },
+				{ "systemCreated" , true},
+				{ "mappedValues",
+					{
+						{
+							{ "value", 1.0 },
+							{ "variable", "alpha" },
+							{ "variableType", "FLOAT" }
+						},
+						{
+							{ "value", { 0.2 * 1.3, 1.3, 0.78 * 1.3 } },
+							{ "variable", "baseColor" },
+							{ "variableType", "FLOAT3" }
+						}
+					}
+				},
+				{ "textures", { } },
+				{ "uuid", "1d7630c4-86b0-49eb-88f5-40bacb02a652" },
+				{ "rasterizerState",
+					{
+						{ "FillMode", "WIREFRAME" },
+						{ "CullMode", "BACK" },
+						{ "FrontCounterClockwise", false},
+						{ "DepthBias", -100},
+						{ "DepthBiasClamp", 0.0},
+						{ "SlopeScaledDepthBias", 0.0},
+						{ "DepthClipEnable", false },
+						{ "MultisampleEnable", false},
+						{ "AntialiasedLineEnable", false},
+						{ "ForcedSampleCount", 0},
+						{ "ConservativeRaster", "OFF" }
+					}
+				},
+				{ "overrideDepthStencil", true },
+				{ "depthStencil",
+					{
+						{ "BackFace",
+							{
+								{ "StencilDepthFailOp", "KEEP"},
+								{ "StencilFailOp", "KEEP"},
+								{ "StencilFunc", "ALWAYS"},
+								{ "StencilPassOp", "KEEP" }
+							}
+						},
+						{ "DepthEnable", true },
+						{ "DepthFunc", "LESS" },
+						{ "DepthWriteMask", "ALL" },
+						{ "FrontFace",
+							{
+								{ "StencilDepthFailOp", "KEEP"},
+								{ "StencilFailOp", "KEEP"},
+								{ "StencilFunc", "ALWAYS"},
+								{ "StencilPassOp", "KEEP" }
+							}
+						},
+						{ "StencilEnable", false},
+						{ "StencilReadMask", 255},
+						{ "StencilWriteMask", 255 }
+					}
+				}
 			}
 		}
 	);
@@ -953,6 +1234,53 @@ namespace Templates
 		}
 	);
 
+	nlohmann::json systemPhysicGeometries = nlohmann::json::array(
+		{
+			{
+				{ "name", "floor" },
+				{ "uuid", "330c6bfd-2c71-4c6b-be42-b797d07ab5ba" },
+				{ "model", ""},
+				{ "mesh", "d41e5c29-49bb-4f2c-aa2b-da781fbac512"},
+				{ "systemCreated" , true}
+			},
+			{
+				{ "name", "cube" },
+				{ "uuid", "a5d06057-5344-413c-9647-ed2aac874021" },
+				{ "model", ""},
+				{ "mesh", "f7786ac1-e296-4e9a-a7e6-6f1949de75ef"},
+				{ "systemCreated" , true}
+			},
+			{
+				{ "name", "pyramid" },
+				{ "uuid", "36c75d6d-970f-43dc-97bd-9bc13a035a3a" },
+				{ "model", ""},
+				{ "mesh", "d76b3bd8-0f53-4128-974e-2d6d5062bc00"},
+				{ "systemCreated" , true}
+			},
+			{
+				{ "name", "sphere" },
+				{ "uuid", "a96cbfaf-0827-4b04-ae68-548c9bffaf87" },
+				{ "model", ""},
+				{ "mesh", "4d1174b2-8225-4c09-9db6-ff09718ae0f5"},
+				{ "systemCreated" , true  }
+			},
+			{
+				{ "name", "cone" },
+				{ "uuid", "8a41c342-e388-4e1f-8ba9-8b0a41b1c975" },
+				{ "model", ""},
+				{ "mesh", "ad73990a-c59d-45d2-8ec3-807b1f52f5b9"},
+				{ "systemCreated" , true  }
+			},
+			{
+				{ "name", "capsule" },
+				{ "uuid", "95eee3bb-5b2f-41d7-b43a-11ab5524cca1" },
+				{ "model", ""},
+				{ "mesh", "c900056b-9f67-47d1-a252-71e0ef1f9a65"},
+				{ "systemCreated" , true  }
+			},
+		}
+	);
+
 	std::unordered_map<TemplateType, std::set<JUUID>> templates;
 	std::unordered_map<JUUID, TemplateType> templatesTypes;
 	std::set<JUUID>& GetTemplates(TemplateType type)
@@ -981,6 +1309,7 @@ namespace Templates
 		LoadTemplates(systemMaterials, CreateMaterial);
 		LoadTemplates(systemRenderPasses, CreateRenderPass);
 		LoadTemplates(systemTextures, CreateTexture);
+		LoadTemplates(systemPhysicGeometries, CreatePhysicGeometry);
 
 		CreatePrimitiveMeshTemplate("d41e5c29-49bb-4f2c-aa2b-da781fbac512", "floor");
 		CreatePrimitiveMeshTemplate("d8bfdef4-55f9-4f6e-b4a8-20915eb854d6", "utahteapot");
@@ -990,6 +1319,7 @@ namespace Templates
 		CreatePrimitiveMeshTemplate("30f15e68-db42-46fa-b846-b2647a0ac9b9", "boxlines");
 		CreatePrimitiveMeshTemplate("4d1174b2-8225-4c09-9db6-ff09718ae0f5", "sphere");
 		CreatePrimitiveMeshTemplate("ad73990a-c59d-45d2-8ec3-807b1f52f5b9", "cone");
+		CreatePrimitiveMeshTemplate("c900056b-9f67-47d1-a252-71e0ef1f9a65", "capsule");
 	}
 
 	void CreateTemplates()
@@ -1000,6 +1330,7 @@ namespace Templates
 		LoadTemplates(defaultTemplatesFolder, Sound::templateName, CreateSound);
 		LoadTemplates(defaultTemplatesFolder, Texture::templateName, CreateTexture);
 		LoadTemplates(defaultTemplatesFolder, RenderPass::templateName, CreateRenderPass);
+		LoadTemplates(defaultTemplatesFolder, PhysicGeometry::templateName, CreatePhysicGeometry);
 	}
 
 #if defined(_EDITOR)
@@ -1057,6 +1388,7 @@ namespace Templates
 		//ClearMeshInstances();
 		ClearMaterialInstances();
 		ClearShaderInstances();
+		ClearPhysicGeometryInstances();
 	}
 
 	void DestroyTemplates()
@@ -1068,23 +1400,8 @@ namespace Templates
 		//ReleaseMeshTemplates();
 		ReleaseMaterialTemplates();
 		ReleaseShaderTemplates();
+		ReleasePhysicGeometryTemplates();
 	}
-
-#if defined(_EDITOR)
-	/*
-	void DestroyTemplatesReferences()
-	{
-		//ReleaseSoundEffectsInstances();
-	}
-	*/
-#endif
-
-	/*
-	void FreeGPUIntermediateResources()
-	{
-		//FreeGPUTexturesUploadIntermediateResources();
-	}
-	*/
 
 	void TemplatesStep(DX::StepTimer& timer)
 	{
@@ -1139,7 +1456,13 @@ namespace Templates
 					auto& t = GetRenderPassTemplate(uuid);
 					return static_cast<JTemplate*>(t.get());
 				}
-			}
+			},
+			{ T_PhysicGeometries, [](JUUID uuid)
+				{
+					auto& t = GetPhysicGeometryTemplate(uuid);
+					return static_cast<JTemplate*>(t.get());
+				}
+			},
 		};
 
 		TemplateType type = GetTemplateType(uuid);
@@ -1163,40 +1486,46 @@ namespace Templates
 		{
 			{ T_Shaders, [str2JUUIDName](JUUID uuid)
 				{
-					ShaderJsonUUID o = uuid;
+					ShaderJsonID o = uuid;
 					return str2JUUIDName(TemplateTypeToString.at(T_Shaders), o->uuid(),o->name());
 				}
 			},
 			{ T_Materials, [str2JUUIDName](JUUID uuid)
 				{
-					MaterialJsonUUID o = uuid;
+					MaterialJsonID o = uuid;
 					return str2JUUIDName(TemplateTypeToString.at(T_Materials), o->uuid(),o->name());
 				}
 			},
 			{ T_Models3D, [str2JUUIDName](JUUID uuid)
 				{
-					Model3DJsonUUID o = uuid;
+					Model3DJsonID o = uuid;
 					return str2JUUIDName(TemplateTypeToString.at(T_Models3D), o->uuid(),o->name());
 				}
 			},
 			{ T_Sounds, [str2JUUIDName](JUUID uuid)
 				{
-					SoundJsonUUID o = uuid;
+					SoundJsonID o = uuid;
 					return str2JUUIDName(TemplateTypeToString.at(T_Sounds), o->uuid(),o->name());
 				}
 			},
 			{ T_Textures, [str2JUUIDName](JUUID uuid)
 				{
-					TextureJsonUUID o = uuid;
+					TextureJsonID o = uuid;
 					return str2JUUIDName(TemplateTypeToString.at(T_Textures), o->uuid(),o->name());
 				}
 			},
 			{ T_RenderPasses, [str2JUUIDName](JUUID uuid)
 				{
-					RenderPassJsonUUID o = uuid;
+					RenderPassJsonID o = uuid;
 					return str2JUUIDName(TemplateTypeToString.at(T_RenderPasses), o->uuid(),o->name());
 				}
-			}
+			},
+			{ T_PhysicGeometries, [str2JUUIDName](JUUID uuid)
+				{
+					PhysicGeometryJsonID o = uuid;
+					return str2JUUIDName(TemplateTypeToString.at(T_PhysicGeometries), o->uuid(),o->name());
+				}
+			},
 		};
 
 		std::vector<JUUIDName> templatesTypeList;
@@ -1219,7 +1548,8 @@ namespace Templates
 			{ T_Shaders, GetShaderAttributes },
 			{ T_Sounds, GetSoundAttributes },
 			{ T_Textures, GetTextureAttributes },
-			{ T_RenderPasses, GetRenderPassAttributes }
+			{ T_RenderPasses, GetRenderPassAttributes },
+			{ T_PhysicGeometries, GetPhysicGeometryAttributes },
 		};
 		return GetTAtts.at(t)();
 	}
@@ -1233,7 +1563,8 @@ namespace Templates
 			{ T_Shaders, GetShaderDrawers },
 			{ T_Sounds, GetSoundDrawers },
 			{ T_Textures, GetTextureDrawers },
-			{ T_RenderPasses, GetRenderPassDrawers }
+			{ T_RenderPasses, GetRenderPassDrawers },
+			{ T_PhysicGeometries, GetPhysicGeometryDrawers },
 		};
 		return GetTDrawers.at(t)();
 	}
@@ -1247,7 +1578,8 @@ namespace Templates
 			{ T_Shaders, GetShaderPreviewers },
 			{ T_Sounds, GetSoundPreviewers },
 			{ T_Textures, GetTexturePreviewers },
-			{ T_RenderPasses, GetRenderPassPreviewers }
+			{ T_RenderPasses, GetRenderPassPreviewers },
+			{ T_PhysicGeometries, GetPhysicGeometryPreviewers },
 		};
 		return GetTPreviewers.at(t)();
 	}
@@ -1261,7 +1593,8 @@ namespace Templates
 			{ T_Shaders, CreateShaderJson },
 			{ T_Sounds, CreateSoundJson },
 			{ T_Textures, CreateTextureJson },
-			{ T_RenderPasses, CreateRenderPassJson }
+			{ T_RenderPasses, CreateRenderPassJson },
+			{ T_PhysicGeometries, CreatePhysicGeometryJson },
 		};
 		return GetTJson.at(t)();
 	}
@@ -1299,7 +1632,12 @@ namespace Templates
 				{
 					{ "assetsFolder" , defaultAssetsFolder },
 					{ "fileFolder" , defaultAssetsFolder }
-				}); }}
+				}); }},
+			{ T_PhysicGeometries, [] { return nlohmann::json(
+				{
+					{ "assetsFolder" , defaultAssetsFolder },
+					{ "fileFolder" , defaultAssetsFolder }
+				}); }},
 		};
 		return GetTJson.at(t)();
 	}
@@ -1313,7 +1651,8 @@ namespace Templates
 			{ T_Shaders, GetShaderRequiredAttributes },
 			{ T_Sounds, GetSoundRequiredAttributes },
 			{ T_Textures, GetTextureRequiredAttributes },
-			{ T_RenderPasses, GetRenderPassRequiredAttributes }
+			{ T_RenderPasses, GetRenderPassRequiredAttributes },
+			{ T_PhysicGeometries, GetPhysicGeometryRequiredAttributes },
 		};
 		return GetTRequiredAtts.at(t)();
 	}
@@ -1327,7 +1666,8 @@ namespace Templates
 			{ T_Shaders, GetShaderCreatorDrawers },
 			{ T_Sounds, GetSoundCreatorDrawers },
 			{ T_Textures, GetTextureCreatorDrawers },
-			{ T_RenderPasses, GetRenderPassCreatorDrawers }
+			{ T_RenderPasses, GetRenderPassCreatorDrawers },
+			{ T_PhysicGeometries, GetPhysicGeometryCreatorDrawers },
 		};
 		return GetTDrawers.at(t)();
 	}
@@ -1341,7 +1681,8 @@ namespace Templates
 			{ T_Shaders, GetShaderCreatorValidator },
 			{ T_Sounds, GetSoundCreatorValidator },
 			{ T_Textures, GetTextureCreatorValidator },
-			{ T_RenderPasses, GetRenderPassCreatorValidator }
+			{ T_RenderPasses, GetRenderPassCreatorValidator },
+			{ T_PhysicGeometries, GetPhysicGeometryCreatorValidator },
 		};
 		return GetTValidator.at(t)();
 	}
@@ -1366,6 +1707,7 @@ namespace Templates
 			{ T_Sounds,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateSound); } },
 			{ T_Textures,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateTextureFromJsonDefinition); } },
 			{ T_RenderPasses,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateRenderPass); } },
+			{ T_PhysicGeometries,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreatePhysicGeometry); } },
 		};
 		CreateT.at(t)(json);
 		Editor::MarkTemplatesPanelAssetsAsDirty();
@@ -1380,19 +1722,21 @@ namespace Templates
 			{ Sound::templateName, T_Sounds },
 			{ Texture::templateName, T_Textures },
 			{ RenderPass::templateName, T_RenderPasses },
+			{ PhysicGeometry::templateName, T_PhysicGeometries },
 		};
 		return GetT4F.at(file);
 	}
 
-	std::string GetTemplateName(TemplateType t, JUUID uuid)
+	JNAME GetTemplateName(TemplateType t, JUUID uuid)
 	{
-		const std::map<TemplateType, std::function<std::string(std::string)>> GetTName = {
+		const std::map<TemplateType, std::function<JNAME(JUUID)>> GetTName = {
 			{ T_Materials, GetMaterialName },
 			{ T_Models3D, GetModel3DName },
 			{ T_Shaders, GetShaderName },
 			{ T_Sounds, GetSoundName },
 			{ T_Textures, GetTextureName },
 			{ T_RenderPasses, GetRenderPassName },
+			{ T_PhysicGeometries, GetPhysicGeometryName },
 		};
 		return GetTName.at(t)(uuid);
 	}
@@ -1406,6 +1750,7 @@ namespace Templates
 			{ T_Sounds, Sound::templateName },
 			{ T_Textures, Texture::templateName },
 			{ T_RenderPasses, RenderPass::templateName },
+			{ T_PhysicGeometries, PhysicGeometry::templateName },
 		};
 		return defaultTemplatesFolder + GetF.at(t);
 	}
@@ -1422,6 +1767,7 @@ namespace Templates
 			{ T_Sounds, DeleteSoundTemplate },
 			{ T_Textures, DeleteTextureTemplate },
 			{ T_RenderPasses, DeleteRenderPassTemplate },
+			{ T_PhysicGeometries, DeletePhysicGeometryTemplate },
 		};
 		DeleteT.at(t)(uuid);
 	}
@@ -1440,9 +1786,6 @@ namespace Templates
 				return defaultLevelsFolder + name + ".json";
 			}
 		);
-		/*
-		std::set<std::string> skipLevelFiles = { defaultLevelsFolder + Editor::currentLevelName + ".json" };
-		*/
 
 		auto deleteTemplate = [type, uuid](std::vector<nlohmann::json> references)
 			{

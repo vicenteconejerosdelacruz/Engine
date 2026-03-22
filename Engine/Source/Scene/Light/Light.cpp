@@ -1,12 +1,13 @@
 #include "pch.h"
 #include "Light.h"
 #include <Scene.h>
+#include <NoMath.h>
 
 #if defined(_EDITOR)
 namespace Editor
 {
-	extern void SelectLight(SceneUnitId id, JUUID luuid);
-	extern JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraSUUUID camera, std::string name, std::string material, std::string pickingMaterial);
+	extern void SelectLight(LightID light);
+	extern RenderableID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
 	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 }
@@ -55,6 +56,21 @@ namespace Scene
 #include <Attributes/JUpdate.h>
 #include <LightAtt.h>
 #include <JEnd.h>
+		RENAME_ON_DELETION(Light);
+	}
+
+	void Light::create_rotation(XMFLOAT3 v)
+	{
+		if (!contains("rotation"))
+		{
+			rotation(v);
+		}
+	}
+
+	void Light::rotation(XMFLOAT3 v)
+	{
+		(*this)["rotation"] = FromXMFLOAT3(v);
+		updateRotationQ();
 	}
 
 #if defined(_EDITOR)
@@ -86,6 +102,12 @@ namespace Scene
 			RegisterBillboard(unit, uuid());
 		}
 #endif
+		SetInitialConditions();
+	}
+
+	void Light::SetInitialConditions()
+	{
+		updateRotationQ();
 	}
 
 	void Light::BindToScene()
@@ -105,14 +127,14 @@ namespace Scene
 	{
 		auto cams = cameras();
 		for (auto& uuid : cams) {
-			BindCamera(uuid);
+			BindCamera(MAKESUUUID(unit, uuid));
 		}
 	}
 
-	void Light::BindCamera(JUUID cuuid)
+	void Light::BindCamera(CameraID camera)
 	{
-		if (cuuid.empty()) return;
-		Scene::BindToScene(unit, uuid(), cuuid);
+		if (camera.empty()) return;
+		Scene::BindToScene(unit, uuid(), camera.uuid());
 	}
 
 	void Light::UnbindFromScene()
@@ -135,16 +157,15 @@ namespace Scene
 	{
 		auto cams = cameras();
 		for (auto& uuid : cams) {
-			UnbindCamera(uuid);
+			UnbindCamera(MAKESUUUID(unit, uuid));
 		}
 	}
 
-	void Light::UnbindCamera(JUUID cuuid)
+	void Light::UnbindCamera(CameraID camera)
 	{
-		if (cuuid.empty()) return;
-		CameraSUUUID cam = MAKESUUUID(unit, cuuid);
-		cam->UnbindLight(MAKESUUUID(unit, uuid()));
-		Scene::UnbindFromScene(unit, uuid(), cuuid);
+		if (camera.empty()) return;
+		camera->UnbindLight(MAKESUUUID(unit, uuid()));
+		Scene::UnbindFromScene(unit, uuid(), camera.uuid());
 	}
 
 	void Light::Destroy()
@@ -153,28 +174,55 @@ namespace Scene
 #include <Attributes/JDestroy.h>
 #include <LightAtt.h>
 #include <JEnd.h>
+
+		SceneObject::Destroy();
+	}
+
+	XMVECTOR Light::positionV()
+	{
+		XMFLOAT3 pos = position();
+		return XMLoadFloat3(&pos);
+	}
+
+	void Light::updateRotationQ()
+	{
+		XMFLOAT3 v = rotation();
+		rotationQuaternion = XMQuaternionRotationRollPitchYaw(
+			XMConvertToRadians(v.x),
+			XMConvertToRadians(v.y),
+			XMConvertToRadians(v.z)
+		);
+		for (auto c : shadowMapCameras)
+		{
+			c->rotationQ(rotationQuaternion);
+		}
+	}
+
+	XMVECTOR Light::rotationQ()
+	{
+		return rotationQuaternion;
+	}
+
+	void Light::rotationQ(XMVECTOR q)
+	{
+		rotationQuaternion = q;
+		for (auto c : shadowMapCameras)
+		{
+			c->rotationQ(rotationQuaternion);
+		}
 	}
 
 	XMMATRIX Light::world()
 	{
-		XMFLOAT3 posV = position();
-		XMFLOAT3 rotV = rotation();
-		float roll, pitch, yaw;
-		pitch = rotV.x; yaw = rotV.y; roll = rotV.z;
-		XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll));
-		XMMATRIX rotationM = XMMatrixRotationQuaternion(rotQ);
-		XMMATRIX positionM = XMMatrixTranslationFromVector({ posV.x, posV.y, posV.z });
+		XMMATRIX rotationM = XMMatrixRotationQuaternion(rotationQ());
+		XMMATRIX positionM = XMMatrixTranslationFromVector(positionV());
 		return XMMatrixMultiply(rotationM, positionM);
 	}
 
 	XMVECTOR Light::fw()
 	{
 		FXMVECTOR dir = { 0.0f, 0.0f, 1.0f,0.0f };
-		XMFLOAT3 rotV = rotation();
-		float roll, pitch, yaw;
-		pitch = rotV.x; yaw = rotV.y; roll = rotV.z;
-		XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll));
-		XMVECTOR fw = XMVector3Normalize(XMVector3Rotate(dir, rotQ));
+		XMVECTOR fw = XMVector3Normalize(XMVector3Rotate(dir, rotationQ()));
 		return fw;
 	}
 
@@ -294,31 +342,29 @@ namespace Scene
 		}
 	}
 
-	JUUID Light::CreateBillboard(CameraSUUUID camera)
+	RenderableID Light::CreateBillboard(CameraID camera)
 	{
 		using namespace Editor;
 
-		if (lightType() == LT_Ambient) return "";
+		if (lightType() == LT_Ambient) return RenderableID();
 
-		JUUID uuid = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "LightBulb", "LightBulbPicking");
-		RenderableSUUUID bb = MAKESUUUID(unit, uuid);
-		bb->OnPick = [&] { SelectLight(unit, this->uuid()); };
-		UpdateBillboard(uuid);
-		return uuid;
+		RenderableID bb = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "LightBulb", "LightBulbPicking");
+		bb->OnPick = [&] { SelectLight(SUuuid()); };
+		UpdateBillboard(bb);
+		return bb;
 	}
 
-	void Light::UpdateBillboard(JUUID uuid)
+	void Light::UpdateBillboard(RenderableID renderable)
 	{
-		assert(!uuid.empty());
-		if (uuid.empty()) return;
+		assert(!renderable.empty());
+		if (renderable.empty()) return;
 
 		auto& scene = GetSceneUnit(unit);
 
 		XMFLOAT3 baseColor = color();
-		RenderableSUUUID bb = MAKESUUUID(unit, uuid);
-		bb->position(position());
-		bb->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
-		bb->WriteConstantsBuffer(scene->Frame());
+		renderable->position(position());
+		renderable->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
+		renderable->WriteConstantsBuffer(scene->Frame());
 	}
 
 	BoundingBox Light::GetBoundingBox()
@@ -334,10 +380,10 @@ namespace Scene
 
 	void LightsStep(SceneUnitId id)
 	{
-		std::set<LightSUUUID> lightsToUpdateCamAttributes;
-		std::set<LightSUUUID> lightsToUpdateTransformation;
-		std::set<LightSUUUID> lightsToDelete;
-		std::set<LightSUUUID> lightToRecreateCameras;
+		std::set<LightID> lightsToUpdateCamAttributes;
+		std::set<LightID> lightsToUpdateTransformation;
+		std::set<LightID> lightsToDelete;
+		std::set<LightID> lightToRecreateCameras;
 
 		std::set<Light::Light_UpdateFlags> smCamAttributes =
 		{
@@ -351,9 +397,19 @@ namespace Scene
 
 		auto lights = GetLights(id);
 
+		auto& scene = GetSceneUnit(id);
+
 		for (auto& uuid : lights)
 		{
-			LightSUUUID l = MAKESUUUID(id, uuid);
+			LightID l = MAKESUUUID(id, uuid);
+
+			//is this(hack) or fix the loading system
+			//if (!l->RenderReady() && scene->IsBound(uuid))
+			//{
+			//	l->RenderReady(true);
+			//	scene->EraseLightFromLoadingPool(l);
+			//}
+
 			if (l->lightType() != LT_Ambient)
 			{
 				if (l->dirty(Light::Update_cameras))
@@ -423,6 +479,7 @@ namespace Scene
 			}
 			for (auto l : lightsToUpdateTransformation)
 			{
+				l->updateRotationQ();
 				l->UpdateShadowMapCameraTransformation();
 			}
 		}
@@ -431,12 +488,13 @@ namespace Scene
 		{
 			EraseLightFromLights(l->unit, l.uuid());
 			EraseLightFromShadowMapLights(l->unit, l.uuid());
-			DeleteLightSUSceneObject(l->unit, l.uuid());
+			DeleteLightSceneObject(l);
 		}
 
 		if (lightToRecreateCameras.size() > 0)
 		{
 			auto& scene = GetSceneUnit(id);
+			/*
 			scene->PushLoadingExecutionCallback([=]
 				{
 					for (auto& l : lightToRecreateCameras)
@@ -462,6 +520,7 @@ namespace Scene
 					}
 				}
 			);
+			*/
 		}
 	}
 
@@ -471,8 +530,8 @@ namespace Scene
 		{
 			for (auto& [uuid, _] : container)
 			{
-				LightSUUUID l = MAKESUUUID(id, uuid);
-				DeleteLightSUSceneObject(l->unit, l->uuid());
+				LightID l = MAKESUUUID(id, uuid);
+				DeleteLightSceneObject(l);
 			}
 		}
 #include <TrackUUID/JClear.h>
@@ -486,7 +545,7 @@ namespace Scene
 		std::transform(LightSUsceneObjects.at(id).begin(), LightSUsceneObjects.at(id).end(), std::inserter(uuids, uuids.begin()), [](auto& pair) { return pair.first; });
 		for (auto& uuid : uuids)
 		{
-			DeleteLightSUSceneObject(id, uuid);
+			DeleteLightSceneObject(MAKESUUUID(id, uuid));
 		}
 #include <TrackUUID/JClearUnit.h>
 #include <LightAtt.h>
@@ -498,7 +557,7 @@ namespace Scene
 #if defined(_EDITOR)
 		using namespace Editor;
 #endif
-		LightSUUUID l = MAKESUUUID(id, uuid);
+		LightID l = MAKESUUUID(id, uuid);
 #if defined(_EDITOR)
 		DestroyBillboard(l->unit, uuid);
 #endif

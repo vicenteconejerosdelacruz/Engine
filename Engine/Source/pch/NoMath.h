@@ -1,6 +1,8 @@
 #pragma once
-#include <DirectXMath.h>
-#include <DirectXCollision.h>
+#include <SimpleMath.h>
+#include <corecrt_math_defines.h>
+#include <foundation/PxVec3.h>
+#include <foundation/PxQuat.h>
 
 namespace DirectX
 {
@@ -10,6 +12,8 @@ namespace DirectX
 	static const XMVECTORF32 g_vMultiplySetzwToZero = { 1.0f, 1.0f, 0.0f, 0.0f };
 	static const XMVECTORF32 g_vZero = { 0.0f, 0.0f, 0.0f, 0.0f };
 }
+using namespace DirectX;
+using namespace physx;
 
 inline bool IsPowerOfTwo(unsigned int n) { return (n > 0) && ((n & (n - 1)) == 0); }
 inline unsigned int PrevPowerOfTwo(unsigned int x) { x = x | (x >> 1); x = x | (x >> 2); x = x | (x >> 4); x = x | (x >> 8); x = x | (x >> 16); return x - (x >> 1); }
@@ -25,9 +29,29 @@ inline XMFLOAT3 ToXMFLOAT3(nlohmann::json f3)
 	return XMFLOAT3(f3.at(0), f3.at(1), f3.at(2));
 }
 
+inline XMFLOAT3 ToXMFLOAT3(PxVec3 v)
+{
+	return XMFLOAT3(v.x, v.y, v.z);
+}
+
+inline XMFLOAT3 ToXMFLOAT3(PxVec3d v)
+{
+	return XMFLOAT3(static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z));
+}
+
 inline nlohmann::json FromXMFLOAT3(XMFLOAT3 f3)
 {
 	return nlohmann::json::array({ f3.x,f3.y,f3.z });
+}
+
+inline XMFLOAT4 ToXMFLOAT4(nlohmann::json f4)
+{
+	return XMFLOAT4(f4.at(0), f4.at(1), f4.at(2), f4.at(3));
+}
+
+inline nlohmann::json FromXMFLOAT4(XMFLOAT4 f4)
+{
+	return nlohmann::json::array({ f4.x,f4.y,f4.z,f4.w });
 }
 
 inline BoundingBox GetContainedBoundingBox(auto objects)
@@ -62,62 +86,6 @@ inline XMFLOAT4X4 GetBoundindBoxesCentroid(auto& objects)
 	return w;
 }
 
-inline void MatrixDump(DirectX::XMMATRIX m)
-{
-	std::string row1 = "[" +
-		std::to_string(m.r[0].m128_f32[0]) + "," +
-		std::to_string(m.r[0].m128_f32[1]) + "," +
-		std::to_string(m.r[0].m128_f32[2]) + "," +
-		std::to_string(m.r[0].m128_f32[3]) + "]";
-	std::string row2 = "[" +
-		std::to_string(m.r[1].m128_f32[0]) + "," +
-		std::to_string(m.r[1].m128_f32[1]) + "," +
-		std::to_string(m.r[1].m128_f32[2]) + "," +
-		std::to_string(m.r[1].m128_f32[3]) + "]";
-	std::string row3 = "[" +
-		std::to_string(m.r[2].m128_f32[0]) + "," +
-		std::to_string(m.r[2].m128_f32[1]) + "," +
-		std::to_string(m.r[2].m128_f32[2]) + "," +
-		std::to_string(m.r[2].m128_f32[3]) + "]";
-	std::string row4 = "[" +
-		std::to_string(m.r[3].m128_f32[0]) + "," +
-		std::to_string(m.r[3].m128_f32[1]) + "," +
-		std::to_string(m.r[3].m128_f32[2]) + "," +
-		std::to_string(m.r[3].m128_f32[3]) + "]";
-	std::string matrixDump = row1 + "\n" + row2 + "\n" + row3 + "\n" + row4 + "\n";
-
-	OutputDebugStringA("Matrix\n");
-	OutputDebugStringA(matrixDump.c_str());
-}
-
-inline void MatrixDump(DirectX::XMFLOAT4X4 m)
-{
-	std::string row1 = "[" +
-		std::to_string(m._11) + "," +
-		std::to_string(m._12) + "," +
-		std::to_string(m._13) + "," +
-		std::to_string(m._14) + "]";
-	std::string row2 = "[" +
-		std::to_string(m._21) + "," +
-		std::to_string(m._22) + "," +
-		std::to_string(m._23) + "," +
-		std::to_string(m._24) + "]";
-	std::string row3 = "[" +
-		std::to_string(m._31) + "," +
-		std::to_string(m._32) + "," +
-		std::to_string(m._33) + "," +
-		std::to_string(m._34) + "]";
-	std::string row4 = "[" +
-		std::to_string(m._41) + "," +
-		std::to_string(m._42) + "," +
-		std::to_string(m._43) + "," +
-		std::to_string(m._44) + "]";
-	std::string matrixDump = row1 + "\n" + row2 + "\n" + row3 + "\n" + row4 + "\n";
-
-	OutputDebugStringA("Matrix\n");
-	OutputDebugStringA(matrixDump.c_str());
-}
-
 inline XMFLOAT3 GetPitchYawRoll(XMFLOAT4X4 transform)
 {
 	float pitch = XMScalarASin(-transform._32);
@@ -130,11 +98,6 @@ inline XMFLOAT3 GetPitchYawRoll(XMFLOAT4X4 transform)
 	float yaw = XMVectorGetY(res);
 
 	return XMFLOAT3(XMConvertToDegrees(pitch), XMConvertToDegrees(yaw), XMConvertToDegrees(roll));
-}
-
-inline std::string OutputV3(XMVECTOR V3)
-{
-	return std::string(std::to_string(V3.m128_f32[0]) + "," + std::to_string(V3.m128_f32[1]) + "," + std::to_string(V3.m128_f32[2]));
 }
 
 inline XMFLOAT3 Quaternion2Euler(XMVECTOR Q)
@@ -172,4 +135,70 @@ inline XMFLOAT3 Quaternion2Euler(XMVECTOR Q)
 	angles.y = XMConvertToDegrees(angles.y);
 	angles.z = XMConvertToDegrees(angles.z);
 	return angles;
+}
+
+inline PxVec3 ToPxVec3(XMFLOAT3 v)
+{
+	return PxVec3(v.x, v.y, v.z);
+}
+
+inline PxVec3 ToPxVec3(XMVECTOR v)
+{
+	return PxVec3(v.m128_f32[0], v.m128_f32[1], v.m128_f32[2]);
+}
+
+inline PxVec3d ToPxVec3d(XMFLOAT3 v)
+{
+	PxVec3d vd;
+	vd.x = v.x;
+	vd.y = v.y;
+	vd.z = v.z;
+	return vd;
+}
+
+inline PxQuat ToPxQuat(XMVECTOR Q)
+{
+	return PxQuat(Q.m128_f32[0], Q.m128_f32[1], Q.m128_f32[2], Q.m128_f32[3]);
+}
+
+inline PxQuat ToPxQuat(XMFLOAT3 euler)
+{
+	float roll, pitch, yaw;
+	pitch = euler.x; yaw = euler.y; roll = euler.z;
+	return ToPxQuat(XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll)));
+}
+
+inline XMVECTOR XMQuatFromDegrees(float pitch, float yaw, float roll)
+{
+	return XMQuaternionRotationRollPitchYaw(
+		XMConvertToRadians(pitch),
+		XMConvertToRadians(yaw),
+		XMConvertToRadians(roll)
+	);
+}
+
+inline XMVECTOR XMQuatFromDegrees(XMFLOAT3 Euler)
+{
+	return XMQuaternionRotationRollPitchYaw(
+		XMConvertToRadians(Euler.x),
+		XMConvertToRadians(Euler.y),
+		XMConvertToRadians(Euler.z)
+	);
+}
+
+inline XMVECTOR XMQuatFromDegrees(XMVECTOR Euler)
+{
+	return XMQuaternionRotationRollPitchYaw(
+		XMConvertToRadians(Euler.m128_f32[0]),
+		XMConvertToRadians(Euler.m128_f32[1]),
+		XMConvertToRadians(Euler.m128_f32[2])
+	);
+}
+
+inline XMFLOAT3 XMClamp(XMFLOAT3 v, float min, float max)
+{
+	v.x = std::clamp(v.x, min, max);
+	v.y = std::clamp(v.y, min, max);
+	v.z = std::clamp(v.z, min, max);
+	return v;
 }

@@ -10,16 +10,20 @@ extern std::unique_ptr<Renderer> renderer;
 
 namespace ComputeShader
 {
+	ComputeShader::~ComputeShader() {
+		DeleteShaderInstance(shader());
+	}
+
 	void ComputeShader::Init(std::string shaderName, std::vector<MaterialSamplerDesc> samplers, std::wstring target)
 	{
 		using namespace DeviceUtils;
 
 		//Get an instance of the BoundingBox Compute shader
 		shader = GetShaderUUIDByName(shaderName);
-		Source compCS = { .shaderType = COMPUTE_SHADER, .shaderTarget = target, .shaderUUID = shader };
-		auto& shaderIns = CreateShaderInstance(shader, [compCS]
+		Source compCS = { .shaderType = COMPUTE_SHADER, .shaderTarget = target, .shaderTemplate = shader };
+		auto& shaderIns = CreateShaderInstance(shader(), [compCS]
 			{
-				return std::make_unique<ShaderInstance>(compCS.shaderUUID, compCS.shaderUUID, compCS);
+				return std::make_unique<ShaderInstance>(compCS.shaderTemplate(), compCS.shaderTemplate(), compCS);
 			}
 		);
 

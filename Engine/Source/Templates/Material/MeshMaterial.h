@@ -2,7 +2,7 @@
 
 struct MeshMaterial
 {
-	std::string mesh;
+	nlohmann::json mesh;
 	std::string materialUUID;
 };
 

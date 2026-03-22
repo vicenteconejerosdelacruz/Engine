@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _TEMPLATES_SOUND_H
+#define _TEMPLATES_SOUND_H
+
 #include <memory>
 #include <string>
 #include <Audio.h>
@@ -68,6 +70,7 @@ namespace Templates
 	};
 
 	TEMPDECL_FULL(Sound);
+	DEF_TEMPLATE_ID(SoundJson, GetSoundTemplate);
 
 	void SoundJsonStep();
 	void ReleaseSoundEffectsInstances();
@@ -83,3 +86,7 @@ namespace Templates
 
 	void DestroySoundEffectInstance(JUUID uuid, SoundInstance& soundEffectInstance);
 };
+using namespace Templates;
+DEF_TEMPLATE_ID_HASH(SoundJson);
+
+#endif

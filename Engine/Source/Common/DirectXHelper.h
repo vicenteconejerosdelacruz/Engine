@@ -2,7 +2,7 @@
 
 #include <ppltasks.h>	// Para create_task
 #include <Windows.h>
-#include <DirectXMath.h>
+#include <SimpleMath.h>
 
 using namespace Microsoft::WRL;
 using namespace DirectX;

@@ -1,12 +1,20 @@
-#pragma once
+#ifndef _PRIMITIVE_PENTAHEDRON_H
+#define _PRIMITIVE_PENTAHEDRON_H
+
 #include "Primitive.h"
 #include <VertexFormats.h>
 
-struct Pentahedron : public Primitive
+namespace Primitives
 {
-	static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL_TANGENT_TEXCOORD0;
-	typedef Vertex<VertexClass> VertexType;
+	struct Pentahedron : Primitive
+	{
+		static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL_TANGENT_TEXCOORD0;
+		typedef Vertex<VertexClass> VertexType;
 
-	std::vector<uint32_t> GetIndices();
-	std::vector<VertexType> GetVertices();
+		Pentahedron(nlohmann::json& json) : Primitive(json) {}
+		std::vector<uint32_t> GetIndices();
+		std::vector<VertexType> GetVertices();
+	};
 };
+
+#endif

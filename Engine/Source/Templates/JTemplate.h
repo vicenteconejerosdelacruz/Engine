@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _JTEMPLATE_H
+#define _JTEMPLATE_H
 
 #include <JObject.h>
 #include <nlohmann/json.hpp>
@@ -23,7 +24,8 @@ enum TemplateType {
 	T_Models3D,
 	T_Sounds,
 	T_Textures,
-	T_RenderPasses
+	T_RenderPasses,
+	T_PhysicGeometries
 };
 
 inline const std::unordered_map<TemplateType, std::string> TemplateTypeToString = {
@@ -32,7 +34,8 @@ inline const std::unordered_map<TemplateType, std::string> TemplateTypeToString 
 	{ T_Models3D, "Models3D" },
 	{ T_Sounds, "Sounds" },
 	{ T_Textures, "Textures" },
-	{ T_RenderPasses, "RenderPasses"}
+	{ T_RenderPasses, "RenderPasses"},
+	{ T_PhysicGeometries, "PhysicGeometries" }
 };
 
 inline const std::unordered_map<std::string, TemplateType> StringToTemplateType = {
@@ -41,7 +44,8 @@ inline const std::unordered_map<std::string, TemplateType> StringToTemplateType 
 	{ "Models3D", T_Models3D },
 	{ "Sounds", T_Sounds },
 	{ "Textures", T_Textures },
-	{ "RenderPasses", T_RenderPasses }
+	{ "RenderPasses", T_RenderPasses },
+	{ "PhysicGeometries", T_PhysicGeometries }
 };
 
 #if defined(_EDITOR)
@@ -51,7 +55,8 @@ inline const std::unordered_map<TemplateType, const char* > TemplateTypePanelMen
 	{ T_Models3D, ICON_FA_CUBE "Models3D" },
 	{ T_Sounds, ICON_FA_MUSIC "Sounds" },
 	{ T_Textures, ICON_FA_IMAGE "Textures" },
-	{ T_RenderPasses, ICON_FA_TV "RenderPasses"}
+	{ T_RenderPasses, ICON_FA_TV "RenderPasses"},
+	{ T_PhysicGeometries, ICON_FA_HOUSE_USER "PhysicGeometries" }
 };
 #endif
 
@@ -88,3 +93,6 @@ namespace Templates
 #include <Sound/Sound.h>
 #include <Textures/Texture.h>
 #include <Mesh/Mesh.h>
+#include <PhysicGeometry.h>
+
+#endif

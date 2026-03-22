@@ -72,7 +72,7 @@ struct RightPanelComponent
 
 	bool HasSelectedChildren(std::map<std::string, std::any>& dump, std::string path);
 
-	void DrawAssetTreeNodes(std::map<std::string, std::any>& dump, std::string path, auto OnSelect, auto OnOpen, auto OnDelete)
+	void DrawAssetTreeNodes(std::map<std::string, std::any>& dump, std::string path, auto OnSelect, auto OnOpen, auto OnDelete, auto OnRightClick)
 	{
 		std::map<std::string, std::any> nodes;
 		std::copy_if(dump.begin(), dump.end(), std::inserter(nodes, nodes.begin()), [](auto& pair)
@@ -90,7 +90,7 @@ struct RightPanelComponent
 				ImGui::SetNextItemOpen(true);
 			if (ImGui::TreeNodeEx(first.c_str()))
 			{
-				DrawAssetTreeNodes(child, p, OnSelect, OnOpen, OnDelete);
+				DrawAssetTreeNodes(child, p, OnSelect, OnOpen, OnDelete, OnRightClick);
 				ImGui::TreePop();
 			}
 		}
@@ -176,6 +176,10 @@ struct RightPanelComponent
 					{
 						OnOpen(uuid);
 					}
+					if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+					{
+						OnRightClick(uuid);
+					}
 					ImGui::TreePop();
 				}
 			}
@@ -183,9 +187,9 @@ struct RightPanelComponent
 		}
 	}
 
-	void DrawAssetsTree(auto GetObjects, auto GetPanelObject, auto OnSelect, auto OnOpen, auto OnDelete, std::string ignorePrefix)
+	void DrawAssetsTree(auto GetObjects, auto GetPanelObject, auto OnSelect, auto OnOpen, auto OnDelete, auto OnRightClick, std::string ignorePrefix)
 	{
-		DrawAssetTreeNodes(assets, "", OnSelect, OnOpen, OnDelete);
+		DrawAssetTreeNodes(assets, "", OnSelect, OnOpen, OnDelete, OnRightClick);
 	}
 
 	void DrawTabs(std::function<void(std::string)> onChangeTab);
@@ -199,7 +203,8 @@ struct RightPanelComponent
 		auto OnSelect,
 		auto OnOpen,
 		auto OnNew,
-		auto OnDelete
+		auto OnDelete,
+		auto OnRightClick
 	)
 	{
 		if (assets.empty() || dirtyAssetsTree)
@@ -250,7 +255,7 @@ struct RightPanelComponent
 							selectedTab = detailAbleTabs.at(1);
 							MatchAttributes();
 							OnOpen(uuidToPick);
-						}, OnDelete, "");
+						}, OnDelete, OnRightClick, "");
 				}
 				else
 				{

@@ -1,19 +1,25 @@
-#pragma once
+#ifndef _ANIMATION_ANIMATED_H
+#define _ANIMATION_ANIMATED_H
 
 #include <queue>
 #include <map>
-#include <DirectXMath.h>
+#include <SimpleMath.h>
 #include <assimp/scene.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <memory>
 
-namespace Scene { struct Renderable; };
+namespace Scene
+{
+	DEF_SCENEOBJECT_ID_DEP(Renderable);
+};
 struct aiScene;
 
 using namespace DirectX;
+using namespace Scene;
 
 namespace Animation
 {
+
 	static const unsigned int MAX_BONES = 1024U;
 	typedef XMMATRIX BonesMatrices[MAX_BONES];
 
@@ -72,11 +78,12 @@ namespace Animation
 	void DestroyAnimated();
 	void DestroyAnimated(SceneUnitId id);
 
-	void AttachAnimation(SceneUnitId id, JUUID renderableUUID, std::unique_ptr<Animated>& animated);
-	ConstantsBufferUUID GetAnimatedConstantsBuffer(JUUID renderableUUID);
-	void WriteBoneTransformationsToConstantsBuffer(JUUID renderableUUID, BonesTransformations& bonesTransformation, unsigned int backbufferIndex);
+	void AttachAnimation(RenderableID renderable, std::unique_ptr<Animated>& animated);
+	ConstantsBufferID GetAnimatedConstantsBuffer(RenderableID renderable);
+	void WriteBoneTransformationsToConstantsBuffer(RenderableID renderable, BonesTransformations& bonesTransformation, unsigned int backbufferIndex);
 
 	void TraverseMultiplycationQueue(float time, std::string currentAnimation, std::unique_ptr<Animated>& animations, BonesTransformations& bonesTransformation);
 	void TraverseMultiplycationQueue(float time, MultiplyCmdQueue& cmds, BonesKeysMap& boneKeys, BonesTransformations& bonesTransformation, BonesTransformations& bonesOffsets, XMMATRIX& rootNodeInverseTransform, XMMATRIX parentTransformation);
 }
 
+#endif

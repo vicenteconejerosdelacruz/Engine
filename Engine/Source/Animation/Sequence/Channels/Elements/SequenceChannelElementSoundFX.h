@@ -1,6 +1,15 @@
-#pragma once
-#include "SequenceChannelElement.h"
+#ifndef _SEQUENCE_CHANNEL_ELEMENT_SOUND_FX_H
+#define _SEQUENCE_CHANNEL_ELEMENT_SOUND_FX_H
 
+#include "SequenceChannelElement.h"
+#include <UUID.h>
+
+namespace Templates
+{
+	DEF_TEMPLATE_ID_DEP(SoundJson, GetSoundTemplate);
+};
+
+using namespace Templates;
 struct SequenceChannelElementSoundFX : SequenceChannelElement
 {
 	SequenceChannelElementSoundFX();
@@ -10,7 +19,8 @@ struct SequenceChannelElementSoundFX : SequenceChannelElement
 	int GetFrameStart();
 	int GetFrameEnd();
 
-	SoundJsonUUID sound;
+	SoundJsonID sound;
 	float volume;
 	bool loop;
 };
+#endif

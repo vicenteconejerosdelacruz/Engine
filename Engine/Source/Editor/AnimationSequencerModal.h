@@ -37,6 +37,7 @@ struct AnimationSequencerModal
 
 	void Initialize(JUUID uuid);
 	nlohmann::json GetModalLevelJson();
+	void DestroyStep();
 	void DestroySceneObjects();
 	void Step();
 	void DrawLoading();
@@ -62,18 +63,19 @@ struct AnimationSequencerModal
 	bool showing = false;
 	bool initializing = false;
 	bool destroying = false;
-	Model3DInstanceUUID model3dUUID;
+	unsigned int destructionFrames = 0;
+	Model3DInstanceID model3dUUID;
 	JUUID renderableUUID;
-	RenderableSUUUID renderable;
+	RenderableID renderable;
 	JUUID floorUUID;
-	RenderableSUUUID floor;
+	RenderableID floor;
 	JUUID cameraUUID;
-	CameraSUUUID camera;
+	CameraID camera;
 	JUUID ambientLightUUID;
-	LightSUUUID ambientLight;
+	LightID ambientLight;
 	JUUID directionalLightUUID;
-	LightSUUUID directionalLight;
-	Model3DJsonUUID model3D;
+	LightID directionalLight;
+	Model3DJsonID model3D;
 	XMFLOAT3 cameraInitialPos;
 	XMFLOAT3 cameraInitialRot;
 

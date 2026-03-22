@@ -4,31 +4,33 @@
 #include <Renderer.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <Level.h>
+#include <unordered_map>
 
 extern std::unique_ptr<Renderer> renderer;
 #if defined(_EDITOR)
 namespace Editor
 {
-	extern bool IsPlaying(SceneUnitId unit);
-	extern bool IsPaused(SceneUnitId unit);
+	extern bool IsPlaying(SceneUnitId id);
+	extern bool IsPaused(SceneUnitId id);
 	extern void DrawEditor();
 	extern void EraseSceneObjectFromSelection(SceneUnitId unit, JUUID uuid);
 	extern void MarkSceneUnitAsModified(SceneUnitId id);
 	extern void MarkScenePanelAssetsAsDirty();
-	extern void UpdateBoundingBox(SceneUnitId unit);
-	extern void WriteSceneUnitEditorPlayCameraConstantsBuffer(SceneUnitId unit);
-	extern void SwitchToSceneUnitEditorCamera(SceneUnitId unit);
-	extern void SwitchToSceneUnitEditorPlayCamera(SceneUnitId unit);
+	extern void UpdateBoundingBox(SceneUnitId id);
+	extern void WriteSceneUnitEditorPlayCameraConstantsBuffer(SceneUnitId id);
+	extern void SwitchToSceneUnitEditorCamera(SceneUnitId id);
+	extern void SwitchToSceneUnitEditorPlayCamera(SceneUnitId id);
 	extern void RemoveSceneUnitEditorCameraFromWindowCameras(SceneUnitId id);
 	extern void AddSceneUnitEditorCameraToWindowCameras(SceneUnitId id);
 	extern void HandleEditorMouseMovements(SceneUnitId id);
 	extern void CreateRegisteredBillboards(SceneUnitId id);
 	extern void UpdateBillboards();
-	extern void BindRenderableToPickingPass(RenderableSUUUID uuid);
+	extern void BindRenderableToPickingPass(RenderableID uuid);
 	extern void DeleteSceneUnitLevel(SceneUnitId id);
 	extern void DeleteSceneUnitGizmos(SceneUnitId id);
 	extern void DeleteSceneUnitSelection(SceneUnitId id);
 	extern void DeleteSceneUnitGameController(SceneUnitId id);
+	extern void DeleteSceneUnitPhysicsController(SceneUnitId id);
 	extern void DeleteSceneUnitBoundingBox(SceneUnitId id);
 	extern void DeleteSceneUnitBillboards(SceneUnitId id);
 	extern void DeleteSceneUnitEditorIndependentCamera(SceneUnitId id);
@@ -45,6 +47,26 @@ namespace Scene
 	std::map<SceneUnitId, std::unique_ptr<SceneUnit>> scenesUnits;
 	std::map<SceneUnitId, SceneUnitId> attachedUnits; //<Attached, Destination>
 	std::set<SceneUnitId> renderableSceneUnits;
+	std::map<size_t, CommandsProcessor> loadingProcessor;
+
+	std::tuple<size_t, CommandsProcessor&> CreateLoadingProcessor()
+	{
+		size_t thread_id = nostd::threadIdHash();
+		loadingProcessor.insert_or_assign(thread_id, CommandsProcessor(renderer->d3dDevice, 1));
+		return std::tie(thread_id, loadingProcessor.at(thread_id));
+	}
+
+	CommandsProcessor& GetLoadingProcessor(size_t id)
+	{
+		id = id ? id : nostd::threadIdHash();
+		return loadingProcessor.at(id);
+	}
+
+	void DestroyLoadingProcessor(size_t id)
+	{
+		id = id ? id : nostd::threadIdHash();
+		loadingProcessor.erase(id);
+	}
 
 	void CreateSceneLevelAsync(std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 	{
@@ -53,22 +75,12 @@ namespace Scene
 		std::thread levelThread([](std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 			{
 				SceneUnitId id = nostd::threadIdHash();
-				auto& scene = CreateScene(id, filename, Renderer::numFrames);
 
-				scene->PushLoadingExecutionCallback([=]
-					{
-						auto& sceneU = GetSceneUnit(id);
-						sceneU->SetLoadingComplete(true);
-					}
-				);
+				auto& scene = CreateScene(id, filename, Renderer::numFrames);
+				auto [lid, _] = CreateLoadingProcessor();
 
 				LoadLevel(scene, filename, data, progress);
-
 				levelLoaded(id);
-
-				scene->SetCanSubmitLoading(true);
-				scene->SetLoadingComplete(true);
-
 			}, filename, data, levelLoaded, progress
 		);
 		levelThread.detach();
@@ -83,17 +95,9 @@ namespace Scene
 				SceneUnitId unit = nostd::threadIdHash();
 				auto& scene = CreateScene(unit, filename);
 				scene->SetIsolated(true);
+				auto [lid, _] = CreateLoadingProcessor();
 
-				scene->PushLoadingExecutionCallback([=]
-					{
-						auto& sceneU = GetSceneUnit(unit);
-						sceneU->SetLoadingComplete(true);
-					}
-				);
 				LoadLevel(scene, filename, data, progress);
-
-				scene->SetCanSubmitLoading(true);
-
 				levelLoaded(unit);
 			}, filename, data, levelLoaded, progress
 		);
@@ -107,19 +111,10 @@ namespace Scene
 		std::thread levelThread([](SceneUnitId parentUnit, std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 			{
 				auto& scene = GetSceneUnit(parentUnit);
-
-				scene->PushLoadingExecutionCallback([=]
-					{
-						auto& sceneU = GetSceneUnit(parentUnit);
-						sceneU->SetLoadingComplete(true);
-					}
-				);
+				auto [lid, _] = CreateLoadingProcessor();
 
 				LoadLevel(scene, filename, data, progress);
-
 				levelLoaded(parentUnit);
-
-				scene->SetCanSubmitLoading(true);
 			}, parentUnit, filename, data, levelLoaded, progress
 		);
 		levelThread.detach();
@@ -128,13 +123,24 @@ namespace Scene
 	std::unique_ptr<SceneUnit>& CreateScene(SceneUnitId unit, std::string unitName, unsigned int numProcessors)
 	{
 		scenesUnits.insert_or_assign(unit, std::make_unique<SceneUnit>(unit, unitName));
-		scenesUnits.at(unit)->InitLoadingProcessor(renderer->d3dDevice, unit, 1U);
+		//scenesUnits.at(unit)->InitLoadingProcessor(renderer->d3dDevice, unit, 1U);
 		if (numProcessors > 0U)
 		{
-			scenesUnits.at(unit)->InitFrame2FrameProcessor(renderer->d3dDevice, unit, numProcessors);
-			scenesUnits.at(unit)->InitComputeProcessor(renderer->d3dDevice, unit, numProcessors);
+			scenesUnits.at(unit)->InitFrame2FrameProcessor(renderer->d3dDevice, numProcessors, unit);
+			scenesUnits.at(unit)->InitComputeProcessor(renderer->d3dDevice, numProcessors, unit);
 		}
 		return scenesUnits.at(unit);
+	}
+
+	void CreateSceneUnitSceneObjects(SceneUnitId unit)
+	{
+		CreateRenderableSceneObjects(unit);
+		CreateCameraSceneObjects(unit);
+		CreateLightSceneObjects(unit);
+		CreateSoundFXSceneObjects(unit);
+		CreatePhysicSceneSceneObjects(unit);
+		CreateTriggerSceneObjects(unit);
+		CreateBoundarySceneObjects(unit);
 	}
 
 	void DestroyScene(SceneUnitId id)
@@ -152,6 +158,7 @@ namespace Scene
 		DeleteSceneUnitGizmos(id);
 		DeleteSceneUnitSelection(id);
 		DeleteSceneUnitGameController(id);
+		DeleteSceneUnitPhysicsController(id);
 		DeleteSceneUnitBoundingBox(id);
 		DeleteSceneUnitBillboards(id);
 		DeleteSceneUnitEditorIndependentCamera(id);
@@ -182,7 +189,14 @@ namespace Scene
 		{
 			if (scene->MarkedForDelete())
 			{
-				scenesToDelete.insert(unit);
+				if (scene->DeleteFrames() > 0)
+				{
+					scene->DecreaseDeleteFrames();
+				}
+				else if (scene->DeleteFrames() == 0)
+				{
+					scenesToDelete.insert(unit);
+				}
 			}
 		}
 
@@ -236,7 +250,7 @@ namespace Scene
 			auto& cameras = GetWindowCameras(id);
 			for (auto& uuid : cameras)
 			{
-				CameraSUUUID cam = MAKESUUUID(id, uuid);
+				CameraID cam = MAKESUUUID(id, uuid);
 				cam->ResizeReleasePasses();
 			}
 #if defined(_EDITOR)
@@ -258,7 +272,7 @@ namespace Scene
 			auto& cameras = GetWindowCameras(id);
 			for (auto& uuid : cameras)
 			{
-				CameraSUUUID cam = MAKESUUUID(id, uuid);
+				CameraID cam = MAKESUUUID(id, uuid);
 				cam->ResizePasses(width, height);
 			}
 #if defined(_EDITOR)
@@ -294,6 +308,11 @@ namespace Scene
 		return scenesUnits.at(id)->GetSceneObjectTypes().contains(uuid);
 	}
 
+	bool SceneObjectExists(SUUUID suuuid)
+	{
+		return scenesUnits.at(std::get<0>(suuuid))->GetSceneObjectTypes().contains(std::get<1>(suuuid));
+	}
+
 	void MoveSceneObjectUnit(JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
 	{
 		auto mover = [](auto mvfn, auto uuid, auto fromId, auto toId)
@@ -309,22 +328,37 @@ namespace Scene
 		{
 			{ SO_Renderables, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
 			{
-				mover(GetRenderablesSUSceneObjects,uuid,fromId,toId);
+				mover(GetRenderablesSceneObjects,uuid,fromId,toId);
 			}
 			},
 			{ SO_Cameras, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
 			{
-				mover(GetCamerasSUSceneObjects,uuid,fromId,toId);
+				mover(GetCamerasSceneObjects,uuid,fromId,toId);
 			}
 			},
 			{ SO_Lights, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
 			{
-				mover(GetLightsSUSceneObjects,uuid,fromId,toId);
+				mover(GetLightsSceneObjects,uuid,fromId,toId);
 			}
 			},
 			{ SO_SoundEffects, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
 			{
-				mover(GetSoundFXsSUSceneObjects,uuid,fromId,toId);
+				mover(GetSoundFXsSceneObjects,uuid,fromId,toId);
+			}
+			},
+			{ SO_PhysicScenes, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
+			{
+				mover(GetPhysicScenesSceneObjects,uuid,fromId,toId);
+			}
+			},
+			{ SO_Triggers, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
+			{
+				mover(GetTriggersSceneObjects,uuid,fromId,toId);
+			}
+			},
+			{ SO_Boundaries, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
+			{
+				mover(GetBoundarysSceneObjects,uuid,fromId,toId);
 			}
 			},
 		};
@@ -348,6 +382,11 @@ namespace Scene
 		renderableSceneUnits.erase(id);
 	}
 
+	bool SceneUnitRenderingExists(SceneUnitId id)
+	{
+		return renderableSceneUnits.contains(id);
+	}
+
 	void BindSceneObjects(SceneUnitId id)
 	{
 		std::unordered_map<SceneObjectType, std::function<void(SceneUnitId, JUUID)>> typeBinder =
@@ -355,32 +394,56 @@ namespace Scene
 			{
 				SO_Renderables, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& so = GetRenderableSUSceneObject(id, uuid);
+					auto& so = GetRenderableSceneObject(id, uuid);
 					so->BindToScene();
 				}
 			},
 			{
 				SO_Cameras, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& so = GetCameraSUSceneObject(id, uuid);
+					auto& so = GetCameraSceneObject(id, uuid);
 					so->BindToScene();
 				}
 			},
-			{ SO_Lights, [](SceneUnitId id, JUUID uuid)
+			{
+				SO_Lights, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& so = GetLightSUSceneObject(id, uuid);
+					auto& so = GetLightSceneObject(id, uuid);
 					so->BindToScene();
 				}
 			},
 			{
 				SO_SoundEffects, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& so = GetSoundFXSUSceneObject(id, uuid);
+					auto& so = GetSoundFXSceneObject(id, uuid);
+					so->BindToScene();
+				}
+			},
+			{
+				SO_PhysicScenes, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& so = GetPhysicSceneSceneObject(id, uuid);
+					so->BindToScene();
+				}
+			},
+			{
+				SO_Triggers, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& so = GetTriggerSceneObject(id, uuid);
+					so->BindToScene();
+				}
+			},
+			{
+				SO_Boundaries, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& so = GetBoundarySceneObject(id, uuid);
 					so->BindToScene();
 				}
 			}
 		};
-		for (auto& uuid : GetUnboundedSceneObjects(id))
+
+		std::set<JUUID> uuids = GetUnboundedSceneObjects(id);
+		for (auto& uuid : uuids)
 		{
 			typeBinder.at(GetSceneObjectType(id, uuid))(id, uuid);
 		}
@@ -391,8 +454,10 @@ namespace Scene
 	{
 		SceneObject* sceneObjectO = GetSceneObjectPointer(id, sceneObject);
 		SceneObjectType type = sceneObjectO->JType();
-		std::string dump = sceneObjectO->dump();
-		nlohmann::json data = nlohmann::json::parse(dump);
+		//std::string dump = sceneObjectO->dump();
+		//nlohmann::json data = nlohmann::json::parse(dump);
+		nlohmann::json data;
+		sceneObjectO->WriteJson(data);
 
 		JUUID uuid = getUUID();
 		std::string name = data.at("name");
@@ -406,22 +471,37 @@ namespace Scene
 		{
 		case SO_Cameras:
 		{
-			CreateSUCamera(id, data);
+			CreateCamera(id, data);
 		}
 		break;
 		case SO_Lights:
 		{
-			CreateSULight(id, data);
+			CreateLight(id, data);
 		}
 		break;
 		case SO_Renderables:
 		{
-			CreateSURenderable(id, data);
+			CreateRenderable(id, data);
 		}
 		break;
 		case SO_SoundEffects:
 		{
-			CreateSUSoundFX(id, data);
+			CreateSoundFX(id, data);
+		}
+		break;
+		case SO_PhysicScenes:
+		{
+			CreatePhysicScene(id, data);
+		}
+		break;
+		case SO_Triggers:
+		{
+			CreateTrigger(id, data);
+		}
+		break;
+		case SO_Boundaries:
+		{
+			CreateBoundary(id, data);
 		}
 		break;
 		}
@@ -455,6 +535,9 @@ namespace Scene
 			if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
 				dt = 0.0f;
 #endif
+			TriggersStep(unit);
+			BoundariesStep(unit);
+			PhysicSceneStep(unit, dt);
 			SoundFXsStep(unit, dt);
 			RenderablesStep(unit, dt);
 			AnimableStep(unit, dt);
@@ -469,7 +552,7 @@ namespace Scene
 
 		for (JUUID uuid : GetRenderables(id))
 		{
-			RenderableSUUUID r = MAKESUUUID(id, uuid);
+			RenderableID r = MAKESUUUID(id, uuid);
 			if (!r->RenderReady()) continue;
 
 			r->WriteAnimationConstantsBuffer(scene->Frame());
@@ -479,7 +562,7 @@ namespace Scene
 		//write the constants buffers of the cameras which renders shadow maps
 		for (JUUID uuid : GetCameras(id))
 		{
-			CameraSUUUID c = MAKESUUUID(id, uuid);
+			CameraID c = MAKESUUUID(id, uuid);
 			if (!c->RenderReady() || !c->shadowMapLight().empty()) continue;
 
 			c->WriteLightsConstantsBuffer(scene->Frame());
@@ -493,7 +576,7 @@ namespace Scene
 
 		for (JUUID uuid : GetLights(id))
 		{
-			LightSUUUID l = MAKESUUUID(id, uuid);
+			LightID l = MAKESUUUID(id, uuid);
 
 			if (!l->RenderReady() || !l->hasShadowMaps()) continue;
 
@@ -501,7 +584,7 @@ namespace Scene
 				{
 					auto& camera = l->shadowMapCameras.at(cameraIndex);
 					auto& rp = camera->renderPassesUUID.at(0);
-					for (RenderableSUUUID r : camera->renderables)
+					for (RenderableID r : camera->renderables)
 					{
 						if (r->castShadows())
 						{
@@ -554,7 +637,7 @@ namespace Scene
 			}
 
 			//filter out cameras used to render shadow maps
-			CameraSUUUID cam = MAKESUUUID(id, uuid);
+			CameraID cam = MAKESUUUID(id, uuid);
 			if (!cam->RenderReady() || !cam->shadowMapLight().empty())
 			{
 				it = cameras.erase(it);
@@ -567,7 +650,7 @@ namespace Scene
 		std::vector<JUUID> nonSwapChainCams;
 		std::copy_if(cameras.begin(), cameras.end(), std::back_inserter(nonSwapChainCams), [&](JUUID uuid)
 			{
-				auto& cam = GetCameraSUSceneObject(id, uuid);
+				CameraID cam = MAKESUUUID(id, uuid);
 				//we skip swap chain cams
 				if (cam->useSwapChain()) return false;
 				//we skip cameras which resolves to the swapchain
@@ -581,7 +664,7 @@ namespace Scene
 		//render non swapchain buffer cameras(rtt stuff)
 		for (auto& uuid : nonSwapChainCams)
 		{
-			auto& cam = GetCameraSUSceneObject(id, uuid);
+			CameraID cam = MAKESUUUID(id, uuid);
 #if defined(_DEVELOPMENT)
 			PIXBeginEvent(commandList.p, 0, std::string("nonSwapChain:" + cam->name()).c_str());
 #endif
@@ -592,10 +675,10 @@ namespace Scene
 		}
 
 		//check if there is any camera with any render pass resolving to the swapchain
-		bool resolvedToSwapchain = std::any_of(nonSwapChainCams.begin(), nonSwapChainCams.end(), [&](JUUID camUUID)
+		bool resolvedToSwapchain = std::any_of(nonSwapChainCams.begin(), nonSwapChainCams.end(), [&](JUUID uuid)
 			{
-				auto& cam = GetCameraSUSceneObject(id, camUUID);
-				return std::any_of(cam->renderPassesUUID.begin(), cam->renderPassesUUID.end(), [](RenderPassInstanceUUID& pass)
+				CameraID cam = MAKESUUUID(id, uuid);
+				return std::any_of(cam->renderPassesUUID.begin(), cam->renderPassesUUID.end(), [](RenderPassInstanceID& pass)
 					{
 						return pass->renderCallbackOverride == RenderPassRenderCallbackOverride_Resolve;
 					}
@@ -622,7 +705,7 @@ namespace Scene
 	{
 		for (JUUID uuid : GetAnimables(id))
 		{
-			RenderableSUUUID r = MAKESUUUID(id, uuid);
+			RenderableID r = MAKESUUUID(id, uuid);
 			r->StepAnimation(elapsedSeconds);
 		}
 	}
@@ -633,28 +716,25 @@ namespace Scene
 		using namespace Editor;
 		UpdateBillboards();
 #endif
-		for (auto& [unit, scene] : scenesUnits)
+		for (auto& [id, scene] : scenesUnits)
 		{
-			if (!SceneUnitExits(unit)) continue;
+			if (!SceneUnitExits(id) || !SceneUnitRenderingExists(id) || scene->MarkedForDelete()) continue;
 
-			if (scene->MarkedForDelete()) continue;
-
-			scene->Loading();
-
-			if (!renderableSceneUnits.contains(unit) || !scene->IsLoadingComplete()) continue;
-
+			//scene->Loading();
+			//
+			//if (!renderableSceneUnits.contains(unit) || !scene->IsLoadingComplete()) continue;
 #if defined(_EDITOR)
-			if (!Editor::IsPlaying(unit) && !scene->IsIsolated())
+			if (!Editor::IsPlaying(id) && !scene->IsIsolated())
 			{
-				WriteSceneUnitEditorPlayCameraConstantsBuffer(unit);
-				SwitchToSceneUnitEditorCamera(unit);
+				WriteSceneUnitEditorPlayCameraConstantsBuffer(id);
+				SwitchToSceneUnitEditorCamera(id);
 			}
 #endif
 			scene->Render();
 #if defined(_EDITOR)
-			if (!Editor::IsPlaying(unit) && !scene->IsIsolated())
+			if (!Editor::IsPlaying(id) && !scene->IsIsolated())
 			{
-				SwitchToSceneUnitEditorPlayCamera(unit);
+				SwitchToSceneUnitEditorPlayCamera(id);
 			}
 #endif
 		}
@@ -670,7 +750,7 @@ namespace Scene
 #endif
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->MarkedForDelete() || !scene->IsLoadingComplete() || (!renderableSceneUnits.contains(unit))) continue;
+			//if (scene->MarkedForDelete() || !scene->IsLoadingComplete() || (!renderableSceneUnits.contains(unit))) continue;
 
 			scene->PostRender();
 		}
@@ -681,7 +761,8 @@ namespace Scene
 	{
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->MarkedForDelete() || !scene->IsLoadingComplete()) continue;
+			//if (scene->MarkedForDelete() || !scene->IsLoadingComplete()) continue;
+			if (scene->MarkedForDelete() || !scene->HasComputeProcessor()) continue;
 			computeRunners.insert(unit);
 			scene->RunComputeShaders();
 		}
@@ -691,15 +772,26 @@ namespace Scene
 	{
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->MarkedForDelete() || !scene->IsLoadingComplete()) continue;
+			//if (scene->MarkedForDelete() || !scene->IsLoadingComplete()) continue;
 			if (!computeRunners.contains(unit)) continue;
 			scene->SolveComputeShaders();
 		}
 		computeRunners.clear();
 	}
 
-	void DeletedScenes()
+	SceneObject* GetSceneObjectPointer(SUUUID suuid)
 	{
+		return GetSceneObjectPointer(FROMSUUUID(suuid));
+	}
+
+	v8_templates_creators GetSceneObjectV8TemplatesCreators(SUUUID suuuid)
+	{
+		return GetSceneObjectPointer(suuuid)->GetV8TemplatesCreators();
+	}
+
+	v8_context_creators GetSceneObjectV8ContextCreators(SUUUID suuuid)
+	{
+		return GetSceneObjectPointer(suuuid)->GetV8ContextCreators();
 	}
 
 	SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid)
@@ -708,25 +800,43 @@ namespace Scene
 		{
 			{ SO_Renderables, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& o = GetRenderableSUSceneObject(id, uuid);
+					auto& o = GetRenderableSceneObject(id, uuid);
 					return static_cast<SceneObject*>(o.get());
 				}
 			},
 			{ SO_Cameras, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& o = GetCameraSUSceneObject(id, uuid);
+					auto& o = GetCameraSceneObject(id, uuid);
 					return static_cast<SceneObject*>(o.get());
 				}
 			},
 			{ SO_Lights, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& o = GetLightSUSceneObject(id, uuid);
+					auto& o = GetLightSceneObject(id, uuid);
 					return static_cast<SceneObject*>(o.get());
 				}
 			},
 			{ SO_SoundEffects, [](SceneUnitId id, JUUID uuid)
 				{
-					auto& o = GetSoundFXSUSceneObject(id, uuid);
+					auto& o = GetSoundFXSceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			},
+			{ SO_PhysicScenes, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetPhysicSceneSceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			},
+			{ SO_Triggers, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetTriggerSceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
+			},
+			{ SO_Boundaries, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetBoundarySceneObject(id, uuid);
 					return static_cast<SceneObject*>(o.get());
 				}
 			}
@@ -755,30 +865,51 @@ namespace Scene
 				{
 					{ SO_Renderables, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 						{
-							RenderableSUUUID o = MAKESUUUID(id,uuid);
+							RenderableID o = MAKESUUUID(id,uuid);
 							if (o->hidden()) return JUUIDName();
 							return str2JUUIDName(SceneObjectTypeToString.at(SO_Renderables), o->uuid(),o->name());
 						}
 					},
 					{ SO_Cameras, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 						{
-							CameraSUUUID o = MAKESUUUID(id,uuid);
+							CameraID o = MAKESUUUID(id,uuid);
 							if (o->hidden()) return JUUIDName();
 							return str2JUUIDName(SceneObjectTypeToString.at(SO_Cameras), o->uuid(),o->name());
 						}
 					},
 					{ SO_Lights, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 						{
-							LightSUUUID o = MAKESUUUID(id,uuid);
+							LightID o = MAKESUUUID(id,uuid);
 							if (o->hidden()) return JUUIDName();
 							return str2JUUIDName(SceneObjectTypeToString.at(SO_Lights), o->uuid(),o->name());
 						}
 					},
 					{ SO_SoundEffects, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 						{
-							SoundFXSUUUID o = MAKESUUUID(id,uuid);
+							SoundFXID o = MAKESUUUID(id,uuid);
 							if (o->hidden()) return JUUIDName();
 							return str2JUUIDName(SceneObjectTypeToString.at(SO_SoundEffects), o->uuid(),o->name());
+						}
+					},
+					{ SO_PhysicScenes, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+						{
+							PhysicSceneID o = MAKESUUUID(id,uuid);
+							if (o->hidden()) return JUUIDName();
+							return str2JUUIDName(SceneObjectTypeToString.at(SO_PhysicScenes), o->uuid(),o->name());
+						}
+					},
+					{ SO_Triggers, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+						{
+							TriggerID o = MAKESUUUID(id,uuid);
+							if (o->hidden()) return JUUIDName();
+							return str2JUUIDName(SceneObjectTypeToString.at(SO_Triggers), o->uuid(),o->name());
+						}
+					},
+					{ SO_Boundaries, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+						{
+							BoundaryID o = MAKESUUUID(id,uuid);
+							if (o->hidden()) return JUUIDName();
+							return str2JUUIDName(SceneObjectTypeToString.at(SO_Boundaries), o->uuid(),o->name());
 						}
 					}
 				};
@@ -811,30 +942,51 @@ namespace Scene
 		{
 			{ SO_Renderables, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					RenderableSUUUID o = MAKESUUUID(id,uuid);
+					RenderableID o = MAKESUUUID(id,uuid);
 					if (o->hidden()) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Renderables), o->uuid(),o->name());
 				}
 			},
 			{ SO_Cameras, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					CameraSUUUID o = MAKESUUUID(id,uuid);
+					CameraID o = MAKESUUUID(id,uuid);
 					if (o->hidden()) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Cameras), o->uuid(),o->name());
 				}
 			},
 			{ SO_Lights, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					LightSUUUID o = MAKESUUUID(id,uuid);
+					LightID o = MAKESUUUID(id,uuid);
 					if (o->hidden()) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Lights), o->uuid(),o->name());
 				}
 			},
 			{ SO_SoundEffects, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					SoundFXSUUUID o = MAKESUUUID(id,uuid);
+					SoundFXID o = MAKESUUUID(id,uuid);
 					if (o->hidden()) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_SoundEffects), o->uuid(),o->name());
+				}
+			},
+			{ SO_PhysicScenes, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					PhysicSceneID o = MAKESUUUID(id,uuid);
+					if (o->hidden()) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_PhysicScenes), o->uuid(),o->name());
+				}
+			},
+			{ SO_Triggers, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					TriggerID o = MAKESUUUID(id,uuid);
+					if (o->hidden()) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_Triggers), o->uuid(),o->name());
+				}
+			},
+			{ SO_Boundaries, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					BoundaryID o = MAKESUUUID(id,uuid);
+					if (o->hidden()) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_Boundaries), o->uuid(),o->name());
 				}
 			}
 		};
@@ -866,30 +1018,51 @@ namespace Scene
 		{
 			{ SO_Renderables, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					RenderableSUUUID o = MAKESUUUID(id,uuid);
+					RenderableID o = MAKESUUUID(id,uuid);
 					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Renderables), o->uuid(),o->name());
 				}
 			},
 			{ SO_Cameras, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					CameraSUUUID o = MAKESUUUID(id,uuid);
+					CameraID o = MAKESUUUID(id,uuid);
 					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Cameras), o->uuid(),o->name());
 				}
 			},
 			{ SO_Lights, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					LightSUUUID o = MAKESUUUID(id,uuid);
+					LightID o = MAKESUUUID(id,uuid);
 					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Lights), o->uuid(),o->name());
 				}
 			},
 			{ SO_SoundEffects, [str2JUUIDName](SceneUnitId id, JUUID uuid)
 				{
-					SoundFXSUUUID o = MAKESUUUID(id,uuid);
+					SoundFXID o = MAKESUUUID(id,uuid);
 					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_SoundEffects), o->uuid(),o->name());
+				}
+			},
+			{ SO_PhysicScenes, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					PhysicSceneID o = MAKESUUUID(id,uuid);
+					if (o->hidden() || o->markedForDelete) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_PhysicScenes), o->uuid(),o->name());
+				}
+			},
+			{ SO_Triggers, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					TriggerID o = MAKESUUUID(id,uuid);
+					if (o->hidden() || o->markedForDelete) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_Triggers), o->uuid(),o->name());
+				}
+			},
+			{ SO_Boundaries, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					BoundaryID o = MAKESUUUID(id,uuid);
+					if (o->hidden() || o->markedForDelete) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_Boundaries), o->uuid(),o->name());
 				}
 			}
 		};
@@ -899,6 +1072,8 @@ namespace Scene
 		{
 			for (auto& uuid : uuids)
 			{
+				if (!SceneObjectExists(id, uuid))
+					continue;
 				JUUIDName uuidName = getJUUIDName.at(type)(id, uuid);
 				if (!std::get<0>(uuidName).empty())
 					sceneObjectsTypeList.push_back(uuidName);
@@ -909,84 +1084,106 @@ namespace Scene
 
 	std::vector<std::pair<std::string, JsonToEditorValueType>> GetSceneObjectAttributes(SceneObjectType so)
 	{
-		const std::map<SceneObjectType, std::function<std::vector<std::pair<std::string, JsonToEditorValueType>>()>> GetSOAtts =
+		const std::unordered_map<SceneObjectType, std::function<std::vector<std::pair<std::string, JsonToEditorValueType>>()>> GetSOAtts =
 		{
 			{ SO_Renderables, GetRenderableAttributes },
 			{ SO_Lights, GetLightAttributes },
 			{ SO_Cameras, GetCameraAttributes },
-			{ SO_SoundEffects, GetSoundFXAttributes }
+			{ SO_SoundEffects, GetSoundFXAttributes },
+			{ SO_PhysicScenes, GetPhysicSceneAttributes },
+			{ SO_Triggers, GetTriggerAttributes },
+			{ SO_Boundaries, GetBoundaryAttributes },
 		};
 		return GetSOAtts.at(so)();
 	}
 
 	std::map<std::string, JEdvEditorDrawerFunction> GetSceneObjectDrawers(SceneObjectType so)
 	{
-		const std::map<SceneObjectType, std::function<std::map<std::string, JEdvEditorDrawerFunction>()>> GetSODrawers =
+		const std::unordered_map<SceneObjectType, std::function<std::map<std::string, JEdvEditorDrawerFunction>()>> GetSODrawers =
 		{
 			{ SO_Renderables, GetRenderableDrawers },
 			{ SO_Lights, GetLightDrawers },
 			{ SO_Cameras, GetCameraDrawers },
-			{ SO_SoundEffects, GetSoundFXDrawers }
+			{ SO_SoundEffects, GetSoundFXDrawers },
+			{ SO_PhysicScenes, GetPhysicSceneDrawers },
+			{ SO_Triggers, GetTriggerDrawers },
+			{ SO_Boundaries, GetBoundaryDrawers },
 		};
 		return GetSODrawers.at(so)();
 	}
 
 	std::map<std::string, JEdvEditorDrawerFunction> GetSceneObjectPreviewers(SceneObjectType so)
 	{
-		const std::map<SceneObjectType, std::function<std::map<std::string, JEdvEditorDrawerFunction>()>> GetSOPreviewers =
+		const std::unordered_map<SceneObjectType, std::function<std::map<std::string, JEdvEditorDrawerFunction>()>> GetSOPreviewers =
 		{
 			{ SO_Renderables, GetRenderablePreviewers },
 			{ SO_Lights, GetLightPreviewers },
 			{ SO_Cameras, GetCameraPreviewers },
-			{ SO_SoundEffects, GetSoundFXPreviewers }
+			{ SO_SoundEffects, GetSoundFXPreviewers },
+			{ SO_PhysicScenes, GetPhysicScenePreviewers },
+			{ SO_Triggers, GetTriggerPreviewers },
+			{ SO_Boundaries, GetBoundaryPreviewers },
 		};
 		return GetSOPreviewers.at(so)();
 	}
 
 	nlohmann::json GetSceneObjectJson(SceneObjectType so)
 	{
-		const std::map<SceneObjectType, std::function<nlohmann::json()>> GetSOJson =
+		const std::unordered_map<SceneObjectType, std::function<nlohmann::json()>> GetSOJson =
 		{
 			{ SO_Renderables, CreateRenderableJson },
 			{ SO_Lights, CreateLightJson },
 			{ SO_Cameras, CreateCameraJson },
-			{ SO_SoundEffects, CreateSoundFXJson }
+			{ SO_SoundEffects, CreateSoundFXJson },
+			{ SO_PhysicScenes, CreatePhysicSceneJson },
+			{ SO_Triggers, [] { auto json = CreateTriggerJson(); json["trigger"] = true; return json; } }, //inject this att to handle no trigger with meshes
+			{ SO_Boundaries, [] { auto json = CreateBoundaryJson(); json["boundary"] = true; return json; } }, //inject this att to handle no boundary with meshes
 		};
 		return GetSOJson.at(so)();
 	}
 
 	std::vector<std::string> GetSceneObjectRequiredAttributes(SceneObjectType so)
 	{
-		const std::map<SceneObjectType, std::function<std::vector<std::string>()>> GetSORequiredAtts =
+		const std::unordered_map<SceneObjectType, std::function<std::vector<std::string>()>> GetSORequiredAtts =
 		{
 			{ SO_Renderables, GetRenderableRequiredAttributes },
 			{ SO_Lights, GetLightRequiredAttributes },
 			{ SO_Cameras, GetCameraRequiredAttributes },
-			{ SO_SoundEffects, GetSoundFXRequiredAttributes }
+			{ SO_SoundEffects, GetSoundFXRequiredAttributes },
+			{ SO_PhysicScenes, GetPhysicSceneRequiredAttributes },
+			{ SO_Triggers, GetTriggerRequiredAttributes },
+			{ SO_Boundaries, GetBoundaryRequiredAttributes },
+
 		};
 		return GetSORequiredAtts.at(so)();
 	}
 
 	std::map<std::string, JEdvCreatorDrawerFunction> GetSceneObjectCreatorDrawers(SceneObjectType so)
 	{
-		const std::map<SceneObjectType, std::function<std::map<std::string, JEdvCreatorDrawerFunction>()>> GetSODrawers =
+		const std::unordered_map<SceneObjectType, std::function<std::map<std::string, JEdvCreatorDrawerFunction>()>> GetSODrawers =
 		{
 			{ SO_Renderables, GetRenderableCreatorDrawers },
 			{ SO_Lights, GetLightCreatorDrawers },
 			{ SO_Cameras, GetCameraCreatorDrawers },
-			{ SO_SoundEffects, GetSoundFXCreatorDrawers }
+			{ SO_SoundEffects, GetSoundFXCreatorDrawers },
+			{ SO_PhysicScenes, GetPhysicSceneCreatorDrawers },
+			{ SO_Triggers, GetTriggerCreatorDrawers },
+			{ SO_Boundaries, GetBoundaryCreatorDrawers },
 		};
 		return GetSODrawers.at(so)();
 	}
 
 	std::map<std::string, JEdvCreatorValidatorFunction> GetSceneObjectValidators(SceneObjectType so)
 	{
-		const std::map<SceneObjectType, std::function<std::map<std::string, JEdvCreatorValidatorFunction>()>> GetSOValidators =
+		const std::unordered_map<SceneObjectType, std::function<std::map<std::string, JEdvCreatorValidatorFunction>()>> GetSOValidators =
 		{
 			{ SO_Renderables, GetRenderableCreatorValidator },
 			{ SO_Lights, GetLightCreatorValidator },
 			{ SO_Cameras, GetCameraCreatorValidator },
-			{ SO_SoundEffects, GetSoundFXCreatorValidator }
+			{ SO_SoundEffects, GetSoundFXCreatorValidator },
+			{ SO_PhysicScenes, GetPhysicSceneCreatorValidator },
+			{ SO_Triggers, GetTriggerCreatorValidator },
+			{ SO_Boundaries, GetBoundaryCreatorValidator },
 		};
 		return GetSOValidators.at(so)();
 	}
@@ -1001,7 +1198,10 @@ namespace Scene
 			{ SO_Renderables, DeleteRenderable },
 			{ SO_Lights, DeleteLight },
 			{ SO_Cameras, DeleteCamera },
-			{ SO_SoundEffects, DeleteSoundFX }
+			{ SO_SoundEffects, DeleteSoundFX },
+			{ SO_PhysicScenes, DeletePhysicScene },
+			{ SO_Triggers, DeleteTrigger },
+			{ SO_Boundaries, DeleteBoundary },
 		};
 		EraseSceneObjectFromSelection(id, uuid);
 		DeleteSO.at(type)(id, uuid);
@@ -1031,6 +1231,7 @@ namespace Scene
 					BindRenderableToPickingPass(MAKESUUUID(id, uuid));
 				}
 				MarkSceneUnitAsModified(id);
+				MarkScenePanelAssetsAsDirty();
 #endif
 			},
 			[](std::string, unsigned int, unsigned int) {}

@@ -174,20 +174,25 @@ namespace Scene {
 
 		void Destroy();
 
+		XMVECTOR positionV();
+		void updateRotationQ();
+		XMVECTOR rotationQ();
+		void rotationQ(XMVECTOR q);
 		XMMATRIX world();
 		XMVECTOR fw();
 
 		//CREATE
 		virtual void Initialize();
+		virtual void SetInitialConditions();
 		virtual void BindToScene();
 		void BindCameras();
-		void BindCamera(JUUID cuuid);
+		void BindCamera(CameraID camera);
 		void BindRenderablesToShadowMapCamera();
 		virtual void UnbindFromScene();
 		void UnbindCameras();
-		void UnbindCamera(JUUID cuuid);
+		void UnbindCamera(CameraID camera);
 		void UnbindRenderablesFromShadowMapCameras();
-		void UnbindRenderableFromShadowMapCamera(RenderableSUUUID r);
+		void UnbindRenderableFromShadowMapCamera(RenderableID r);
 
 		void LoadShadowMap();
 		void CreateShadowMap();
@@ -228,30 +233,32 @@ namespace Scene {
 		void RenderShadowMapMinMaxChain();
 
 		//Billboard
-		virtual JUUID CreateBillboard(CameraSUUUID camera);
-		virtual void UpdateBillboard(JUUID uuid);
+		virtual RenderableID CreateBillboard(CameraID camera);
+		virtual void UpdateBillboard(RenderableID renderable);
 		BoundingBox GetBoundingBox();
 		//Gizmo
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation);
 		virtual void WriteJson(nlohmann::json& j);
 #endif
 
-		bool markedForDelete = false;
+		DeleteHook markedForDelete;
 		bool renderReady = false;
+		//Transformation
+		XMVECTOR rotationQuaternion;
 		//Camera
 		unsigned int shadowMapIndex = 0xFFFFFFFF;
-		std::vector<CameraSUUUID> shadowMapCameras;
+		std::vector<CameraID> shadowMapCameras;
 		std::vector<D3D12_RECT> shadowMapScissorRect;
 		std::vector<D3D12_VIEWPORT> shadowMapViewport;
-		RenderToTexturePassUUID shadowMapRenderPass;
+		RenderToTexturePassID shadowMapRenderPass;
 		std::vector<std::tuple<float, float>> shadowMapNearFarPlanes;
 		XMFLOAT2 shadowMapTexelInvSize;
 #if defined(_EDITOR)
 		unsigned int const destroyStepsCount = 2U;
 		unsigned int destroySteps;
 		bool destroySMChain = false;
-		std::vector<RenderPassInstanceUUID> shadowMapMinMaxChainRenderPass;
-		RenderPassInstanceUUID shadowMapMinMaxChainResultRenderPass;
+		std::vector<RenderPassInstanceID> shadowMapMinMaxChainRenderPass;
+		RenderPassInstanceID shadowMapMinMaxChainResultRenderPass;
 #endif
 	};
 
@@ -270,3 +277,5 @@ namespace Scene {
 #endif
 };
 
+using namespace Scene;
+DEF_SCENEOBJECT_ID_HASH(Light);

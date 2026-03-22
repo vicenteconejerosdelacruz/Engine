@@ -11,10 +11,28 @@ extern std::unique_ptr<Renderer> renderer;
 #if defined(_EDITOR)
 namespace Editor
 {
-	extern void SelectCamera(SceneUnitId id, JUUID camera);
-	extern JUUID CreateBillboardFromMaterials(SceneUnitId id, CameraSUUUID camera, std::string name, std::string material, std::string pickingMaterial);
+	extern void SelectCamera(CameraID camera);
+	extern RenderableID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
 	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
+	extern bool IsPlaying(SceneUnitId id);
+
+	extern bool StaticBodiesSceneUnitRegistered(SceneUnitId id);
+	extern bool DynamicBodiesSceneUnitRegistered(SceneUnitId id);
+	extern bool CharactersSceneUnitRegistered(SceneUnitId id);
+	extern bool TriggersSceneUnitRegistered(SceneUnitId id);
+
+	//Should Draw
+	extern bool StaticBodiesShouldDraw(SceneUnitId id);
+	extern bool DynamicBodiesShouldDraw(SceneUnitId id);
+	extern bool CharactersShouldDraw(SceneUnitId id);
+	extern bool TriggersShouldDraw(SceneUnitId id);
+
+	//Physics Objects list
+	extern std::set<PhysicObjectID> GetStaticBodies(SceneUnitId id);
+	extern std::set<PhysicObjectID> GetDynamicBodies(SceneUnitId id);
+	extern std::set<PhysicObjectID> GetCharacters(SceneUnitId id);
+	extern std::set<PhysicObjectID> GetTriggers(SceneUnitId id);
 }
 #endif
 namespace Scene
@@ -58,6 +76,21 @@ namespace Scene
 #include <Attributes/JUpdate.h>
 #include <CameraAtt.h>
 #include <JEnd.h>
+		RENAME_ON_DELETION(Camera);
+	}
+
+	void Camera::create_rotation(XMFLOAT3 v)
+	{
+		if (!contains("rotation"))
+		{
+			rotation(v);
+		}
+	}
+
+	void Camera::rotation(XMFLOAT3 v)
+	{
+		(*this)["rotation"] = FromXMFLOAT3(v);
+		updateRotationQ();
 	}
 
 #if defined(_EDITOR)
@@ -66,6 +99,19 @@ namespace Scene
 #include <Editor/JWriteJson.h>
 #include <CameraAtt.h>
 #include <JEnd.h>
+	}
+
+	std::map<std::string, ScriptBinding> Camera::GetScriptBindingOptions()
+	{
+		std::map<std::string, ScriptBinding> options = SceneObject::GetScriptBindingOptions();
+
+		for (auto& [key, _] : at("controllers").items())
+		{
+			std::string name = std::string(at("name")) + "/" + std::string(key);
+			options.insert_or_assign(name, ScriptBinding(at("uuid"), key));
+		}
+
+		return options;
 	}
 #endif
 
@@ -94,28 +140,52 @@ namespace Scene
 			CreateLightsConstantsBuffer();
 			CreateShadowMapsConstantsBuffer();
 		}
+		SetInitialConditions();
+	}
+
+	void Camera::SetInitialConditions()
+	{
+		updateRotationQ();
 	}
 
 	XMVECTOR Camera::positionV()
 	{
 		XMFLOAT3 pos = position();
-		return { pos.x,pos.y,pos.z,0.0f };
+		return XMLoadFloat3(&pos);
+	}
+
+	void Camera::positionV(XMVECTOR v)
+	{
+		XMFLOAT3 pos;
+		XMStoreFloat3(&pos, v);
+		position(pos);
+	}
+
+	void Camera::updateRotationQ()
+	{
+		XMFLOAT3 v = rotation();
+		rotationQuaternion = XMQuaternionRotationRollPitchYaw(
+			XMConvertToRadians(v.x),
+			XMConvertToRadians(v.y),
+			XMConvertToRadians(v.z)
+		);
 	}
 
 	XMVECTOR Camera::rotationQ()
 	{
-		XMFLOAT3 rotV = rotation();
-		float roll, pitch, yaw;
-		pitch = rotV.x; yaw = rotV.y; roll = rotV.z;
-		XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll));
-		return rotQ;
+		return rotationQuaternion;
+	}
+
+	void Camera::rotationQ(XMVECTOR q)
+	{
+		rotationQuaternion = q;
 	}
 
 	XMVECTOR Camera::forward()
 	{
 		if (!shadowMapLight().empty())
 		{
-			auto& lcam = GetLightSUSceneObject(unit, shadowMapLight());
+			LightID lcam = MAKESUUUID(unit, shadowMapLight());
 			if (lcam->lightType() == LT_Point)
 			{
 				unsigned int i = 0U;
@@ -136,7 +206,7 @@ namespace Scene
 	{
 		if (!shadowMapLight().empty())
 		{
-			auto& lcam = GetLightSUSceneObject(unit, shadowMapLight());
+			LightID lcam = MAKESUUUID(unit, shadowMapLight());
 			if (lcam->lightType() == LT_Point)
 			{
 				unsigned int i = 0U;
@@ -161,13 +231,8 @@ namespace Scene
 
 	XMMATRIX Camera::world()
 	{
-		XMFLOAT3 posV = position();
-		XMFLOAT3 rotV = rotation();
-		float roll, pitch, yaw;
-		pitch = rotV.x; yaw = rotV.y; roll = rotV.z;
-		XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll));
-		XMMATRIX rotationM = XMMatrixRotationQuaternion(rotQ);
-		XMMATRIX positionM = XMMatrixTranslationFromVector({ posV.x, posV.y, posV.z });
+		XMMATRIX rotationM = XMMatrixRotationQuaternion(rotationQ());
+		XMMATRIX positionM = XMMatrixTranslationFromVector(positionV());
 		return XMMatrixMultiply(rotationM, positionM);
 	}
 
@@ -181,7 +246,7 @@ namespace Scene
 		return (projectionType() == PROJ_Orthographic) ? orthographicProjection.projectionMatrix : perspectiveProjection.projectionMatrix;
 	}
 
-	void Camera::CopyProjection(CameraSUUUID cam)
+	void Camera::CopyProjection(CameraID cam)
 	{
 		projectionType(cam->projectionType());
 		fitWindow(cam->fitWindow());
@@ -266,21 +331,21 @@ namespace Scene
 		}
 	}
 
-	RenderPassJsonUUID Camera::GetRenderPassTemplateFromInstanceIndex(unsigned int passIndex)
+	RenderPassJsonID Camera::GetRenderPassTemplateFromInstanceIndex(unsigned int passIndex)
 	{
 		return renderPassesUUID.at(passIndex)->renderPassTemplate;
 	}
 
-	RenderPassInstanceUUID Camera::CreateRenderPass(JUUID passUUID, unsigned int passIndex)
+	RenderPassInstanceID Camera::CreateRenderPass(RenderPassJsonID pass, unsigned int passIndex)
 	{
 		unsigned int projW = static_cast<unsigned int>(projectionWidth());
 		unsigned int projH = static_cast<unsigned int>(projectionHeight());
-		return CreateRenderPassInstance(unit, uuid(), passUUID, passIndex, projW, projH);
+		return CreateRenderPassInstance(SUuuid(), pass, passIndex, projW, projH);
 	}
 
-	void Camera::CreateRenderPassAtIndex(JUUID passUUID, unsigned int passIndex)
+	void Camera::CreateRenderPassAtIndex(RenderPassJsonID pass, unsigned int passIndex)
 	{
-		renderPassesUUID.insert(renderPassesUUID.begin() + passIndex, CreateRenderPass(passUUID, passIndex));
+		renderPassesUUID.insert(renderPassesUUID.begin() + passIndex, CreateRenderPass(pass, passIndex));
 		RearrangeRenderPassesAfter(passIndex);
 	}
 
@@ -291,10 +356,10 @@ namespace Scene
 		RearrangeRenderPassesAfter(passIndex);
 	}
 
-	void Camera::SwapRenderPassAtIndex(JUUID passUUID, unsigned int passIndex)
+	void Camera::SwapRenderPassAtIndex(RenderPassJsonID pass, unsigned int passIndex)
 	{
 		renderPassesUUID.at(passIndex)->MarkForDelete();
-		renderPassesUUID[passIndex] = CreateRenderPass(passUUID, passIndex);
+		renderPassesUUID[passIndex] = CreateRenderPass(pass, passIndex);
 		RearrangeRenderPassesAfter(passIndex);
 	}
 
@@ -314,9 +379,9 @@ namespace Scene
 
 	void Camera::DestroyRenderPasses()
 	{
-		for (auto uuid : renderPassesUUID)
+		for (auto pass : renderPassesUUID)
 		{
-			DestroyRenderPassInstance(uuid());
+			DestroyRenderPassInstance(pass);
 		}
 		renderPassesUUID.clear();
 	}
@@ -401,7 +466,7 @@ namespace Scene
 		}
 	}
 
-	void Camera::BindRenderable(RenderableSUUUID renderable)
+	void Camera::BindRenderable(RenderableID renderable)
 	{
 		if (renderables.contains(renderable)) return;
 		renderables.insert(renderable);
@@ -412,13 +477,13 @@ namespace Scene
 		renderable->CreatePipelineStates(SUuuid());
 	}
 
-	void Camera::BindLight(LightSUUUID light)
+	void Camera::BindLight(LightID light)
 	{
 		lights.push_back(light);
 		BindLightWithShadowMap(light);
 	}
 
-	void Camera::BindLightWithShadowMap(LightSUUUID light)
+	void Camera::BindLightWithShadowMap(LightID light)
 	{
 		if (light->hasShadowMaps())
 		{
@@ -459,7 +524,7 @@ namespace Scene
 		//DEBUGEAR USANDO grid.hlsl como punto de partida para debugear el shadowmap del previewer
 	}
 
-	void Camera::UnbindRenderable(RenderableSUUUID renderable)
+	void Camera::UnbindRenderable(RenderableID renderable)
 	{
 		if (!renderables.contains(renderable)) return;
 		renderables.erase(renderable);
@@ -470,13 +535,13 @@ namespace Scene
 		renderable->DestroyPipelineStates(SUuuid());
 	}
 
-	void Camera::UnbindLight(LightSUUUID light)
+	void Camera::UnbindLight(LightID light)
 	{
 		nostd::vector_erase(lights, light);
 		UnbindLightWithShadowMap(light);
 	}
 
-	void Camera::UnbindLightWithShadowMap(LightSUUUID light)
+	void Camera::UnbindLightWithShadowMap(LightID light)
 	{
 		if (lightsWithShadowMaps.contains(light))
 		{
@@ -490,7 +555,7 @@ namespace Scene
 		if (useSwapChain()) return true;
 		for (auto i = 0; i < renderPasses().size(); i++)
 		{
-			RenderPassJsonUUID pass = renderPasses().at(i);
+			RenderPassJsonID pass = renderPasses().at(i);
 			if (pass.empty()) continue;
 
 			if (pass->type() == RenderPassType_SwapChainPass) return true;
@@ -516,7 +581,7 @@ namespace Scene
 		CalculateBoundingFrustum();
 
 		//first make a set of objects which are not meant to be rendered first
-		std::set<RenderableSUUUID> nonRoot;
+		std::set<RenderableID> nonRoot;
 		for (auto r : renderables)
 		{
 			std::vector<JUUID> uuids = r->renderNext();
@@ -527,11 +592,31 @@ namespace Scene
 			}
 		}
 
-		//create the renderable set recursivelly
-		nostd::VectorSet<RenderableSUUUID> renVecSet;
-		std::function<void(RenderableSUUUID)> addToRenderablesVecSet;
-		addToRenderablesVecSet = [&](RenderableSUUUID r)
+#if defined(_EDITOR)
+		using namespace Editor;
+
+		//Physics Objects list
+		std::vector<std::tuple<bool, std::set<PhysicObjectID>>> drawPhysicsObjects;
+		if (StaticBodiesSceneUnitRegistered(unit)) drawPhysicsObjects.push_back(std::make_tuple(StaticBodiesShouldDraw(unit), GetStaticBodies(unit)));
+		if (DynamicBodiesSceneUnitRegistered(unit)) drawPhysicsObjects.push_back(std::make_tuple(DynamicBodiesShouldDraw(unit), GetDynamicBodies(unit)));
+		if (CharactersSceneUnitRegistered(unit)) drawPhysicsObjects.push_back(std::make_tuple(CharactersShouldDraw(unit), GetCharacters(unit)));
+		if (TriggersSceneUnitRegistered(unit)) drawPhysicsObjects.push_back(std::make_tuple(TriggersShouldDraw(unit), Editor::GetTriggers(unit)));
+
+		for (auto& [draw, list] : drawPhysicsObjects)
+		{
+			for (auto phO : list)
 			{
+				phO->visible(false);
+			}
+		}
+#endif
+
+		//create the renderable set recursivelly
+		nostd::VectorSet<RenderableID> renVecSet;
+		std::function<void(RenderableID)> addToRenderablesVecSet;
+		addToRenderablesVecSet = [&](RenderableID r)
+			{
+				if (!r->visible()) return;
 				renVecSet.insert(r);
 				for (auto& uuid : r->renderNext())
 				{
@@ -549,16 +634,38 @@ namespace Scene
 
 		auto draw = [&](SceneUnitId unit, auto& rpi)
 			{
+
 				for (auto it = renVecSet.begin(); it != renVecSet.end(); it++)
 				{
-					RenderableSUUUID renderable = *it;
+					RenderableID renderable = *it;
 					if (renderable->checkBoundingBox() && boundingFrustum.Contains(renderable->GetBoundingBox()) == ContainmentType::DISJOINT)
 						continue;
+					//OutputDebugStringA(std::string(rpi->renderPassTemplate->name() + ":" + renderable->name() + "\n").c_str());
 					renderable->Render(unit, rpi, SUuuid());
 				}
+
+#if defined(_EDITOR)
+				for (auto& [draw, list] : drawPhysicsObjects)
+				{
+					if (!draw) continue;
+					for (auto phO : list)
+					{
+
+						RenderableID shape = phO->renderableShape;
+						RenderableID lines = phO->renderableLines;
+						if (!shape || (shape->checkBoundingBox() && boundingFrustum.Contains(shape->GetBoundingBox()) == ContainmentType::DISJOINT))
+							continue;
+						phO->visible(true);
+						shape->Render(unit, rpi, SUuuid());
+						lines->Render(unit, rpi, SUuuid());
+						//triggers can be picked
+						if (phO->behavior() != PB_Trigger && !phO->boundary) { phO->visible(false); }
+					}
+				}
+#endif
 			};
 
-		std::vector<RenderPassInstanceUUID> rpiv = renderPassesUUID;
+		std::vector<RenderPassInstanceID> rpiv = renderPassesUUID;
 		if (useSwapChain())
 		{
 			rpiv.push_back(renderer->swapChainPass);
@@ -580,6 +687,8 @@ namespace Scene
 #include <Attributes/JDestroy.h>
 #include <CameraAtt.h>
 #include <JEnd.h>
+
+		SceneObject::Destroy();
 	}
 
 	void Camera::CreateConstantsBuffer()
@@ -603,7 +712,7 @@ namespace Scene
 
 		if (iblTextures.contains(TextureShaderUsage_IBLPreFilteredEnvironment))
 		{
-			TextureJsonUUID tex = iblTextures.at(TextureShaderUsage_IBLPreFilteredEnvironment);
+			TextureJsonID tex = iblTextures.at(TextureShaderUsage_IBLPreFilteredEnvironment);
 			atts.IBLNumEnvLevels = static_cast<float>(tex->mipLevels());
 		}
 		else
@@ -629,8 +738,13 @@ namespace Scene
 
 	void Camera::Rotate(float dx, float dy)
 	{
-		rotation(rotation() + XMFLOAT3{ dy, dx, 0.0f });
-		UdateLightRotation();
+		XMVECTOR upV = { 0.0f,1.0f,0.0f,0.0f }; // we just use the up vector in order to avoid roll rotations
+		XMVECTOR rightV = -right();
+		XMVECTOR rotQYaw = XMQuaternionRotationAxis(upV, XMConvertToRadians(dx));
+		XMVECTOR rotQPitch = XMQuaternionRotationAxis(rightV, XMConvertToRadians(dy));
+		rotationQuaternion = XMQuaternionMultiply(rotationQuaternion, XMQuaternionMultiply(rotQPitch, rotQYaw));
+
+		UpdateLightRotation();
 	}
 
 	void Camera::UpdateLightPosition()
@@ -640,7 +754,7 @@ namespace Scene
 		if (!SceneObjectExists(unit, shadowMapLight()))
 			return;
 
-		LightSUUUID lcam = MAKESUUUID(unit, shadowMapLight());
+		LightID lcam = MAKESUUUID(unit, shadowMapLight());
 
 		switch (lcam->lightType())
 		{
@@ -661,29 +775,27 @@ namespace Scene
 		}
 	}
 
-	void Camera::UdateLightRotation()
+	void Camera::UpdateLightRotation()
 	{
 		using namespace Scene;
 
 		if (!SceneObjectExists(unit, shadowMapLight()))
 			return;
 
-		LightSUUUID lcam = MAKESUUUID(unit, shadowMapLight());
-
-		XMFLOAT3 rot = rotation();
+		LightID lcam = MAKESUUUID(unit, shadowMapLight());
 
 		switch (lcam->lightType())
 		{
 		case LT_Directional:
 		{
-			lcam->rotation(rot);
+			lcam->rotationQ(rotationQ());
 			XMVECTOR camPos = XMVectorScale(XMVector3Normalize(forward()), lcam->dirDist());
 			position(*(XMFLOAT3*)camPos.m128_f32);
 		}
 		break;
 		case LT_Spot:
 		{
-			lcam->rotation(rot);
+			lcam->rotationQ(rotationQ());
 		}
 		break;
 		}
@@ -755,9 +867,9 @@ namespace Scene
 
 	void Camera::WriteShadowMapsConstantsBuffer(unsigned int frame)
 	{
-		for (LightSUUUID light : lights)
+		for (LightID light : lights)
 		{
-			for (CameraSUUUID cam : light->shadowMapCameras)
+			for (CameraID cam : light->shadowMapCameras)
 			{
 				cam->WriteConstantsBuffer(frame);
 			}
@@ -765,7 +877,7 @@ namespace Scene
 
 		size_t offset = shadowMapsCB->alignedConstantBufferSize * frame;
 		ShadowMapAttributes* atts = (ShadowMapAttributes*)(shadowMapsCB->mappedConstantBuffer + offset);
-		for (LightSUUUID light : lights)
+		for (LightID light : lights)
 		{
 			if (!lightsWithShadowMaps.contains(light))
 				continue;
@@ -881,27 +993,25 @@ namespace Scene
 	{
 	}
 
-	JUUID Camera::CreateBillboard(CameraSUUUID camera)
+	RenderableID Camera::CreateBillboard(CameraID camera)
 	{
-		JUUID uuid = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "Camera", "CameraPicking");
-		RenderableSUUUID bb = MAKESUUUID(unit, uuid);
-		bb->OnPick = [this] {Editor::SelectCamera(unit, this->uuid()); };
-		UpdateBillboard(uuid);
-		return uuid;
+		RenderableID bb = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "Camera", "CameraPicking");
+		bb->OnPick = [&] {Editor::SelectCamera(SUuuid()); };
+		UpdateBillboard(bb);
+		return bb;
 	}
 
-	void Camera::UpdateBillboard(JUUID uuid)
+	void Camera::UpdateBillboard(RenderableID renderable)
 	{
-		assert(!uuid.empty());
-		if (uuid.empty()) return;
+		assert(!renderable.empty());
+		if (renderable.empty()) return;
 
 		auto& scene = GetSceneUnit(unit);
 
 		XMFLOAT3 baseColor = { 1.0f,1.0f,1.0f };
-		RenderableSUUUID bb = MAKESUUUID(unit, uuid);
-		bb->position(position());
-		bb->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
-		bb->WriteConstantsBuffer(scene->Frame());
+		renderable->position(position());
+		renderable->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
+		renderable->WriteConstantsBuffer(scene->Frame());
 	}
 
 	BoundingBox Camera::GetBoundingBox()
@@ -915,11 +1025,32 @@ namespace Scene
 	{
 		//auto Cameras = nostd::GetUUIDS(CamerasceneObjects);
 		auto& Cameras = GetCameras(id);
-		std::set<CameraSUUUID> cams;
+		std::set<CameraID> cams;
 		std::transform(Cameras.begin(), Cameras.end(), std::inserter(cams, cams.begin()), [&](auto o) { return MAKESUUUID(id, o); });
 
+		//is this(hack) or fix the loading system. that's what i'm doing now
+		//auto& scene = GetSceneUnit(id);
+		//for (auto& c : cams)
+		//{
+		//	if (!c->RenderReady() && scene->IsBound(c.uuid()))
+		//	{
+		//		c->RenderReady(true);
+		//		scene->EraseCameraFromLoadingPool(c);
+		//	}
+		//}
+
+		//update rotation quaternion
+		for (auto cam : cams)
+		{
+			if (cam->dirty(Camera::Update_rotation))
+			{
+				cam->updateRotationQ();
+				cam->clean(Camera::Update_rotation);
+			}
+		}
+
 		//we construct the set of cameras with dirty render passes
-		std::set<CameraSUUUID> dirtyPassesCams;
+		std::set<CameraID> dirtyPassesCams;
 		std::copy_if(cams.begin(), cams.end(), std::inserter(dirtyPassesCams, dirtyPassesCams.begin()), [](auto cam)
 			{
 				return cam->dirty(Camera::Update_renderPasses);
@@ -928,19 +1059,19 @@ namespace Scene
 
 		for (auto& cam : dirtyPassesCams)
 		{
-			std::map<RenderPassJsonUUID, std::tuple<int, int>> passes;
+			std::map<RenderPassJsonID, std::tuple<int, int>> passes;
 
 			//prev pass fill
 			for (unsigned int i = 0; i < cam->UpdatePrevValues["renderPasses"].size(); i++)
 			{
-				RenderPassJsonUUID pass = JUUID(cam->UpdatePrevValues["renderPasses"].at(i));
+				RenderPassJsonID pass = JUUID(cam->UpdatePrevValues["renderPasses"].at(i));
 				if (pass.empty()) continue;
 				passes[pass] = std::make_tuple(-1, -1);
 			}
 			//curr pass fill
 			for (unsigned int i = 0; i < cam->at("renderPasses").size(); i++)
 			{
-				RenderPassJsonUUID pass = JUUID(cam->at("renderPasses").at(i));
+				RenderPassJsonID pass = JUUID(cam->at("renderPasses").at(i));
 				if (pass.empty()) continue;
 				passes[pass] = std::make_tuple(-1, -1);
 			}
@@ -948,7 +1079,7 @@ namespace Scene
 			int index = 0;
 			for (unsigned int i = 0; i < cam->UpdatePrevValues["renderPasses"].size(); i++)
 			{
-				RenderPassJsonUUID pass = JUUID(cam->UpdatePrevValues["renderPasses"].at(i));
+				RenderPassJsonID pass = JUUID(cam->UpdatePrevValues["renderPasses"].at(i));
 				if (pass.empty()) continue;
 				std::get<0>(passes[pass]) = index;
 				index++;
@@ -957,7 +1088,7 @@ namespace Scene
 			index = 0;
 			for (unsigned int i = 0; i < cam->at("renderPasses").size(); i++)
 			{
-				RenderPassJsonUUID pass = JUUID(cam->at("renderPasses").at(i));
+				RenderPassJsonID pass = JUUID(cam->at("renderPasses").at(i));
 				if (pass.empty()) continue;
 				std::get<1>(passes[pass]) = index;
 				index++;
@@ -966,7 +1097,7 @@ namespace Scene
 			//figure out the rearrange
 			int deleteElementIndex = -1;
 			int addElementIndex = -1;
-			RenderPassJsonUUID addElementJsonUUID;
+			RenderPassJsonID addElementJsonUUID;
 			for (auto& [pass, fromto] : passes)
 			{
 				auto& [from, to] = fromto;
@@ -1013,14 +1144,14 @@ namespace Scene
 		}
 
 		//now get cameras with dirty ibl
-		std::set<CameraSUUUID> dirtyIBL;
+		std::set<CameraID> dirtyIBL;
 		std::copy_if(cams.begin(), cams.end(), std::inserter(dirtyIBL, dirtyIBL.begin()), [](auto cam)
 			{
 				return cam->dirty(Camera::Update_IBLIrradiance) || cam->dirty(Camera::Update_IBLPreFilteredEnvironment) || cam->dirty(Camera::Update_IBLBRDFLUT);
 			}
 		);
 
-		std::map<SceneUnitId, std::set<CameraSUUUID>> camerasToRebind;
+		std::map<SceneUnitId, std::set<CameraID>> camerasToRebind;
 		for (auto& cam : dirtyIBL)
 		{
 			size_t prevTexSize = cam->iblTextures.size();
@@ -1067,18 +1198,18 @@ namespace Scene
 
 		for (auto& [id, cams] : camerasToRebind)
 		{
-			auto& scene = GetSceneUnit(id);
-			scene->ResetLoadingCommandList();
-			scene->SetLoading(true);
-			scene->SetCanSubmitLoading(false);
-			for (auto& cam : cams)
-			{
-				rebindCam(cam);
-			}
-			scene->CloseSubmitLoadingCommandList();
+			//auto& scene = GetSceneUnit(id);
+			//scene->ResetLoadingCommandList();
+			//scene->SetLoading(true);
+			//scene->SetCanSubmitLoading(false);
+			//for (auto& cam : cams)
+			//{
+			//	rebindCam(cam);
+			//}
+			//scene->CloseSubmitLoadingCommandList();
 		}
 
-		std::set<CameraSUUUID> dirtyProjectionCams;
+		std::set<CameraID> dirtyProjectionCams;
 		std::copy_if(cams.begin(), cams.end(), std::inserter(dirtyProjectionCams, dirtyProjectionCams.begin()), [](auto cam)
 			{
 				return cam->dirty(Camera::Update_projectionType) || cam->dirty(Camera::Update_perspective) ||
@@ -1095,7 +1226,7 @@ namespace Scene
 			cam->UpdateProjection();
 		}
 
-		std::set<CameraSUUUID> delCams;
+		std::set<CameraID> delCams;
 		std::copy_if(cams.begin(), cams.end(), std::inserter(delCams, delCams.begin()), [](auto c) { return c->markedForDelete; });
 
 		for (auto c : delCams)
@@ -1104,7 +1235,7 @@ namespace Scene
 			EraseCameraFromWindowCameras(c->unit, c.uuid());
 			EraseCameraFromSwapChainCameras(c->unit, c.uuid());
 			EraseCameraFromMouseCameras(c->unit, c.uuid());
-			DeleteCameraSUSceneObject(c->unit, c.uuid());
+			DeleteCameraSceneObject(c);
 		}
 	}
 
@@ -1114,10 +1245,10 @@ namespace Scene
 		{
 			for (auto& [uuid, _] : container)
 			{
-				CameraSUUUID cam = MAKESUUUID(id, uuid);
+				CameraID cam = MAKESUUUID(id, uuid);
 				if (cam->shadowMapLight().empty())
 				{
-					DeleteCameraSUSceneObject(cam->unit, cam->uuid());
+					DeleteCameraSceneObject(cam);
 				}
 			}
 		}
@@ -1132,7 +1263,7 @@ namespace Scene
 		std::transform(CameraSUsceneObjects.at(id).begin(), CameraSUsceneObjects.at(id).end(), std::inserter(uuids, uuids.begin()), [](auto& pair) { return pair.first; });
 		for (auto& uuid : uuids)
 		{
-			DeleteCameraSUSceneObject(id, uuid);
+			DeleteCameraSceneObject(MAKESUUUID(id, uuid));
 		}
 #include <TrackUUID/JClearUnit.h>
 #include <CameraAtt.h>
@@ -1141,7 +1272,7 @@ namespace Scene
 
 	void DeleteCamera(SceneUnitId id, JUUID uuid)
 	{
-		CameraSUUUID cam = MAKESUUUID(id, uuid);
+		CameraID cam = MAKESUUUID(id, uuid);
 #if defined(_EDITOR)
 		Editor::DestroyBillboard(cam->unit, uuid);
 #endif

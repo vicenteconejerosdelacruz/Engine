@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _RENDER_VERTEX_FORMATS_H
+#define _RENDER_VERTEX_FORMATS_H
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <cstddef>
@@ -24,7 +26,7 @@ enum VertexClass {
 	POS_NORMAL_TANGENT_BITANGENT_TEXCOORD0_SKINNING
 };
 
-static std::map < VertexClass, std::string> VertexClassToString =
+static std::map<VertexClass, std::string> VertexClassToString =
 {
 	{ POS, "VertexPos"},
 	{ POS_SKINNING, "VertexPosSkinning" },
@@ -444,3 +446,5 @@ static std::map<VertexClass, std::function<void(aiMesh*, std::vector<byte>&)>> V
 
 void LoadIndices(aiMesh* mesh, std::vector<unsigned int>& indicesData);
 void LoadBonesInVertices(aiMesh* mesh, Animation::BonesTransformations& bones, Vertex<POS_NORMAL_TANGENT_TEXCOORD0_SKINNING>* vertices);
+
+#endif

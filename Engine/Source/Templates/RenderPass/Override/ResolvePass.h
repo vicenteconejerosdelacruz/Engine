@@ -2,19 +2,21 @@
 
 #include "OverridePass.h"
 
-struct ResolvePass : public OverridePass
+namespace Templates
 {
-	enum ResolveMode
+	struct ResolvePass : public OverridePass
 	{
-		ResolveMode_FullScreenQuad,
-		ResolveMode_CopyFromRenderToTexture
+		enum ResolveMode
+		{
+			ResolveMode_FullScreenQuad,
+			ResolveMode_CopyFromRenderToTexture
+		};
+
+		ResolveMode mode;
+
+		ResolvePass(CameraID cam, unsigned int rpI, RenderPassJsonID rpT, RenderPassInstanceID rp);
+		virtual void CreatePrevPassDependentResources();
+		virtual void Pass(SceneUnitId unit);
+		void Render(SceneUnitId unit);
 	};
-
-	ResolveMode mode;
-
-	ResolvePass(SceneUnitId id, JUUID cam, unsigned int rpI, JUUID rpT, JUUID rp);
-	virtual void CreatePrevPassDependentResources();
-	virtual void Pass(SceneUnitId unit);
-	void Render(SceneUnitId unit);
 };
-

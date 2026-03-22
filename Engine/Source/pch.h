@@ -11,9 +11,13 @@ enum SceneObjectType {
 	SO_Renderables,
 	SO_Lights,
 	SO_Cameras,
-	SO_SoundEffects
+	SO_SoundEffects,
+	SO_PhysicScenes,
+	SO_Triggers,
+	SO_Boundaries,
 };
-typedef size_t SceneUnitId;
+
+#include "pch/SceneUnitId.h"
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 // Windows Header Files
@@ -39,7 +43,6 @@ typedef size_t SceneUnitId;
 #if defined(_DEVELOPMENT)
 #include <DirectXTex.h>
 #endif
-#include <DirectXMath.h>
 #include <DirectXColors.h>
 
 #include <d3d12.h>
@@ -102,7 +105,7 @@ typedef size_t SceneUnitId;
 #include <locale>
 
 #if defined(_EDITOR)
-//#include <ShlObj.h>
+#include <ShlObj.h>
 #include <imgui.h>
 #include "misc/cpp/imgui_stdlib.h"
 #include "imgui_internal.h"
@@ -120,9 +123,6 @@ typedef size_t SceneUnitId;
 //v8
 #include <v8.h>
 #include <libplatform/libplatform.h>
-//v8pp
-#include <v8pp/context.hpp>
-#include <v8pp/module.hpp>
 
 template<typename... Args> void whatis();
 template<typename T> void whatis(T);
@@ -141,15 +141,12 @@ using namespace DirectX::SimpleMath;
 #include "pch/ShaderMaterials.h"
 #include "pch/RefTracker.h"
 #include "pch/NoMath.h"
-#include "pch/UUID/DeviceUtilsUUID.h"
-#include "pch/UUID/TemplateUUID.h"
-#include "pch/UUID/SceneObjectUUID.h"
-#include "pch/UUID/ComputeShaderUUID.h"
+#include "pch/GameStateMachine.h"
+#include "pch/GameEngineState.h"
+#include "pch/DeleteHook.h"
 #if defined(_EDITOR)
 #include "pch/JExposeEditor.h"
 #endif
-#include "pch/GameStateMachine.h"
-#include "pch/GameEngineState.h"
 
 template<>
 struct std::hash<SUUUID>

@@ -6,11 +6,7 @@
 #include <map>
 #include <UUID.h>
 #include <v8-context.h>
-
-struct JObject;
-
-//typedef std::function<void(JUUID)> JObjectChangeCallback;
-//typedef std::function<void(unsigned int, unsigned int)> JObjectChangePostCallback;
+#include <ScriptBinding.h>
 
 struct JObject : nlohmann::json
 {
@@ -59,11 +55,19 @@ struct JObject : nlohmann::json
 		}
 		patch_inplace(p);
 	}
+
+#if defined(_EDITOR)
 	virtual void WriteJson(nlohmann::json& j) {}
+#endif
 
 	bool dirty(size_t flag) const
 	{
 		return !!(updateFlag & (1 << flag));
+	}
+
+	bool dirty(std::vector<size_t> flags)
+	{
+		return std::any_of(flags.begin(), flags.end(), [&](size_t flag) { return dirty(flag); });
 	}
 
 	void flag(size_t flag)
@@ -76,62 +80,20 @@ struct JObject : nlohmann::json
 		updateFlag &= ~(1 << flag);
 	}
 
+	void clean(std::vector<size_t> flags)
+	{
+		std::for_each(flags.begin(), flags.end(), [&](size_t flag) { clean(flag); });
+	}
+
 	void clear()
 	{
 		updateFlag = 0ULL;
 	}
 
+#if defined(_EDITOR)
 	virtual std::function<bool(JObject*)> GetAssetsConditioner() { return [](JObject*) { return true; }; }
-
 	virtual void EditorPreview(size_t flags) {}
 	virtual void DestroyEditorPreview() {}
-
-	/*
-	std::unordered_map<JUUID, std::tuple<JObjectChangeCallback, JObjectChangePostCallback>> bindedChangesCallbacks;
-	*/
-	/*
-	void BindChangeCallback(JUUID objectUUID = "", JObjectChangeCallback cb = nullptr, JObjectChangePostCallback postCb = nullptr)
-	{
-		if (objectUUID == "" || (cb == nullptr && postCb == nullptr)) return;
-		bindedChangesCallbacks.insert_or_assign(objectUUID, std::make_tuple(cb, postCb));
-	}
-	*/
-	/*
-	void UnbindChangeCallback(JUUID objectUUID)
-	{
-		if (objectUUID == "") return;
-		bindedChangesCallbacks.erase(objectUUID);
-	}
-	*/
-	/*
-	static inline void RunChangesCallback(auto JObjectContainer, auto cbComplete)
-	{
-		unsigned int total = 0U;
-		std::for_each(JObjectContainer.begin(), JObjectContainer.end(), [&total, cbComplete](auto j) mutable
-			{
-				for (auto& [_, lambdas] : j->bindedChangesCallbacks)
-				{
-					auto& lambda = std::get<0>(lambdas);
-					if (lambda)
-						lambda(j());
-					total++;
-				}
-				cbComplete(j);
-			}
-		);
-
-		unsigned int idx = 0;
-		std::for_each(JObjectContainer.begin(), JObjectContainer.end(), [&idx, total](auto j)
-			{
-				for (auto& [_, lambdas] : j->bindedChangesCallbacks)
-				{
-					auto& lambda = std::get<1>(lambdas);
-					if (lambda)
-						lambda(idx, total);
-					idx++;
-				}
-			}
-		);
-	}
-	*/
+	virtual std::map<std::string, ScriptBinding> GetScriptBindingOptions() { return { {"",ScriptBinding()} }; }
+#endif
 };

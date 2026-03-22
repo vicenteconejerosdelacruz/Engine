@@ -1,0 +1,7 @@
+JCLASS(PhysicGeometry, _)
+JTYPE(TemplateType, T_PhysicGeometries)
+JEXPOSE(std::string, uuid, "", jedv_t_hidden, 0, false)
+JEXPOSE(std::string, name, "", jedv_t_te_physycgeometry_name, 0, true)
+JEXPOSE(std::string, model, "", jedv_t_te_model3d, 1, true)
+JEXPOSE(std::string, mesh, "", jedv_t_te_mesh, 1, true)
+JPREVIEW(cookModel3D, jedv_cook_physx_mesh)

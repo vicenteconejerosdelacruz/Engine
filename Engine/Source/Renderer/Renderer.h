@@ -1,6 +1,8 @@
-#pragma once
+#ifndef _RENDERER_H
+#define _RENDERER_H
 
 #include <dxgi1_6.h>
+#include <RenderPass/RenderPass.h>
 
 using namespace Microsoft::WRL;
 using namespace DirectX;
@@ -61,6 +63,7 @@ struct Renderer
 	D3D12_RECT scissorRect;
 
 	//the swap chain pass
-	RenderPassInstanceUUID swapChainPass;
+	RenderPassInstanceID swapChainPass;
 };
 
+#endif

@@ -10,25 +10,43 @@ std::map<SceneObjectType, std::function<JNAME(SceneUnitId, JUUID)>> NameFnc =
 {
 	{ SO_Renderables, [](SceneUnitId id, JUUID uuid)
 		{
-			auto& so = GetRenderableSUSceneObject(id, uuid);
+			auto& so = GetRenderableSceneObject(id, uuid);
 			return so->name();
 		}
 	},
 	{ SO_Cameras, [](SceneUnitId id, JUUID uuid)
 		{
-			auto& so = GetCameraSUSceneObject(id, uuid);
+			auto& so = GetCameraSceneObject(id, uuid);
 			return so->name();
 		}
 	},
 	{ SO_Lights, [](SceneUnitId id, JUUID uuid)
 		{
-			auto& so = GetLightSUSceneObject(id, uuid);
+			auto& so = GetLightSceneObject(id, uuid);
 			return so->name();
 		}
 	},
 	{ SO_SoundEffects, [](SceneUnitId id, JUUID uuid)
 		{
-			auto& so = GetSoundFXSUSceneObject(id, uuid);
+			auto& so = GetSoundFXSceneObject(id, uuid);
+			return so->name();
+		}
+	},
+	{ SO_PhysicScenes, [](SceneUnitId id, JUUID uuid)
+		{
+			auto& so = GetPhysicSceneSceneObject(id, uuid);
+			return so->name();
+		}
+	},
+	{ SO_Triggers, [](SceneUnitId id, JUUID uuid)
+		{
+			auto& so = GetTriggerSceneObject(id, uuid);
+			return so->name();
+		}
+	},
+	{ SO_Boundaries, [](SceneUnitId id, JUUID uuid)
+		{
+			auto& so = GetBoundarySceneObject(id, uuid);
 			return so->name();
 		}
 	}
@@ -39,25 +57,43 @@ std::map<SceneObjectType, std::function<void(SceneUnitId, JUUID, JUUID)>> BindFn
 {
 	{ SO_Renderables, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
 		{
-			auto& so = GetRenderableSUSceneObject(id, uuid);
+			auto& so = GetRenderableSceneObject(id, uuid);
 			so->Bind(uuidB);
 		}
 	},
 	{ SO_Cameras, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
 		{
-			auto& so = GetCameraSUSceneObject(id, uuid);
+			auto& so = GetCameraSceneObject(id, uuid);
 			so->Bind(uuidB);
 		}
 	},
 	{ SO_Lights, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
 		{
-			auto& so = GetLightSUSceneObject(id, uuid);
+			auto& so = GetLightSceneObject(id, uuid);
 			so->Bind(uuidB);
 		}
 	},
 	{ SO_SoundEffects, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
 		{
-			auto& so = GetSoundFXSUSceneObject(id, uuid);
+			auto& so = GetSoundFXSceneObject(id, uuid);
+			so->Bind(uuidB);
+		}
+	},
+	{ SO_PhysicScenes, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
+		{
+			auto& so = GetPhysicSceneSceneObject(id, uuid);
+			so->Bind(uuidB);
+		}
+	},
+	{ SO_Triggers, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
+		{
+			auto& so = GetTriggerSceneObject(id, uuid);
+			so->Bind(uuidB);
+		}
+	},
+	{ SO_Boundaries, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
+		{
+			auto& so = GetBoundarySceneObject(id, uuid);
 			so->Bind(uuidB);
 		}
 	}
@@ -67,25 +103,43 @@ std::map<SceneObjectType, std::function<void(SceneUnitId, JUUID, JUUID)>> Unbind
 {
 	{ SO_Renderables, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
 		{
-			auto& so = GetRenderableSUSceneObject(id, uuid);
+			auto& so = GetRenderableSceneObject(id, uuid);
 			so->Unbind(uuidB);
 		}
 	},
 	{ SO_Cameras, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
 		{
-			auto& so = GetCameraSUSceneObject(id, uuid);
+			auto& so = GetCameraSceneObject(id, uuid);
 			so->Unbind(uuidB);
 		}
 	},
 	{ SO_Lights, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
 		{
-			auto& so = GetLightSUSceneObject(id, uuid);
+			auto& so = GetLightSceneObject(id, uuid);
 			so->Unbind(uuidB);
 		}
 	},
 	{ SO_SoundEffects, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
 		{
-			auto& so = GetSoundFXSUSceneObject(id, uuid);
+			auto& so = GetSoundFXSceneObject(id, uuid);
+			so->Unbind(uuidB);
+		}
+	},
+	{ SO_PhysicScenes, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
+		{
+			auto& so = GetPhysicSceneSceneObject(id, uuid);
+			so->Unbind(uuidB);
+		}
+	},
+	{ SO_Triggers, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
+		{
+			auto& so = GetTriggerSceneObject(id, uuid);
+			so->Unbind(uuidB);
+		}
+	},
+	{ SO_Boundaries, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
+		{
+			auto& so = GetBoundarySceneObject(id, uuid);
 			so->Unbind(uuidB);
 		}
 	}

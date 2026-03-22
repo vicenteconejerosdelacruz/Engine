@@ -5,18 +5,13 @@
 #include <Material/BlendDesc.h>
 #include <ShaderMaterials.h>
 #include <ImEditor.h>
-#include <Shader/ShaderInstance.h>
+#include <Shader/Shader.h>
 #include <NoStd.h>
-//#include <Renderable/Renderable.h>
-//#include <Camera/Camera.h>
-//#include <Light/Light.h>
-//#include <Light/ShadowMap.h>
-//#include <Sound/SoundFX.h>
-//#include <RenderPass/RenderPass.h>
 #include <SceneObject.h>
 #include <JTemplate.h>
-//#include <DeviceUtils/RenderPass/SwapChainPass.h>
 #include <DeviceUtils/RenderPass/RenderToTexturePass.h>
+#include <Primitives.h>
+#include <ScriptBinding.h>
 
 namespace Templates
 {
@@ -28,18 +23,20 @@ namespace Templates
 	extern std::vector<JUUIDName> GetShadersUUIDsNames();
 	extern std::vector<JUUIDName> GetSoundsUUIDsNames();
 	extern std::vector<JUUIDName> GetTexturesUUIDsNames();
-	extern std::string GetMeshName(std::string uuid);
-	extern std::string GetModel3DName(std::string uuid);
-	extern std::string GetMaterialName(std::string uuid);
-	extern std::string GetShaderName(std::string uuid);
-	extern std::string GetSoundName(std::string uuid);
-	extern std::string GetTextureName(std::string uuid);
+	extern std::vector<JUUIDName> GetPhysicGeometrysUUIDsNames();
+	extern JNAME GetMeshName(JUUID uuid);
+	extern JNAME GetModel3DName(JUUID uuid);
+	extern JNAME GetMaterialName(JUUID uuid);
+	extern JNAME GetShaderName(JUUID uuid);
+	extern JNAME GetSoundName(JUUID uuid);
+	extern JNAME GetTextureName(JUUID uuid);
 };
 
 namespace Scene
 {
 	extern std::function<std::vector<JUUIDName>()> GetSceneObjectsByType(SceneUnitId id, SceneObjectType typeToGet);
 	extern std::vector<JUUIDName> GetSUSceneObjectsByType(SceneUnitId id, SceneObjectType typeToGet);
+	extern SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid);
 };
 
 namespace Editor
@@ -47,7 +44,10 @@ namespace Editor
 	extern void MarkTemplatesPanelAssetsAsDirty();
 	extern void MarkScenePanelAssetsAsDirty();
 	extern void MarkSceneUnitAsModified(SceneUnitId id);
-	extern void OpenAnimationSequencer(std::string uuid);
+	extern void OpenAnimationSequencer(JUUID uuid);
+	extern void WriteSceneUnitDirectionalShadowMapAttributes(SceneUnitId id);
+	extern void StartScriptEdition(JObject* object, std::string attribute);
+	extern void OpenScriptBindingSelector(JObject* object, std::string attribute, int index, ScriptBinding sb);
 };
 
 namespace Game

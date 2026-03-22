@@ -7,94 +7,103 @@
 #include <DeviceUtils/PipelineState/PipelineState.h>
 #include <DeviceUtils/RenderPass/RenderToTexturePass.h>
 
-OverridePass::~OverridePass()
+namespace Templates
 {
-	if (!fsQuad.empty() && MeshInstanceExists(fsQuad))
+	OverridePass::~OverridePass()
 	{
-		DestroyMeshInstance(fsQuad);
-	}
-	if (!fsQuadMaterial.empty())
-	{
-		DestroyMaterialInstance(fsQuadMaterial());
-	}
-	if (!fsQuadConstantsBuffer.empty())
-	{
-		DestroyConstantsBuffer(fsQuadConstantsBuffer());
-	}
-}
-
-void OverridePass::CreateFsQuadResources(SceneUnitId id, std::string materialName, JUUID renderPassTemplate, std::function<void(std::string, ShaderConstantsBufferVariable&)> constantsBufferPusher)
-{
-	using namespace Scene;
-
-	auto& fsQuadMesh = GetMeshInstance(id, GetMeshUUIDByName("decal"));
-	fsQuad = fsQuadMesh->uuid;
-	fsQuadMaterial = GetMaterialUUIDByName(materialName);
-	VertexClass vertexClass = fsQuadMesh->vertexClass;
-	CreateMaterialInstance(fsQuadMaterial(), [this, id, vertexClass]()
+		if (!fsQuad.empty() && MeshInstanceExists(fsQuad))
 		{
-			return std::make_unique<MaterialInstance>(id, fsQuadMaterial(), fsQuadMaterial(), vertexClass, false, false);
+			DestroyMeshInstance(fsQuad);
 		}
-	);
-	auto& fsQuadMat = fsQuadMaterial;
-
-	if (fsQuadMat->variablesBufferSize.size() > 0ULL)
-	{
-		size_t size = fsQuadMat->variablesBufferSize.at(0);
-		fsQuadConstantsBuffer = CreateConstantsBuffer(size, Renderer::numFrames, materialName + ":cbv");
-
-		auto& vsVars = fsQuadMat->vertexShaderInstanceUUID->constantsBuffersVariables;
-		auto& psVars = fsQuadMat->pixelShaderInstanceUUID->constantsBuffersVariables;
-
-		for (auto& [name, var] : vsVars) { constantsBufferPusher(name, var); }
-		for (auto& [name, var] : psVars) { constantsBufferPusher(name, var); }
+		if (!fsQuadMaterial.empty())
+		{
+			DestroyMaterialInstance(fsQuadMaterial());
+		}
+		if (!fsQuadConstantsBuffer.empty())
+		{
+			DestroyConstantsBuffer(fsQuadConstantsBuffer());
+		}
 	}
 
-	auto& miVS = fsQuadMat->vertexShaderInstanceUUID;
-	auto& miPS = fsQuadMat->pixelShaderInstanceUUID;
+	void OverridePass::CreateFsQuadResources(SceneUnitId id, std::string materialName, JUUID renderPassTemplate, std::function<void(std::string, ShaderConstantsBufferVariable&)> constantsBufferPusher)
+	{
+		using namespace Scene;
 
-	auto& vsCBparams = miVS->constantsBuffersParameters;
-	auto& psCBparams = miPS->constantsBuffersParameters;
-	auto& uavParams = miPS->uavParameters;
-	auto& psSRVCSparams = miPS->srvCSParameters;
-	auto& psSRVTexparams = miPS->srvTexParameters;
-	auto& psSamplersParams = miPS->samplersParameters;
-	auto& samplers = fsQuadMat->samplers;
+		nlohmann::json decalMeshJson = GetMeshJsonByName("decal");
+		auto& fsQuadMesh = GetMeshInstance(id, decalMeshJson);
+		fsQuad = fsQuadMesh->uuid;
+		fsQuadMaterial = GetMaterialUUIDByName(materialName);
+		VertexClass vertexClass = fsQuadMesh->vertexClass;
+		CreateMaterialInstance(fsQuadMaterial(), [this, id, vertexClass]()
+			{
+				return std::make_unique<MaterialInstance>(id, fsQuadMaterial(), fsQuadMaterial(), vertexClass, false, false);
+			}
+		);
+		auto& fsQuadMat = fsQuadMaterial;
 
-	std::string rsName = "rootSignature:" + materialName;
-	rootSignature = CreateRootSignature(rsName, vsCBparams, psCBparams, uavParams, psSRVCSparams, psSRVTexparams, psSamplersParams, samplers);
+		if (fsQuadMat->variablesBufferSize.size() > 0ULL)
+		{
+			size_t size = fsQuadMat->variablesBufferSize.at(0);
+			fsQuadConstantsBuffer = CreateConstantsBuffer(size, Renderer::numFrames, materialName + ":cbv");
 
-	auto& vsLayout = vertexInputLayoutsMap[vertexClass];
-	auto& vsByteCode = miVS->byteCode;
-	auto& psByteCode = miPS->byteCode;
+			auto& vsVars = fsQuadMat->vertexShaderInstanceID->constantsBuffersVariables;
+			auto& psVars = fsQuadMat->pixelShaderInstanceID->constantsBuffersVariables;
 
-	MaterialJsonUUID material = fsQuadMaterial();
-	BlendDesc blendDesc = material->blendState();
-	RasterizerDesc rasterizerDesc = material->rasterizerState();
+			for (auto& [name, var] : vsVars) { constantsBufferPusher(name, var); }
+			for (auto& [name, var] : psVars) { constantsBufferPusher(name, var); }
+		}
 
-	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		auto& miVS = fsQuadMat->vertexShaderInstanceID;
+		auto& miPS = fsQuadMat->pixelShaderInstanceID;
 
-	std::string plName = "pipelineState:" + materialName;
-	auto& renderPass = GetRenderPassTemplate(renderPassTemplate);
-	auto rtf = renderPass->renderTargetFormats();
-	auto df = renderPass->depthStencilFormat();
+		auto& vsCBparams = miVS->constantsBuffersParameters;
+		auto& psCBparams = miPS->constantsBuffersParameters;
+		auto& uavParams = miPS->uavParameters;
+		auto& psSRVCSparams = miPS->srvCSParameters;
+		auto& psSRVTexparams = miPS->srvTexParameters;
+		auto& psSamplersParams = miPS->samplersParameters;
+		auto& samplers = fsQuadMat->samplers;
 
-	pipelineState = CreateGraphicsPipelineState(plName, vsLayout, vsByteCode, psByteCode, rootSignature, blendDesc, rasterizerDesc, primitiveTopologyType, rtf, df);
-}
+		std::string rsName = "rootSignature:" + materialName;
+		rootSignature = CreateRootSignature(rsName, vsCBparams, psCBparams, uavParams, psSRVCSparams, psSRVTexparams, psSamplersParams, samplers);
 
-RenderPassInstanceUUID OverridePass::GetPrevRenderPass()
-{
-	if (renderPassIndex == 0U) return JUUID();
-	return camera->renderPassesUUID.at(renderPassIndex - 1);
-}
+		auto& vsLayout = vertexInputLayoutsMap[vertexClass];
+		auto& vsByteCode = miVS->byteCode;
+		auto& psByteCode = miPS->byteCode;
 
-RenderPassJsonUUID OverridePass::GetPrevRenderPassTemplate()
-{
-	if (renderPassIndex == 0U) return JUUID();
-	return GetPrevRenderPass()->renderPassTemplate;
-}
+		MaterialJsonID material = fsQuadMaterial();
+		BlendDesc blendDesc = material->blendState();
+		RasterizerDesc rasterizerDesc = material->rasterizerState();
+		DepthStencilDesc depthStencil = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 
-JUUID OverridePass::GetPrevPassRenderToTexture(unsigned int index)
-{
-	return GetPrevRenderPass()->renderToTexturePass->renderToTexture.at(index)();
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE primitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		std::string plName = "pipelineState:" + materialName;
+		auto& renderPass = GetRenderPassTemplate(renderPassTemplate);
+		auto rtf = renderPass->renderTargetFormats();
+		auto df = renderPass->depthStencilFormat();
+		if (df == DXGI_FORMAT_UNKNOWN)
+		{
+			depthStencil.DepthEnable = false;
+		}
+
+		pipelineState = CreateGraphicsPipelineState(plName, vsLayout, vsByteCode, psByteCode, rootSignature, blendDesc, rasterizerDesc, depthStencil, primitiveTopologyType, rtf, df);
+	}
+
+	RenderPassInstanceID OverridePass::GetPrevRenderPass()
+	{
+		if (renderPassIndex == 0U) return JUUID();
+		return camera->renderPassesUUID.at(renderPassIndex - 1);
+	}
+
+	RenderPassJsonID OverridePass::GetPrevRenderPassTemplate()
+	{
+		if (renderPassIndex == 0U) return JUUID();
+		return GetPrevRenderPass()->renderPassTemplate;
+	}
+
+	JUUID OverridePass::GetPrevPassRenderToTexture(unsigned int index)
+	{
+		return GetPrevRenderPass()->renderToTexturePass->renderToTexture.at(index)();
+	}
 }

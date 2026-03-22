@@ -159,11 +159,13 @@ nlohmann::json AnimationSequencerModal::GetModalLevelJson()
 					{ "castShadows", false },
 					{ "shadowed", true },
 					{
-						"meshMaterials",
+						"meshMaterial",
 						{
-							{
-								{ "material", "ecd1688c-73d6-49d0-870f-ca916a417c49"},
-								{ "mesh", "d41e5c29-49bb-4f2c-aa2b-da781fbac512" }
+							{ "material", "ecd1688c-73d6-49d0-870f-ca916a417c49"},
+							{ "mesh",
+								{
+									{ "primitive", "d41e5c29-49bb-4f2c-aa2b-da781fbac512"}
+								}
 							}
 						}
 					},
@@ -181,11 +183,25 @@ nlohmann::json AnimationSequencerModal::GetModalLevelJson()
 	return modal;
 }
 
+void AnimationSequencerModal::DestroyStep()
+{
+	if (destructionFrames > 0)
+	{
+		destructionFrames--;
+	}
+	else
+	{
+		DestroySceneObjects();
+		destroying = false;
+	}
+}
+
 void AnimationSequencerModal::DestroySceneObjects()
 {
 	using namespace Scene;
 
-	DestroyScene(unit);
+	auto& scene = GetSceneUnit(unit);
+	scene->MarkForDelete();
 	unit = 0;
 	showing = false;
 
@@ -330,7 +346,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			if (sequence != "")
 			{
 				Sequence& seq = animationsSequences.sequences.at(sequence);
-				sequencePlayer.SetSequence(seq, unit, renderable.uuid());
+				sequencePlayer.SetSequence(seq, renderable);
 				timelineEditor.Init(renderable, sequencePlayer.sequence);
 				renderable->SetCurrentAnimation(&sequencePlayer);
 			}
@@ -351,7 +367,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			playingSequence = false;
 			playingSequenceTime = 0.0f;
 			timelineEditor.Reset();
-			sequencePlayer.SetSequence(Sequence(), unit, "");
+			sequencePlayer.SetSequence(Sequence(), RenderableID());
 			renderable->SetCurrentAnimation(nullptr);
 			selectedTransformationKeyframe = nullptr;
 			keyFrameFrame = -1;
@@ -376,7 +392,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			playingSequence = false;
 			playingSequenceTime = 0.0f;
 			Sequence& seq = animationsSequences.sequences.at(seqName);
-			sequencePlayer.SetSequence(seq, unit, renderable.uuid());
+			sequencePlayer.SetSequence(seq, renderable);
 			timelineEditor.Init(renderable, sequencePlayer.sequence);
 			renderable->SetCurrentAnimation(&sequencePlayer);
 		};
@@ -1205,7 +1221,7 @@ void AnimationSequencerModal::Exit()
 	renderable->SetCurrentAnimation(nullptr);
 	destroying = true;
 	showing = false;
-	DestroySceneObjects();
+	destructionFrames = Renderer::numFrames;
 }
 
 void AnimationSequencerModal::SaveAndExit()
@@ -1217,9 +1233,9 @@ void AnimationSequencerModal::SaveAndExit()
 
 	renderable->SetCurrentAnimation(nullptr);
 	destroying = true;
+	destructionFrames = Renderer::numFrames;
 	showing = false;
 	model3D->animationSequences(animationsSequences);
 	model3D->flag(Model3DJson::Update_animationSequences);
 	Editor::templatesModified = true;
-	DestroySceneObjects();
 }
