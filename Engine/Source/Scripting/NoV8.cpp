@@ -105,10 +105,6 @@ namespace nov8
 			func(args);
 		}
 	}
-	v8_function v8_wrap_call(std::function<void()> func)
-	{
-		return [func](const FunctionCallbackInfo<Value>& info) { func(); };
-	}
 	v8_function v8_toJSON(nlohmann::json* json)
 	{
 		return [=](const FunctionCallbackInfo<Value>& args)
@@ -164,7 +160,7 @@ namespace nov8
 				Isolate* isolate = info.GetIsolate();
 				Local<Context> context = isolate->GetCurrentContext();
 				Local<ObjectTemplate> binding_map_tmpl = ObjectTemplate::New(isolate);
-				
+
 
 				switch (sb.bindingType)
 				{

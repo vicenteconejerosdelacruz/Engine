@@ -4,6 +4,8 @@
 #include <libplatform/libplatform.h>
 #include <nlohmann/json.hpp>
 #include <set>
+#include <tuple>
+#include <type_traits>
 
 struct JObject;
 namespace Game
@@ -43,6 +45,27 @@ namespace nov8
 	using v8_functions_creators = std::map<std::string, v8_function>;
 	using v8_context_creators = std::map<std::string, v8_context_attribute>;
 
+	// thanks google, keep the vibes alive
+	// Estructura base para extraer tipos de una función/lambda
+	template <typename T>
+	struct v8_lambda_traits : v8_lambda_traits<decltype(&T::operator())> {};
+
+	// Especialización para el operador de llamada del lambda
+	template <typename C, typename R, typename... Args>
+	struct v8_lambda_traits<R(C::*)(Args...) const> {
+		using ReturnType = R;
+		using ArgsTuple = std::tuple<Args...>; // Los tipos de los argumentos guardados en una tupla
+		static constexpr size_t ArgCount = sizeof...(Args); // Cuántos argumentos hay
+	};
+
+	// Versión no-const (por si usas lambdas mutables)
+	template <typename C, typename R, typename... Args>
+	struct v8_lambda_traits<R(C::*)(Args...)> {
+		using ReturnType = R;
+		using ArgsTuple = std::tuple<Args...>;
+		static constexpr size_t ArgCount = sizeof...(Args);
+	};
+
 	//console.log
 	void ConsoleLog(const FunctionCallbackInfo<Value>& info);
 	void AddConsoleToContext(Isolate* isolate, Local<Context> context);
@@ -57,6 +80,37 @@ namespace nov8
 	Local<External> v8_external(Isolate* isolate, void* value);
 	Local<Value> v8_json_parse(Isolate* isolate, nlohmann::json& json);
 	v8_get v8_fixed_size(int size);
+	// thanks google, keep the vibes alive
+	template <typename T>
+	T v8_to_cpp(v8::Isolate* isolate, v8::Local<v8::Value> val) {
+		auto context = isolate->GetCurrentContext();
+
+		if constexpr (std::is_same_v<T, int>) {
+			return val->Int32Value(context).FromMaybe(0);
+		}
+		else if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>) {
+			return static_cast<T>(val->NumberValue(context).FromMaybe(0.0));
+		}
+		else if constexpr (std::is_same_v<T, bool>) {
+			return val->BooleanValue(isolate);
+		}
+		else if constexpr (std::is_same_v<T, std::string>) {
+			v8::String::Utf8Value utf8(isolate, val);
+			return std::string(*utf8 ? *utf8 : "");
+		}
+		// Si necesitas tus propios objetos (ej. JObject*), añádelos aquí
+		return T{};
+	}
+	template <typename Tuple, size_t... Is>
+	Tuple v8_to_tuple(const v8::FunctionCallbackInfo<v8::Value>& info, std::index_sequence<Is...>) {
+		v8::Isolate* isolate = info.GetIsolate();
+
+		// std::tuple_element_t<Is, Tuple> obtiene el tipo exacto (int, string, etc.) 
+		// que el lambda espera en la posición Is.
+		return std::make_tuple(
+			v8_to_cpp<std::tuple_element_t<Is, Tuple>>(isolate, info[Is])...
+		);
+	}
 
 	//accessors
 	void v8_getter(Local<Name> property, const PropertyCallbackInfo<Value>& info);
@@ -64,7 +118,29 @@ namespace nov8
 
 	//functions
 	void v8_call_function(const FunctionCallbackInfo<Value>&);
-	v8_function v8_wrap_call(std::function<void()> func);
+	// thanks google, keep the vibes alive
+	template <typename F>
+	v8_function v8_wrap_call(F&& func) {
+		// 1. Deducir tipos del lambda (usando los Traits que definimos antes)
+		using Traits = v8_lambda_traits<std::decay_t<F>>;
+		using ArgsTuple = typename Traits::ArgsTuple;
+
+		// 2. Retornar el std::function que V8 espera
+		// Capturamos el lambda por valor [func] para que viva dentro del std::function
+		return [func = std::forward<F>(func)](const FunctionCallbackInfo<Value>& info) {
+			Isolate* isolate = info.GetIsolate();
+
+			// 3. Validar argumentos (opcional pero recomendado)
+			if (info.Length() < Traits::ArgCount) {
+				isolate->ThrowException(String::NewFromUtf8Literal(isolate, "Faltan argumentos"));
+				return;
+			}
+
+			// 4. Convertir argumentos de V8 a Tupla y ejecutar
+			auto args = v8_to_tuple<ArgsTuple>(info, std::make_index_sequence<Traits::ArgCount>{});
+			std::apply(func, args);
+			};
+	}
 	void AddFunctionToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_functions& att_functions, std::string path, std::string functionName, v8_function func);
 	void AddFunctionToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_functions& att_functions, std::string path, std::string attribute, std::string functionName, v8_function func);
 	template<typename T>
