@@ -17,6 +17,7 @@ Global
 		Editor_Debug|x64 = Editor_Debug|x64
 		Editor_Development|x64 = Editor_Development|x64
 		Editor_Release|x64 = Editor_Release|x64
+		Editor_SoftDebug|x64 = Editor_SoftDebug|x64
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
@@ -30,6 +31,8 @@ Global
 		{E270C8EB-E5D2-4DA6-B98F-EA3500A257E4}.Editor_Development|x64.Build.0 = Editor_Development|x64
 		{E270C8EB-E5D2-4DA6-B98F-EA3500A257E4}.Editor_Release|x64.ActiveCfg = Editor_Release|x64
 		{E270C8EB-E5D2-4DA6-B98F-EA3500A257E4}.Editor_Release|x64.Build.0 = Editor_Release|x64
+		{E270C8EB-E5D2-4DA6-B98F-EA3500A257E4}.Editor_SoftDebug|x64.ActiveCfg = Editor_SoftDebug|x64
+		{E270C8EB-E5D2-4DA6-B98F-EA3500A257E4}.Editor_SoftDebug|x64.Build.0 = Editor_SoftDebug|x64
 		{E270C8EB-E5D2-4DA6-B98F-EA3500A257E4}.Release|x64.ActiveCfg = Release|x64
 		{E270C8EB-E5D2-4DA6-B98F-EA3500A257E4}.Release|x64.Build.0 = Release|x64
 		{813AD4CB-C718-400C-8E38-DAE951B36D49}.Debug|x64.ActiveCfg = Debug|x64
@@ -42,6 +45,8 @@ Global
 		{813AD4CB-C718-400C-8E38-DAE951B36D49}.Editor_Development|x64.Build.0 = Editor_Development|x64
 		{813AD4CB-C718-400C-8E38-DAE951B36D49}.Editor_Release|x64.ActiveCfg = Editor_Release|x64
 		{813AD4CB-C718-400C-8E38-DAE951B36D49}.Editor_Release|x64.Build.0 = Editor_Release|x64
+		{813AD4CB-C718-400C-8E38-DAE951B36D49}.Editor_SoftDebug|x64.ActiveCfg = Editor_SoftDebug|x64
+		{813AD4CB-C718-400C-8E38-DAE951B36D49}.Editor_SoftDebug|x64.Build.0 = Editor_SoftDebug|x64
 		{813AD4CB-C718-400C-8E38-DAE951B36D49}.Release|x64.ActiveCfg = Release|x64
 		{813AD4CB-C718-400C-8E38-DAE951B36D49}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection

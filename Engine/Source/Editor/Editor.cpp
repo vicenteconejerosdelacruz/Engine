@@ -1463,73 +1463,65 @@ namespace Editor
 	{
 		if (currentLevelName.empty()) return;
 
-		ImGuiIO& io = ImGui::GetIO();
-		ImVec2 mouse = io.MousePos;
-
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground;
-		ImGui::Begin("tabsBarWindow", nullptr, window_flags);
-
 		const ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImDrawList* draw_list = ImGui::GetWindowDrawList();
-		ImVec2 selectorPos = ImVec2(0, viewport->Size.y - 22);
 
-		for (auto& [unit, name] : currentLevelName)
+		// 1. Configurar la posición y tamaño de la ventana contenedora
+		float height = 25.0f; // Un poco más de los 22 que usabas para dar margen
+		ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y + viewport->WorkSize.y - height));
+		ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, height));
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar;
+
+		if (ImGui::Begin("tabsBarWindow", nullptr, window_flags))
 		{
-			std::string tabS = ((unit == currentSceneUnitId) ? "*" : "") + name;
-			ImVec2 nameSize = ImGui::CalcTextSize(tabS.c_str());
-			std::vector<ImVec2> selectorArea = {
-				ImVec2(selectorPos.x,selectorPos.y),
-				ImVec2(selectorPos.x + nameSize.x + 20.0f,selectorPos.y + 20.0f),
-			};
-			ImRect selectorRect(selectorArea.at(0), selectorArea.at(1));
-			ImRect closeButtonRect(
-				ImVec2(selectorPos.x + nameSize.x + 4.0f, selectorPos.y),
-				ImVec2(selectorPos.x + nameSize.x + 4.0f + 16, selectorPos.y + 16)
-			);
+			ImGuiIO& io = ImGui::GetIO();
+			ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-			ImU32 filledColor = rgba(52, 67, 96, 0.8);
+			// 2. La posición inicial relativa a la ventana actual
+			ImVec2 selectorPos = ImGui::GetCursorScreenPos();
 
-			if (selectorRect.Contains(mouse) && !closeButtonRect.Contains(mouse))
+			for (auto& [unit, name] : currentLevelName)
 			{
-				if (unit != currentSceneUnitId)
-				{
-					filledColor = rgba(138, 107, 164, 0.8);
-					if (ImGui::IsMouseDown(0))
-					{
+				std::string tabS = ((unit == currentSceneUnitId) ? "*" : "") + name;
+				ImVec2 nameSize = ImGui::CalcTextSize(tabS.c_str());
+
+				// Definir rectángulos de interacción
+				ImRect selectorRect(selectorPos, ImVec2(selectorPos.x + nameSize.x + 40.0f, selectorPos.y + height));
+				ImRect closeButtonRect(ImVec2(selectorRect.Max.x - 20.0f, selectorPos.y), selectorRect.Max);
+
+				// Lógica de colores (simplificada para el ejemplo)
+				ImU32 filledColor = rgba(52, 67, 96, 0.8);
+				if (selectorRect.Contains(io.MousePos)) {
+					filledColor = (unit == currentSceneUnitId) ? rgba(20, 86, 218, 0.8) : rgba(138, 107, 164, 0.8);
+					if (ImGui::IsMouseClicked(0) && !closeButtonRect.Contains(io.MousePos)) {
 						PauseSounds(currentSceneUnitId);
 						SetCurrentSceneUnit(unit);
 						ResetRenderableScenes();
 						EnableSceneUnitRendering(unit);
 					}
 				}
-				else
-				{
-					filledColor = rgba(20, 86, 218, 0.8);
-				}
-			}
 
-			draw_list->AddRectFilled(selectorArea.at(0), selectorArea.at(1), filledColor);
+				// Dibujar fondo
+				draw_list->AddRectFilled(selectorRect.Min, selectorRect.Max, filledColor);
 
-			ImGui::PushID(std::to_string(unit).c_str());
-			{
-				ImGui::SetCursorScreenPos(ImVec2(selectorPos.x, selectorPos.y + 2.0f));
-				ImGui::Text(tabS.c_str());
-			}
-			ImGui::PopID();
+				// Dibujar Texto
+				ImGui::SetCursorScreenPos(ImVec2(selectorPos.x + 5.0f, selectorPos.y + 2.0f));
+				ImGui::TextUnformatted(tabS.c_str());
 
-			ImGui::PushID(std::string(std::to_string(unit) + "-Close").c_str());
-			{
-				ImGui::SetCursorScreenPos(ImVec2(selectorPos.x + nameSize.x + 4.0f, selectorPos.y));
-				if (ImGui::Button("X"))
-				{
+				// Botón de cierre (integrado en el flujo de ImGui para que funcione el clic)
+				ImGui::SameLine();
+				ImGui::SetCursorScreenPos(ImVec2(selectorRect.Max.x - 18.0f, selectorPos.y + 2.0f));
+				ImGui::PushID(unit);
+				if (ImGui::SmallButton("x")) {
 					CloseScene(unit);
 				}
+				ImGui::PopID();
+
+				// Avanzar posición para la siguiente pestaña
+				selectorPos.x = selectorRect.Max.x + 2.0f;
 			}
-			ImGui::PopID();
-
-			selectorPos.x += nameSize.x + 24.0f;
 		}
-
 		ImGui::End();
 	}
 

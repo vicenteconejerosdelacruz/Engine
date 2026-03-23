@@ -405,6 +405,7 @@ FodyWeavers.xsd
 /TestGame/Development
 /TestGame/Release
 /TestGame/Editor_Debug
+/TestGame/Editor_SoftDebug
 /TestGame/Editor_Development
 /TestGame/Editor_Release
 /SDKs/v8pp-2.1.1/out
