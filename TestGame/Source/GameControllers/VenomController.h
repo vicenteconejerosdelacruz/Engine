@@ -20,6 +20,7 @@ enum VenomStates
 	VS_Attack_1,
 	VS_JumpKick,
 	VS_JumpDash,
+	VS_GrabWall,
 };
 
 inline static std::unordered_map<std::string, VenomStates> stringToVenomStates =
@@ -34,6 +35,7 @@ inline static std::unordered_map<std::string, VenomStates> stringToVenomStates =
 	{ "Attack_1", VS_Attack_1 },
 	{ "JumpKick", VS_JumpKick },
 	{ "JumpDash", VS_JumpDash },
+	{ "GrabWall", VS_GrabWall },
 };
 
 namespace Game
@@ -160,6 +162,10 @@ namespace Game
 		bool ShouldJumpDash();
 		void EnterJumpDash();
 		void JumpDash();
+
+		//GrabWall
+		bool ShouldGrabWall();
+		void EnterGrabWall();
 
 		//State machine
 		GameStatesMachine<VenomStates> vsm;

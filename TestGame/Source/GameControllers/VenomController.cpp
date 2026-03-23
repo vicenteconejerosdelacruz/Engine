@@ -56,6 +56,7 @@ namespace Game
 				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { EnterAttack1(); }},
 				{ VS_JumpKick,[&](auto* sm, VenomStates prevState) { EnterJumpKick(); }},
 				{ VS_JumpDash,[&](auto* sm, VenomStates prevState) { EnterJumpDash(); }},
+				{ VS_GrabWall, [&](auto* sm, VenomStates prevState) { EnterGrabWall(); }},
 			},
 			.onLeave = {
 				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { LeaveAttack1(); }},
@@ -88,6 +89,7 @@ namespace Game
 		attack1Window = false;
 		newAttack1 = false;
 		currentAttack1Animation = 0;
+		canAttachToWall(false);
 	}
 
 #if defined(_EDITOR)
@@ -310,6 +312,10 @@ namespace Game
 		else if (ShouldWalk())
 		{
 			vsm.ChangeState(VS_Walking);
+		}
+		else if (ShouldGrabWall())
+		{
+			vsm.ChangeState(VS_GrabWall);
 		}
 	}
 
@@ -592,6 +598,18 @@ namespace Game
 		}
 		RunningJumpMoveForward(runSpeed());
 	}
+
+	//GrabWall
+	bool VenomController::ShouldGrabWall()
+	{
+		return (buttons.b == GamePad::ButtonStateTracker::PRESSED && canAttachToWall());
+	}
+
+	void VenomController::EnterGrabWall()
+	{
+		venom->animationUseTransformation(true);
+		venom->SetCurrentAnimation("FloorToWall");
+	}
 }
 
 //Animations chop analysis
@@ -623,3 +641,15 @@ namespace Game
 
 //103551_Dash_L_End
 //103551_Dash_R_End
+
+//JumpToWallFloor
+//FloorToWall -> Turn_L90_C -> SwingingStart_To_LowCrawl
+//Onwall_Idle
+//Onwall_To_Jump
+//Move_To_LowCrawl_F
+//Jump_To_LowCrawl_F 
+//LowCrawl_To_Onwall
+//LowCrawl_To_Jump
+//103501_Wallrun_F
+//103501_LowCrawl_Move
+//103501_LowCrawl_Idle_L

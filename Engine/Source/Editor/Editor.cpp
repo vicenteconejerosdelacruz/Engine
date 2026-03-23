@@ -2371,6 +2371,12 @@ namespace Editor
 	}
 
 	//Mouse Processing
+	bool AnyModalShowing()
+	{
+		return loadingProgress.loadSceneUnitModal || sceneObjectModal.creating || templateModal.creating || deletePrompt.showing ||
+			animationSequencer.showing || sceneObjectPopup.show || scriptEditModal.showing || scriptBindingModal.showing;
+	}
+
 	bool MouseIsInGameArea(std::unique_ptr<DirectX::Mouse>& mouse)
 	{
 		auto coordsInArea = [](int x, int y, RECT area)
@@ -2395,7 +2401,7 @@ namespace Editor
 
 	void GameAreaMouseProcessing(std::unique_ptr<DirectX::Mouse>& mouse, CameraID camera)
 	{
-		if (loadingProgress.loadSceneUnitModal || sceneObjectModal.creating || templateModal.creating || deletePrompt.showing || animationSequencer.showing) return;
+		if (AnyModalShowing()) return;
 
 		DirectX::Mouse::State state = mouse->GetState();
 
