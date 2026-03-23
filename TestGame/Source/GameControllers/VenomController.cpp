@@ -57,6 +57,7 @@ namespace Game
 				{ VS_JumpKick,[&](auto* sm, VenomStates prevState) { EnterJumpKick(); }},
 				{ VS_JumpDash,[&](auto* sm, VenomStates prevState) { EnterJumpDash(); }},
 				{ VS_GrabWall, [&](auto* sm, VenomStates prevState) { EnterGrabWall(); }},
+				{ VS_WallIdle, [&](auto* sm, VenomStates prevState) { EnterWallIdle(); }},
 			},
 			.onLeave = {
 				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { LeaveAttack1(); }},
@@ -71,6 +72,7 @@ namespace Game
 				{ VS_Attack_1, [&](auto* sm) { Attacking1(); }},
 				{ VS_JumpKick, [&](auto* sm) { JumpKick(); } },
 				{ VS_JumpDash, [&](auto* sm) { JumpDash(); } },
+				{ VS_WallIdle, [&](auto* sm) { WallIdle(); } },
 			}
 		};
 		SetInitialConditions();
@@ -186,7 +188,7 @@ namespace Game
 			{ "PlayerReady", v8_wrap_call([&] { VenomReady(); }) },
 			{ "StartNextPunchWindow", v8_wrap_call([&] { StartVenomNextPunchWindow(); }) },
 			{ "EvaluateNextPunch", v8_wrap_call([&] { EvaluateVenomNextPunch(); }) },
-			//{ "SwitchToState", v8_wrap_call([&](std::string state) vsm.ChangeState(stringToVenomStates.at(state)); }) },
+			{ "SwitchToState", v8_wrap_call([&](std::string state) {vsm.ChangeState(stringToVenomStates.at(state)); }) },
 			{ "BeginJump", v8_wrap_call([&] { VenomBeginJump(); }) },
 			{ "EndJumpLanding", v8_wrap_call([&] { VenomEndJumpLanding(); }) },
 			{ "BeginRunJump", v8_wrap_call([&] { VenomBeginRunJump(); }) },
@@ -609,6 +611,15 @@ namespace Game
 	{
 		venom->animationUseTransformation(true);
 		venom->SetCurrentAnimation("FloorToWall");
+	}
+
+	//WallIdle
+	void VenomController::EnterWallIdle()
+	{
+		venom->SetCurrentAnimation("WallIdle", 0.0f, 1.0f, true, true);
+	}
+	void VenomController::WallIdle()
+	{
 	}
 }
 
