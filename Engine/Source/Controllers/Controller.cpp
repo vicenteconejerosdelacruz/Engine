@@ -2,6 +2,7 @@
 #include "Controller.h"
 #include <map>
 #include <NoStd.h>
+#include <mutex>
 
 namespace Editor
 {
@@ -19,9 +20,10 @@ namespace Game
 
 #endif
 
-	std::unordered_map<JUUID, std::unique_ptr<Controller>> controllersUUIDs;
-	std::unordered_map<SUUUID, std::set<JUUID>> controllerUUIDBySUUUID;
+	std::map<JUUID, std::unique_ptr<Controller>> controllersUUIDs;
+	std::map<SUUUID, std::set<JUUID>> controllerUUIDBySUUUID;
 	std::set<JUUID> mappedController;
+	static std::mutex controllerMutex;
 
 	Controller::Controller(nlohmann::json& json) :JObject(json)
 	{
@@ -85,6 +87,7 @@ namespace Game
 
 	JUUID RegisterController(std::string controllerName, SUUUID sceneObject, std::unique_ptr<Controller>& controller)
 	{
+		std::lock_guard<std::mutex> lock(controllerMutex);
 		JUUID uuid = getUUID();
 		controller->controller = uuid;
 		controllersUUIDs.insert_or_assign(uuid, std::move(controller));
@@ -98,6 +101,7 @@ namespace Game
 
 	void MapControllers(SceneUnitId id)
 	{
+		std::lock_guard<std::mutex> lock(controllerMutex);
 		for (auto& [suuuid, uuidset] : controllerUUIDBySUUUID)
 		{
 			SceneUnitId unit = std::get<0>(suuuid);
@@ -126,6 +130,7 @@ namespace Game
 
 	void DestroyControllers()
 	{
+		std::lock_guard<std::mutex> lock(controllerMutex);
 		controllersUUIDs.clear();
 		controllerUUIDBySUUUID.clear();
 		mappedController.clear();
@@ -133,6 +138,7 @@ namespace Game
 
 	void DestroyController(JUUID uuid)
 	{
+		std::lock_guard<std::mutex> lock(controllerMutex);
 		controllersUUIDs.at(uuid)->Unmap();
 		mappedController.erase(uuid);
 		controllersUUIDs.erase(uuid);
@@ -150,7 +156,8 @@ namespace Game
 
 	void StepControllers(DX::StepTimer& timer)
 	{
-		float dt = static_cast<FLOAT>(timer.GetElapsedSeconds());
+		std::lock_guard<std::mutex> lock(controllerMutex);
+		float dt = static_cast<float>(timer.GetElapsedSeconds());
 		std::map<unsigned int, std::set<JUUID>> prioritySet;
 
 		for (auto& [suuuid, uuidset] : controllerUUIDBySUUUID)
