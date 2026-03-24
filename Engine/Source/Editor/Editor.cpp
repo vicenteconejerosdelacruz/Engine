@@ -1512,7 +1512,7 @@ namespace Editor
 				// Botón de cierre (integrado en el flujo de ImGui para que funcione el clic)
 				ImGui::SameLine();
 				ImGui::SetCursorScreenPos(ImVec2(selectorRect.Max.x - 18.0f, selectorPos.y + 2.0f));
-				ImGui::PushID(unit);
+				ImGui::PushID(std::to_string(unit).c_str());
 				if (ImGui::SmallButton("x")) {
 					CloseScene(unit);
 				}
@@ -3155,8 +3155,11 @@ namespace Editor
 					{
 						patch = toReplace.at(uuid);
 					}
-					patch[attribute] = initialJ.at(attribute);
-					toReplace.insert_or_assign(uuid, patch);
+					if (!std::set<std::string>({ "controllers","physicObject" }).contains(attribute))
+					{
+						patch[attribute] = initialJ.at(attribute);
+						toReplace.insert_or_assign(uuid, patch);
+					}
 				}
 			}
 		}
