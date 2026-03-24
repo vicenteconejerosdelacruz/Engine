@@ -699,6 +699,7 @@ namespace Scene
 		sequencePlayer.loop = loop;
 		sequencePlayer.newSequence = true;
 		sequencePlayer.ResetFrames();
+		animationTimeFactor(timeFactor);
 	}
 
 	void Renderable::StepAnimation(double elapsedSeconds)
@@ -1044,7 +1045,7 @@ namespace Scene
 			if (Editor::IsPlaying(renderable->unit) && !Editor::IsPaused(renderable->unit))
 #endif
 			{
-				player->Step(dt * 1000.0f);
+				player->Step(dt * 1000.0f * renderable->animationTimeFactor());
 			}
 			player->ApplyFrameValues(renderable);
 		}
