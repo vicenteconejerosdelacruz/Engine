@@ -131,7 +131,8 @@ namespace Scene
 			{ "behavior", "Static" },
 			{ "geometry", geometry() },
 			{ "color", FromXMFLOAT4(color()) },
-			{ "overrideColor", overrideColor() }
+			{ "overrideColor", overrideColor() },
+			{ "skipRendering", skipRendering() }
 		};
 
 		std::string pOname = name() + "-physicObject";
@@ -231,12 +232,21 @@ namespace Scene
 
 				b->clean({ Boundary::Update_overrideColor, Boundary::Update_color });
 			};
+		auto checkForSkipRendering = [](BoundaryID b)
+			{
+				if (!b->dirty(Boundary::Update_skipRendering)) return;
+
+				b->physicObject->skipRendering(b->skipRendering());
+
+				b->clean(Boundary::Update_skipRendering);
+			};
 #endif
 
 		std::for_each(bs.begin(), bs.end(), checkForPosRot);
 		std::for_each(bs.begin(), bs.end(), checkForScale);
 #if defined(_EDITOR)
 		std::for_each(bs.begin(), bs.end(), checkForColor);
+		std::for_each(bs.begin(), bs.end(), checkForSkipRendering);
 #endif
 		std::for_each(bs.begin(), bs.end(), checkForDelete);
 	}

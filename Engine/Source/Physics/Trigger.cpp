@@ -116,7 +116,8 @@ namespace Scene
 			{ "behavior", "Trigger" },
 			{ "geometry", geometry() },
 			{ "color", FromXMFLOAT4(color()) },
-			{ "overrideColor", overrideColor() }
+			{ "overrideColor", overrideColor() },
+			{ "skipRendering", skipRendering() }
 		};
 
 		std::string pOname = name() + "-physicObject";
@@ -221,12 +222,21 @@ namespace Scene
 
 				t->clean({ Trigger::Update_overrideColor, Trigger::Update_color });
 			};
+		auto checkForSkipRendering = [](TriggerID t)
+			{
+				if (!t->dirty(Trigger::Update_skipRendering)) return;
+
+				t->physicObject->skipRendering(t->skipRendering());
+
+				t->clean(Trigger::Update_skipRendering);
+			};
 #endif
 
 		std::for_each(tr.begin(), tr.end(), checkForPosRot);
 		std::for_each(tr.begin(), tr.end(), checkForScale);
 #if defined(_EDITOR)
 		std::for_each(tr.begin(), tr.end(), checkForColor);
+		std::for_each(tr.begin(), tr.end(), checkForSkipRendering);
 #endif
 		std::for_each(tr.begin(), tr.end(), checkForDelete);
 	}

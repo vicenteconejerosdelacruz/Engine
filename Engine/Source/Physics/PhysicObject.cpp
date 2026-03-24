@@ -664,7 +664,7 @@ namespace Physics
 
 	std::vector<std::string> PhysicObject::GetPhysicBehaviorAttributes()
 	{
-		std::vector<std::string> atts = { "behavior", "color", "overrideColor" };
+		std::vector<std::string> atts = { "behavior", "color", "overrideColor", "skipRendering" };
 
 		std::vector<std::string> staticAtts =
 		{
