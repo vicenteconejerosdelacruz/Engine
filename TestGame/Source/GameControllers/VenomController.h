@@ -22,7 +22,7 @@ enum VenomStates
 	VS_JumpDash,
 	VS_GrabWall,
 	VS_WallIdle,
-	VS_WallMove,
+	VS_CrawlOnWall,
 };
 
 inline static std::unordered_map<std::string, VenomStates> stringToVenomStates =
@@ -39,7 +39,7 @@ inline static std::unordered_map<std::string, VenomStates> stringToVenomStates =
 	{ "JumpDash", VS_JumpDash },
 	{ "GrabWall", VS_GrabWall },
 	{ "WallIdle", VS_WallIdle },
-	{ "WallMove", VS_WallMove },
+	{ "CrawlOnWall", VS_CrawlOnWall },
 };
 
 namespace Game
@@ -111,10 +111,12 @@ namespace Game
 		void UpdateLookTo();
 
 		//Movement
-		void CharacterMove(XMVECTOR stickDisplacement, float dt, float sideSpeed, XMFLOAT3 gravity);
+		void CharacterMoveXZPlane(XMVECTOR stickDisplacement, float dt, float sideSpeed, XMFLOAT3 gravity);
+		void CharacterMoveXYPlane(XMVECTOR stickDisplacement, float dt, float sideSpeed);
 		void MoveForward(float sideSpeed);
 		void JumpingMoveForward(float sideSpeed);
 		void RunningJumpMoveForward(float sideSpeed);
+		void CrawlOnWall(float sideSpeed);
 
 		//Intro
 		void EnterIntro();
@@ -174,6 +176,13 @@ namespace Game
 		//WallIdle
 		void EnterWallIdle();
 		void WallIdle();
+
+		//WallMove
+		bool ShouldCrawlOnWall();
+		void EnterCrawlOnWall();
+		void LeaveCrawlOnWall();
+		void CrawlOnWall();
+		void AdjustCrawlAnimationTimeFactor();
 
 		//State machine
 		GameStatesMachine<VenomStates> vsm;

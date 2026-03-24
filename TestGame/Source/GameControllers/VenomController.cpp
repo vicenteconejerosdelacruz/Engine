@@ -58,9 +58,11 @@ namespace Game
 				{ VS_JumpDash,[&](auto* sm, VenomStates prevState) { EnterJumpDash(); }},
 				{ VS_GrabWall, [&](auto* sm, VenomStates prevState) { EnterGrabWall(); }},
 				{ VS_WallIdle, [&](auto* sm, VenomStates prevState) { EnterWallIdle(); }},
+				{ VS_CrawlOnWall, [&](auto* sm, VenomStates prevState) { EnterCrawlOnWall(); }},
 			},
 			.onLeave = {
 				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { LeaveAttack1(); }},
+				{ VS_CrawlOnWall, [&](auto* sm, VenomStates prevState) { LeaveCrawlOnWall(); }},
 			},
 			.onStep = {
 				{ VS_None, [&](auto* sm) { venomScale = venom->scale(); vsm.ChangeState(VS_Intro); }},
@@ -73,6 +75,7 @@ namespace Game
 				{ VS_JumpKick, [&](auto* sm) { JumpKick(); } },
 				{ VS_JumpDash, [&](auto* sm) { JumpDash(); } },
 				{ VS_WallIdle, [&](auto* sm) { WallIdle(); } },
+				{ VS_CrawlOnWall, [&](auto* sm) { CrawlOnWall(); } },
 			}
 		};
 		SetInitialConditions();
@@ -243,31 +246,44 @@ namespace Game
 	}
 
 	//Movement
-	void VenomController::CharacterMove(XMVECTOR stickDisplacement, float dt, float sideSpeed, XMFLOAT3 gravity)
+	void VenomController::CharacterMoveXZPlane(XMVECTOR stickDisplacement, float dt, float sideSpeed, XMFLOAT3 gravity)
 	{
 		XMVECTOR downDisp = { 0.0f, fixedDownDisplacement() + downSpeed * dt, 0.0f };
-		XMFLOAT3 scale = venom->scale();
 		XMVECTOR move = XMVector3Normalize(stickDisplacement) * sideSpeed * dt;
-		//move = XMVectorScale(move, delta) + downDisp;
 		move += downDisp;
 		PxControllerCollisionFlags colFlag = physicObject->MoveCharacter(move, dt);
 		touchingDown = !!(colFlag & PxControllerCollisionFlag::Enum::eCOLLISION_DOWN);
+		if (!!(colFlag & PxControllerCollisionFlag::Enum::eCOLLISION_UP))
+		{
+			downSpeed = 0.0f;
+		}
 		downSpeed = (touchingDown) ? 0.0f : (downSpeed + gravity.y * dt);
+	}
+
+	void VenomController::CharacterMoveXYPlane(XMVECTOR stickDisplacement, float dt, float sideSpeed)
+	{
+		XMVECTOR move = stickDisplacement * sideSpeed * dt;
+		PxControllerCollisionFlags colFlag = physicObject->MoveCharacter(move, dt);
 	}
 
 	void VenomController::MoveForward(float sideSpeed)
 	{
-		CharacterMove(leftStick, gameUpdateFrequency, sideSpeed, physicScene->gravity());
+		CharacterMoveXZPlane(leftStick, gameUpdateFrequency, sideSpeed, physicScene->gravity());
 	}
 
 	void VenomController::JumpingMoveForward(float sideSpeed)
 	{
-		CharacterMove(leftStick, gameUpdateFrequency, sideSpeed, physicScene->gravity());
+		CharacterMoveXZPlane(leftStick, gameUpdateFrequency, sideSpeed, physicScene->gravity());
 	}
 
 	void VenomController::RunningJumpMoveForward(float sideSpeed)
 	{
-		CharacterMove(runningJumpLeftStick, gameUpdateFrequency, sideSpeed, physicScene->gravity());
+		CharacterMoveXZPlane(runningJumpLeftStick, gameUpdateFrequency, sideSpeed, physicScene->gravity());
+	}
+
+	void VenomController::CrawlOnWall(float sideSpeed)
+	{
+		CharacterMoveXYPlane(XMVectorSwizzle(leftStick, 0, 2, 1, 3), gameUpdateFrequency, sideSpeed);
 	}
 
 	//Intro
@@ -618,8 +634,51 @@ namespace Game
 	{
 		venom->SetCurrentAnimation("WallIdle", 0.0f, 1.0f, true, true);
 	}
+
 	void VenomController::WallIdle()
 	{
+		if (ShouldCrawlOnWall())
+		{
+			vsm.ChangeState(VS_CrawlOnWall);
+		}
+	}
+
+	//WallMove
+	bool VenomController::ShouldCrawlOnWall()
+	{
+		XMVECTOR len = XMVector3Length(leftStick);
+		float l = len.m128_f32[0];
+		return l > wallMoveThreshold();
+	}
+
+	void VenomController::EnterCrawlOnWall()
+	{
+		venom->SetCurrentAnimation("WallCrawl", 0.0f, 1.0f, true, true);
+	}
+
+	void VenomController::LeaveCrawlOnWall()
+	{
+		venom->animationTimeFactor(1.0f);
+	}
+
+	void VenomController::CrawlOnWall()
+	{
+		if (!ShouldCrawlOnWall())
+		{
+			vsm.ChangeState(VS_WallIdle);
+			return;
+		}
+
+		AdjustCrawlAnimationTimeFactor();
+		CrawlOnWall(wallMoveSpeed());
+	}
+
+	void VenomController::AdjustCrawlAnimationTimeFactor()
+	{
+		XMVECTOR len = XMVector3Length(leftStick);
+		float l = std::clamp(len.m128_f32[0], 0.0f, 1.0f);
+		float tf = std::lerp(wallMoveMinTimeFactor(), wallMoveMaxTimeFactor(), l);
+		venom->animationTimeFactor(tf);
 	}
 }
 
