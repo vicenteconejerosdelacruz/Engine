@@ -26,6 +26,11 @@ extern float gameUpdateFrequency;
 
 namespace Game
 {
+	std::vector<std::string> GetBlockedWallMovementMasks()
+	{
+		return nostd::GetKeysFromMap(StringToWallMovementAxis);
+	}
+
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
@@ -263,6 +268,7 @@ namespace Game
 	void VenomController::CharacterMoveXYPlane(XMVECTOR stickDisplacement, float dt, float sideSpeed)
 	{
 		XMVECTOR move = stickDisplacement * sideSpeed * dt;
+		//PrintXMVector(move, "move");
 		PxControllerCollisionFlags colFlag = physicObject->MoveCharacter(move, dt);
 	}
 
@@ -283,7 +289,23 @@ namespace Game
 
 	void VenomController::CrawlOnWall(float sideSpeed)
 	{
-		CharacterMoveXYPlane(XMVectorSwizzle(leftStick, 0, 2, 1, 3), gameUpdateFrequency, sideSpeed);
+		XMVECTOR stickMovement = XMVectorSwizzle(leftStick, 0, 2, 1, 3);
+		if (blockedWallMovementMask() != 0)
+		{
+			for (auto& [flag, func] : wallMovementBlocker)
+			{
+				if (flag & blockedWallMovementMask())
+				{
+					func(stickMovement);
+				}
+			}
+		}
+		CharacterMoveXYPlane(stickMovement, gameUpdateFrequency, sideSpeed);
+	}
+
+	bool VenomController::AttachedToWall()
+	{
+		return std::set<VenomStates>({ VS_GrabWall, VS_WallIdle, VS_CrawlOnWall, }).contains(vsm.currentState);
 	}
 
 	//Intro
@@ -630,6 +652,11 @@ namespace Game
 	}
 
 	//WallIdle
+	bool VenomController::ShouldDetachFromWall()
+	{
+		return buttons.b == GamePad::ButtonStateTracker::PRESSED;
+	}
+
 	void VenomController::EnterWallIdle()
 	{
 		venom->SetCurrentAnimation("WallIdle", 0.0f, 1.0f, true, true);
@@ -640,6 +667,10 @@ namespace Game
 		if (ShouldCrawlOnWall())
 		{
 			vsm.ChangeState(VS_CrawlOnWall);
+		}
+		else if (ShouldDetachFromWall())
+		{
+
 		}
 	}
 
@@ -666,6 +697,10 @@ namespace Game
 		if (!ShouldCrawlOnWall())
 		{
 			vsm.ChangeState(VS_WallIdle);
+			return;
+		}
+		else if (ShouldDetachFromWall())
+		{
 			return;
 		}
 
@@ -718,7 +753,8 @@ namespace Game
 //Onwall_To_Jump
 //Move_To_LowCrawl_F
 //Jump_To_LowCrawl_F 
-//LowCrawl_To_Onwall
+//JumpFromWall: LowCrawl_To_Onwall     ->  Onwall_To_Jump
+//				(mirar muro a camara)  -> backflip to fall
 //LowCrawl_To_Jump
 //103501_Wallrun_F
 //103501_LowCrawl_Move

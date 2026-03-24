@@ -42,8 +42,35 @@ inline static std::unordered_map<std::string, VenomStates> stringToVenomStates =
 	{ "CrawlOnWall", VS_CrawlOnWall },
 };
 
+enum WallMovementAxis
+{
+	WMA_Up = 1 << 0,
+	WMA_Down = 1 << 1,
+	WMA_Left = 1 << 2,
+	WMA_Right = 1 << 3,
+	WMA_All = 0b1111
+};
+
+inline std::unordered_map<WallMovementAxis, std::string> WallMovementAxisToString =
+{
+	{ WMA_Up, "Up" },
+	{ WMA_Down, "Down" },
+	{ WMA_Left, "Left" },
+	{ WMA_Right, "Right" },
+};
+
+inline std::unordered_map<std::string, WallMovementAxis> StringToWallMovementAxis =
+{
+	{ "Up", WMA_Up },
+	{ "Down", WMA_Down },
+	{ "Left", WMA_Left },
+	{ "Right", WMA_Right },
+};
+
 namespace Game
 {
+	extern std::vector<std::string> GetBlockedWallMovementMasks();
+
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
@@ -88,6 +115,14 @@ namespace Game
 			"JumpDash1Landing","RunDash2Landing"
 		};
 
+		static inline std::map<WallMovementAxis, std::function<void(XMVECTOR& v)>> wallMovementBlocker =
+		{
+			{ WMA_Up, [](auto& v) { v.m128_f32[1] = std::min(v.m128_f32[1],0.0f); }},
+			{ WMA_Down, [](auto& v) { v.m128_f32[1] = std::max(v.m128_f32[1],0.0f); } },
+			{ WMA_Left, [](auto& v) { v.m128_f32[0] = std::max(v.m128_f32[0],0.0f); } },
+			{ WMA_Right, [](auto& v) { v.m128_f32[0] = std::min(v.m128_f32[0],0.0f); } },
+		};
+
 		//Constructor and Binding
 		VenomController(nlohmann::json& json);
 		virtual void SetInitialConditions();
@@ -117,6 +152,7 @@ namespace Game
 		void JumpingMoveForward(float sideSpeed);
 		void RunningJumpMoveForward(float sideSpeed);
 		void CrawlOnWall(float sideSpeed);
+		bool AttachedToWall();
 
 		//Intro
 		void EnterIntro();
@@ -174,6 +210,7 @@ namespace Game
 		void EnterGrabWall();
 
 		//WallIdle
+		bool ShouldDetachFromWall();
 		void EnterWallIdle();
 		void WallIdle();
 

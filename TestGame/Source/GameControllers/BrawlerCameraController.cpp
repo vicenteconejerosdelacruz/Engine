@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "BrawlerCameraController.h"
+#include "VenomController.h"
 #if defined(_EDITOR)
 #include <Editor.h>
 #endif
@@ -47,6 +48,11 @@ namespace Game
 
 		camera = so;
 		venomR = MAKESUUUID(std::get<0>(so), venom());
+		initialY = venomR->position().y;
+		lastVenomY = initialY;
+		currentVenomY = currentVenomY;
+		deltaY = 0.0f;
+		isAttachedToWall = false;
 	}
 
 	void BrawlerCameraController::Unmap()
@@ -63,12 +69,35 @@ namespace Game
 			return;
 #endif
 
+		XMFLOAT3 p = camera->position();
+
 		if (follow)
 		{
-			XMFLOAT3 p = camera->position();
 			p.x = venomR->position().x;
-			camera->position(p);
 		}
+
+		VenomController* venom = static_cast<VenomController*>(GetController(venomR->at("controllers").at("venom")).get());
+		if (venom->AttachedToWall())
+		{
+			if (!isAttachedToWall)
+			{
+				isAttachedToWall = true;
+				lastVenomY = venomR->position().y;
+				currentVenomY = lastVenomY;
+			}
+			else
+			{
+				lastVenomY = currentVenomY;
+				currentVenomY = venomR->position().y;
+			}
+			p.y += (currentVenomY - lastVenomY);
+		}
+		else
+		{
+			isAttachedToWall = false;
+		}
+
+		camera->position(p);
 	}
 
 	//JS binding

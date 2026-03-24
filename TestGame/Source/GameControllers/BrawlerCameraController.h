@@ -45,5 +45,10 @@ namespace Game
 		CameraID camera;
 		RenderableID venomR;
 		bool follow = true;
+		float initialY;
+		float lastVenomY;
+		float currentVenomY;
+		float deltaY;
+		bool isAttachedToWall = false;
 	};
 }
