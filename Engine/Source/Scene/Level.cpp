@@ -222,5 +222,8 @@ namespace Scene::Level
 #endif
 		loading.CloseCommandList();
 		loading.ExecuteCommandList();
+#if defined(_EDITOR)
+		scene->SetCanBuildAssetsTree(true);
+#endif
 	}
 }

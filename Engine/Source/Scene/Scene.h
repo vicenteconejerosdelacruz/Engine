@@ -113,6 +113,9 @@ namespace Scene
 	void EnableSceneUnitRendering(SceneUnitId id);
 	void RemoveSceneUnitRendering(SceneUnitId id);
 	bool SceneUnitRenderingExists(SceneUnitId id);
+#if defined(_EDITOR)
+	bool SceneCanBuildAssetsTree(SceneUnitId id);
+#endif
 
 	void BindSceneObjects(SceneUnitId id);
 	JUUID CloneSceneObject(SceneUnitId id, JUUID, nlohmann::json parameters = {});

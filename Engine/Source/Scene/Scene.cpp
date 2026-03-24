@@ -387,6 +387,17 @@ namespace Scene
 		return renderableSceneUnits.contains(id);
 	}
 
+#if defined(_EDITOR)
+	bool SceneCanBuildAssetsTree(SceneUnitId id)
+	{
+		if (SceneUnitRenderingExists(id))
+		{
+			return GetSceneUnit(id)->CanBuildAssetsTree();
+		}
+		return false;
+	}
+#endif
+
 	void BindSceneObjects(SceneUnitId id)
 	{
 		std::unordered_map<SceneObjectType, std::function<void(SceneUnitId, JUUID)>> typeBinder =

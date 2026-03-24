@@ -356,6 +356,7 @@ namespace Editor
 		}
 		levelModified.erase(id);
 		defaultLevel.erase(id);
+		sceneObjectEdition.erase(id);
 	}
 
 	void DeleteSceneUnitGizmos(SceneUnitId id)
@@ -1826,7 +1827,7 @@ namespace Editor
 		using namespace Scene;
 		for (auto& [id, panel] : sceneObjectEdition)
 		{
-			if (IsPlaying(id) || !SceneUnitRenderingExists(id))
+			if (IsPlaying(id) || !SceneUnitRenderingExists(id) || SceneCanBuildAssetsTree(id))
 				continue;
 
 			panel.BuildAssetsTree(

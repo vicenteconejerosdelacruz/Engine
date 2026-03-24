@@ -22,10 +22,10 @@ namespace Scene
 		markedForDelete = false;
 		deleteCallback = nullptr;
 		isolated = false;
-		//loading = std::make_unique<std::atomic_bool>(false);
-		//canSubmitLoading = std::make_unique<std::atomic_bool>(false);
-		//loadingComplete = std::make_unique<std::atomic_bool>(false);
 		binder.unit = unit;
+#if defined(_EDITOR)
+		canBuildAssetsTree = std::make_unique<std::atomic_bool>(false);
+#endif
 		CreateShadowMapResources(id);
 	}
 
@@ -102,120 +102,6 @@ namespace Scene
 		return unboundedSceneObjects;
 	}
 
-	//void SceneUnit::InsertRenderableIntoLoadingPool(RenderableID uuid)
-	//{
-	//	renderablesInLoadingPool.insert(uuid);
-	//}
-
-	//void SceneUnit::InsertCameraIntoLoadingPool(CameraID uuid)
-	//{
-	//	camerasInLoadingPool.insert(uuid);
-	//}
-
-	//void SceneUnit::InsertLightIntoLoadingPool(LightID uuid)
-	//{
-	//	lightsInLoadingPool.insert(uuid);
-	//}
-
-	//std::set<RenderableID>& SceneUnit::GetRenderablesInLoadingPool()
-	//{
-	//	return renderablesInLoadingPool;
-	//}
-
-	//std::set<CameraID>& SceneUnit::GetCamerasInLoadingPool()
-	//{
-	//	return camerasInLoadingPool;
-	//}
-
-	//std::set<LightID>& SceneUnit::GetLightsInLoadingPool()
-	//{
-	//	return lightsInLoadingPool;
-	//}
-
-	//size_t SceneUnit::GetRenderablesLoadingPoolSize()
-	//{
-	//	return renderablesInLoadingPool.size();
-	//}
-
-	//size_t SceneUnit::GetCamerasLoadingPoolSize()
-	//{
-	//	return camerasInLoadingPool.size();
-	//}
-
-	//size_t SceneUnit::GetLightsLoadingPoolSize()
-	//{
-	//	return lightsInLoadingPool.size();
-	//}
-
-	//void SceneUnit::MarkRenderablesInLoadingPoolAsReady()
-	//{
-	//	for (RenderableID r : GetRenderablesInLoadingPool())
-	//	{
-	//		if (r->RenderReady() || !IsBound(r->uuid()))
-	//			continue;
-	//		r->RenderReady(true);
-	//	}
-	//}
-
-	//void SceneUnit::MarkCamerasInLoadingPoolAsReady()
-	//{
-	//	for (CameraID c : GetCamerasInLoadingPool())
-	//	{
-	//		if (c->RenderReady() || !IsBound(c->uuid()))
-	//			continue;
-	//		c->RenderReady(true);
-	//	}
-	//}
-
-	//void SceneUnit::MarkLightsInLoadingPoolAsReady()
-	//{
-	//	for (LightID l : GetLightsInLoadingPool())
-	//	{
-	//		if (l->RenderReady() || !IsBound(l->uuid()))
-	//			continue;
-	//		l->RenderReady(true);
-	//	}
-	//}
-
-	//void SceneUnit::ClearRenderablesLoadingPool()
-	//{
-	//	renderablesInLoadingPool.clear();
-	//}
-
-	//void SceneUnit::ClearCamerasLoadingPool()
-	//{
-	//	camerasInLoadingPool.clear();
-	//}
-
-	//void SceneUnit::ClearLightsLoadingPool()
-	//{
-	//	lightsInLoadingPool.clear();
-	//}
-
-	//void SceneUnit::EraseRenderableFromLoadingPool(RenderableID r)
-	//{
-	//	if (renderablesInLoadingPool.contains(r))
-	//		renderablesInLoadingPool.erase(r);
-	//}
-
-	//void SceneUnit::EraseCameraFromLoadingPool(CameraID c)
-	//{
-	//	if (camerasInLoadingPool.erase(c))
-	//		camerasInLoadingPool.erase(c);
-	//}
-
-	//void SceneUnit::EraseLightFromLoadingPool(LightID l)
-	//{
-	//	if (lightsInLoadingPool.contains(l))
-	//		lightsInLoadingPool.erase(l);
-	//}
-
-	//void SceneUnit::InitLoadingProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t id, size_t capacity)
-	//{
-	//	loadingProcessor.Init(d3dDevice, id, capacity, true);
-	//	SetLoading(true);
-	//}
-
 	void SceneUnit::InitFrame2FrameProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t capacity, size_t id)
 	{
 		commandsProcessor = std::make_unique<CommandsProcessor>(d3dDevice, capacity, id);
@@ -225,36 +111,6 @@ namespace Scene
 	{
 		computeProcessor = std::make_unique<CommandsProcessor>(d3dDevice, capacity, id);
 	}
-
-	//void SceneUnit::SetLoading(bool value)
-	//{
-	//	loading->store(value);
-	//}
-
-	//bool SceneUnit::IsLoading()
-	//{
-	//	return loading->load();
-	//}
-
-	//void SceneUnit::SetCanSubmitLoading(bool value)
-	//{
-	//	canSubmitLoading->store(value);
-	//}
-
-	//bool SceneUnit::IsReadyToSubmitLoading()
-	//{
-	//	return canSubmitLoading->load();
-	//}
-
-	//void SceneUnit::SetLoadingComplete(bool value)
-	//{
-	//	loadingComplete->store(value);
-	//}
-
-	//bool SceneUnit::IsLoadingComplete()
-	//{
-	//	return loadingComplete->load();
-	//}
 
 	void SceneUnit::Bind(JUUID uuidA, JUUID uuidB)
 	{
@@ -286,83 +142,6 @@ namespace Scene
 		if (unboundedSceneObjects.contains(uuid))
 			unboundedSceneObjects.insert(uuid);
 	}
-
-	//bool SceneUnit::LoadingCommandListIsOpen()
-	//{
-	//	return loadingProcessor.IsOpen();
-	//}
-
-	//CComPtr<ID3D12GraphicsCommandList2>& SceneUnit::GetLoadingCommandList(bool OpenIfClosed)
-	//{
-	//	return loadingProcessor.GetCommandList(OpenIfClosed);
-	//}
-
-	//void SceneUnit::ResetLoadingCommandList()
-	//{
-	//	loadingProcessor.ResetCommandList();
-	//}
-
-	//void SceneUnit::CloseLoadingCommandList()
-	//{
-	//	loadingProcessor.CloseCommandList();
-	//}
-
-//	void SceneUnit::SubmitLoadingCommandList()
-//	{
-//		renderer->ExecuteCommands(GetLoadingCommandList(false), [&]
-//			{
-//				SetLoading(false);
-//				SetCanSubmitLoading(false);
-//				MarkRenderablesInLoadingPoolAsReady();
-//				MarkCamerasInLoadingPoolAsReady();
-//				MarkLightsInLoadingPoolAsReady();
-//				ClearRenderablesLoadingPool();
-//				ClearCamerasLoadingPool();
-//				ClearLightsLoadingPool();
-//#if defined(_EDITOR)
-//				using namespace Editor;
-//				MarkScenePanelAssetsAsDirty();
-//#endif
-//				for (auto& cb : postLoadingExecutionCallbacks)
-//				{
-//					cb();
-//				}
-//				postLoadingExecutionCallbacks.clear();
-//			}
-//		);
-//	}
-
-	//void SceneUnit::PushLoadingExecutionCallback(std::function<void()> cb)
-	//{
-	//	postLoadingExecutionCallbacks.push_back(cb);
-	//}
-
-	//void SceneUnit::Loading()
-	//{
-	//	using namespace Scene;
-	//
-	//	if (!IsLoading() || !IsReadyToSubmitLoading()) return;
-	//
-	//	CloseSubmitLoadingCommandList();
-	//}
-
-	//void SceneUnit::SubmitForLoading(std::function<void()> loader)
-	//{
-	//	bool doSubmit = !LoadingCommandListIsOpen();
-	//	if (doSubmit)
-	//	{
-	//		ResetLoadingCommandList();
-	//		SetLoading(true);
-	//		SetCanSubmitLoading(false);
-	//	}
-	//
-	//	loader();
-	//
-	//	if (doSubmit)
-	//	{
-	//		SetCanSubmitLoading(true);
-	//	}
-	//}
 
 	//F2F
 	CComPtr<ID3D12GraphicsCommandList2>& SceneUnit::GetCommandList()
@@ -473,4 +252,15 @@ namespace Scene
 		RunBoundingBoxComputeShadersSolution(id);
 		CloseSubmitAndNextComputeCommandList();
 	}
+#if defined(_EDITOR)
+	bool SceneUnit::CanBuildAssetsTree()
+	{
+		return canBuildAssetsTree->load();
+	}
+
+	void SceneUnit::SetCanBuildAssetsTree(bool value)
+	{
+		canBuildAssetsTree->store(value);
+	}
+#endif
 };
