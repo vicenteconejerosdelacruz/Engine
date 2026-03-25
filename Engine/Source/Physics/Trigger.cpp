@@ -117,7 +117,9 @@ namespace Scene
 			{ "geometry", geometry() },
 			{ "color", FromXMFLOAT4(color()) },
 			{ "overrideColor", overrideColor() },
-			{ "skipRendering", skipRendering() }
+			{ "skipRendering", skipRendering() },
+			{ "objectMask", objectMask() },
+			{ "collisionMask", collisionMask() }
 		};
 
 		std::string pOname = name() + "-physicObject";
@@ -231,13 +233,30 @@ namespace Scene
 				t->clean(Trigger::Update_skipRendering);
 			};
 #endif
+		auto checkObjectMask = [](TriggerID t)
+			{
+				if (!t->dirty(Trigger::Update_objectMask)) return;
 
+				t->physicObject->objectMask(t->objectMask());
+
+				t->clean(Trigger::Update_objectMask);
+			};
+		auto checkCollisionMask = [](TriggerID t)
+			{
+				if (!t->dirty(Trigger::Update_collisionMask)) return;
+
+				t->physicObject->collisionMask(t->collisionMask());
+
+				t->clean(Trigger::Update_collisionMask);
+			};
 		std::for_each(tr.begin(), tr.end(), checkForPosRot);
 		std::for_each(tr.begin(), tr.end(), checkForScale);
 #if defined(_EDITOR)
 		std::for_each(tr.begin(), tr.end(), checkForColor);
 		std::for_each(tr.begin(), tr.end(), checkForSkipRendering);
 #endif
+		std::for_each(tr.begin(), tr.end(), checkObjectMask);
+		std::for_each(tr.begin(), tr.end(), checkCollisionMask);
 		std::for_each(tr.begin(), tr.end(), checkForDelete);
 	}
 

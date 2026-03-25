@@ -23,6 +23,8 @@ enum VenomStates
 	VS_GrabWall,
 	VS_WallIdle,
 	VS_CrawlOnWall,
+	VS_DetachFromWall,
+	VS_Falling
 };
 
 inline static std::unordered_map<std::string, VenomStates> stringToVenomStates =
@@ -40,6 +42,8 @@ inline static std::unordered_map<std::string, VenomStates> stringToVenomStates =
 	{ "GrabWall", VS_GrabWall },
 	{ "WallIdle", VS_WallIdle },
 	{ "CrawlOnWall", VS_CrawlOnWall },
+	{ "DetachFromWall", VS_DetachFromWall },
+	{ "Falling", VS_Falling },
 };
 
 enum WallMovementAxis
@@ -135,6 +139,9 @@ namespace Game
 
 		//Step
 		virtual void Step(float delta);
+		//Physics
+		void OnStaticContactEvent(JUUID physicObject, unsigned int event);
+		void OnCharacterHitEvent(PxFilterData fd);
 
 		//JS binding
 		virtual v8_templates_creators GetV8TemplatesCreators();
@@ -152,7 +159,7 @@ namespace Game
 		void JumpingMoveForward(float sideSpeed);
 		void RunningJumpMoveForward(float sideSpeed);
 		void CrawlOnWall(float sideSpeed);
-		bool AttachedToWall();
+		//bool AttachedToWall();
 
 		//Intro
 		void EnterIntro();
@@ -178,7 +185,6 @@ namespace Game
 		void EnterJumping();
 		void VenomBeginJump();
 		void Jumping();
-		//void LeaveJumping();
 
 		//RunningJump
 		void EnterRunningJump();
@@ -220,6 +226,13 @@ namespace Game
 		void LeaveCrawlOnWall();
 		void CrawlOnWall();
 		void AdjustCrawlAnimationTimeFactor();
+
+		//DetachFromWall
+		void EnterDetachFromWall();
+
+		//Fall
+		void EnterFalling();
+		void Falling();
 
 		//State machine
 		GameStatesMachine<VenomStates> vsm;

@@ -666,6 +666,9 @@
     <ClInclude Include="Editor\Modals\SimpleModal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Physics\CharacterHitCallback.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -984,6 +987,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Editor\Modals\SimpleModal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\CharacterHitCallback.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

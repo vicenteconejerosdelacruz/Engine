@@ -1,5 +1,4 @@
-#ifndef _PHYSICS_PHYSIC_H
-#define _PHYSICS_PHYSIC_H
+#pragma once
 
 #include <SceneUnitId.h>
 #include <UUID.h>
@@ -12,5 +11,3 @@ namespace Physics
 	void DestroyPhysics();
 	void CreatePhysicsScene(PhysicSceneID physicScene);
 };
-
-#endif

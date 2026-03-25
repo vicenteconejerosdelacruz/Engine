@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "VenomController.h"
+#include "BrawlerCameraController.h"
+#include <GamePhysics.h>
 #include <Scene.h>
 #include <SceneObject.h>
 #include <Renderable/Renderable.h>
@@ -8,6 +10,7 @@
 #include <GamePad.h>
 #include <StepTimer.h>
 #include <Camera/Camera.h>
+#include <NoStd.h>
 #if defined(_EDITOR)
 #include <Editor.h>
 #endif
@@ -28,7 +31,12 @@ namespace Game
 {
 	std::vector<std::string> GetBlockedWallMovementMasks()
 	{
-		return nostd::GetKeysFromMap(StringToWallMovementAxis);
+		return nostd::GetValuesFromFlagsMap(WallMovementAxisToString);
+	}
+
+	static BrawlerCameraController* GetBrawlerCam(CameraID cam)
+	{
+		return static_cast<BrawlerCameraController*>(GetController(cam->at("controllers").at("brawler-cam")).get());
 	}
 
 #if defined(_EDITOR)
@@ -64,6 +72,8 @@ namespace Game
 				{ VS_GrabWall, [&](auto* sm, VenomStates prevState) { EnterGrabWall(); }},
 				{ VS_WallIdle, [&](auto* sm, VenomStates prevState) { EnterWallIdle(); }},
 				{ VS_CrawlOnWall, [&](auto* sm, VenomStates prevState) { EnterCrawlOnWall(); }},
+				{ VS_DetachFromWall, [&](auto* sm, VenomStates prevState) { EnterDetachFromWall(); }},
+				{ VS_Falling, [&](auto* sm, VenomStates prevState) { EnterFalling(); }},
 			},
 			.onLeave = {
 				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { LeaveAttack1(); }},
@@ -81,6 +91,7 @@ namespace Game
 				{ VS_JumpDash, [&](auto* sm) { JumpDash(); } },
 				{ VS_WallIdle, [&](auto* sm) { WallIdle(); } },
 				{ VS_CrawlOnWall, [&](auto* sm) { CrawlOnWall(); } },
+				{ VS_Falling, [&](auto* sm) { Falling(); }},
 			}
 		};
 		SetInitialConditions();
@@ -128,14 +139,25 @@ namespace Game
 		}
 		physicScene = MAKESUUUID(unit, *GetPhysicScenes(unit).begin());
 		physicObject = venom->at("physicObject").at(0);
-
-		//BindV8Module();
+		RegisterContactCallback(PB_Static, physicObject(), [&](JUUID uuid, unsigned int event)
+			{
+				OnStaticContactEvent(uuid, event);
+			}
+		);
+		RegisterCharacterHitCallback(physicObject(), [&](PxFilterData fd)
+			{
+				OnCharacterHitEvent(fd);
+				OutputDebugStringA(std::string("CCT tocando objeto con Word0: " + std::to_string(fd.word0) + "y Word1:" + std::to_string(fd.word1) + "\n").c_str());
+			}
+		);
 		SetInitialConditions();
 	}
 
 	void VenomController::Unmap()
 	{
 		Controller::Unmap();
+		UnregisterContactCallback(PB_Static, physicObject());
+		UnregisterCharacterHitCallback(physicObject());
 		venom.clear();
 		camera.clear();
 		physicScene.clear();
@@ -168,6 +190,34 @@ namespace Game
 		UpdateLeftStickVector();
 		UpdateLookTo();
 		vsm.Step();
+	}
+
+	void VenomController::OnStaticContactEvent(JUUID physicObject, unsigned int event)
+	{
+		PhysicObjectID phO = physicObject;
+
+		if (std::set<VenomStates>({ VS_GrabWall, VS_WallIdle, VS_CrawlOnWall, VS_DetachFromWall }).contains(vsm.currentState))
+			return;
+
+		/*
+		if ((phO->collisionMask() & CF_Floor) && (event & PxPairFlag::eNOTIFY_TOUCH_FOUND))
+		{
+			GetBrawlerCam(camera)->followY(false);
+		}
+		*/
+	}
+
+	void VenomController::OnCharacterHitEvent(PxFilterData fd)
+	{
+		std::set<VenomStates> nonFloorStates = { VS_GrabWall, VS_WallIdle, VS_CrawlOnWall, VS_DetachFromWall };
+		//skips contacts if the character is in a wall state
+		if (nonFloorStates.contains(vsm.currentState))
+			return;
+
+		if ((CM_Floor & fd.word0) && GetBrawlerCam(camera)->followY())
+		{
+			GetBrawlerCam(camera)->followY(false);
+		}
 	}
 
 	//JS binding
@@ -301,11 +351,6 @@ namespace Game
 			}
 		}
 		CharacterMoveXYPlane(stickMovement, gameUpdateFrequency, sideSpeed);
-	}
-
-	bool VenomController::AttachedToWall()
-	{
-		return std::set<VenomStates>({ VS_GrabWall, VS_WallIdle, VS_CrawlOnWall, }).contains(vsm.currentState);
 	}
 
 	//Intro
@@ -649,6 +694,7 @@ namespace Game
 	{
 		venom->animationUseTransformation(true);
 		venom->SetCurrentAnimation("FloorToWall");
+		GetBrawlerCam(camera)->followY(true);
 	}
 
 	//WallIdle
@@ -670,7 +716,7 @@ namespace Game
 		}
 		else if (ShouldDetachFromWall())
 		{
-
+			vsm.ChangeState(VS_DetachFromWall);
 		}
 	}
 
@@ -701,6 +747,7 @@ namespace Game
 		}
 		else if (ShouldDetachFromWall())
 		{
+			vsm.ChangeState(VS_DetachFromWall);
 			return;
 		}
 
@@ -714,6 +761,41 @@ namespace Game
 		float l = std::clamp(len.m128_f32[0], 0.0f, 1.0f);
 		float tf = std::lerp(wallMoveMinTimeFactor(), wallMoveMaxTimeFactor(), l);
 		venom->animationTimeFactor(tf);
+	}
+
+	//DetachFromWall
+	void VenomController::EnterDetachFromWall()
+	{
+		venom->SetCurrentAnimation("DetachFromWall");
+	}
+
+	//Fall
+	void VenomController::EnterFalling()
+	{
+		venom->SetCurrentAnimation("JumpLoop", 0.0f, 1.0f, true, true);
+		jumping = true;
+		canJump = false;
+		downSpeed = 0.0f;
+		touchingDown = false;
+	}
+
+	void VenomController::Falling()
+	{
+		if (ShouldJumpKick())
+		{
+			vsm.ChangeState(VS_JumpKick);
+			return;
+		}
+
+		XMVECTOR len = XMVector3Length(leftStick);
+		float l = XMVectorGetX(len);
+		JumpingMoveForward(walkSpeed() * l);
+		if (touchingDown && jumping && !canJump)
+		{
+			jumping = false;
+			canJump = true;
+			vsm.ChangeState(VS_Idle);
+		}
 	}
 }
 
@@ -753,7 +835,7 @@ namespace Game
 //Onwall_To_Jump
 //Move_To_LowCrawl_F
 //Jump_To_LowCrawl_F 
-//JumpFromWall: LowCrawl_To_Onwall     ->  Onwall_To_Jump
+//DetachFromWall: LowCrawl_To_Onwall     ->  Onwall_To_Jump
 //				(mirar muro a camara)  -> backflip to fall
 //LowCrawl_To_Jump
 //103501_Wallrun_F

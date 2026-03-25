@@ -37,10 +37,10 @@ inline std::unordered_map<PhysicsBehavior, std::string> PhysicsBehaviorToString 
 
 inline std::unordered_map<std::string, PhysicsBehavior> StringToPhysicsBehavior =
 {
-		{ "Static", PB_Static },
-		{ "Dynamic", PB_Dynamic },
-		{ "Trigger", PB_Trigger },
-		{ "Character", PB_Character },
+	{ "Static", PB_Static },
+	{ "Dynamic", PB_Dynamic },
+	{ "Trigger", PB_Trigger },
+	{ "Character", PB_Character },
 };
 
 namespace Physics
@@ -84,6 +84,7 @@ namespace Physics
 		JUUID uuid();
 		bool CanBuild();
 		void InheritGeometryAttributes();
+		PxFilterData GetPxFilterData();
 		void CreatePhysicsBehavior();
 		void CreateStaticMeshBehavior();
 		void CreateDynamicMeshBehavior();
@@ -161,6 +162,10 @@ namespace Physics
 	void RegisterTriggerContactCallback(TriggerID trigger, std::function<void(SUUUID, unsigned int)> callback);
 	void UnregisterTriggerContactCallback(TriggerID trigger);
 	void CallTriggerContactCallback(TriggerID trigger, SUUUID sceneObject, unsigned int event);
+	//Character Callback
+	void RegisterCharacterHitCallback(JUUID object, std::function<void(PxFilterData)> callback);
+	void UnregisterCharacterHitCallback(JUUID object);
+	void CallCharacterHitCallback(JUUID destObject, PxFilterData filterData);
 
 	DEF_TEMPLATE_ID(PhysicObject, GetPhysicObject);
 };

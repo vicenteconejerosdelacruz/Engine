@@ -54,13 +54,42 @@ namespace Physics
 		PX_RELEASE(gFoundation);
 	}
 
+	PxFilterFlags BitmaskFilterShader(
+		PxFilterObjectAttributes attributes0, PxFilterData fd0,
+		PxFilterObjectAttributes attributes1, PxFilterData fd1,
+		PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize)
+	{
+		// 1. Ignorar si ambos son triggers (opcional, según tu juego)
+		if (PxFilterObjectIsTrigger(attributes0) || PxFilterObjectIsTrigger(attributes1))
+		{
+			pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
+			return PxFilterFlag::eDEFAULT;
+		}
+
+		// 2. Lógica de Bitmask: 
+		// ¿El grupo de A está en la máscara de colisión de B? 
+		// Y ¿El grupo de B está en la máscara de colisión de A?
+		if ((fd0.word0 & fd1.word1) && (fd1.word0 & fd0.word1))
+		{
+			// Si ambos quieren chocar, habilitamos la resolución física y los eventos
+			pairFlags = PxPairFlag::eCONTACT_DEFAULT; // Chocan y rebotan
+			pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND; // Avisar al código (onContact)
+
+			return PxFilterFlag::eDEFAULT;
+		}
+
+		// Si no pasan el AND binario, se ignoran por completo (atraviesan)
+		return PxFilterFlag::eSUPPRESS;
+	}
+
 	void CreatePhysicsScene(PhysicSceneID physicScene)
 	{
 		PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
 		XMFLOAT3 gravity = physicScene->gravity();
 		sceneDesc.gravity = PxVec3(gravity.x, gravity.y, gravity.z);
 		sceneDesc.cpuDispatcher = gDispatcher;
-		sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+		//sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+		sceneDesc.filterShader = BitmaskFilterShader;
 		sceneDesc.cudaContextManager = gCudaContextManager;
 		sceneDesc.flags |= PxSceneFlag::eENABLE_GPU_DYNAMICS;
 		sceneDesc.broadPhaseType = PxBroadPhaseType::eGPU;

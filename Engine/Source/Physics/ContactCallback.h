@@ -1,5 +1,4 @@
-#ifndef _PHYSICS_CONTACT_CALLBACK_H
-#define _PHYSICS_CONTACT_CALLBACK_H
+#pragma once 
 
 #include <PxPhysicsAPI.h>
 #include <UUID.h>
@@ -36,5 +35,3 @@ namespace Physics
 		PhysicSceneID physicScene;
 	};
 }
-
-#endif

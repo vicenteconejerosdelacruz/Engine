@@ -3,5 +3,5 @@
 
 std::vector<std::string> Physics::GetCollisionMasks()
 {
-	return nostd::GetKeysFromMap(StringToCollisionFlags);
+	return nostd::GetValuesFromFlagsMap(CollisionMasksToString);
 }

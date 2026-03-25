@@ -44,11 +44,7 @@ namespace Game
 		//object to interact with
 		CameraID camera;
 		RenderableID venomR;
-		bool follow = true;
-		float initialY;
-		float lastVenomY;
-		float currentVenomY;
-		float deltaY;
-		bool isAttachedToWall = false;
+		float Ycam2venom;
+		float YcamInitial;
 	};
 }

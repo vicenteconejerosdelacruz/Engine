@@ -9,5 +9,7 @@ JEXPOSE_TRANSFORM_CALLBACK(XMFLOAT3, rotation, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT
 JEXPOSE_TRANSFORM(XMFLOAT3, scale, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(1.0f, 1.0f, 1.0f), jedv_t_float3, 1, false)
 JEXPOSE_TRANSFORM(XMFLOAT4, color, ToXMFLOAT4, FromXMFLOAT4, XMFLOAT4(0.2f, 1.0f, 0.78f, 0.5f), jedv_t_color_float4, 1, false)
 JEXPOSE(bool, overrideColor, false, jedv_t_boolean, 1, false)
+JEXPOSE_FLAG(objectMask, 0U, GetCollisionMasks, 1, false)
+JEXPOSE_FLAG(collisionMask, 0U, GetCollisionMasks, 1, false)
 JEXPOSE(std::string, geometry, "", jedv_t_te_physycgeometry, 1, true)
 JTRACKUUID(Boundary, Boundaries, 0, true)

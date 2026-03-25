@@ -162,6 +162,30 @@ namespace nostd {
 		return keys;
 	}
 
+	template<typename K>
+	inline std::vector<std::string> GetValuesFromFlagsMap(std::map<K, std::string>& map)
+	{
+		std::vector<std::string> ret;
+		for (unsigned int i = 0; i < map.size(); i++)
+		{
+			K bitmask = static_cast<K>(1 << i);
+			ret.push_back(map.at(bitmask));
+		}
+		return ret;
+	}
+
+	template<typename K>
+	inline std::vector<std::string> GetValuesFromFlagsMap(std::unordered_map<K, std::string>& map)
+	{
+		std::vector<std::string> ret;
+		for (unsigned int i = 0; i < map.size(); i++)
+		{
+			K bitmask = static_cast<K>(1 << i);
+			ret.push_back(map.at(bitmask));
+		}
+		return ret;
+	}
+
 	template<typename T = JUUID>
 	inline std::set<T> GetUUIDS(auto& iterable)
 	{

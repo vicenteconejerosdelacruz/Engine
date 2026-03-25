@@ -132,7 +132,9 @@ namespace Scene
 			{ "geometry", geometry() },
 			{ "color", FromXMFLOAT4(color()) },
 			{ "overrideColor", overrideColor() },
-			{ "skipRendering", skipRendering() }
+			{ "skipRendering", skipRendering() },
+			{ "objectMask", objectMask() },
+			{ "collisionMask", collisionMask() }
 		};
 
 		std::string pOname = name() + "-physicObject";
@@ -241,6 +243,22 @@ namespace Scene
 				b->clean(Boundary::Update_skipRendering);
 			};
 #endif
+		auto checkObjectMask = [](BoundaryID t)
+			{
+				if (!t->dirty(Boundary::Update_objectMask)) return;
+
+				t->physicObject->objectMask(t->objectMask());
+
+				t->clean(Boundary::Update_objectMask);
+			};
+		auto checkCollisionMask = [](BoundaryID b)
+			{
+				if (!b->dirty(Boundary::Update_collisionMask)) return;
+
+				b->physicObject->collisionMask(b->collisionMask());
+
+				b->clean(Boundary::Update_collisionMask);
+			};
 
 		std::for_each(bs.begin(), bs.end(), checkForPosRot);
 		std::for_each(bs.begin(), bs.end(), checkForScale);
@@ -248,6 +266,8 @@ namespace Scene
 		std::for_each(bs.begin(), bs.end(), checkForColor);
 		std::for_each(bs.begin(), bs.end(), checkForSkipRendering);
 #endif
+		std::for_each(bs.begin(), bs.end(), checkObjectMask);
+		std::for_each(bs.begin(), bs.end(), checkCollisionMask);
 		std::for_each(bs.begin(), bs.end(), checkForDelete);
 	}
 

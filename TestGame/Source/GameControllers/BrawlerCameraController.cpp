@@ -48,11 +48,8 @@ namespace Game
 
 		camera = so;
 		venomR = MAKESUUUID(std::get<0>(so), venom());
-		initialY = venomR->position().y;
-		lastVenomY = initialY;
-		currentVenomY = currentVenomY;
-		deltaY = 0.0f;
-		isAttachedToWall = false;
+		YcamInitial = camera->position().y;
+		Ycam2venom = YcamInitial - venomR->position().y;
 	}
 
 	void BrawlerCameraController::Unmap()
@@ -71,30 +68,18 @@ namespace Game
 
 		XMFLOAT3 p = camera->position();
 
-		if (follow)
+		if (followX())
 		{
 			p.x = venomR->position().x;
 		}
 
-		VenomController* venom = static_cast<VenomController*>(GetController(venomR->at("controllers").at("venom")).get());
-		if (venom->AttachedToWall())
+		if (followY())
 		{
-			if (!isAttachedToWall)
-			{
-				isAttachedToWall = true;
-				lastVenomY = venomR->position().y;
-				currentVenomY = lastVenomY;
-			}
-			else
-			{
-				lastVenomY = currentVenomY;
-				currentVenomY = venomR->position().y;
-			}
-			p.y += (currentVenomY - lastVenomY);
+			p.y = venomR->position().y + Ycam2venom;
 		}
 		else
 		{
-			isAttachedToWall = false;
+			p.y = YcamInitial;
 		}
 
 		camera->position(p);
@@ -122,8 +107,8 @@ namespace Game
 	v8_functions_creators BrawlerCameraController::GetV8FunctionsCreators()
 	{
 		return {
-			{ "StopCameraFollow", v8_wrap_call([&] { follow = false; }) },
-			{ "StartCameraFollow", v8_wrap_call([&] { follow = true; }) },
+			//{ "StopCameraFollow", v8_wrap_call([&] { follow = false; }) },
+			//{ "StartCameraFollow", v8_wrap_call([&] { follow = true; }) },
 		};
 	}
 }

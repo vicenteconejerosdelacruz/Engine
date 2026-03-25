@@ -1,22 +1,29 @@
 #include <vector>
 #include <string>
 
-enum CollisionFlags
+
+enum CollisionMasks
 {
-	CF_WallGrabArea = 1 << 0,
-	CF_WallBlockVerticalUp = 1 << 1,
+	CM_Static = 1 << 0,
+	CM_Floor = 1 << 1,
+	CM_Hero = 1 << 2,
+	CM_Enemy = 1 << 3,
 };
 
-inline std::unordered_map<CollisionFlags, std::string> CollisionFlagsToString =
+inline std::map<CollisionMasks, std::string> CollisionMasksToString =
 {
-	{ CF_WallGrabArea, "WallGrabArea" },
-	{ CF_WallBlockVerticalUp, "WallBlockVerticalUp" },
+	{ CM_Static, "Static" },
+	{ CM_Floor, "Floor" },
+	{ CM_Hero, "Hero" },
+	{ CM_Enemy, "Enemy" },
 };
 
-inline std::unordered_map<std::string, CollisionFlags> StringToCollisionFlags =
+inline std::map<std::string, CollisionMasks> StringToCollisionMasks =
 {
-	{ "WallGrabArea", CF_WallGrabArea },
-	{ "WallBlockVerticalUp", CF_WallBlockVerticalUp },
+	{ "Static", CM_Static },
+	{ "Floor", CM_Floor },
+	{ "Hero", CM_Hero },
+	{ "Enemy", CM_Enemy },
 };
 
 namespace Physics

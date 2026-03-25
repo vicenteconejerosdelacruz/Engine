@@ -183,6 +183,7 @@ namespace Game
 	void ThirdPersonController::OnTriggerEvent(JUUID triggerPhysicObject, unsigned int event)
 	{
 		PhysicObjectID physicObject = triggerPhysicObject;
+		/*
 		if (physicObject->trigger->collisionMask() & CF_WallGrabArea)
 		{
 			if (event & PxPairFlag::eNOTIFY_TOUCH_FOUND)
@@ -194,6 +195,7 @@ namespace Game
 				canJump = false;
 			}
 		}
+		*/
 	}
 }
 

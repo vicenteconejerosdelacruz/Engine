@@ -515,6 +515,7 @@
     <ClInclude Include="Common\d3dx12.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Physics\Boundary.h" />
+    <ClInclude Include="Physics\CharacterHitCallback.h" />
     <ClInclude Include="Physics\PhysicObject.h" />
     <ClInclude Include="Physics\Physics.h" />
     <ClInclude Include="Primitives\BoxLines.h" />
@@ -651,6 +652,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Editor_Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Physics\CharacterHitCallback.cpp" />
     <ClCompile Include="Scripting\NoV8.cpp" />
     <ClInclude Include="Scripting\NoV8.h" />
     <ClCompile Include="Physics\Boundary.cpp" />

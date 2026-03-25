@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "PhysicObject.h"
 #include <Primitives.h>
-//Physx
-#include <PxPhysicsAPI.h>
+#include "CharacterHitCallback.h" 
 #include <NoMath.h>
+#include <PxPhysicsAPI.h>
 
 #if defined(_EDITOR)
 namespace Editor
@@ -58,6 +58,7 @@ namespace Physics
 	std::map<SUUUID, JUUID> physicTriggerUUIDBySUUID;
 	std::map<PhysicsBehavior, std::map<JUUID, std::function<void(JUUID, unsigned int)>>> physicContactSubscribers;
 	std::map<TriggerID, std::function<void(SUUUID, unsigned int)>> triggerContactSubscribers;
+	std::map<JUUID, std::function<void(PxFilterData)>> characterHitSubscriber;
 
 #if defined(_EDITOR)
 
@@ -145,6 +146,14 @@ namespace Physics
 		}
 	}
 
+	PxFilterData PhysicObject::GetPxFilterData()
+	{
+		PxFilterData filterData;
+		filterData.word0 = objectMask();
+		filterData.word1 = collisionMask();
+		return filterData;
+	}
+
 	void PhysicObject::CreatePhysicsBehavior()
 	{
 		PhysicGeometryJsonID jg = geometry();
@@ -194,6 +203,7 @@ namespace Physics
 		actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
 		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
 		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), localRotQ));
+		shape->setSimulationFilterData(GetPxFilterData());
 
 		//set the actor position and rotation
 		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
@@ -235,6 +245,7 @@ namespace Physics
 		//create the PxShape
 		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
 		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), localRotQ));
+		shape->setSimulationFilterData(GetPxFilterData());
 
 		//set the actor position and rotation
 		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
@@ -280,6 +291,8 @@ namespace Physics
 				desc.material = material;
 				desc.position = ToPxVec3d(renderable->position() + localPosition());
 				desc.userData = this;
+				CharacterHitCallback* cctHit = new CharacterHitCallback(uuid());
+				desc.reportCallback = cctHit;
 				controller = manager->createController(desc);
 			};
 
@@ -292,6 +305,8 @@ namespace Physics
 				desc.material = material;
 				desc.position = ToPxVec3d(renderable->position() + localPosition());
 				desc.userData = this;
+				CharacterHitCallback* cctHit = new CharacterHitCallback(uuid());
+				desc.reportCallback = cctHit;
 				controller = manager->createController(desc);
 			};
 
@@ -305,6 +320,9 @@ namespace Physics
 
 		controller->setUserData(this);
 		controller->getActor()->userData = this;
+		PxShape* cctShape;
+		controller->getActor()->getShapes(&cctShape, 1);
+		cctShape->setSimulationFilterData(GetPxFilterData());
 
 		physicCharacterUUIDBySUUID[renderable()] = at("uuid");
 	}
@@ -335,6 +353,7 @@ namespace Physics
 		//create the PxShape
 		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material, PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION);
 		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), localRotQ));
+		shape->setSimulationFilterData(GetPxFilterData());
 
 		//set the actor position and rotation
 		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
@@ -369,6 +388,7 @@ namespace Physics
 		actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
 		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
 		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
+		shape->setSimulationFilterData(GetPxFilterData());
 
 		//set the actor position and rotation
 		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
@@ -405,6 +425,7 @@ namespace Physics
 		//create the PxShape
 		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
 		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
+		shape->setSimulationFilterData(GetPxFilterData());
 
 		//set the actor position and rotation
 		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
@@ -455,6 +476,7 @@ namespace Physics
 		//create the PxShape
 		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material, PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION);
 		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
+		shape->setSimulationFilterData(GetPxFilterData());
 
 		//set the actor position and rotation
 		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
@@ -664,7 +686,7 @@ namespace Physics
 
 	std::vector<std::string> PhysicObject::GetPhysicBehaviorAttributes()
 	{
-		std::vector<std::string> atts = { "behavior", "color", "overrideColor", "skipRendering" };
+		std::vector<std::string> atts = { "behavior", "color", "overrideColor", "skipRendering", "objectMask", "collisionMask" };
 
 		std::vector<std::string> staticAtts =
 		{
@@ -1251,6 +1273,22 @@ namespace Physics
 
 				p->clean(flags);
 			};
+		auto checkPxFilterData = [](PhysicObjectID p)
+			{
+				if (!p->dirty({ PhysicObject::Update_objectMask,PhysicObject::Update_collisionMask })) return;
+
+				if (p->behavior() != PB_Character)
+				{
+					p->shape->setSimulationFilterData(p->GetPxFilterData());
+				}
+				else
+				{
+					p->DestroyPhysicsBehavior();
+					p->CreatePhysicsBehavior();
+				}
+
+				p->clean({ PhysicObject::Update_objectMask,PhysicObject::Update_collisionMask });
+			};
 #if defined(_EDITOR)
 		std::map<PhysicsBehavior, XMFLOAT4> behaviorColors =
 		{
@@ -1269,6 +1307,7 @@ namespace Physics
 		std::for_each(phOs.begin(), phOs.end(), checkLocalPose);
 		std::for_each(phOs.begin(), phOs.end(), checkBehaviorGeom);
 		std::for_each(phOs.begin(), phOs.end(), checkVelocity);
+		std::for_each(phOs.begin(), phOs.end(), checkPxFilterData);
 #if defined(_EDITOR)
 		std::for_each(phOs.begin(), phOs.end(), updateColors);
 #endif
@@ -1307,5 +1346,22 @@ namespace Physics
 		if (!triggerContactSubscribers.contains(trigger)) return;
 
 		triggerContactSubscribers.at(trigger)(sceneObject, event);
+	}
+	//Character Callback
+	void RegisterCharacterHitCallback(JUUID object, std::function<void(PxFilterData)> callback)
+	{
+		characterHitSubscriber[object] = callback;
+	}
+
+	void UnregisterCharacterHitCallback(JUUID object)
+	{
+		if (characterHitSubscriber.contains(object))
+			characterHitSubscriber.erase(object);
+	}
+
+	void CallCharacterHitCallback(JUUID destObject, PxFilterData filterData)
+	{
+		if (characterHitSubscriber.contains(destObject))
+			characterHitSubscriber.at(destObject)(filterData);
 	}
 };
