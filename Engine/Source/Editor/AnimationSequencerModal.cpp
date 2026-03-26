@@ -646,6 +646,7 @@ void AnimationSequencerModal::DrawSequenceSelector(
 		std::vector<std::string> sequences = { "" };
 		std::vector<std::string> modelSequences = nostd::GetKeysFromMap(animationsSequences.sequences);
 		nostd::AppendToVector(sequences, modelSequences);
+		std::sort(sequences.begin(), sequences.end());
 
 		ImGui::DrawItemWithEnabledState([this, onEraseSequence]
 			{
