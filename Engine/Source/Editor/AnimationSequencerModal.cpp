@@ -389,6 +389,8 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			addNewSequence = false;
 			animationsSequences.sequences.insert_or_assign(seqName, Sequence());
 			selectedSequence = seqName;
+			selectedTransformationKeyframe = nullptr;
+			nextSelectedTransformationKeyframe = nullptr;
 			playingSequence = false;
 			playingSequenceTime = 0.0f;
 			Sequence& seq = animationsSequences.sequences.at(seqName);
