@@ -147,7 +147,6 @@ namespace Game
 		RegisterCharacterHitCallback(physicObject(), [&](PxFilterData fd)
 			{
 				OnCharacterHitEvent(fd);
-				OutputDebugStringA(std::string("CCT tocando objeto con Word0: " + std::to_string(fd.word0) + "y Word1:" + std::to_string(fd.word1) + "\n").c_str());
 			}
 		);
 		SetInitialConditions();
