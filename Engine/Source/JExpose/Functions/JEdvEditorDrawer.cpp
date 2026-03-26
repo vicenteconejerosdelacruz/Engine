@@ -5230,6 +5230,7 @@ JEdvEditorDrawerFunction DrawVectorObject<jedv_t_controller_vector>()
 					std::string controllerUUID = json.at(objectIndex)->at(attribute).at(controllerName);
 					DestroyController(controllerUUID);
 					json.at(objectIndex)->at(attribute).erase(controllerName);
+					Editor::MarkSceneUnitAsModified(Editor::currentSceneUnitId);
 				};
 			auto addController = [&json, attribute](int objectIndex, std::string controllerName)
 				{
@@ -5238,6 +5239,7 @@ JEdvEditorDrawerFunction DrawVectorObject<jedv_t_controller_vector>()
 					JUUID uuid = CreateController(controllerName, MAKESUUUID(Editor::currentSceneUnitId, sceneObject), placeholder);
 					json.at(objectIndex)->at(attribute)[controllerName] = uuid;
 					GetController(uuid)->Map(MAKESUUUID(Editor::currentSceneUnitId, sceneObject));
+					Editor::MarkSceneUnitAsModified(Editor::currentSceneUnitId);
 				};
 			auto swapController = [&](int objectIndex, std::string controllerFrom, std::string controllerTo)
 				{
