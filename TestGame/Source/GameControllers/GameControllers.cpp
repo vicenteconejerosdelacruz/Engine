@@ -3,6 +3,7 @@
 #include "SpinYawController.h"
 #include "ThirdPersonController.h"
 #include "BrawlerCameraController.h"
+#include "Enemies/TugController.h"
 
 namespace Game
 {
@@ -12,6 +13,7 @@ namespace Game
 		{ "spinyaw", [](nlohmann::json& json) { return std::make_unique<Game::SpinYawController>(json); }},
 		{ "thirdperson", [](nlohmann::json& json) { return std::make_unique<Game::ThirdPersonController>(json); }},
 		{ "brawler-cam", [](nlohmann::json& json) { return std::make_unique<Game::BrawlerCameraController>(json); }},
+		{ "tug", [](nlohmann::json& json) { return std::make_unique<Game::TugController>(json); }},
 	};
 
 	std::vector<std::string> GetControllers()

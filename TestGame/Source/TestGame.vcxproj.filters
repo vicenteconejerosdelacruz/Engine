@@ -66,6 +66,12 @@
     <ClInclude Include="GameControllers\BrawlerCameraController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameControllers\Enemies\TugController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Controllers\TugControllerAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TestGame.cpp">
@@ -99,6 +105,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameControllers\BrawlerCameraController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameControllers\Enemies\TugController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

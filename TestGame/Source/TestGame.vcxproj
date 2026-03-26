@@ -507,6 +507,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="GameControllers\BrawlerCameraController.h" />
+    <ClInclude Include="GameControllers\Enemies\TugController.h" />
     <ClInclude Include="GameControllers\SpinYawController.h" />
     <ClInclude Include="GameControllers\ThirdPersonController.h" />
     <ClInclude Include="GameControllers\VenomController.h" />
@@ -524,6 +525,7 @@
     <ClInclude Include="JExpose\Controllers\BrawlerCameraControllerAtt.h" />
     <ClInclude Include="JExpose\Controllers\SpinYawControllerAtt.h" />
     <ClInclude Include="JExpose\Controllers\ThirdPersonControllerAtt.h" />
+    <ClInclude Include="JExpose\Controllers\TugControllerAtt.h" />
     <ClInclude Include="JExpose\Controllers\VenomControllerAtt.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
@@ -532,6 +534,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameControllers\BrawlerCameraController.cpp" />
+    <ClCompile Include="GameControllers\Enemies\TugController.cpp" />
     <ClCompile Include="GameControllers\GameControllers.cpp" />
     <ClCompile Include="GameControllers\SpinYawController.cpp" />
     <ClCompile Include="GameControllers\ThirdPersonController.cpp" />
