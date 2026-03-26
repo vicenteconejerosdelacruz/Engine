@@ -106,6 +106,8 @@ void ChannelElement::Move(int frames, int totalFrames, int framesPerSecond)
 
 std::tuple<ChannelElement, ChannelElement> ChannelElement::Split(int frame)
 {
+	frame = std::max(frame, 1);
+
 	std::tuple<ChannelElement, ChannelElement> elements;
 	auto& [left, right] = elements;
 
