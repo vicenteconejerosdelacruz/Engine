@@ -410,3 +410,4 @@ FodyWeavers.xsd
 /TestGame/Editor_Release
 /SDKs/v8pp-2.1.1/out
 /TestGame/Target/Assets/**/*.cooked
+/SDKs/ultralight/ultralight-free-sdk-1.4.0-win-x64
