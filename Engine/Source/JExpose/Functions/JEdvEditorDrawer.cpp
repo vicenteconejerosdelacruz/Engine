@@ -1844,6 +1844,7 @@ void DrawResourceSelection(
 	std::function<std::string(JUUID)> ResourceUUIDToName,
 	std::function<std::vector<JUUIDName>()> GetResourcesUUIDsNames,
 	const char* iconCode,
+	std::function<void(const char*, JUUIDName)> OpenItem,
 	bool readOnly,
 	std::function<void(JUUID)> updateCb
 )
@@ -1898,7 +1899,7 @@ void DrawResourceSelection(
 			update("");
 		}
 		ImGui::SameLine();
-		ImGui::OpenTemplate(iconCode, selected);
+		OpenItem(iconCode, selected);
 		ImGui::SameLine();
 		if (!readOnly)
 		{
@@ -1933,7 +1934,7 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_renderable>()
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
 			auto getName = [](JUUID uuid) { return Scene::GetRenderableName(MAKESUUUID(Editor::currentSceneUnitId, uuid)); };
-			DrawResourceSelection(attribute, json, getName, SortUUIDSUNameByName(Editor::currentSceneUnitId, [](auto unit) { return Scene::GetRenderablesIDsNames(unit, false); }), ICON_FA_SNOWMAN);
+			DrawResourceSelection(attribute, json, getName, SortUUIDSUNameByName(Editor::currentSceneUnitId, [](auto unit) { return Scene::GetRenderablesIDsNames(unit, false); }), ICON_FA_SNOWMAN, ImGui::OpenSceneObject);
 		};
 }
 
@@ -1942,7 +1943,7 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_mesh>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
-			DrawResourceSelection(attribute, json, Templates::GetMeshName, SortUUIDNameByName(Templates::GetMeshesUUIDsNames), ICON_FA_HOTEL, true);
+			DrawResourceSelection(attribute, json, Templates::GetMeshName, SortUUIDNameByName(Templates::GetMeshesUUIDsNames), ICON_FA_HOTEL, [](const char*, JUUIDName) {}, true);
 		};
 }
 
@@ -1951,7 +1952,7 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_shader>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
-			DrawResourceSelection(attribute, json, Templates::GetShaderName, SortUUIDNameByName(Templates::GetShadersUUIDsNames), ICON_FA_FILE_CODE);
+			DrawResourceSelection(attribute, json, Templates::GetShaderName, SortUUIDNameByName(Templates::GetShadersUUIDsNames), ICON_FA_FILE_CODE, ImGui::OpenTemplate);
 		};
 }
 
@@ -1961,7 +1962,7 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_model3d>()
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
 			bool systemCreated = json.at(0)->contains("systemCreated");
-			DrawResourceSelection(attribute, json, Templates::GetModel3DName, SortUUIDNameByName(Templates::GetModel3DsUUIDsNames), ICON_FA_CUBE, systemCreated);
+			DrawResourceSelection(attribute, json, Templates::GetModel3DName, SortUUIDNameByName(Templates::GetModel3DsUUIDsNames), ICON_FA_CUBE, ImGui::OpenTemplate, systemCreated);
 		};
 }
 
@@ -1970,7 +1971,7 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_sound>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
-			DrawResourceSelection(attribute, json, Templates::GetSoundName, SortUUIDNameByName(Templates::GetSoundsUUIDsNames), ICON_FA_MUSIC);
+			DrawResourceSelection(attribute, json, Templates::GetSoundName, SortUUIDNameByName(Templates::GetSoundsUUIDsNames), ICON_FA_MUSIC, ImGui::OpenTemplate);
 		};
 }
 
@@ -1979,7 +1980,7 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_texture>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
-			DrawResourceSelection(attribute, json, Templates::GetTextureName, SortUUIDNameByName(Templates::GetTexturesUUIDsNames), ICON_FA_IMAGE);
+			DrawResourceSelection(attribute, json, Templates::GetTextureName, SortUUIDNameByName(Templates::GetTexturesUUIDsNames), ICON_FA_IMAGE, ImGui::OpenTemplate);
 		};
 }
 
@@ -2031,6 +2032,7 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_physycgeometry>()
 					DrawResourceSelection(
 						attribute, json, Templates::GetPhysicGeometryName,
 						SortUUIDNameByName(Templates::GetPhysicGeometrysUUIDsNames), ICON_FA_IMAGE,
+						ImGui::OpenTemplate,
 						false, [&](JUUID uuid)
 						{
 							for (auto& j : json)
@@ -2046,6 +2048,7 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_physycgeometry>()
 					DrawResourceSelection(
 						attribute, json, Templates::GetPhysicGeometryName,
 						SortUUIDNameByName(Templates::GetPhysicGeometrysTriggerUUIDsNames), ICON_FA_IMAGE,
+						ImGui::OpenTemplate,
 						false, [&](JUUID uuid)
 						{
 							for (auto& j : json)
@@ -2061,6 +2064,7 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_physycgeometry>()
 					DrawResourceSelection(
 						attribute, json, Templates::GetPhysicGeometryName,
 						SortUUIDNameByName(Templates::GetPhysicGeometrysCharacterUUIDsNames), ICON_FA_IMAGE,
+						ImGui::OpenTemplate,
 						false, [&](JUUID uuid)
 						{
 							for (auto& j : json)

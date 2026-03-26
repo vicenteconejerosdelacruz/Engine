@@ -857,7 +857,7 @@ namespace Editor
 
 		if (currentSceneUnitId != 0 && sceneObjectEdition.contains(currentSceneUnitId) && sceneObjectEdition.at(currentSceneUnitId).selectedNextFrame != "")
 		{
-			OpenTemplate(sceneObjectEdition.at(currentSceneUnitId).selectedNextFrame);
+			OpenSceneObject(sceneObjectEdition.at(currentSceneUnitId).selectedNextFrame);
 			sceneObjectEdition.at(currentSceneUnitId).selectedNextFrame = "";
 		}
 

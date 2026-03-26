@@ -181,6 +181,7 @@ void DrawResourceSelection(
 	std::function<std::string(JUUID)> ResourceUUIDToName,
 	std::function<std::vector<JUUIDName>()> GetResourcesUUIDsNames,
 	const char* iconCode,
+	std::function<void(const char*, JUUIDName)> OpenItem = [](const char* icon, JUUIDName resource) {},
 	bool readOnly = false,
 	std::function<void(JUUID)> updateCb = [](JUUID) {}
 );
