@@ -807,8 +807,9 @@ namespace Physics
 		}
 		else if (std::set<PhysicsBehavior>({ PB_Character }).contains(behavior()))
 		{
-			renderableLines->position(renderable->position());
-			renderableShape->position(renderable->position());
+			auto [pos, _, __, ___] = GetPhysicsAvatarTransformation();
+			renderableLines->position(pos);
+			renderableShape->position(pos);
 		}
 		else if (std::set<PhysicsBehavior>({ PB_Trigger }).contains(behavior()))
 		{
