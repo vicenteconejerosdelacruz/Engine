@@ -512,16 +512,6 @@
     <ClInclude Include="GameControllers\ThirdPersonController.h" />
     <ClInclude Include="GameControllers\VenomController.h" />
     <ClInclude Include="GamePhysics\GamePhysics.h" />
-    <ClInclude Include="GameStates\GameStates.h" />
-    <ClInclude Include="GameStates\Game\BootScreen.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="GameStates\Game\Loading.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="GameStates\Game\PlayMode.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="JExpose\Controllers\BrawlerCameraControllerAtt.h" />
     <ClInclude Include="JExpose\Controllers\SpinYawControllerAtt.h" />
     <ClInclude Include="JExpose\Controllers\ThirdPersonControllerAtt.h" />
@@ -540,15 +530,6 @@
     <ClCompile Include="GameControllers\ThirdPersonController.cpp" />
     <ClCompile Include="GameControllers\VenomController.cpp" />
     <ClCompile Include="GamePhysics\GamePhysics.cpp" />
-    <ClCompile Include="GameStates\Game\BootScreen.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GameStates\Game\Loading.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GameStates\Game\PlayMode.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">pch.h</PrecompiledHeaderFile>
