@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "TugController.h"
+#include "../VenomController.h"
 #include <StepTimer.h>
 #include <NoStd.h>
 #if defined(_EDITOR)
@@ -18,6 +19,17 @@ namespace Game
 #include <JEnd.h>
 
 #endif
+
+	VenomStates TugController::venomState()
+	{
+		return venomController()->vsm.currentState;
+	}
+
+	VenomController* TugController::venomController()
+	{
+		return GetController<VenomController>(venomR->at("controllers").at("venom"));
+	}
+
 	//Constructor and Binding
 	TugController::TugController(nlohmann::json& json) : Controller(json)
 	{
@@ -33,12 +45,15 @@ namespace Game
 			.currentState = TS_None,
 			.onEnter = {
 				{ TS_Idle, [&](auto* sm, TugStates prevState) { EnterIdle(); }},
+				{ TS_CombatIdle, [&](auto* sm, TugStates prevState) { EnterCombatIdle(); }},
 			},
 			.onLeave = {
 				{ TS_Idle,[&](auto* sm, TugStates prevState) { LeaveIdle(); }},
 			},
 			.onStep = {
+				{ TS_None, [&](auto* sm) { tugScale = tug->scale(); tugInitialLookTo = lookingTo(); tsm.ChangeState(TS_Idle); }},
 				{ TS_Idle, [&](auto* sm) { Idle(); }},
+				{ TS_CombatIdle, [&](auto* sm) { CombatIdle(); }},
 			}
 		};
 		SetInitialConditions();
@@ -47,6 +62,7 @@ namespace Game
 	void TugController::SetInitialConditions()
 	{
 		tsm.currentState = TS_None;
+		venomR = MAKESUUUID(tug.unit(), venom());
 	}
 
 #if defined(_EDITOR)
@@ -69,20 +85,6 @@ namespace Game
 		{
 			tug = so;
 		}
-		/*
-		physicScene = MAKESUUUID(unit, *GetPhysicScenes(unit).begin());
-		physicObject = venom->at("physicObject").at(0);
-		RegisterContactCallback(PB_Static, physicObject(), [&](JUUID uuid, unsigned int event)
-			{
-				OnStaticContactEvent(uuid, event);
-			}
-		);
-		RegisterCharacterHitCallback(physicObject(), [&](PxFilterData fd)
-			{
-				OnCharacterHitEvent(fd);
-			}
-		);
-		*/
 		SetInitialConditions();
 	}
 
@@ -104,7 +106,6 @@ namespace Game
 
 		float dt = static_cast<float>(timer.GetElapsedSeconds());
 
-		UpdateLookTo();
 		tsm.Step();
 	}
 
@@ -135,19 +136,63 @@ namespace Game
 
 	void TugController::UpdateLookTo()
 	{
+		float dx = venomR->position().x - tug->position().x;
+		if (dx > 0.0f)
+		{
+			if (lookingTo() == CLT_Left)
+			{
+				lookingTo(CLT_Right);
+				XMFLOAT3 scl = tug->scale() * lookToSwapVector();
+				tug->scale(scl);
+			}
+		}
+		else if (dx < 0.0f)
+		{
+			if (lookingTo() == CLT_Right)
+			{
+				lookingTo(CLT_Left);
+				XMFLOAT3 scl = tug->scale() * lookToSwapVector();
+				tug->scale(scl);
+			}
+		}
 	}
 
 	//Idle
-	void TugController::ShouldIdle()
+	bool TugController::ShouldIdle()
 	{
+		return false;
 	}
+
 	void TugController::EnterIdle()
 	{
+		tug->SetCurrentAnimation("TugIdle", 0.0f, 1.0f, true, true);
 	}
+
 	void TugController::LeaveIdle()
 	{
 	}
+
 	void TugController::Idle()
 	{
+		if (ShouldCombatIdle())
+		{
+			tsm.ChangeState(TS_CombatIdle);
+		}
+	}
+
+	//CombatIdle
+	bool TugController::ShouldCombatIdle()
+	{
+		return (venomState() == VS_Idle);
+	}
+
+	void TugController::EnterCombatIdle()
+	{
+		tug->SetCurrentAnimation("TugCombatIdle", 0.0f, combatIdleTimeFactor(), true, true);
+	}
+
+	void TugController::CombatIdle()
+	{
+		UpdateLookTo();
 	}
 };

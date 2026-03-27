@@ -5,16 +5,43 @@
 #include <string>
 #include <nlohmann/json.hpp>
 
+enum VenomStates;
+
+enum CharacterLookingTo
+{
+	CLT_Right,
+	CLT_Left,
+};
+
+inline static std::unordered_map<CharacterLookingTo, std::string> CharacterLookingToToString =
+{
+	{ CLT_Right, "Right" },
+	{ CLT_Left, "Left" },
+};
+
+inline static std::unordered_map<std::string, CharacterLookingTo> StringToCharacterLookingTo =
+{
+	{ "Right", CLT_Right },
+	{ "Left", CLT_Left },
+};
+
 enum TugStates
 {
 	TS_None,
-	TS_Idle
+	TS_Idle,
+	TS_CombatIdle,
+	TS_CombatFollow,
+	TS_CombatFollowBrawler,
+	TS_CombatPunch,
 };
 
 inline static std::unordered_map<std::string, TugStates> StringToTugStates =
 {
-	{ "None", TS_None},
-	{ "Idle", TS_Idle},
+	{ "None", TS_None },
+	{ "Idle", TS_Idle },
+	{ "CombatIdle", TS_CombatIdle },
+	{ "CombatFollowBrawler", TS_CombatFollowBrawler },
+	{ "CombatPunch", TS_CombatPunch },
 };
 
 namespace Game
@@ -31,6 +58,8 @@ namespace Game
 
 #endif
 
+	struct VenomController;
+
 	struct TugController : Controller
 	{
 #include <Attributes/JFlags.h>
@@ -41,11 +70,8 @@ namespace Game
 #include <TugControllerAtt.h>
 #include <JEnd.h>
 
-		enum LookingTo
-		{
-			LT_Right,
-			LT_Left,
-		};
+		VenomStates venomState();
+		VenomController* venomController();
 
 		//Constructor and Binding
 		TugController(nlohmann::json& json);
@@ -69,19 +95,25 @@ namespace Game
 		void UpdateLookTo();
 
 		//Idle
-		void ShouldIdle();
+		bool ShouldIdle();
 		void EnterIdle();
 		void LeaveIdle();
 		void Idle();
+
+		//CombatIdle
+		bool ShouldCombatIdle();
+		void EnterCombatIdle();
+		void CombatIdle();
 
 		//State machine
 		GameStatesMachine<TugStates> tsm;
 
 		//Initial States
 		XMFLOAT3 tugScale;
-		LookingTo lookingTo = LT_Right;
+		CharacterLookingTo tugInitialLookTo;
 
 		//SceneObjects
 		RenderableID tug;
+		RenderableID venomR;
 	};
 };

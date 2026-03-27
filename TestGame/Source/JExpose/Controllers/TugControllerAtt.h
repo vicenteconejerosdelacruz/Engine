@@ -1,2 +1,6 @@
 JCLASS(TugController, _)
+JEXPOSE(std::string, venom, "", jedv_t_so_renderable, 1, false)
 JEXPOSE(float, walkSpeed, 3.0f, jedv_t_float, 1, false)
+JEXPOSE_ENUM(CharacterLookingTo, lookingTo, CLT_Right, jedv_t_enum, 1, false)
+JEXPOSE(float, combatIdleTimeFactor, 1.0f, jedv_t_float, 1, false)
+JEXPOSE_TRANSFORM(XMFLOAT3, lookToSwapVector, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(1.0f, 1.0f, 1.0f), jedv_t_float3, 1, false)
