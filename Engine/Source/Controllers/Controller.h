@@ -82,4 +82,10 @@ namespace Game
 
 	extern std::vector<std::string> GetControllers();
 	extern JUUID CreateController(std::string name, SUUUID sceneObject, nlohmann::json& json);
+
+	template<typename T>
+	T* GetController(JUUID uuid)
+	{
+		return static_cast<T*>(GetController(uuid).get());
+	}
 };
