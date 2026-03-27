@@ -141,6 +141,7 @@ namespace Scene
 		CreatePhysicSceneSceneObjects(unit);
 		CreateTriggerSceneObjects(unit);
 		CreateBoundarySceneObjects(unit);
+		CreateSceneControllerSceneObjects(unit);
 	}
 
 	void DestroyScene(SceneUnitId id)
@@ -361,6 +362,11 @@ namespace Scene
 				mover(GetBoundarysSceneObjects,uuid,fromId,toId);
 			}
 			},
+			{ SO_SceneControllers, [&](JUUID uuid, SceneUnitId fromId, SceneUnitId toId)
+			{
+				mover(GetSceneControllersSceneObjects,uuid,fromId,toId);
+			}
+			},
 		};
 
 		SceneObjectType type = GetSceneObjectType(fromId, uuid);
@@ -450,6 +456,13 @@ namespace Scene
 					auto& so = GetBoundarySceneObject(id, uuid);
 					so->BindToScene();
 				}
+			},
+			{
+				SO_SceneControllers, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& so = GetSceneControllerSceneObject(id, uuid);
+					so->BindToScene();
+				}
 			}
 		};
 
@@ -513,6 +526,11 @@ namespace Scene
 		case SO_Boundaries:
 		{
 			CreateBoundary(id, data);
+		}
+		break;
+		case SO_SceneControllers:
+		{
+			CreateSceneController(id, data);
 		}
 		break;
 		}
@@ -850,6 +868,12 @@ namespace Scene
 					auto& o = GetBoundarySceneObject(id, uuid);
 					return static_cast<SceneObject*>(o.get());
 				}
+			},
+			{ SO_SceneControllers, [](SceneUnitId id, JUUID uuid)
+				{
+					auto& o = GetSceneControllerSceneObject(id, uuid);
+					return static_cast<SceneObject*>(o.get());
+				}
 			}
 		};
 
@@ -921,6 +945,13 @@ namespace Scene
 							BoundaryID o = MAKESUUUID(id,uuid);
 							if (o->hidden()) return JUUIDName();
 							return str2JUUIDName(SceneObjectTypeToString.at(SO_Boundaries), o->uuid(),o->name());
+						}
+					},
+					{ SO_SceneControllers, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+						{
+							SceneControllerID o = MAKESUUUID(id,uuid);
+							if (o->hidden()) return JUUIDName();
+							return str2JUUIDName(SceneObjectTypeToString.at(SO_SceneControllers), o->uuid(),o->name());
 						}
 					}
 				};
@@ -999,6 +1030,13 @@ namespace Scene
 					if (o->hidden()) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Boundaries), o->uuid(),o->name());
 				}
+			},
+			{ SO_SceneControllers, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					SceneControllerID o = MAKESUUUID(id,uuid);
+					if (o->hidden()) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_SceneControllers), o->uuid(),o->name());
+				}
 			}
 		};
 
@@ -1075,6 +1113,13 @@ namespace Scene
 					if (o->hidden() || o->markedForDelete) return JUUIDName();
 					return str2JUUIDName(SceneObjectTypeToString.at(SO_Boundaries), o->uuid(),o->name());
 				}
+			},
+			{ SO_SceneControllers, [str2JUUIDName](SceneUnitId id, JUUID uuid)
+				{
+					SceneControllerID o = MAKESUUUID(id,uuid);
+					if (o->hidden() || o->markedForDelete) return JUUIDName();
+					return str2JUUIDName(SceneObjectTypeToString.at(SO_SceneControllers), o->uuid(),o->name());
+				}
 			}
 		};
 
@@ -1104,6 +1149,7 @@ namespace Scene
 			{ SO_PhysicScenes, GetPhysicSceneAttributes },
 			{ SO_Triggers, GetTriggerAttributes },
 			{ SO_Boundaries, GetBoundaryAttributes },
+			{ SO_SceneControllers, GetSceneControllerAttributes },
 		};
 		return GetSOAtts.at(so)();
 	}
@@ -1119,6 +1165,7 @@ namespace Scene
 			{ SO_PhysicScenes, GetPhysicSceneDrawers },
 			{ SO_Triggers, GetTriggerDrawers },
 			{ SO_Boundaries, GetBoundaryDrawers },
+			{ SO_SceneControllers, GetSceneControllerDrawers },
 		};
 		return GetSODrawers.at(so)();
 	}
@@ -1134,6 +1181,7 @@ namespace Scene
 			{ SO_PhysicScenes, GetPhysicScenePreviewers },
 			{ SO_Triggers, GetTriggerPreviewers },
 			{ SO_Boundaries, GetBoundaryPreviewers },
+			{ SO_SceneControllers, GetSceneControllerPreviewers },
 		};
 		return GetSOPreviewers.at(so)();
 	}
@@ -1149,6 +1197,7 @@ namespace Scene
 			{ SO_PhysicScenes, CreatePhysicSceneJson },
 			{ SO_Triggers, [] { auto json = CreateTriggerJson(); json["trigger"] = true; return json; } }, //inject this att to handle no trigger with meshes
 			{ SO_Boundaries, [] { auto json = CreateBoundaryJson(); json["boundary"] = true; return json; } }, //inject this att to handle no boundary with meshes
+			{ SO_SceneControllers, CreateSceneControllerJson },
 		};
 		return GetSOJson.at(so)();
 	}
@@ -1164,6 +1213,7 @@ namespace Scene
 			{ SO_PhysicScenes, GetPhysicSceneRequiredAttributes },
 			{ SO_Triggers, GetTriggerRequiredAttributes },
 			{ SO_Boundaries, GetBoundaryRequiredAttributes },
+			{ SO_SceneControllers, GetSceneControllerRequiredAttributes },
 
 		};
 		return GetSORequiredAtts.at(so)();
@@ -1180,6 +1230,7 @@ namespace Scene
 			{ SO_PhysicScenes, GetPhysicSceneCreatorDrawers },
 			{ SO_Triggers, GetTriggerCreatorDrawers },
 			{ SO_Boundaries, GetBoundaryCreatorDrawers },
+			{ SO_SceneControllers, GetSceneControllerCreatorDrawers },
 		};
 		return GetSODrawers.at(so)();
 	}
@@ -1195,6 +1246,7 @@ namespace Scene
 			{ SO_PhysicScenes, GetPhysicSceneCreatorValidator },
 			{ SO_Triggers, GetTriggerCreatorValidator },
 			{ SO_Boundaries, GetBoundaryCreatorValidator },
+			{ SO_SceneControllers, GetSceneControllerCreatorValidator },
 		};
 		return GetSOValidators.at(so)();
 	}
@@ -1213,6 +1265,7 @@ namespace Scene
 			{ SO_PhysicScenes, DeletePhysicScene },
 			{ SO_Triggers, DeleteTrigger },
 			{ SO_Boundaries, DeleteBoundary },
+			{ SO_SceneControllers, DeleteSceneController },
 		};
 		EraseSceneObjectFromSelection(id, uuid);
 		DeleteSO.at(type)(id, uuid);

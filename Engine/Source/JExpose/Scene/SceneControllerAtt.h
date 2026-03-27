@@ -1,0 +1,7 @@
+JCLASS(SceneController, GetSceneControllers)
+JTYPE(SceneObjectType, SO_SceneControllers)
+JEXPOSE(std::string, uuid, "", jedv_t_hidden, 0, false)
+JEXPOSE(bool, hidden, false, jedv_t_hidden, 0, false)
+JEXPOSE(std::string, name, "scene.controller", jedv_t_so_physicscene_name, 0, true)
+JEXPOSE_MAP_OBJECT(Controller, controllers, nlohmann::json::object({}), jedv_t_controller_vector, 1, false)
+JTRACKUUID(SceneController, SceneControllers, 1, true)

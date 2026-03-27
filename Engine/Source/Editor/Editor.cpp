@@ -1643,6 +1643,7 @@ namespace Editor
 		level[SceneObjectTypeJsonContainer.at(SO_PhysicScenes)] = json::array();
 		level[SceneObjectTypeJsonContainer.at(SO_Triggers)] = json::array();
 		level[SceneObjectTypeJsonContainer.at(SO_Boundaries)] = json::array();
+		level[SceneObjectTypeJsonContainer.at(SO_SceneControllers)] = json::array();
 
 		WriteRenderablesJson(id, level[SceneObjectTypeJsonContainer.at(SO_Renderables)]);
 		WriteLightsJson(id, level[SceneObjectTypeJsonContainer.at(SO_Lights)]);
@@ -1651,6 +1652,7 @@ namespace Editor
 		WritePhysicSceneJson(id, level[SceneObjectTypeJsonContainer.at(SO_PhysicScenes)]);
 		WriteTriggersJson(id, level[SceneObjectTypeJsonContainer.at(SO_Triggers)]);
 		WriteBoundariesJson(id, level[SceneObjectTypeJsonContainer.at(SO_Boundaries)]);
+		WriteSceneControllersJson(id, level[SceneObjectTypeJsonContainer.at(SO_SceneControllers)]);
 
 		std::string levelString = level.dump(4);
 		return levelString;
@@ -2992,6 +2994,7 @@ namespace Editor
 			{ SO_PhysicScenes, std::set<JUUID>() },
 			{ SO_Triggers, std::set<JUUID>() },
 			{ SO_Boundaries, std::set<JUUID>() },
+			{ SO_SceneControllers, std::set<JUUID>() },
 		};
 		std::map<SceneObjectType, std::set<JUUID>> currentObjects =
 		{
@@ -3002,6 +3005,7 @@ namespace Editor
 			{ SO_PhysicScenes, std::set<JUUID>() },
 			{ SO_Triggers, std::set<JUUID>() },
 			{ SO_Boundaries, std::set<JUUID>() },
+			{ SO_SceneControllers, std::set<JUUID>() },
 		};
 		//delete
 		std::map<SceneObjectType, std::set<JUUID>> toDelete =
@@ -3013,6 +3017,7 @@ namespace Editor
 			{ SO_PhysicScenes, std::set<JUUID>() },
 			{ SO_Triggers, std::set<JUUID>() },
 			{ SO_Boundaries, std::set<JUUID>() },
+			{ SO_SceneControllers, std::set<JUUID>() },
 		};
 		//create
 		std::map<SceneObjectType, std::set<JUUID>> toCreate =
@@ -3024,6 +3029,7 @@ namespace Editor
 			{ SO_PhysicScenes, std::set<JUUID>() },
 			{ SO_Triggers, std::set<JUUID>() },
 			{ SO_Boundaries, std::set<JUUID>() },
+			{ SO_SceneControllers, std::set<JUUID>() },
 		};
 		std::map<SceneObjectType, std::map<JUUID, nlohmann::json&>> toCreateRefs =
 		{
@@ -3034,6 +3040,7 @@ namespace Editor
 			{ SO_PhysicScenes, std::map<JUUID,nlohmann::json&>() },
 			{ SO_Triggers, std::map<JUUID,nlohmann::json&>() },
 			{ SO_Boundaries, std::map<JUUID,nlohmann::json&>() },
+			{ SO_SceneControllers, std::map<JUUID,nlohmann::json&>() },
 		};
 		//replacement
 		std::map<SceneObjectType, std::map<JUUID, nlohmann::json&>> initialRefs =
@@ -3045,6 +3052,7 @@ namespace Editor
 			{ SO_PhysicScenes, std::map<JUUID,nlohmann::json&>() },
 			{ SO_Triggers, std::map<JUUID,nlohmann::json&>() },
 			{ SO_Boundaries, std::map<JUUID,nlohmann::json&>() },
+			{ SO_SceneControllers, std::map<JUUID,nlohmann::json&>() },
 		};
 		std::map<SceneObjectType, std::map<JUUID, nlohmann::json&>> currentRefs =
 		{
@@ -3055,6 +3063,7 @@ namespace Editor
 			{ SO_PhysicScenes, std::map<JUUID,nlohmann::json&>() },
 			{ SO_Triggers, std::map<JUUID,nlohmann::json&>() },
 			{ SO_Boundaries, std::map<JUUID,nlohmann::json&>() },
+			{ SO_SceneControllers, std::map<JUUID,nlohmann::json&>() },
 		};
 
 		auto gatherUUIDs = [](nlohmann::json& j, std::string so_type_name, std::set<JUUID>& uuids)

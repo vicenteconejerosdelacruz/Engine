@@ -15,6 +15,7 @@ enum SceneObjectType {
 	SO_PhysicScenes,
 	SO_Triggers,
 	SO_Boundaries,
+	SO_SceneControllers,
 };
 
 #include "pch/SceneUnitId.h"

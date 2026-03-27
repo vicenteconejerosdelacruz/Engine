@@ -198,6 +198,14 @@ namespace Scene::Level
 				progress(json.at("name"), count, total);
 			}
 		);
+		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_SceneControllers), [&](nlohmann::json& json)
+			{
+				progress(json.at("name"), count, total);
+				CreateSceneController(id, json);
+				count++;
+				progress(json.at("name"), count, total);
+			}
+		);
 
 #if defined(_EDITOR)
 		if (!scene->IsIsolated())

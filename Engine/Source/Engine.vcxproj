@@ -402,6 +402,7 @@
     <ClInclude Include="Animation\Sequence\SequencePlayer.h" />
     <ClInclude Include="Audio\AudioSystem.h" />
     <ClInclude Include="Controllers\Controller.h" />
+    <ClInclude Include="Controllers\SceneController.h" />
     <ClInclude Include="Editor\AnimationSequencerModal.h" />
     <ClInclude Include="Editor\AssetsTree.h" />
     <ClInclude Include="Editor\CreatorModal.h" />
@@ -434,6 +435,7 @@
     <ClInclude Include="JExpose\Primitives\SphereAtt.h" />
     <ClInclude Include="JExpose\Scene\BoundaryAtt.h" />
     <ClInclude Include="JExpose\Scene\PhysicSceneAtt.h" />
+    <ClInclude Include="JExpose\Scene\SceneControllerAtt.h" />
     <ClInclude Include="JExpose\Scene\TriggerAtt.h" />
     <ClInclude Include="JExpose\Templates\PhysicGeometryAtt.h" />
     <ClInclude Include="pch\DeleteHook.h" />
@@ -619,6 +621,7 @@
     <ClCompile Include="Animation\Sequence\SequencePlayer.cpp" />
     <ClCompile Include="Audio\AudioSystem.cpp" />
     <ClCompile Include="Controllers\Controller.cpp" />
+    <ClCompile Include="Controllers\SceneController.cpp" />
     <ClCompile Include="Editor\AnimationSequencerModal.cpp" />
     <ClCompile Include="Editor\AssetsTree.cpp" />
     <ClCompile Include="Editor\DefaultLevel.cpp" />

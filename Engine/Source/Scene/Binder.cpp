@@ -49,7 +49,14 @@ std::map<SceneObjectType, std::function<JNAME(SceneUnitId, JUUID)>> NameFnc =
 			auto& so = GetBoundarySceneObject(id, uuid);
 			return so->name();
 		}
+	},
+	{ SO_SceneControllers, [](SceneUnitId id, JUUID uuid)
+		{
+			auto& so = GetSceneControllerSceneObject(id, uuid);
+			return so->name();
+		}
 	}
+
 };
 #endif
 
@@ -96,6 +103,12 @@ std::map<SceneObjectType, std::function<void(SceneUnitId, JUUID, JUUID)>> BindFn
 			auto& so = GetBoundarySceneObject(id, uuid);
 			so->Bind(uuidB);
 		}
+	},
+	{ SO_SceneControllers, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
+		{
+			auto& so = GetSceneControllerSceneObject(id, uuid);
+			so->Bind(uuidB);
+		}
 	}
 };
 
@@ -140,6 +153,12 @@ std::map<SceneObjectType, std::function<void(SceneUnitId, JUUID, JUUID)>> Unbind
 	{ SO_Boundaries, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
 		{
 			auto& so = GetBoundarySceneObject(id, uuid);
+			so->Unbind(uuidB);
+		}
+	},
+	{ SO_SceneControllers, [](SceneUnitId id, JUUID uuid, JUUID uuidB)
+		{
+			auto& so = GetSceneControllerSceneObject(id, uuid);
 			so->Unbind(uuidB);
 		}
 	}
