@@ -97,14 +97,14 @@ namespace Scripting
 		Context::Scope context_scope(context);
 
 		//create the source code as a local string
-		Local<String> source = String::NewFromUtf8(isolate, script.c_str()).ToLocalChecked();
+		Local<v8::String> source = v8::String::NewFromUtf8(isolate, script.c_str()).ToLocalChecked();
 		Local<Script> runnable = Script::Compile(context, source).ToLocalChecked();
 		//run the code and capture it's result
 		Local<Value> result = runnable->Run(context).ToLocalChecked();
 
 #if defined(_DEVELOPMENT)
 		//print result if not undefined
-		String::Utf8Value utf8(isolate, result);
+		v8::String::Utf8Value utf8(isolate, result);
 		if (std::string(*utf8) != "undefined")
 		{
 			std::string resultStr = std::string("result:") + *utf8 + "\n";

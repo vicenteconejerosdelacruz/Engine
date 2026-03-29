@@ -7,7 +7,7 @@
 #include <Renderable/RenderableBoundingBox.h>
 #include <NoMath.h>
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 
 #if defined(_EDITOR)
 namespace Editor
@@ -446,8 +446,8 @@ namespace Scene
 			for (unsigned int j = 0; j < mi->variablesBufferSize.size(); j++)
 			{
 				size_t size = mi->variablesBufferSize[j];
-				ConstantsBufferID cbuffer = CreateConstantsBuffer(size, Renderer::numFrames, name() + "." + std::to_string(j) + "." + mesh->uuid);
-				for (unsigned int n = 0; n < Renderer::numFrames; n++)
+				ConstantsBufferID cbuffer = CreateConstantsBuffer(size, JRenderer::numFrames, name() + "." + std::to_string(j) + "." + mesh->uuid);
+				for (unsigned int n = 0; n < JRenderer::numFrames; n++)
 				{
 					WriteMaterialVariablesToConstantsBufferSpace(mi, cbuffer, n);
 				}

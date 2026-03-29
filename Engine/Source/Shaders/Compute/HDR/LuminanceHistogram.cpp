@@ -7,7 +7,7 @@
 #include <DeviceUtils/RenderToTexture/RenderToTexture.h>
 #include <DirectXHelper.h>
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 
 using namespace DeviceUtils;
 
@@ -19,7 +19,7 @@ namespace ComputeShader
 		rttUUID = RenderToTextureID;
 
 		//create the luminicance histogram buffer containing the calculation parameters (C0)
-		constantsBuffers = CreateConstantsBuffer(sizeof(LuminanceHistogramBuffer), Renderer::numFrames, "LuminanceHistogramBuffer");
+		constantsBuffers = CreateConstantsBuffer(sizeof(LuminanceHistogramBuffer), JRenderer::numFrames, "LuminanceHistogramBuffer");
 
 		//create the uav resource for the calculation results, this is table of 256 unsigned ints (U0)
 		unsigned int dataSize = static_cast<unsigned int>(sizeof(unsigned int[256]));

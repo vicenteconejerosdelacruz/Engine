@@ -30,7 +30,7 @@ extern HWND hWnd;
 extern RECT hWndRect;
 extern std::unique_ptr<DirectX::Mouse> mouse;
 extern std::unique_ptr<DirectX::Keyboard> keyboard;
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 extern std::string gameAppTitle;
 extern bool inSizeMove;
 extern RECT GetMaximizedAreaSize();
@@ -419,8 +419,8 @@ namespace Editor
 		loadingProgress.loadSceneUnitModal = true;
 		LoadWorkbench();
 
-		commandListProcessor = std::make_unique<CommandsProcessor>(renderer->d3dDevice, Renderer::numFrames, 0xed1704);
-		commandListPickingPassProcessor = std::make_unique<CommandsProcessor>(renderer->d3dDevice, Renderer::numFrames, 0x91c39455);
+		commandListProcessor = std::make_unique<CommandsProcessor>(renderer->d3dDevice, JRenderer::numFrames, 0xed1704);
+		commandListPickingPassProcessor = std::make_unique<CommandsProcessor>(renderer->d3dDevice, JRenderer::numFrames, 0x91c39455);
 
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();

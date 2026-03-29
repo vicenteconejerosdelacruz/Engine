@@ -11,7 +11,7 @@ namespace Editor
 }
 #endif
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 
 namespace Scene
 {
@@ -302,7 +302,7 @@ namespace Scene
 	{
 		auto& smPass = shadowMapRenderPass;
 		D3D12_SHADER_RESOURCE_VIEW_DESC shadowMapSrvDesc = {
-			.Format = Renderer::depthFormatSRVConversion.contains(smPass->depthStencilFormat) ? Renderer::depthFormatSRVConversion.at(smPass->depthStencilFormat) : smPass->depthStencilFormat,
+			.Format = JRenderer::depthFormatSRVConversion.contains(smPass->depthStencilFormat) ? JRenderer::depthFormatSRVConversion.at(smPass->depthStencilFormat) : smPass->depthStencilFormat,
 			.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
 			.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
 			.Texture2D = {.MostDetailedMip = 0, .MipLevels = 1U, .ResourceMinLODClamp = 0.0f },

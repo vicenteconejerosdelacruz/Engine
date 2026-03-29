@@ -28,7 +28,7 @@ namespace Templates
 			{
 				auto& fsCB = fsQuadConstantsBuffer;
 
-				for (unsigned int n = 0; n < Renderer::numFrames; n++)
+				for (unsigned int n = 0; n < JRenderer::numFrames; n++)
 				{
 					if (name == "texelInvSize")
 					{

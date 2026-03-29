@@ -1,5 +1,4 @@
-#ifndef _JTEMPLATE_H
-#define _JTEMPLATE_H
+#pragma once
 
 #include <JObject.h>
 #include <nlohmann/json.hpp>
@@ -94,5 +93,3 @@ namespace Templates
 #include <Textures/Texture.h>
 #include <Mesh/Mesh.h>
 #include <PhysicGeometry.h>
-
-#endif

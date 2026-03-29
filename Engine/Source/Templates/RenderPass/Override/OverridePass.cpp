@@ -44,7 +44,7 @@ namespace Templates
 		if (fsQuadMat->variablesBufferSize.size() > 0ULL)
 		{
 			size_t size = fsQuadMat->variablesBufferSize.at(0);
-			fsQuadConstantsBuffer = CreateConstantsBuffer(size, Renderer::numFrames, materialName + ":cbv");
+			fsQuadConstantsBuffer = CreateConstantsBuffer(size, JRenderer::numFrames, materialName + ":cbv");
 
 			auto& vsVars = fsQuadMat->vertexShaderInstanceID->constantsBuffersVariables;
 			auto& psVars = fsQuadMat->pixelShaderInstanceID->constantsBuffersVariables;

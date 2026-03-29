@@ -6,7 +6,7 @@
 #include <Level.h>
 #include <unordered_map>
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 #if defined(_EDITOR)
 namespace Editor
 {
@@ -76,7 +76,7 @@ namespace Scene
 			{
 				SceneUnitId id = nostd::threadIdHash();
 
-				auto& scene = CreateScene(id, filename, Renderer::numFrames);
+				auto& scene = CreateScene(id, filename, JRenderer::numFrames);
 				auto [lid, _] = CreateLoadingProcessor();
 
 				LoadLevel(scene, filename, data, progress);

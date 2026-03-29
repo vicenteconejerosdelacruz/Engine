@@ -6,7 +6,7 @@
 #include <Renderer.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 
 #if defined(_EDITOR)
 namespace Editor
@@ -693,7 +693,7 @@ namespace Scene
 
 	void Camera::CreateConstantsBuffer()
 	{
-		cameraCb = DeviceUtils::CreateConstantsBuffer(sizeof(CameraAttributes), Renderer::numFrames, name());
+		cameraCb = DeviceUtils::CreateConstantsBuffer(sizeof(CameraAttributes), JRenderer::numFrames, name());
 	}
 
 	void Camera::WriteConstantsBuffer(unsigned int frame)
@@ -832,7 +832,7 @@ namespace Scene
 	//Lights
 	void Camera::CreateLightsConstantsBuffer()
 	{
-		lightsCB = DeviceUtils::CreateConstantsBuffer(sizeof(LightPool), Renderer::numFrames, std::string(name() + "-lightsCbv"));
+		lightsCB = DeviceUtils::CreateConstantsBuffer(sizeof(LightPool), JRenderer::numFrames, std::string(name() + "-lightsCbv"));
 	}
 
 	void Camera::DestroyLightsConstantsBuffer()
@@ -856,7 +856,7 @@ namespace Scene
 	//ShadowMaps
 	void Camera::CreateShadowMapsConstantsBuffer()
 	{
-		shadowMapsCB = DeviceUtils::CreateConstantsBuffer(sizeof(ShadowMapAttributes) * MaxLights, Renderer::numFrames, std::string(name() + "-shadowMapsCbv"));
+		shadowMapsCB = DeviceUtils::CreateConstantsBuffer(sizeof(ShadowMapAttributes) * MaxLights, JRenderer::numFrames, std::string(name() + "-shadowMapsCbv"));
 	}
 
 	void Camera::DestroyShadowMapsConstantsBuffer()

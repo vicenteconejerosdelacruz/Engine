@@ -284,12 +284,12 @@ namespace Templates {
 			};
 		auto bindSITCSStructured = [this](D3D12_SHADER_INPUT_BIND_DESC& desc, std::string resourceName)
 			{
-				if (shaderSource.shaderType == ShaderType::COMPUTE_SHADER)
+				if (shaderSource.shaderType == JShaderType::COMPUTE_SHADER)
 					srvCSParameters.insert_or_assign(resourceName, ShaderSRVParameter({ .registerId = desc.BindPoint, .numSRV = desc.BindCount }));
 			};
 		auto bindSITPSStructured = [this](D3D12_SHADER_INPUT_BIND_DESC& desc, std::string resourceName)
 			{
-				if (shaderSource.shaderType == ShaderType::PIXEL_SHADER)
+				if (shaderSource.shaderType == JShaderType::PIXEL_SHADER)
 					srvTexParameters.insert_or_assign(StringToTextureShaderUsage.at(resourceName), ShaderSRVParameter({ .registerId = desc.BindPoint, .numSRV = desc.BindCount > 0 ? desc.BindCount : desc.NumSamples })); //if N > 0 -> N else -1
 			};
 		auto bindSITByteAddress = [this](D3D12_SHADER_INPUT_BIND_DESC& desc, std::string resourceName)

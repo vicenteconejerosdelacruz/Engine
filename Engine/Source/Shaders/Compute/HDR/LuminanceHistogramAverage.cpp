@@ -6,7 +6,7 @@
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <DirectXHelper.h>
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 
 using namespace DeviceUtils;
 
@@ -22,7 +22,7 @@ namespace ComputeShader
 		histogramGpuHandle = gpuHandle;
 
 		//create the luminicance histogram buffer containing the calculation parameters (C0)
-		constantsBuffers = CreateConstantsBuffer(sizeof(LuminanceHistogramAverageBuffer), Renderer::numFrames, "LuminanceHistogramAverageBuffer");
+		constantsBuffers = CreateConstantsBuffer(sizeof(LuminanceHistogramAverageBuffer), JRenderer::numFrames, "LuminanceHistogramAverageBuffer");
 
 		//create the uav resource for the calculation results, this is a single float
 		unsigned int dataSize = static_cast<unsigned int>(sizeof(float));

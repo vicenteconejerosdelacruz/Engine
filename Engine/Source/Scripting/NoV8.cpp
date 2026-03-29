@@ -14,7 +14,7 @@ namespace nov8
 
 		std::vector<std::string> strvec;
 		for (int i = 0; i < info.Length(); i++) {
-			String::Utf8Value str(isolate, info[i]);
+			v8::String::Utf8Value str(isolate, info[i]);
 			if (*str)
 			{
 				strvec.push_back(*str);
@@ -28,8 +28,8 @@ namespace nov8
 	void AddConsoleToContext(Isolate* isolate, Local<Context> context)
 	{
 		Local<Object> console = Object::New(isolate);
-		console->Set(context, String::NewFromUtf8(isolate, "log").ToLocalChecked(), FunctionTemplate::New(isolate, ConsoleLog)->GetFunction(context).ToLocalChecked()).Check();;
-		context->Global()->Set(context, String::NewFromUtf8(isolate, "console").ToLocalChecked(), console).Check();
+		console->Set(context, v8::String::NewFromUtf8(isolate, "log").ToLocalChecked(), FunctionTemplate::New(isolate, ConsoleLog)->GetFunction(context).ToLocalChecked()).Check();;
+		context->Global()->Set(context, v8::String::NewFromUtf8(isolate, "console").ToLocalChecked(), console).Check();
 	}
 	void AddTemplateJsonAttributes(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, v8_templates_creators& attributeCreator, JObject& json, std::string path)
 	{
@@ -57,19 +57,19 @@ namespace nov8
 
 	Local<Name> v8_name(Isolate* isolate, std::string name)
 	{
-		return String::NewFromUtf8(isolate, name.c_str()).ToLocalChecked();
+		return v8::String::NewFromUtf8(isolate, name.c_str()).ToLocalChecked();
 	}
 
 	std::string v8_name(Isolate* isolate, Local<Name> name)
 	{
-		Local<String> v8String = name->ToString(isolate->GetCurrentContext()).ToLocalChecked();
-		String::Utf8Value utf8(isolate, v8String);
+		Local<v8::String> v8String = name->ToString(isolate->GetCurrentContext()).ToLocalChecked();
+		v8::String::Utf8Value utf8(isolate, v8String);
 		return *utf8;
 	}
 
-	Local<String> v8_string(Isolate* isolate, std::string str)
+	Local<v8::String> v8_string(Isolate* isolate, std::string str)
 	{
-		return String::NewFromUtf8(isolate, str.c_str()).ToLocalChecked();
+		return v8::String::NewFromUtf8(isolate, str.c_str()).ToLocalChecked();
 	}
 
 	Local<External> v8_external(Isolate* isolate, void* value)

@@ -81,7 +81,7 @@ namespace Scene
 		SceneUnitId id;
 		std::string unitName;
 		bool markedForDelete;
-		unsigned int deleteFrames = Renderer::numFrames;
+		unsigned int deleteFrames = JRenderer::numFrames;
 		std::function<void()> deleteCallback;
 		bool isolated;
 #if defined(_EDITOR)

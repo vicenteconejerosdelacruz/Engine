@@ -5,7 +5,7 @@
 #include <DirectXHelper.h>
 #include <ImageConvert.h>
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 
 #if defined(_EDITOR)
 namespace Editor {

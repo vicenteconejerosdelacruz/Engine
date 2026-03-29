@@ -18,7 +18,7 @@ CComPtr<ID3D12DebugDevice1> debugDevice;
 unsigned int backBufferIndex;
 
 //CREATE
-void Renderer::Initialize(HWND coreHwnd) {
+void JRenderer::Initialize(HWND coreHwnd) {
 	hwnd = coreHwnd;
 
 #if defined(_DEBUG)
@@ -65,18 +65,18 @@ void Renderer::Initialize(HWND coreHwnd) {
 	fenceEvent = CreateEventHandle();
 }
 
-void Renderer::CreateSwapChainPass()
+void JRenderer::CreateSwapChainPass()
 {
 	using namespace Templates;
 	swapChainPass = CreateRenderPassInstance(CameraID(), GetRenderPassUUIDByName("simplePass"), 0);
 }
 
-unsigned int Renderer::GetBackBufferIndex()
+unsigned int JRenderer::GetBackBufferIndex()
 {
 	return backBufferIndex;
 }
 
-void Renderer::UpdateViewportPerspective() {
+void JRenderer::UpdateViewportPerspective() {
 	RECT rect;
 	GetWindowRect(hwnd, &rect);
 	int width = rect.right - rect.left;
@@ -86,7 +86,7 @@ void Renderer::UpdateViewportPerspective() {
 	screenViewport = { 0.0f, 0.0f, static_cast<FLOAT>(width), static_cast<FLOAT>(height), 0.0f, 1.0f };
 }
 
-void Renderer::Resize(unsigned int width, unsigned int height) {
+void JRenderer::Resize(unsigned int width, unsigned int height) {
 	using namespace DeviceUtils;
 
 	Flush();
@@ -107,14 +107,14 @@ void Renderer::Resize(unsigned int width, unsigned int height) {
 	backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 }
 
-void Renderer::ExecuteCommands(CComPtr<ID3D12GraphicsCommandList2>& commandList, std::function<void()> callback)
+void JRenderer::ExecuteCommands(CComPtr<ID3D12GraphicsCommandList2>& commandList, std::function<void()> callback)
 {
 	ID3D12CommandList* const commandLists[] = { commandList };
 	commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
 	if (callback) { executionCallback.push_back(callback); }
 }
 
-void Renderer::Present() {
+void JRenderer::Present() {
 	using namespace DeviceUtils;
 
 	//present
@@ -128,7 +128,7 @@ void Renderer::Present() {
 	executionCallback.clear();
 }
 
-void Renderer::Flush()
+void JRenderer::Flush()
 {
 	DeviceUtils::Flush(commandQueue, fence, fenceValue, fenceEvent);
 }

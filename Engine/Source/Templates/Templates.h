@@ -1,5 +1,4 @@
-#ifndef _TEMPLATES_H
-#define _TEMPLATES_H
+#pragma once
 
 #include <vector>
 #include <set>
@@ -101,5 +100,3 @@ namespace Templates {
 	void FindRecursiveJsonReference(nlohmann::json json, JUUID uuid, std::string path, std::function<void(std::string path)> addReference);
 #endif
 }
-
-#endif

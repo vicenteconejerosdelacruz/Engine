@@ -6,21 +6,21 @@
 #include <map>
 #include <UUID.h>
 
-enum ShaderType {
+enum JShaderType {
 	VERTEX_SHADER,
 	PIXEL_SHADER,
 	GEOMETRY_SHADER,
 	COMPUTE_SHADER,
 };
 
-inline static std::unordered_map<ShaderType, std::string> ShaderTypeToStr = {
+inline static std::unordered_map<JShaderType, std::string> JShaderTypeToStr = {
 	{ VERTEX_SHADER, "VERTEX_SHADER" },
 	{ PIXEL_SHADER, "PIXEL_SHADER" },
 	{ GEOMETRY_SHADER, "GEOMETRY_SHADER" },
 	{ COMPUTE_SHADER, "GEOMETRY_SHADER" },
 };
 
-inline static std::unordered_map<std::string, ShaderType> StrToShaderType = {
+inline static std::unordered_map<std::string, JShaderType> StrToJShaderType = {
 	{ "VERTEX_SHADER", VERTEX_SHADER },
 	{ "PIXEL_SHADER", PIXEL_SHADER },
 	{ "GEOMETRY_SHADER", GEOMETRY_SHADER },
@@ -35,7 +35,7 @@ namespace Templates
 
 using namespace Templates;
 struct Source {
-	ShaderType shaderType;
+	JShaderType shaderType;
 	std::wstring shaderTarget;
 	ShaderJsonID shaderTemplate;
 	std::vector<std::string> defines;
@@ -54,7 +54,7 @@ struct Source {
 			if (i < (defines.size() - 1))
 				defs += ",";
 		}
-		return ShaderTypeToStr.at(shaderType) + ":" + shaderTemplate() + " (" + defs + ")";
+		return JShaderTypeToStr.at(shaderType) + ":" + shaderTemplate() + " (" + defs + ")";
 	}
 };
 
@@ -65,7 +65,7 @@ struct std::hash<Source>
 	{
 		using std::hash;
 		std::string s = "";
-		s += ShaderTypeToStr.at(src.shaderType);
+		s += JShaderTypeToStr.at(src.shaderType);
 		s += src.shaderTemplate();
 		for (auto& v : src.defines) { s += v; }
 		return hash<std::string>()(s);
@@ -74,7 +74,7 @@ struct std::hash<Source>
 	{
 		using std::hash;
 		std::string s = "";
-		s += ShaderTypeToStr.at(src.shaderType);
+		s += JShaderTypeToStr.at(src.shaderType);
 		s += src.shaderTemplate();
 		for (auto& v : src.defines) { s += v; }
 		return hash<std::string>()(s);

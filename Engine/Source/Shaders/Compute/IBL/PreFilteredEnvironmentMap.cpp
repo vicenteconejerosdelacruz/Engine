@@ -8,7 +8,7 @@
 #include <DirectXHelper.h>
 #include <DXTypes.h>
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 
 using namespace DeviceUtils;
 using namespace Templates;
@@ -96,7 +96,7 @@ namespace ComputeShader
 			};
 			renderer->d3dDevice->CreateUnorderedAccessView(resources.back(), nullptr, &uavDesc, resultCpuHandle);
 
-			mipsResultsCB.push_back(CreateConstantsBuffer(sizeof(XMFLOAT4), Renderer::numFrames, std::string("PrefilteredEnvironmentMap:CBV[" + std::to_string(i + 1) + "]")));
+			mipsResultsCB.push_back(CreateConstantsBuffer(sizeof(XMFLOAT4), JRenderer::numFrames, std::string("PrefilteredEnvironmentMap:CBV[" + std::to_string(i + 1) + "]")));
 
 			//Create a ReadBack
 			readBackSizes.push_back(static_cast<size_t>(faceW) * static_cast<size_t>(faceH) * pixelSize * static_cast<size_t>(numFaces));

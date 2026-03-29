@@ -7,7 +7,7 @@
 #include <Editor.h>
 #endif
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 
 namespace Scene
 {

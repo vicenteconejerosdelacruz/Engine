@@ -1,5 +1,4 @@
-#ifndef _TEMPLATES_SHADER_H
-#define _TEMPLATES_SHADER_H
+#pragma once
 
 #include <set>
 #include <map>
@@ -145,5 +144,3 @@ namespace Templates
 using namespace Templates;
 DEF_TEMPLATE_ID_HASH(ShaderJson);
 DEF_TEMPLATE_ID_HASH(ShaderInstance);
-
-#endif

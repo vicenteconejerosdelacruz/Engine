@@ -7,9 +7,9 @@
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-struct Renderer
+struct JRenderer
 {
-	~Renderer() {}
+	~JRenderer() {}
 	static const constexpr unsigned int numFrames = 3;
 	static const constexpr float fovAngleY = (70.0f * XM_PI / 180.0f);
 	static inline const std::unordered_map<DXGI_FORMAT, DXGI_FORMAT> depthFallback = {

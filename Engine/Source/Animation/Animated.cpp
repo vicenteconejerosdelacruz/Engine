@@ -132,7 +132,7 @@ namespace Animation {
 	{
 		using namespace Scene;
 		using namespace DeviceUtils;
-		animationsCbv[renderable] = CreateConstantsBuffer(sizeof(BonesMatrices), Renderer::numFrames, renderable->name());
+		animationsCbv[renderable] = CreateConstantsBuffer(sizeof(BonesMatrices), JRenderer::numFrames, renderable->name());
 		renderable->bonesTransformation = animated->bonesOffsets;
 	}
 

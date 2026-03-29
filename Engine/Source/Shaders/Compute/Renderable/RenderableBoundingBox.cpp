@@ -4,7 +4,7 @@
 #include <Renderer.h>
 #include <DeviceUtils/Resources/Resources.h>
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 
 namespace ComputeShader
 {

@@ -11,7 +11,7 @@
 #include <NoMath.h>
 #include <Game.h>
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 extern DX::StepTimer timer;
 
 namespace Editor
@@ -1224,7 +1224,7 @@ void AnimationSequencerModal::Exit()
 	renderable->SetCurrentAnimation(nullptr);
 	destroying = true;
 	showing = false;
-	destructionFrames = Renderer::numFrames;
+	destructionFrames = JRenderer::numFrames;
 }
 
 void AnimationSequencerModal::SaveAndExit()
@@ -1236,7 +1236,7 @@ void AnimationSequencerModal::SaveAndExit()
 
 	renderable->SetCurrentAnimation(nullptr);
 	destroying = true;
-	destructionFrames = Renderer::numFrames;
+	destructionFrames = JRenderer::numFrames;
 	showing = false;
 	model3D->animationSequences(animationsSequences);
 	model3D->flag(Model3DJson::Update_animationSequences);

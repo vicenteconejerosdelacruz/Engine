@@ -10,7 +10,7 @@
 #include <pix3.h>
 #endif
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 
 namespace DeviceUtils {
 
@@ -56,8 +56,8 @@ namespace DeviceUtils {
 			d3dDevice->CreateShaderResourceView(rtt->renderToTexture, &rttSRVDesc, rtt->cpuTextureHandle);
 		}
 
-		if (Renderer::depthFallback.contains(depthStencilFormat) && !renderer->d32FSupported)
-			depthStencilFormat = Renderer::depthFallback.at(depthStencilFormat);
+		if (JRenderer::depthFallback.contains(depthStencilFormat) && !renderer->d32FSupported)
+			depthStencilFormat = JRenderer::depthFallback.at(depthStencilFormat);
 
 		renderPass->depthStencilFormat = depthStencilFormat;
 		if (depthStencilFormat != DXGI_FORMAT_UNKNOWN)
@@ -71,7 +71,7 @@ namespace DeviceUtils {
 			AllocCSUDescriptor(renderPass->cpuDepthStencilTextureHandle, renderPass->gpuDepthStencilTextureHandle);
 
 			D3D12_SHADER_RESOURCE_VIEW_DESC depthStencilSRVDesc = {
-				.Format = Renderer::depthFormatSRVConversion.contains(depthStencilFormat) ? Renderer::depthFormatSRVConversion.at(depthStencilFormat) : depthStencilFormat,
+				.Format = JRenderer::depthFormatSRVConversion.contains(depthStencilFormat) ? JRenderer::depthFormatSRVConversion.at(depthStencilFormat) : depthStencilFormat,
 				.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
 				.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
 				.Texture2D = {.MostDetailedMip = 0, .MipLevels = 1U, .ResourceMinLODClamp = 0.0f },
@@ -225,7 +225,7 @@ namespace DeviceUtils {
 			AllocCSUDescriptor(cpuDepthStencilTextureHandle, gpuDepthStencilTextureHandle);
 
 			D3D12_SHADER_RESOURCE_VIEW_DESC depthStencilSRVDesc = {
-				.Format = Renderer::depthFormatSRVConversion.contains(depthStencilFormat) ? Renderer::depthFormatSRVConversion.at(depthStencilFormat) : depthStencilFormat,
+				.Format = JRenderer::depthFormatSRVConversion.contains(depthStencilFormat) ? JRenderer::depthFormatSRVConversion.at(depthStencilFormat) : depthStencilFormat,
 				.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
 				.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
 				.Texture2D = {.MostDetailedMip = 0, .MipLevels = 1U, .ResourceMinLODClamp = 0.0f },

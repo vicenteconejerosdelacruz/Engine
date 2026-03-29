@@ -14,7 +14,7 @@
 #include "Cone.h"
 #include "Capsule.h"
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 namespace Primitives
 {
 	using namespace Templates;

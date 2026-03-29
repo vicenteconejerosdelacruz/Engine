@@ -58,7 +58,7 @@ bool editorPlayMode = false;
 extern std::string gameAppTitle;
 extern float gameUpdateFrequency;
 
-std::unique_ptr<Renderer> renderer;
+std::unique_ptr<JRenderer> renderer;
 
 //FPS
 DX::StepTimer timer;
@@ -248,7 +248,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	CreateTemplates();
 
 	//initialize the render and reset the commands
-	renderer = std::make_unique<Renderer>();
+	renderer = std::make_unique<JRenderer>();
 	renderer->Initialize(hWnd);
 	//create the editor and a default scene
 #if defined(_EDITOR)

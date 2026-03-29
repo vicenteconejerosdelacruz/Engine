@@ -8,7 +8,7 @@
 #include <DirectXTex.h>
 #include <DXTypes.h>
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 
 using namespace DeviceUtils;
 using namespace Templates;

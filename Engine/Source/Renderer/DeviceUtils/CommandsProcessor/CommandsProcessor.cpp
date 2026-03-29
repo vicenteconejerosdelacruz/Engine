@@ -5,7 +5,7 @@
 #include <DirectXHelper.h>
 #include <Renderer.h>
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 
 namespace DeviceUtils
 {
