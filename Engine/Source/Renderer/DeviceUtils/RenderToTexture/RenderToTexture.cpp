@@ -58,7 +58,7 @@ namespace DeviceUtils {
 			D3D12_HEAP_FLAG_NONE,
 			&resourceDesc,
 			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-			&clearValue,
+			useClearColor ? &clearValue : nullptr,
 			IID_PPV_ARGS(&renderToTexture)
 		));
 

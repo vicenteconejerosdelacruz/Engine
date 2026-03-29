@@ -54,6 +54,7 @@ template<> JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_sha
 template<> JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_sound_name>() { return DrawCreatorValue<std::string, jedv_t_string>(); }
 template<> JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_texture_name>() { return DrawCreatorValue<std::string, jedv_t_string>(); }
 template<> JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_physycgeometry_name>() { return DrawCreatorValue<std::string, jedv_t_string>(); }
+template<> JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_htmlui_name>() { return DrawCreatorValue<std::string, jedv_t_string>(); }
 
 template<>
 JEdvCreatorDrawerFunction DrawCreatorValue<bool, jedv_t_boolean>()
@@ -716,6 +717,18 @@ JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_model3d_filepath>
 			EditorCreatorDrawFilePath(attribute, json, attribute, ICON_FA_CUBE, modalProperties,
 				{ "Gltf files. (*.gltf)", "Glb files. (*.glb)" },
 				{ "*.gltf", "*.glb" }
+			);
+		};
+}
+
+template<>
+JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_htmls_filepath>()
+{
+	return[](std::string attribute, nlohmann::json& json, nlohmann::json& modalProperties)
+		{
+			EditorCreatorDrawFilePath(attribute, json, attribute, ICON_FA_FILE_UPLOAD, modalProperties,
+				{ "HMTL files. (*.html)" },
+				{ "*.html" }
 			);
 		};
 }

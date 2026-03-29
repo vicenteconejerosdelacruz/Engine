@@ -44,4 +44,5 @@ namespace Templates
 #include "MinMaxChainPass.h"
 #include "MinMaxChainResultPass.h"
 #include "ResolvePass.h"
+#include "ResolveUIPass.h"
 #include "ToneMappingPass.h"

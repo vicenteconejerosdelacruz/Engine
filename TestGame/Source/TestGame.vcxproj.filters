@@ -60,6 +60,12 @@
     <ClInclude Include="JExpose\Controllers\TugControllerAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameControllers\Brawler\BrawlerSceneController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Controllers\BrawlerSceneControllerAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TestGame.cpp">
@@ -87,6 +93,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameControllers\Enemies\TugController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameControllers\Brawler\BrawlerSceneController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

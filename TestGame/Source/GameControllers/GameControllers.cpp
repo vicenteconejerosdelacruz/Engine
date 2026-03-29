@@ -4,6 +4,7 @@
 #include "ThirdPersonController.h"
 #include "BrawlerCameraController.h"
 #include "Enemies/TugController.h"
+#include "Brawler/BrawlerSceneController.h"
 
 namespace Game
 {
@@ -12,6 +13,7 @@ namespace Game
 		{ "venom", [](nlohmann::json& json) { return std::make_unique<Game::VenomController>(json); }},
 		{ "spinyaw", [](nlohmann::json& json) { return std::make_unique<Game::SpinYawController>(json); }},
 		{ "thirdperson", [](nlohmann::json& json) { return std::make_unique<Game::ThirdPersonController>(json); }},
+		{ "brawler-scene", [](nlohmann::json& json) { return std::make_unique<Game::BrawlerSceneController>(json); }},
 		{ "brawler-cam", [](nlohmann::json& json) { return std::make_unique<Game::BrawlerCameraController>(json); }},
 		{ "tug", [](nlohmann::json& json) { return std::make_unique<Game::TugController>(json); }},
 	};

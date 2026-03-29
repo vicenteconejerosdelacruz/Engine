@@ -24,7 +24,8 @@ enum TemplateType {
 	T_Sounds,
 	T_Textures,
 	T_RenderPasses,
-	T_PhysicGeometries
+	T_PhysicGeometries,
+	T_HtmlUIs,
 };
 
 inline const std::unordered_map<TemplateType, std::string> TemplateTypeToString = {
@@ -34,7 +35,8 @@ inline const std::unordered_map<TemplateType, std::string> TemplateTypeToString 
 	{ T_Sounds, "Sounds" },
 	{ T_Textures, "Textures" },
 	{ T_RenderPasses, "RenderPasses"},
-	{ T_PhysicGeometries, "PhysicGeometries" }
+	{ T_PhysicGeometries, "PhysicGeometries" },
+	{ T_HtmlUIs, "HtmlUIs" },
 };
 
 inline const std::unordered_map<std::string, TemplateType> StringToTemplateType = {
@@ -44,7 +46,8 @@ inline const std::unordered_map<std::string, TemplateType> StringToTemplateType 
 	{ "Sounds", T_Sounds },
 	{ "Textures", T_Textures },
 	{ "RenderPasses", T_RenderPasses },
-	{ "PhysicGeometries", T_PhysicGeometries }
+	{ "PhysicGeometries", T_PhysicGeometries },
+	{ "HtmlUIs", T_HtmlUIs },
 };
 
 #if defined(_EDITOR)
@@ -55,7 +58,8 @@ inline const std::unordered_map<TemplateType, const char* > TemplateTypePanelMen
 	{ T_Sounds, ICON_FA_MUSIC "Sounds" },
 	{ T_Textures, ICON_FA_IMAGE "Textures" },
 	{ T_RenderPasses, ICON_FA_TV "RenderPasses"},
-	{ T_PhysicGeometries, ICON_FA_HOUSE_USER "PhysicGeometries" }
+	{ T_PhysicGeometries, ICON_FA_HOUSE_USER "PhysicGeometries" },
+	{ T_HtmlUIs, ICON_FA_COOKIE "HtmlUIs" },
 };
 #endif
 
@@ -93,3 +97,4 @@ namespace Templates
 #include <Textures/Texture.h>
 #include <Mesh/Mesh.h>
 #include <PhysicGeometry.h>
+#include <HtmlUI/HtmlUI.h>

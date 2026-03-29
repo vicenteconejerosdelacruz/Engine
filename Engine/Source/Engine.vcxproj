@@ -179,7 +179,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;_DEVELOPMENT;HAS_DIRECTXTK12;_EDITOR;DIRECTX_TEX_VERSION=207;TOOL_VERSION=DIRECTX_TEX_VERSION;NOMINMAX;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>pch;JExpose;JExpose/Scene;JExpose/Templates;JExpose/Primitives;JExpose/Physics;JExpose/Controllers;Effects;Game;Animation;Audio;Primitives;Common;Renderer;Scene;Templates;Controllers;Shaders/Compiler;Shaders/Compute;Scripting;Physics;Utils;Editor;GameControllers;../../SDKs/dxc/dxc_2024_07_31/inc;../../SDKs/assimp/assimp-5.4.3/build/include;../../SDKs/assimp/assimp-5.4.3/include;../../SDKs/DirectXTK12/Inc;../../SDKs/imgui;../../SDKs/imgui/backends;../../SDKs/imguizmo;../../SDKs/tween;../../SDKs/DirectXTex/DirectXTex;../../SDKs/DirectXTex/Texconv;../../SDKs/DirectXTex/Texdiag;../../SDKs/DirectXTex/Texassemble;../../SDKs/DirectXTex/Common;../../SDKs/DirectXTex/CmdLineHelpers;../../SDKs/v8pp-2.1.1/packages/v8-v143-x64.9.8.177.4/include;../../SDKs/v8pp-2.1.1;../../SDKs/v8pp-2.1.1/out;../../SDKs/PhysX/physx/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>pch;JExpose;JExpose/Scene;JExpose/Templates;JExpose/Primitives;JExpose/Physics;JExpose/Controllers;Effects;Game;Animation;Audio;Primitives;Common;Renderer;Scene;Templates;Controllers;Shaders/Compiler;Shaders/Compute;Scripting;Physics;UI;Utils;Editor;GameControllers;../../SDKs/dxc/dxc_2024_07_31/inc;../../SDKs/assimp/assimp-5.4.3/build/include;../../SDKs/assimp/assimp-5.4.3/include;../../SDKs/DirectXTK12/Inc;../../SDKs/imgui;../../SDKs/imgui/backends;../../SDKs/imguizmo;../../SDKs/tween;../../SDKs/DirectXTex/DirectXTex;../../SDKs/DirectXTex/Texconv;../../SDKs/DirectXTex/Texdiag;../../SDKs/DirectXTex/Texassemble;../../SDKs/DirectXTex/Common;../../SDKs/DirectXTex/CmdLineHelpers;../../SDKs/v8pp-2.1.1/packages/v8-v143-x64.9.8.177.4/include;../../SDKs/v8pp-2.1.1;../../SDKs/v8pp-2.1.1/out;../../SDKs/PhysX/physx/include;../../SDKs/ultralight/ultralight-free-sdk-1.4.0-win-x64/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -292,7 +292,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;_DEVELOPMENT;HAS_DIRECTXTK12;_EDITOR;DIRECTX_TEX_VERSION=207;TOOL_VERSION=DIRECTX_TEX_VERSION;NOMINMAX;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>pch;JExpose;JExpose/Scene;JExpose/Templates;JExpose/Primitives;JExpose/Physics;JExpose/Controllers;Effects;Game;Animation;Audio;Primitives;Common;Renderer;Scene;Templates;Controllers;Shaders/Compiler;Shaders/Compute;Scripting;Physics;Utils;Editor;GameControllers;../../SDKs/dxc/dxc_2024_07_31/inc;../../SDKs/assimp/assimp-5.4.3/build/include;../../SDKs/assimp/assimp-5.4.3/include;../../SDKs/DirectXTK12/Inc;../../SDKs/imgui;../../SDKs/imgui/backends;../../SDKs/imguizmo;../../SDKs/tween;../../SDKs/DirectXTex/DirectXTex;../../SDKs/DirectXTex/Texconv;../../SDKs/DirectXTex/Texdiag;../../SDKs/DirectXTex/Texassemble;../../SDKs/DirectXTex/Common;../../SDKs/DirectXTex/CmdLineHelpers;../../SDKs/v8pp-2.1.1/packages/v8-v143-x64.9.8.177.4/include;../../SDKs/v8pp-2.1.1;../../SDKs/v8pp-2.1.1/out;../../SDKs/PhysX/physx/include;../../SDKs/ultralight/ultralight-free-sdk-1.4.0-win-x64/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>pch;JExpose;JExpose/Scene;JExpose/Templates;JExpose/Primitives;JExpose/Physics;JExpose/Controllers;Effects;Game;Animation;Audio;Primitives;Common;Renderer;Scene;Templates;Controllers;Shaders/Compiler;Shaders/Compute;Scripting;Physics;UI;Utils;Editor;GameControllers;../../SDKs/dxc/dxc_2024_07_31/inc;../../SDKs/assimp/assimp-5.4.3/build/include;../../SDKs/assimp/assimp-5.4.3/include;../../SDKs/DirectXTK12/Inc;../../SDKs/imgui;../../SDKs/imgui/backends;../../SDKs/imguizmo;../../SDKs/tween;../../SDKs/DirectXTex/DirectXTex;../../SDKs/DirectXTex/Texconv;../../SDKs/DirectXTex/Texdiag;../../SDKs/DirectXTex/Texassemble;../../SDKs/DirectXTex/Common;../../SDKs/DirectXTex/CmdLineHelpers;../../SDKs/v8pp-2.1.1/packages/v8-v143-x64.9.8.177.4/include;../../SDKs/v8pp-2.1.1;../../SDKs/v8pp-2.1.1/out;../../SDKs/PhysX/physx/include;../../SDKs/ultralight/ultralight-free-sdk-1.4.0-win-x64/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -437,6 +437,7 @@
     <ClInclude Include="JExpose\Scene\PhysicSceneAtt.h" />
     <ClInclude Include="JExpose\Scene\SceneControllerAtt.h" />
     <ClInclude Include="JExpose\Scene\TriggerAtt.h" />
+    <ClInclude Include="JExpose\Templates\HtmlUIAtt.h" />
     <ClInclude Include="JExpose\Templates\PhysicGeometryAtt.h" />
     <ClInclude Include="pch\DeleteHook.h" />
     <ClInclude Include="pch\GameEngineState.h" />
@@ -581,6 +582,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="pch\Application.h" />
+    <ClInclude Include="Templates\HtmlUI\HtmlUI.h" />
     <ClInclude Include="Templates\JTemplate.h" />
     <ClInclude Include="Templates\Material\BlendDesc.h" />
     <ClInclude Include="Templates\Material\DepthStencilDesc.h" />
@@ -596,6 +598,7 @@
     <ClInclude Include="Templates\RenderPass\Override\MinMaxChainResultPass.h" />
     <ClInclude Include="Templates\RenderPass\Override\OverridePass.h" />
     <ClInclude Include="Templates\RenderPass\Override\ResolvePass.h" />
+    <ClInclude Include="Templates\RenderPass\Override\ResolveUIPass.h" />
     <ClInclude Include="Templates\RenderPass\Override\ToneMappingPass.h" />
     <ClInclude Include="Templates\RenderPass\PassMaterialOverride.h" />
     <ClInclude Include="Templates\RenderPass\RenderPass.h" />
@@ -605,6 +608,7 @@
     <ClInclude Include="Templates\TemplateDef.h" />
     <ClInclude Include="Templates\Templates.h" />
     <ClInclude Include="Templates\Textures\Texture.h" />
+    <ClInclude Include="UI\UI.h" />
     <ClInclude Include="Utils\ImageConvert.h" />
   </ItemGroup>
   <ItemGroup>
@@ -709,6 +713,7 @@
     <ClCompile Include="Shaders\Compute\IBL\DiffuseIrradianceMap.cpp" />
     <ClCompile Include="Shaders\Compute\IBL\PreFilteredEnvironmentMap.cpp" />
     <ClCompile Include="Shaders\Compute\Renderable\RenderableBoundingBox.cpp" />
+    <ClCompile Include="Templates\HtmlUI\HtmlUI.cpp" />
     <ClCompile Include="Templates\Material\Material.cpp" />
     <ClCompile Include="Templates\Material\Variables.cpp" />
     <ClCompile Include="Templates\Mesh\Mesh.cpp" />
@@ -718,12 +723,14 @@
     <ClCompile Include="Templates\RenderPass\Override\MinMaxChainResultPass.cpp" />
     <ClCompile Include="Templates\RenderPass\Override\OverridePass.cpp" />
     <ClCompile Include="Templates\RenderPass\Override\ResolvePass.cpp" />
+    <ClCompile Include="Templates\RenderPass\Override\ResolveUIPass.cpp" />
     <ClCompile Include="Templates\RenderPass\Override\ToneMappingPass.cpp" />
     <ClCompile Include="Templates\RenderPass\RenderPass.cpp" />
     <ClCompile Include="Templates\Shader\Shader.cpp" />
     <ClCompile Include="Templates\Sound\Sound.cpp" />
     <ClCompile Include="Templates\Templates.cpp" />
     <ClCompile Include="Templates\Textures\Texture.cpp" />
+    <ClCompile Include="UI\UI.cpp" />
     <ClCompile Include="Utils\ImageConvert.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -963,6 +963,18 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_sounds_filepath>()
 }
 
 template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_htmls_filepath>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			EditorDrawFilePath(attribute, json, ICON_FA_FILE_UPLOAD, defaultUIFolder,
+				{ "HTML files. (*.wav)" },
+				{ "*.html" }
+			);
+		};
+}
+
+template<>
 JEdvEditorDrawerFunction DrawValue<int, jedv_t_integer>()
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
@@ -1837,6 +1849,7 @@ template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_shader_name
 template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_sound_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
 template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_texture_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
 template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_physycgeometry_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
+template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_htmlui_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
 
 void DrawResourceSelection(
 	std::string attribute,
@@ -2084,6 +2097,15 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_physycgeometry>()
 			};
 
 			geometrySelector.at(StringToPhysicsBehavior.at(json.at(0)->at("behavior")))();
+		};
+}
+
+template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_htmlui>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			DrawResourceSelection(attribute, json, Templates::GetHtmlUIName, SortUUIDNameByName(Templates::GetHtmlUIsUUIDsNames), ICON_FA_FILE_UPLOAD, ImGui::OpenTemplate);
 		};
 }
 

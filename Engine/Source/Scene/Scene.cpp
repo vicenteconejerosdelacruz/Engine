@@ -730,6 +730,15 @@ namespace Scene
 		}
 	}
 
+	void RenderControllers(SceneUnitId id)
+	{
+		std::set<JUUID> controllers = GetControllersInSceneUnit(id);
+		for (JUUID uuid : controllers)
+		{
+			GetController(uuid)->Render(id);
+		}
+	}
+
 	void AnimableStep(SceneUnitId id, double elapsedSeconds)
 	{
 		for (JUUID uuid : GetAnimables(id))
@@ -779,8 +788,6 @@ namespace Scene
 #endif
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			//if (scene->MarkedForDelete() || !scene->IsLoadingComplete() || (!renderableSceneUnits.contains(unit))) continue;
-
 			scene->PostRender();
 		}
 	}

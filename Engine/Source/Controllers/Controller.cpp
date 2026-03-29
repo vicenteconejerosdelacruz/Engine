@@ -118,6 +118,19 @@ namespace Game
 		}
 	}
 
+	std::set<JUUID> GetControllersInSceneUnit(SceneUnitId id)
+	{
+		std::set<JUUID> controllers;
+		for (auto& [suuuid, uuidset] : controllerUUIDBySUUUID)
+		{
+			SceneUnitId unit = std::get<0>(suuuid);
+			if (unit != id) continue;
+
+			controllers.insert(uuidset.begin(), uuidset.end());
+		}
+		return controllers;
+	}
+
 	std::unique_ptr<Controller>& GetController(JUUID uuid)
 	{
 		return controllersUUIDs.at(uuid);

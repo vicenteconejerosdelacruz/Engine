@@ -126,6 +126,7 @@ namespace Scene
 	void WriteConstantsBuffers(SceneUnitId id);
 	void RenderSceneShadowMaps(SceneUnitId id);
 	void RenderSceneCameras(SceneUnitId id);
+	void RenderControllers(SceneUnitId id);
 
 	void AnimableStep(SceneUnitId id, double elapsedSeconds);
 	void SceneRender();

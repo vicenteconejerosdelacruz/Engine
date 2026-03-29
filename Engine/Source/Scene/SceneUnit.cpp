@@ -201,6 +201,7 @@ namespace Scene
 #endif
 				RenderSceneShadowMaps(id);
 				RenderSceneCameras(id);
+				RenderControllers(id);
 			}
 			CloseSubmitAndNextCommandList();
 		}

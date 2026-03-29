@@ -3,6 +3,7 @@
 #include <Renderer.h>
 #include <Scripting.h>
 #include <Physics.h>
+#include <UI.h>
 #include <AudioSystem.h>
 #include <ShaderCompiler.h>
 #include <Templates.h>
@@ -21,6 +22,7 @@ using namespace AudioSystem;
 using namespace ShaderCompiler;
 using namespace Scripting;
 using namespace Physics;
+using namespace UI;
 using namespace Game;
 #if defined(_EDITOR)
 using namespace Editor;
@@ -243,6 +245,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	//Initialize the v8 scripting
 	InitScripting(std::filesystem::current_path().string().c_str());
 
+	//Initialize the UI system
+	InitUI(defaultUIFolder);
+
 	//create the templates
 	CreateSystemTemplates();
 	CreateTemplates();
@@ -435,6 +440,7 @@ void AppStep()
 #endif
 		}
 	);
+	UIStep();
 	Render();
 }
 

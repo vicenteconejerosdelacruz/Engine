@@ -20,7 +20,7 @@
 #include "Editor/Editor.h"
 #endif
 
-extern std::unique_ptr<Renderer> renderer;
+extern std::unique_ptr<JRenderer> renderer;
 extern DX::StepTimer timer;
 extern std::unique_ptr<DirectX::Mouse> mouse;
 extern std::unique_ptr<DirectX::Keyboard> keyboard;

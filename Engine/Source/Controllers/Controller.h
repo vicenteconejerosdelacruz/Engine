@@ -66,6 +66,8 @@ namespace Game
 		virtual v8_templates_creators GetV8TemplatesCreators();
 		virtual v8_context_creators GetV8ContextCreators();
 		virtual v8_functions_creators GetV8FunctionsCreators() { return {}; }
+		//Rendering
+		virtual void Render(SceneUnitId id) {};
 
 		JUUID controller;
 		SceneUnitId unit;
@@ -74,6 +76,7 @@ namespace Game
 
 	JUUID RegisterController(std::string controllerName, SUUUID sceneObject, std::unique_ptr<Controller>& controller);
 	void MapControllers(SceneUnitId id);
+	std::set<JUUID> GetControllersInSceneUnit(SceneUnitId id);
 	std::unique_ptr<Controller>& GetController(JUUID uuid);
 	std::set<JUUID> GetControllersBySceneObjectUUID(SUUUID uuid);
 	void DestroyControllers();

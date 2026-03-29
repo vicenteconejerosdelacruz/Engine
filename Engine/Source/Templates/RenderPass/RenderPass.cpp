@@ -172,8 +172,16 @@ namespace Templates
 		this->renderPassTemplate = renderPassTemplate;
 		this->renderPassInstance = renderPassInstance;
 		this->renderPassIndex = renderPassIndex;
-		this->width = width;
-		this->height = height;
+		if (renderPassTemplate->fitWindow() && renderPassTemplate->type() == RenderPassType_RenderToTexturePass)
+		{
+			this->width = renderer->scissorRect.right;
+			this->height = renderer->scissorRect.bottom;
+		}
+		else
+		{
+			this->width = width;
+			this->height = height;
+		}
 
 		renderPassTemplatesInstances[renderPassTemplate].insert(renderPassInstance);
 
@@ -189,6 +197,7 @@ namespace Templates
 			{ RenderPassRenderCallbackOverride_None, [](auto c,auto rpindex, auto rpTemplate, auto rpInstance) { return nullptr; }},
 			{ RenderPassRenderCallbackOverride_ToneMapping, [&](auto c, auto rpindex, auto rpTemplate, auto rpInstance) { return std::make_unique<ToneMappingPass>(c,rpindex, rpTemplate, rpInstance); } },
 			{ RenderPassRenderCallbackOverride_Resolve, [&](auto c, auto rpindex, auto rpTemplate, auto rpInstance) { return rpindex > 0 ? std::make_unique<ResolvePass>(c,rpindex, rpTemplate, rpInstance) : nullptr; } },
+			{ RenderPassRenderCallbackOverride_ResolveUI, [&](auto c, auto rpindex, auto rpTemplate, auto rpInstance) { return rpindex > 0 ? std::make_unique<ResolveUIPass>(c,rpindex, rpTemplate, rpInstance) : nullptr; } },
 			{ RenderPassRenderCallbackOverride_MinMaxChain, [&](auto c, auto rpindex, auto rpTemplate, auto rpInstance) { return std::make_unique<MinMaxChainPass>(c,rpindex, rpTemplate, rpInstance); } },
 			{ RenderPassRenderCallbackOverride_MinMaxChainResult, [&](auto c, auto rpindex, auto rpTemplate, auto rpInstance) { return std::make_unique<MinMaxChainResultPass>(c,rpindex, rpTemplate, rpInstance); } }
 		};

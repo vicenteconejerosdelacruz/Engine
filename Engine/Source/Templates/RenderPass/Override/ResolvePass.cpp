@@ -14,12 +14,19 @@ namespace Templates
 
 	void ResolvePass::CreatePrevPassDependentResources()
 	{
-		auto prevPassJ = GetPrevRenderPassTemplate();
-		mode = ResolveMode_CopyFromRenderToTexture;
-
-		if (prevPassJ->renderTargetFormats().at(0) == DXGI_FORMAT_R8G8B8A8_UNORM)
+		if (renderPassTemplate->usePrevPassTexture())
 		{
-			mode = ResolveMode_FullScreenQuad;
+			auto prevPassJ = GetPrevRenderPassTemplate();
+			mode = ResolveMode_CopyFromRenderToTexture;
+
+			if (prevPassJ->renderTargetFormats().at(0) == DXGI_FORMAT_R8G8B8A8_UNORM)
+			{
+				mode = ResolveMode_FullScreenQuad;
+			}
+		}
+		else
+		{
+			mode = ResolveMode_CopyFromRenderToTexture;
 		}
 
 		if (mode == ResolveMode_CopyFromRenderToTexture)
@@ -44,7 +51,7 @@ namespace Templates
 	void ResolvePass::Pass(SceneUnitId unit)
 	{
 		auto& swapChain = renderPassInstance->swapChainPass;
-		swapChain->BeginRenderPass(unit, swapChain->depthStencilViewDescriptorHeap);
+		swapChain->BeginRenderPass(unit, swapChain->depthStencilViewDescriptorHeap, clearRTV);
 		if (mode == ResolveMode_FullScreenQuad)
 		{
 			swapChain->CopyFromRenderToTexture(unit, GetPrevPassRenderToTexture());
@@ -63,7 +70,7 @@ namespace Templates
 		auto& commandList = scene->GetCommandList();
 		auto& fsCB = fsQuadConstantsBuffer;
 		auto& fsQuadMesh = GetMeshInstance(fsQuad);
-		auto& prevPassRTT = GetRenderToTexture(GetPrevPassRenderToTexture());
+		auto& prevPassRTT = renderPassTemplate->usePrevPassTexture() ? GetRenderToTexture(GetPrevPassRenderToTexture()) : GetRenderToTexture(rt_texture());
 
 #if defined(_DEVELOPMENT)
 		PIXBeginEvent(commandList.p, 0, "ResolvePassQuad");

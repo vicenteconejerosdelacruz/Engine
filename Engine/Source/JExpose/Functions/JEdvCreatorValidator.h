@@ -57,4 +57,6 @@ JEdvCreatorValidatorFunction CreatorValidValue<std::string, jedv_t_sounds_filepa
 template<>
 JEdvCreatorValidatorFunction CreatorValidValue<std::string, jedv_t_model3d_filepath>();
 template<>
+JEdvCreatorValidatorFunction CreatorValidValue<std::string, jedv_t_htmls_filepath>();
+template<>
 JEdvCreatorValidatorFunction CreatorValidVector<std::string, jedv_t_filepath_vector_image>();

@@ -123,6 +123,8 @@ template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_shaders_filepath>();
 template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_sounds_filepath>();
+template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_htmls_filepath>();
 
 template<>
 JEdvEditorDrawerFunction DrawValue<int, jedv_t_integer>();
@@ -174,6 +176,7 @@ template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_shader_name
 template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_sound_name>();
 template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_texture_name>();
 template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_physycgeometry_name>();
+template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_htmlui_name>();
 
 void DrawResourceSelection(
 	std::string attribute,
@@ -200,6 +203,8 @@ template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_texture>();
 template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_physycgeometry>();
+template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_htmlui>();
 template<>
 JEdvEditorDrawerFunction DrawValue<bool, jedv_t_boolean>();
 template<>

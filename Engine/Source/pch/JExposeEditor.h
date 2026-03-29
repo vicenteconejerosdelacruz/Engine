@@ -23,6 +23,7 @@ namespace Templates
 	extern std::vector<JUUIDName> GetShadersUUIDsNames();
 	extern std::vector<JUUIDName> GetSoundsUUIDsNames();
 	extern std::vector<JUUIDName> GetTexturesUUIDsNames();
+	extern std::vector<JUUIDName> GetHtmlUIsUUIDsNames();
 	extern std::vector<JUUIDName> GetPhysicGeometrysUUIDsNames();
 	extern JNAME GetMeshName(JUUID uuid);
 	extern JNAME GetModel3DName(JUUID uuid);

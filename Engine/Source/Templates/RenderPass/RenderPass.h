@@ -55,6 +55,7 @@ enum RenderPassRenderCallbackOverride
 	RenderPassRenderCallbackOverride_None,
 	RenderPassRenderCallbackOverride_ToneMapping,
 	RenderPassRenderCallbackOverride_Resolve,
+	RenderPassRenderCallbackOverride_ResolveUI,
 	RenderPassRenderCallbackOverride_MinMaxChain,
 	RenderPassRenderCallbackOverride_MinMaxChainResult,
 };
@@ -64,6 +65,7 @@ inline static std::unordered_map<RenderPassRenderCallbackOverride, std::string> 
 	{ RenderPassRenderCallbackOverride_None, "None" },
 	{ RenderPassRenderCallbackOverride_ToneMapping,	"ToneMapping" },
 	{ RenderPassRenderCallbackOverride_Resolve, "Resolve" },
+	{ RenderPassRenderCallbackOverride_ResolveUI, "ResolveUI" },
 	{ RenderPassRenderCallbackOverride_MinMaxChain, "MinMaxChain" },
 	{ RenderPassRenderCallbackOverride_MinMaxChainResult, "MinMaxChainResult" },
 };
@@ -73,6 +75,7 @@ inline static std::unordered_map<std::string, RenderPassRenderCallbackOverride> 
 	{ "None", RenderPassRenderCallbackOverride_None },
 	{ "ToneMapping", RenderPassRenderCallbackOverride_ToneMapping },
 	{ "Resolve", RenderPassRenderCallbackOverride_Resolve },
+	{ "ResolveUI", RenderPassRenderCallbackOverride_ResolveUI },
 	{ "MinMaxChain", RenderPassRenderCallbackOverride_MinMaxChain },
 	{ "MinMaxChainResult", RenderPassRenderCallbackOverride_MinMaxChainResult },
 };

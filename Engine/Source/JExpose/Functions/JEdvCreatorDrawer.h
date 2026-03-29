@@ -58,6 +58,7 @@ template<> JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_sha
 template<> JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_sound_name>();
 template<> JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_texture_name>();
 template<> JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_physycgeometry_name>();
+template<> JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_te_htmlui_name>();
 
 template<>
 JEdvCreatorDrawerFunction DrawCreatorValue<bool, jedv_t_boolean>();
@@ -140,6 +141,9 @@ JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_sounds_filepath>(
 
 template<>
 JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_model3d_filepath>();
+
+template<>
+JEdvCreatorDrawerFunction DrawCreatorValue<std::string, jedv_t_htmls_filepath>();
 
 template<>
 JEdvCreatorDrawerFunction DrawCreatorVector<std::string, jedv_t_filepath_vector_image>();

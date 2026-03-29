@@ -675,6 +675,18 @@
     <ClInclude Include="JExpose\Scene\SceneControllerAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UI\UI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Templates\HtmlUI\HtmlUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Templates\HtmlUIAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Templates\RenderPass\Override\ResolveUIPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -999,6 +1011,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Controllers\SceneController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\UI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Templates\HtmlUI\HtmlUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Templates\RenderPass\Override\ResolveUIPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

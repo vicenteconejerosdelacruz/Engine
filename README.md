@@ -1,10 +1,8 @@
 # Culpeo Game Engine
 
-<img src="https://media.githubusercontent.com/media/vicenteconejerosdelacruz/Engine/refs/heads/main/TestGame/Target/Assets/ui/logo.png" 
-        alt="Picture" 
-        width="800" 
-        height="600" 
-        style="display: block; margin: 0 auto" />
+![](https://media.githubusercontent.com/media/vicenteconejerosdelacruz/Engine/refs/heads/main/TestGame/Target/Assets/ui/logo.png)
+
+## Table of Content
 
 - [Installation](#install)
 - [Dependencies](#deps)
@@ -16,6 +14,8 @@
   - [v8pp](#deps-v8pp)
   - [DirectXTK12](#deps-directxtk12)
   - [DirectXTex](#deps-directxtex)
+  - [UltraLight](#deps-ultra-light)
+  - [PhysX](#deps-physx)
 - [Architecture](#arch)
   - [JSON](#arch-json)
     - [nlohmann::json integration](#arch-json-integration)
@@ -49,3 +49,33 @@
     - [2D Sounds](#arch-audio-2d)
     - [3D Sounds](#arch-audio-3d)
   - [Animation Sequencer](#arch-animation-sequencer)
+
+---
+
+## Installation
+
+In order to install you must clone the repository using git. this repository uses git LFS so be sure to have it enabled
+
+in the SDKs folder there is a buildSDK.ps1 powershell script which right now partially builds the entire dependencies. 
+
+The next dependencies are included in the repository
+
+- Assimp
+
+- DirectXTex
+
+- DirectXTK12
+
+- imgui
+
+- imguizmo
+
+Libraries like
+
+- V8
+
+- PhysX
+
+- UltraLight
+
+are required but the installation instructions will be covered in this readme

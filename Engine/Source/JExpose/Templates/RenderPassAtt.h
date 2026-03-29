@@ -8,3 +8,4 @@ JEXPOSE_VECTOR_TRANSFORM(DXGI_FORMAT, renderTargetFormats, ToDXGIFormat, FromDXG
 JEXPOSE_ENUM(DXGI_FORMAT, depthStencilFormat, DXGI_FORMAT_D32_FLOAT, jedv_t_dxgi_depth_format, 1, true)
 JEXPOSE_ENUM(RenderPassMaterialOverride, materialOverride, RenderPassMaterialOverride_None, jedv_t_enum, 1, true)
 JEXPOSE_ENUM(RenderPassRenderCallbackOverride, renderCallbackOverride, RenderPassRenderCallbackOverride_None, jedv_t_enum, 1, true)
+JEXPOSE(bool, usePrevPassTexture, true, jedv_t_boolean, 1, false)

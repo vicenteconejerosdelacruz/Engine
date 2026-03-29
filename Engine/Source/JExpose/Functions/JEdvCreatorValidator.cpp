@@ -136,6 +136,14 @@ JEdvCreatorValidatorFunction CreatorValidValue<std::string, jedv_t_model3d_filep
 }
 
 template<>
+JEdvCreatorValidatorFunction CreatorValidValue<std::string, jedv_t_htmls_filepath>() {
+	return[](std::string attribute, nlohmann::json& json)
+		{
+			return json.at(attribute) != "";
+		};
+}
+
+template<>
 JEdvCreatorValidatorFunction CreatorValidVector<std::string, jedv_t_filepath_vector_image>() {
 	return[](std::string attribute, nlohmann::json& json)
 		{
