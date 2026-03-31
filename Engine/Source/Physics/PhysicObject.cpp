@@ -1024,6 +1024,15 @@ namespace Physics
 						{ "StencilReadMask", 255},
 						{ "StencilWriteMask", 255 }
 					}
+				},
+				{ "passMaterialOverrides",
+					{
+						{
+							{ "meshIndex", 0 },
+							{ "renderPass", GetRenderPassUUIDByName("PickingPass") },
+							{ "material", GetMaterialUUIDByName("TranslucentPicking")}
+						}
+					}
 				}
 			}
 		);

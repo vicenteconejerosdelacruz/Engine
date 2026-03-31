@@ -996,8 +996,8 @@ namespace Templates
 						{ "ForcedSampleCount", 0},
 						{ "ConservativeRaster", "OFF" }
 					}
-				}/*,
-				{ "overrideDepthStencil", true}*/
+				},
+				{ "overrideDepthStencil", true}
 			},
 			{
 				{ "name", "Translucent" },
@@ -1232,6 +1232,39 @@ namespace Templates
 						{ "StencilWriteMask", 255 }
 					}
 				}
+			},
+			{
+				{ "name", "TranslucentPicking" },
+				{ "shader_ps", "e32c5e9c-26a5-4f2b-8d0c-5899c67f1def" },
+				{ "shader_vs", "79568541-34c8-4464-bec1-77debde975e0" },
+				{ "systemCreated" , true},
+				{ "mappedValues",
+					{
+						{
+							{ "value", 1.0 },
+							{ "variable", "alphaCut" },
+							{ "variableType", "FLOAT" }
+						}
+					}
+				},
+				{ "textures", {} },
+				{ "uuid", "c6396dfa-16ba-4c07-adfc-daa9c3866eb3" },
+				{ "rasterizerState",
+					{
+						{ "FillMode", "SOLID" },
+						{ "CullMode", "NONE" },
+						{ "FrontCounterClockwise", false},
+						{ "DepthBias", 0},
+						{ "DepthBiasClamp", 0.0},
+						{ "SlopeScaledDepthBias", 0.0},
+						{ "DepthClipEnable", true},
+						{ "MultisampleEnable", false},
+						{ "AntialiasedLineEnable", false},
+						{ "ForcedSampleCount", 0},
+						{ "ConservativeRaster", "OFF" }
+					}
+				},
+				{ "overrideDepthStencil", true}
 			}
 		}
 	);

@@ -2654,13 +2654,13 @@ namespace Editor
 				for (JUUID uuid : GetRenderables(id))
 				{
 					RenderableID r = MAKESUUUID(id, uuid);
-					OutputDebugStringA(("RenderPickingPass:" + r->name() + ":" + std::to_string(objectId) + "\n").c_str());
 					if (!r->visible()
 #if defined(_EDITOR_BOUNDINGBOX)
 						|| boundingBox.at(id).uuid() == r->uuid()
 #endif
 						) continue;
 
+					//OutputDebugStringA(("RenderPickingPass:" + r->name() + ":" + std::to_string(objectId) + "\n").c_str());
 					r->WriteConstantsBuffer("objectId", objectId, backBufferIndex);
 					r->Render(id, mousePicking.pickingPass.at(id), camera);
 					objectId++;
@@ -2723,6 +2723,8 @@ namespace Editor
 
 			if (pickedObjectId == objectId)
 			{
+				//OutputDebugStringA(("PickSceneObject:" + r->name() + ":" + std::to_string(objectId) + "\n").c_str());
+				//OutputDebugStringA("picked!\n");
 				SelectSceneObject(id, r.uuid());
 				break;
 			}
