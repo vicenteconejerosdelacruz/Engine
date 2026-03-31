@@ -62,6 +62,16 @@ namespace Templates
 #include <Model3DAtt.h>
 #include <JEnd.h>
 	}
+
+	void Model3DJson::ListenUpdate(Model3D_UpdateFlags flag, SUUUID suuuid, std::function<void()> callback)
+	{
+		updateFlagsListeners[flag].insert_or_assign(suuuid, callback);
+	}
+	void Model3DJson::RemoveUpdateListener(Model3D_UpdateFlags flag, SUUUID suuuid)
+	{
+		if (updateFlagsListeners[flag].contains(suuuid))
+			updateFlagsListeners[flag].erase(suuuid);
+	}
 #endif
 
 	TEMPDEF_FULL(Model3D);
@@ -84,13 +94,16 @@ namespace Templates
 			}
 		);
 
-		if (seqMdls.size() > 0ULL)
+		for (auto seqMdl : seqMdls)
 		{
-			//JObject::RunChangesCallback(seqMdls, [](auto mdl)
-			//	{
-			//		mdl->clean(Model3DJson::Update_animationSequences);
-			//	}
-			//);
+			seqMdl->clean(Model3DJson::Update_animationSequences);
+
+			if (!seqMdl->updateFlagsListeners.contains(Model3DJson::Update_animationSequences)) continue;
+
+			for (auto& [_, cb] : seqMdl->updateFlagsListeners.at(Model3DJson::Update_animationSequences))
+			{
+				cb();
+			}
 		}
 	}
 #endif

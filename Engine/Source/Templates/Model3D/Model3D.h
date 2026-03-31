@@ -63,7 +63,11 @@ namespace Templates
 
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
+		void ListenUpdate(Model3D_UpdateFlags flag, SUUUID suuuid, std::function<void()> callback);
+		void RemoveUpdateListener(Model3D_UpdateFlags flag, SUUUID suuuid);
 #endif
+
+		std::map<Model3D_UpdateFlags, std::map<SUUUID, std::function<void()>>> updateFlagsListeners;
 	};
 
 	struct Model3DInstance;
