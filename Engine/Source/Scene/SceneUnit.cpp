@@ -85,6 +85,7 @@ namespace Scene
 		DestroyLights(id);
 		DestroyCameras(id);
 		DestroyPhysicScenes(id);
+		DestroySceneControllers(id);
 	}
 
 	std::unordered_map<JUUID, SceneObjectType>& SceneUnit::GetSceneObjectTypes()
