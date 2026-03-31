@@ -297,21 +297,23 @@ namespace Scene
 		{
 			CreateModel3DInstance(model(), [this]
 				{
-					return std::make_unique<Model3DInstance>(unit, model(), uuid()/*, [this](JUUID model3DTemplateUUID)
-						{
-							auto& model = GetModel3DTemplate(model3DTemplateUUID);
-							if (model->dirty(Model3DJson::Update_animationSequences))
-							{
-								RebuildAnimationSequences();
-							}
-						}*/
-					);
+					return std::make_unique<Model3DInstance>(unit, model(), uuid());
 				}
 			);
 			model3D = model();
 			meshes = model3D->meshes;
 			if (model3D->animations)
+			{
+#if defined(_EDITOR)
+				Model3DJsonID model3dJson = model();
+				model3dJson->ListenUpdate(Model3DJson::Update_animationSequences, SUuuid(), [&]()
+					{
+						RebuildAnimationSequences();
+					}
+				);
+#endif
 				animable = model3D;
+			}
 
 			if (animable.empty())
 			{
@@ -747,6 +749,11 @@ namespace Scene
 
 		if (!model3D.empty())
 		{
+#if defined(_EDITOR)
+			Model3DJsonID model3dJson = model();
+			model3dJson->RemoveUpdateListener(Model3DJson::Update_animationSequences, SUuuid());
+#endif
+
 			DeleteModel3DInstance(model3D());
 			if (!boundingBoxCompute.empty())
 			{
