@@ -22,6 +22,8 @@ namespace Game
 
 	std::map<JUUID, std::unique_ptr<Controller>> controllersUUIDs;
 	std::map<SUUUID, std::set<JUUID>> controllerUUIDBySUUUID;
+	std::map<SUUUID, std::set<JUUIDName>> controllerUUIDNameBySUUUID;
+	std::map<JUUID, SUUUID> controllersSUUUID;
 	std::set<JUUID> mappedController;
 	static std::mutex controllerMutex;
 
@@ -82,7 +84,29 @@ namespace Game
 #include <Attributes/JV8Context.h>
 #include <ControllerAtt.h>
 #include <JEnd.h>
+#include <Scene.h>
 		return creators;
+	}
+
+#if defined(_EDITOR)
+	std::map<unsigned int, std::set<JUUID>> GetControllersPrioritySet(bool ignoreEditorPlay)
+#else
+	std::map<unsigned int, std::set<JUUID>> GetControllersPrioritySet()
+#endif
+	{
+		std::map<unsigned int, std::set<JUUID>> prioritySet;
+
+		for (auto& [suuuid, uuidset] : controllerUUIDBySUUUID)
+		{
+#if defined(_EDITOR)
+			if (!Editor::IsPlaying(std::get<0>(suuuid)) && !ignoreEditorPlay) continue;
+#endif
+			for (auto& uuid : uuidset)
+			{
+				prioritySet[controllersUUIDs.at(uuid)->priority()].insert(uuid);
+			}
+		}
+		return prioritySet;
 	}
 
 	JUUID RegisterController(std::string controllerName, SUUUID sceneObject, std::unique_ptr<Controller>& controller)
@@ -91,27 +115,36 @@ namespace Game
 		JUUID uuid = getUUID();
 		controller->controller = uuid;
 		controllersUUIDs.insert_or_assign(uuid, std::move(controller));
+		//relate the suuuid to the controllers
 		if (!controllerUUIDBySUUUID.contains(sceneObject))
 		{
 			controllerUUIDBySUUUID.insert_or_assign(sceneObject, std::set<JUUID>());
 		}
 		controllerUUIDBySUUUID.at(sceneObject).insert(uuid);
+		//relate the suuuid
+		if (!controllerUUIDNameBySUUUID.contains(sceneObject))
+		{
+			controllerUUIDNameBySUUUID.insert_or_assign(sceneObject, std::set<JUUIDName>());
+		}
+		controllerUUIDNameBySUUUID.at(sceneObject).insert(std::make_tuple(uuid, controllerName));
+		controllersSUUUID.insert_or_assign(uuid, sceneObject);
+
 		return uuid;
 	}
 
 	void MapControllers(SceneUnitId id)
 	{
-		std::lock_guard<std::mutex> lock(controllerMutex);
-		for (auto& [suuuid, uuidset] : controllerUUIDBySUUUID)
-		{
-			SceneUnitId unit = std::get<0>(suuuid);
-			if (unit != id) continue;
+		std::map<unsigned int, std::set<JUUID>> prioritySet = GetControllersPrioritySet(true);
 
+		for (auto& [_, uuidset] : prioritySet)
+		{
 			for (auto& uuid : uuidset)
 			{
-				if (!controllersUUIDs.contains(uuid) || mappedController.contains(uuid)) continue;
+				if (std::get<0>(controllersSUUUID.at(uuid)) != id ||
+					!controllersUUIDs.contains(uuid) ||
+					mappedController.contains(uuid)) continue;
 				{
-					controllersUUIDs.at(uuid)->Map(suuuid);
+					controllersUUIDs.at(uuid)->Map(controllersSUUUID.at(uuid));
 					mappedController.insert(uuid);
 				}
 			}
@@ -131,6 +164,23 @@ namespace Game
 		return controllers;
 	}
 
+	std::vector<JUUIDName> GetControllersInstancesInSceneUnit(SceneUnitId id)
+	{
+		std::vector<JUUIDName> controllers;
+		for (auto& [suuuid, uuidset] : controllerUUIDNameBySUUUID)
+		{
+			SceneUnitId unit = std::get<0>(suuuid);
+			if (unit != id) continue;
+
+			for (auto& uuidName : uuidset)
+			{
+				controllers.push_back(std::make_tuple(std::get<1>(suuuid), std::get<1>(uuidName)));
+			}
+		}
+		SortUUIDByName(controllers);
+		return controllers;
+	}
+
 	std::unique_ptr<Controller>& GetController(JUUID uuid)
 	{
 		return controllersUUIDs.at(uuid);
@@ -146,6 +196,8 @@ namespace Game
 		std::lock_guard<std::mutex> lock(controllerMutex);
 		controllersUUIDs.clear();
 		controllerUUIDBySUUUID.clear();
+		controllerUUIDNameBySUUUID.clear();
+		controllersSUUUID.clear();
 		mappedController.clear();
 	}
 
@@ -165,24 +217,30 @@ namespace Game
 			else
 				it++;
 		}
+		//delete the controller names
+		for (auto it = controllerUUIDNameBySUUUID.begin(); it != controllerUUIDNameBySUUUID.end();)
+		{
+			for (auto sit = it->second.begin(); sit != it->second.end();)
+			{
+				if (std::get<0>(*sit) == uuid)
+					it->second.erase(*sit);
+				else
+					sit++;
+			}
+
+			if (it->second.size() == 0ULL)
+				it = controllerUUIDNameBySUUUID.erase(it);
+			else
+				it++;
+		}
+		controllersSUUUID.erase(uuid);
 	}
 
 	void StepControllers(DX::StepTimer& timer)
 	{
 		std::lock_guard<std::mutex> lock(controllerMutex);
 		float dt = static_cast<float>(timer.GetElapsedSeconds());
-		std::map<unsigned int, std::set<JUUID>> prioritySet;
-
-		for (auto& [suuuid, uuidset] : controllerUUIDBySUUUID)
-		{
-#if defined(_EDITOR)
-			if (!Editor::IsPlaying(std::get<0>(suuuid))) continue;
-#endif
-			for (auto& uuid : uuidset)
-			{
-				prioritySet[controllersUUIDs.at(uuid)->priority()].insert(uuid);
-			}
-		}
+		std::map<unsigned int, std::set<JUUID>> prioritySet = GetControllersPrioritySet();
 
 		for (auto& [_, uuidset] : prioritySet)
 		{
@@ -191,5 +249,17 @@ namespace Game
 				controllersUUIDs.at(uuid)->Step(dt);
 			}
 		}
+	}
+
+	Controller* GetController(SceneUnitId id, ControllerBinding cb)
+	{
+		using namespace Scene;
+		SceneObject* so = GetSceneObjectPointer(MAKESUUUID(id, cb.uuid));
+		return GetController(so->at("controllers").at(cb.name)).get();
+	}
+
+	JUUID GetControllerUUID(SceneUnitId id, ControllerBinding cb)
+	{
+		return GetController(id, cb)->controller;
 	}
 }

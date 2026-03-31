@@ -1952,6 +1952,61 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_renderable>()
 }
 
 template<>
+JEdvEditorDrawerFunction DrawValue<ControllerBinding, jedv_t_so_controller_instance>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			if (json.size() > 1ULL) return;
+			ControllerBinding selected(json.at(0)->at(attribute));
+			std::vector<JUUIDName> controllers = GetControllersInstancesInSceneUnit(Editor::currentSceneUnitId);
+			std::map<std::string, ControllerBinding> selectables = { { "",ControllerBinding()} };
+			std::transform(controllers.begin(), controllers.end(), std::inserter(selectables, selectables.begin()), [](JUUIDName& uuidName)
+				{
+					JUUID sceneObjectId = std::get<0>(uuidName);
+					JNAME controllerName = std::get<1>(uuidName);
+					SceneObjectType type = GetSceneObjectType(Editor::currentSceneUnitId, sceneObjectId);
+					SceneObject* so = GetSceneObjectPointer(Editor::currentSceneUnitId, sceneObjectId);
+					std::string option = SceneObjectTypeToString.at(type) + "/" + std::string(so->at("name")) + ":" + controllerName;
+					std::pair<std::string, ControllerBinding> pair(option, ControllerBinding(uuidName));
+					return pair;
+				}
+			);
+			//table
+			std::string tableName = "tables-" + attribute + "-table";
+			if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+			{
+				ImGui::TableNextRow();
+
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text(attribute.c_str());
+
+				ImGui::TableSetColumnIndex(1);
+				ImGui::PushID(attribute.c_str());
+
+				ImGui::DrawComboSelection(selected, selectables, [&](std::string option)
+					{
+						json.at(0)->at(attribute) = FromControllerBinding(selectables.at(option));
+						Editor::MarkSceneUnitAsModified(Editor::currentSceneUnitId);
+					}
+				);
+
+				ImGui::PopID();
+				ImGui::EndTable();
+			}
+		};
+}
+
+template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_scenecontroller>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			auto getName = [](JUUID uuid) { return Scene::GetSceneControllerName(MAKESUUUID(Editor::currentSceneUnitId, uuid)); };
+			DrawResourceSelection(attribute, json, getName, SortUUIDSUNameByName(Editor::currentSceneUnitId, [](auto unit) { return Scene::GetSceneControllersIDsNames(unit, false); }), ICON_FA_SNOWMAN, ImGui::OpenSceneObject);
+		};
+}
+
+template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_mesh>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)

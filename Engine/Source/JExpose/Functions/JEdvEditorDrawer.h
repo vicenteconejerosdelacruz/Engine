@@ -169,6 +169,7 @@ template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_renderable_
 template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_soundeffect_name>();
 template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_physicscene_name>();
 template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_trigger_name>();
+template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_controller_instance>();
 template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_material_name>();
 template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_model3d_name>();
 template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_renderpass_name>();
@@ -191,6 +192,8 @@ void DrawResourceSelection(
 
 template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_renderable>();
+template<>
+JEdvEditorDrawerFunction DrawValue<ControllerBinding, jedv_t_so_controller_instance>();
 template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_mesh>();
 template<>

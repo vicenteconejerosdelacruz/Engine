@@ -71,6 +71,8 @@ enum JsonToEditorValueType
 	jedv_t_so_soundeffect_vector,
 	jedv_t_so_physicscene_name,
 	jedv_t_so_trigger_name,
+	jedv_t_so_scenecontroller,
+	jedv_t_so_controller_instance,
 	jedv_t_te_mesh,
 	jedv_t_te_material,
 	jedv_t_te_material_name,

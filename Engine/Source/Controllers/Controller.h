@@ -25,6 +25,65 @@ virtual std::vector<std::pair<std::string, JsonToEditorValueType>> GetController
 	return attributes;\
 }
 
+namespace Scene
+{
+	struct SceneObject;
+};
+
+struct ControllerBinding
+{
+	ControllerBinding() {}
+	ControllerBinding(nlohmann::json json)
+	{
+		uuid = json.at("uuid");
+		name = json.at("name");
+	}
+	ControllerBinding(JUUIDName uuidName)
+	{
+		uuid = std::get<0>(uuidName);
+		name = std::get<1>(uuidName);
+	}
+
+	nlohmann::json ToJSON()
+	{
+		return {
+			{ "uuid", uuid },
+			{ "name", name }
+		};
+	}
+	bool operator<(const ControllerBinding& other) const
+	{
+		if (uuid != other.uuid) return uuid < other.uuid;
+		return name < other.name;
+	}
+
+	bool operator==(const ControllerBinding& other) const
+	{
+		return uuid == other.uuid && name == other.name;
+	}
+
+	ControllerBinding& operator=(const ControllerBinding& other)
+	{
+		if (this != &other) {
+			name = other.name;
+			uuid = other.uuid;
+		}
+		return *this;
+	}
+
+	JUUID uuid;
+	JNAME name;
+};
+
+inline ControllerBinding ToControllerBinding(nlohmann::json j)
+{
+	return ControllerBinding(j);
+}
+inline nlohmann::json FromControllerBinding(ControllerBinding sb)
+{
+	return sb.ToJSON();
+}
+
 using namespace nov8;
 namespace Game
 {
@@ -74,8 +133,14 @@ namespace Game
 		SUUUID sceneObject;
 	};
 
+#if defined(_EDITOR)
+	std::map<unsigned int, std::set<JUUID>> GetControllersPrioritySet(bool ignoreEditorPlay = false);
+#else
+	std::map<unsigned int, std::set<JUUID>> GetControllersPrioritySet();
+#endif
 	JUUID RegisterController(std::string controllerName, SUUUID sceneObject, std::unique_ptr<Controller>& controller);
 	void MapControllers(SceneUnitId id);
+	std::vector<JUUIDName> GetControllersInstancesInSceneUnit(SceneUnitId id);
 	std::set<JUUID> GetControllersInSceneUnit(SceneUnitId id);
 	std::unique_ptr<Controller>& GetController(JUUID uuid);
 	std::set<JUUID> GetControllersBySceneObjectUUID(SUUUID uuid);
@@ -83,12 +148,21 @@ namespace Game
 	void DestroyController(JUUID uuid);
 	void StepControllers(DX::StepTimer& timer);
 
-	extern std::vector<std::string> GetControllers();
-	extern JUUID CreateController(std::string name, SUUUID sceneObject, nlohmann::json& json);
-
 	template<typename T>
 	T* GetController(JUUID uuid)
 	{
 		return static_cast<T*>(GetController(uuid).get());
 	}
+
+	Controller* GetController(SceneUnitId id, ControllerBinding cb);
+	template<typename T>
+	T* GetController(SceneUnitId id, ControllerBinding cb)
+	{
+		return static_cast<T*>(GetController(id, cb));
+	};
+
+	JUUID GetControllerUUID(SceneUnitId id, ControllerBinding cb);
+
+	extern std::vector<std::string> GetControllers();
+	extern JUUID CreateController(std::string name, SUUUID sceneObject, nlohmann::json& json);
 };
