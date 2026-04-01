@@ -2626,8 +2626,6 @@ namespace Editor
 #if !defined(_EDITOR_PICKINGPASS)
 		return;
 #endif
-		ImGuiIO& io = ImGui::GetIO();
-		if (io.WantCaptureMouse) return;
 
 		if (camera.empty() ||
 #if !defined(_EDITOR_PICKINGPASS_EVERY_FRAME)
@@ -2705,7 +2703,8 @@ namespace Editor
 
 	void PickSceneObject(SceneUnitId id, unsigned int pickedObjectId)
 	{
-		if (pickedObjectId == 0U)
+		ImGuiIO& io = ImGui::GetIO();
+		if (pickedObjectId == 0U || io.WantCaptureMouse)
 		{
 			SelectSceneObject(id, "");
 			return;
