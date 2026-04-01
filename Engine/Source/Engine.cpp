@@ -450,11 +450,9 @@ void Render()
 	using namespace Scene;
 	RunComputeShaders();
 	SceneRender();
-	GameRender();
 	renderer->Present();
 	SolveComputeShaders();
 	ScenePostRender();
-	GamePostRender();
 }
 
 void ResizeWindow()

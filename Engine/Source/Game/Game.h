@@ -16,6 +16,4 @@ namespace Game
 	void RegisterSceneUnitGame(SceneUnitId id, GEngineSM& gesm);
 	void DestroySeneUnitGame(SceneUnitId id);
 	void GameStep();
-	void GameRender();
-	void GamePostRender();
 };

@@ -58,14 +58,4 @@ namespace Game
 			gesm.Step();
 		}
 	}
-
-	void GameRender()
-	{
-		//ges.Render();
-	}
-
-	void GamePostRender()
-	{
-		//ges.PostRender();
-	}
 };
