@@ -1,5 +1,4 @@
-#ifndef _SEQUENCE_CHANNEL_ELEMENT_TRANSFORMATION_H
-#define _SEQUENCE_CHANNEL_ELEMENT_TRANSFORMATION_H
+#pragma once
 
 #include "SequenceChannelElement.h"
 #include <unordered_map>
@@ -62,5 +61,3 @@ struct SequenceChannelElementTransformation : SequenceChannelElement
 
 	std::unordered_map<int, TransformationKeyFrame> keyFrames;
 };
-
-#endif

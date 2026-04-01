@@ -1,4 +1,4 @@
-#ifndef _SEQUENCE_H
+#pragma once
 #define _SEQUENCE_H
 
 #include <string>
@@ -37,4 +37,3 @@ inline static nlohmann::json FromSequence(Sequence s)
 {
 	return s.json();
 }
-#endif

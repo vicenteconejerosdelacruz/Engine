@@ -1,5 +1,4 @@
-#ifndef _CHANNEL_ELEMENT_H
-#define _CHANNEL_ELEMENT_H
+#pragma once
 
 #include "Elements/SequenceChannelElementAnimation.h"
 #include "Elements/SequenceChannelElementTransformation.h"
@@ -58,4 +57,3 @@ struct ChannelElement
 	SequenceChannelElementSoundFX soundfx;
 	SequenceChannelElementScript script;
 };
-#endif

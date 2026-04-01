@@ -1,5 +1,4 @@
-#ifndef _SEQUENCE_CHANNEL_ELEMENT_SCRIPT_H
-#define _SEQUENCE_CHANNEL_ELEMENT_SCRIPT_H
+#pragma once
 
 #include "SequenceChannelElement.h"
 
@@ -12,4 +11,3 @@ struct SequenceChannelElementScript : SequenceChannelElement
 
 	std::string script;
 };
-#endif
