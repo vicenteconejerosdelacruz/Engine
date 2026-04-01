@@ -1,5 +1,4 @@
 #pragma once
-#define _SEQUENCE_H
 
 #include <string>
 #include <vector>

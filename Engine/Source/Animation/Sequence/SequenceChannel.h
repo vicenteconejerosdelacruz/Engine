@@ -1,5 +1,4 @@
 #pragma once
-#define _SEQUENCE_CHANNEL_H
 
 #include "Channels/Elements/SequenceChannelElementAnimation.h"
 #include "Channels/Elements/SequenceChannelElementTransformation.h"

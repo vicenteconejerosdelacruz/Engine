@@ -1,5 +1,4 @@
-#ifndef _SEQUENCE_PLAYER_H
-#define _SEQUENCE_PLAYER_H
+#pragma once
 
 #include "Sequence.h"
 
@@ -26,4 +25,3 @@ struct SequencePlayer
 	void ExecuteFrameScripts(int frame);
 	void ResetFrames();
 };
-#endif
