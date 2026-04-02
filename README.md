@@ -6,16 +6,16 @@
 
 - [Installation](#install)
 - [Dependencies](#deps)
-  - [Assimp](#deps-assimp)
   - [nlohmann::json](#deps-nlohmann-json)
-  - [imgui](#deps-imgui)
-  - [ImGuizmo](#deps-imguizmo)
-  - [v8](#deps-v8)
-  - [v8pp](#deps-v8pp)
+  - [Assimp](#deps-assimp)
   - [DirectXTK12](#deps-directxtk12)
   - [DirectXTex](#deps-directxtex)
-  - [UltraLight](#deps-ultra-light)
+  - [DXIL](#deps-dxil)
   - [PhysX](#deps-physx)
+  - [v8](#deps-v8)
+  - [UltraLight](#deps-ultra-light)
+  - [ImGui](#deps-imgui)
+  - [ImGuizmo](#deps-imguizmo)
 - [Architecture](#arch)
   - [JSON](#arch-json)
     - [nlohmann::json integration](#arch-json-integration)
@@ -79,3 +79,57 @@ Libraries like
 - UltraLight
 
 are required but the installation instructions will be covered in this readme
+
+## Dependencies
+
+lets make an explanation of the dependencies listed in the installation step and what is their purpose
+
+### nlohmann::json [GitHub - nlohmann/json: JSON for Modern C++ · GitHub](https://github.com/nlohmann/json)
+
+nlohmann::json is a pure header library made with the specific purpose to load/parse & build json representations. this allows Culpeo to acomplish load&save json files for templates and levels, but also every [JObject](#defs-JObect) derived (Templates, SceneObjects, Controllers & PhysicObjects) can use nlohmann::json representation to interact with
+
+### Assimp [Open Asset Import Library · GitHub](https://github.com/assimp)
+
+Assimp's purpose is to allow 3D Models to be loaded into the engine. it imports the meshes as a readable format which laters get's transformed into Vertices and Indices representations. It also loads descriptions for the materials(textures and properties) which are used to build basic Materials(which can be modified) for the 3D model
+
+### DirectXTK12 [GitHub - microsoft/DirectXTK12: The DirectX Tool Kit (aka DirectXTK12) is a collection of helper classes for writing DirectX 12 code in C++ · GitHub](https://github.com/microsoft/DirectXTK12)
+
+DirectXTK12 is used for processing the Mouse, Gamepad and Keyboard input and also is used to load images in dds format 
+
+### DirectXTex [GitHub - microsoft/DirectXTex: DirectXTex texture processing library · GitHub](https://github.com/microsoft/DirectXTex)
+
+DirectXTex is mainly a Library/CLI utility used to gather information from images like dimensions(texdiag), convert images formats(texconv). but I'have modified DirectXTex to allow to use it as an integrated library so there is no need to open an cmd or powershell terminal in order to interact with it. any jpeg, gif or png is converted to dds using this library
+
+### Physx [GitHub - NVIDIA-Omniverse/PhysX: NVIDIA PhysX SDK · GitHub](https://github.com/NVIDIA-Omniverse/PhysX)
+
+Physx is the physics library developed by NVidia, we currently support making static, dynamic, character controllers and triggers
+
+### V8 [GitHub - v8/v8: The official mirror of the V8 Git repository · GitHub](https://github.com/v8/v8)
+
+V8 is a JavaScript Engine developed by google, used for running scripts. it's installation is done not through github, but through nuget as v8pp [GitHub - pmed/v8pp: Bind C++ functions and classes into V8 JavaScript engine · GitHub](https://github.com/pmed/v8pp) offers a ready to use alternative. nonetheless v8pp is not used in Culpeo, but attributes and functions are binded using Culpeo own implementations needed in ordere to interact with nlohmann::json 
+
+### Ultralight https://ultralig.ht/
+
+Ultralight allow us to render UI elements using HTML webpages, it's built using JavaScriptCore(another JavaScript Engine) and it's possible to have rich and complex UI elements in the game built by a web designer supporting simple HTML webpage or larger pages embedding frameworks like react
+
+### ImGui [GitHub - ocornut/imgui: Dear ImGui: Bloat-free Graphical User interface for C++ with minimal dependencies · GitHub](https://github.com/ocornut/imgui)
+
+ImGui is an inmediate mode UI library, great for building customizable tools like the Modals, Panels. In culpeo's case the whole Editor is built using ImGui 
+
+### ImGuizmo [GitHub - CedricGuillemet/ImGuizmo: Immediate mode 3D gizmo for scene editing and other controls based on Dear Imgui · GitHub](https://github.com/cedricguillemet/imguizmo)
+
+ImGuizmo is a small library that allows to easily modify objects transformation(position, rotation & scale) of objects using the mouse
+
+## Architecture
+
+### JSON
+
+Most of the architecture on how data is handled are done through JSON objects, either using nlohmann::json interfaces or class methods created to interact with nlohmann::json 
+
+for example a simple boolean attribute in nlohmann::json is represented like this
+
+```basic nlohmann::json attribute
+nlohmann::json attributes = { {"visible", true} };
+attributes["visible"] = false;
+attributes.at("visible") = true;
+```
