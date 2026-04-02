@@ -290,6 +290,54 @@ void AnimationSequencerModal::EraseSequenceTriggers()
 	sequenceTriggers.clear();
 }
 
+void AnimationSequencerModal::UpdateTriggers()
+{
+	Animation::BonesTransformations& bonesTransformation = renderable->bonesTransformation;
+	int frame = timelineEditor.selectedFrameInTimeline;
+	XMMATRIX world = renderable->world();
+	for (auto& [channel, triggers] : sequenceTriggers)
+	{
+		for (auto& trigger : triggers)
+		{
+			SequenceChannelElementTrigger* elem = trigger.trigger;
+			RenderableID renderable = trigger.renderable;
+			bool visible = frame >= elem->frameStart && frame <= elem->frameEnd;
+			trigger.renderable->visible(visible);
+			if (elem->bone.empty())
+			{
+				trigger.renderable->position(elem->position);
+				trigger.renderable->rotation(elem->rotation);
+				trigger.renderable->scale(elem->scale);
+			}
+			else
+			{
+				XMMATRIX boneSpace = bonesTransformation.at(elem->bone);
+				XMMATRIX boneWorldSpace = XMMatrixMultiply(XMMatrixTranspose(boneSpace), world);
+				XMVECTOR boneWorldScale, boneWorldRotationQ, boneWorldTranslation;
+				XMMatrixDecompose(&boneWorldScale, &boneWorldRotationQ, &boneWorldTranslation, boneWorldSpace);
+
+				XMVECTOR tPos = XMVector3Transform(XMLoadFloat3(&elem->position), boneWorldSpace);
+				XMVECTOR tScl = XMLoadFloat3(&elem->scale);
+
+				XMVECTOR tRotQ = XMQuaternionMultiply(boneWorldRotationQ, XMQuaternionRotationRollPitchYaw(
+					XMConvertToRadians(elem->rotation.x),
+					XMConvertToRadians(elem->rotation.y),
+					XMConvertToRadians(elem->rotation.z))
+				);
+
+				XMFLOAT3 fPos, fRot, fScl;
+				fRot = Quaternion2Euler(tRotQ); //we convert to euler without much purpose, but anyway
+				XMStoreFloat3(&fPos, tPos);
+				XMStoreFloat3(&fScl, XMVectorMultiply(tScl, boneWorldScale));
+				trigger.renderable->position(fPos);
+				trigger.renderable->rotation(fRot);
+				trigger.renderable->rotationQ(tRotQ);
+				trigger.renderable->scale(fScl);
+			}
+		}
+	}
+}
+
 void AnimationSequencerModal::DestroyStep()
 {
 	if (destructionFrames > 0)
@@ -397,55 +445,6 @@ void AnimationSequencerModal::Step()
 	WriteConstantsBuffers(unit);
 
 	UpdateTriggers();
-}
-
-void AnimationSequencerModal::UpdateTriggers()
-{
-	Animation::BonesTransformations& bonesTransformation = renderable->bonesTransformation;
-	int frame = timelineEditor.selectedFrameInTimeline;
-	XMMATRIX world = renderable->world();
-	for (auto& [channel, triggers] : sequenceTriggers)
-	{
-		for (auto& trigger : triggers)
-		{
-			SequenceChannelElementTrigger* elem = trigger.trigger;
-			RenderableID renderable = trigger.renderable;
-			bool visible = frame >= elem->frameStart && frame <= elem->frameEnd;
-			trigger.renderable->visible(visible);
-			if (elem->bone.empty())
-			{
-				trigger.renderable->position(elem->position);
-				trigger.renderable->rotation(elem->rotation);
-				trigger.renderable->scale(elem->scale);
-			}
-			else
-			{
-				XMMATRIX wBone = bonesTransformation.at(elem->bone);
-				XMMATRIX mBone = XMMatrixMultiply(XMMatrixTranspose(wBone), world);
-				XMVECTOR scale, rotationQuat, translation;
-				XMMatrixDecompose(&scale, &rotationQuat, &translation, mBone);
-
-				XMVECTOR tPos = XMVector3Transform(XMLoadFloat3(&elem->position), mBone);
-				//XMVECTOR tScl = XMLoadFloat3(&elem->scale);
-
-				XMVECTOR tRotQ = XMQuaternionMultiply(rotationQuat, XMQuaternionRotationRollPitchYaw(
-					XMConvertToRadians(elem->rotation.x),
-					XMConvertToRadians(elem->rotation.y),
-					XMConvertToRadians(elem->rotation.z))
-				);
-
-				XMFLOAT3 fPos, fRot/*, fScl*/;
-				fRot = Quaternion2Euler(tRotQ);
-				XMStoreFloat3(&fPos, tPos);
-				//XMStoreFloat3(&fScl, XMVectorMultiply(tScl, scale));
-				trigger.renderable->position(fPos);
-				trigger.renderable->rotation(fRot);
-				trigger.renderable->rotationQ(tRotQ);
-				trigger.renderable->scale(elem->scale);
-				//trigger.renderable->scale(fScl);
-			}
-		}
-	}
 }
 
 void AnimationSequencerModal::DrawLoading()
