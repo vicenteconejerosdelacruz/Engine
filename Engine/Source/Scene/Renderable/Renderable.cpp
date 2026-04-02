@@ -920,17 +920,6 @@ namespace Scene
 		std::set<RenderableID> r;
 		std::transform(Renderables.begin(), Renderables.end(), std::inserter(r, r.begin()), [&](auto o) { return MAKESUUUID(unit, o); });
 
-		//is this(hack) or fix the loading system
-		//auto& scene = GetSceneUnit(unit);
-		//for (auto& ren : r)
-		//{
-		//	if (!ren->RenderReady() && scene->IsBound(ren.uuid()))
-		//	{
-		//		ren->RenderReady(true);
-		//		scene->EraseRenderableFromLoadingPool(ren);
-		//	}
-		//}
-
 		std::set<RenderableID> cleanRot;
 		std::for_each(r.begin(), r.end(), [&](auto& o)
 			{
@@ -993,7 +982,6 @@ namespace Scene
 			for (auto o : rMeshMaterial)
 			{
 				o->clean(Renderable::Update_meshMaterial);
-				o->visible(false);
 			}
 		}
 
@@ -1009,7 +997,6 @@ namespace Scene
 			for (auto o : rDepthStencil)
 			{
 				o->clean(Renderable::Update_depthStencil);
-				o->visible(false);
 			}
 		}
 
