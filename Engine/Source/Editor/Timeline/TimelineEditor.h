@@ -27,7 +27,8 @@ struct TimelineEditor
 	bool DrawPlusButton(ImVec2 pos, ImVec2 size, bool canInteract);
 	void DrawAddChannelButton(Sequence& sequence, ImVec2 pos, bool canInteract);
 	void DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract,
-		std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame
+		std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
+		std::function<void(SequenceChannelElementTrigger*)> setElementTrigger
 	);
 	void DrawVerticalScrollbar(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract);
 	void DrawHorizontalScrollbar(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract);
@@ -35,11 +36,14 @@ struct TimelineEditor
 	void DrawSelectedFrameVerticalLine(ImVec2 timelinePos, ImVec2 timelineSize);
 	void DrawActionPopup(Sequence& sequence, std::function<void(TransformationKeyFrame*, int frame)> setTransformationKeyFrame,
 		std::function<void()> deleteTransformationKeyFrame,
-		std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit);
+		std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit,
+		std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit);
 	void Draw(Sequence& sequence, ImVec2 pos, ImVec2 size,
 		std::function<void(TransformationKeyFrame*, int frame)> setTransformationKeyFrame,
+		std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
 		std::function<void()> deleteTransformationKeyFrame,
-		std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit
+		std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit,
+		std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit
 	);
 
 	void HandleElementDrag(Sequence& sequence);
@@ -58,6 +62,7 @@ struct TimelineEditor
 	void AddTransformationElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementTransformation* elem);
 	void AddSoundFXElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementSoundFX* elem);
 	void AddScriptElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementScript* elem);
+	void AddTriggerElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementTrigger* elem);
 	void DeleteElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
 	void SplitElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
 	void ToggleAnimationElementDirectionInChannelAtFrame(Sequence& sequence, int channelId, int frame);
@@ -66,6 +71,9 @@ struct TimelineEditor
 	void FlipTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
 	void OpenScriptEditionForElementInFrameAtChannel(Sequence& sequence, int channelId, int frame,
 		std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit);
+	void OpenTriggerScriptEditionForElementInFrameAtChannel(Sequence& sequence, int channelId, int frame, bool onEnterScript,
+		std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit);
+	void OpenBonePicker(Sequence& sequence, int channelId, int frame);
 	void SetFrameAtMouseXCoord(Sequence& sequence, ImVec2 markerPos, ImVec2 mousePos);
 	void ScrollAndSetFrame(Sequence& sequence, ImVec2 timelineSize, ImVec2 markerPos, ImVec2 mousePos, float distance, float axisSize);
 
@@ -109,4 +117,5 @@ struct TimelineEditor
 	//popups
 	AddElementPopup addElementPopup;
 	InteractElementPopup interactElementPopup;
+	PickBonePopup pickBonePopup;
 };

@@ -288,3 +288,13 @@ SequenceChannelElementScript* SequenceChannel::GetScriptToRunAtFrame(int frame)
 	}
 	return nullptr;
 }
+
+SequenceChannelElementTrigger* SequenceChannel::GetTriggerElementAtFrame(int frame)
+{
+	for (auto& element : elements)
+	{
+		if (element.type == SCET_Trigger && element.GetFrameStart() <= frame && frame <= element.GetFrameEnd())
+			return &element.trigger;
+	}
+	return nullptr;
+}

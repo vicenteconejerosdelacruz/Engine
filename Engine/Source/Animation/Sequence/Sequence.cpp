@@ -161,3 +161,10 @@ bool Sequence::Runnable() const
 {
 	return !sequenceChannels.empty();
 }
+
+SequenceChannelElementType Sequence::GetElementType(unsigned int channelId, unsigned int frame)
+{
+	auto& channel = sequenceChannels.at(channelId);
+	int elemIdx = channel.GetFirstElementIndexBetweenFrames(frame, frame);
+	return channel.elements.at(elemIdx).type;
+}

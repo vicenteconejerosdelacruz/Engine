@@ -130,7 +130,8 @@ void TimelineEditor::DrawAddChannelButton(Sequence& sequence, ImVec2 pos, bool c
 }
 
 void TimelineEditor::DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract,
-	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame
+	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
+	std::function<void(SequenceChannelElementTrigger*)> setElementTrigger
 )
 {
 	ImGuiIO& io = ImGui::GetIO();
@@ -208,8 +209,10 @@ void TimelineEditor::DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2
 	if (std::get<0>(selectedChannelFrame) != -1 && std::get<1>(selectedChannelFrame) != -1)
 	{
 		auto& [channel, frame] = selectedChannelFrame;
-		auto* elem = sequence.sequenceChannels.at(channel).GetTransformationKeyframe(frame);
-		setTransformationKeyFrame(elem, frame);
+		auto* elemKeyFrame = sequence.sequenceChannels.at(channel).GetTransformationKeyframe(frame);
+		auto* elemTrigger = sequence.sequenceChannels.at(channel).GetTriggerElementAtFrame(frame);
+		setTransformationKeyFrame(elemKeyFrame, frame);
+		setElementTrigger(elemTrigger);
 		SelectFrameInChannel(channel, frame);
 	}
 	if (std::get<0>(actionChannelFrame) != -1 && std::get<1>(actionChannelFrame) != -1)
@@ -482,7 +485,8 @@ void TimelineEditor::DrawSelectedFrameVerticalLine(ImVec2 timelinePos, ImVec2 ti
 void TimelineEditor::DrawActionPopup(Sequence& sequence,
 	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
 	std::function<void()> deleteTransformationKeyFrame,
-	std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit
+	std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit,
+	std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit
 )
 {
 	if (popup == TP_None) return;
@@ -513,6 +517,12 @@ void TimelineEditor::DrawActionPopup(Sequence& sequence,
 			{ SCET_Script, [this, &sequence, channel](SequenceChannelElement* elem)
 			{
 				AddScriptElementToChannel(sequence, channel, static_cast<SequenceChannelElementScript*>(elem));
+				popup = TP_None;
+			}
+			},
+			{ SCET_Trigger, [this, &sequence, channel](SequenceChannelElement* elem)
+			{
+				AddTriggerElementToChannel(sequence, channel, static_cast<SequenceChannelElementTrigger*>(elem));
 				popup = TP_None;
 			}
 			},
@@ -577,20 +587,53 @@ void TimelineEditor::DrawActionPopup(Sequence& sequence,
 			},
 			{ IP_Script_Edit, [this,&sequence,channel,frame, setScriptToEdit]()
 			{
-				OpenScriptEditionForElementInFrameAtChannel(sequence,channel,frame, setScriptToEdit);
+				OpenScriptEditionForElementInFrameAtChannel(sequence, channel, frame, setScriptToEdit);
 				popup = TP_None;
+			}
+			},
+			{ IP_Trigger_OnEnter, [this,&sequence, channel, frame, setTriggerScriptToEdit]
+			{
+				OpenTriggerScriptEditionForElementInFrameAtChannel(sequence, channel, frame, true, setTriggerScriptToEdit);
+				popup = TP_None;
+			}
+			},
+			{ IP_Trigger_OnLeave,[this,&sequence, channel, frame, setTriggerScriptToEdit]
+			{
+				OpenTriggerScriptEditionForElementInFrameAtChannel(sequence, channel, frame, false, setTriggerScriptToEdit);
+				popup = TP_None;
+			}
+			},
+			{ IP_Pick_Bone, [&]()
+			{
+				OpenBonePicker(sequence,channel,frame);
+				popup = TP_PickBone;
 			}
 			}
 		};
 
 		interactElementPopup.Draw(popupCoords, element, frame, interactions, [this]() { popup = TP_None; });
 	}
+	else if (popup == TP_PickBone)
+	{
+		auto& [channel, frame] = popupChannelFrame;
+		auto& seqChannel = sequence.sequenceChannels.at(channel);
+		int elementIndex = seqChannel.GetFirstElementIndexBetweenFrames(frame, frame);
+		ChannelElement& element = seqChannel.elements.at(elementIndex);
+
+		pickBonePopup.Draw(popupCoords, element, [&]
+			{
+				popup = TP_None;
+			}
+		);
+	}
 }
 
 void TimelineEditor::Draw(Sequence& sequence, ImVec2 pos, ImVec2 size,
 	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
+	std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
 	std::function<void()> deleteTransformationKeyFrame,
-	std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit
+	std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit,
+	std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit
 )
 {
 	auto getTimelineValues = [pos, size]()
@@ -605,12 +648,12 @@ void TimelineEditor::Draw(Sequence& sequence, ImVec2 pos, ImVec2 size,
 	bool draging = elementDrag || elementDragLeftBoundary || elementDragRightBoundary;
 	DrawBackground(pos, size);
 	DrawAddChannelButton(sequence, pos, canInteract && !markerMouseDrag && !draging);
-	DrawTimeline(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging, setTransformationKeyFrame);
+	DrawTimeline(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging, setTransformationKeyFrame, setElementTrigger);
 	DrawMarkers(sequence, timelinePos, timelineSize, canInteract && !draging);
 	DrawSelectedFrameVerticalLine(timelinePos, timelineSize);
 	DrawVerticalScrollbar(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging);
 	DrawHorizontalScrollbar(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging);
-	DrawActionPopup(sequence, setTransformationKeyFrame, deleteTransformationKeyFrame, setScriptToEdit);
+	DrawActionPopup(sequence, setTransformationKeyFrame, deleteTransformationKeyFrame, setScriptToEdit, setTriggerScriptToEdit);
 	HandleElementDrag(sequence);
 	HandleElementDragLeftBoundary(sequence);
 	HandleElementDragRightBoundary(sequence);
@@ -879,6 +922,18 @@ void TimelineEditor::AddScriptElementToChannel(Sequence& sequence, int channelId
 	seqChannel.InsertChannelElement(chanElem, sequence.totalFrames, sequence.framesPerSecond);
 }
 
+void TimelineEditor::AddTriggerElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementTrigger* elem)
+{
+	SequenceChannel& seqChannel = sequence.sequenceChannels.at(channelId);
+	ChannelElement chanElem;
+	chanElem.type = SCET_Trigger;
+	SequenceChannelElementTrigger& trigger = chanElem.trigger;
+	trigger.frameStart = elem->frameStart;
+	trigger.frameEnd = elem->frameStart;
+	trigger.bone = elem->bone;
+	seqChannel.InsertChannelElement(chanElem, sequence.totalFrames, sequence.framesPerSecond);
+}
+
 void TimelineEditor::DeleteElementInFrameAtChannel(Sequence& sequence, int channelId, int frame)
 {
 	SequenceChannel& seqChannel = sequence.sequenceChannels.at(channelId);
@@ -946,6 +1001,21 @@ void TimelineEditor::OpenScriptEditionForElementInFrameAtChannel(Sequence& seque
 	if (elementIndex == -1) return;
 	ChannelElement& element = seqChannel.elements.at(elementIndex);
 	setScriptToEdit(channelId, frame, &element.script);
+}
+
+void TimelineEditor::OpenTriggerScriptEditionForElementInFrameAtChannel(Sequence& sequence, int channelId, int frame, bool onEnterScript, std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit)
+{
+	SequenceChannel& seqChannel = sequence.sequenceChannels.at(channelId);
+	int elementIndex = seqChannel.GetFirstElementIndexBetweenFrames(frame, frame);
+	if (elementIndex == -1) return;
+	ChannelElement& element = seqChannel.elements.at(elementIndex);
+	setTriggerScriptToEdit(channelId, frame, onEnterScript, &element.trigger);
+}
+
+void TimelineEditor::OpenBonePicker(Sequence& sequence, int channelId, int frame)
+{
+	pickBonePopup.bones = nostd::GetKeysFromMap(renderable->animable->animations->bonesOffsets);
+	pickBonePopup.bones.insert(pickBonePopup.bones.begin(), { "" });
 }
 
 void TimelineEditor::SetFrameAtMouseXCoord(Sequence& sequence, ImVec2 markerPos, ImVec2 mousePos)

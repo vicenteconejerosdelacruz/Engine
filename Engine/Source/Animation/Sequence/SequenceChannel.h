@@ -4,6 +4,7 @@
 #include "Channels/Elements/SequenceChannelElementTransformation.h"
 #include "Channels/Elements/SequenceChannelElementSoundFX.h"
 #include "Channels/Elements/SequenceChannelElementScript.h"
+#include "Channels/Elements/SequenceChannelElementTrigger.h"
 #include "Channels/ChannelElement.h"
 
 struct SequenceChannel
@@ -23,6 +24,7 @@ struct SequenceChannel
 	TransformationKeyFrame* GetTransformationKeyframe(int frame);
 	SequenceChannelElementSoundFX* GetSoundFXToCreateAtFrame(int frame);
 	SequenceChannelElementScript* GetScriptToRunAtFrame(int frame);
+	SequenceChannelElementTrigger* GetTriggerElementAtFrame(int frame);
 
 	void InsertChannelElement(ChannelElement element, int& totalFrames, int framesPerSecond);
 	void MoveElement(int elementIndex, int frames, int totalFrames, int framesPerSecond);

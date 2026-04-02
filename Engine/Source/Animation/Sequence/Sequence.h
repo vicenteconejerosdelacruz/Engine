@@ -20,6 +20,7 @@ struct Sequence
 	void CreateSoundFXsAtFrame(int frame, SceneUnitId id);
 	void RunScriptAtFrame(int frame, RenderableID renderable);
 	bool Runnable() const;
+	SequenceChannelElementType GetElementType(unsigned int channelId, unsigned int frame);
 
 	int framesPerSecond;
 	int totalFrames;

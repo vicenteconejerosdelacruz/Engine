@@ -44,8 +44,10 @@ void AnimationSequencerModal::Initialize(JUUID uuid)
 	adjustToBoundingBox = true;
 	selectedTransformationKeyframe = nullptr;
 	keyFrameFrame = -1;
+	selectedElementTrigger = nullptr;
 	nextSelectedTransformationKeyframe = nullptr;
 	nextSelectedKeyFrameFrame = -1;
+	nextSelectedElementTrigger = nullptr;
 	selectedSequenceRenaming = false;
 	selectedSequenceNewName = "";
 	selectedSequenceCloning = false;
@@ -72,6 +74,8 @@ void AnimationSequencerModal::Initialize(JUUID uuid)
 			EnableSceneUnitRendering(id);
 			showing = true;
 			initializing = false;
+			bones = nostd::GetKeysFromMap(renderable->animable->animations->bonesOffsets);
+			bones.insert(bones.begin(), { "" });
 		},
 		[&](std::string asset, unsigned int count, unsigned int total)
 		{
@@ -183,6 +187,109 @@ nlohmann::json AnimationSequencerModal::GetModalLevelJson()
 	return modal;
 }
 
+void AnimationSequencerModal::CreateSequenceTriggers(Sequence& sequence)
+{
+	nlohmann::json renderables = nlohmann::json::array({});
+
+	for (unsigned int i = 0; i < sequence.sequenceChannels.size(); i++)
+	{
+		auto& channel = sequencePlayer.sequence.sequenceChannels.at(i);
+		for (auto& element : channel.elements)
+		{
+			if (element.type != SCET_Trigger) continue;
+
+			sequenceTriggers[i].push_back(
+				{
+					.trigger = &element.trigger,
+					.renderable = MAKESUUUID(unit,getUUID())
+				}
+			);
+			renderables.push_back(CreateSequenceTriggerRenderable(sequenceTriggers[i].back()));
+		}
+	}
+
+	if (renderables.size() == 0ULL) return;
+
+	nlohmann::json data = {
+		{ "renderables", renderables }
+	};
+
+	AttachLevelIntoScene(unit, "triggers", data, [=](SceneUnitId) {});
+}
+
+nlohmann::json AnimationSequencerModal::CreateSequenceTriggerRenderable(TriggerRenderable& triggerRenderable)
+{
+	auto trigger = triggerRenderable.trigger;
+	auto renderable = triggerRenderable.renderable;
+
+	nlohmann::json jrentrigger = nlohmann::json(
+		{
+			{
+				"meshMaterial",
+				{
+					{ "material", GetMaterialUUIDByName("Floor")},
+					{ "mesh",
+						{
+							{ "primitive", "f7786ac1-e296-4e9a-a7e6-6f1949de75ef" }
+						}
+					}
+				}
+			},
+			{ "castShadows", false },
+			{ "shadowed", false },
+			{ "name" , renderable.uuid()},
+			{ "uuid" , renderable.uuid()},
+			{ "position", FromXMFLOAT3(trigger->position) },
+			{ "topology", "TRIANGLELIST" },
+			{ "rotation" , FromXMFLOAT3(trigger->rotation) },
+			{ "scale" , FromXMFLOAT3(trigger->scale) },
+			{ "skipMeshes" , {}},
+			{ "visible" , true },
+			{ "hidden" , true},
+			{ "cameras", { cameraUUID }},
+			{ "depthStencil",
+				{
+					{ "BackFace",
+						{
+							{ "StencilDepthFailOp", "KEEP"},
+							{ "StencilFailOp", "KEEP"},
+							{ "StencilFunc", "ALWAYS"},
+							{ "StencilPassOp", "KEEP" }
+						}
+					},
+					{ "DepthEnable", true },
+					{ "DepthFunc", "LESS" },
+					{ "DepthWriteMask", "ALL" },
+					{ "FrontFace",
+						{
+							{ "StencilDepthFailOp", "KEEP"},
+							{ "StencilFailOp", "KEEP"},
+							{ "StencilFunc", "ALWAYS"},
+							{ "StencilPassOp", "KEEP" }
+						}
+					},
+					{ "StencilEnable", false},
+					{ "StencilReadMask", 255},
+					{ "StencilWriteMask", 255 }
+				}
+			}
+		}
+	);
+	return jrentrigger;
+}
+
+void AnimationSequencerModal::EraseSequenceTriggers()
+{
+	for (auto& [_, trs] : sequenceTriggers)
+	{
+		for (auto& tr : trs)
+		{
+			tr.renderable->markedForDelete = true;
+		}
+	}
+	sequenceTriggers.clear();
+}
+
 void AnimationSequencerModal::DestroyStep()
 {
 	if (destructionFrames > 0)
@@ -213,6 +320,7 @@ void AnimationSequencerModal::DestroySceneObjects()
 	model3D.clear();
 	model3dUUID.clear();
 	selectedSequence.clear();
+	sequenceTriggers.clear();
 }
 
 void AnimationSequencerModal::Step()
@@ -282,10 +390,61 @@ void AnimationSequencerModal::Step()
 		camera->at("position") = camera->at("freeposition");
 		camera->at("rotation") = camera->at("freerotation");
 	}
+	camera->updateRotationQ();
 
 	camera->WriteConstantsBuffer(scene->Frame());
 	renderable->WriteConstantsBuffer(scene->Frame());
 	WriteConstantsBuffers(unit);
+
+	UpdateTriggers();
+}
+
+void AnimationSequencerModal::UpdateTriggers()
+{
+	Animation::BonesTransformations& bonesTransformation = renderable->bonesTransformation;
+	int frame = timelineEditor.selectedFrameInTimeline;
+	XMMATRIX world = renderable->world();
+	for (auto& [channel, triggers] : sequenceTriggers)
+	{
+		for (auto& trigger : triggers)
+		{
+			SequenceChannelElementTrigger* elem = trigger.trigger;
+			RenderableID renderable = trigger.renderable;
+			bool visible = frame >= elem->frameStart && frame <= elem->frameEnd;
+			trigger.renderable->visible(visible);
+			if (elem->bone.empty())
+			{
+				trigger.renderable->position(elem->position);
+				trigger.renderable->rotation(elem->rotation);
+				trigger.renderable->scale(elem->scale);
+			}
+			else
+			{
+				XMMATRIX wBone = bonesTransformation.at(elem->bone);
+				XMMATRIX mBone = XMMatrixMultiply(XMMatrixTranspose(wBone), world);
+				XMVECTOR scale, rotationQuat, translation;
+				XMMatrixDecompose(&scale, &rotationQuat, &translation, mBone);
+
+				XMVECTOR tPos = XMVector3Transform(XMLoadFloat3(&elem->position), mBone);
+				XMVECTOR tScl = XMLoadFloat3(&elem->scale);
+
+				XMVECTOR tRotQ = XMQuaternionMultiply(rotationQuat, XMQuaternionRotationRollPitchYaw(
+					XMConvertToRadians(elem->rotation.x),
+					XMConvertToRadians(elem->rotation.y),
+					XMConvertToRadians(elem->rotation.z))
+				);
+
+				XMFLOAT3 fPos, fRot, fScl;
+				fRot = Quaternion2Euler(tRotQ);
+				XMStoreFloat3(&fPos, tPos);
+				XMStoreFloat3(&fScl, XMVectorMultiply(tScl, scale));
+				trigger.renderable->position(fPos);
+				trigger.renderable->rotation(fRot);
+				trigger.renderable->rotationQ(tRotQ);
+				trigger.renderable->scale(fScl);
+			}
+		}
+	}
 }
 
 void AnimationSequencerModal::DrawLoading()
@@ -335,20 +494,24 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 		{
 			selectedTransformationKeyframe = nullptr;
 			keyFrameFrame = -1;
+			selectedElementTrigger = nullptr;
 			nextSelectedTransformationKeyframe = nullptr;
 			nextSelectedKeyFrameFrame = -1;
+			nextSelectedElementTrigger = nullptr;
 
 			if (selectedSequence != "" && animationsSequences.sequences.contains(selectedSequence))
 			{
 				animationsSequences.sequences.insert_or_assign(selectedSequence, sequencePlayer.sequence);
 			}
 			selectedSequence = sequence;
+			EraseSequenceTriggers();
 			if (sequence != "")
 			{
 				Sequence& seq = animationsSequences.sequences.at(sequence);
 				sequencePlayer.SetSequence(seq, renderable);
 				timelineEditor.Init(renderable, sequencePlayer.sequence);
 				renderable->SetCurrentAnimation(&sequencePlayer);
+				CreateSequenceTriggers(seq);
 			}
 			playingSequence = false;
 			playingSequenceTime = 0.0f;
@@ -371,8 +534,10 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			renderable->SetCurrentAnimation(nullptr);
 			selectedTransformationKeyframe = nullptr;
 			keyFrameFrame = -1;
+			selectedElementTrigger = nullptr;
 			nextSelectedTransformationKeyframe = nullptr;
 			nextSelectedKeyFrameFrame = -1;
+			nextSelectedElementTrigger = nullptr;
 		};
 	auto onRenameSequence = [&](std::string sequence)
 		{
@@ -390,7 +555,9 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			animationsSequences.sequences.insert_or_assign(seqName, Sequence());
 			selectedSequence = seqName;
 			selectedTransformationKeyframe = nullptr;
+			selectedElementTrigger = nullptr;
 			nextSelectedTransformationKeyframe = nullptr;
+			nextSelectedElementTrigger = nullptr;
 			playingSequence = false;
 			playingSequenceTime = 0.0f;
 			Sequence& seq = animationsSequences.sequences.at(seqName);
@@ -515,6 +682,11 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 						nextSelectedTransformationKeyframe = tkeyframe;
 						nextSelectedKeyFrameFrame = frame;
 					},
+					[&](SequenceChannelElementTrigger* elementTrigger)
+					{
+						selectedElementTrigger = nullptr;
+						nextSelectedElementTrigger = elementTrigger;
+					},
 					[&]()
 					{
 						selectedTransformationKeyframe = nullptr;
@@ -523,14 +695,27 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 					[&](int channel, int frame, SequenceChannelElementScript* scriptToEdit)
 					{
 						selectedScriptChannelFrame = std::make_tuple(channel, frame);
+						selectedScriptType = SCET_Script;
 						selectedScriptToEdit = scriptToEdit;
 						selectedScriptToEditContent = scriptToEdit->script;
+					},
+					[&](int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger* scriptToEdit)
+					{
+						selectedScriptChannelFrame = std::make_tuple(channel, frame);
+						selectedScriptType = SCET_Trigger;
+						selectedScriptToEdit = scriptToEdit;
+						selectedScriptToEditContent = onEnterScript ? scriptToEdit->onEnter : scriptToEdit->onLeave;
+						isEnterScript = onEnterScript;
 					}
 				);
 			}
 			if (selectedTransformationKeyframe != nullptr)
 			{
 				DrawTransformationKeyFrameAttributes(*selectedTransformationKeyframe, keyFrameFrame, keyframePos, keyframeSize);
+			}
+			if (selectedElementTrigger != nullptr)
+			{
+				DrawElementTriggerAttributes(*selectedElementTrigger, keyframePos, keyframeSize);
 			}
 			DrawSaveAndExitButtons(saveExitBtnPos, saveExitBtnSize, exit, saveexit);
 			if (addNewSequence)
@@ -557,7 +742,21 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 				scriptEditSize,
 				[&]()
 				{
-					selectedScriptToEdit->script = selectedScriptToEditContent;
+					if (selectedScriptType == SCET_Script)
+					{
+						((SequenceChannelElementScript*)selectedScriptToEdit)->script = selectedScriptToEditContent;
+					}
+					else if (selectedScriptType == SCET_Trigger)
+					{
+						if (this->isEnterScript)
+						{
+							((SequenceChannelElementTrigger*)selectedScriptToEdit)->onEnter = selectedScriptToEditContent;
+						}
+						else
+						{
+							((SequenceChannelElementTrigger*)selectedScriptToEdit)->onLeave = selectedScriptToEditContent;
+						}
+					}
 					selectedScriptToEdit = nullptr;
 				},
 				[&]()
@@ -577,6 +776,12 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 		keyFrameFrame = nextSelectedKeyFrameFrame;
 		nextSelectedTransformationKeyframe = nullptr;
 		nextSelectedKeyFrameFrame = -1;
+	}
+
+	if (nextSelectedElementTrigger != nullptr)
+	{
+		selectedElementTrigger = nextSelectedElementTrigger;
+		nextSelectedElementTrigger = nullptr;
 	}
 
 	if (exit)
@@ -728,7 +933,8 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 				if (adjustToBoundingBox)
 				{
 					float modelDistanceScale = camera->at("modelDistanceScale");
-					modelDistanceScale += io.MouseWheel;
+					modelDistanceScale -= io.MouseWheel;
+					modelDistanceScale = std::max(modelDistanceScale, 0.1f);
 					camera->at("modelDistanceScale") = modelDistanceScale;
 					Step();
 				}
@@ -782,15 +988,16 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 	{
 		ImGui::Text("camera");
 		ImGui::Checkbox("Adjust camera", &adjustToBoundingBox);
+		Camera* cam = (Camera*)GetSceneObjectPointer(unit, camera.uuid());
 		if (adjustToBoundingBox)
 		{
-			std::vector<JObject*> camV({ GetSceneObjectPointer(unit,camera.uuid()) });
+			std::vector<JObject*> camV({ cam });
 			DrawValue<XMFLOAT3, jedv_t_float3_angle>()("rotation", camV);
 			DrawValue<float, jedv_t_float>()("modelDistanceScale", camV);
 		}
 		else
 		{
-			std::vector<JObject*> camV({ GetSceneObjectPointer(unit,camera.uuid()) });
+			std::vector<JObject*> camV({ cam });
 			DrawValue<XMFLOAT3, jedv_t_float3>()("freeposition", camV);
 			DrawValue<XMFLOAT3, jedv_t_float3_angle>()("freerotation", camV);
 		}
@@ -885,6 +1092,96 @@ void AnimationSequencerModal::DrawTransformationKeyFrameAttributes(Transformatio
 				keyframe.easing = StringToEasing.at(newEase);
 			}
 		);
+		ImGui::PopID();
+	}
+	ImGui::EndChild();
+
+	ImGui::PopStyleVar(2);
+}
+
+void AnimationSequencerModal::DrawElementTriggerAttributes(SequenceChannelElementTrigger& elementTrigger, ImVec2 pos, ImVec2 size)
+{
+	const int defaultTableFlags = ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_NoPadInnerX;
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
+
+	ImVec2 attsPos(pos);
+	ImVec2 attsSize(size);
+	ImGui::SetNextWindowPos(attsPos, 0);
+	ImGui::SetNextWindowSize(attsSize, 0);
+	ImGui::BeginChild("trigger-atts", attsSize, 0);
+	{
+		ImGui::Text("bone");
+		ImGui::PushID("trigger-bone");
+		if (ImGui::BeginTable("trigger-bone", 1, defaultTableFlags))
+		{
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::DrawComboSelection(elementTrigger.bone, bones, [&](std::string bone)
+				{
+					elementTrigger.bone = bone;
+				}
+			);
+			ImGui::EndTable();
+		}
+		ImGui::PopID();
+
+		ImGui::Text("position");
+		ImGui::PushID("trigger-position");
+		if (ImGui::BeginTable("trigger-position-table", 3, defaultTableFlags))
+		{
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::InputFloat("x", &elementTrigger.position.x, 0.0f, 0.0f, "%.3f");
+			ImGui::TableSetColumnIndex(1);
+			ImGui::InputFloat("y", &elementTrigger.position.y, 0.0f, 0.0f, "%.3f");
+			ImGui::TableSetColumnIndex(2);
+			ImGui::InputFloat("z", &elementTrigger.position.z, 0.0f, 0.0f, "%.3f");
+			ImGui::EndTable();
+		}
+		ImGui::PopID();
+
+		ImGui::Text("rotation");
+		ImGui::PushID("trigger-rotation");
+		if (ImGui::BeginTable("trigger-rotation-table", 3, defaultTableFlags))
+		{
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			float pitch = XMConvertToRadians(elementTrigger.rotation.x);
+			if (ImGui::SliderAngle("pitch", &pitch, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
+			{
+				elementTrigger.rotation.x = XMConvertToDegrees(pitch);
+			}
+			ImGui::TableSetColumnIndex(1);
+			float yaw = XMConvertToRadians(elementTrigger.rotation.y);
+			if (ImGui::SliderAngle("yaw", &yaw, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
+			{
+				elementTrigger.rotation.y = XMConvertToDegrees(yaw);
+			}
+			ImGui::TableSetColumnIndex(2);
+			float roll = XMConvertToRadians(elementTrigger.rotation.z);
+			if (ImGui::SliderAngle("roll", &roll, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
+			{
+				elementTrigger.rotation.z = XMConvertToDegrees(roll);
+			}
+			ImGui::EndTable();
+		}
+		ImGui::PopID();
+
+		ImGui::Text("scale");
+		ImGui::PushID("trigger-scale");
+		if (ImGui::BeginTable("trigger-scale-table", 3, defaultTableFlags))
+		{
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::InputFloat("x", &elementTrigger.scale.x, 0.0f, 0.0f, "%.3f");
+			ImGui::TableSetColumnIndex(1);
+			ImGui::InputFloat("y", &elementTrigger.scale.y, 0.0f, 0.0f, "%.3f");
+			ImGui::TableSetColumnIndex(2);
+			ImGui::InputFloat("z", &elementTrigger.scale.z, 0.0f, 0.0f, "%.3f");
+			ImGui::EndTable();
+		}
 		ImGui::PopID();
 	}
 	ImGui::EndChild();

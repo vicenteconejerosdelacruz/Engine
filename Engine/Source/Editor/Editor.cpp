@@ -2790,7 +2790,8 @@ namespace Editor
 				{ "scale" , { 1.0f, 1.0f, 1.0f } },
 				{ "skipMeshes" , {}},
 				{ "visible" , true},
-				{ "hidden" , true},
+				{ "hidden" , true },
+				{ "systemCreated", true },
 				{ "cameras", { camera.uuid() }},
 				{ "passMaterialOverrides",
 					{

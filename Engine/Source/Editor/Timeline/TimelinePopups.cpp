@@ -35,6 +35,12 @@ void AddElementPopup::Init(RenderableID renderable, int frame)
 	//script
 	script.frameStart = frame;
 	script.frameEnd = frame;
+
+	//trigger
+	trigger.frameStart = frame;
+	trigger.frameEnd = frame;
+	bones = nostd::GetKeysFromMap(renderable->animable->animations->bonesOffsets);
+	bones.insert(bones.begin(), { "" });
 }
 
 void AddElementPopup::Draw(ImVec2 pos, std::unordered_map<SequenceChannelElementType, std::function<void(SequenceChannelElement*)>> elementBuilders, std::function<void()> closePopup)
@@ -43,7 +49,7 @@ void AddElementPopup::Draw(ImVec2 pos, std::unordered_map<SequenceChannelElement
 
 	ImVec2 size(200, 75);
 
-	if (type == SCET_Animation || type == SCET_SoundFX)
+	if (type == SCET_Animation || type == SCET_SoundFX || type == SCET_Trigger)
 	{
 		size.y += 20;
 	}
@@ -60,12 +66,17 @@ void AddElementPopup::Draw(ImVec2 pos, std::unordered_map<SequenceChannelElement
 		std::string selected = SequenceChannelElementTypeToStr.at(type);
 		bool changedToAnim = false;
 		bool changedToSfx = false;
+		bool changedToTrigger = false;
 		ImGui::PushID("NewElementType");
-		ImGui::DrawComboSelection(selected, selectables, [this, &changedToAnim, &changedToSfx](std::string newElementType)
+		ImGui::DrawComboSelection(selected, selectables,
+			[this, &changedToAnim,
+			&changedToSfx, &changedToTrigger
+			](std::string newElementType)
 			{
 				type = StrToSequenceChannelElementType.at(newElementType);
 				changedToAnim = type == SCET_Animation;
 				changedToSfx = type == SCET_SoundFX;
+				changedToTrigger = type == SCET_Trigger;
 			}
 		);
 		ImGui::PopID();
@@ -84,14 +95,25 @@ void AddElementPopup::Draw(ImVec2 pos, std::unordered_map<SequenceChannelElement
 			);
 			ImGui::PopID();
 		}
-		else if (type == SCET_SoundFX)
+		else if (type == SCET_SoundFX && !changedToSfx)
 		{
 			ImGui::SetNextItemWidth(size.x);
-			ImGui::PushID("ElementTypeAnimationName");
+			ImGui::PushID("ElementTypeSFXName");
 			ImGui::DrawComboSelection(selectedSoundEffect, soundEffects, [this](JUUIDName selected)
 				{
 					selectedSoundEffect = selected;
 					soundfx.sound = std::get<0>(selected);
+				}
+			);
+			ImGui::PopID();
+		}
+		else if (type == SCET_Trigger && !changedToTrigger)
+		{
+			ImGui::SetNextItemWidth(size.x);
+			ImGui::PushID("ElementTypeBoneName");
+			ImGui::DrawComboSelection(trigger.bone, bones, [this](std::string selectedBone)
+				{
+					trigger.bone = selectedBone;
 				}
 			);
 			ImGui::PopID();
@@ -114,6 +136,7 @@ void AddElementPopup::Draw(ImVec2 pos, std::unordered_map<SequenceChannelElement
 				{ SCET_Transformation, &transformation },
 				{ SCET_SoundFX, &soundfx },
 				{ SCET_Script, &script },
+				{ SCET_Trigger, &trigger },
 			};
 			elementBuilders.at(type)(typeTemplate.at(type));
 		}
@@ -171,6 +194,13 @@ void InteractElementPopup::Draw(ImVec2 pos, ChannelElement& element, int frame, 
 		options.push_back(std::make_tuple("Edit Script", IP_Script_Edit, true));
 		size.y += 20;
 	}
+	else if (element.type == SCET_Trigger)
+	{
+		options.push_back(std::make_tuple("Bone", IP_Pick_Bone, true));
+		options.push_back(std::make_tuple("OnEnter Script", IP_Trigger_OnEnter, true));
+		options.push_back(std::make_tuple("OnLeave Script", IP_Trigger_OnLeave, true));
+		size.y += 50;
+	}
 
 	ImGui::SetNextWindowPos(pos);
 	ImGui::SetNextWindowSize(size);
@@ -195,6 +225,36 @@ void InteractElementPopup::Draw(ImVec2 pos, ChannelElement& element, int frame, 
 		if (ImGui::MenuItem("Cancel")) {
 			closePopup();
 		}
+		ImGui::EndPopup();
+	}
+	ImGui::PopStyleVar(2);
+}
+
+void PickBonePopup::Draw(ImVec2 pos, ChannelElement& element, std::function<void()> closePopup)
+{
+	ImGui::OpenPopup("PickBonePopup");
+
+	ImVec2 size(200, 75);
+	ImGui::SetNextWindowPos(pos);
+	ImGui::SetNextWindowSize(size);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
+	if (ImGui::BeginPopupModal("PickBonePopup", nullptr, popupChildFlag))
+	{
+		ImGui::SetNextItemWidth(size.x);
+		ImGui::PushID("ElementTypeBoneName");
+		ImGui::DrawComboSelection(element.trigger.bone, bones, [&](std::string selectedBone)
+			{
+				element.trigger.bone = selectedBone;
+			}
+		);
+		ImGui::PopID();
+
+		ImGui::Separator();
+		if (ImGui::MenuItem("Close")) {
+			closePopup();
+		}
+
 		ImGui::EndPopup();
 	}
 	ImGui::PopStyleVar(2);

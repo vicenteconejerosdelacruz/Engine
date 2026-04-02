@@ -26,6 +26,11 @@ ChannelElement::ChannelElement(const ChannelElement& other)
 		script = other.script;
 	}
 	break;
+	case SCET_Trigger:
+	{
+		trigger = other.trigger;
+	}
+	break;
 	}
 }
 
@@ -52,6 +57,11 @@ ChannelElement::ChannelElement(const nlohmann::json& j)
 	case SCET_Script:
 	{
 		script = SequenceChannelElementScript(j.at("script"));
+	}
+	break;
+	case SCET_Trigger:
+	{
+		trigger = SequenceChannelElementTrigger(j.at("trigger"));
 	}
 	break;
 	}
@@ -174,6 +184,22 @@ std::tuple<ChannelElement, ChannelElement> ChannelElement::Split(int frame)
 		right.script.script = script.script;
 	}
 	break;
+	case SCET_Trigger:
+	{
+		left.trigger.position = trigger.position;
+		right.trigger.position = trigger.position;
+		left.trigger.rotation = trigger.rotation;
+		right.trigger.rotation = trigger.rotation;
+		left.trigger.scale = trigger.scale;
+		right.trigger.scale = trigger.scale;
+		left.trigger.onEnter = trigger.onEnter;
+		right.trigger.onEnter = trigger.onEnter;
+		left.trigger.onLeave = trigger.onLeave;
+		right.trigger.onLeave = trigger.onLeave;
+		left.trigger.bone = trigger.bone;
+		right.trigger.bone = trigger.bone;
+	}
+	break;
 	}
 
 	return elements;
@@ -203,6 +229,11 @@ void ChannelElement::ExpandLeftBorder(int numFrames)
 		script.ExpandLeftBorder(numFrames);
 	}
 	break;
+	case SCET_Trigger:
+	{
+		trigger.ExpandLeftBorder(numFrames);
+	}
+	break;
 	}
 }
 void ChannelElement::ExpandRightBorder(int numFrames)
@@ -229,6 +260,11 @@ void ChannelElement::ExpandRightBorder(int numFrames)
 		script.ExpandRightBorder(numFrames);
 	}
 	break;
+	case SCET_Trigger:
+	{
+		trigger.ExpandRightBorder(numFrames);
+	}
+	break;
 	}
 }
 
@@ -239,7 +275,8 @@ SequenceChannelElement* ChannelElement::GetElementPointer()
 		{ SCET_Animation, &animation },
 		{ SCET_Transformation, &transformation },
 		{ SCET_SoundFX, &soundfx },
-		{ SCET_Script, &script }
+		{ SCET_Script, &script },
+		{ SCET_Trigger, &trigger },
 	};
 	return elementsByType.at(type);
 }
@@ -266,6 +303,11 @@ int ChannelElement::GetFrameStart()
 	case SCET_Script:
 	{
 		return script.frameStart;
+	}
+	break;
+	case SCET_Trigger:
+	{
+		return trigger.frameStart;
 	}
 	break;
 	}
@@ -296,6 +338,11 @@ int ChannelElement::GetFrameEnd()
 		return script.frameEnd;
 	}
 	break;
+	case SCET_Trigger:
+	{
+		return trigger.frameEnd;
+	}
+	break;
 	}
 	return 0;
 }
@@ -322,6 +369,11 @@ bool ChannelElement::operator==(const ChannelElement& other) const {
 	case SCET_Script:
 	{
 		return script == other.script;
+	}
+	break;
+	case SCET_Trigger:
+	{
+		return trigger == other.trigger;
 	}
 	break;
 	}
@@ -352,6 +404,11 @@ nlohmann::json ChannelElement::json()
 	case SCET_Script:
 	{
 		j["script"] = script.json();
+	}
+	break;
+	case SCET_Trigger:
+	{
+		j["trigger"] = trigger.json();
 	}
 	break;
 	}

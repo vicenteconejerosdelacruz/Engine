@@ -24,6 +24,12 @@ static inline std::unordered_map<std::string, SequencerModalPopup> StringToSeque
 	{ "Interact with Element", SMP_InteractWithElement }
 };
 
+struct TriggerRenderable
+{
+	SequenceChannelElementTrigger* trigger;
+	RenderableID renderable;
+};
+
 struct AnimationSequencerModal
 {
 	static inline ImGuiWindowFlags defaultChildFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar |
@@ -37,15 +43,20 @@ struct AnimationSequencerModal
 
 	void Initialize(JUUID uuid);
 	nlohmann::json GetModalLevelJson();
+	void CreateSequenceTriggers(Sequence& sequence);
+	nlohmann::json CreateSequenceTriggerRenderable(TriggerRenderable& triggerRenderable);
+	void EraseSequenceTriggers();
 	void DestroyStep();
 	void DestroySceneObjects();
 	void Step();
+	void UpdateTriggers();
 	void DrawLoading();
 	void DrawSequencer(const char* title, ImVec2 pos, ImVec2 size);
 	void DrawTitleBar(const char* title, ImVec2 pos, ImVec2 size, bool& exit);
 	void DrawSequenceSelector(ImVec2 curPos, std::function<void(std::string)> onSelectSequence, std::function<void(std::string)> onEraseSequence, std::function<void(std::string)> onRenameSequence, std::function<void(std::string)> onCloneSequence, std::function<void()> onAddSequence);
 	void DrawModelPreview(ImVec2 curPos, ImVec2 size);
 	void DrawTransformationKeyFrameAttributes(TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size);
+	void DrawElementTriggerAttributes(SequenceChannelElementTrigger& elementTrigger, ImVec2 pos, ImVec2 size);
 	void DrawTimelineController(ImVec2 curPos, ImVec2 size, Sequence& sequence);
 	void DrawSaveAndExitButtons(ImVec2 curPos, ImVec2 size, bool& exit, bool& saveexit);
 	void DrawAddNewSequencePopup(ImVec2 pos, ImVec2 size, std::string& newSeqName, std::function<void(std::string)> onAddNewSequenceClicked, std::function<void()> onCancelAddNewSequenceClicked);
@@ -78,6 +89,7 @@ struct AnimationSequencerModal
 	Model3DJsonID model3D;
 	XMFLOAT3 cameraInitialPos;
 	XMFLOAT3 cameraInitialRot;
+	std::set<JUUID> triggersUUIDs;
 
 	//Sequence selection
 	bool addNewSequence;
@@ -101,18 +113,26 @@ struct AnimationSequencerModal
 	TimelineEditor timelineEditor;
 	TransformationKeyFrame* selectedTransformationKeyframe;
 	int keyFrameFrame;
+	SequenceChannelElementTrigger* selectedElementTrigger;
 	//this "next" is because ImGui will change data if we set the pointer directly
 	TransformationKeyFrame* nextSelectedTransformationKeyframe;
 	int nextSelectedKeyFrameFrame;
+	SequenceChannelElementTrigger* nextSelectedElementTrigger;
 	SequencePlayer sequencePlayer;
 
 	//script editor
 	std::tuple<int, int> selectedScriptChannelFrame = std::make_tuple(-1, -1);
-	SequenceChannelElementScript* selectedScriptToEdit;
+	SequenceChannelElementType selectedScriptType;
+	SequenceChannelElement* selectedScriptToEdit;
 	std::string selectedScriptToEditContent;
+	bool isEnterScript;
 
 	//preview model
 	bool mousePreviewLeftClickPressed;
 	ImVec2 mousePreviewLeftClickLastCoords;
 	bool wheelCapture;
+	std::vector<std::string> bones;
+
+	//sequence triggers
+	std::map<unsigned int, std::vector<TriggerRenderable>> sequenceTriggers;
 };
