@@ -54,6 +54,16 @@ inline nlohmann::json FromXMFLOAT4(XMFLOAT4 f4)
 	return nlohmann::json::array({ f4.x,f4.y,f4.z,f4.w });
 }
 
+inline XMVECTOR ToXMVECTOR(nlohmann::json xmf4)
+{
+	return { xmf4.at(0), xmf4.at(1), xmf4.at(2), xmf4.at(3) };
+}
+
+inline nlohmann::json FromXMVECTOR(XMVECTOR xmf4)
+{
+	return nlohmann::json::array({ xmf4.m128_f32[0], xmf4.m128_f32[1], xmf4.m128_f32[2], xmf4.m128_f32[3] });
+}
+
 inline BoundingBox GetContainedBoundingBox(auto objects)
 {
 	BoundingBox bb;
