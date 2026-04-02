@@ -6,11 +6,11 @@ namespace Game
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraControllerAtt.h>
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraControllerAtt.h>
 #include <JEnd.h>
 
 #endif
@@ -18,11 +18,11 @@ namespace Game
 	struct BrawlerCameraController : Controller
 	{
 #include <Attributes/JFlags.h>
-#include <BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraControllerAtt.h>
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraControllerAtt.h>
 #include <JEnd.h>
 
 		BrawlerCameraController(nlohmann::json& json);

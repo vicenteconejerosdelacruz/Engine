@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "VenomController.h"
-#include "BrawlerCameraController.h"
+//#include "BrawlerCameraController.h"
+#include "../Scene/BrawlerSceneController.h"
 #include <GamePhysics.h>
 #include <Scene.h>
 #include <SceneObject.h>
@@ -9,7 +10,7 @@
 #include <Keyboard.h>
 #include <GamePad.h>
 #include <StepTimer.h>
-#include <Camera/Camera.h>
+//#include <Camera/Camera.h>
 #include <NoStd.h>
 #if defined(_EDITOR)
 #include <Editor.h>
@@ -34,27 +35,33 @@ namespace Game
 		return nostd::GetValuesFromFlagsMap(WallMovementAxisToString);
 	}
 
-	static BrawlerCameraController* GetBrawlerCam(CameraID cam)
-	{
-		return static_cast<BrawlerCameraController*>(GetController(cam->at("controllers").at("brawler-cam")).get());
-	}
-
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <VenomControllerAtt.h>
+#include <Brawler/VenomControllerAtt.h>
 #include <JEnd.h>
 
 #endif
+
+	BrawlerCameraController* VenomController::GetBrawlerCamera()
+	{
+		return Game::GetController<BrawlerSceneController>(unit, sceneController())->GetCameraController();
+	}
+
+	VenomStates VenomController::GetState()
+	{
+		return vsm.currentState;
+	}
+
 	//Constructor and Binding
 	VenomController::VenomController(nlohmann::json& json) : Controller(json)
 	{
 #include <Attributes/JInit.h>
-#include <VenomControllerAtt.h>
+#include <Brawler/VenomControllerAtt.h>
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <VenomControllerAtt.h>
+#include <Brawler/VenomControllerAtt.h>
 #include <JEnd.h>
 
 		vsm = {
@@ -117,7 +124,7 @@ namespace Game
 	void VenomController::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <VenomControllerAtt.h>
+#include <Brawler/VenomControllerAtt.h>
 #include <JEnd.h>
 		j.erase("uuid");
 	}
@@ -133,10 +140,11 @@ namespace Game
 		{
 			venom = so;
 		}
-		if (GetCountFromMouseCameras(unit) > 0ULL)
-		{
-			camera = MAKESUUUID(unit, *GetMouseCameras(unit).begin());
-		}
+		GetController<BrawlerSceneController>(unit, sceneController())->RegisterHero(controller);
+		//if (GetCountFromMouseCameras(unit) > 0ULL)
+		//{
+		//	camera = MAKESUUUID(unit, *GetMouseCameras(unit).begin());
+		//}
 		physicScene = MAKESUUUID(unit, *GetPhysicScenes(unit).begin());
 		physicObject = venom->at("physicObject").at(0);
 		RegisterContactCallback(PB_Static, physicObject(), [&](JUUID uuid, unsigned int event)
@@ -158,7 +166,7 @@ namespace Game
 		UnregisterContactCallback(PB_Static, physicObject());
 		UnregisterCharacterHitCallback(physicObject());
 		venom.clear();
-		camera.clear();
+		//camera.clear();
 		physicScene.clear();
 		physicObject.clear();
 	}
@@ -198,10 +206,11 @@ namespace Game
 		if (std::set<VenomStates>({ VS_GrabWall, VS_WallIdle, VS_CrawlOnWall, VS_DetachFromWall }).contains(vsm.currentState))
 			return;
 
+		//this is commented as a left over
 		/*
 		if ((phO->collisionMask() & CF_Floor) && (event & PxPairFlag::eNOTIFY_TOUCH_FOUND))
 		{
-			GetBrawlerCam(camera)->followY(false);
+			GetBrawlerCamera()->followY(false);
 		}
 		*/
 	}
@@ -213,9 +222,11 @@ namespace Game
 		if (nonFloorStates.contains(vsm.currentState))
 			return;
 
-		if ((CM_Floor & fd.word0) && GetBrawlerCam(camera)->followY())
+		BrawlerCameraController* brawlerCam = GetBrawlerCamera();
+
+		if ((CM_Floor & fd.word0) && brawlerCam->followY())
 		{
-			GetBrawlerCam(camera)->followY(false);
+			brawlerCam->followY(false);
 		}
 	}
 
@@ -224,7 +235,7 @@ namespace Game
 	{
 		v8_templates_creators creators = Controller::GetV8TemplatesCreators();
 #include <Attributes/JV8Templates.h>
-#include <VenomControllerAtt.h>
+#include <Brawler/VenomControllerAtt.h>
 #include <JEnd.h>
 		return creators;
 	}
@@ -233,7 +244,7 @@ namespace Game
 	{
 		v8_context_creators creators = Controller::GetV8ContextCreators();
 #include <Attributes/JV8Context.h>
-#include <VenomControllerAtt.h>
+#include <Brawler/VenomControllerAtt.h>
 #include <JEnd.h>
 		return creators;
 	}
@@ -693,7 +704,7 @@ namespace Game
 	{
 		venom->animationUseTransformation(true);
 		venom->SetCurrentAnimation("FloorToWall");
-		GetBrawlerCam(camera)->followY(true);
+		GetBrawlerCamera()->followY(true);
 	}
 
 	//WallIdle

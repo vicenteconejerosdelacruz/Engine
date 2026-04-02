@@ -14,7 +14,7 @@ namespace Game
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <SpinYawControllerAtt.h>
+#include <Test/SpinYawControllerAtt.h>
 #include <JEnd.h>
 
 #endif
@@ -22,11 +22,11 @@ namespace Game
 	SpinYawController::SpinYawController(nlohmann::json& json) : Controller(json)
 	{
 #include <Attributes/JInit.h>
-#include <SpinYawControllerAtt.h>
+#include <Test/SpinYawControllerAtt.h>
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <SpinYawControllerAtt.h>
+#include <Test/SpinYawControllerAtt.h>
 #include <JEnd.h>
 	}
 
@@ -34,7 +34,7 @@ namespace Game
 	void SpinYawController::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <SpinYawControllerAtt.h>
+#include <Test/SpinYawControllerAtt.h>
 #include <JEnd.h>
 		j.erase("uuid");
 	}

@@ -26,7 +26,7 @@ namespace Game
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <ThirdPersonControllerAtt.h>
+#include <ThirdPerson/ThirdPersonControllerAtt.h>
 #include <JEnd.h>
 
 #endif
@@ -34,11 +34,11 @@ namespace Game
 	ThirdPersonController::ThirdPersonController(nlohmann::json& json) : Controller(json)
 	{
 #include <Attributes/JInit.h>
-#include <ThirdPersonControllerAtt.h>
+#include <ThirdPerson/ThirdPersonControllerAtt.h>
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <ThirdPersonControllerAtt.h>
+#include <ThirdPerson/ThirdPersonControllerAtt.h>
 #include <JEnd.h>
 	}
 
@@ -46,7 +46,7 @@ namespace Game
 	void ThirdPersonController::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <ThirdPersonControllerAtt.h>
+#include <ThirdPerson/ThirdPersonControllerAtt.h>
 #include <JEnd.h>
 		j.erase("uuid");
 	}

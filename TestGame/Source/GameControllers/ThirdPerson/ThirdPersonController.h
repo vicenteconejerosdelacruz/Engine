@@ -6,11 +6,11 @@ namespace Game
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <ThirdPersonControllerAtt.h>
+#include <ThirdPerson/ThirdPersonControllerAtt.h>
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <ThirdPersonControllerAtt.h>
+#include <ThirdPerson/ThirdPersonControllerAtt.h>
 #include <JEnd.h>
 
 #endif
@@ -18,11 +18,11 @@ namespace Game
 	struct ThirdPersonController : Controller
 	{
 #include <Attributes/JFlags.h>
-#include <ThirdPersonControllerAtt.h>
+#include <ThirdPerson/ThirdPersonControllerAtt.h>
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <ThirdPersonControllerAtt.h>
+#include <ThirdPerson/ThirdPersonControllerAtt.h>
 #include <JEnd.h>
 
 		ThirdPersonController(nlohmann::json& json);

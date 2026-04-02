@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "BrawlerCameraController.h"
-#include "VenomController.h"
+#include "../Heroes/VenomController.h"
+#include "../Scene/BrawlerSceneController.h"
 #if defined(_EDITOR)
 #include <Editor.h>
 #endif
@@ -10,7 +11,7 @@ namespace Game
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraControllerAtt.h>
 #include <JEnd.h>
 
 #endif
@@ -18,11 +19,11 @@ namespace Game
 	BrawlerCameraController::BrawlerCameraController(nlohmann::json& json) : Controller(json)
 	{
 #include <Attributes/JInit.h>
-#include <BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraControllerAtt.h>
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraControllerAtt.h>
 #include <JEnd.h>
 	}
 
@@ -34,7 +35,7 @@ namespace Game
 	void BrawlerCameraController::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraControllerAtt.h>
 #include <JEnd.h>
 
 		Controller::WriteJson(j);
@@ -50,6 +51,7 @@ namespace Game
 		venomR = MAKESUUUID(std::get<0>(so), venom());
 		YcamInitial = camera->position().y;
 		Ycam2venom = YcamInitial - venomR->position().y;
+		GetController<BrawlerSceneController>(unit, sceneController())->RegisterCamera(controller);
 	}
 
 	void BrawlerCameraController::Unmap()
@@ -90,7 +92,7 @@ namespace Game
 	{
 		v8_templates_creators creators = Controller::GetV8TemplatesCreators();
 #include <Attributes/JV8Templates.h>
-#include <BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraControllerAtt.h>
 #include <JEnd.h>
 		return creators;
 	}
@@ -99,7 +101,7 @@ namespace Game
 	{
 		v8_context_creators creators = Controller::GetV8ContextCreators();
 #include <Attributes/JV8Context.h>
-#include <BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraControllerAtt.h>
 #include <JEnd.h>
 		return creators;
 	}

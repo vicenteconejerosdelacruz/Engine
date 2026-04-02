@@ -1,10 +1,10 @@
 #include "pch.h"
-#include "VenomController.h"
-#include "SpinYawController.h"
-#include "ThirdPersonController.h"
-#include "BrawlerCameraController.h"
-#include "Enemies/TugController.h"
-#include "Brawler/BrawlerSceneController.h"
+#include "Test/SpinYawController.h"
+#include "ThirdPerson/ThirdPersonController.h"
+#include "Brawler/Scene/BrawlerSceneController.h"
+#include "Brawler/Heroes/VenomController.h"
+#include "Brawler/Enemies/ThugController.h"
+#include "Brawler/Camera/BrawlerCameraController.h"
 
 namespace Game
 {
@@ -15,7 +15,7 @@ namespace Game
 		{ "thirdperson", [](nlohmann::json& json) { return std::make_unique<Game::ThirdPersonController>(json); }},
 		{ "brawler-scene", [](nlohmann::json& json) { return std::make_unique<Game::BrawlerSceneController>(json); }},
 		{ "brawler-cam", [](nlohmann::json& json) { return std::make_unique<Game::BrawlerCameraController>(json); }},
-		{ "tug", [](nlohmann::json& json) { return std::make_unique<Game::TugController>(json); }},
+		{ "thug", [](nlohmann::json& json) { return std::make_unique<Game::ThugController>(json); }},
 	};
 
 	std::vector<std::string> GetControllers()

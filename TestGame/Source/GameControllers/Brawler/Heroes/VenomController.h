@@ -1,11 +1,12 @@
 #pragma once
 #include <Controller.h>
 #include <GameStateMachine.h>
+#include <UUID.h>
 
 namespace Scene
 {
 	struct Renderable;
-	struct Camera;
+	//struct Camera;
 };
 
 enum VenomStates
@@ -73,27 +74,29 @@ inline std::unordered_map<std::string, WallMovementAxis> StringToWallMovementAxi
 
 namespace Game
 {
+	struct BrawlerCameraController;
+
 	extern std::vector<std::string> GetBlockedWallMovementMasks();
 
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <VenomControllerAtt.h>
+#include <Brawler/VenomControllerAtt.h>
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <VenomControllerAtt.h>
+#include <Brawler/VenomControllerAtt.h>
 #include <JEnd.h>
 
 #endif
 	struct VenomController : Controller
 	{
 #include <Attributes/JFlags.h>
-#include <VenomControllerAtt.h>
+#include <Brawler/VenomControllerAtt.h>
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <VenomControllerAtt.h>
+#include <Brawler/VenomControllerAtt.h>
 #include <JEnd.h>
 
 		enum LookingTo
@@ -126,6 +129,9 @@ namespace Game
 			{ WMA_Left, [](auto& v) { v.m128_f32[0] = std::max(v.m128_f32[0],0.0f); } },
 			{ WMA_Right, [](auto& v) { v.m128_f32[0] = std::min(v.m128_f32[0],0.0f); } },
 		};
+
+		BrawlerCameraController* GetBrawlerCamera();
+		VenomStates GetState();
 
 		//Constructor and Binding
 		VenomController(nlohmann::json& json);
@@ -243,7 +249,7 @@ namespace Game
 
 		//SceneObjects
 		RenderableID venom;
-		CameraID camera;
+		//CameraID camera;
 		PhysicSceneID physicScene;
 		PhysicObjectID physicObject;
 

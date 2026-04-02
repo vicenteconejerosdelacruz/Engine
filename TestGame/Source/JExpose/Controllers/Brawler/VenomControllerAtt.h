@@ -1,4 +1,5 @@
 JCLASS(VenomController, _)
+JEXPOSE_TRANSFORM(ControllerBinding, sceneController, ToControllerBinding, FromControllerBinding, {}, jedv_t_so_controller_instance, 1, false)
 JEXPOSE(float, lookToThreshold, 0.03f, jedv_t_float, 1, false)
 JEXPOSE(float, walkThreshold, 0.05f, jedv_t_float, 1, false)
 JEXPOSE(float, runThreshold, 0.4f, jedv_t_float, 1, false)

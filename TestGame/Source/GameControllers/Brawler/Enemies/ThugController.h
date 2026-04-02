@@ -25,60 +25,62 @@ inline static std::unordered_map<std::string, CharacterLookingTo> StringToCharac
 	{ "Left", CLT_Left },
 };
 
-enum TugStates
+enum ThugStates
 {
 	TS_None,
 	TS_Idle,
 	TS_CombatIdle,
 	TS_CombatFollow,
-	TS_CombatFollowBrawler,
+	//TS_CombatFollowBrawler,
 	TS_CombatPunch,
 };
 
-inline static std::unordered_map<std::string, TugStates> StringToTugStates =
+inline static std::unordered_map<std::string, ThugStates> StringToTugStates =
 {
 	{ "None", TS_None },
 	{ "Idle", TS_Idle },
 	{ "CombatIdle", TS_CombatIdle },
-	{ "CombatFollowBrawler", TS_CombatFollowBrawler },
+	{ "CombatFollow", TS_CombatFollow },
+	//{ "CombatFollowBrawler", TS_CombatFollowBrawler },
 	{ "CombatPunch", TS_CombatPunch },
 };
 
 namespace Game
 {
+	struct BrawlerSceneController;
+
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <TugControllerAtt.h>
+#include <Brawler/ThugControllerAtt.h>
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <TugControllerAtt.h>
+#include <Brawler/ThugControllerAtt.h>
 #include <JEnd.h>
 
 #endif
 
 	struct VenomController;
 
-	struct TugController : Controller
+	struct ThugController : Controller
 	{
 #include <Attributes/JFlags.h>
-#include <TugControllerAtt.h>
+#include <Brawler/ThugControllerAtt.h>
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <TugControllerAtt.h>
+#include <Brawler/ThugControllerAtt.h>
 #include <JEnd.h>
 
-		VenomStates venomState();
-		VenomController* venomController();
+		BrawlerSceneController* GetBrawlerSceneController();
 
 		//Constructor and Binding
-		TugController(nlohmann::json& json);
+		ThugController(nlohmann::json& json);
 		virtual void SetInitialConditions();
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
-		DECL_CONTROLLER_DRAWER(TugController, Controller);
+		DECL_CONTROLLER_DRAWER(ThugController, Controller);
 #endif
 		virtual void Map(SUUUID so);
 		virtual void Unmap();
@@ -91,8 +93,12 @@ namespace Game
 		virtual v8_context_creators GetV8ContextCreators();
 		virtual v8_functions_creators GetV8FunctionsCreators();
 
+		//Movement
+		void CharacterMoveXZPlane(XMVECTOR displacement, float dt, float sideSpeed, XMFLOAT3 gravity);
+
 		//States
 		void UpdateLookTo();
+		bool IsInAttackRange();
 
 		//Idle
 		bool ShouldIdle();
@@ -104,16 +110,35 @@ namespace Game
 		bool ShouldCombatIdle();
 		void EnterCombatIdle();
 		void CombatIdle();
+		void CombatIdleNextState();
+
+		//CombatFollow
+		bool ShouldCombatFollow();
+		void EnterCombatFollow();
+		void CombatFollow();
+		void MoveTowardHero(float speed);
+		void EvaluateNextFollowMovement();
+
+		//CombatPunch
+		void EnterCombatPunch();
+		void CombatPunch();
+		void OnCombatPunchAnimationEnd();
 
 		//State machine
-		GameStatesMachine<TugStates> tsm;
+		GameStatesMachine<ThugStates> tsm;
 
 		//Initial States
-		XMFLOAT3 tugScale;
-		CharacterLookingTo tugInitialLookTo;
+		XMFLOAT3 thugScale;
+		CharacterLookingTo thugInitialLookTo;
 
 		//SceneObjects
-		RenderableID tug;
-		RenderableID venomR;
+		RenderableID thug;
+		PhysicSceneID physicScene;
+		PhysicObjectID physicObject;
+
+		//Picked hero
+		JUUID heroController;
+		RenderableID heroRenderable;
+		XMFLOAT3 heroAttackOffset;
 	};
 };

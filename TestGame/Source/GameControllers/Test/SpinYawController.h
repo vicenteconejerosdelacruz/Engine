@@ -6,11 +6,11 @@ namespace Game
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <SpinYawControllerAtt.h>
+#include <Test/SpinYawControllerAtt.h>
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <SpinYawControllerAtt.h>
+#include <Test/SpinYawControllerAtt.h>
 #include <JEnd.h>
 
 #endif
@@ -18,11 +18,11 @@ namespace Game
 	struct SpinYawController : Controller
 	{
 #include <Attributes/JFlags.h>
-#include <SpinYawControllerAtt.h>
+#include <Test/SpinYawControllerAtt.h>
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <SpinYawControllerAtt.h>
+#include <Test/SpinYawControllerAtt.h>
 #include <JEnd.h>
 
 		SpinYawController(nlohmann::json& json);

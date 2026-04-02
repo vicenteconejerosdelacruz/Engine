@@ -27,43 +27,46 @@
     <ClInclude Include="TestGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Controllers\VenomControllerAtt.h">
+    <ClInclude Include="JExpose\Controllers\Brawler\VenomControllerAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Controllers\SpinYawControllerAtt.h">
+    <ClInclude Include="JExpose\Controllers\Test\SpinYawControllerAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameControllers\SpinYawController.h">
+    <ClInclude Include="GameControllers\Test\SpinYawController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameControllers\VenomController.h">
+    <ClInclude Include="GameControllers\Brawler\Heroes\VenomController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Controllers\ThirdPersonControllerAtt.h">
+    <ClInclude Include="JExpose\Controllers\ThirdPerson\ThirdPersonControllerAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameControllers\ThirdPersonController.h">
+    <ClInclude Include="GameControllers\ThirdPerson\ThirdPersonController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GamePhysics\GamePhysics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Controllers\BrawlerCameraControllerAtt.h">
+    <ClInclude Include="JExpose\Controllers\Brawler\BrawlerCameraControllerAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameControllers\BrawlerCameraController.h">
+    <ClInclude Include="GameControllers\Brawler\Camera\BrawlerCameraController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameControllers\Enemies\TugController.h">
+    <ClInclude Include="GameControllers\Brawler\Enemies\ThugController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Controllers\TugControllerAtt.h">
+    <ClInclude Include="JExpose\Controllers\Brawler\ThugControllerAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameControllers\Brawler\BrawlerSceneController.h">
+    <ClInclude Include="GameControllers\Brawler\Scene\BrawlerSceneController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Controllers\BrawlerSceneControllerAtt.h">
+    <ClInclude Include="JExpose\Controllers\Brawler\BrawlerSceneControllerAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameControllers\Brawler\Heroes\Hero.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -77,25 +80,28 @@
     <ClCompile Include="GameControllers\GameControllers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameControllers\SpinYawController.cpp">
+    <ClCompile Include="GameControllers\Test\SpinYawController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameControllers\VenomController.cpp">
+    <ClCompile Include="GameControllers\Brawler\Heroes\VenomController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameControllers\ThirdPersonController.cpp">
+    <ClCompile Include="GameControllers\ThirdPerson\ThirdPersonController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GamePhysics\GamePhysics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameControllers\BrawlerCameraController.cpp">
+    <ClCompile Include="GameControllers\Brawler\Camera\BrawlerCameraController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameControllers\Enemies\TugController.cpp">
+    <ClCompile Include="GameControllers\Brawler\Enemies\ThugController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameControllers\Brawler\BrawlerSceneController.cpp">
+    <ClCompile Include="GameControllers\Brawler\Scene\BrawlerSceneController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameControllers\Brawler\Heroes\Hero.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
