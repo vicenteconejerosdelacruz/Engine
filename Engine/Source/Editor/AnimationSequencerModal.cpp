@@ -426,7 +426,7 @@ void AnimationSequencerModal::UpdateTriggers()
 				XMMatrixDecompose(&scale, &rotationQuat, &translation, mBone);
 
 				XMVECTOR tPos = XMVector3Transform(XMLoadFloat3(&elem->position), mBone);
-				XMVECTOR tScl = XMLoadFloat3(&elem->scale);
+				//XMVECTOR tScl = XMLoadFloat3(&elem->scale);
 
 				XMVECTOR tRotQ = XMQuaternionMultiply(rotationQuat, XMQuaternionRotationRollPitchYaw(
 					XMConvertToRadians(elem->rotation.x),
@@ -434,14 +434,15 @@ void AnimationSequencerModal::UpdateTriggers()
 					XMConvertToRadians(elem->rotation.z))
 				);
 
-				XMFLOAT3 fPos, fRot, fScl;
+				XMFLOAT3 fPos, fRot/*, fScl*/;
 				fRot = Quaternion2Euler(tRotQ);
 				XMStoreFloat3(&fPos, tPos);
-				XMStoreFloat3(&fScl, XMVectorMultiply(tScl, scale));
+				//XMStoreFloat3(&fScl, XMVectorMultiply(tScl, scale));
 				trigger.renderable->position(fPos);
 				trigger.renderable->rotation(fRot);
 				trigger.renderable->rotationQ(tRotQ);
-				trigger.renderable->scale(fScl);
+				trigger.renderable->scale(elem->scale);
+				//trigger.renderable->scale(fScl);
 			}
 		}
 	}
