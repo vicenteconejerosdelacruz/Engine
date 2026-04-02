@@ -187,157 +187,6 @@ nlohmann::json AnimationSequencerModal::GetModalLevelJson()
 	return modal;
 }
 
-void AnimationSequencerModal::CreateSequenceTriggers(Sequence& sequence)
-{
-	nlohmann::json renderables = nlohmann::json::array({});
-
-	for (unsigned int i = 0; i < sequence.sequenceChannels.size(); i++)
-	{
-		auto& channel = sequencePlayer.sequence.sequenceChannels.at(i);
-		for (auto& element : channel.elements)
-		{
-			if (element.type != SCET_Trigger) continue;
-
-			sequenceTriggers[i].push_back(
-				{
-					.trigger = &element.trigger,
-					.renderable = MAKESUUUID(unit,getUUID())
-				}
-			);
-			renderables.push_back(CreateSequenceTriggerRenderable(sequenceTriggers[i].back()));
-		}
-	}
-
-	if (renderables.size() == 0ULL) return;
-
-	nlohmann::json data = {
-		{ "renderables", renderables }
-	};
-
-	AttachLevelIntoScene(unit, "triggers", data, [=](SceneUnitId) {});
-}
-
-nlohmann::json AnimationSequencerModal::CreateSequenceTriggerRenderable(TriggerRenderable& triggerRenderable)
-{
-	auto trigger = triggerRenderable.trigger;
-	auto renderable = triggerRenderable.renderable;
-
-	nlohmann::json jrentrigger = nlohmann::json(
-		{
-			{
-				"meshMaterial",
-				{
-					{ "material", GetMaterialUUIDByName("Floor")},
-					{ "mesh",
-						{
-							{ "primitive", "f7786ac1-e296-4e9a-a7e6-6f1949de75ef" }
-						}
-					}
-				}
-			},
-			{ "castShadows", false },
-			{ "shadowed", false },
-			{ "name" , renderable.uuid()},
-			{ "uuid" , renderable.uuid()},
-			{ "position", FromXMFLOAT3(trigger->position) },
-			{ "topology", "TRIANGLELIST" },
-			{ "rotation" , FromXMFLOAT3(trigger->rotation) },
-			{ "scale" , FromXMFLOAT3(trigger->scale) },
-			{ "skipMeshes" , {}},
-			{ "visible" , true },
-			{ "hidden" , true},
-			{ "cameras", { cameraUUID }},
-			{ "depthStencil",
-				{
-					{ "BackFace",
-						{
-							{ "StencilDepthFailOp", "KEEP"},
-							{ "StencilFailOp", "KEEP"},
-							{ "StencilFunc", "ALWAYS"},
-							{ "StencilPassOp", "KEEP" }
-						}
-					},
-					{ "DepthEnable", true },
-					{ "DepthFunc", "LESS" },
-					{ "DepthWriteMask", "ALL" },
-					{ "FrontFace",
-						{
-							{ "StencilDepthFailOp", "KEEP"},
-							{ "StencilFailOp", "KEEP"},
-							{ "StencilFunc", "ALWAYS"},
-							{ "StencilPassOp", "KEEP" }
-						}
-					},
-					{ "StencilEnable", false},
-					{ "StencilReadMask", 255},
-					{ "StencilWriteMask", 255 }
-				}
-			}
-		}
-	);
-	return jrentrigger;
-}
-
-void AnimationSequencerModal::EraseSequenceTriggers()
-{
-	for (auto& [_, trs] : sequenceTriggers)
-	{
-		for (auto& tr : trs)
-		{
-			tr.renderable->markedForDelete = true;
-		}
-	}
-	sequenceTriggers.clear();
-}
-
-void AnimationSequencerModal::UpdateTriggers()
-{
-	Animation::BonesTransformations& bonesTransformation = renderable->bonesTransformation;
-	int frame = timelineEditor.selectedFrameInTimeline;
-	XMMATRIX world = renderable->world();
-	for (auto& [channel, triggers] : sequenceTriggers)
-	{
-		for (auto& trigger : triggers)
-		{
-			SequenceChannelElementTrigger* elem = trigger.trigger;
-			RenderableID renderable = trigger.renderable;
-			bool visible = frame >= elem->frameStart && frame <= elem->frameEnd;
-			trigger.renderable->visible(visible);
-			if (elem->bone.empty())
-			{
-				trigger.renderable->position(elem->position);
-				trigger.renderable->rotation(elem->rotation);
-				trigger.renderable->scale(elem->scale);
-			}
-			else
-			{
-				XMMATRIX boneSpace = bonesTransformation.at(elem->bone);
-				XMMATRIX boneWorldSpace = XMMatrixMultiply(XMMatrixTranspose(boneSpace), world);
-				XMVECTOR boneWorldScale, boneWorldRotationQ, boneWorldTranslation;
-				XMMatrixDecompose(&boneWorldScale, &boneWorldRotationQ, &boneWorldTranslation, boneWorldSpace);
-
-				XMVECTOR tPos = XMVector3Transform(XMLoadFloat3(&elem->position), boneWorldSpace);
-				XMVECTOR tScl = XMLoadFloat3(&elem->scale);
-
-				XMVECTOR tRotQ = XMQuaternionMultiply(boneWorldRotationQ, XMQuaternionRotationRollPitchYaw(
-					XMConvertToRadians(elem->rotation.x),
-					XMConvertToRadians(elem->rotation.y),
-					XMConvertToRadians(elem->rotation.z))
-				);
-
-				XMFLOAT3 fPos, fRot, fScl;
-				fRot = Quaternion2Euler(tRotQ); //we convert to euler without much purpose, but anyway
-				XMStoreFloat3(&fPos, tPos);
-				XMStoreFloat3(&fScl, XMVectorMultiply(tScl, boneWorldScale));
-				trigger.renderable->position(fPos);
-				trigger.renderable->rotation(fRot);
-				trigger.renderable->rotationQ(tRotQ);
-				trigger.renderable->scale(fScl);
-			}
-		}
-	}
-}
-
 void AnimationSequencerModal::DestroyStep()
 {
 	if (destructionFrames > 0)
@@ -368,7 +217,6 @@ void AnimationSequencerModal::DestroySceneObjects()
 	model3D.clear();
 	model3dUUID.clear();
 	selectedSequence.clear();
-	sequenceTriggers.clear();
 }
 
 void AnimationSequencerModal::Step()
@@ -412,6 +260,7 @@ void AnimationSequencerModal::Step()
 			sequencePlayer.SetFrame(timelineEditor.GetFrame(seq), false);
 		}
 		sequencePlayer.ApplyFrameValues(renderable);
+		sequencePlayer.ApplyFrameTriggerAvatarValues();
 	}
 
 	if (adjustToBoundingBox)
@@ -443,8 +292,6 @@ void AnimationSequencerModal::Step()
 	camera->WriteConstantsBuffer(scene->Frame());
 	renderable->WriteConstantsBuffer(scene->Frame());
 	WriteConstantsBuffers(unit);
-
-	UpdateTriggers();
 }
 
 void AnimationSequencerModal::DrawLoading()
@@ -504,14 +351,13 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 				animationsSequences.sequences.insert_or_assign(selectedSequence, sequencePlayer.sequence);
 			}
 			selectedSequence = sequence;
-			EraseSequenceTriggers();
 			if (sequence != "")
 			{
 				Sequence& seq = animationsSequences.sequences.at(sequence);
 				sequencePlayer.SetSequence(seq, renderable);
+				sequencePlayer.CreateSequenceTriggersAvatars(cameraUUID);
 				timelineEditor.Init(renderable, sequencePlayer.sequence);
 				renderable->SetCurrentAnimation(&sequencePlayer);
-				CreateSequenceTriggers(seq);
 			}
 			playingSequence = false;
 			playingSequenceTime = 0.0f;

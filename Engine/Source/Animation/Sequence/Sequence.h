@@ -16,6 +16,7 @@ struct Sequence
 
 	std::string GetAnimationNameAtFrame(int frame);
 	SequenceChannelElementAnimation* GetAnimationElementAtFrame(int frame);
+	std::set<SequenceChannelElementTrigger*> GetTriggerElements();
 	XMMATRIX GetTransformationAtFrame(int frame);
 	void CreateSoundFXsAtFrame(int frame, SceneUnitId id);
 	void RunScriptAtFrame(int frame, RenderableID renderable);

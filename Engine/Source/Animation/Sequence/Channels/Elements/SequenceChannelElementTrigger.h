@@ -12,6 +12,7 @@ struct SequenceChannelElementTrigger : SequenceChannelElement
 	SequenceChannelElementTrigger(const nlohmann::json& j);
 	bool operator==(const SequenceChannelElementTrigger& other) const;
 	nlohmann::json json();
+	void ApplyFrameTriggerAvatarValues(int frame, RenderableID renderable);
 
 	XMFLOAT3 position;
 	XMFLOAT3 rotation;
@@ -21,8 +22,7 @@ struct SequenceChannelElementTrigger : SequenceChannelElement
 	std::string onLeave;
 	bool enabled;
 #if defined(_EDITOR)
-	RenderableID renderable;
-	RenderableID renderableLines;
-	JUUID physicObject;
+	RenderableID triggerRenderable;
 #endif
+	JUUID physicObject;
 };

@@ -24,12 +24,6 @@ static inline std::unordered_map<std::string, SequencerModalPopup> StringToSeque
 	{ "Interact with Element", SMP_InteractWithElement }
 };
 
-struct TriggerRenderable
-{
-	SequenceChannelElementTrigger* trigger;
-	RenderableID renderable;
-};
-
 struct AnimationSequencerModal
 {
 	static inline ImGuiWindowFlags defaultChildFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar |
@@ -43,13 +37,9 @@ struct AnimationSequencerModal
 
 	void Initialize(JUUID uuid);
 	nlohmann::json GetModalLevelJson();
-	void CreateSequenceTriggers(Sequence& sequence);
-	nlohmann::json CreateSequenceTriggerRenderable(TriggerRenderable& triggerRenderable);
-	void EraseSequenceTriggers();
 	void DestroyStep();
 	void DestroySceneObjects();
 	void Step();
-	void UpdateTriggers();
 	void DrawLoading();
 	void DrawSequencer(const char* title, ImVec2 pos, ImVec2 size);
 	void DrawTitleBar(const char* title, ImVec2 pos, ImVec2 size, bool& exit);
@@ -132,7 +122,4 @@ struct AnimationSequencerModal
 	ImVec2 mousePreviewLeftClickLastCoords;
 	bool wheelCapture;
 	std::vector<std::string> bones;
-
-	//sequence triggers
-	std::map<unsigned int, std::vector<TriggerRenderable>> sequenceTriggers;
 };

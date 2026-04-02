@@ -87,6 +87,21 @@ SequenceChannelElementAnimation* Sequence::GetAnimationElementAtFrame(int frame)
 	return *animations.begin();
 }
 
+std::set<SequenceChannelElementTrigger*> Sequence::GetTriggerElements()
+{
+	std::set<SequenceChannelElementTrigger*> triggers;
+	for (auto& seqChannels : sequenceChannels)
+	{
+		for (auto& elem : seqChannels.elements)
+		{
+			if (elem.type != SCET_Trigger) continue;
+			triggers.insert(&elem.trigger);
+		}
+	}
+
+	return triggers;
+}
+
 XMMATRIX Sequence::GetTransformationAtFrame(int frame)
 {
 	std::vector<SequenceChannelElementTransformation*> transformations;

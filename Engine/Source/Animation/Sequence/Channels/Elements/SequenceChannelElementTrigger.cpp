@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "SequenceChannelElementTrigger.h"
 #include <NoMath.h>
+#include <Renderable/Renderable.h>
+#include <Animated.h>
 
 SequenceChannelElementTrigger::SequenceChannelElementTrigger(const nlohmann::json& j) :SequenceChannelElement(j)
 {
@@ -46,4 +48,43 @@ nlohmann::json SequenceChannelElementTrigger::json()
 	};
 
 	return j;
+}
+
+void SequenceChannelElementTrigger::ApplyFrameTriggerAvatarValues(int frame, RenderableID renderable)
+{
+	XMMATRIX world = renderable->world();
+	Animation::BonesTransformations& bonesTransformation = renderable->bonesTransformation;
+	bool visible = frame >= frameStart && frame <= frameEnd;
+	triggerRenderable->visible(visible);
+	if (bone.empty())
+	{
+		triggerRenderable->position(position);
+		triggerRenderable->rotation(rotation);
+		triggerRenderable->scale(scale);
+	}
+	else
+	{
+		XMMATRIX boneSpace = bonesTransformation.at(bone);
+		XMMATRIX boneWorldSpace = XMMatrixMultiply(XMMatrixTranspose(boneSpace), world);
+		XMVECTOR boneWorldScale, boneWorldRotationQ, boneWorldTranslation;
+		XMMatrixDecompose(&boneWorldScale, &boneWorldRotationQ, &boneWorldTranslation, boneWorldSpace);
+
+		XMVECTOR tPos = XMVector3Transform(XMLoadFloat3(&position), boneWorldSpace);
+		XMVECTOR tScl = XMLoadFloat3(&scale);
+
+		XMVECTOR tRotQ = XMQuaternionMultiply(boneWorldRotationQ, XMQuaternionRotationRollPitchYaw(
+			XMConvertToRadians(rotation.x),
+			XMConvertToRadians(rotation.y),
+			XMConvertToRadians(rotation.z))
+		);
+
+		XMFLOAT3 fPos, fRot, fScl;
+		fRot = Quaternion2Euler(tRotQ); //we convert to euler without much purpose, but anyway
+		XMStoreFloat3(&fPos, tPos);
+		XMStoreFloat3(&fScl, XMVectorMultiply(tScl, boneWorldScale));
+		triggerRenderable->position(fPos);
+		triggerRenderable->rotation(fRot);
+		triggerRenderable->rotationQ(tRotQ);
+		triggerRenderable->scale(fScl);
+	}
 }

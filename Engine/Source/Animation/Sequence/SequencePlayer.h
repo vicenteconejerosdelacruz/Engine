@@ -16,11 +16,18 @@ struct SequencePlayer
 	SequencePlayer();
 	SequencePlayer(const Sequence& seq, RenderableID renderable);
 	void SetSequence(const Sequence& seq, RenderableID renderable);
+#if defined(_EDITOR)
+	void CreateSequenceTriggersAvatars(JUUID camera);
+#endif
+	void CreateSequenceTriggers();
 	void Step(float dt);
 	void SetTime(float t);
 	void StepFrame(int df);
 	void SetFrame(int frame, bool runningPlayer = true);
 	void ApplyFrameValues(RenderableID renderable);
+#if defined(_EDITOR)
+	void ApplyFrameTriggerAvatarValues();
+#endif
 	void CreateFrameSoundFXs(int frame);
 	void ExecuteFrameScripts(int frame);
 	void ResetFrames();
