@@ -128,8 +128,59 @@ Most of the architecture on how data is handled are done through JSON objects, e
 
 for example a simple boolean attribute in nlohmann::json is represented like this
 
-```basic nlohmann::json attribute
+```cpp
 nlohmann::json attributes = { {"visible", true} };
 attributes["visible"] = false;
 attributes.at("visible") = true;
 ```
+
+in the Engine case you can expose attributes to be used like this
+
+```cpp
+bool visible();
+void visible(bool value);
+```
+
+to acomplish this you must use c/c++ macros in the attribute header file(will be explained later). for example a simple version of an attribute header file would be
+
+```cpp
+JCLASS(Renderable, GetRenderables)
+JTYPE(SceneObjectType, SO_Renderables))
+JEXPOSE(bool, visible, true, jedv_t_boolean, 0, false)
+JTRACKUUID(Renderable, Renderables, 0, true)
+```
+
+the JEXPOSE macro will make the "visible"" attribute to be accesible using functions and the nlohmann::json representation
+
+### Macros magic
+
+you will find several macros aimed to some specific use cases like
+
+#### JSON interoperability
+
+the Scene Objects and Templates will define an attribute file "*Att.h" on which macros like
+
+```cpp
+#define JCLASS(CLASS,GETJOBJECTS)
+#define JTYPE(TYPE,VALUE)
+#define JEXPOSE(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_CALLBACK(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_TRANSFORM(TYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_TRANSFORM_CALLBACK(TYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_ENUM(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_VECTOR(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_VECTOR_TRANSFORM(TYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_SET(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_MAP_TRANSFORM(KEYTYPE,VALUETYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_MAP_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_VECTOR_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE)
+#define JEXPOSE_FLAG(ATT, INITIAL, GETFLAGSVALUESFUNCTION,UPDATEMASK,REQUIREDTOCREATE)
+#define JPREVIEW(NAME,JEDVALUETYPE)
+#define JTRACKUUID(CLASS,NAME,LIMIT,COND)
+```
+
+are used 
+
+- uuid based object pointers
+
+- 
