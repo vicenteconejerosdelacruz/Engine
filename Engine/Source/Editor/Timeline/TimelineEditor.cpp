@@ -131,7 +131,8 @@ void TimelineEditor::DrawAddChannelButton(Sequence& sequence, ImVec2 pos, bool c
 
 void TimelineEditor::DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract,
 	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
-	std::function<void(SequenceChannelElementTrigger*)> setElementTrigger
+	std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
+	std::function<void(int channel)> onChannelDeleted
 )
 {
 	ImGuiIO& io = ImGui::GetIO();
@@ -201,6 +202,7 @@ void TimelineEditor::DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2
 	{
 		setTransformationKeyFrame(nullptr, -1);
 		DeleteChannel(sequence, deleteChannelId, timelinePos, timelineSize);
+		onChannelDeleted(deleteChannelId);
 	}
 	if (expandChannelId != -1)
 	{
@@ -486,6 +488,7 @@ void TimelineEditor::DrawActionPopup(Sequence& sequence,
 	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
 	std::function<void()> deleteTransformationKeyFrame,
 	std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit,
+	std::function<void()> onTriggerAdded,
 	std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit
 )
 {
@@ -520,9 +523,9 @@ void TimelineEditor::DrawActionPopup(Sequence& sequence,
 				popup = TP_None;
 			}
 			},
-			{ SCET_Trigger, [this, &sequence, channel](SequenceChannelElement* elem)
+			{ SCET_Trigger, [this, &sequence, channel, onTriggerAdded](SequenceChannelElement* elem)
 			{
-				AddTriggerElementToChannel(sequence, channel, static_cast<SequenceChannelElementTrigger*>(elem));
+				AddTriggerElementToChannel(sequence, channel, static_cast<SequenceChannelElementTrigger*>(elem),onTriggerAdded);
 				popup = TP_None;
 			}
 			},
@@ -633,7 +636,9 @@ void TimelineEditor::Draw(Sequence& sequence, ImVec2 pos, ImVec2 size,
 	std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
 	std::function<void()> deleteTransformationKeyFrame,
 	std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit,
-	std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit
+	std::function<void()> onTriggerAdded,
+	std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit,
+	std::function<void(int channel)> onChannelDeleted
 )
 {
 	auto getTimelineValues = [pos, size]()
@@ -648,12 +653,12 @@ void TimelineEditor::Draw(Sequence& sequence, ImVec2 pos, ImVec2 size,
 	bool draging = elementDrag || elementDragLeftBoundary || elementDragRightBoundary;
 	DrawBackground(pos, size);
 	DrawAddChannelButton(sequence, pos, canInteract && !markerMouseDrag && !draging);
-	DrawTimeline(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging, setTransformationKeyFrame, setElementTrigger);
+	DrawTimeline(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging, setTransformationKeyFrame, setElementTrigger, onChannelDeleted);
 	DrawMarkers(sequence, timelinePos, timelineSize, canInteract && !draging);
 	DrawSelectedFrameVerticalLine(timelinePos, timelineSize);
 	DrawVerticalScrollbar(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging);
 	DrawHorizontalScrollbar(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging);
-	DrawActionPopup(sequence, setTransformationKeyFrame, deleteTransformationKeyFrame, setScriptToEdit, setTriggerScriptToEdit);
+	DrawActionPopup(sequence, setTransformationKeyFrame, deleteTransformationKeyFrame, setScriptToEdit, onTriggerAdded, setTriggerScriptToEdit);
 	HandleElementDrag(sequence);
 	HandleElementDragLeftBoundary(sequence);
 	HandleElementDragRightBoundary(sequence);
@@ -922,7 +927,7 @@ void TimelineEditor::AddScriptElementToChannel(Sequence& sequence, int channelId
 	seqChannel.InsertChannelElement(chanElem, sequence.totalFrames, sequence.framesPerSecond);
 }
 
-void TimelineEditor::AddTriggerElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementTrigger* elem)
+void TimelineEditor::AddTriggerElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementTrigger* elem, std::function<void()> onTriggerAdded)
 {
 	SequenceChannel& seqChannel = sequence.sequenceChannels.at(channelId);
 	ChannelElement chanElem;
@@ -931,7 +936,13 @@ void TimelineEditor::AddTriggerElementToChannel(Sequence& sequence, int channelI
 	trigger.frameStart = elem->frameStart;
 	trigger.frameEnd = elem->frameStart;
 	trigger.bone = elem->bone;
+	trigger.collisionMask = 0;
+	trigger.objectMask = 0;
+	trigger.position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	trigger.rotation = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	trigger.scale = XMFLOAT3(1.0f, 1.0f, 1.0f);
 	seqChannel.InsertChannelElement(chanElem, sequence.totalFrames, sequence.framesPerSecond);
+	onTriggerAdded();
 }
 
 void TimelineEditor::DeleteElementInFrameAtChannel(Sequence& sequence, int channelId, int frame)

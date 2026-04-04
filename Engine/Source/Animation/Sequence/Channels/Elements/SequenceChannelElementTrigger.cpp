@@ -58,6 +58,8 @@ nlohmann::json SequenceChannelElementTrigger::json()
 
 void SequenceChannelElementTrigger::ApplyFrameTriggerAvatarValues(int frame, RenderableID renderable)
 {
+	if (!triggerRenderable) return;
+
 	XMMATRIX world = renderable->world();
 	Animation::BonesTransformations& bonesTransformation = renderable->bonesTransformation;
 	bool visible = frame >= frameStart && frame <= frameEnd;

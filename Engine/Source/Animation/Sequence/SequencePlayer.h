@@ -18,6 +18,7 @@ struct SequencePlayer
 	void SetSequence(const Sequence& seq, RenderableID renderable);
 #if defined(_EDITOR)
 	void CreateSequenceTriggersAvatars(JUUID camera);
+	void DestroySequenceTriggersAvatars();
 #endif
 	void CreateSequenceTriggers();
 	void DestroySequenceTriggers();

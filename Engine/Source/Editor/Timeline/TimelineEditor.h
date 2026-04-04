@@ -28,7 +28,8 @@ struct TimelineEditor
 	void DrawAddChannelButton(Sequence& sequence, ImVec2 pos, bool canInteract);
 	void DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract,
 		std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
-		std::function<void(SequenceChannelElementTrigger*)> setElementTrigger
+		std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
+		std::function<void(int channel)> onChannelDeleted
 	);
 	void DrawVerticalScrollbar(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract);
 	void DrawHorizontalScrollbar(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract);
@@ -37,13 +38,16 @@ struct TimelineEditor
 	void DrawActionPopup(Sequence& sequence, std::function<void(TransformationKeyFrame*, int frame)> setTransformationKeyFrame,
 		std::function<void()> deleteTransformationKeyFrame,
 		std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit,
+		std::function<void()> onTriggerAdded,
 		std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit);
 	void Draw(Sequence& sequence, ImVec2 pos, ImVec2 size,
 		std::function<void(TransformationKeyFrame*, int frame)> setTransformationKeyFrame,
 		std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
 		std::function<void()> deleteTransformationKeyFrame,
 		std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit,
-		std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit
+		std::function<void()> onTriggerAdded,
+		std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit,
+		std::function<void(int channel)> onChannelDeleted
 	);
 
 	void HandleElementDrag(Sequence& sequence);
@@ -62,7 +66,7 @@ struct TimelineEditor
 	void AddTransformationElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementTransformation* elem);
 	void AddSoundFXElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementSoundFX* elem);
 	void AddScriptElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementScript* elem);
-	void AddTriggerElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementTrigger* elem);
+	void AddTriggerElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementTrigger* elem, std::function<void()> onTriggerAdded);
 	void DeleteElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
 	void SplitElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
 	void ToggleAnimationElementDirectionInChannelAtFrame(Sequence& sequence, int channelId, int frame);

@@ -355,6 +355,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			{
 				animationsSequences.sequences.insert_or_assign(selectedSequence, sequencePlayer.sequence);
 			}
+			sequencePlayer.DestroySequenceTriggersAvatars();
 			selectedSequence = sequence;
 			if (sequence != "")
 			{
@@ -550,6 +551,10 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 						selectedScriptToEdit = scriptToEdit;
 						selectedScriptToEditContent = scriptToEdit->script;
 					},
+					[&]
+					{
+						sequencePlayer.CreateSequenceTriggersAvatars(cameraUUID);
+					},
 					[&](int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger* scriptToEdit)
 					{
 						selectedScriptChannelFrame = std::make_tuple(channel, frame);
@@ -557,6 +562,13 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 						selectedScriptToEdit = scriptToEdit;
 						selectedScriptToEditContent = onEnterScript ? scriptToEdit->onEnter : scriptToEdit->onLeave;
 						isEnterScript = onEnterScript;
+					},
+					[&](int channel)
+					{
+						nextSelectedTransformationKeyframe = nullptr;
+						selectedTransformationKeyframe = nullptr;
+						nextSelectedElementTrigger = nullptr;
+						selectedElementTrigger = nullptr;
 					}
 				);
 			}
