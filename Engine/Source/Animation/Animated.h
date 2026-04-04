@@ -1,5 +1,4 @@
-#ifndef _ANIMATION_ANIMATED_H
-#define _ANIMATION_ANIMATED_H
+#pragma once
 
 #include <queue>
 #include <map>
@@ -85,5 +84,3 @@ namespace Animation
 	void TraverseMultiplycationQueue(float time, std::string currentAnimation, std::unique_ptr<Animated>& animations, BonesTransformations& bonesTransformation);
 	void TraverseMultiplycationQueue(float time, MultiplyCmdQueue& cmds, BonesKeysMap& boneKeys, BonesTransformations& bonesTransformation, BonesTransformations& bonesOffsets, XMMATRIX& rootNodeInverseTransform, XMMATRIX parentTransformation);
 }
-
-#endif
