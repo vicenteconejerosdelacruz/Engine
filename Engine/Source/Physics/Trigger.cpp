@@ -188,6 +188,30 @@ namespace Scene
 	void Trigger::OnTriggerEvent(SUUUID sceneObject, unsigned int event)
 	{
 		using namespace Scripting;
+		SceneObject* so = GetSceneObjectPointer(sceneObject);
+
+		auto current_bindings = bindings();
+
+		auto extra_bindings = so->GetScriptBindings();
+		bool add_extra = false;
+		if (extra_bindings.size() > 0ULL)
+		{
+			std::set<JNAME> skips;
+			std::transform(current_bindings.begin(), current_bindings.end(), std::inserter(skips, skips.begin()), [&](ScriptBinding& sb)
+				{
+					return sb.bindingName;
+				}
+			);
+			for (auto& sb : extra_bindings)
+			{
+				if (skips.contains(sb.bindingName))
+					continue;
+				current_bindings.push_back(sb);
+				add_extra = true;
+			}
+			bindings(current_bindings);
+		}
+
 		if (event & PxPairFlag::eNOTIFY_TOUCH_FOUND)
 		{
 			Scripting::RunScript(onEnter(), SUuuid());
@@ -196,6 +220,8 @@ namespace Scene
 		{
 			Scripting::RunScript(onLeave(), SUuuid());
 		}
+
+		bindings(current_bindings);
 	}
 
 	//Scripting

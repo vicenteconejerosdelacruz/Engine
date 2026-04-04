@@ -19,6 +19,11 @@ namespace Editor
 	extern bool templatesModified;
 };
 
+namespace Physics
+{
+	extern std::vector<std::string> GetCollisionMasks();
+};
+
 void AnimationSequencerModal::Initialize(JUUID uuid)
 {
 	using namespace Scene;
@@ -486,8 +491,8 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 		};
 	auto getKeyframeValues = [pos, size]
 		{
-			ImVec2 kpos(pos.x, pos.y + titleBarH + 50);
-			ImVec2 ksize(300.0f, 200.0f);
+			ImVec2 kpos(pos.x, pos.y + titleBarH + 65);
+			ImVec2 ksize(300.0f, 300.0f);
 			return std::make_tuple(kpos, ksize);
 		};
 	auto getScriptEditValues = [pos, size]
@@ -1029,6 +1034,68 @@ void AnimationSequencerModal::DrawElementTriggerAttributes(SequenceChannelElemen
 			ImGui::EndTable();
 		}
 		ImGui::PopID();
+
+		std::vector<std::string> collisionMasks = GetCollisionMasks();
+		ImGui::PushID("trigger-masks");
+		if (ImGui::BeginTable("trigger-masks", 2, defaultTableFlags))
+		{
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("objectMask");
+			ImGui::PushID("objectMask");
+			for (unsigned int i = 0; i < collisionMasks.size(); i++)
+			{
+				bool value = !!(elementTrigger.objectMask & (1 << i));
+				if (ImGui::Checkbox(collisionMasks.at(i).c_str(), &value))
+				{
+					if (value)
+						elementTrigger.objectMask |= (1 << i);
+					else
+						elementTrigger.objectMask &= ~(1 << i);
+				}
+			}
+			ImGui::PopID();
+
+			ImGui::TableSetColumnIndex(1);
+			ImGui::Text("collisionMask");
+			ImGui::PushID("collisionMask");
+			for (unsigned int i = 0; i < collisionMasks.size(); i++)
+			{
+				bool value = !!(elementTrigger.collisionMask & (1 << i));
+				if (ImGui::Checkbox(collisionMasks.at(i).c_str(), &value))
+				{
+					if (value)
+						elementTrigger.collisionMask |= (1 << i);
+					else
+						elementTrigger.collisionMask &= ~(1 << i);
+				}
+			}
+			ImGui::PopID();
+
+			ImGui::EndTable();
+		}
+		ImGui::PopID();
+		/*
+		if (ImGui::CollapsingHeader("objectMask"))
+		{
+			ImGui::PushID("trigger-objectMask");
+			if (ImGui::BeginTable("trigger-objectMask", 1, defaultTableFlags))
+			{
+
+			}
+			ImGui::PopID();
+		}
+
+		if (ImGui::CollapsingHeader("collisionMask"))
+		{
+			ImGui::PushID("trigger-collisionMask");
+			if (ImGui::BeginTable("trigger-collisionMask", 1, defaultTableFlags))
+			{
+
+			}
+			ImGui::PopID();
+		}
+		*/
 	}
 	ImGui::EndChild();
 

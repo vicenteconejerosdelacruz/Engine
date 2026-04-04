@@ -115,6 +115,51 @@ void SequencePlayer::CreateSequenceTriggersAvatars(JUUID camera)
 }
 #endif
 
+void SequencePlayer::CreateSequenceTriggers()
+{
+	XMMATRIX world = renderable->world();
+	Animation::BonesTransformations& bonesTransformation = renderable->bonesTransformation;
+
+	auto triggers = sequence.GetTriggerElements();
+	if (triggers.size() == 0ULL) return;
+
+	nlohmann::json triggersJ = nlohmann::json::array({});
+	SceneUnitId unit = renderable.unit();
+
+	for (auto* t : triggers)
+	{
+		triggersJ.push_back(t->CreateTriggerJson(renderable, world, bonesTransformation));
+		t->trigger = MAKESUUUID(0ULL, triggersJ.back().at("uuid"));
+		t->triggerBuilt = std::make_unique<std::atomic_bool>(false);
+	}
+
+	nlohmann::json data = {
+		{ "triggers", triggersJ }
+	};
+
+	AttachLevelIntoScene(unit, "triggers", data, [=](SceneUnitId)
+		{
+			for (auto* t : triggers)
+			{
+				t->trigger = MAKESUUUID(unit, std::get<1>(t->trigger()));
+				t->triggerBuilt->store(true);
+			}
+		}
+	);
+}
+
+void SequencePlayer::DestroySequenceTriggers()
+{
+	auto triggers = sequence.GetTriggerElements();
+	for (auto* t : triggers)
+	{
+		t->triggerBuilt->store(false);
+		t->triggerBuilt = nullptr;
+		t->trigger->markedForDelete = true;
+		t->trigger.clear();
+	}
+}
+
 void SequencePlayer::Step(float dt)
 {
 	if (!sequence.Runnable()) return;
@@ -332,6 +377,15 @@ void SequencePlayer::ApplyFrameTriggerAvatarValues()
 	for (auto* t : triggers)
 	{
 		t->ApplyFrameTriggerAvatarValues(currentFrame, renderable);
+	}
+}
+
+void SequencePlayer::ApplyFrameTriggerValues()
+{
+	auto triggers = sequence.GetTriggerElements();
+	for (auto* t : triggers)
+	{
+		t->ApplyFrameTriggerValues(currentFrame, renderable);
 	}
 }
 

@@ -30,21 +30,26 @@ namespace Physics
 		while (count--)
 		{
 			const PxTriggerPair& current = *pairs++;
+			if (!(current.status & PxPairFlag::eNOTIFY_TOUCH_FOUND) && !(current.status & PxPairFlag::eNOTIFY_TOUCH_LOST))
+				continue;
+
+			PhysicObject* trigger = (PhysicObject*)current.triggerShape->userData;
+			PhysicObject* other = (PhysicObject*)current.otherActor->userData;
+
+			if (!trigger->built || !trigger->trigger) continue;
+			if (!other->built || !other->renderable) continue;
+			if (!(trigger->collisionMask() & other->objectMask()))
+				continue;
+
 			if (current.status & PxPairFlag::eNOTIFY_TOUCH_FOUND)
 			{
-				PhysicObject* trigger = (PhysicObject*)current.triggerShape->userData;
-				PhysicObject* other = (PhysicObject*)current.otherActor->userData;
-				//OutputDebugStringA("Shape is entering trigger volume\n");
 				CallRegisteredCallbacks(PB_Trigger, other->uuid(), trigger->uuid(), PxPairFlag::eNOTIFY_TOUCH_FOUND);
-				CallTriggerContactCallback(trigger->trigger, MAKESUUUID(other->unit(), other->uuid()), PxPairFlag::eNOTIFY_TOUCH_FOUND);
+				CallTriggerContactCallback(trigger->trigger, other->renderable(), PxPairFlag::eNOTIFY_TOUCH_FOUND);
 			}
 			if (current.status & PxPairFlag::eNOTIFY_TOUCH_LOST)
 			{
-				PhysicObject* trigger = (PhysicObject*)current.triggerShape->userData;
-				PhysicObject* other = (PhysicObject*)current.otherActor->userData;
-				//OutputDebugStringA("Shape is leaving trigger volume\n");
 				CallRegisteredCallbacks(PB_Trigger, other->uuid(), trigger->uuid(), PxPairFlag::eNOTIFY_TOUCH_LOST);
-				CallTriggerContactCallback(trigger->trigger, MAKESUUUID(other->unit(), other->uuid()), PxPairFlag::eNOTIFY_TOUCH_LOST);
+				CallTriggerContactCallback(trigger->trigger, other->renderable(), PxPairFlag::eNOTIFY_TOUCH_LOST);
 			}
 		}
 	}

@@ -174,13 +174,16 @@ namespace Scene
 		//Scripting
 		virtual v8_templates_creators GetV8TemplatesCreators();
 		virtual v8_context_creators GetV8ContextCreators();
+#if defined(_EDITOR)
+		virtual std::map<std::string, ScriptBinding> GetScriptBindingOptions();
+#endif
+		std::vector<ScriptBinding> GetScriptBindings() override;
 
 #if defined(_EDITOR)
 		std::function<void()> OnPick;
 		//Gizmo
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
 		virtual void WriteJson(nlohmann::json& j);
-		virtual std::map<std::string, ScriptBinding> GetScriptBindingOptions();
 #endif
 
 		//State

@@ -124,7 +124,7 @@ namespace Scene
 		virtual v8_templates_creators GetV8TemplatesCreators() { return {}; }
 		virtual v8_context_creators GetV8ContextCreators() { return {}; }
 		virtual v8_functions_creators GetV8FunctionsCreators() { return {}; }
-
+		virtual std::vector<ScriptBinding> GetScriptBindings() { return {}; }
 
 #if defined(_EDITOR)
 		//Billboard

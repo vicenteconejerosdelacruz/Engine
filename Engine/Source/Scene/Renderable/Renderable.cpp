@@ -85,25 +85,6 @@ namespace Scene
 #include <RenderableAtt.h>
 #include <JEnd.h>
 	}
-
-	std::map<std::string, ScriptBinding> Renderable::GetScriptBindingOptions()
-	{
-		std::map<std::string, ScriptBinding> options = SceneObject::GetScriptBindingOptions();
-
-		for (auto& [key, _] : at("controllers").items())
-		{
-			std::string name = std::string(at("name")) + "/" + std::string(key);
-			options.insert_or_assign(name, ScriptBinding(at("uuid"), key));
-		}
-
-		for (unsigned int i = 0; i < at("physicObject").size(); i++)
-		{
-			std::string name = std::string(at("name")) + "/physicObject/" + std::to_string(i);
-			options.insert_or_assign(name, ScriptBinding(at("uuid"), i));
-		}
-
-		return options;
-	}
 #endif
 
 	void Renderable::Initialize()
@@ -697,11 +678,13 @@ namespace Scene
 			SetCurrentAnimation(&sequencePlayer);
 
 		animationSequence(anim);
+		sequencePlayer.DestroySequenceTriggers();
 		sequencePlayer.sequence = animationsSequences.sequences.at(anim);
 		sequencePlayer.loop = loop;
 		sequencePlayer.newSequence = true;
 		sequencePlayer.ResetFrames();
 		sequencePlayer.ApplyFrameValues();
+		sequencePlayer.CreateSequenceTriggers();
 		animationTimeFactor(timeFactor);
 	}
 
@@ -915,6 +898,37 @@ namespace Scene
 		return creators;
 	}
 
+#if defined(_EDITOR)
+	std::map<std::string, ScriptBinding> Renderable::GetScriptBindingOptions()
+	{
+		std::map<std::string, ScriptBinding> options = SceneObject::GetScriptBindingOptions();
+
+		for (auto& [key, _] : at("controllers").items())
+		{
+			std::string name = std::string(at("name")) + "/" + std::string(key);
+			options.insert_or_assign(name, ScriptBinding(at("uuid"), key));
+		}
+
+		for (unsigned int i = 0; i < at("physicObject").size(); i++)
+		{
+			std::string name = std::string(at("name")) + "/physicObject/" + std::to_string(i);
+			options.insert_or_assign(name, ScriptBinding(at("uuid"), i));
+		}
+
+		return options;
+	}
+#endif
+
+	std::vector<ScriptBinding> Renderable::GetScriptBindings()
+	{
+		std::vector<ScriptBinding> bindings;
+		for (auto& [name, _] : at("controllers").items())
+		{
+			bindings.push_back(ScriptBinding(uuid(), name, name));
+		}
+		return bindings;
+	}
+
 	void RenderablesStep(SceneUnitId unit, float dt)
 	{
 		auto& Renderables = GetRenderables(unit);
@@ -1043,6 +1057,7 @@ namespace Scene
 				player->Step(dt * 1000.0f * renderable->animationTimeFactor());
 			}
 			player->ApplyFrameValues();
+			player->ApplyFrameTriggerValues();
 		}
 	}
 

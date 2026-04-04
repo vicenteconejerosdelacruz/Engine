@@ -20,6 +20,7 @@ struct SequencePlayer
 	void CreateSequenceTriggersAvatars(JUUID camera);
 #endif
 	void CreateSequenceTriggers();
+	void DestroySequenceTriggers();
 	void Step(float dt);
 	void SetTime(float t);
 	void StepFrame(int df);
@@ -28,6 +29,7 @@ struct SequencePlayer
 #if defined(_EDITOR)
 	void ApplyFrameTriggerAvatarValues();
 #endif
+	void ApplyFrameTriggerValues();
 	void CreateFrameSoundFXs(int frame);
 	void ExecuteFrameScripts(int frame);
 	void ResetFrames();
