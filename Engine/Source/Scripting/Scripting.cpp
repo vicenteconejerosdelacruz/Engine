@@ -52,11 +52,6 @@ namespace Scripting
 		return isolate;
 	}
 
-	void BindModule(std::function<void(Isolate*)> binder)
-	{
-		binder(isolate);
-	}
-
 	Local<Context> CreateSceneObjectScriptContext(Isolate* isolate, SceneObject* so, v8_att_context& att_context)
 	{
 		Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
@@ -100,16 +95,42 @@ namespace Scripting
 		Local<v8::String> source = v8::String::NewFromUtf8(isolate, script.c_str()).ToLocalChecked();
 		Local<Script> runnable = Script::Compile(context, source).ToLocalChecked();
 		//run the code and capture it's result
-		Local<Value> result = runnable->Run(context).ToLocalChecked();
+		v8::TryCatch try_catch(isolate);
 
-#if defined(_DEVELOPMENT)
-		//print result if not undefined
-		v8::String::Utf8Value utf8(isolate, result);
-		if (std::string(*utf8) != "undefined")
+		Local<Value> result;
+		if (!runnable->Run(context).ToLocal(&result))
 		{
-			std::string resultStr = std::string("result:") + *utf8 + "\n";
-			OutputDebugStringA(resultStr.c_str());
-		}
+#if defined(_DEVELOPMENT)
+			v8::String::Utf8Value exception(isolate, try_catch.Exception());
+			v8::Local<v8::Message> message = try_catch.Message();
+			if (!message.IsEmpty()) {
+				int line_number = message->GetLineNumber(context).FromMaybe(-1);
+				v8::String::Utf8Value filename(isolate, message->GetScriptResourceName());
+
+				std::string linenumstr = "Error en " + std::string(*filename) + ", linea " + std::to_string(line_number) + "\n";
+				OutputDebugStringA(linenumstr.c_str());
+
+				// Imprimir el Stack Trace completo si está disponible
+				v8::Local<v8::Value> stack_trace;
+				if (try_catch.StackTrace(context).ToLocal(&stack_trace)) {
+					v8::String::Utf8Value stack_str(isolate, stack_trace);
+					std::string stacktrace = "Stack Trace:\n" + std::string(*stack_str) + "\n";
+					OutputDebugStringA(stacktrace.c_str());
+				}
+			}
 #endif
+		}
+		else
+		{
+#if defined(_DEVELOPMENT)
+			//print result if not undefined
+			v8::String::Utf8Value utf8(isolate, result);
+			if (std::string(*utf8) != "undefined")
+			{
+				std::string resultStr = std::string("result:") + *utf8 + "\n";
+				OutputDebugStringA(resultStr.c_str());
+			}
+#endif
+		}
 	}
 }

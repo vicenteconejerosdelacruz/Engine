@@ -15,6 +15,5 @@ namespace Scripting
 	void InitScripting(const char* path);
 	void ShutdownScripting();
 	Isolate* GetIsolate();
-	void BindModule(std::function<void(Isolate*)>);
 	void RunScript(std::string script, SUUUID suuuid);
 }
