@@ -171,6 +171,11 @@ namespace Game
 		physicObject.clear();
 	}
 
+	void VenomController::TakeHit(int damage)
+	{
+		OutputDebugStringA(std::string("take hit" + std::to_string(damage) + "\n").c_str());
+	}
+
 	//Step
 	void VenomController::Step(float delta)
 	{
@@ -256,11 +261,12 @@ namespace Game
 			{ "PlayerReady", v8_wrap_call([&] { VenomReady(); }) },
 			{ "StartNextPunchWindow", v8_wrap_call([&] { StartVenomNextPunchWindow(); }) },
 			{ "EvaluateNextPunch", v8_wrap_call([&] { EvaluateVenomNextPunch(); }) },
-			{ "SwitchToState", v8_wrap_call([&](std::string state) {vsm.ChangeState(stringToVenomStates.at(state)); }) },
+			{ "SwitchToState", v8_wrap_call([&](std::string state) { vsm.ChangeState(stringToVenomStates.at(state)); }) },
 			{ "BeginJump", v8_wrap_call([&] { VenomBeginJump(); }) },
 			{ "EndJumpLanding", v8_wrap_call([&] { VenomEndJumpLanding(); }) },
 			{ "BeginRunJump", v8_wrap_call([&] { VenomBeginRunJump(); }) },
 			{ "RunJumpLanding", v8_wrap_call([&] { VenomRunJumpLanding(); }) },
+			{ "TakeHit", v8_wrap_call([&](int damage) { TakeHit(damage); }) },
 		};
 	}
 

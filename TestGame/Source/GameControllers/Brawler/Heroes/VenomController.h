@@ -143,6 +143,9 @@ namespace Game
 		virtual void Map(SUUUID so);
 		virtual void Unmap();
 
+		//States
+		void TakeHit(int damage);
+
 		//Step
 		virtual void Step(float delta);
 		//Physics
