@@ -161,6 +161,7 @@ namespace nov8
 				Local<Context> context = isolate->GetCurrentContext();
 				Local<ObjectTemplate> binding_map_tmpl = ObjectTemplate::New(isolate);
 
+				v8_att_functions& att_functions = att_context.att_functions;
 
 				switch (sb.bindingType)
 				{
@@ -170,6 +171,8 @@ namespace nov8
 					v8_templates_creators template_creators = so->GetV8TemplatesCreators();
 					v8_functions_creators functions_creators = so->GetV8FunctionsCreators();
 
+					//Add toJSON
+					AddFunctionToTemplate(isolate, binding_map_tmpl, att_functions, binded->SUuuid_str(), "toJSON", v8_toJSON(so));
 					//Add Attributes
 					AddTemplateJsonAttributes(isolate, binding_map_tmpl, att_context, template_creators, *binded, path);
 					//Add Functions
@@ -183,6 +186,8 @@ namespace nov8
 					v8_templates_creators template_creators = controller->GetV8TemplatesCreators();
 					v8_functions_creators functions_creators = controller->GetV8FunctionsCreators();
 
+					//Add toJSON
+					AddFunctionToTemplate(isolate, binding_map_tmpl, att_functions, controller->controller, "toJSON", v8_toJSON(controller.get()));
 					//Add Attributes
 					AddTemplateJsonAttributes(isolate, binding_map_tmpl, att_context, template_creators, *controller.get(), path);
 					//Add Functions
