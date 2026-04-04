@@ -259,7 +259,7 @@ void AnimationSequencerModal::Step()
 		{
 			sequencePlayer.SetFrame(timelineEditor.GetFrame(seq), false);
 		}
-		sequencePlayer.ApplyFrameValues(renderable);
+		sequencePlayer.ApplyFrameValues();
 		sequencePlayer.ApplyFrameTriggerAvatarValues();
 	}
 

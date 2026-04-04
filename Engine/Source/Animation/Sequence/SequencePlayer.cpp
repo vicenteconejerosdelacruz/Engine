@@ -307,7 +307,7 @@ void SequencePlayer::SetFrame(int frame, bool runningPlayer)
 	}
 }
 
-void SequencePlayer::ApplyFrameValues(RenderableID renderable)
+void SequencePlayer::ApplyFrameValues()
 {
 	SequenceChannelElementAnimation* animation = sequence.GetAnimationElementAtFrame(currentFrame);
 	if (animation == nullptr)

@@ -24,7 +24,7 @@ struct SequencePlayer
 	void SetTime(float t);
 	void StepFrame(int df);
 	void SetFrame(int frame, bool runningPlayer = true);
-	void ApplyFrameValues(RenderableID renderable);
+	void ApplyFrameValues();
 #if defined(_EDITOR)
 	void ApplyFrameTriggerAvatarValues();
 #endif

@@ -701,6 +701,7 @@ namespace Scene
 		sequencePlayer.loop = loop;
 		sequencePlayer.newSequence = true;
 		sequencePlayer.ResetFrames();
+		sequencePlayer.ApplyFrameValues();
 		animationTimeFactor(timeFactor);
 	}
 
@@ -1041,7 +1042,7 @@ namespace Scene
 			{
 				player->Step(dt * 1000.0f * renderable->animationTimeFactor());
 			}
-			player->ApplyFrameValues(renderable);
+			player->ApplyFrameValues();
 		}
 	}
 
