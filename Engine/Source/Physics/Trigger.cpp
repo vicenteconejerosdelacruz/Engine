@@ -40,6 +40,52 @@ namespace Scene
 
 #endif
 
+	void Trigger::create_rotation(XMFLOAT3 v)
+	{
+		if (!contains("rotation"))
+		{
+			rotation(v);
+		}
+		else
+		{
+			updateRotationQ();
+		}
+	}
+
+	void Trigger::rotation(XMFLOAT3 v)
+	{
+		(*this)["rotation"] = FromXMFLOAT3(v);
+		updateRotationQ();
+	}
+
+	void Trigger::updateRotationQ()
+	{
+		XMFLOAT3 v = rotation();
+		rotationQuaternion = XMQuaternionRotationRollPitchYaw(
+			XMConvertToRadians(v.x),
+			XMConvertToRadians(v.y),
+			XMConvertToRadians(v.z)
+		);
+		if (!physicObject.empty())
+		{
+			physicObject->UpdateGlobalPoseFromTrigger();
+		}
+	}
+
+	XMVECTOR Trigger::rotationQ()
+	{
+		return rotationQuaternion;
+	}
+
+	void Trigger::rotationQ(XMVECTOR q)
+	{
+		rotationQuaternion = q;
+		if (!physicObject.empty())
+		{
+			physicObject->UpdateGlobalPoseFromTrigger();
+		}
+	}
+
 #if defined(_EDITOR)
 	void WriteTriggersJson(SceneUnitId id, nlohmann::json& json)
 	{
@@ -198,6 +244,7 @@ namespace Scene
 			{
 				if (!t->dirty({ Trigger::Update_position,Trigger::Update_rotation })) return;
 
+				t->updateRotationQ();
 				t->physicObject->UpdateGlobalPoseFromTrigger();
 #if defined(_EDITOR)
 				t->physicObject->UpdatePhysicsAvatarTransformation();

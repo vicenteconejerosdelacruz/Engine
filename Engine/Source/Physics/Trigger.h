@@ -64,6 +64,11 @@ namespace Scene
 #include <JEnd.h>
 
 		Trigger(SceneUnitId id, nlohmann::json& json);
+
+		void updateRotationQ();
+		XMVECTOR rotationQ();
+		void rotationQ(XMVECTOR Q);
+
 		~Trigger() { Destroy(); }
 		virtual void Initialize();
 		virtual void BindToScene();
@@ -83,7 +88,11 @@ namespace Scene
 		virtual v8_templates_creators GetV8TemplatesCreators();
 		virtual v8_context_creators GetV8ContextCreators();
 
+		//State
 		DeleteHook markedForDelete;
+		//Transformation
+		XMVECTOR rotationQuaternion;
+		//Physics
 		PhysicObjectID physicObject;
 	};
 
