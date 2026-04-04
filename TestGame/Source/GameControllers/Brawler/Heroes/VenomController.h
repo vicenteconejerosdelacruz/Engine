@@ -144,7 +144,7 @@ namespace Game
 		virtual void Unmap();
 
 		//States
-		void TakeHit(int damage);
+		void TakeHit(JUUID enemyController, int damage);
 
 		//Step
 		virtual void Step(float delta);

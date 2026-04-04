@@ -37,7 +37,7 @@ namespace Game
 #include <ControllerAtt.h>
 #include <JEnd.h>
 
-		(*this)["uuid"] = getUUID();
+		uuid(getUUID());
 	}
 
 	void Controller::JUpdate(nlohmann::json p)
@@ -62,6 +62,7 @@ namespace Game
 #include <Editor/JWriteJson.h>
 #include <ControllerAtt.h>
 #include <JEnd.h>
+		j.erase("uuid");
 	}
 #endif
 
@@ -84,7 +85,6 @@ namespace Game
 #include <Attributes/JV8Context.h>
 #include <ControllerAtt.h>
 #include <JEnd.h>
-#include <Scene.h>
 		return creators;
 	}
 

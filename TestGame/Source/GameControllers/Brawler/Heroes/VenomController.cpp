@@ -166,9 +166,9 @@ namespace Game
 		physicObject.clear();
 	}
 
-	void VenomController::TakeHit(int damage)
+	void VenomController::TakeHit(JUUID enemyController, int damage)
 	{
-		OutputDebugStringA(std::string("VenomController take hit " + std::to_string(damage) + "\n").c_str());
+		OutputDebugStringA(std::string("VenomController take hit from " + enemyController + " " + std::to_string(damage) + "\n").c_str());
 	}
 
 	//Step
@@ -253,7 +253,7 @@ namespace Game
 			{ "EndJumpLanding", v8_wrap_call([&] { VenomEndJumpLanding(); }) },
 			{ "BeginRunJump", v8_wrap_call([&] { VenomBeginRunJump(); }) },
 			{ "RunJumpLanding", v8_wrap_call([&] { VenomRunJumpLanding(); }) },
-			{ "TakeHit", v8_wrap_call([&](int damage) { TakeHit(damage); }) },
+			{ "TakeHit", v8_wrap_call([&](JUUID enemyController, int damage) { TakeHit(enemyController, damage); }) },
 		};
 	}
 
