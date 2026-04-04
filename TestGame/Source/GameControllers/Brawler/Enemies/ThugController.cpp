@@ -104,6 +104,11 @@ namespace Game
 		thug.clear();
 	}
 
+	void ThugController::TakeHit(int damage)
+	{
+		OutputDebugStringA(std::string("ThugController take hit " + std::to_string(damage) + "\n").c_str());
+	}
+
 	//Step
 	void ThugController::Step(float delta)
 	{
@@ -141,7 +146,8 @@ namespace Game
 		return {
 			{ "EvaluateNextFollowMovement", v8_wrap_call([&] { EvaluateNextFollowMovement(); }) },
 			{ "CombatIdleNextState", v8_wrap_call([&] { CombatIdleNextState(); }) },
-			{ "OnCombatPunchAnimationEnd", v8_wrap_call([&] { OnCombatPunchAnimationEnd(); }) }
+			{ "OnCombatPunchAnimationEnd", v8_wrap_call([&] { OnCombatPunchAnimationEnd(); }) },
+			{ "TakeHit", v8_wrap_call([&](int damage) { TakeHit(damage); }) },
 		};
 	}
 
@@ -299,7 +305,9 @@ namespace Game
 	{
 		XMFLOAT3 heroPos = heroRenderable->position() + heroAttackOffset;
 		XMFLOAT3 myPos = thug->position();
-		XMVECTOR disp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&heroPos), XMLoadFloat3(&myPos)));
+		XMVECTOR diff = XMVectorSubtract(XMLoadFloat3(&heroPos), XMLoadFloat3(&myPos));
+		diff.m128_f32[1] = 0.0f; diff.m128_f32[3] = 0.0f;
+		XMVECTOR disp = XMVector3Normalize(diff);
 		CharacterMoveXZPlane(disp, gameUpdateFrequency, speed, physicScene->gravity());
 	}
 

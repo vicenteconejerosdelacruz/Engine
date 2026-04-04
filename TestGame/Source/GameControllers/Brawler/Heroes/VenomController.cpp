@@ -141,10 +141,6 @@ namespace Game
 			venom = so;
 		}
 		GetController<BrawlerSceneController>(unit, sceneController())->RegisterHero(controller);
-		//if (GetCountFromMouseCameras(unit) > 0ULL)
-		//{
-		//	camera = MAKESUUUID(unit, *GetMouseCameras(unit).begin());
-		//}
 		physicScene = MAKESUUUID(unit, *GetPhysicScenes(unit).begin());
 		physicObject = venom->at("physicObject").at(0);
 		RegisterContactCallback(PB_Static, physicObject(), [&](JUUID uuid, unsigned int event)
@@ -166,14 +162,13 @@ namespace Game
 		UnregisterContactCallback(PB_Static, physicObject());
 		UnregisterCharacterHitCallback(physicObject());
 		venom.clear();
-		//camera.clear();
 		physicScene.clear();
 		physicObject.clear();
 	}
 
 	void VenomController::TakeHit(int damage)
 	{
-		OutputDebugStringA(std::string("take hit" + std::to_string(damage) + "\n").c_str());
+		OutputDebugStringA(std::string("VenomController take hit " + std::to_string(damage) + "\n").c_str());
 	}
 
 	//Step
@@ -210,14 +205,6 @@ namespace Game
 
 		if (std::set<VenomStates>({ VS_GrabWall, VS_WallIdle, VS_CrawlOnWall, VS_DetachFromWall }).contains(vsm.currentState))
 			return;
-
-		//this is commented as a left over
-		/*
-		if ((phO->collisionMask() & CF_Floor) && (event & PxPairFlag::eNOTIFY_TOUCH_FOUND))
-		{
-			GetBrawlerCamera()->followY(false);
-		}
-		*/
 	}
 
 	void VenomController::OnCharacterHitEvent(PxFilterData fd)
