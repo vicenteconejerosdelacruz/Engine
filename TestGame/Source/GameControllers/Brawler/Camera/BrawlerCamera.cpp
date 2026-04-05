@@ -46,7 +46,7 @@ namespace Game::Brawler
 		venomR = MAKESUUUID(std::get<0>(so), venom());
 		YcamInitial = camera->position().y;
 		Ycam2venom = YcamInitial - venomR->position().y;
-		GetController<Brawler::BrawlerScene>(unit, sceneController())->RegisterCamera(controller);
+		GetController<Brawler::BrawlerScene>(unit, sceneController())->RegisterCamera(uuid());
 	}
 
 	void BrawlerCamera::Unmap()

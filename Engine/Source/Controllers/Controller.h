@@ -128,7 +128,6 @@ namespace Game
 		//Rendering
 		virtual void Render(SceneUnitId id) {};
 
-		JUUID controller;
 		SceneUnitId unit;
 		SUUUID sceneObject;
 	};

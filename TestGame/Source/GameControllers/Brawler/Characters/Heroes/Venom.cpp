@@ -137,7 +137,7 @@ namespace Game::Brawler
 		{
 			venom = so;
 		}
-		GetController<BrawlerScene>(unit, sceneController())->RegisterHero(controller);
+		GetController<BrawlerScene>(unit, sceneController())->RegisterHero(uuid());
 		physicScene = MAKESUUUID(unit, *GetPhysicScenes(unit).begin());
 		physicObject = venom->at("physicObject").at(0);
 		RegisterContactCallback(PB_Static, physicObject(), [&](JUUID uuid, unsigned int event)

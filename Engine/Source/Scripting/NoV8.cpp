@@ -187,7 +187,7 @@ namespace nov8
 					v8_functions_creators functions_creators = controller->GetV8FunctionsCreators();
 
 					//Add toJSON
-					AddFunctionToTemplate(isolate, binding_map_tmpl, att_functions, controller->controller, "toJSON", v8_toJSON(controller.get()));
+					AddFunctionToTemplate(isolate, binding_map_tmpl, att_functions, controller->uuid(), "toJSON", v8_toJSON(controller.get()));
 					//Add Attributes
 					AddTemplateJsonAttributes(isolate, binding_map_tmpl, att_context, template_creators, *controller.get(), path);
 					//Add Functions

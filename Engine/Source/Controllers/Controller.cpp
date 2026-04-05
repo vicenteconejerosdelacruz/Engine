@@ -113,8 +113,7 @@ namespace Game
 	JUUID RegisterController(std::string controllerName, SUUUID sceneObject, std::unique_ptr<Controller>& controller)
 	{
 		std::lock_guard<std::mutex> lock(controllerMutex);
-		JUUID uuid = getUUID();
-		controller->controller = uuid;
+		JUUID uuid = controller->uuid();
 		controllersUUIDs.insert_or_assign(uuid, std::move(controller));
 		//relate the suuuid to the controllers
 		if (!controllerUUIDBySUUUID.contains(sceneObject))
@@ -261,6 +260,6 @@ namespace Game
 
 	JUUID GetControllerUUID(SceneUnitId id, ControllerBinding cb)
 	{
-		return GetController(id, cb)->controller;
+		return GetController(id, cb)->uuid();
 	}
 }
