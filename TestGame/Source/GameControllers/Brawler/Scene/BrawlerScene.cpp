@@ -1,3 +1,4 @@
+#include "BrawlerScene.h"
 #include "pch.h"
 #include "BrawlerScene.h"
 #include "../Characters/Heroes/Venom.h"
@@ -29,13 +30,23 @@ namespace Game::Brawler
 
 	void BrawlerScene::SetInitialConditions()
 	{
-		heroHealthChanged = true;
-		heroHealth = 100;
-		lastAttacker = "";
-		newAttacker = false;
-		lastAttackerHealthChanged = false;
-		lastAttackerHealth = 100;
-		lastAttackerName = "";
+		if (!venomUIInstance().empty())
+		{
+			DeleteHtmlUIInstance(venomUIInstance());
+			venomUIInstance("");
+		}
+		heroes_clear();
+		enemies_clear();
+		camera("");
+		leftSlot("");
+		rightSlot("");
+		heroHealthChanged(true);
+		heroHealth(100);
+		lastAttacker("");
+		newAttacker(false);
+		lastAttackerHealthChanged(false);
+		lastAttackerHealth(100);
+		lastAttackerName("");
 	}
 
 #if defined(_EDITOR)
@@ -52,7 +63,6 @@ namespace Game::Brawler
 	{
 		using namespace Scene;
 		Controller::Map(so);
-
 
 		SetInitialConditions();
 	}
@@ -74,13 +84,13 @@ namespace Game::Brawler
 		if (!Editor::IsPlaying(id) || Editor::IsPaused(id))
 			return;
 #endif
-		venomUIInstance.empty() ? CreateVenomUI(id) : UpdateVenomUI(id);
+		venomUIInstance().empty() ? CreateVenomUI(id) : UpdateVenomUI(id);
 	}
 
 	//UI
 	void BrawlerScene::CreateVenomUI(SceneUnitId id)
 	{
-		venomUIInstance = venomUI() + "-" + getUUID();
+		venomUIInstance(venomUI() + "-" + getUUID());
 		CreateHtmlUIInstance(venomUIInstance(), [&]()
 			{
 				return std::make_unique<HtmlUIInstance>(id, venomUIInstance(), venomUI());
@@ -92,86 +102,91 @@ namespace Game::Brawler
 	{
 		UpdateHeroHealthUI();
 		UpdateEnemyUI();
-		venomUIInstance->UpdateTexture(id);
-		venomUIInstance->Resolve(id);
+		HtmlUIInstanceID instance = venomUIInstance();
+		instance->UpdateTexture(id);
+		instance->Resolve(id);
 	}
 
 	void BrawlerScene::HeroTookHit(JUUID enemy, int newHealth)
 	{
-		heroHealth = newHealth;
-		heroHealthChanged = true;
+		heroHealth(newHealth);
+		heroHealthChanged(true);
+		UpdateEnemy(enemy);
+	}
 
-		newAttacker = lastAttacker != enemy;
-		lastAttacker = enemy;
+	void BrawlerScene::UpdateEnemy(JUUID enemy)
+	{
+		newAttacker(lastAttacker() != enemy);
+		lastAttacker(enemy);
 
-		if (newAttacker)
-		{
-			auto* bc = GetController<BrawlerCharacter>(lastAttacker);
-			lastAttackerName = bc->name();
-			lastAttackerHealth = bc->health();
-			lastAttackerHealthChanged = true;
-		}
+		auto* bc = GetController<BrawlerCharacter>(lastAttacker());
+		lastAttackerName(bc->name());
+		lastAttackerHealth(bc->health());
+		lastAttackerHealthChanged(true);
 	}
 
 	void BrawlerScene::UpdateHeroHealthUI()
 	{
-		if (heroHealthChanged)
+		if (heroHealthChanged())
 		{
-			std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'HERO_HP', value: " + std::to_string(heroHealth) + " } })); ";
-			venomUIInstance->EvaluateScript(js);
-			heroHealthChanged = false;
+			std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'HERO_HP', value: " + std::to_string(heroHealth()) + " } })); ";
+			HtmlUIInstanceID instance = venomUIInstance();
+			instance->EvaluateScript(js);
+			heroHealthChanged(false);
 		}
 	}
 
 	void BrawlerScene::UpdateEnemyUI()
 	{
-		if (newAttacker)
+		if (newAttacker())
 		{
-			std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'NEW_ENEMY', name:'" + lastAttackerName + "' } })); ";
-			venomUIInstance->EvaluateScript(js);
-			newAttacker = false;
+			std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'NEW_ENEMY', name:'" + lastAttackerName() + "' } })); ";
+			HtmlUIInstanceID instance = venomUIInstance();
+			instance->EvaluateScript(js);
+			newAttacker(false);
 		}
-		if (lastAttackerHealthChanged)
+		if (lastAttackerHealthChanged())
 		{
-			std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'ENEMY_HP', value: " + std::to_string(lastAttackerHealth) + " } })); ";
-			venomUIInstance->EvaluateScript(js);
-			lastAttackerHealthChanged = false;
+			std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'ENEMY_HP', value: " + std::to_string(lastAttackerHealth()) + " } })); ";
+			HtmlUIInstanceID instance = venomUIInstance();
+			instance->EvaluateScript(js);
+			lastAttackerHealthChanged(false);
 		}
 	}
 
 	void BrawlerScene::RegisterCamera(JUUID camController)
 	{
-		cameraController = camController;
+		camera(camController);
 	}
 
 	void BrawlerScene::RegisterHero(JUUID heroController)
 	{
-		heroesControllers.insert(heroController);
-		heroHealth = GetController<BrawlerCharacter>(heroController)->health();
+		heroes_insert(heroController);
+		heroHealth(GetController<BrawlerCharacter>(heroController)->health());
 	}
 
 	void BrawlerScene::RegisterEnemy(JUUID enemyController)
 	{
-		enemiesControllers.insert(enemyController);
+		enemies_insert(enemyController);
 	}
 
 	const std::set<VenomStates> venomNonAttackStates({ VS_None, VS_Intro });
 	bool BrawlerScene::HeroesReadyToFight()
 	{
-		auto* venom = GetController<Venom>(*heroesControllers.begin());
+		auto* venom = GetController<Venom>(*heroes().begin());
 		return !venomNonAttackStates.contains(venom->GetState());
 	}
 
 	std::tuple<JUUID, XMFLOAT3> BrawlerScene::PickHeroToFight(JUUID enemyController)
 	{
-		if (!leftSlot.empty() && !rightSlot.empty())
+		if (!leftSlot().empty() && !rightSlot().empty())
 			return std::make_tuple("", XMFLOAT3());
 
-		return std::make_tuple(*heroesControllers.begin(), rightSlot.empty() ? thugAttackOffsetVector() : (-1.0f * thugAttackOffsetVector()));
+		return std::make_tuple(*heroes().begin(), rightSlot().empty() ? thugAttackOffsetVector() : (-1.0f * thugAttackOffsetVector()));
 	}
 
 	BrawlerCamera* BrawlerScene::GetCameraController()
 	{
-		return GetController<BrawlerCamera>(cameraController);
+		return GetController<BrawlerCamera>(camera());
 	}
 };

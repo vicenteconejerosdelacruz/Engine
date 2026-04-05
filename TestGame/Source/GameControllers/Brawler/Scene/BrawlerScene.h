@@ -51,6 +51,7 @@ namespace Game
 			void CreateVenomUI(SceneUnitId id);
 			void UpdateVenomUI(SceneUnitId id);
 			void HeroTookHit(JUUID enemy, int newHealth);
+			void UpdateEnemy(JUUID enemy);
 			void UpdateHeroHealthUI();
 			void UpdateEnemyUI();
 
@@ -68,6 +69,7 @@ namespace Game
 			//Camera
 			BrawlerCamera* GetCameraController();
 
+			/*
 			HtmlUIInstanceID venomUIInstance;
 
 			std::set<JUUID> heroesControllers;
@@ -87,6 +89,7 @@ namespace Game
 
 			int lastAttackerHealth;
 			std::string lastAttackerName;
+			*/
 		};
 	};
 };

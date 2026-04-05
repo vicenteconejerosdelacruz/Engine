@@ -55,6 +55,7 @@ namespace Game::Brawler
 		};
 
 		thugInitialLookTo = lookingTo();
+		initialHealth = health();
 		SetInitialConditions();
 	}
 
@@ -62,6 +63,7 @@ namespace Game::Brawler
 	{
 		tsm.currentState = TS_None;
 		lookingTo(thugInitialLookTo);
+		health(initialHealth);
 		heroController.clear();
 		heroRenderable.clear();
 		heroAttackOffset = { 0.0f,0.0f,0.0f };
@@ -103,7 +105,8 @@ namespace Game::Brawler
 
 	void Thug::TakeHit(int damage)
 	{
-		OutputDebugStringA(std::string("ThugController take hit " + std::to_string(damage) + "\n").c_str());
+		health(std::max(0, health() - damage));
+		GetController<BrawlerScene>(unit, sceneController())->UpdateEnemy(uuid());
 	}
 
 	//Step
@@ -152,18 +155,6 @@ namespace Game::Brawler
 	{
 		XMVECTOR move = XMVector3Normalize(displacement) * sideSpeed * dt;
 		physicObject->MoveCharacter(move, dt);
-		/*
-		XMVECTOR downDisp = { 0.0f, fixedDownDisplacement() + downSpeed * dt, 0.0f };
-		XMVECTOR move = XMVector3Normalize(stickDisplacement) * sideSpeed * dt;
-		move += downDisp;
-		PxControllerCollisionFlags colFlag = physicObject->MoveCharacter(move, dt);
-		touchingDown = !!(colFlag & PxControllerCollisionFlag::Enum::eCOLLISION_DOWN);
-		if (!!(colFlag & PxControllerCollisionFlag::Enum::eCOLLISION_UP))
-		{
-			downSpeed = 0.0f;
-		}
-		downSpeed = (touchingDown) ? 0.0f : (downSpeed + gravity.y * dt);
-		*/
 	}
 
 	void Thug::UpdateLookTo()

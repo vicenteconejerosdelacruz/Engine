@@ -98,11 +98,13 @@ namespace Game::Brawler
 				{ VS_Falling, [&](auto* sm) { Falling(); }},
 			}
 		};
+		initialHealth = health();
 		SetInitialConditions();
 	}
 
 	void Venom::SetInitialConditions()
 	{
+		health(initialHealth);
 		vsm.currentState = VS_None;
 		venomScale = { 0.0f,0.0f,0.0f };
 		leftStick = XMVectorZero();

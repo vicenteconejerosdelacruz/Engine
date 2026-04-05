@@ -235,6 +235,7 @@ namespace Game
 			//Initial States
 			XMFLOAT3 venomScale;
 			CharacterLookingTo lookingTo = CLT_Right;
+			int initialHealth;
 
 			//SceneObjects
 			RenderableID venom;
