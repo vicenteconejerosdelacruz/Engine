@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "ThugController.h"
-#include "../Scene/BrawlerSceneController.h"
+#include "Thug.h"
+#include "../../Scene/BrawlerScene.h"
 #include <StepTimer.h>
 #include <NoStd.h>
 #include <SimpleMath.h>
@@ -11,30 +11,27 @@
 //Timer
 extern DX::StepTimer timer;
 extern float gameUpdateFrequency;
-namespace Game
+namespace Game::Brawler
 {
 #if defined(_EDITOR)
-
 #include <Editor/JDrawersDef.h>
-#include <Brawler/ThugControllerAtt.h>
+#include <Brawler/ThugAtt.h>
 #include <JEnd.h>
-
 #endif
 
-	BrawlerSceneController* ThugController::GetBrawlerSceneController()
+	BrawlerScene* Thug::GetBrawlerSceneController()
 	{
-		return GetController<BrawlerSceneController>(unit, sceneController());
+		return GetController<BrawlerScene>(unit, sceneController());
 	}
 
 	//Constructor and Binding
-	ThugController::ThugController(nlohmann::json& json) : Controller(json)
+	Thug::Thug(nlohmann::json& json) : BrawlerCharacter(json)
 	{
 #include <Attributes/JInit.h>
-#include <Brawler/ThugControllerAtt.h>
+#include <Brawler/ThugAtt.h>
 #include <JEnd.h>
-
 #include <Attributes/JUpdate.h>
-#include <Brawler/ThugControllerAtt.h>
+#include <Brawler/ThugAtt.h>
 #include <JEnd.h>
 
 		tsm = {
@@ -61,7 +58,7 @@ namespace Game
 		SetInitialConditions();
 	}
 
-	void ThugController::SetInitialConditions()
+	void Thug::SetInitialConditions()
 	{
 		tsm.currentState = TS_None;
 		lookingTo(thugInitialLookTo);
@@ -71,19 +68,19 @@ namespace Game
 	}
 
 #if defined(_EDITOR)
-	void ThugController::WriteJson(nlohmann::json& j)
+	void Thug::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <Brawler/ThugControllerAtt.h>
+#include <Brawler/ThugAtt.h>
 #include <JEnd.h>
-		j.erase("uuid");
+		BrawlerCharacter::WriteJson(j);
 	}
 #endif
 
-	void ThugController::Map(SUUUID so)
+	void Thug::Map(SUUUID so)
 	{
 		using namespace Scene;
-		Controller::Map(so);
+		BrawlerCharacter::Map(so);
 		SceneObjectType type = GetSceneObjectType(FROMSUUUID(so));
 
 		if (type == SO_Renderables)
@@ -98,19 +95,19 @@ namespace Game
 		SetInitialConditions();
 	}
 
-	void ThugController::Unmap()
+	void Thug::Unmap()
 	{
-		Controller::Unmap();
+		BrawlerCharacter::Unmap();
 		thug.clear();
 	}
 
-	void ThugController::TakeHit(int damage)
+	void Thug::TakeHit(int damage)
 	{
 		OutputDebugStringA(std::string("ThugController take hit " + std::to_string(damage) + "\n").c_str());
 	}
 
 	//Step
-	void ThugController::Step(float delta)
+	void Thug::Step(float delta)
 	{
 #if defined(_EDITOR)
 		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
@@ -123,25 +120,25 @@ namespace Game
 	}
 
 	//JS binding
-	v8_templates_creators ThugController::GetV8TemplatesCreators()
+	v8_templates_creators Thug::GetV8TemplatesCreators()
 	{
-		v8_templates_creators creators = Controller::GetV8TemplatesCreators();
+		v8_templates_creators creators = BrawlerCharacter::GetV8TemplatesCreators();
 #include <Attributes/JV8Templates.h>
-#include <Brawler/ThugControllerAtt.h>
+#include <Brawler/ThugAtt.h>
 #include <JEnd.h>
 		return creators;
 	}
 
-	v8_context_creators ThugController::GetV8ContextCreators()
+	v8_context_creators Thug::GetV8ContextCreators()
 	{
-		v8_context_creators creators = Controller::GetV8ContextCreators();
+		v8_context_creators creators = BrawlerCharacter::GetV8ContextCreators();
 #include <Attributes/JV8Context.h>
-#include <Brawler/ThugControllerAtt.h>
+#include <Brawler/ThugAtt.h>
 #include <JEnd.h>
 		return creators;
 	}
 
-	v8_functions_creators ThugController::GetV8FunctionsCreators()
+	v8_functions_creators Thug::GetV8FunctionsCreators()
 	{
 		return {
 			{ "EvaluateNextFollowMovement", v8_wrap_call([&] { EvaluateNextFollowMovement(); }) },
@@ -151,7 +148,7 @@ namespace Game
 		};
 	}
 
-	void ThugController::CharacterMoveXZPlane(XMVECTOR displacement, float dt, float sideSpeed, XMFLOAT3 gravity)
+	void Thug::CharacterMoveXZPlane(XMVECTOR displacement, float dt, float sideSpeed, XMFLOAT3 gravity)
 	{
 		XMVECTOR move = XMVector3Normalize(displacement) * sideSpeed * dt;
 		physicObject->MoveCharacter(move, dt);
@@ -169,7 +166,7 @@ namespace Game
 		*/
 	}
 
-	void ThugController::UpdateLookTo()
+	void Thug::UpdateLookTo()
 	{
 		float dx = heroRenderable->position().x - thug->position().x;
 		if (dx > 0.0f)
@@ -192,7 +189,7 @@ namespace Game
 		}
 	}
 
-	bool ThugController::IsInAttackRange()
+	bool Thug::IsInAttackRange()
 	{
 		if (!heroRenderable) return false;
 
@@ -208,16 +205,16 @@ namespace Game
 	//	return false;
 	//}
 
-	void ThugController::EnterIdle()
+	void Thug::EnterIdle()
 	{
 		thug->SetCurrentAnimation("ThugIdle", 0.0f, 1.0f, true, true);
 	}
 
-	void ThugController::LeaveIdle()
+	void Thug::LeaveIdle()
 	{
 	}
 
-	void ThugController::Idle()
+	void Thug::Idle()
 	{
 		if (ShouldCombatIdle())
 		{
@@ -230,18 +227,18 @@ namespace Game
 	}
 
 	//CombatIdle
-	bool ThugController::ShouldCombatIdle()
+	bool Thug::ShouldCombatIdle()
 	{
 		if (!GetBrawlerSceneController()->HeroesReadyToFight()) return false;
 		return IsInAttackRange();
 	}
 
-	void ThugController::EnterCombatIdle()
+	void Thug::EnterCombatIdle()
 	{
 		thug->SetCurrentAnimation("ThugCombatIdle", 0.0f, combatIdleTimeFactor(), true, true);
 	}
 
-	void ThugController::CombatIdle()
+	void Thug::CombatIdle()
 	{
 		UpdateLookTo();
 		if (ShouldCombatFollow())
@@ -250,7 +247,7 @@ namespace Game
 		}
 	}
 
-	void ThugController::CombatIdleNextState()
+	void Thug::CombatIdleNextState()
 	{
 		if (ShouldCombatFollow())
 		{
@@ -263,13 +260,13 @@ namespace Game
 	}
 
 	//CombatFollow
-	bool ThugController::ShouldCombatFollow()
+	bool Thug::ShouldCombatFollow()
 	{
 		if (!GetBrawlerSceneController()->HeroesReadyToFight()) return false;
 		return !IsInAttackRange();
 	}
 
-	void ThugController::EnterCombatFollow()
+	void Thug::EnterCombatFollow()
 	{
 		if (heroController.empty())
 		{
@@ -288,7 +285,7 @@ namespace Game
 		EvaluateNextFollowMovement();
 	}
 
-	void ThugController::CombatFollow()
+	void Thug::CombatFollow()
 	{
 		if (IsInAttackRange())
 		{
@@ -301,7 +298,7 @@ namespace Game
 		}
 	}
 
-	void ThugController::MoveTowardHero(float speed)
+	void Thug::MoveTowardHero(float speed)
 	{
 		XMFLOAT3 heroPos = heroRenderable->position() + heroAttackOffset;
 		XMFLOAT3 myPos = thug->position();
@@ -311,7 +308,7 @@ namespace Game
 		CharacterMoveXZPlane(disp, gameUpdateFrequency, speed, physicScene->gravity());
 	}
 
-	void ThugController::EvaluateNextFollowMovement()
+	void Thug::EvaluateNextFollowMovement()
 	{
 		XMFLOAT3 heroPos = heroRenderable->position() + heroAttackOffset;
 		XMFLOAT3 myPos = thug->position();
@@ -346,16 +343,16 @@ namespace Game
 	}
 
 	//CombatPunch
-	void ThugController::EnterCombatPunch()
+	void Thug::EnterCombatPunch()
 	{
 		thug->SetCurrentAnimation("ThugCombatPunch", 0.0f, combatPunchTimeFactor(), true, false);
 	}
 
-	void ThugController::CombatPunch()
+	void Thug::CombatPunch()
 	{
 
 	}
-	void ThugController::OnCombatPunchAnimationEnd()
+	void Thug::OnCombatPunchAnimationEnd()
 	{
 		tsm.ChangeState(TS_CombatIdle);
 	}

@@ -1,4 +1,4 @@
-JCLASS(ThirdPersonController, _)
+JCLASS(ThirdPersonCharacter, _)
 JEXPOSE(float, speed, 1.0f, jedv_t_float, 1, false)
 JEXPOSE(float, fixedDownDisplacement, -0.1f, jedv_t_float, 1, false)
 JEXPOSE(float, jumpSpeed, 1.0f, jedv_t_float, 1, false)

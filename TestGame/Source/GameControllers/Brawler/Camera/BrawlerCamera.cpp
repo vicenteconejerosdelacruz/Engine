@@ -1,49 +1,44 @@
 #include "pch.h"
-#include "BrawlerCameraController.h"
-#include "../Heroes/VenomController.h"
-#include "../Scene/BrawlerSceneController.h"
+#include "BrawlerCamera.h"
+#include "../Characters/Heroes/Venom.h"
+#include "../Scene/BrawlerScene.h"
 #if defined(_EDITOR)
 #include <Editor.h>
 #endif
 
-namespace Game
+namespace Game::Brawler
 {
 #if defined(_EDITOR)
-
 #include <Editor/JDrawersDef.h>
-#include <Brawler/BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraAtt.h>
 #include <JEnd.h>
-
 #endif
 
-	BrawlerCameraController::BrawlerCameraController(nlohmann::json& json) : Controller(json)
+	BrawlerCamera::BrawlerCamera(nlohmann::json& json) : Controller(json)
 	{
 #include <Attributes/JInit.h>
-#include <Brawler/BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraAtt.h>
 #include <JEnd.h>
-
 #include <Attributes/JUpdate.h>
-#include <Brawler/BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraAtt.h>
 #include <JEnd.h>
 	}
 
-	void BrawlerCameraController::SetInitialConditions()
+	void BrawlerCamera::SetInitialConditions()
 	{
 	}
 
 #if defined(_EDITOR)
-	void BrawlerCameraController::WriteJson(nlohmann::json& j)
+	void BrawlerCamera::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <Brawler/BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraAtt.h>
 #include <JEnd.h>
-
 		Controller::WriteJson(j);
-		j.erase("uuid");
 	}
 #endif
 
-	void BrawlerCameraController::Map(SUUUID so)
+	void BrawlerCamera::Map(SUUUID so)
 	{
 		Controller::Map(so);
 
@@ -51,17 +46,17 @@ namespace Game
 		venomR = MAKESUUUID(std::get<0>(so), venom());
 		YcamInitial = camera->position().y;
 		Ycam2venom = YcamInitial - venomR->position().y;
-		GetController<BrawlerSceneController>(unit, sceneController())->RegisterCamera(controller);
+		GetController<Brawler::BrawlerScene>(unit, sceneController())->RegisterCamera(controller);
 	}
 
-	void BrawlerCameraController::Unmap()
+	void BrawlerCamera::Unmap()
 	{
 		Controller::Unmap();
 		camera.clear();
 		venomR.clear();
 	}
 
-	void BrawlerCameraController::Step(float delta)
+	void BrawlerCamera::Step(float delta)
 	{
 #if defined(_EDITOR)
 		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
@@ -88,25 +83,25 @@ namespace Game
 	}
 
 	//JS binding
-	v8_templates_creators BrawlerCameraController::GetV8TemplatesCreators()
+	v8_templates_creators BrawlerCamera::GetV8TemplatesCreators()
 	{
 		v8_templates_creators creators = Controller::GetV8TemplatesCreators();
 #include <Attributes/JV8Templates.h>
-#include <Brawler/BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraAtt.h>
 #include <JEnd.h>
 		return creators;
 	}
 
-	v8_context_creators BrawlerCameraController::GetV8ContextCreators()
+	v8_context_creators BrawlerCamera::GetV8ContextCreators()
 	{
 		v8_context_creators creators = Controller::GetV8ContextCreators();
 #include <Attributes/JV8Context.h>
-#include <Brawler/BrawlerCameraControllerAtt.h>
+#include <Brawler/BrawlerCameraAtt.h>
 #include <JEnd.h>
 		return creators;
 	}
 
-	v8_functions_creators BrawlerCameraController::GetV8FunctionsCreators()
+	v8_functions_creators BrawlerCamera::GetV8FunctionsCreators()
 	{
 		return {
 			//{ "StopCameraFollow", v8_wrap_call([&] { follow = false; }) },

@@ -510,34 +510,38 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="GameControllers\Brawler\Camera\BrawlerCameraController.h" />
-    <ClInclude Include="GameControllers\Brawler\Heroes\Hero.h" />
-    <ClInclude Include="GameControllers\Brawler\Scene\BrawlerSceneController.h" />
-    <ClInclude Include="GameControllers\Brawler\Enemies\ThugController.h" />
-    <ClInclude Include="GameControllers\Test\SpinYawController.h" />
-    <ClInclude Include="GameControllers\ThirdPerson\ThirdPersonController.h" />
-    <ClInclude Include="GameControllers\Brawler\Heroes\VenomController.h" />
+    <ClInclude Include="GameControllers\Brawler\Camera\BrawlerCamera.h" />
+    <ClInclude Include="GameControllers\Brawler\Characters\BrawlerCharacter.h" />
+    <ClInclude Include="GameControllers\Brawler\Characters\Heroes\Hero.h" />
+    <ClInclude Include="GameControllers\Brawler\Scene\BrawlerScene.h" />
+    <ClInclude Include="GameControllers\Brawler\Characters\Enemies\Thug.h" />
+    <ClInclude Include="GameControllers\Test\SpinYaw.h" />
+    <ClInclude Include="GameControllers\ThirdPerson\ThirdPersonCharacter.h" />
+    <ClInclude Include="GameControllers\Brawler\Characters\Heroes\Venom.h" />
     <ClInclude Include="GamePhysics\GamePhysics.h" />
-    <ClInclude Include="JExpose\Controllers\Brawler\BrawlerCameraControllerAtt.h" />
-    <ClInclude Include="JExpose\Controllers\Brawler\BrawlerSceneControllerAtt.h" />
-    <ClInclude Include="JExpose\Controllers\Test\SpinYawControllerAtt.h" />
-    <ClInclude Include="JExpose\Controllers\ThirdPerson\ThirdPersonControllerAtt.h" />
-    <ClInclude Include="JExpose\Controllers\Brawler\ThugControllerAtt.h" />
-    <ClInclude Include="JExpose\Controllers\Brawler\VenomControllerAtt.h" />
+    <ClInclude Include="JExpose\Controllers\Brawler\BrawlerCharacterAtt.h" />
+    <ClInclude Include="JExpose\Controllers\Brawler\BrawlerCameraAtt.h" />
+    <ClInclude Include="JExpose\Controllers\Brawler\BrawlerSceneAtt.h" />
+    <ClInclude Include="JExpose\Controllers\Brawler\HeroAtt.h" />
+    <ClInclude Include="JExpose\Controllers\Test\SpinYawAtt.h" />
+    <ClInclude Include="JExpose\Controllers\ThirdPerson\ThirdPersonCharacterAtt.h" />
+    <ClInclude Include="JExpose\Controllers\Brawler\ThugAtt.h" />
+    <ClInclude Include="JExpose\Controllers\Brawler\VenomAtt.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TestGame.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GameControllers\Brawler\Camera\BrawlerCameraController.cpp" />
-    <ClCompile Include="GameControllers\Brawler\Heroes\Hero.cpp" />
-    <ClCompile Include="GameControllers\Brawler\Scene\BrawlerSceneController.cpp" />
-    <ClCompile Include="GameControllers\Brawler\Enemies\ThugController.cpp" />
+    <ClCompile Include="GameControllers\Brawler\Camera\BrawlerCamera.cpp" />
+    <ClCompile Include="GameControllers\Brawler\Characters\BrawlerCharacter.cpp" />
+    <ClCompile Include="GameControllers\Brawler\Characters\Heroes\Hero.cpp" />
+    <ClCompile Include="GameControllers\Brawler\Scene\BrawlerScene.cpp" />
+    <ClCompile Include="GameControllers\Brawler\Characters\Enemies\Thug.cpp" />
     <ClCompile Include="GameControllers\GameControllers.cpp" />
-    <ClCompile Include="GameControllers\Test\SpinYawController.cpp" />
-    <ClCompile Include="GameControllers\ThirdPerson\ThirdPersonController.cpp" />
-    <ClCompile Include="GameControllers\Brawler\Heroes\VenomController.cpp" />
+    <ClCompile Include="GameControllers\Test\SpinYaw.cpp" />
+    <ClCompile Include="GameControllers\ThirdPerson\ThirdPersonCharacter.cpp" />
+    <ClCompile Include="GameControllers\Brawler\Characters\Heroes\Venom.cpp" />
     <ClCompile Include="GamePhysics\GamePhysics.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">Create</PrecompiledHeader>

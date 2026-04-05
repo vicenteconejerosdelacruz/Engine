@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "SpinYawController.h"
+#include "SpinYaw.h"
 #include <GamePad.h>
 #include <Scene.h>
 #if defined(_EDITOR)
@@ -9,38 +9,35 @@
 extern std::unique_ptr<DirectX::GamePad> gamePad;
 extern DirectX::GamePad::ButtonStateTracker buttons;
 
-namespace Game
+namespace Game::Test
 {
 #if defined(_EDITOR)
-
 #include <Editor/JDrawersDef.h>
-#include <Test/SpinYawControllerAtt.h>
+#include <Test/SpinYawAtt.h>
 #include <JEnd.h>
-
 #endif
 
-	SpinYawController::SpinYawController(nlohmann::json& json) : Controller(json)
+	SpinYaw::SpinYaw(nlohmann::json& json) : Controller(json)
 	{
 #include <Attributes/JInit.h>
-#include <Test/SpinYawControllerAtt.h>
+#include <Test/SpinYawAtt.h>
 #include <JEnd.h>
-
 #include <Attributes/JUpdate.h>
-#include <Test/SpinYawControllerAtt.h>
+#include <Test/SpinYawAtt.h>
 #include <JEnd.h>
 	}
 
 #if defined(_EDITOR)
-	void SpinYawController::WriteJson(nlohmann::json& j)
+	void SpinYaw::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <Test/SpinYawControllerAtt.h>
+#include <Test/SpinYawAtt.h>
 #include <JEnd.h>
-		j.erase("uuid");
+		Controller::WriteJson(j);
 	}
 #endif
 
-	void SpinYawController::Step(float delta)
+	void SpinYaw::Step(float delta)
 	{
 		using namespace Scene;
 

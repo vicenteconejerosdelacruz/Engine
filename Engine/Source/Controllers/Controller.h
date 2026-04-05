@@ -11,13 +11,13 @@
 #include <NoV8.h>
 
 #define DECL_CONTROLLER_DRAWER(JClass,ParentJClass)\
-virtual std::map<std::string, JEdvEditorDrawerFunction> GetControllerDrawers()\
+std::map<std::string, JEdvEditorDrawerFunction> GetControllerDrawers() override\
 {\
 	std::map<std::string, JEdvEditorDrawerFunction> drawers = ParentJClass::GetControllerDrawers();\
 	drawers.merge(Get##JClass##Drawers());\
 	return drawers;\
 }\
-virtual std::vector<std::pair<std::string, JsonToEditorValueType>> GetControllerAttributes()\
+std::vector<std::pair<std::string, JsonToEditorValueType>> GetControllerAttributes() override\
 {\
 	std::vector<std::pair<std::string, JsonToEditorValueType>> attributes = ParentJClass::GetControllerAttributes();\
 	auto atts = Get##JClass##Attributes();\

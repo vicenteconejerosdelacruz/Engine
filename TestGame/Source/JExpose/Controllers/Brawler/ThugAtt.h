@@ -1,4 +1,4 @@
-JCLASS(ThugController, _)
+JCLASS(Thug, _)
 JEXPOSE_TRANSFORM(ControllerBinding, sceneController, ToControllerBinding, FromControllerBinding, {}, jedv_t_so_controller_instance, 1, false)
 JEXPOSE(float, walkSpeed, 3.0f, jedv_t_float, 1, false)
 JEXPOSE_ENUM(CharacterLookingTo, lookingTo, CLT_Right, jedv_t_enum, 1, false)

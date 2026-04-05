@@ -1,7 +1,7 @@
 #include "pch.h"
-#include "VenomController.h"
-//#include "BrawlerCameraController.h"
-#include "../Scene/BrawlerSceneController.h"
+#include "Venom.h"
+//#include "BrawlerCamera.h"
+#include "../../Scene/BrawlerScene.h"
 #include <GamePhysics.h>
 #include <Scene.h>
 #include <SceneObject.h>
@@ -28,7 +28,7 @@ extern DirectX::GamePad::ButtonStateTracker buttons;
 extern DX::StepTimer timer;
 extern float gameUpdateFrequency;
 
-namespace Game
+namespace Game::Brawler
 {
 	std::vector<std::string> GetBlockedWallMovementMasks()
 	{
@@ -36,32 +36,29 @@ namespace Game
 	}
 
 #if defined(_EDITOR)
-
 #include <Editor/JDrawersDef.h>
-#include <Brawler/VenomControllerAtt.h>
+#include <Brawler/VenomAtt.h>
 #include <JEnd.h>
-
 #endif
 
-	BrawlerCameraController* VenomController::GetBrawlerCamera()
+	BrawlerCamera* Venom::GetBrawlerCamera()
 	{
-		return Game::GetController<BrawlerSceneController>(unit, sceneController())->GetCameraController();
+		return Game::GetController<BrawlerScene>(unit, sceneController())->GetCameraController();
 	}
 
-	VenomStates VenomController::GetState()
+	VenomStates Venom::GetState()
 	{
 		return vsm.currentState;
 	}
 
 	//Constructor and Binding
-	VenomController::VenomController(nlohmann::json& json) : Controller(json)
+	Venom::Venom(nlohmann::json& json) : Hero(json)
 	{
 #include <Attributes/JInit.h>
-#include <Brawler/VenomControllerAtt.h>
+#include <Brawler/VenomAtt.h>
 #include <JEnd.h>
-
 #include <Attributes/JUpdate.h>
-#include <Brawler/VenomControllerAtt.h>
+#include <Brawler/VenomAtt.h>
 #include <JEnd.h>
 
 		vsm = {
@@ -104,7 +101,7 @@ namespace Game
 		SetInitialConditions();
 	}
 
-	void VenomController::SetInitialConditions()
+	void Venom::SetInitialConditions()
 	{
 		vsm.currentState = VS_None;
 		venomScale = { 0.0f,0.0f,0.0f };
@@ -121,26 +118,26 @@ namespace Game
 	}
 
 #if defined(_EDITOR)
-	void VenomController::WriteJson(nlohmann::json& j)
+	void Venom::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <Brawler/VenomControllerAtt.h>
+#include <Brawler/VenomAtt.h>
 #include <JEnd.h>
-		j.erase("uuid");
+		Hero::WriteJson(j);
 	}
 #endif
 
-	void VenomController::Map(SUUUID so)
+	void Venom::Map(SUUUID so)
 	{
 		using namespace Scene;
-		Controller::Map(so);
+		Hero::Map(so);
 		SceneObjectType type = GetSceneObjectType(FROMSUUUID(so));
 
 		if (type == SO_Renderables)
 		{
 			venom = so;
 		}
-		GetController<BrawlerSceneController>(unit, sceneController())->RegisterHero(controller);
+		GetController<BrawlerScene>(unit, sceneController())->RegisterHero(controller);
 		physicScene = MAKESUUUID(unit, *GetPhysicScenes(unit).begin());
 		physicObject = venom->at("physicObject").at(0);
 		RegisterContactCallback(PB_Static, physicObject(), [&](JUUID uuid, unsigned int event)
@@ -156,9 +153,9 @@ namespace Game
 		SetInitialConditions();
 	}
 
-	void VenomController::Unmap()
+	void Venom::Unmap()
 	{
-		Controller::Unmap();
+		Hero::Unmap();
 		UnregisterContactCallback(PB_Static, physicObject());
 		UnregisterCharacterHitCallback(physicObject());
 		venom.clear();
@@ -166,13 +163,13 @@ namespace Game
 		physicObject.clear();
 	}
 
-	void VenomController::TakeHit(JUUID enemyController, int damage)
+	void Venom::TakeHit(JUUID enemyController, int damage)
 	{
-		OutputDebugStringA(std::string("VenomController take hit from " + enemyController + " " + std::to_string(damage) + "\n").c_str());
+		OutputDebugStringA(std::string("Venom take hit from " + enemyController + " " + std::to_string(damage) + "\n").c_str());
 	}
 
 	//Step
-	void VenomController::Step(float delta)
+	void Venom::Step(float delta)
 	{
 #if defined(_EDITOR)
 		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
@@ -199,7 +196,7 @@ namespace Game
 		vsm.Step();
 	}
 
-	void VenomController::OnStaticContactEvent(JUUID physicObject, unsigned int event)
+	void Venom::OnStaticContactEvent(JUUID physicObject, unsigned int event)
 	{
 		PhysicObjectID phO = physicObject;
 
@@ -207,14 +204,14 @@ namespace Game
 			return;
 	}
 
-	void VenomController::OnCharacterHitEvent(PxFilterData fd)
+	void Venom::OnCharacterHitEvent(PxFilterData fd)
 	{
 		std::set<VenomStates> nonFloorStates = { VS_GrabWall, VS_WallIdle, VS_CrawlOnWall, VS_DetachFromWall };
 		//skips contacts if the character is in a wall state
 		if (nonFloorStates.contains(vsm.currentState))
 			return;
 
-		BrawlerCameraController* brawlerCam = GetBrawlerCamera();
+		BrawlerCamera* brawlerCam = GetBrawlerCamera();
 
 		if ((CM_Floor & fd.word0) && brawlerCam->followY())
 		{
@@ -223,25 +220,25 @@ namespace Game
 	}
 
 	//JS binding
-	v8_templates_creators VenomController::GetV8TemplatesCreators()
+	v8_templates_creators Venom::GetV8TemplatesCreators()
 	{
-		v8_templates_creators creators = Controller::GetV8TemplatesCreators();
+		v8_templates_creators creators = Hero::GetV8TemplatesCreators();
 #include <Attributes/JV8Templates.h>
-#include <Brawler/VenomControllerAtt.h>
+#include <Brawler/VenomAtt.h>
 #include <JEnd.h>
 		return creators;
 	}
 
-	v8_context_creators VenomController::GetV8ContextCreators()
+	v8_context_creators Venom::GetV8ContextCreators()
 	{
-		v8_context_creators creators = Controller::GetV8ContextCreators();
+		v8_context_creators creators = Hero::GetV8ContextCreators();
 #include <Attributes/JV8Context.h>
-#include <Brawler/VenomControllerAtt.h>
+#include <Brawler/VenomAtt.h>
 #include <JEnd.h>
 		return creators;
 	}
 
-	v8_functions_creators VenomController::GetV8FunctionsCreators()
+	v8_functions_creators Venom::GetV8FunctionsCreators()
 	{
 		return {
 			//{ "animationUseTransformation", [&](bool value) venom->animationUseTransformation(value); }) },
@@ -258,7 +255,7 @@ namespace Game
 	}
 
 	//Joystick
-	void VenomController::UpdateLeftStickVector()
+	void Venom::UpdateLeftStickVector()
 	{
 		std::set<VenomStates> noUpdateStates = { VS_RunningJump, VS_JumpDash };
 
@@ -275,7 +272,7 @@ namespace Game
 		}
 	}
 
-	void VenomController::UpdateLookTo()
+	void Venom::UpdateLookTo()
 	{
 		if (vsm.currentState == VS_Intro) return;
 
@@ -304,7 +301,7 @@ namespace Game
 	}
 
 	//Movement
-	void VenomController::CharacterMoveXZPlane(XMVECTOR stickDisplacement, float dt, float sideSpeed, XMFLOAT3 gravity)
+	void Venom::CharacterMoveXZPlane(XMVECTOR stickDisplacement, float dt, float sideSpeed, XMFLOAT3 gravity)
 	{
 		XMVECTOR downDisp = { 0.0f, fixedDownDisplacement() + downSpeed * dt, 0.0f };
 		XMVECTOR move = XMVector3Normalize(stickDisplacement) * sideSpeed * dt;
@@ -318,29 +315,29 @@ namespace Game
 		downSpeed = (touchingDown) ? 0.0f : (downSpeed + gravity.y * dt);
 	}
 
-	void VenomController::CharacterMoveXYPlane(XMVECTOR stickDisplacement, float dt, float sideSpeed)
+	void Venom::CharacterMoveXYPlane(XMVECTOR stickDisplacement, float dt, float sideSpeed)
 	{
 		XMVECTOR move = stickDisplacement * sideSpeed * dt;
 		//PrintXMVector(move, "move");
 		PxControllerCollisionFlags colFlag = physicObject->MoveCharacter(move, dt);
 	}
 
-	void VenomController::MoveForward(float sideSpeed)
+	void Venom::MoveForward(float sideSpeed)
 	{
 		CharacterMoveXZPlane(leftStick, gameUpdateFrequency, sideSpeed, physicScene->gravity());
 	}
 
-	void VenomController::JumpingMoveForward(float sideSpeed)
+	void Venom::JumpingMoveForward(float sideSpeed)
 	{
 		CharacterMoveXZPlane(leftStick, gameUpdateFrequency, sideSpeed, physicScene->gravity());
 	}
 
-	void VenomController::RunningJumpMoveForward(float sideSpeed)
+	void Venom::RunningJumpMoveForward(float sideSpeed)
 	{
 		CharacterMoveXZPlane(runningJumpLeftStick, gameUpdateFrequency, sideSpeed, physicScene->gravity());
 	}
 
-	void VenomController::CrawlOnWall(float sideSpeed)
+	void Venom::CrawlOnWall(float sideSpeed)
 	{
 		XMVECTOR stickMovement = XMVectorSwizzle(leftStick, 0, 2, 1, 3);
 		if (blockedWallMovementMask() != 0)
@@ -357,33 +354,33 @@ namespace Game
 	}
 
 	//Intro
-	void VenomController::EnterIntro()
+	void Venom::EnterIntro()
 	{
 		venom->animationUseTransformation(true);
 		venom->SetCurrentAnimation("Intro", 0.0f, 1.0f, true, false);
 	}
 
-	void VenomController::VenomReady()
+	void Venom::VenomReady()
 	{
 		vsm.ChangeState(VS_Idle);
 	}
 
 	//Idle
-	bool VenomController::ShouldIdle()
+	bool Venom::ShouldIdle()
 	{
 		XMVECTOR len = XMVector3Length(leftStick);
 		float l = len.m128_f32[0];
 		return l < walkThreshold();
 	}
 
-	void VenomController::EnterIdle()
+	void Venom::EnterIdle()
 	{
 		canJump = true;
 		venom->animationUseTransformation(false);
 		venom->SetCurrentAnimation("Idle", 0.0f, 1.0f, true, true);
 	}
 
-	void VenomController::Idle()
+	void Venom::Idle()
 	{
 		if (ShouldAttackX())
 		{
@@ -408,19 +405,19 @@ namespace Game
 	}
 
 	//Walking
-	bool VenomController::ShouldWalk()
+	bool Venom::ShouldWalk()
 	{
 		XMVECTOR len = XMVector3Length(leftStick);
 		float l = len.m128_f32[0];
 		return l > walkThreshold() && l < runThreshold();
 	}
 
-	void VenomController::EnterWalking()
+	void Venom::EnterWalking()
 	{
 		venom->SetCurrentAnimation("Walk", 0.0f, 1.0f, true, true);
 	}
 
-	void VenomController::Walking()
+	void Venom::Walking()
 	{
 		if (ShouldAttackX())
 		{
@@ -445,19 +442,19 @@ namespace Game
 	}
 
 	//Running
-	bool VenomController::ShouldRun()
+	bool Venom::ShouldRun()
 	{
 		XMVECTOR len = XMVector3Length(leftStick);
 		float l = len.m128_f32[0];
 		return l > runThreshold();
 	}
 
-	void VenomController::EnterRunning()
+	void Venom::EnterRunning()
 	{
 		venom->SetCurrentAnimation("Run", 0.0f, 1.0f, true, true);
 	}
 
-	void VenomController::Running()
+	void Venom::Running()
 	{
 		if (ShouldAttackX())
 		{
@@ -481,18 +478,18 @@ namespace Game
 	}
 
 	//Jumping
-	bool VenomController::ShouldJump()
+	bool Venom::ShouldJump()
 	{
 		return (buttons.a == GamePad::ButtonStateTracker::PRESSED) && touchingDown && canJump && !jumping;
 	}
 
-	void VenomController::EnterJumping()
+	void Venom::EnterJumping()
 	{
 		venom->animationUseTransformation(true);
 		venom->SetCurrentAnimation("JumpBegin");
 	}
 
-	void VenomController::VenomBeginJump()
+	void Venom::VenomBeginJump()
 	{
 		venom->SetCurrentAnimation("JumpLoop", 0.0f, 1.0f, true, true);
 		jumping = true;
@@ -501,7 +498,7 @@ namespace Game
 		touchingDown = false;
 	}
 
-	void VenomController::Jumping()
+	void Venom::Jumping()
 	{
 		if (ShouldJumpKick())
 		{
@@ -521,20 +518,20 @@ namespace Game
 	}
 
 	//RunningJump
-	void VenomController::EnterRunningJump()
+	void Venom::EnterRunningJump()
 	{
 		runningJumpLeftStick = leftStick;
 		venom->animationUseTransformation(true);
 		venom->SetCurrentAnimation("RunJumpBegin");
 	}
 
-	void VenomController::VenomBeginRunJump()
+	void Venom::VenomBeginRunJump()
 	{
 		venom->SetCurrentAnimation("RunJumpLoop");
 		runningJumpTimeLeft = runningJumpTime();
 	}
 
-	void VenomController::RunningJump()
+	void Venom::RunningJump()
 	{
 		if (ShouldJumpDash())
 		{
@@ -554,30 +551,30 @@ namespace Game
 		RunningJumpMoveForward(runSpeed());
 	}
 
-	void VenomController::VenomRunJumpLanding()
+	void Venom::VenomRunJumpLanding()
 	{
 		vsm.ChangeState(VS_Running);
 	}
 
-	void VenomController::VenomEndJumpLanding()
+	void Venom::VenomEndJumpLanding()
 	{
 		vsm.ChangeState(VS_Idle);
 	}
 
 	//Attack1
-	bool VenomController::ShouldAttackX()
+	bool Venom::ShouldAttackX()
 	{
 		return (buttons.x == GamePad::ButtonStateTracker::PRESSED);
 	}
 
-	void VenomController::EnterAttack1()
+	void Venom::EnterAttack1()
 	{
 		auto animation = Attack1Animations.at(currentAttack1Animation);
 		venom->SetCurrentAnimation(animation);
 		currentAttack1Animation = (currentAttack1Animation + 1) % Attack1Animations.size();
 	}
 
-	void VenomController::Attacking1()
+	void Venom::Attacking1()
 	{
 		if (!newAttack1 && attack1Window && ShouldAttackX())
 		{
@@ -585,12 +582,12 @@ namespace Game
 		}
 	}
 
-	void VenomController::StartVenomNextPunchWindow()
+	void Venom::StartVenomNextPunchWindow()
 	{
 		attack1Window = true;
 	}
 
-	void VenomController::EvaluateVenomNextPunch()
+	void Venom::EvaluateVenomNextPunch()
 	{
 		std::vector<std::pair<std::function<bool()>, std::function<void()>>> postAttackActions = {
 			{
@@ -625,7 +622,7 @@ namespace Game
 		attack1Window = false;
 	}
 
-	void VenomController::LeaveAttack1()
+	void Venom::LeaveAttack1()
 	{
 		attack1Window = false;
 		newAttack1 = false;
@@ -633,18 +630,18 @@ namespace Game
 	}
 
 	//JuumpKick
-	bool VenomController::ShouldJumpKick()
+	bool Venom::ShouldJumpKick()
 	{
 		return jumping && (buttons.x == GamePad::ButtonStateTracker::PRESSED);
 	}
 
-	void VenomController::EnterJumpKick()
+	void Venom::EnterJumpKick()
 	{
 		venom->animationUseTransformation(true);
 		venom->SetCurrentAnimation("JumpKick");
 	}
 
-	void VenomController::JumpKick()
+	void Venom::JumpKick()
 	{
 		XMVECTOR len = XMVector3Length(leftStick);
 		float l = XMVectorGetX(len);
@@ -658,12 +655,12 @@ namespace Game
 	}
 
 	//JumpDash
-	bool VenomController::ShouldJumpDash()
+	bool Venom::ShouldJumpDash()
 	{
 		return (buttons.x == GamePad::ButtonStateTracker::PRESSED);
 	}
 
-	void VenomController::EnterJumpDash()
+	void Venom::EnterJumpDash()
 	{
 		std::srand(static_cast<int>(std::time(0)));
 		jumpDashTimeLeft = jumpDashTime();
@@ -673,7 +670,7 @@ namespace Game
 		venom->SetCurrentAnimation(dashAnim);
 	}
 
-	void VenomController::JumpDash()
+	void Venom::JumpDash()
 	{
 		if (jumpDashTimeLeft != 0.0f)
 		{
@@ -688,12 +685,12 @@ namespace Game
 	}
 
 	//GrabWall
-	bool VenomController::ShouldGrabWall()
+	bool Venom::ShouldGrabWall()
 	{
 		return (buttons.b == GamePad::ButtonStateTracker::PRESSED && canAttachToWall());
 	}
 
-	void VenomController::EnterGrabWall()
+	void Venom::EnterGrabWall()
 	{
 		venom->animationUseTransformation(true);
 		venom->SetCurrentAnimation("FloorToWall");
@@ -701,17 +698,17 @@ namespace Game
 	}
 
 	//WallIdle
-	bool VenomController::ShouldDetachFromWall()
+	bool Venom::ShouldDetachFromWall()
 	{
 		return buttons.b == GamePad::ButtonStateTracker::PRESSED;
 	}
 
-	void VenomController::EnterWallIdle()
+	void Venom::EnterWallIdle()
 	{
 		venom->SetCurrentAnimation("WallIdle", 0.0f, 1.0f, true, true);
 	}
 
-	void VenomController::WallIdle()
+	void Venom::WallIdle()
 	{
 		if (ShouldCrawlOnWall())
 		{
@@ -724,24 +721,24 @@ namespace Game
 	}
 
 	//WallMove
-	bool VenomController::ShouldCrawlOnWall()
+	bool Venom::ShouldCrawlOnWall()
 	{
 		XMVECTOR len = XMVector3Length(leftStick);
 		float l = len.m128_f32[0];
 		return l > wallMoveThreshold();
 	}
 
-	void VenomController::EnterCrawlOnWall()
+	void Venom::EnterCrawlOnWall()
 	{
 		venom->SetCurrentAnimation("WallCrawl", 0.0f, 1.0f, true, true);
 	}
 
-	void VenomController::LeaveCrawlOnWall()
+	void Venom::LeaveCrawlOnWall()
 	{
 		venom->animationTimeFactor(1.0f);
 	}
 
-	void VenomController::CrawlOnWall()
+	void Venom::CrawlOnWall()
 	{
 		if (!ShouldCrawlOnWall())
 		{
@@ -758,7 +755,7 @@ namespace Game
 		CrawlOnWall(wallMoveSpeed());
 	}
 
-	void VenomController::AdjustCrawlAnimationTimeFactor()
+	void Venom::AdjustCrawlAnimationTimeFactor()
 	{
 		XMVECTOR len = XMVector3Length(leftStick);
 		float l = std::clamp(len.m128_f32[0], 0.0f, 1.0f);
@@ -767,13 +764,13 @@ namespace Game
 	}
 
 	//DetachFromWall
-	void VenomController::EnterDetachFromWall()
+	void Venom::EnterDetachFromWall()
 	{
 		venom->SetCurrentAnimation("DetachFromWall");
 	}
 
 	//Fall
-	void VenomController::EnterFalling()
+	void Venom::EnterFalling()
 	{
 		venom->SetCurrentAnimation("JumpLoop", 0.0f, 1.0f, true, true);
 		jumping = true;
@@ -782,7 +779,7 @@ namespace Game
 		touchingDown = false;
 	}
 
-	void VenomController::Falling()
+	void Venom::Falling()
 	{
 		if (ShouldJumpKick())
 		{

@@ -1,4 +1,4 @@
-JCLASS(BrawlerCameraController, _)
+JCLASS(BrawlerCamera, _)
 JEXPOSE(std::string, venom, "", jedv_t_so_renderable, 1, false)
 JEXPOSE_TRANSFORM(ControllerBinding, sceneController, ToControllerBinding, FromControllerBinding, {}, jedv_t_so_controller_instance, 1, false)
 JEXPOSE(bool, followX, true, jedv_t_boolean, 1, false)

@@ -62,7 +62,8 @@ namespace Game
 #include <Editor/JWriteJson.h>
 #include <ControllerAtt.h>
 #include <JEnd.h>
-		j.erase("uuid");
+		if (j.contains("uuid"))
+			j.erase("uuid");
 	}
 #endif
 

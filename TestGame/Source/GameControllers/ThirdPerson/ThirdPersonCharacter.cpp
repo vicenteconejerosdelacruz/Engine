@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "ThirdPersonController.h"
+#include "ThirdPersonCharacter.h"
 #include <GamePhysics.h>
 #include <GamePad.h>
 #include <Scene.h>
@@ -21,38 +21,35 @@ namespace Physics
 extern std::unique_ptr<DirectX::GamePad> gamePad;
 extern DirectX::GamePad::ButtonStateTracker buttons;
 
-namespace Game
+namespace Game::ThirdPerson
 {
 #if defined(_EDITOR)
-
 #include <Editor/JDrawersDef.h>
-#include <ThirdPerson/ThirdPersonControllerAtt.h>
+#include <ThirdPerson/ThirdPersonCharacterAtt.h>
 #include <JEnd.h>
-
 #endif
 
-	ThirdPersonController::ThirdPersonController(nlohmann::json& json) : Controller(json)
+	ThirdPersonCharacter::ThirdPersonCharacter(nlohmann::json& json) : Controller(json)
 	{
 #include <Attributes/JInit.h>
-#include <ThirdPerson/ThirdPersonControllerAtt.h>
+#include <ThirdPerson/ThirdPersonCharacterAtt.h>
 #include <JEnd.h>
-
 #include <Attributes/JUpdate.h>
-#include <ThirdPerson/ThirdPersonControllerAtt.h>
+#include <ThirdPerson/ThirdPersonCharacterAtt.h>
 #include <JEnd.h>
 	}
 
 #if defined(_EDITOR)
-	void ThirdPersonController::WriteJson(nlohmann::json& j)
+	void ThirdPersonCharacter::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <ThirdPerson/ThirdPersonControllerAtt.h>
+#include <ThirdPerson/ThirdPersonCharacterAtt.h>
 #include <JEnd.h>
-		j.erase("uuid");
+		Controller::WriteJson(j);
 	}
 #endif
 
-	void ThirdPersonController::SetInitialConditions()
+	void ThirdPersonCharacter::SetInitialConditions()
 	{
 		yaw = 0.0f;
 		pitch = 0.0f;
@@ -60,7 +57,7 @@ namespace Game
 		jumping = false;
 	}
 
-	void ThirdPersonController::Map(SUUUID so)
+	void ThirdPersonCharacter::Map(SUUUID so)
 	{
 		using namespace Scene;
 		using namespace Physics;
@@ -87,7 +84,7 @@ namespace Game
 		);
 	}
 
-	void ThirdPersonController::Unmap()
+	void ThirdPersonCharacter::Unmap()
 	{
 		Controller::Unmap();
 		UnregisterContactCallback(PB_Trigger, physicObject());
@@ -96,7 +93,7 @@ namespace Game
 		physicObject.clear();
 	}
 
-	void ThirdPersonController::Step(float delta)
+	void ThirdPersonCharacter::Step(float delta)
 	{
 #if defined(_EDITOR)
 		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
@@ -119,7 +116,7 @@ namespace Game
 		UpdatePosition(delta);
 	}
 
-	void ThirdPersonController::UpdateJump()
+	void ThirdPersonCharacter::UpdateJump()
 	{
 		if (canJump && !jumping && buttons.a == GamePad::ButtonStateTracker::PRESSED)
 		{
@@ -128,19 +125,19 @@ namespace Game
 		}
 	}
 
-	void ThirdPersonController::UpdateLeftStickVector()
+	void ThirdPersonCharacter::UpdateLeftStickVector()
 	{
 		auto pad = gamePad->GetState(0);
 		leftStick = pad.IsConnected() ? XMVECTOR({ pad.thumbSticks.leftX, 0.0f, pad.thumbSticks.leftY, 0.0f }) : XMVectorZero();
 	}
 
-	void ThirdPersonController::UpdateRightStickVector()
+	void ThirdPersonCharacter::UpdateRightStickVector()
 	{
 		auto pad = gamePad->GetState(0);
 		rightStick = pad.IsConnected() ? XMVECTOR({ pad.thumbSticks.rightX, -pad.thumbSticks.rightY, 0.0f, 0.0f }) : XMVectorZero();
 	}
 
-	void ThirdPersonController::UpdateLookTo(float delta)
+	void ThirdPersonCharacter::UpdateLookTo(float delta)
 	{
 		pitch += rightStick.m128_f32[1] * 0.5f;
 		yaw += rightStick.m128_f32[0] * 0.5f;
@@ -153,7 +150,7 @@ namespace Game
 		camera->positionV(camPos);
 	}
 
-	void ThirdPersonController::UpdatePosition(float delta)
+	void ThirdPersonCharacter::UpdatePosition(float delta)
 	{
 		XMVECTOR fw = camera->forward();
 		fw.m128_f32[1] = 0.0f;
@@ -180,7 +177,7 @@ namespace Game
 		}
 	}
 
-	void ThirdPersonController::OnTriggerEvent(JUUID triggerPhysicObject, unsigned int event)
+	void ThirdPersonCharacter::OnTriggerEvent(JUUID triggerPhysicObject, unsigned int event)
 	{
 		PhysicObjectID physicObject = triggerPhysicObject;
 		/*

@@ -1,48 +1,47 @@
 #include "pch.h"
-#include "BrawlerSceneController.h"
-#include "../Heroes/VenomController.h"
+#include "BrawlerScene.h"
+#include "../Characters/Heroes/Venom.h"
 #if defined(_EDITOR)
 #include <Editor.h>
 #endif
 
-namespace Game
+namespace Game::Brawler
 {
+
 #if defined(_EDITOR)
-
 #include <Editor/JDrawersDef.h>
-#include <Brawler/BrawlerSceneControllerAtt.h>
+#include <Brawler/BrawlerSceneAtt.h>
 #include <JEnd.h>
-
 #endif
 
 	//Constructor and Binding
-	BrawlerSceneController::BrawlerSceneController(nlohmann::json& json) : Controller(json)
+	BrawlerScene::BrawlerScene(nlohmann::json& json) : Controller(json)
 	{
 #include <Attributes/JInit.h>
-#include <Brawler/BrawlerSceneControllerAtt.h>
+#include <Brawler/BrawlerSceneAtt.h>
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <Brawler/BrawlerSceneControllerAtt.h>
+#include <Brawler/BrawlerSceneAtt.h>
 #include <JEnd.h>
 		SetInitialConditions();
 	}
 
-	void BrawlerSceneController::SetInitialConditions()
+	void BrawlerScene::SetInitialConditions()
 	{
 	}
 
 #if defined(_EDITOR)
-	void BrawlerSceneController::WriteJson(nlohmann::json& j)
+	void BrawlerScene::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <Brawler/BrawlerSceneControllerAtt.h>
+#include <Brawler/BrawlerSceneAtt.h>
 #include <JEnd.h>
-		j.erase("uuid");
+		Controller::WriteJson(j);
 	}
 #endif
 
-	void BrawlerSceneController::Map(SUUUID so)
+	void BrawlerScene::Map(SUUUID so)
 	{
 		using namespace Scene;
 		Controller::Map(so);
@@ -51,18 +50,18 @@ namespace Game
 		SetInitialConditions();
 	}
 
-	void BrawlerSceneController::Unmap()
+	void BrawlerScene::Unmap()
 	{
 		Controller::Unmap();
 	}
 
 	//Step
-	void BrawlerSceneController::Step(float delta)
+	void BrawlerScene::Step(float delta)
 	{
 	}
 
 	//Rendering
-	void BrawlerSceneController::Render(SceneUnitId id)
+	void BrawlerScene::Render(SceneUnitId id)
 	{
 #if defined(_EDITOR)
 		if (!Editor::IsPlaying(id) || Editor::IsPaused(id))
@@ -72,7 +71,7 @@ namespace Game
 	}
 
 	//UI
-	void BrawlerSceneController::CreateVenomUI(SceneUnitId id)
+	void BrawlerScene::CreateVenomUI(SceneUnitId id)
 	{
 		venomUIInstance = venomUI() + "-" + getUUID();
 		CreateHtmlUIInstance(venomUIInstance(), [&]()
@@ -82,35 +81,35 @@ namespace Game
 		);
 	}
 
-	void BrawlerSceneController::UpdateVenomUI(SceneUnitId id)
+	void BrawlerScene::UpdateVenomUI(SceneUnitId id)
 	{
 		venomUIInstance->UpdateTexture(id);
 		venomUIInstance->Resolve(id);
 	}
 
-	void BrawlerSceneController::RegisterCamera(JUUID camController)
+	void BrawlerScene::RegisterCamera(JUUID camController)
 	{
 		cameraController = camController;
 	}
 
-	void BrawlerSceneController::RegisterHero(JUUID heroController)
+	void BrawlerScene::RegisterHero(JUUID heroController)
 	{
 		heroesControllers.insert(heroController);
 	}
 
-	void BrawlerSceneController::RegisterEnemy(JUUID enemyController)
+	void BrawlerScene::RegisterEnemy(JUUID enemyController)
 	{
 		enemiesControllers.insert(enemyController);
 	}
 
 	const std::set<VenomStates> venomNonAttackStates({ VS_None, VS_Intro });
-	bool BrawlerSceneController::HeroesReadyToFight()
+	bool BrawlerScene::HeroesReadyToFight()
 	{
-		auto* venom = GetController<VenomController>(*heroesControllers.begin());
+		auto* venom = GetController<Venom>(*heroesControllers.begin());
 		return !venomNonAttackStates.contains(venom->GetState());
 	}
 
-	std::tuple<JUUID, XMFLOAT3> BrawlerSceneController::PickHeroToFight(JUUID enemyController)
+	std::tuple<JUUID, XMFLOAT3> BrawlerScene::PickHeroToFight(JUUID enemyController)
 	{
 		if (!leftSlot.empty() && !rightSlot.empty())
 			return std::make_tuple("", XMFLOAT3());
@@ -118,8 +117,8 @@ namespace Game
 		return std::make_tuple(*heroesControllers.begin(), rightSlot.empty() ? thugAttackOffsetVector() : (-1.0f * thugAttackOffsetVector()));
 	}
 
-	BrawlerCameraController* BrawlerSceneController::GetCameraController()
+	BrawlerCamera* BrawlerScene::GetCameraController()
 	{
-		return GetController<BrawlerCameraController>(cameraController);
+		return GetController<BrawlerCamera>(cameraController);
 	}
 };
