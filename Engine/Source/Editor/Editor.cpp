@@ -3187,10 +3187,6 @@ namespace Editor
 			SceneObject* so = GetSceneObjectPointer(id, uuid);
 			so->merge_patch(patch);
 			so->SetInitialConditions();
-			for (auto& cuuid : GetControllersBySceneObjectUUID(so->SUuuid()))
-			{
-				GetController(cuuid)->SetInitialConditions();
-			}
 			for (PhysicObjectID phO : GetPhysicsObjectsBySceneObjectUUID(so->SUuuid()))
 			{
 				phO->SetInitialConditions();
@@ -3203,6 +3199,17 @@ namespace Editor
 			for (auto& uuid : uuidset)
 			{
 				DeleteSceneObjectFromEditor(id, uuid);
+			}
+		}
+
+		std::map<unsigned int, std::set<JUUID>> prioritySet = GetControllersPrioritySet(id, true);
+
+		for (auto& [_, uuidset] : prioritySet)
+		{
+			for (auto& uuid : uuidset)
+			{
+				//GetController(uuid)->SetInitialConditions();
+				GetController(uuid)->Map(GetControllerSUUUID(uuid));
 			}
 		}
 
