@@ -134,8 +134,10 @@ namespace Game
 
 #if defined(_EDITOR)
 	std::map<unsigned int, std::set<JUUID>> GetControllersPrioritySet(bool ignoreEditorPlay = false);
+	std::map<unsigned int, std::set<JUUID>> GetControllersPrioritySet(SceneUnitId id, bool ignoreEditorPlay = false);
 #else
 	std::map<unsigned int, std::set<JUUID>> GetControllersPrioritySet();
+	std::map<unsigned int, std::set<JUUID>> GetControllersPrioritySet(SceneUnitId id);
 #endif
 	JUUID RegisterController(std::string controllerName, SUUUID sceneObject, std::unique_ptr<Controller>& controller);
 	void MapControllers(SceneUnitId id);
@@ -146,6 +148,7 @@ namespace Game
 	void DestroyControllers();
 	void DestroyController(JUUID uuid);
 	void StepControllers(DX::StepTimer& timer);
+	SUUUID GetControllerSUUUID(JUUID uuid);
 
 	template<typename T>
 	T* GetController(JUUID uuid)

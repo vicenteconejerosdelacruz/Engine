@@ -110,6 +110,29 @@ namespace Game
 		return prioritySet;
 	}
 
+#if defined(_EDITOR)
+	std::map<unsigned int, std::set<JUUID>> GetControllersPrioritySet(SceneUnitId id, bool ignoreEditorPlay)
+#else
+	std::map<unsigned int, std::set<JUUID>> GetControllersPrioritySet(SceneUnitId id)
+#endif
+	{
+		std::map<unsigned int, std::set<JUUID>> prioritySet;
+
+		for (auto& [suuuid, uuidset] : controllerUUIDBySUUUID)
+		{
+#if defined(_EDITOR)
+			if (!Editor::IsPlaying(std::get<0>(suuuid)) && !ignoreEditorPlay) continue;
+#endif
+			if (std::get<0>(suuuid) != id) continue;
+
+			for (auto& uuid : uuidset)
+			{
+				prioritySet[controllersUUIDs.at(uuid)->priority()].insert(uuid);
+			}
+		}
+		return prioritySet;
+	}
+
 	JUUID RegisterController(std::string controllerName, SUUUID sceneObject, std::unique_ptr<Controller>& controller)
 	{
 		std::lock_guard<std::mutex> lock(controllerMutex);
@@ -249,6 +272,11 @@ namespace Game
 				controllersUUIDs.at(uuid)->Step(dt);
 			}
 		}
+	}
+
+	SUUUID GetControllerSUUUID(JUUID uuid)
+	{
+		return controllersSUUUID.at(uuid);
 	}
 
 	Controller* GetController(SceneUnitId id, ControllerBinding cb)
