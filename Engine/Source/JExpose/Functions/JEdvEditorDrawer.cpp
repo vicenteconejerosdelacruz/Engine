@@ -5370,7 +5370,8 @@ JEdvEditorDrawerFunction DrawVectorObject<jedv_t_controller_vector>()
 					auto attributes = controller->GetControllerAttributes();
 					for (auto& [att, _] : attributes)
 					{
-						drawers.at(att)(att, jvec);
+						if (drawers.at(att))
+							drawers.at(att)(att, jvec);
 					}
 				};
 			auto drawAddController = [attribute, &addTuple, getAvailableControllers, addController](JObject* j, int objectIndex)
