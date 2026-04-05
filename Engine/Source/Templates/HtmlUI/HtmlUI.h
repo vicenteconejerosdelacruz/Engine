@@ -77,6 +77,7 @@ namespace Templates
 		void Destroy();
 		void UpdateTexture(SceneUnitId id);
 		void Resolve(SceneUnitId id);
+		void EvaluateScript(std::string js);
 
 		JUUID instanceUUID;
 		RefPtr<View> view;

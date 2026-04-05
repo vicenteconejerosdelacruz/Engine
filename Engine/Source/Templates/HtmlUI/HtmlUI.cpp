@@ -196,4 +196,9 @@ namespace Templates
 	{
 		resolvePass->Pass(id);
 	}
+
+	void HtmlUIInstance::EvaluateScript(std::string js)
+	{
+		view->EvaluateScript(js.c_str());
+	}
 };
