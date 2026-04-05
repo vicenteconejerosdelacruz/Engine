@@ -50,6 +50,9 @@ namespace Game
 			//UI
 			void CreateVenomUI(SceneUnitId id);
 			void UpdateVenomUI(SceneUnitId id);
+			void HeroTookHit(JUUID enemy, int newHealth);
+			void UpdateHeroHealthUI();
+			void UpdateEnemyUI();
 
 			//Camera
 			void RegisterCamera(JUUID camController);
@@ -73,6 +76,17 @@ namespace Game
 
 			JUUID leftSlot;
 			JUUID rightSlot;
+
+			//UI
+			bool heroHealthChanged = true;
+			int heroHealth;
+
+			JUUID lastAttacker;
+			bool newAttacker = false;
+			bool lastAttackerHealthChanged = false;
+
+			int lastAttackerHealth;
+			std::string lastAttackerName;
 		};
 	};
 };

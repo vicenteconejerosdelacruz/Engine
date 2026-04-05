@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build & rd /s /q \"../../Target/Assets/html/%npm_package_name%\" & xcopy /s /i /y dist \"../../Target/Assets/html/%npm_package_name%\"",
     "lint": "eslint .",
     "preview": "vite preview"
   },

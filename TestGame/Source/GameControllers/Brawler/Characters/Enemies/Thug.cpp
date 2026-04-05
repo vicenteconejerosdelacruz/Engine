@@ -91,7 +91,7 @@ namespace Game::Brawler
 		physicScene = MAKESUUUID(unit, *GetPhysicScenes(unit).begin());
 		physicObject = thug->at("physicObject").at(0);
 
-		GetBrawlerSceneController()->RegisterEnemy(controller);
+		GetBrawlerSceneController()->RegisterEnemy(uuid());
 		SetInitialConditions();
 	}
 
@@ -270,7 +270,7 @@ namespace Game::Brawler
 	{
 		if (heroController.empty())
 		{
-			std::tuple<JUUID, XMFLOAT3> heroAndOffset = GetBrawlerSceneController()->PickHeroToFight(controller);
+			std::tuple<JUUID, XMFLOAT3> heroAndOffset = GetBrawlerSceneController()->PickHeroToFight(uuid());
 			if (!std::get<0>(heroAndOffset).empty())
 			{
 				heroController = std::get<0>(heroAndOffset);

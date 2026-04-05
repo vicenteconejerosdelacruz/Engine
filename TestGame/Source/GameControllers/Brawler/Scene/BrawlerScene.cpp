@@ -29,6 +29,13 @@ namespace Game::Brawler
 
 	void BrawlerScene::SetInitialConditions()
 	{
+		heroHealthChanged = true;
+		heroHealth = 100;
+		lastAttacker = "";
+		newAttacker = false;
+		lastAttackerHealthChanged = false;
+		lastAttackerHealth = 100;
+		lastAttackerName = "";
 	}
 
 #if defined(_EDITOR)
@@ -83,8 +90,53 @@ namespace Game::Brawler
 
 	void BrawlerScene::UpdateVenomUI(SceneUnitId id)
 	{
+		UpdateHeroHealthUI();
+		UpdateEnemyUI();
 		venomUIInstance->UpdateTexture(id);
 		venomUIInstance->Resolve(id);
+	}
+
+	void BrawlerScene::HeroTookHit(JUUID enemy, int newHealth)
+	{
+		heroHealth = newHealth;
+		heroHealthChanged = true;
+
+		newAttacker = lastAttacker != enemy;
+		lastAttacker = enemy;
+
+		if (newAttacker)
+		{
+			auto* bc = GetController<BrawlerCharacter>(lastAttacker);
+			lastAttackerName = bc->name();
+			lastAttackerHealth = bc->health();
+			lastAttackerHealthChanged = true;
+		}
+	}
+
+	void BrawlerScene::UpdateHeroHealthUI()
+	{
+		if (heroHealthChanged)
+		{
+			std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'HERO_HP', value: " + std::to_string(heroHealth) + " } })); ";
+			venomUIInstance->EvaluateScript(js);
+			heroHealthChanged = false;
+		}
+	}
+
+	void BrawlerScene::UpdateEnemyUI()
+	{
+		if (newAttacker)
+		{
+			std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'NEW_ENEMY', name:'" + lastAttackerName + "' } })); ";
+			venomUIInstance->EvaluateScript(js);
+			newAttacker = false;
+		}
+		if (lastAttackerHealthChanged)
+		{
+			std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'ENEMY_HP', value: " + std::to_string(lastAttackerHealth) + " } })); ";
+			venomUIInstance->EvaluateScript(js);
+			lastAttackerHealthChanged = false;
+		}
 	}
 
 	void BrawlerScene::RegisterCamera(JUUID camController)
@@ -95,6 +147,7 @@ namespace Game::Brawler
 	void BrawlerScene::RegisterHero(JUUID heroController)
 	{
 		heroesControllers.insert(heroController);
+		heroHealth = GetController<BrawlerCharacter>(heroController)->health();
 	}
 
 	void BrawlerScene::RegisterEnemy(JUUID enemyController)

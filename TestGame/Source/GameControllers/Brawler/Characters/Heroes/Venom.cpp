@@ -165,7 +165,8 @@ namespace Game::Brawler
 
 	void Venom::TakeHit(JUUID enemyController, int damage)
 	{
-		OutputDebugStringA(std::string("Venom take hit from " + enemyController + " " + std::to_string(damage) + "\n").c_str());
+		health(std::max(0, health() - damage));
+		GetController<BrawlerScene>(unit, sceneController())->HeroTookHit(enemyController, health());
 	}
 
 	//Step
