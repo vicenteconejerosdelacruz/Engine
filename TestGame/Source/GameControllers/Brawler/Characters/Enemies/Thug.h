@@ -17,6 +17,7 @@ namespace Game
 			TS_CombatFollow,
 			//TS_CombatFollowBrawler,
 			TS_CombatPunch,
+			TS_Death,
 		};
 
 		inline static std::unordered_map<std::string, ThugStates> StringToTugStates =
@@ -27,6 +28,7 @@ namespace Game
 			{ "CombatFollow", TS_CombatFollow },
 			//{ "CombatFollowBrawler", TS_CombatFollowBrawler },
 			{ "CombatPunch", TS_CombatPunch },
+			{ "Death", TS_Death }
 		};
 
 #if defined(_EDITOR)
@@ -102,6 +104,11 @@ namespace Game
 			void EnterCombatPunch();
 			void CombatPunch();
 			void OnCombatPunchAnimationEnd();
+
+			//Death
+			bool ShouldDie();
+			void EnterDeath();
+			void OnDeathAnimationEnd();
 
 			//State machine
 			GameStatesMachine<ThugStates> tsm;

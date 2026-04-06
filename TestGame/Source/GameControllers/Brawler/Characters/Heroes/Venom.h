@@ -25,7 +25,8 @@ namespace Game
 			VS_WallIdle,
 			VS_CrawlOnWall,
 			VS_DetachFromWall,
-			VS_Falling
+			VS_Falling,
+			VS_Death
 		};
 
 		inline static std::unordered_map<std::string, VenomStates> stringToVenomStates =
@@ -45,6 +46,7 @@ namespace Game
 			{ "CrawlOnWall", VS_CrawlOnWall },
 			{ "DetachFromWall", VS_DetachFromWall },
 			{ "Falling", VS_Falling },
+			{ "Death", VS_Death },
 		};
 
 		enum WallMovementAxis
@@ -228,6 +230,11 @@ namespace Game
 			//Fall
 			void EnterFalling();
 			void Falling();
+
+			//Death
+			bool ShouldDie();
+			void EnterDeath();
+			void OnDeathAnimationEnd();
 
 			//State machine
 			GameStatesMachine<VenomStates> vsm;

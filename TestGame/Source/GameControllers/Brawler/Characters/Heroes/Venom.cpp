@@ -78,6 +78,7 @@ namespace Game::Brawler
 				{ VS_CrawlOnWall, [&](auto* sm, VenomStates prevState) { EnterCrawlOnWall(); }},
 				{ VS_DetachFromWall, [&](auto* sm, VenomStates prevState) { EnterDetachFromWall(); }},
 				{ VS_Falling, [&](auto* sm, VenomStates prevState) { EnterFalling(); }},
+				{ VS_Death, [&](auto* sm, VenomStates prevState) { EnterDeath(); }},
 			},
 			.onLeave = {
 				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { LeaveAttack1(); }},
@@ -191,12 +192,19 @@ namespace Game::Brawler
 			buttons.Reset();
 		}
 
-		XMVECTOR XMpos, XMrot, XMscl;
-		XMMatrixDecompose(&XMscl, &XMrot, &XMpos, venom->animationTransformation);
+		if (vsm.currentState != VS_Death)
+		{
+			XMVECTOR XMpos, XMrot, XMscl;
+			XMMatrixDecompose(&XMscl, &XMrot, &XMpos, venom->animationTransformation);
 
-		UpdateLeftStickVector();
-		UpdateLookTo();
+			UpdateLeftStickVector();
+			UpdateLookTo();
+		}
 		vsm.Step();
+		if (ShouldDie())
+		{
+			vsm.ChangeState(VS_Death);
+		}
 	}
 
 	void Venom::OnStaticContactEvent(JUUID physicObject, unsigned int event)
@@ -244,7 +252,6 @@ namespace Game::Brawler
 	v8_functions_creators Venom::GetV8FunctionsCreators()
 	{
 		return {
-			//{ "animationUseTransformation", [&](bool value) venom->animationUseTransformation(value); }) },
 			{ "PlayerReady", v8_wrap_call([&] { VenomReady(); }) },
 			{ "StartNextPunchWindow", v8_wrap_call([&] { StartVenomNextPunchWindow(); }) },
 			{ "EvaluateNextPunch", v8_wrap_call([&] { EvaluateVenomNextPunch(); }) },
@@ -254,6 +261,7 @@ namespace Game::Brawler
 			{ "BeginRunJump", v8_wrap_call([&] { VenomBeginRunJump(); }) },
 			{ "RunJumpLanding", v8_wrap_call([&] { VenomRunJumpLanding(); }) },
 			{ "TakeHit", v8_wrap_call([&](JUUID enemyController, int damage) { TakeHit(enemyController, damage); }) },
+			{ "OnDeathAnimationEnd", v8_wrap_call([&] { OnDeathAnimationEnd(); }) },
 		};
 	}
 
@@ -799,6 +807,21 @@ namespace Game::Brawler
 			canJump = true;
 			vsm.ChangeState(VS_Idle);
 		}
+	}
+
+	//Death
+	bool Venom::ShouldDie()
+	{
+		return health() <= 0 && vsm.currentState != VS_Death;
+	}
+
+	void Venom::EnterDeath()
+	{
+		venom->SetCurrentAnimation("Death", 0.0f, deathTimeFactor());
+	}
+
+	void Venom::OnDeathAnimationEnd()
+	{
 	}
 }
 

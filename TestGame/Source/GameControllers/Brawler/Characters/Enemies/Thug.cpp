@@ -41,6 +41,7 @@ namespace Game::Brawler
 				{ TS_CombatIdle, [&](auto* sm, ThugStates prevState) { EnterCombatIdle(); }},
 				{ TS_CombatFollow, [&](auto* sm, ThugStates prevState) { EnterCombatFollow(); }},
 				{ TS_CombatPunch, [&](auto* sm, ThugStates prevState) { EnterCombatPunch(); }},
+				{ TS_Death, [&](auto* sm, ThugStates prevState) { EnterDeath(); }},
 			},
 			.onLeave = {
 				{ TS_Idle,[&](auto* sm, ThugStates prevState) { LeaveIdle(); }},
@@ -105,6 +106,7 @@ namespace Game::Brawler
 
 	void Thug::TakeHit(int damage)
 	{
+		if (tsm.currentState == TS_Death) return;
 		health(std::max(0, health() - damage));
 		GetController<BrawlerScene>(unit, sceneController())->UpdateEnemy(uuid());
 	}
@@ -120,6 +122,10 @@ namespace Game::Brawler
 		float dt = static_cast<float>(timer.GetElapsedSeconds());
 
 		tsm.Step();
+		if (ShouldDie())
+		{
+			tsm.ChangeState(TS_Death);
+		}
 	}
 
 	//JS binding
@@ -148,6 +154,7 @@ namespace Game::Brawler
 			{ "CombatIdleNextState", v8_wrap_call([&] { CombatIdleNextState(); }) },
 			{ "OnCombatPunchAnimationEnd", v8_wrap_call([&] { OnCombatPunchAnimationEnd(); }) },
 			{ "TakeHit", v8_wrap_call([&](int damage) { TakeHit(damage); }) },
+			{ "OnDeathAnimationEnd", v8_wrap_call([&] { OnDeathAnimationEnd(); }) },
 		};
 	}
 
@@ -343,8 +350,24 @@ namespace Game::Brawler
 	{
 
 	}
+
 	void Thug::OnCombatPunchAnimationEnd()
 	{
 		tsm.ChangeState(TS_CombatIdle);
+	}
+
+	bool Thug::ShouldDie()
+	{
+		return health() <= 0 && tsm.currentState != TS_Death;
+	}
+
+	void Thug::EnterDeath()
+	{
+		thug->SetCurrentAnimation("ThugDeath", 0.0f, deathTimeFactor());
+	}
+
+	void Thug::OnDeathAnimationEnd()
+	{
+
 	}
 };
