@@ -124,6 +124,10 @@ struct TSUUUID {
 	SUUUID SUuuid;
 	std::function<bool()> validator = nullptr;
 	TSUUUID() {}
+	TSUUUID(const SceneUnitId unit, JUUID uuid)
+	{
+		SUuuid = MAKESUUUID(unit, uuid);
+	}
 	TSUUUID(const TSUUUID& other)
 	{
 		SUuuid = other.SUuuid;
