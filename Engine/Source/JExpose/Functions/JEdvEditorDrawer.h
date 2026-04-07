@@ -156,9 +156,6 @@ template<>
 JEdvEditorDrawerFunction DrawValue<XMFLOAT4, jedv_t_color_float4>();
 
 template<>
-JEdvEditorDrawerFunction DrawValue<unsigned int, jedv_t_sound_instance_flags>();
-
-template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_string>();
 
 JEdvEditorDrawerFunction DrawNonEmptyValue(std::function<void()> onChange);

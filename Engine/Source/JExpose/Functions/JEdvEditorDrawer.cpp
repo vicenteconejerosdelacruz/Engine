@@ -1664,95 +1664,6 @@ JEdvEditorDrawerFunction DrawValue<XMFLOAT4, jedv_t_color_float4>()
 }
 
 template<>
-JEdvEditorDrawerFunction DrawValue<unsigned int, jedv_t_sound_instance_flags>()
-{
-	return[](std::string attribute, std::vector<JObject*>& json)
-		{
-			auto getSoundEffects = [&json]()
-				{
-					std::vector<Scene::SoundFX*> sfxs;
-					std::transform(json.begin(), json.end(), std::back_inserter(sfxs), [](auto& j)
-						{
-							return static_cast<Scene::SoundFX*>(j);
-						}
-					);
-					return sfxs;
-				};
-
-			auto drawInstanceFlags = [attribute](auto& sfx)
-				{
-					auto& StoE = StringToSOUND_EFFECT_INSTANCE_FLAGS;
-					unsigned int instanceFlags = sfx->instanceFlags();
-					bool sameLine = true;
-					std::for_each(StoE.begin(), StoE.end(), [attribute, &instanceFlags, &sfx, &sameLine](auto& pair)
-						{
-							bool value = !!(instanceFlags & pair.second);
-							if (ImGui::Checkbox(pair.first.c_str(), &value))
-							{
-								if (value)
-								{
-									instanceFlags |= pair.second;
-								}
-								else
-								{
-									instanceFlags &= ~pair.second;
-								}
-								nlohmann::json patch = { {attribute,instanceFlags} };
-								sfx->JUpdate(patch);
-							}
-							if (sameLine)
-								ImGui::SameLine();
-							sameLine = !sameLine;
-						}
-					);
-				};
-
-			auto sfxs = getSoundEffects();
-
-			std::string tableName = attribute + "-table";
-			if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags | ImGuiTableFlags_Hideable))
-			{
-				ImGui::TableSetupColumn("attribute", ImGuiTableColumnFlags_WidthFixed);
-				ImGui::TableSetupColumn("value", ImGuiTableColumnFlags_WidthStretch);
-
-				ImGui::TableNextRow();
-				ImGui::TableSetColumnIndex(0);
-				ImGui::Text(attribute.c_str());
-
-				for (auto& sfx : sfxs)
-				{
-					if (!sfx->GetEffect()) continue;
-
-					ImGui::TableNextRow();
-					if (sfxs.size() > 1ULL)
-					{
-						ImGui::TableSetColumnIndex(0);
-						ImGui::Text(sfx->name().c_str());
-					}
-					ImGui::TableSetColumnIndex(1);
-					drawInstanceFlags(sfx);
-					ImGui::TableNextRow();
-					ImGui::TableSetColumnIndex(1);
-
-					ImGui::DrawAudioController(
-						[sfx]() {return sfx->IsPlaying(); },
-						[sfx]() {return sfx->IsPaused(); },
-						[sfx]() { sfx->Play(); },
-						[sfx]() { sfx->Stop(); },
-						[sfx]() { sfx->Pause(); },
-						[sfx]() {return sfx->Time(); },
-						[sfx]() {return sfx->Duration(); }
-					);
-					if (sfx != *(sfxs.end() - 1))
-						ImGui::Separator();
-				}
-
-				ImGui::EndTable();
-			}
-		};
-}
-
-template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_string>()
 {
 	return [](std::string attribute, std::vector<JObject*>& json)
@@ -2039,7 +1950,52 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_sound>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
-			DrawResourceSelection(attribute, json, Templates::GetSoundName, SortUUIDNameByName(Templates::GetSoundsUUIDsNames), ICON_FA_MUSIC, ImGui::OpenTemplate);
+			if (json.size() > 1ULL) return;
+
+			auto drawInstanceFlags = [attribute](auto& sfx)
+				{
+					auto& StoE = StringToSOUND_EFFECT_INSTANCE_FLAGS;
+					unsigned int instanceFlags = sfx->at("instanceFlags");
+					bool sameLine = true;
+					std::for_each(StoE.begin(), StoE.end(), [attribute, &instanceFlags, &sfx, &sameLine](auto& pair)
+						{
+							bool value = !!(instanceFlags & pair.second);
+							if (ImGui::Checkbox(pair.first.c_str(), &value))
+							{
+								if (value)
+								{
+									instanceFlags |= pair.second;
+								}
+								else
+								{
+									instanceFlags &= ~pair.second;
+								}
+								nlohmann::json patch = { {attribute,instanceFlags} };
+								sfx->JUpdate(patch);
+							}
+							if (sameLine)
+								ImGui::SameLine();
+							sameLine = !sameLine;
+						}
+					);
+				};
+
+			auto hasSoundEffect = [attribute](auto& json)
+				{
+					return json->contains(attribute) && json->at(attribute) != "";
+				};
+
+			DrawResourceSelection(attribute, json, Templates::GetSoundName, SortUUIDNameByName(Templates::GetSoundsUUIDsNames), ICON_FA_MUSIC, ImGui::OpenTemplate, false, [](JUUID)
+				{
+					int i = 0;
+				}
+			);
+
+			bool hasSfx = hasSoundEffect(json.at(0));
+			if (hasSfx)
+			{
+				drawInstanceFlags(json.at(0));
+			}
 		};
 }
 

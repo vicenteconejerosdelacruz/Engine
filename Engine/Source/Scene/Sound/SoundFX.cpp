@@ -325,21 +325,26 @@ namespace Scene
 		std::set<SoundFXID> sfxs;
 		std::transform(SoundFxs.begin(), SoundFxs.end(), std::inserter(sfxs, sfxs.end()), [&](auto o) { return MAKESUUUID(id, o); });
 
-		//update the rotation quaternion if the rotation attribute is dirty
-		for (auto sfx : sfxs)
-		{
-			if (sfx->dirty(SoundFX::Update_rotation))
+		auto updateRotations = [](SoundFXID sfx)
 			{
+				if (!sfx->dirty(SoundFX::Update_rotation))
+					return;
 				sfx->updateRotationQ();
 				sfx->clean(SoundFX::Update_rotation);
-			}
-		}
+			};
 
-		std::for_each(sfxs.begin(), sfxs.end(), [step](auto sfx)
+		auto updateSound = [](SoundFXID sfx)
 			{
-				sfx->clear();
-			}
-		);
+				if (!sfx->dirty(SoundFX::Update_sound))
+					return;
+
+				DestroySoundEffectInstance(sfx->uuid(), sfx->soundEffectInstance);
+				sfx->soundEffectInstance = GetSoundEffectInstance(sfx->sound(), sfx->instanceFlags(), sfx->uuid());
+				sfx->clean(SoundFX::Update_sound);
+			};
+
+		std::for_each(sfxs.begin(), sfxs.end(), updateRotations);
+		std::for_each(sfxs.begin(), sfxs.end(), updateSound);
 
 		std::set<SoundFXID> sfxsDelete;
 		std::copy_if(sfxs.begin(), sfxs.end(), std::inserter(sfxsDelete, sfxsDelete.end()), [](auto sfx)
