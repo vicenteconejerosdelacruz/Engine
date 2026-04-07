@@ -107,11 +107,16 @@ void JRenderer::Resize(unsigned int width, unsigned int height) {
 	backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 }
 
+static std::mutex commandsMutex;
 void JRenderer::ExecuteCommands(CComPtr<ID3D12GraphicsCommandList2>& commandList, std::function<void()> callback)
 {
 	ID3D12CommandList* const commandLists[] = { commandList };
 	commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
-	if (callback) { executionCallback.push_back(callback); }
+	if (callback)
+	{
+		std::lock_guard<std::mutex> lock(commandsMutex);
+		executionCallback.push_back(callback);
+	}
 }
 
 void JRenderer::Present() {
@@ -124,8 +129,12 @@ void JRenderer::Present() {
 
 	//make the CPU to wait for the GPU to finish the current processing
 	WaitForFenceValue(fence, frameFenceValues[backBufferIndex], fenceEvent);
-	std::for_each(executionCallback.begin(), executionCallback.end(), [](auto x) {x(); });
-	executionCallback.clear();
+	if (executionCallback.size() > 0)
+	{
+		std::lock_guard<std::mutex> lock(commandsMutex);
+		std::for_each(executionCallback.begin(), executionCallback.end(), [](auto x) {x(); });
+		executionCallback.clear();
+	}
 }
 
 void JRenderer::Flush()
