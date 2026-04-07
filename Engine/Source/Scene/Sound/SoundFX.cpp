@@ -310,6 +310,7 @@ namespace Scene
 	{
 		return BoundingBox(position(), { 0.1f,0.1f,0.1f });
 	}
+
 	bool SoundFX::CanInteractWithGizmo(ImGuizmo::OPERATION operation)
 	{
 		return nostd::bytesHas(instanceFlags(), SoundEffectInstance_Use3D);
@@ -400,7 +401,7 @@ namespace Scene
 		for (auto& [uuid, _] : SoundFXSUsceneObjects.at(id))
 		{
 			SoundFXID sfx = MAKESUUUID(id, uuid);
-			if (sfx->markedForDelete) continue;
+			if (sfx->markedForDelete || !sfx->autoPlay()) continue;
 			sfx->Play();
 		}
 	}
