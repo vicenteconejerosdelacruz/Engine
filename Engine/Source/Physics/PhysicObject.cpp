@@ -664,6 +664,9 @@ namespace Physics
 	void PhysicObject::UpdateGlobalPoseFromTrigger()
 	{
 		actor->setGlobalPose(PxTransform(ToPxVec3(trigger->position()), ToPxQuat(trigger->rotationQ())));
+#if defined(_EDITOR)
+		UpdatePhysicsAvatarTransformation();
+#endif
 	}
 
 	PxControllerCollisionFlags  PhysicObject::MoveCharacter(XMVECTOR disp, float delta)
