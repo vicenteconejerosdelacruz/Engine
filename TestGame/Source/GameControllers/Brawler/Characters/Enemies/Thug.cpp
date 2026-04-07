@@ -155,6 +155,7 @@ namespace Game::Brawler
 			{ "OnCombatPunchAnimationEnd", v8_wrap_call([&] { OnCombatPunchAnimationEnd(); }) },
 			{ "TakeHit", v8_wrap_call([&](int damage) { TakeHit(damage); }) },
 			{ "OnDeathAnimationEnd", v8_wrap_call([&] { OnDeathAnimationEnd(); }) },
+			{ "PlayPunchSound", v8_wrap_call([&] { PlayPunchSound(); })},
 		};
 	}
 
@@ -354,6 +355,13 @@ namespace Game::Brawler
 	void Thug::OnCombatPunchAnimationEnd()
 	{
 		tsm.ChangeState(TS_CombatIdle);
+	}
+
+	void Thug::PlayPunchSound()
+	{
+		SoundFXID sfx = SoundFXID(unit, punchSounds().at(0));
+		sfx->Stop();
+		sfx->Play();
 	}
 
 	bool Thug::ShouldDie()

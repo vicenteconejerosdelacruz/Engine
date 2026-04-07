@@ -104,6 +104,7 @@ namespace Game
 			void EnterCombatPunch();
 			void CombatPunch();
 			void OnCombatPunchAnimationEnd();
+			void PlayPunchSound();
 
 			//Death
 			bool ShouldDie();
