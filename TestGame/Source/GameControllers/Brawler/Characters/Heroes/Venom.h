@@ -197,6 +197,7 @@ namespace Game
 			void StartVenomNextPunchWindow();
 			void EvaluateVenomNextPunch();
 			void LeaveAttack1();
+			void PlayPunchSound(int punchIdx, int enemyHealth);
 
 			//JuumpKick
 			bool ShouldJumpKick();

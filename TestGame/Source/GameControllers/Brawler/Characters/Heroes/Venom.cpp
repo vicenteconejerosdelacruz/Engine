@@ -262,6 +262,7 @@ namespace Game::Brawler
 			{ "RunJumpLanding", v8_wrap_call([&] { VenomRunJumpLanding(); }) },
 			{ "TakeHit", v8_wrap_call([&](JUUID enemyController, int damage) { TakeHit(enemyController, damage); }) },
 			{ "OnDeathAnimationEnd", v8_wrap_call([&] { OnDeathAnimationEnd(); }) },
+			{ "PlayPunchSound", v8_wrap_call([&](int punchIdx, int enemyHealth) { PlayPunchSound(punchIdx, enemyHealth); })},
 		};
 	}
 
@@ -640,6 +641,13 @@ namespace Game::Brawler
 		currentAttack1Animation = 0;
 	}
 
+	void Venom::PlayPunchSound(int punchIdx, int enemyHealth)
+	{
+		SoundFXID sfx = SoundFXID(unit, enemyHealth > 0 ? punchSounds().at(punchIdx) : punchDeathSound().at(0));
+		sfx->Stop();
+		sfx->Play();
+	}
+
 	//JuumpKick
 	bool Venom::ShouldJumpKick()
 	{
@@ -867,3 +875,7 @@ namespace Game::Brawler
 //103501_Wallrun_F
 //103501_LowCrawl_Move
 //103501_LowCrawl_Idle_L
+
+//Onwall_To_Spawn_Web
+//A5*
+//A4*
