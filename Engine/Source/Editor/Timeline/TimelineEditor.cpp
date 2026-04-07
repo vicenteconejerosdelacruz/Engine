@@ -938,6 +938,7 @@ void TimelineEditor::AddTriggerElementToChannel(Sequence& sequence, int channelI
 	trigger.bone = elem->bone;
 	trigger.collisionMask = 0;
 	trigger.objectMask = 0;
+	trigger.color = elem->color;
 	trigger.position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	trigger.rotation = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	trigger.scale = XMFLOAT3(1.0f, 1.0f, 1.0f);

@@ -990,6 +990,16 @@ void AnimationSequencerModal::DrawElementTriggerAttributes(SequenceChannelElemen
 		}
 		ImGui::PopID();
 
+		ImGui::Text("color");
+		ImGui::SameLine();
+		ImGui::PushID("trigger-color");
+		XMFLOAT4 color = elementTrigger.color;
+		if (ImGui::ColorEdit4("##", &color.x, ImGuiColorEditFlags_NoInputs))
+		{
+			elementTrigger.color = color;
+		}
+		ImGui::PopID();
+
 		ImGui::Text("position");
 		ImGui::PushID("trigger-position");
 		if (ImGui::BeginTable("trigger-position-table", 3, defaultTableFlags))

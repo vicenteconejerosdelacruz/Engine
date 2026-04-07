@@ -9,6 +9,7 @@ SequenceChannelElementTrigger::SequenceChannelElementTrigger(const nlohmann::jso
 	position = ToXMFLOAT3(j.at("position"));
 	rotation = ToXMFLOAT3(j.at("rotation"));
 	scale = ToXMFLOAT3(j.at("scale"));
+	color = j.contains("color") ? ToXMFLOAT4(j.at("color")) : XMFLOAT4(227.0f / 255.0f, 119.0f / 255.0f, 19.0f / 255.0f, 0.3f);
 	bone = j.at("bone");
 	onEnter = j.at("onEnter");
 	onLeave = j.at("onLeave");
@@ -30,6 +31,9 @@ bool SequenceChannelElementTrigger::operator==(const SequenceChannelElementTrigg
 		&& scale.x == other.scale.x
 		&& scale.y == other.scale.y
 		&& scale.z == other.scale.z
+		&& color.x == other.color.x
+		&& color.y == other.color.y
+		&& color.z == other.color.z
 		&& bone == other.bone
 		&& onEnter == other.onEnter
 		&& onLeave == other.onLeave
@@ -46,6 +50,7 @@ nlohmann::json SequenceChannelElementTrigger::json()
 		{ "position", FromXMFLOAT3(position) },
 		{ "rotation", FromXMFLOAT3(rotation) },
 		{ "scale", FromXMFLOAT3(scale) },
+		{ "color", FromXMFLOAT4(color) },
 		{ "bone", bone },
 		{ "onEnter", onEnter },
 		{ "onLeave", onLeave },
@@ -123,6 +128,8 @@ nlohmann::json SequenceChannelElementTrigger::CreateTriggerJson(RenderableID ren
 		{ "rotation", FromXMFLOAT3(fRot) },
 		{ "rotationQ", FromXMVECTOR(tRotQ) },
 		{ "scale", FromXMFLOAT3(fScl) },
+		{ "overrideColor", true },
+		{ "color", FromXMFLOAT4(color) },
 		{ "objectMask", objectMask },
 		{ "onEnter", onEnter },
 		{ "onLeave", onLeave },

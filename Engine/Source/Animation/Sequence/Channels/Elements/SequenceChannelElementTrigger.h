@@ -43,6 +43,7 @@ struct SequenceChannelElementTrigger : SequenceChannelElement
 	XMFLOAT3 position;
 	XMFLOAT3 rotation;
 	XMFLOAT3 scale;
+	XMFLOAT4 color;
 	std::string bone;
 	std::string onEnter;
 	std::string onLeave;
