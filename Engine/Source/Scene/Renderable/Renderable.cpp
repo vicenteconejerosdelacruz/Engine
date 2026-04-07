@@ -381,7 +381,7 @@ namespace Scene
 				{
 					matUUID = GetMaterialUUIDByName(fallbackMaterialName); //fallback
 				}
-				materials[pass].push_back(pass->GetRenderPassMaterialInstance(unit, matUUID, mesh, shadowed(), mpmo, uuid()));
+				materials[pass].push_back(pass->GetRenderPassMaterialInstance(id, matUUID, mesh, shadowed(), mpmo, uuid()));
 			}
 			*/
 		}
@@ -929,11 +929,11 @@ namespace Scene
 		return bindings;
 	}
 
-	void RenderablesStep(SceneUnitId unit, float dt)
+	void RenderablesStep(SceneUnitId id, float dt)
 	{
-		auto& Renderables = GetRenderables(unit);
+		auto& Renderables = GetRenderables(id);
 		std::set<RenderableID> r;
-		std::transform(Renderables.begin(), Renderables.end(), std::inserter(r, r.begin()), [&](auto o) { return MAKESUUUID(unit, o); });
+		std::transform(Renderables.begin(), Renderables.end(), std::inserter(r, r.begin()), [&](auto o) { return MAKESUUUID(id, o); });
 
 		std::set<RenderableID> cleanRot;
 		std::for_each(r.begin(), r.end(), [&](auto& o)
