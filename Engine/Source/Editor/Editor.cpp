@@ -1769,14 +1769,15 @@ namespace Editor
 			{
 				sceneObjectEdition.at(currentSceneUnitId).DrawPanel(soPos, soSize, SceneObjectsTypePanelMenuItems,
 					GetSceneObjectsTypesList,
-					[](JUUID uuid) { return GetSceneObjectPointer(Editor::currentSceneUnitId, uuid); },
+					[](JUUID uuid) { return GetSceneObjectPointer(currentSceneUnitId, uuid); },
 					OnChangeSceneObjectTab,
 					matchSceneObjectsAttributes,
 					[](JUUID uuid, bool selected) { SetSceneObjectSelection(currentSceneUnitId, uuid, selected); },
 					[](JUUID uuid) { SendEditorPreview(uuid, [](JUUID uuid) { return GetSceneObjectPointer(currentSceneUnitId, uuid); }, sceneObjectEdition.at(currentSceneUnitId).drawers); },
 					[](SceneObjectType type) { StartSceneObjectCreation(type); },
-					[](JUUID uuid) { DeleteSceneObjectFromEditor(Editor::currentSceneUnitId, uuid); },
-					[](JUUID uuid) { OpenPopupForSceneObject(Editor::currentSceneUnitId, uuid); }
+					[](JUUID uuid) { DeleteSceneObjectFromEditor(currentSceneUnitId, uuid); },
+					[](JUUID uuid) { OpenPopupForSceneObject(currentSceneUnitId, uuid); },
+					[] { ClearSceneObjectsSelection(currentSceneUnitId); }
 				);
 			}
 
@@ -1805,7 +1806,8 @@ namespace Editor
 				[](JUUID uuid) { SendEditorPreview(uuid, GetJTemplatePointer, templateEdition.drawers); },
 				[](TemplateType type) { StartTemplateCreation(type); },
 				[](JUUID uuid) { DeleteTemplate(uuid); },
-				[](JUUID uuid) { OpenPopupForTemplate(uuid); }
+				[](JUUID uuid) { OpenPopupForTemplate(uuid); },
+				[] {}
 			);
 		}
 		ImGui::End();

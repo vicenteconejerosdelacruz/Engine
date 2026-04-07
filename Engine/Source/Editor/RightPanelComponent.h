@@ -204,7 +204,8 @@ struct RightPanelComponent
 		auto OnOpen,
 		auto OnNew,
 		auto OnDelete,
-		auto OnRightClick
+		auto OnRightClick,
+		auto OnClearSelection
 	)
 	{
 		if (assets.empty() || dirtyAssetsTree)
@@ -215,6 +216,22 @@ struct RightPanelComponent
 			DrawTabs(OnChangeTab);
 			if (selectedTab == detailAbleTabs.at(0))
 			{
+
+				ImGui::PushID((panelName + "-deselect").c_str());
+				ImGui::DrawItemWithEnabledState([&]
+					{
+						if (ImGui::Button("Deselect"))
+						{
+							selected.clear();
+							editables.clear();
+							OnClearSelection();
+						}
+					}
+				, selected.size() > 0);
+				ImGui::PopID();
+
+				ImGui::SameLine();
+
 				std::vector<std::string> selectables = { "New" };
 				std::transform(menuItems.begin(), menuItems.end(), std::back_inserter(selectables), [](auto& p) { return p.second; });
 				ImGui::PushID((panelName + "-new").c_str());
