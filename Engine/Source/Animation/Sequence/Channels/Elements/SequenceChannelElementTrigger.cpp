@@ -128,6 +128,8 @@ nlohmann::json SequenceChannelElementTrigger::CreateTriggerJson(RenderableID ren
 		{ "onLeave", onLeave },
 		{ "trigger", true },
 		{ "uuid", uuid },
+		{ "countEnter", 1 },
+		{ "countLeave", 1 },
 	};
 	if (bindings.size() > 0ULL)
 	{

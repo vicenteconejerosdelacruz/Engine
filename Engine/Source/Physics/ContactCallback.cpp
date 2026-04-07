@@ -36,18 +36,22 @@ namespace Physics
 			PhysicObject* trigger = (PhysicObject*)current.triggerShape->userData;
 			PhysicObject* other = (PhysicObject*)current.otherActor->userData;
 
+			if (!trigger || !other) continue;
 			if (!trigger->built || !trigger->trigger) continue;
 			if (!other->built || !other->renderable) continue;
-			if (!(trigger->collisionMask() & other->objectMask()))
-				continue;
+			if (!(trigger->collisionMask() & other->objectMask())) continue;
 
 			if (current.status & PxPairFlag::eNOTIFY_TOUCH_FOUND)
 			{
+				if (trigger->trigger->countEnter() <= 0) continue;
+				trigger->trigger->countEnter(trigger->trigger->countEnter() - 1);
 				CallRegisteredCallbacks(PB_Trigger, other->uuid(), trigger->uuid(), PxPairFlag::eNOTIFY_TOUCH_FOUND);
 				CallTriggerContactCallback(trigger->trigger, other->renderable(), PxPairFlag::eNOTIFY_TOUCH_FOUND);
 			}
 			if (current.status & PxPairFlag::eNOTIFY_TOUCH_LOST)
 			{
+				if (trigger->trigger->countLeave() <= 0) continue;
+				trigger->trigger->countLeave(trigger->trigger->countLeave() - 1);
 				CallRegisteredCallbacks(PB_Trigger, other->uuid(), trigger->uuid(), PxPairFlag::eNOTIFY_TOUCH_LOST);
 				CallTriggerContactCallback(trigger->trigger, other->renderable(), PxPairFlag::eNOTIFY_TOUCH_LOST);
 			}
