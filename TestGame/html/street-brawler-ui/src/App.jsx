@@ -40,6 +40,7 @@ function App() {
       if (e.detail.type === 'HERO_HP') setHero(prev => ({ ...prev, hp: e.detail.value }));
       if (e.detail.type === 'ENEMY_HP') setEnemy(prev => ({ ...prev, hp: e.detail.value }));
       if (e.detail.type === 'NEW_ENEMY') setEnemy(prev => ({ ...prev, name: e.detail.name, active: true }));
+      if (e.detail.type === 'REMOVE_ENEMY') setEnemy(prev => ({ ...prev, name: '', active: false }));
     };
 
     window.addEventListener('engineUpdate', handleEngineUpdate);
