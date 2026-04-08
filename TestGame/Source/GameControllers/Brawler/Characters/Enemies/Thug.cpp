@@ -108,7 +108,7 @@ namespace Game::Brawler
 	{
 		if (tsm.currentState == TS_Death) return;
 		health(std::max(0, health() - damage));
-		GetController<BrawlerScene>(unit, sceneController())->UpdateEnemy(uuid());
+		GetBrawlerSceneController()->UpdateEnemy(uuid());
 	}
 
 	//Step
@@ -371,11 +371,12 @@ namespace Game::Brawler
 
 	void Thug::EnterDeath()
 	{
+		GetBrawlerSceneController()->UnRegisterEnemy(uuid());
 		thug->SetCurrentAnimation("ThugDeath", 0.0f, deathTimeFactor());
 	}
 
 	void Thug::OnDeathAnimationEnd()
 	{
-
+		thug->markedForDelete = true;
 	}
 };

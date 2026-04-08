@@ -138,6 +138,14 @@ namespace Game::Brawler
 
 	void BrawlerScene::UpdateEnemyUI()
 	{
+		if (lastAttackerDied())
+		{
+			std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'REMOVE_ENEMY' } })); ";
+			HtmlUIInstanceID instance = venomUIInstance();
+			instance->EvaluateScript(js);
+			lastAttackerDied(false);
+		}
+
 		if (newAttacker())
 		{
 			std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'NEW_ENEMY', name:'" + lastAttackerName() + "' } })); ";
@@ -168,6 +176,17 @@ namespace Game::Brawler
 	void BrawlerScene::RegisterEnemy(JUUID enemyController)
 	{
 		enemies_insert(enemyController);
+	}
+
+	void BrawlerScene::UnRegisterEnemy(JUUID enemyController)
+	{
+		if (enemies_contains(enemyController))
+			enemies_erase(enemyController);
+		if (lastAttacker() == enemyController)
+		{
+			lastAttacker("");
+			lastAttackerDied(true);
+		}
 	}
 
 	const std::set<VenomStates> venomNonAttackStates({ VS_None, VS_Intro });

@@ -63,6 +63,7 @@ namespace Game
 
 			//Enemies
 			void RegisterEnemy(JUUID enemyController);
+			void UnRegisterEnemy(JUUID enemyController);
 			bool HeroesReadyToFight();
 			std::tuple<JUUID, XMFLOAT3> PickHeroToFight(JUUID enemyController);
 
