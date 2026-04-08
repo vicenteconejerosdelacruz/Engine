@@ -43,15 +43,19 @@ namespace Physics
 
 			if (current.status & PxPairFlag::eNOTIFY_TOUCH_FOUND)
 			{
-				if (trigger->trigger->countEnter() <= 0) continue;
-				trigger->trigger->countEnter(trigger->trigger->countEnter() - 1);
+				if (trigger->trigger->countEnter() > 0)
+					trigger->trigger->countEnter(trigger->trigger->countEnter() - 1);
+				else if (trigger->trigger->countEnter() == 0)
+					continue;
 				CallRegisteredCallbacks(PB_Trigger, other->uuid(), trigger->uuid(), PxPairFlag::eNOTIFY_TOUCH_FOUND);
 				CallTriggerContactCallback(trigger->trigger, other->renderable(), PxPairFlag::eNOTIFY_TOUCH_FOUND);
 			}
 			if (current.status & PxPairFlag::eNOTIFY_TOUCH_LOST)
 			{
-				if (trigger->trigger->countLeave() <= 0) continue;
-				trigger->trigger->countLeave(trigger->trigger->countLeave() - 1);
+				if (trigger->trigger->countLeave() > 0)
+					trigger->trigger->countLeave(trigger->trigger->countLeave() - 1);
+				else if (trigger->trigger->countLeave() == 0)
+					continue;
 				CallRegisteredCallbacks(PB_Trigger, other->uuid(), trigger->uuid(), PxPairFlag::eNOTIFY_TOUCH_LOST);
 				CallTriggerContactCallback(trigger->trigger, other->renderable(), PxPairFlag::eNOTIFY_TOUCH_LOST);
 			}
