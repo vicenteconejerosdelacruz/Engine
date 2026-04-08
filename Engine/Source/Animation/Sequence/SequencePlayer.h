@@ -17,6 +17,7 @@ struct SequencePlayer
 	SequencePlayer(const Sequence& seq, RenderableID renderable);
 	void SetSequence(const Sequence& seq, RenderableID renderable);
 #if defined(_EDITOR)
+	nlohmann::json CreateTriggerAvatarJson(SequenceChannelElementTrigger* t, std::string name, JUUID uuid, JUUID camId, std::string material);
 	void CreateSequenceTriggersAvatars(JUUID camera);
 	void DestroySequenceTriggersAvatars();
 #endif

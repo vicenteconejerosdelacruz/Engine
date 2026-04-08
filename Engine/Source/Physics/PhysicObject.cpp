@@ -1041,6 +1041,7 @@ namespace Physics
 		);
 		return jrenderable;
 	}
+
 	nlohmann::json PhysicObject::CreateFromTrigger(std::string name, JUUID uuid, JUUID camId, std::string material)
 	{
 		PhysicGeometryJsonID pg = geometry();

@@ -24,6 +24,7 @@ struct SequenceChannelElementTrigger : SequenceChannelElement
 			position = other.position;
 			rotation = other.rotation;
 			scale = other.scale;
+			color = other.color;
 			bone = other.bone;
 			onEnter = other.onEnter;
 			onLeave = other.onLeave;
@@ -54,6 +55,7 @@ struct SequenceChannelElementTrigger : SequenceChannelElement
 	bool enabled;
 #if defined(_EDITOR)
 	RenderableID triggerRenderable;
+	RenderableID triggerLines;
 #endif
 	TriggerID trigger;
 	std::unique_ptr<std::atomic_bool> triggerBuilt;

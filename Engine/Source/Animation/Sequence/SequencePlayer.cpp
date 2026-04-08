@@ -37,26 +37,15 @@ void SequencePlayer::SetSequence(const Sequence& seq, RenderableID renderable)
 }
 
 #if defined(_EDITOR)
-void SequencePlayer::CreateSequenceTriggersAvatars(JUUID camera)
+
+nlohmann::json SequencePlayer::CreateTriggerAvatarJson(SequenceChannelElementTrigger* t, std::string name, JUUID uuid, JUUID camId, std::string material)
 {
-	using namespace Scene;
-
-	auto triggers = sequence.GetTriggerElements();
-	if (triggers.size() == 0ULL) return;
-
-	nlohmann::json triggersJ = nlohmann::json::array({});
-	SceneUnitId unit = renderable.unit();
-
-	for (auto* t : triggers)
-	{
-		JUUID uuid = getUUID();
-		t->triggerRenderable = MAKESUUUID(unit, uuid);
-		nlohmann::json tj =
+	nlohmann::json jrentrigger = nlohmann::json(
 		{
 			{
 				"meshMaterial",
 				{
-					{ "material", GetMaterialUUIDByName("Floor")},
+					{ "material", GetMaterialUUIDByName(material) },
 					{ "mesh",
 						{
 							{ "primitive", "f7786ac1-e296-4e9a-a7e6-6f1949de75ef" }
@@ -66,16 +55,16 @@ void SequencePlayer::CreateSequenceTriggersAvatars(JUUID camera)
 			},
 			{ "castShadows", false },
 			{ "shadowed", false },
-			{ "name" , uuid },
+			{ "name" , name },
 			{ "uuid" , uuid },
 			{ "position", FromXMFLOAT3(t->position) },
 			{ "topology", "TRIANGLELIST" },
 			{ "rotation" , FromXMFLOAT3(t->rotation) },
 			{ "scale" , FromXMFLOAT3(t->scale) },
 			{ "skipMeshes" , {}},
-			{ "visible" , true },
+			{ "visible" , false },
 			{ "hidden" , true},
-			{ "cameras", { camera }},
+			{ "cameras", { camId }},
 			{ "depthStencil",
 				{
 					{ "BackFace",
@@ -102,9 +91,32 @@ void SequencePlayer::CreateSequenceTriggersAvatars(JUUID camera)
 					{ "StencilWriteMask", 255 }
 				}
 			}
-		};
+		}
+	);
+	return jrentrigger;
+}
 
-		triggersJ.push_back(tj);
+void SequencePlayer::CreateSequenceTriggersAvatars(JUUID camera)
+{
+	using namespace Scene;
+
+	auto triggers = sequence.GetTriggerElements();
+	if (triggers.size() == 0ULL) return;
+
+	nlohmann::json triggersJ = nlohmann::json::array({});
+	SceneUnitId unit = renderable.unit();
+
+	for (auto* t : triggers)
+	{
+		t->triggerLines = RenderableID(unit, getUUID());
+		t->triggerRenderable = RenderableID(unit, getUUID());
+
+		nlohmann::json lines = CreateTriggerAvatarJson(t, t->bone + "-lines", t->triggerLines.uuid(), camera, "Translucent_wired");
+		nlohmann::json shape = CreateTriggerAvatarJson(t, t->bone + "-shape", t->triggerRenderable.uuid(), camera, "Translucent");
+		shape["renderNext"] = { t->triggerLines.uuid() };
+
+		triggersJ.push_back(lines);
+		triggersJ.push_back(shape);
 	}
 
 	nlohmann::json data = {
@@ -121,6 +133,7 @@ void SequencePlayer::DestroySequenceTriggersAvatars()
 	for (auto* t : triggers)
 	{
 		t->triggerRenderable->markedForDelete = true;
+		t->triggerLines->markedForDelete = true;
 	}
 }
 #endif

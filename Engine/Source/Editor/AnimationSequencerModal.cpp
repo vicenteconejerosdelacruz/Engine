@@ -232,10 +232,33 @@ void AnimationSequencerModal::Step()
 	XMFLOAT3 baseColor = ToXMFLOAT3(floor->at("floorColor"));
 	floor->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
 	floor->WriteConstantsBuffer(scene->Frame());
+	floor->renderNext({ renderable.uuid() });
 
 	if (selectedSequence != "")
 	{
 		Sequence& seq = sequencePlayer.sequence;
+		auto triggers = seq.GetTriggerElements();
+
+		renderable->renderNext({});
+		for (auto* t : triggers)
+		{
+			if (t->triggerRenderable)
+			{
+				renderable->renderNext({ t->triggerRenderable.uuid() });
+				t->triggerRenderable->renderNext({ t->triggerLines.uuid() });
+
+				XMFLOAT4 rgba = t->color;
+				XMFLOAT3 baseColor = { rgba.x,rgba.y,rgba.z };
+				XMFLOAT3 lineBaseColor = baseColor * 1.3f;
+				float alpha = rgba.w;
+				t->triggerRenderable->WriteConstantsBuffer("alpha", alpha, scene->Frame());
+				t->triggerRenderable->WriteConstantsBuffer("baseColor", baseColor, scene->Frame());
+				t->triggerRenderable->WriteConstantsBuffer(scene->Frame());
+				t->triggerLines->WriteConstantsBuffer("baseColor", lineBaseColor, scene->Frame());
+				t->triggerLines->WriteConstantsBuffer(scene->Frame());
+			}
+		}
+
 		if (playingSequence)
 		{
 			float totalTime = static_cast<float>(seq.totalFrames) / static_cast<float>(seq.framesPerSecond);

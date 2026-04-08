@@ -34,6 +34,7 @@ bool SequenceChannelElementTrigger::operator==(const SequenceChannelElementTrigg
 		&& color.x == other.color.x
 		&& color.y == other.color.y
 		&& color.z == other.color.z
+		&& color.w == other.color.w
 		&& bone == other.bone
 		&& onEnter == other.onEnter
 		&& onLeave == other.onLeave
@@ -69,12 +70,17 @@ void SequenceChannelElementTrigger::ApplyFrameTriggerAvatarValues(int frame, Ren
 	Animation::BonesTransformations& bonesTransformation = renderable->bonesTransformation;
 	bool visible = frame >= frameStart && frame <= frameEnd;
 	triggerRenderable->visible(visible);
+	triggerLines->visible(visible);
 
 	auto [fPos, fRot, tRotQ, fScl] = GetTransformation(world, bonesTransformation);
 	triggerRenderable->position(fPos);
 	triggerRenderable->rotation(fRot);
 	triggerRenderable->rotationQ(tRotQ);
 	triggerRenderable->scale(fScl);
+	triggerLines->position(fPos);
+	triggerLines->rotation(fRot);
+	triggerLines->rotationQ(tRotQ);
+	triggerLines->scale(fScl);
 }
 
 void SequenceChannelElementTrigger::ApplyFrameTriggerValues(int frame, RenderableID renderable)
