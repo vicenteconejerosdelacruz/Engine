@@ -1,5 +1,4 @@
-#ifndef _PRIMITIVE_CONE_H
-#define _PRIMITIVE_CONE_H
+#pragma once
 
 #include "Primitive.h"
 #include <VertexFormats.h>
@@ -44,5 +43,3 @@ namespace Primitives
 		std::vector<VertexType> GetVertices();
 	};
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef _PRIMITIVE_BOXLINES_H
-#define _PRIMITIVE_BOXLINES_H
+#pragma once
 
 #include "Primitive.h"
 #include <VertexFormats.h>
@@ -16,5 +15,3 @@ namespace Primitives
 		std::vector<VertexType> GetVertices();
 	};
 };
-
-#endif

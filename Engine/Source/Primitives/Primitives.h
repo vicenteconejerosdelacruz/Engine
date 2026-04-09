@@ -1,5 +1,4 @@
-#ifndef _PRIMITIVES_H
-#define _PRIMITIVES_H
+#pragma once
 
 #include <Mesh/Mesh.h>
 #include <Renderer.h>
@@ -101,5 +100,3 @@ static const std::map<std::string, std::function<void(nlohmann::json&, std::set<
 	{ "cone", Primitives::DrawPrimitiveAttributes<Cone, Primitives::GetConeDrawers, Primitives::GetConeAttributes> },
 	{ "capsule", Primitives::DrawPrimitiveAttributes<Capsule, Primitives::GetCapsuleDrawers, Primitives::GetCapsuleAttributes> },
 };
-
-#endif

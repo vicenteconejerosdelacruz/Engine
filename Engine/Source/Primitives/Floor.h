@@ -1,5 +1,4 @@
-#ifndef _PRIMITIVE_FLOOR_H
-#define _PRIMITIVE_FLOOR_H
+#pragma once
 
 #include "Primitive.h"
 #include <VertexFormats.h>
@@ -16,4 +15,3 @@ namespace Primitives
 		std::vector<VertexType> GetVertices();
 	};
 };
-#endif

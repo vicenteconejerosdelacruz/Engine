@@ -1,5 +1,4 @@
-#ifndef _PRIMITIVE_UTAH_TEAPOH_H
-#define _PRIMITIVE_UTAH_TEAPOH_H
+#pragma once
 
 #include "Primitive.h"
 #include <VertexFormats.h>
@@ -17,4 +16,3 @@ namespace Primitives
 	};
 };
 
-#endif
