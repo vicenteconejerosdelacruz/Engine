@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "TimelineChannel.h"
 #include <imgui_internal.h>
+#include <ImEditor.h>
 
 TimelineChannel::TimelineChannel(int index)
 {
@@ -184,6 +185,29 @@ std::tuple<int, int, int, int> TimelineChannel::DrawChannelFrames(Sequence& sequ
 			pMin.x += frameSize.x;
 			pMax.x += frameSize.x;
 		}
+
+		std::vector<ChannelElement> animations;
+		std::copy_if(seqChannel.elements.begin(), seqChannel.elements.end(), std::back_inserter(animations), [](ChannelElement& elem)
+			{
+				return elem.type == SCET_Animation;
+			}
+		);
+
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
+		for (auto& ce : animations)
+		{
+			ImVec2 tagPos(
+				timelinePos.x + channelToolbarWidth - scroll.x + static_cast<float>(ce.animation.GetFrameStart()) * size.x,
+				timelinePos.y + pos.y - scroll.y
+			);
+			ImVec2 minText(tagPos.x, tagPos.y);
+			ImVec2 maxText(tagPos.x + (ce.animation.GetFrameEnd() - ce.animation.GetFrameStart()) * size.x, tagPos.y + size.y);
+			ImGui::PushClipRect(minText, maxText, true);
+			{
+				draw_list->AddText(tagPos, rgba(0, 0, 0, 1.0f), ce.animation.animation.c_str());
+			}
+			ImGui::PopClipRect();
+		}
 	}
 	ImGui::PopClipRect();
 	return clicked;
@@ -256,7 +280,7 @@ std::tuple<bool, bool, bool, bool> TimelineChannel::DrawChannelFrame(SequenceCha
 		{
 			ImVec2 center(
 				pMin.x + (pMax.x - pMin.x) * 0.5f,
-				pMax.y - 5
+				pMax.y - 3
 			);
 			float radius = (pMax.x - pMin.x) / 4.0f;
 			draw_list->AddCircleFilled(center, radius, frameCircleColor, 10);
@@ -280,7 +304,7 @@ std::tuple<bool, bool, bool, bool> TimelineChannel::DrawChannelFrame(SequenceCha
 
 		if (animElement)
 		{
-			float arry = pMin.y + 0.5f * (pMax.y - pMin.y) - 3.0f;
+			float arry = pMin.y + (pMax.y - pMin.y) * 0.8f; // + 0.5f * (pMax.y - pMin.y);// -3.0f;
 			if ((!leftBounded && !rightBounded) || (leftBounded && !rightBounded && forward) || (rightBounded && !leftBounded && !forward))
 			{
 				draw_list->AddLine(ImVec2(pMin.x - 1, arry), ImVec2(pMax.x + 1, arry), animationLineColor);
