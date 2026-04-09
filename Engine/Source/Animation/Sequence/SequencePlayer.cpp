@@ -125,6 +125,7 @@ void SequencePlayer::CreateSequenceTriggersAvatars(JUUID camera)
 
 	AttachLevelIntoScene(unit, "triggers-avatars", data, [=](SceneUnitId) {});
 }
+
 void SequencePlayer::DestroySequenceTriggersAvatars()
 {
 	auto triggers = sequence.GetTriggerElements();

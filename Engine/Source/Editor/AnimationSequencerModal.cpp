@@ -221,6 +221,7 @@ void AnimationSequencerModal::DestroySceneObjects()
 	camera.clear();
 	model3D.clear();
 	model3dUUID.clear();
+	sequencePlayer.DestroySequenceTriggersAvatars();
 	selectedSequence.clear();
 }
 
