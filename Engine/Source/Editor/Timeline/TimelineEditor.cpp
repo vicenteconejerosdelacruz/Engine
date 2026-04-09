@@ -484,7 +484,7 @@ void TimelineEditor::DrawSelectedFrameVerticalLine(ImVec2 timelinePos, ImVec2 ti
 	ImGui::PopClipRect();
 }
 
-void TimelineEditor::DrawActionPopup(Sequence& sequence,
+void TimelineEditor::DrawActionPopup(RenderableID renderable, Sequence& sequence,
 	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
 	std::function<void()> deleteTransformationKeyFrame,
 	std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit,
@@ -614,7 +614,42 @@ void TimelineEditor::DrawActionPopup(Sequence& sequence,
 			}
 		};
 
-		interactElementPopup.Draw(popupCoords, element, frame, interactions, [this]() { popup = TP_None; });
+		std::unordered_map<InteractPopups, std::function<void()>> drawers =
+		{
+			{ IP_Animation_Change, [&sequence, &seqChannel, &element, elementIndex, renderable, this]
+			{
+				ImGui::Text("animation");
+				ImGui::Separator();
+				std::string currentAnimation = element.animation.animation;
+				std::vector<JNAME> animations = nostd::GetKeysFromMap(renderable->animable->animations->animationsLength);
+				animations.erase(animations.begin());
+				ImGui::PushID("ElementTypeAnimationName");
+				ImGui::SetNextItemWidth(200);
+				ImGui::DrawComboSelection(currentAnimation, animations, [&sequence, &seqChannel,  &element, elementIndex, renderable, this](std::string selectedAnim)
+					{
+						int frameStart = element.GetFrameStart();
+						ChannelElement chanElem;
+						SequenceChannelElementAnimation& animation = chanElem.animation;
+
+						chanElem.type = SCET_Animation;
+
+						animation.animation = selectedAnim;
+						animation.frameStart = frameStart;
+						animation.frameEnd = frameStart + GetAnimationNumFrames(sequence, selectedAnim);
+						animation.startTime = 0.0f;
+						animation.endTime = renderable->animable->animations->animationsLength.at(selectedAnim);
+
+						seqChannel.EraseElement(elementIndex);
+						seqChannel.InsertChannelElement(chanElem, sequence.totalFrames, sequence.framesPerSecond);
+						popup = TP_None;
+					}
+				);
+				ImGui::PopID();
+			}
+			}
+		};
+
+		interactElementPopup.Draw(popupCoords, element, frame, drawers, interactions, [this]() { popup = TP_None; });
 	}
 	else if (popup == TP_PickBone)
 	{
@@ -631,7 +666,7 @@ void TimelineEditor::DrawActionPopup(Sequence& sequence,
 	}
 }
 
-void TimelineEditor::Draw(Sequence& sequence, ImVec2 pos, ImVec2 size,
+void TimelineEditor::Draw(RenderableID renderable, Sequence& sequence, ImVec2 pos, ImVec2 size,
 	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
 	std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
 	std::function<void()> deleteTransformationKeyFrame,
@@ -658,7 +693,7 @@ void TimelineEditor::Draw(Sequence& sequence, ImVec2 pos, ImVec2 size,
 	DrawSelectedFrameVerticalLine(timelinePos, timelineSize);
 	DrawVerticalScrollbar(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging);
 	DrawHorizontalScrollbar(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging);
-	DrawActionPopup(sequence, setTransformationKeyFrame, deleteTransformationKeyFrame, setScriptToEdit, onTriggerAdded, setTriggerScriptToEdit);
+	DrawActionPopup(renderable, sequence, setTransformationKeyFrame, deleteTransformationKeyFrame, setScriptToEdit, onTriggerAdded, setTriggerScriptToEdit);
 	HandleElementDrag(sequence);
 	HandleElementDragLeftBoundary(sequence);
 	HandleElementDragRightBoundary(sequence);

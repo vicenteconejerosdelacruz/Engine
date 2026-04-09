@@ -152,7 +152,14 @@ void AddElementPopup::Draw(ImVec2 pos, std::unordered_map<SequenceChannelElement
 	ImGui::PopStyleVar(2);
 }
 
-void InteractElementPopup::Draw(ImVec2 pos, ChannelElement& element, int frame, std::unordered_map<InteractPopups, std::function<void()>> elementInteract, std::function<void()> closePopup)
+void InteractElementPopup::Draw(
+	ImVec2 pos,
+	ChannelElement& element,
+	int frame,
+	std::unordered_map<InteractPopups, std::function<void()>> drawers,
+	std::unordered_map<InteractPopups, std::function<void()>> elementInteract,
+	std::function<void()> closePopup
+)
 {
 	ImGui::OpenPopup("InteractElementPopup");
 
@@ -166,6 +173,7 @@ void InteractElementPopup::Draw(ImVec2 pos, ChannelElement& element, int frame, 
 
 	if (element.type == SCET_Animation)
 	{
+		options.push_back(std::make_tuple("Animation", IP_Animation_Change, true));
 		if (element.animation.forward)
 		{
 			options.push_back(std::make_tuple("Backward", IP_Animation_Backward, true));
@@ -174,7 +182,7 @@ void InteractElementPopup::Draw(ImVec2 pos, ChannelElement& element, int frame, 
 		{
 			options.push_back(std::make_tuple("Forward", IP_Animation_Forward, true));
 		}
-		size.y += 20;
+		size.y += 55;
 	}
 	else if (element.type == SCET_Transformation)
 	{
@@ -206,19 +214,31 @@ void InteractElementPopup::Draw(ImVec2 pos, ChannelElement& element, int frame, 
 	ImGui::SetNextWindowSize(size);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
 	ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
-	if (ImGui::BeginPopupModal("InteractElementPopup", nullptr, popupChildFlag))
-	{
-		for (auto& [title, key, enabled] : options)
+	auto defaultDrawFn = [&elementInteract](bool enabled, std::string title, InteractPopups key)
 		{
 			if (enabled)
 			{
-				if (ImGui::MenuItem(title.c_str())) {
+				if (ImGui::MenuItem(title.c_str()))
+				{
 					elementInteract.at(key)();
 				}
 			}
 			else
 			{
 				ImGui::MenuItem(title.c_str(), NULL, false, false);
+			}
+		};
+	if (ImGui::BeginPopupModal("InteractElementPopup", nullptr, popupChildFlag))
+	{
+		for (auto& [title, key, enabled] : options)
+		{
+			if (!drawers.contains(key))
+			{
+				defaultDrawFn(enabled, title, key);
+			}
+			else
+			{
+				drawers.at(key)();
 			}
 		}
 		ImGui::Separator();

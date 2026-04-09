@@ -49,6 +49,7 @@ enum InteractPopups
 {
 	IP_Delete,
 	IP_Split,
+	IP_Animation_Change,
 	IP_Animation_Forward,
 	IP_Animation_Backward,
 	IP_Transformation_AddKeyframe,
@@ -62,7 +63,14 @@ enum InteractPopups
 
 struct InteractElementPopup
 {
-	void Draw(ImVec2 pos, ChannelElement& element, int frame, std::unordered_map<InteractPopups, std::function<void()>> elementInteract, std::function<void()> closePopup);
+	void Draw(
+		ImVec2 pos,
+		ChannelElement& element,
+		int frame,
+		std::unordered_map<InteractPopups, std::function<void()>> drawers,
+		std::unordered_map<InteractPopups, std::function<void()>> elementInteract,
+		std::function<void()> closePopup
+	);
 };
 
 struct PickBonePopup

@@ -549,7 +549,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			}
 			if (!selectedSequence.empty())
 			{
-				timelineEditor.Draw(sequencePlayer.sequence, sequencerPos, sequencerSize,
+				timelineEditor.Draw(renderable, sequencePlayer.sequence, sequencerPos, sequencerSize,
 					[&](TransformationKeyFrame* tkeyframe, int frame)
 					{
 						selectedTransformationKeyframe = nullptr;
