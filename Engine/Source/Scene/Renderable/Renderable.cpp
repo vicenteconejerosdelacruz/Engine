@@ -695,7 +695,7 @@ namespace Scene
 		using namespace Animation;
 		auto& animations = animable->animations;
 
-		TraverseMultiplycationQueue(animationTime(), animation(), animations, bonesTransformation);
+		TraverseMultiplycationQueue(animationTime(), animation(), animations, bonesTransformation, sequenceBoneTransformations);
 	}
 
 	void Renderable::Destroy()

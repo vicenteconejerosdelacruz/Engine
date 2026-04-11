@@ -16,6 +16,11 @@ ChannelElement::ChannelElement(const ChannelElement& other)
 		transformation = other.transformation;
 	}
 	break;
+	case SCET_BoneTransformation:
+	{
+		boneTransformation = other.boneTransformation;
+	}
+	break;
 	case SCET_SoundFX:
 	{
 		soundfx = other.soundfx;
@@ -47,6 +52,11 @@ ChannelElement::ChannelElement(const nlohmann::json& j)
 	case SCET_Transformation:
 	{
 		transformation = SequenceChannelElementTransformation(j.at("transformation"));
+	}
+	break;
+	case SCET_BoneTransformation:
+	{
+		boneTransformation = SequenceChannelElementBoneTransformation(j.at("boneTransformation"));
 	}
 	break;
 	case SCET_SoundFX:
@@ -112,6 +122,15 @@ void ChannelElement::Move(int frames, int totalFrames, int framesPerSecond)
 		}
 		transformation.keyFrames = newKeys;
 	}
+	if (type == SCET_BoneTransformation)
+	{
+		std::unordered_map<int, TransformationKeyFrame> newKeys;
+		for (auto& [k, v] : boneTransformation.keyFrames)
+		{
+			newKeys.insert_or_assign(k + frames, v);
+		}
+		boneTransformation.keyFrames = newKeys;
+	}
 }
 
 std::tuple<ChannelElement, ChannelElement> ChannelElement::Split(int frame)
@@ -168,6 +187,28 @@ std::tuple<ChannelElement, ChannelElement> ChannelElement::Split(int frame)
 		);
 	}
 	break;
+	case SCET_BoneTransformation:
+	{
+		std::copy_if(
+			boneTransformation.keyFrames.begin(),
+			boneTransformation.keyFrames.end(),
+			std::inserter(left.boneTransformation.keyFrames, left.boneTransformation.keyFrames.begin()),
+			[frame](const std::pair<int, TransformationKeyFrame>& p) {
+				return p.first < frame;
+			}
+		);
+		std::copy_if(
+			boneTransformation.keyFrames.begin(),
+			boneTransformation.keyFrames.end(),
+			std::inserter(right.boneTransformation.keyFrames, right.boneTransformation.keyFrames.begin()),
+			[frame](const std::pair<int, TransformationKeyFrame>& p) {
+				return p.first >= frame;
+			}
+		);
+		left.boneTransformation.bone = boneTransformation.bone;
+		right.boneTransformation.bone = boneTransformation.bone;
+	}
+	break;
 	case SCET_SoundFX:
 	{
 		left.soundfx.sound = soundfx.sound;
@@ -219,6 +260,11 @@ void ChannelElement::ExpandLeftBorder(int numFrames)
 		transformation.ExpandLeftBorder(numFrames);
 	}
 	break;
+	case SCET_BoneTransformation:
+	{
+		boneTransformation.ExpandLeftBorder(numFrames);
+	}
+	break;
 	case SCET_SoundFX:
 	{
 		soundfx.ExpandLeftBorder(numFrames);
@@ -250,6 +296,11 @@ void ChannelElement::ExpandRightBorder(int numFrames)
 		transformation.ExpandRightBorder(numFrames);
 	}
 	break;
+	case SCET_BoneTransformation:
+	{
+		boneTransformation.ExpandRightBorder(numFrames);
+	}
+	break;
 	case SCET_SoundFX:
 	{
 		soundfx.ExpandRightBorder(numFrames);
@@ -274,6 +325,7 @@ SequenceChannelElement* ChannelElement::GetElementPointer()
 	{
 		{ SCET_Animation, &animation },
 		{ SCET_Transformation, &transformation },
+		{ SCET_BoneTransformation, &boneTransformation },
 		{ SCET_SoundFX, &soundfx },
 		{ SCET_Script, &script },
 		{ SCET_Trigger, &trigger },
@@ -293,6 +345,11 @@ int ChannelElement::GetFrameStart()
 	case SCET_Transformation:
 	{
 		return transformation.frameStart;
+	}
+	break;
+	case SCET_BoneTransformation:
+	{
+		return boneTransformation.frameStart;
 	}
 	break;
 	case SCET_SoundFX:
@@ -326,6 +383,11 @@ int ChannelElement::GetFrameEnd()
 	case SCET_Transformation:
 	{
 		return transformation.frameEnd;
+	}
+	break;
+	case SCET_BoneTransformation:
+	{
+		return boneTransformation.frameEnd;
 	}
 	break;
 	case SCET_SoundFX:
@@ -394,6 +456,11 @@ nlohmann::json ChannelElement::json()
 	case SCET_Transformation:
 	{
 		j["transformation"] = transformation.json();
+	}
+	break;
+	case SCET_BoneTransformation:
+	{
+		j["boneTransformation"] = boneTransformation.json();
 	}
 	break;
 	case SCET_SoundFX:

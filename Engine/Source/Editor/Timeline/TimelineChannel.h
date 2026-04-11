@@ -26,6 +26,7 @@ struct TimelineChannel
 	static inline ImU32 frameWithElementBorderColor = rgba(43, 43, 43, 1);
 	static inline ImU32 frameCircleColor = rgba(43, 43, 43, 1);
 	static inline ImU32 frameTransformationKeyFrameCircleColor = rgba(34, 97, 41, 1);
+	static inline ImU32 frameBoneTransformationKeyFrameCircleColor = rgba(98, 44, 153, 1);
 	static inline float frameBorderMouseDistance = 2.0f;
 	static inline float frameBorderMouseThickness = 2.0f;
 	static inline float frameBorderLeftThicknessAdjustment = 1.0f;

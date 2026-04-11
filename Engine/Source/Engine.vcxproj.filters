@@ -690,6 +690,12 @@
     <ClInclude Include="Animation\Sequence\Channels\Elements\SequenceChannelElementTrigger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Animation\Sequence\Channels\Elements\SequenceChannelElementBoneTransformation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Sequence\Channels\Elements\TransformationKeyFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -1026,6 +1032,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Animation\Sequence\Channels\Elements\SequenceChannelElementTrigger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Sequence\Channels\Elements\SequenceChannelElementBoneTransformation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Sequence\Channels\Elements\TransformationKeyFrame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

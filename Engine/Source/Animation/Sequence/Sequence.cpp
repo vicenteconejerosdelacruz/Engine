@@ -127,6 +127,20 @@ XMMATRIX Sequence::GetTransformationAtFrame(int frame)
 	return transformation->GetTransformationInFrame(frame);
 }
 
+Animation::BonesTransformations Sequence::GetBonesTransformations(int frame)
+{
+	Animation::BonesTransformations boneTransformations;
+
+	for (SequenceChannel& channel : sequenceChannels)
+	{
+		SequenceChannelElementBoneTransformation* t = channel.GetBoneTransformationElementAtFrame(frame);
+		if (t == nullptr || t->bone.empty()) continue;
+		boneTransformations.insert_or_assign(t->bone, t->GetTransformationInFrame(frame));
+	}
+
+	return boneTransformations;
+}
+
 void Sequence::CreateSoundFXsAtFrame(int frame, SceneUnitId id)
 {
 	std::set<SequenceChannelElementSoundFX*> soundfxs;

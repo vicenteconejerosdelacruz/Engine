@@ -294,6 +294,15 @@ std::tuple<bool, bool, bool, bool> TimelineChannel::DrawChannelFrame(SequenceCha
 			float radius = (pMax.x - pMin.x) / 4.0f;
 			draw_list->AddCircleFilled(center, radius, frameTransformationKeyFrameCircleColor, 10);
 		}
+		if (seqChannel.FrameHasBoneTransformationKeyframe(frame))
+		{
+			ImVec2 center(
+				pMin.x + (pMax.x - pMin.x) * 0.5f,
+				pMin.y + 5
+			);
+			float radius = (pMax.x - pMin.x) / 4.0f;
+			draw_list->AddCircleFilled(center, radius, frameBoneTransformationKeyFrameCircleColor, 10);
+		}
 		if (rightBounded)
 		{
 			rightBoundaryDrag = mouseInFrame && (pMax.x - mouse.x) < frameBorderMouseDistance;

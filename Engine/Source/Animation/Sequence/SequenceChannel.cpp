@@ -221,6 +221,16 @@ bool SequenceChannel::FrameHasTransformationKeyframe(int frame)
 	return transformation->keyFrames.contains(frame);
 }
 
+bool SequenceChannel::FrameHasBoneTransformationKeyframe(int frame)
+{
+	if (!ChannelHasElementAtFrame(frame)) return false;
+
+	SequenceChannelElementBoneTransformation* boneTransformation = GetBoneTransformationElementAtFrame(frame);
+	if (!boneTransformation) return false;
+
+	return boneTransformation->keyFrames.contains(frame);
+}
+
 void SequenceChannel::EraseElementInFrame(int frame)
 {
 	EraseElement(GetFirstElementIndexBetweenFrames(frame, frame));
@@ -259,6 +269,22 @@ SequenceChannelElementTransformation* SequenceChannel::GetTransformationElementA
 			continue;
 		if (frame >= element.GetFrameStart())
 			curr = &element.transformation;
+	}
+	return curr;
+}
+
+SequenceChannelElementBoneTransformation* SequenceChannel::GetBoneTransformationElementAtFrame(int frame)
+{
+	SequenceChannelElementBoneTransformation* curr = nullptr;
+	for (int i = 0; i < elements.size(); i++)
+	{
+		ChannelElement& element = elements.at(i);
+		if (element.type != SCET_BoneTransformation)
+			continue;
+		if (frame < element.GetFrameStart())
+			continue;
+		if (frame >= element.GetFrameStart())
+			curr = &element.boneTransformation;
 	}
 	return curr;
 }

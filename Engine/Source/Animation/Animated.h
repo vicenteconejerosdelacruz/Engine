@@ -18,7 +18,6 @@ using namespace Scene;
 
 namespace Animation
 {
-
 	static const unsigned int MAX_BONES = 1024U;
 	typedef XMMATRIX BonesMatrices[MAX_BONES];
 
@@ -53,6 +52,8 @@ namespace Animation
 
 	typedef std::unordered_map<std::string, BoneKeys> BonesKeysMap;
 	typedef std::unordered_map<std::string, BonesKeysMap> AnimationBonesKeys;
+	typedef std::unordered_map<std::string, std::string> ParentBones;
+	typedef std::unordered_map<std::string, HierarchyNode*> BoneNodePointer;
 
 	typedef std::pair<HierarchyNode*, bool> MultiplyCmd;
 	typedef std::queue<MultiplyCmd> MultiplyCmdQueue;
@@ -66,11 +67,14 @@ namespace Animation
 		AnimationBonesKeys animationsBonesKeys;
 		HierarchyNode rootHierarchy;
 		MultiplyCmdQueue multiplyNavigator;
+
+		BoneNodePointer boneNodePointers;
+		ParentBones bonesParents;
 	};
 
 	void BuildBonesOffsets(const aiScene* aiModel, BonesTransformations& bonesOffsets);
 	void BuildAnimationBonesKeys(const aiScene* model, AnimationBonesKeys& animationBonesKeys);
-	void BuildNodesHierarchy(aiNode* node, HierarchyNode* nodeInHierarchy, MultiplyCmdQueue& multiplyNavigator);
+	void BuildNodesHierarchy(aiNode* node, HierarchyNode* nodeInHierarchy, MultiplyCmdQueue& multiplyNavigator, BoneNodePointer& boneNodePointers, ParentBones& bonesParents, std::string parentName = "");
 	void DestroyNodesHierarchy(HierarchyNode* node);
 	std::unique_ptr<Animated> CreateAnimatedFromAssimp(const aiScene* aiModel);
 
@@ -81,6 +85,6 @@ namespace Animation
 	ConstantsBufferID GetAnimatedConstantsBuffer(RenderableID renderable);
 	void WriteBoneTransformationsToConstantsBuffer(RenderableID renderable, BonesTransformations& bonesTransformation, unsigned int backbufferIndex);
 
-	void TraverseMultiplycationQueue(float time, std::string currentAnimation, std::unique_ptr<Animated>& animations, BonesTransformations& bonesTransformation);
-	void TraverseMultiplycationQueue(float time, MultiplyCmdQueue& cmds, BonesKeysMap& boneKeys, BonesTransformations& bonesTransformation, BonesTransformations& bonesOffsets, XMMATRIX& rootNodeInverseTransform, XMMATRIX parentTransformation);
+	void TraverseMultiplycationQueue(float time, std::string currentAnimation, std::unique_ptr<Animated>& animations, BonesTransformations& bonesTransformation, BonesTransformations& sequenceBoneTransformations);
+	void TraverseMultiplycationQueue(float time, MultiplyCmdQueue& cmds, BonesKeysMap& boneKeys, BonesTransformations& bonesTransformation, BonesTransformations& bonesOffsets, BonesTransformations& sequenceBoneTransformations, XMMATRIX& rootNodeInverseTransform, XMMATRIX parentTransformation);
 }

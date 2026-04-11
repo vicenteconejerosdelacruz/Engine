@@ -21,6 +21,7 @@ struct SequenceChannel
 	int GetElementIndexBeforeFrame(int frame);
 	SequenceChannelElementAnimation* GetAnimationElementAtFrame(int frame);
 	SequenceChannelElementTransformation* GetTransformationElementAtFrame(int frame);
+	SequenceChannelElementBoneTransformation* GetBoneTransformationElementAtFrame(int frame);
 	TransformationKeyFrame* GetTransformationKeyframe(int frame);
 	SequenceChannelElementSoundFX* GetSoundFXToCreateAtFrame(int frame);
 	SequenceChannelElementScript* GetScriptToRunAtFrame(int frame);
@@ -34,6 +35,7 @@ struct SequenceChannel
 	void SplitElement(int elementIndex, int frame);
 	bool FrameHasElement(int frame, bool& leftBounded, bool& rightBounded);
 	bool FrameHasTransformationKeyframe(int frame);
+	bool FrameHasBoneTransformationKeyframe(int frame);
 	void EraseElementInFrame(int frame);
 	void SplitElementInFrame(int frame);
 

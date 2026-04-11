@@ -25,6 +25,9 @@ void AddElementPopup::Init(RenderableID renderable, int frame)
 	//transformation
 	transformation.frameStart = frame;
 
+	//boneTransformation
+	boneTransformation.frameStart = frame;
+
 	//sound effects
 	soundEffects = Templates::GetSoundsUUIDsNames();
 	selectedSoundEffect = soundEffects.at(0);
@@ -134,6 +137,7 @@ void AddElementPopup::Draw(ImVec2 pos, std::unordered_map<SequenceChannelElement
 			{
 				{ SCET_Animation, &animation },
 				{ SCET_Transformation, &transformation },
+				{ SCET_BoneTransformation, &boneTransformation },
 				{ SCET_SoundFX, &soundfx },
 				{ SCET_Script, &script },
 				{ SCET_Trigger, &trigger },
@@ -196,6 +200,18 @@ void InteractElementPopup::Draw(
 		}
 		options.push_back(std::make_tuple("Flip", IP_Transformation_Flip, true));
 		size.y += 35;
+	}
+	else if (element.type == SCET_BoneTransformation)
+	{
+		if (element.boneTransformation.keyFrames.contains(frame))
+		{
+			options.push_back(std::make_tuple("Remove Bone Keyframe", IP_BoneTransformation_RemoveKeyframe, true));
+		}
+		else
+		{
+			options.push_back(std::make_tuple("Add Bone Keyframe", IP_BoneTransformation_AddKeyframe, true));
+		}
+		size.y += 20;
 	}
 	else if (element.type == SCET_Script)
 	{

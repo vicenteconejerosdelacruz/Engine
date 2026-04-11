@@ -131,6 +131,7 @@ void TimelineEditor::DrawAddChannelButton(Sequence& sequence, ImVec2 pos, bool c
 
 void TimelineEditor::DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract,
 	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
+	std::function<void(SequenceChannelElementBoneTransformation*, TransformationKeyFrame*, int)> setBoneTransformationKeyFrame,
 	std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
 	std::function<void(int channel)> onChannelDeleted
 )
@@ -213,7 +214,17 @@ void TimelineEditor::DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2
 		auto& [channel, frame] = selectedChannelFrame;
 		auto* elemKeyFrame = sequence.sequenceChannels.at(channel).GetTransformationKeyframe(frame);
 		auto* elemTrigger = sequence.sequenceChannels.at(channel).GetTriggerElementAtFrame(frame);
-		setTransformationKeyFrame(elemKeyFrame, frame);
+		auto* boneTransformation = sequence.sequenceChannels.at(channel).GetBoneTransformationElementAtFrame(frame);
+		auto* elemBoneKeyFrame = (boneTransformation && boneTransformation->keyFrames.contains(frame)) ? &boneTransformation->keyFrames.at(frame) : nullptr;
+
+		if (!boneTransformation)
+		{
+			setTransformationKeyFrame(elemKeyFrame, frame);
+		}
+		else
+		{
+			setBoneTransformationKeyFrame(elemBoneKeyFrame ? boneTransformation : nullptr, elemBoneKeyFrame, frame);
+		}
 		setElementTrigger(elemTrigger);
 		SelectFrameInChannel(channel, frame);
 	}
@@ -487,6 +498,8 @@ void TimelineEditor::DrawSelectedFrameVerticalLine(ImVec2 timelinePos, ImVec2 ti
 void TimelineEditor::DrawActionPopup(RenderableID renderable, Sequence& sequence,
 	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
 	std::function<void()> deleteTransformationKeyFrame,
+	std::function<void(SequenceChannelElementBoneTransformation*, TransformationKeyFrame*, int)> setBoneTransformationKeyFrame,
+	std::function<void()> deleteBoneTransformationKeyFrame,
 	std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit,
 	std::function<void()> onTriggerAdded,
 	std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit
@@ -508,6 +521,12 @@ void TimelineEditor::DrawActionPopup(RenderableID renderable, Sequence& sequence
 			{ SCET_Transformation, [this, &sequence, channel](SequenceChannelElement* elem)
 			{
 				AddTransformationElementToChannel(sequence, channel, static_cast<SequenceChannelElementTransformation*>(elem));
+				popup = TP_None;
+			}
+			},
+			{ SCET_BoneTransformation, [this, &sequence, channel](SequenceChannelElement* elem)
+			{
+				AddBoneTransformationElementToChannel(sequence, channel, static_cast<SequenceChannelElementBoneTransformation*>(elem));
 				popup = TP_None;
 			}
 			},
@@ -579,6 +598,22 @@ void TimelineEditor::DrawActionPopup(RenderableID renderable, Sequence& sequence
 				setTransformationKeyFrame(nullptr,-1);
 				RemoveKeyframeFromTransformationElementInFrameAtChannel(sequence, channel, frame);
 				deleteTransformationKeyFrame();
+				popup = TP_None;
+			}
+			},
+			{ IP_BoneTransformation_AddKeyframe, [this, &sequence, channel, frame, setBoneTransformationKeyFrame]()
+			{
+				AddKeyframeToBoneTransformationElementInFrameAtChannel(sequence, channel, frame);
+				TransformationKeyFrame& keyFrame = sequence.sequenceChannels.at(channel).GetBoneTransformationElementAtFrame(frame)->keyFrames.at(frame);
+				setBoneTransformationKeyFrame(sequence.sequenceChannels.at(channel).GetBoneTransformationElementAtFrame(frame), &keyFrame, frame);
+				popup = TP_None;
+			}
+			},
+			{ IP_BoneTransformation_RemoveKeyframe, [this, &sequence, channel, frame,deleteBoneTransformationKeyFrame,setBoneTransformationKeyFrame]()
+			{
+				setBoneTransformationKeyFrame(nullptr, nullptr, -1);
+				RemoveKeyframeFromBoneTransformationElementInFrameAtChannel(sequence, channel, frame);
+				deleteBoneTransformationKeyFrame();
 				popup = TP_None;
 			}
 			},
@@ -668,10 +703,12 @@ void TimelineEditor::DrawActionPopup(RenderableID renderable, Sequence& sequence
 
 void TimelineEditor::Draw(RenderableID renderable, Sequence& sequence, ImVec2 pos, ImVec2 size,
 	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
-	std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
 	std::function<void()> deleteTransformationKeyFrame,
+	std::function<void(SequenceChannelElementBoneTransformation*, TransformationKeyFrame*, int)> setBoneTransformationKeyFrame,
+	std::function<void()> deleteBoneTransformationKeyFrame,
 	std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit,
 	std::function<void()> onTriggerAdded,
+	std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
 	std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit,
 	std::function<void(int channel)> onChannelDeleted
 )
@@ -688,12 +725,12 @@ void TimelineEditor::Draw(RenderableID renderable, Sequence& sequence, ImVec2 po
 	bool draging = elementDrag || elementDragLeftBoundary || elementDragRightBoundary;
 	DrawBackground(pos, size);
 	DrawAddChannelButton(sequence, pos, canInteract && !markerMouseDrag && !draging);
-	DrawTimeline(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging, setTransformationKeyFrame, setElementTrigger, onChannelDeleted);
+	DrawTimeline(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging, setTransformationKeyFrame, setBoneTransformationKeyFrame, setElementTrigger, onChannelDeleted);
 	DrawMarkers(sequence, timelinePos, timelineSize, canInteract && !draging);
 	DrawSelectedFrameVerticalLine(timelinePos, timelineSize);
 	DrawVerticalScrollbar(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging);
 	DrawHorizontalScrollbar(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging);
-	DrawActionPopup(renderable, sequence, setTransformationKeyFrame, deleteTransformationKeyFrame, setScriptToEdit, onTriggerAdded, setTriggerScriptToEdit);
+	DrawActionPopup(renderable, sequence, setTransformationKeyFrame, deleteTransformationKeyFrame, setBoneTransformationKeyFrame, deleteBoneTransformationKeyFrame, setScriptToEdit, onTriggerAdded, setTriggerScriptToEdit);
 	HandleElementDrag(sequence);
 	HandleElementDragLeftBoundary(sequence);
 	HandleElementDragRightBoundary(sequence);
@@ -939,6 +976,18 @@ void TimelineEditor::AddTransformationElementToChannel(Sequence& sequence, int c
 	seqChannel.InsertChannelElement(chanElem, sequence.totalFrames, sequence.framesPerSecond);
 }
 
+void TimelineEditor::AddBoneTransformationElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementBoneTransformation* elem)
+{
+	SequenceChannel& seqChannel = sequence.sequenceChannels.at(channelId);
+	ChannelElement chanElem;
+	chanElem.type = SCET_BoneTransformation;
+	SequenceChannelElementBoneTransformation& transformation = chanElem.boneTransformation;
+	transformation.frameStart = elem->frameStart;
+	transformation.frameEnd = elem->frameStart;
+	transformation.bone = "";
+	seqChannel.InsertChannelElement(chanElem, sequence.totalFrames, sequence.framesPerSecond);
+}
+
 void TimelineEditor::AddSoundFXElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementSoundFX* elem)
 {
 	SequenceChannel& seqChannel = sequence.sequenceChannels.at(channelId);
@@ -1020,6 +1069,23 @@ void TimelineEditor::AddKeyframeToTransformationElementInFrameAtChannel(Sequence
 	}
 }
 
+void TimelineEditor::AddKeyframeToBoneTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame)
+{
+	SequenceChannel& seqChannel = sequence.sequenceChannels.at(channelId);
+	int elementIndex = seqChannel.GetFirstElementIndexBetweenFrames(frame, frame);
+	if (elementIndex == -1) return;
+	ChannelElement& element = seqChannel.elements.at(elementIndex);
+	TransformationKeyFrame prevKeyframe = element.boneTransformation.GetKeyFrameBeforeFrame(frame);
+	if (element.boneTransformation.HasKeyframeAfterFrame(frame))
+	{
+		element.boneTransformation.CreateInterpolatedKeyFrame(frame);
+	}
+	else
+	{
+		element.boneTransformation.keyFrames.insert_or_assign(frame, prevKeyframe);
+	}
+}
+
 void TimelineEditor::RemoveKeyframeFromTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame)
 {
 	SequenceChannel& seqChannel = sequence.sequenceChannels.at(channelId);
@@ -1028,6 +1094,16 @@ void TimelineEditor::RemoveKeyframeFromTransformationElementInFrameAtChannel(Seq
 	ChannelElement& element = seqChannel.elements.at(elementIndex);
 	TransformationKeyFrame prevKeyframe = element.transformation.GetKeyFrameBeforeFrame(frame);
 	element.transformation.keyFrames.erase(frame);
+}
+
+void TimelineEditor::RemoveKeyframeFromBoneTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame)
+{
+	SequenceChannel& seqChannel = sequence.sequenceChannels.at(channelId);
+	int elementIndex = seqChannel.GetFirstElementIndexBetweenFrames(frame, frame);
+	if (elementIndex == -1) return;
+	ChannelElement& element = seqChannel.elements.at(elementIndex);
+	TransformationKeyFrame prevKeyframe = element.boneTransformation.GetKeyFrameBeforeFrame(frame);
+	element.boneTransformation.keyFrames.erase(frame);
 }
 
 void TimelineEditor::FlipTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame)

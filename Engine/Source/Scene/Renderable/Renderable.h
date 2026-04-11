@@ -206,6 +206,7 @@ namespace Scene
 		XMMATRIX animationTransformation;
 		AnimationSequences animationsSequences;
 		SequencePlayer sequencePlayer;
+		Animation::BonesTransformations sequenceBoneTransformations;
 		//Cameras
 		std::set<CameraID> bindedCameras;
 

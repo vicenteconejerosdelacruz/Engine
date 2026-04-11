@@ -54,11 +54,13 @@ namespace Animation {
 		}
 	}
 
-	void BuildNodesHierarchy(aiNode* node, HierarchyNode* nodeInHierarchy, MultiplyCmdQueue& multiplyNavigator)
+	void BuildNodesHierarchy(aiNode* node, HierarchyNode* nodeInHierarchy, MultiplyCmdQueue& multiplyNavigator, BoneNodePointer& boneNodePointers, ParentBones& bonesParents, std::string parentName)
 	{
 		nodeInHierarchy->numChildren = 0;
 		nodeInHierarchy->children = nullptr;
 		std::string nodeName = node->mName.C_Str();
+		bonesParents.insert_or_assign(parentName, nodeName);
+		boneNodePointers.insert_or_assign(nodeName, nodeInHierarchy);
 		nodeInHierarchy->name = nodeName;
 		nodeInHierarchy->transformation = XMMATRIX(&node->mTransformation.a1);
 		if (node->mNumChildren > 0)
@@ -69,7 +71,7 @@ namespace Animation {
 			unsigned int childOffset = 0;
 			for (auto childNode = node->mChildren; childNode < (node->mChildren + node->mNumChildren); childNode++, childOffset++)
 			{
-				BuildNodesHierarchy(*childNode, &nodeInHierarchy->children[childOffset], multiplyNavigator);
+				BuildNodesHierarchy(*childNode, &nodeInHierarchy->children[childOffset], multiplyNavigator, boneNodePointers, bonesParents, nodeName);
 			}
 			multiplyNavigator.push(MultiplyCmd(nodeInHierarchy, false));
 		}
@@ -110,7 +112,7 @@ namespace Animation {
 		BuildAnimationBonesKeys(aiModel, animated->animationsBonesKeys);
 
 		//now build the nodes hierarchy
-		BuildNodesHierarchy(aiModel->mRootNode, &animated->rootHierarchy, animated->multiplyNavigator);
+		BuildNodesHierarchy(aiModel->mRootNode, &animated->rootHierarchy, animated->multiplyNavigator, animated->boneNodePointers, animated->bonesParents);
 
 		return animated;
 	}
@@ -178,9 +180,9 @@ namespace Animation {
 		return ToMatrix(keyFrames[0].key);
 	}
 
-	void TraverseMultiplycationQueue(float time, std::string currentAnimation, std::unique_ptr<Animated>& animations, BonesTransformations& bonesTransformation)
+	void TraverseMultiplycationQueue(float time, std::string currentAnimation, std::unique_ptr<Animated>& animations, BonesTransformations& bonesTransformation, BonesTransformations& sequenceBoneTransformations)
 	{
-		TraverseMultiplycationQueue(time, animations->multiplyNavigator, animations->animationsBonesKeys[currentAnimation], bonesTransformation, animations->bonesOffsets, animations->rootNodeInverseTransform, XMMatrixIdentity());
+		TraverseMultiplycationQueue(time, animations->multiplyNavigator, animations->animationsBonesKeys[currentAnimation], bonesTransformation, animations->bonesOffsets, sequenceBoneTransformations, animations->rootNodeInverseTransform, XMMatrixIdentity());
 	}
 
 	static const XMMATRIX BonesTransformationFlipmYZ = XMMatrixSet(
@@ -189,7 +191,7 @@ namespace Animation {
 		0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
 	);
-	void TraverseMultiplycationQueue(float time, MultiplyCmdQueue& cmds, BonesKeysMap& boneKeys, BonesTransformations& bonesTransformation, BonesTransformations& bonesOffsets, XMMATRIX& rootNodeInverseTransform, XMMATRIX parentTransformation)
+	void TraverseMultiplycationQueue(float time, MultiplyCmdQueue& cmds, BonesKeysMap& boneKeys, BonesTransformations& bonesTransformation, BonesTransformations& bonesOffsets, BonesTransformations& sequenceBoneTransformations, XMMATRIX& rootNodeInverseTransform, XMMATRIX parentTransformation)
 	{
 		auto execCmds = cmds;
 		std::stack<XMMATRIX> transformation;
@@ -218,6 +220,11 @@ namespace Animation {
 					XMMATRIX rotation = InterpolateKeys(XMMatrixRotationQuaternion, XMQuaternionSlerp, time, keys->second.rotation);
 					XMMATRIX translation = InterpolateKeys(XMMatrixTranslationFromVector, XMVectorLerp, time, keys->second.positions);
 					nodeTransformation = XMMatrixTranspose(XMMatrixMultiply(scaling, XMMatrixMultiply(rotation, translation)));
+				}
+
+				if (sequenceBoneTransformations.contains(node->name))
+				{
+					nodeTransformation = XMMatrixMultiply(nodeTransformation, XMMatrixTranspose(sequenceBoneTransformations.at(node->name)));
 				}
 
 				transformation.push(XMMatrixMultiply(transformation.top(), nodeTransformation));

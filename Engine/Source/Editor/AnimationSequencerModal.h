@@ -45,6 +45,7 @@ struct AnimationSequencerModal
 	void DrawTitleBar(const char* title, ImVec2 pos, ImVec2 size, bool& exit);
 	void DrawSequenceSelector(ImVec2 curPos, std::function<void(std::string)> onSelectSequence, std::function<void(std::string)> onEraseSequence, std::function<void(std::string)> onRenameSequence, std::function<void(std::string)> onCloneSequence, std::function<void()> onAddSequence);
 	void DrawModelPreview(ImVec2 curPos, ImVec2 size);
+	void DrawBoneTransformationKeyFrameAttributes(SequenceChannelElementBoneTransformation& boneTransformation, TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size);
 	void DrawTransformationKeyFrameAttributes(TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size);
 	void DrawElementTriggerAttributes(SequenceChannelElementTrigger& elementTrigger, ImVec2 pos, ImVec2 size);
 	void DrawTimelineController(ImVec2 curPos, ImVec2 size, Sequence& sequence);
@@ -100,13 +101,19 @@ struct AnimationSequencerModal
 	bool adjustToBoundingBox = true;
 
 	//timeline editor
+	//the "next" is because ImGui will change data if we set the pointer directly
 	TimelineEditor timelineEditor;
+	//keyframe transformation and bone transformation
+	SequenceChannelElementType selectedTransformationKeyFrameType;
+	SequenceChannelElementBoneTransformation* selectedBoneTransformation;
 	TransformationKeyFrame* selectedTransformationKeyframe;
 	int keyFrameFrame;
-	SequenceChannelElementTrigger* selectedElementTrigger;
-	//this "next" is because ImGui will change data if we set the pointer directly
+	SequenceChannelElementType nextSelectedTransformationKeyFrameType;
 	TransformationKeyFrame* nextSelectedTransformationKeyframe;
 	int nextSelectedKeyFrameFrame;
+
+	//trigger
+	SequenceChannelElementTrigger* selectedElementTrigger;
 	SequenceChannelElementTrigger* nextSelectedElementTrigger;
 	SequencePlayer sequencePlayer;
 

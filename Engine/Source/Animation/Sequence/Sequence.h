@@ -4,6 +4,7 @@
 #include <vector>
 #include "SequenceChannel.h"
 #include "Channels/Elements/SequenceChannelElementAnimation.h"
+#include <Animated.h>
 
 struct Sequence
 {
@@ -18,6 +19,8 @@ struct Sequence
 	SequenceChannelElementAnimation* GetAnimationElementAtFrame(int frame);
 	std::set<SequenceChannelElementTrigger*> GetTriggerElements();
 	XMMATRIX GetTransformationAtFrame(int frame);
+	Animation::BonesTransformations GetBonesTransformations(int frame);
+
 	void CreateSoundFXsAtFrame(int frame, SceneUnitId id);
 	void RunScriptAtFrame(int frame, RenderableID renderable);
 	bool Runnable() const;

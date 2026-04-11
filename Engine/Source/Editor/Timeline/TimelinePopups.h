@@ -31,6 +31,7 @@ struct AddElementPopup
 	SequenceChannelElementType type = SCET_Animation;
 	SequenceChannelElementAnimation animation;
 	SequenceChannelElementTransformation transformation;
+	SequenceChannelElementBoneTransformation boneTransformation;
 	SequenceChannelElementSoundFX soundfx;
 	SequenceChannelElementScript script;
 	SequenceChannelElementTrigger trigger;
@@ -55,6 +56,8 @@ enum InteractPopups
 	IP_Transformation_AddKeyframe,
 	IP_Transformation_RemoveKeyframe,
 	IP_Transformation_Flip,
+	IP_BoneTransformation_AddKeyframe,
+	IP_BoneTransformation_RemoveKeyframe,
 	IP_Script_Edit,
 	IP_Trigger_OnEnter,
 	IP_Trigger_OnLeave,

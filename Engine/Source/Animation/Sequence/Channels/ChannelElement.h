@@ -2,6 +2,7 @@
 
 #include "Elements/SequenceChannelElementAnimation.h"
 #include "Elements/SequenceChannelElementTransformation.h"
+#include "Elements/SequenceChannelElementBoneTransformation.h"
 #include "Elements/SequenceChannelElementSoundFX.h"
 #include "Elements/SequenceChannelElementScript.h"
 #include "Elements/SequenceChannelElementTrigger.h"
@@ -10,6 +11,7 @@ enum SequenceChannelElementType
 {
 	SCET_Animation,
 	SCET_Transformation,
+	SCET_BoneTransformation,
 	SCET_SoundFX,
 	SCET_Script,
 	SCET_Trigger,
@@ -19,6 +21,7 @@ static inline std::unordered_map<SequenceChannelElementType, std::string> Sequen
 {
 	{ SCET_Animation, "animation" },
 	{ SCET_Transformation, "transformation" },
+	{ SCET_BoneTransformation, "boneTransformation" },
 	{ SCET_SoundFX, "soundfx" },
 	{ SCET_Script, "script" },
 	{ SCET_Trigger, "trigger" },
@@ -28,6 +31,7 @@ static inline std::unordered_map<std::string, SequenceChannelElementType> StrToS
 {
 	{ "animation", SCET_Animation },
 	{ "transformation", SCET_Transformation },
+	{ "boneTransformation", SCET_BoneTransformation },
 	{ "soundfx", SCET_SoundFX },
 	{ "script", SCET_Script },
 	{ "trigger", SCET_Trigger },
@@ -58,6 +62,7 @@ struct ChannelElement
 	SequenceChannelElementType type;
 	SequenceChannelElementAnimation animation;
 	SequenceChannelElementTransformation transformation;
+	SequenceChannelElementBoneTransformation boneTransformation;
 	SequenceChannelElementSoundFX soundfx;
 	SequenceChannelElementScript script;
 	SequenceChannelElementTrigger trigger;

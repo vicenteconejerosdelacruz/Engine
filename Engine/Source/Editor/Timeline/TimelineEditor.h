@@ -28,6 +28,7 @@ struct TimelineEditor
 	void DrawAddChannelButton(Sequence& sequence, ImVec2 pos, bool canInteract);
 	void DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract,
 		std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
+		std::function<void(SequenceChannelElementBoneTransformation*, TransformationKeyFrame*, int)> setBoneTransformationKeyFrame,
 		std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
 		std::function<void(int channel)> onChannelDeleted
 	);
@@ -37,15 +38,19 @@ struct TimelineEditor
 	void DrawSelectedFrameVerticalLine(ImVec2 timelinePos, ImVec2 timelineSize);
 	void DrawActionPopup(RenderableID renderable, Sequence& sequence, std::function<void(TransformationKeyFrame*, int frame)> setTransformationKeyFrame,
 		std::function<void()> deleteTransformationKeyFrame,
+		std::function<void(SequenceChannelElementBoneTransformation*, TransformationKeyFrame*, int)> setBoneTransformationKeyFrame,
+		std::function<void()> deleteBoneTransformationKeyFrame,
 		std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit,
 		std::function<void()> onTriggerAdded,
 		std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit);
 	void Draw(RenderableID renderable, Sequence& sequence, ImVec2 pos, ImVec2 size,
 		std::function<void(TransformationKeyFrame*, int frame)> setTransformationKeyFrame,
-		std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
 		std::function<void()> deleteTransformationKeyFrame,
+		std::function<void(SequenceChannelElementBoneTransformation*, TransformationKeyFrame*, int)> setBoneTransformationKeyFrame,
+		std::function<void()> deleteBoneTransformationKeyFrame,
 		std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit,
 		std::function<void()> onTriggerAdded,
+		std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
 		std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit,
 		std::function<void(int channel)> onChannelDeleted
 	);
@@ -64,6 +69,7 @@ struct TimelineEditor
 	void ScrollVertical(Sequence& sequence, ImVec2 timelineSize, float quantity);
 	void AddAnimationElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementAnimation* elem);
 	void AddTransformationElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementTransformation* elem);
+	void AddBoneTransformationElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementBoneTransformation* elem);
 	void AddSoundFXElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementSoundFX* elem);
 	void AddScriptElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementScript* elem);
 	void AddTriggerElementToChannel(Sequence& sequence, int channelId, SequenceChannelElementTrigger* elem, std::function<void()> onTriggerAdded);
@@ -71,7 +77,9 @@ struct TimelineEditor
 	void SplitElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
 	void ToggleAnimationElementDirectionInChannelAtFrame(Sequence& sequence, int channelId, int frame);
 	void AddKeyframeToTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
+	void AddKeyframeToBoneTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
 	void RemoveKeyframeFromTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
+	void RemoveKeyframeFromBoneTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
 	void FlipTransformationElementInFrameAtChannel(Sequence& sequence, int channelId, int frame);
 	void OpenScriptEditionForElementInFrameAtChannel(Sequence& sequence, int channelId, int frame,
 		std::function<void(int channel, int frame, SequenceChannelElementScript*)> setScriptToEdit);

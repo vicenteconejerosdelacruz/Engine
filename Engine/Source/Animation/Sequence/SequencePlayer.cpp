@@ -393,6 +393,7 @@ void SequencePlayer::ApplyFrameValues()
 	}
 
 	renderable->animationTransformation = sequence.GetTransformationAtFrame(currentFrame);
+	renderable->sequenceBoneTransformations = sequence.GetBonesTransformations(currentFrame);
 }
 
 void SequencePlayer::ApplyFrameTriggerAvatarValues()

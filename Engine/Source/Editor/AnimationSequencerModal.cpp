@@ -537,6 +537,88 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 	auto [keyframePos, keyframeSize] = getKeyframeValues();
 	auto [scriptEditPos, scriptEditSize] = getScriptEditValues();
 
+	auto transformationKeyFrameSelected = [&](TransformationKeyFrame* tkeyframe, int frame)
+		{
+			selectedTransformationKeyframe = nullptr;
+			keyFrameFrame = -1;
+			nextSelectedTransformationKeyFrameType = SCET_Transformation;
+			nextSelectedTransformationKeyframe = tkeyframe;
+			nextSelectedKeyFrameFrame = frame;
+		};
+	auto transformationKeyFrameDeleted = [&]
+		{
+			selectedTransformationKeyframe = nullptr;
+			keyFrameFrame = -1;
+		};
+	auto boneTransformationKeyFrameSelected = [&](SequenceChannelElementBoneTransformation* boneTransformation, TransformationKeyFrame* tkeyframe, int frame)
+		{
+			selectedBoneTransformation = boneTransformation;
+			selectedTransformationKeyframe = nullptr;
+			keyFrameFrame = -1;
+			nextSelectedTransformationKeyFrameType = SCET_BoneTransformation;
+			nextSelectedTransformationKeyframe = tkeyframe;
+			nextSelectedKeyFrameFrame = frame;
+		};
+	auto boneTransformationKeyFrameDeleted = [&]
+		{
+			selectedTransformationKeyframe = nullptr;
+			keyFrameFrame = -1;
+		};
+	auto setElementTrigger = [&](SequenceChannelElementTrigger* elementTrigger)
+		{
+			selectedElementTrigger = nullptr;
+			nextSelectedElementTrigger = elementTrigger;
+		};
+	auto onDeleteChannel = [&](int channel)
+		{
+			nextSelectedTransformationKeyframe = nullptr;
+			selectedTransformationKeyframe = nullptr;
+			nextSelectedElementTrigger = nullptr;
+			selectedElementTrigger = nullptr;
+		};
+	auto setScriptToEdit = [&](int channel, int frame, SequenceChannelElementScript* scriptToEdit)
+		{
+			selectedScriptChannelFrame = std::make_tuple(channel, frame);
+			selectedScriptType = SCET_Script;
+			selectedScriptToEdit = scriptToEdit;
+			selectedScriptToEditContent = scriptToEdit->script;
+		};
+	auto onTriggerAdded = [&]
+		{
+			sequencePlayer.CreateSequenceTriggersAvatars(cameraUUID);
+		};
+	auto setTriggerScriptToEdit = [&](int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger* scriptToEdit)
+		{
+			selectedScriptChannelFrame = std::make_tuple(channel, frame);
+			selectedScriptType = SCET_Trigger;
+			selectedScriptToEdit = scriptToEdit;
+			selectedScriptToEditContent = onEnterScript ? scriptToEdit->onEnter : scriptToEdit->onLeave;
+			isEnterScript = onEnterScript;
+		};
+	auto onSaveScriptEdit = [&]
+		{
+			if (selectedScriptType == SCET_Script)
+			{
+				((SequenceChannelElementScript*)selectedScriptToEdit)->script = selectedScriptToEditContent;
+			}
+			else if (selectedScriptType == SCET_Trigger)
+			{
+				if (this->isEnterScript)
+				{
+					((SequenceChannelElementTrigger*)selectedScriptToEdit)->onEnter = selectedScriptToEditContent;
+				}
+				else
+				{
+					((SequenceChannelElementTrigger*)selectedScriptToEdit)->onLeave = selectedScriptToEditContent;
+				}
+			}
+			selectedScriptToEdit = nullptr;
+		};
+	auto onCancelScriptEdit = [&]
+		{
+			selectedScriptToEdit = nullptr;
+		};
+
 	if (ImGui::BeginPopupModal(title, nullptr, defaultChildFlag))
 	{
 		DrawTitleBar(title, titlePos, titleSize, exit);
@@ -551,55 +633,29 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 			if (!selectedSequence.empty())
 			{
 				timelineEditor.Draw(renderable, sequencePlayer.sequence, sequencerPos, sequencerSize,
-					[&](TransformationKeyFrame* tkeyframe, int frame)
-					{
-						selectedTransformationKeyframe = nullptr;
-						keyFrameFrame = -1;
-						nextSelectedTransformationKeyframe = tkeyframe;
-						nextSelectedKeyFrameFrame = frame;
-					},
-					[&](SequenceChannelElementTrigger* elementTrigger)
-					{
-						selectedElementTrigger = nullptr;
-						nextSelectedElementTrigger = elementTrigger;
-					},
-					[&]()
-					{
-						selectedTransformationKeyframe = nullptr;
-						keyFrameFrame = -1;
-					},
-					[&](int channel, int frame, SequenceChannelElementScript* scriptToEdit)
-					{
-						selectedScriptChannelFrame = std::make_tuple(channel, frame);
-						selectedScriptType = SCET_Script;
-						selectedScriptToEdit = scriptToEdit;
-						selectedScriptToEditContent = scriptToEdit->script;
-					},
-					[&]
-					{
-						sequencePlayer.CreateSequenceTriggersAvatars(cameraUUID);
-					},
-					[&](int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger* scriptToEdit)
-					{
-						selectedScriptChannelFrame = std::make_tuple(channel, frame);
-						selectedScriptType = SCET_Trigger;
-						selectedScriptToEdit = scriptToEdit;
-						selectedScriptToEditContent = onEnterScript ? scriptToEdit->onEnter : scriptToEdit->onLeave;
-						isEnterScript = onEnterScript;
-					},
-					[&](int channel)
-					{
-						nextSelectedTransformationKeyframe = nullptr;
-						selectedTransformationKeyframe = nullptr;
-						nextSelectedElementTrigger = nullptr;
-						selectedElementTrigger = nullptr;
-					}
+					transformationKeyFrameSelected,
+					transformationKeyFrameDeleted,
+					boneTransformationKeyFrameSelected,
+					boneTransformationKeyFrameDeleted,
+					setScriptToEdit,
+					onTriggerAdded,
+					setElementTrigger,
+					setTriggerScriptToEdit,
+					onDeleteChannel
 				);
 			}
 			if (selectedTransformationKeyframe != nullptr)
 			{
-				DrawTransformationKeyFrameAttributes(*selectedTransformationKeyframe, keyFrameFrame, keyframePos, keyframeSize);
+				if (selectedTransformationKeyFrameType == SCET_Transformation)
+				{
+					DrawTransformationKeyFrameAttributes(*selectedTransformationKeyframe, keyFrameFrame, keyframePos, keyframeSize);
+				}
+				else if (selectedTransformationKeyFrameType == SCET_BoneTransformation)
+				{
+					DrawBoneTransformationKeyFrameAttributes(*selectedBoneTransformation, *selectedTransformationKeyframe, keyFrameFrame, keyframePos, keyframeSize);
+				}
 			}
+
 			if (selectedElementTrigger != nullptr)
 			{
 				DrawElementTriggerAttributes(*selectedElementTrigger, keyframePos, keyframeSize);
@@ -627,29 +683,8 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 				selectedScriptChannelFrame,
 				scriptEditPos,
 				scriptEditSize,
-				[&]()
-				{
-					if (selectedScriptType == SCET_Script)
-					{
-						((SequenceChannelElementScript*)selectedScriptToEdit)->script = selectedScriptToEditContent;
-					}
-					else if (selectedScriptType == SCET_Trigger)
-					{
-						if (this->isEnterScript)
-						{
-							((SequenceChannelElementTrigger*)selectedScriptToEdit)->onEnter = selectedScriptToEditContent;
-						}
-						else
-						{
-							((SequenceChannelElementTrigger*)selectedScriptToEdit)->onLeave = selectedScriptToEditContent;
-						}
-					}
-					selectedScriptToEdit = nullptr;
-				},
-				[&]()
-				{
-					selectedScriptToEdit = nullptr;
-				}
+				onSaveScriptEdit,
+				onCancelScriptEdit
 			);
 		}
 
@@ -659,6 +694,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 
 	if (nextSelectedTransformationKeyframe != nullptr)
 	{
+		selectedTransformationKeyFrameType = nextSelectedTransformationKeyFrameType;
 		selectedTransformationKeyframe = nextSelectedTransformationKeyframe;
 		keyFrameFrame = nextSelectedKeyFrameFrame;
 		nextSelectedTransformationKeyframe = nullptr;
@@ -897,6 +933,107 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 
 	ImGui::PopStyleVar();
 	ImGui::PopStyleVar();
+}
+
+void AnimationSequencerModal::DrawBoneTransformationKeyFrameAttributes(SequenceChannelElementBoneTransformation& boneTransformation, TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size)
+{
+	std::vector<std::string> bones = nostd::GetKeysFromMap(renderable->animable->animations->bonesOffsets);
+
+	const int defaultTableFlags = ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_NoPadInnerX;
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
+
+	ImVec2 attsPos(pos);
+	ImVec2 attsSize(size);
+	ImGui::SetNextWindowPos(attsPos, 0);
+	ImGui::SetNextWindowSize(attsSize, 0);
+	ImGui::BeginChild("keyframe-atts", attsSize, 0);
+	{
+		ImGui::Text(std::string(std::string("keyframe at frame#") + std::to_string(keyFrameFrame)).c_str());;
+
+		ImGui::Text("bone");
+		ImGui::SameLine();
+		ImGui::PushID("keyframe-bone");
+		{
+			ImGui::DrawComboSelection(boneTransformation.bone, bones, [&boneTransformation](std::string selectedBone)
+				{
+					boneTransformation.bone = selectedBone;
+				}
+			);
+		}
+		ImGui::PopID();
+
+		ImGui::Text("position");
+		ImGui::PushID("keyframe-position");
+		if (ImGui::BeginTable("keyframe-position-table", 3, defaultTableFlags))
+		{
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::InputFloat("x", &keyframe.position.x, 0.0f, 0.0f, "%.3f");
+			ImGui::TableSetColumnIndex(1);
+			ImGui::InputFloat("y", &keyframe.position.y, 0.0f, 0.0f, "%.3f");
+			ImGui::TableSetColumnIndex(2);
+			ImGui::InputFloat("z", &keyframe.position.z, 0.0f, 0.0f, "%.3f");
+			ImGui::EndTable();
+		}
+		ImGui::PopID();
+
+		ImGui::Text("rotation");
+		ImGui::PushID("keyframe-rotation");
+		if (ImGui::BeginTable("keyframe-rotation-table", 3, defaultTableFlags))
+		{
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			float pitch = XMConvertToRadians(keyframe.rotation.x);
+			if (ImGui::SliderAngle("pitch", &pitch, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
+			{
+				keyframe.rotation.x = XMConvertToDegrees(pitch);
+			}
+			ImGui::TableSetColumnIndex(1);
+			float yaw = XMConvertToRadians(keyframe.rotation.y);
+			if (ImGui::SliderAngle("yaw", &yaw, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
+			{
+				keyframe.rotation.y = XMConvertToDegrees(yaw);
+			}
+			ImGui::TableSetColumnIndex(2);
+			float roll = XMConvertToRadians(keyframe.rotation.z);
+			if (ImGui::SliderAngle("roll", &roll, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
+			{
+				keyframe.rotation.z = XMConvertToDegrees(roll);
+			}
+			ImGui::EndTable();
+		}
+		ImGui::PopID();
+
+		ImGui::Text("scale");
+		ImGui::PushID("keyframe-scale");
+		if (ImGui::BeginTable("keyframe-scale-table", 3, defaultTableFlags))
+		{
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::InputFloat("x", &keyframe.scale.x, 0.0f, 0.0f, "%.3f");
+			ImGui::TableSetColumnIndex(1);
+			ImGui::InputFloat("y", &keyframe.scale.y, 0.0f, 0.0f, "%.3f");
+			ImGui::TableSetColumnIndex(2);
+			ImGui::InputFloat("z", &keyframe.scale.z, 0.0f, 0.0f, "%.3f");
+			ImGui::EndTable();
+		}
+		ImGui::PopID();
+
+		ImGui::Text("ease");
+		ImGui::PushID("keyframe-easing");
+		std::string selectedEase = EasingToString.at(keyframe.easing);
+		ImGui::DrawComboSelection(selectedEase, nostd::GetKeysFromMap(StringToEasing), [&keyframe](std::string newEase)
+			{
+				keyframe.easing = StringToEasing.at(newEase);
+			}
+		);
+		ImGui::PopID();
+	}
+	ImGui::EndChild();
+
+	ImGui::PopStyleVar(2);
 }
 
 void AnimationSequencerModal::DrawTransformationKeyFrameAttributes(TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size)
