@@ -79,6 +79,7 @@ namespace Game::Brawler
 				{ VS_DetachFromWall, [&](auto* sm, VenomStates prevState) { EnterDetachFromWall(); }},
 				{ VS_Falling, [&](auto* sm, VenomStates prevState) { EnterFalling(); }},
 				{ VS_Death, [&](auto* sm, VenomStates prevState) { EnterDeath(); }},
+				{ VS_WallToSwing, [&](auto* sm, VenomStates prevState) { EnterWallToSwing(); }},
 			},
 			.onLeave = {
 				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { LeaveAttack1(); }},
@@ -267,10 +268,9 @@ namespace Game::Brawler
 	}
 
 	//Joystick
+	static const std::set<VenomStates> noUpdateStates({ VS_RunningJump, VS_JumpDash });
 	void Venom::UpdateLeftStickVector()
 	{
-		std::set<VenomStates> noUpdateStates = { VS_RunningJump, VS_JumpDash };
-
 		if (noUpdateStates.contains(vsm.currentState)) return; //maybe Vec0?
 
 		auto pad = gamePad->GetState(0);
@@ -284,9 +284,10 @@ namespace Game::Brawler
 		}
 	}
 
+	static const std::set<VenomStates> noUpdateLookToStates({ VS_Intro,VS_WallToSwing });
 	void Venom::UpdateLookTo()
 	{
-		if (vsm.currentState == VS_Intro) return;
+		if (noUpdateLookToStates.contains(vsm.currentState)) return;
 
 		float len = leftStick.m128_f32[0];
 
@@ -737,6 +738,10 @@ namespace Game::Brawler
 		{
 			vsm.ChangeState(VS_DetachFromWall);
 		}
+		else if (ShouldWallToSwing())
+		{
+			vsm.ChangeState(VS_WallToSwing);
+		}
 	}
 
 	//WallMove
@@ -767,6 +772,11 @@ namespace Game::Brawler
 		else if (ShouldDetachFromWall())
 		{
 			vsm.ChangeState(VS_DetachFromWall);
+			return;
+		}
+		else if (ShouldWallToSwing())
+		{
+			vsm.ChangeState(VS_WallToSwing);
 			return;
 		}
 
@@ -831,6 +841,16 @@ namespace Game::Brawler
 	void Venom::OnDeathAnimationEnd()
 	{
 	}
+
+	static const std::set<VenomStates> fromWallSwingStates({ VS_WallIdle,VS_CrawlOnWall });
+	bool Venom::ShouldWallToSwing()
+	{
+		return fromWallSwingStates.contains(vsm.currentState) && buttons.rightShoulder == GamePad::ButtonStateTracker::PRESSED;
+	}
+	void Venom::EnterWallToSwing()
+	{
+		venom->SetCurrentAnimation("WallToSwing");
+	}
 }
 
 //Animations chop analysis
@@ -876,6 +896,10 @@ namespace Game::Brawler
 //103501_LowCrawl_Move
 //103501_LowCrawl_Idle_L
 
+//LowCrawl_To_Onwall
 //Onwall_To_Spawn_Web
 //A5*
 //A4*
+
+//subir con red
+//A5_4_L o A4_4_R

@@ -26,7 +26,9 @@ namespace Game
 			VS_CrawlOnWall,
 			VS_DetachFromWall,
 			VS_Falling,
-			VS_Death
+			VS_Death,
+			VS_WallToSwing,
+			VS_Swing,
 		};
 
 		inline static std::unordered_map<std::string, VenomStates> stringToVenomStates =
@@ -47,6 +49,7 @@ namespace Game
 			{ "DetachFromWall", VS_DetachFromWall },
 			{ "Falling", VS_Falling },
 			{ "Death", VS_Death },
+			{ "WallToSwing", VS_WallToSwing },
 		};
 
 		enum WallMovementAxis
@@ -237,6 +240,10 @@ namespace Game
 			void EnterDeath();
 			void OnDeathAnimationEnd();
 
+			//WallToSwing
+			bool ShouldWallToSwing();
+			void EnterWallToSwing();
+
 			//State machine
 			GameStatesMachine<VenomStates> vsm;
 
@@ -272,6 +279,9 @@ namespace Game
 			//JumpDash
 			int jumpDashAnimationIdx;
 			float jumpDashTimeLeft = 0.0f;
+
+			//WebSwing
+			std::unique_ptr<tween> webTweens[3];
 		};
 	};
 };
