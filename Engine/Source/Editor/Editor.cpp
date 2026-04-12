@@ -43,6 +43,7 @@ ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSaved
 ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 
 static std::mutex levelLoadMutex;
+static const float sequencerAdjustment = 8.0f;
 
 using namespace DeviceUtils;
 
@@ -836,6 +837,9 @@ namespace Editor
 		auto& commandList = commandListProcessor->GetCommandList();
 		TransitionResource(commandList, backBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
+#if defined(_DEVELOPMENT)
+		PIXBeginEvent(commandList.p, 0, L"Draw Editor");
+#endif
 		commandList->RSSetViewports(1, &renderer->screenViewport);
 		commandList->RSSetScissorRects(1, &renderer->scissorRect);
 
@@ -889,12 +893,7 @@ namespace Editor
 				deletePrompt.DrawPrompt("Delete Template");
 			if (animationSequencer.showing)
 			{
-				static const float seqAdj = 8.0f;
-
-				const ImGuiViewport* viewport = ImGui::GetMainViewport();
-				ImVec2 seqPos = ImVec2(viewport->WorkSize.x / seqAdj, viewport->WorkSize.y / seqAdj);
-				ImVec2 seqSize = ImVec2(viewport->WorkSize.x * (1.0f - (2.0f / seqAdj)), viewport->WorkSize.y * (1.0f - (2.0f / seqAdj)));
-				animationSequencer.DrawSequencer("Animation Sequencer", seqPos, seqSize);
+				animationSequencer.DrawSequencer("Animation Sequencer");
 			}
 			if (animationSequencer.destroying)
 			{
@@ -918,6 +917,10 @@ namespace Editor
 
 		// Render Dear ImGui graphics
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
+
+#if defined(_DEVELOPMENT)
+		PIXEndEvent(commandList.p);
+#endif
 
 		TransitionResource(commandList, backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
@@ -1994,7 +1997,10 @@ namespace Editor
 	//Model3D Animation Sequencer
 	void OpenAnimationSequencer(JUUID uuid)
 	{
-		animationSequencer.Initialize(uuid);
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImVec2 seqPos = ImVec2(viewport->WorkSize.x / sequencerAdjustment, viewport->WorkSize.y / sequencerAdjustment);
+		ImVec2 seqSize = ImVec2(viewport->WorkSize.x * (1.0f - (2.0f / sequencerAdjustment)), viewport->WorkSize.y * (1.0f - (2.0f / sequencerAdjustment)));
+		animationSequencer.Initialize(seqPos, seqSize, uuid);
 	}
 
 	//Gizmos

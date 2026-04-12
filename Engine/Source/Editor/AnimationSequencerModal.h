@@ -35,16 +35,20 @@ struct AnimationSequencerModal
 	static inline ImGuiWindowFlags timelineWindowFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize |
 		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar;
 
-	void Initialize(JUUID uuid);
+	void Initialize(ImVec2 seqPos, ImVec2 seqSize, JUUID uuid);
 	nlohmann::json GetModalLevelJson();
 	void DestroyStep();
 	void DestroySceneObjects();
 	void Step();
 	void DrawLoading();
-	void DrawSequencer(const char* title, ImVec2 pos, ImVec2 size);
+	void DrawSequencer(const char* title);
 	void DrawTitleBar(const char* title, ImVec2 pos, ImVec2 size, bool& exit);
 	void DrawSequenceSelector(ImVec2 curPos, std::function<void(std::string)> onSelectSequence, std::function<void(std::string)> onEraseSequence, std::function<void(std::string)> onRenameSequence, std::function<void(std::string)> onCloneSequence, std::function<void()> onAddSequence);
+	ImVec2 GetModelPreviewCameraWidthHeight();
 	void DrawModelPreview(ImVec2 curPos, ImVec2 size);
+	void ResetGizmoVariableWorkers();
+	void DrawKeyFrameGuizmo(XMFLOAT4X4& world4x4, TransformationKeyFrame& keyframe, ImVec2 curPos, ImVec2 size);
+	void BeginGizmoInteraction(CameraID camera, ImVec2 curPos, ImVec2 size, std::function<void(XMFLOAT4X4 view, XMFLOAT4X4 proj)> interaction);
 	void DrawBoneTransformationKeyFrameAttributes(SequenceChannelElementBoneTransformation& boneTransformation, TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size);
 	void DrawTransformationKeyFrameAttributes(TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size);
 	void DrawElementTriggerAttributes(SequenceChannelElementTrigger& elementTrigger, ImVec2 pos, ImVec2 size);
@@ -57,6 +61,9 @@ struct AnimationSequencerModal
 
 	void Exit();
 	void SaveAndExit();
+
+	ImVec2 sequencerPos;
+	ImVec2 sequencerSize;
 
 	SceneUnitId unit;
 	std::string asset;
@@ -129,4 +136,12 @@ struct AnimationSequencerModal
 	ImVec2 mousePreviewLeftClickLastCoords;
 	bool wheelCapture;
 	std::vector<std::string> bones;
+
+	//Gizmo
+	ImGuizmo::OPERATION gizmoOperation;//(ImGuizmo::TRANSLATE);
+	ImGuizmo::MODE gizmoMode;// (ImGuizmo::WORLD);
+	XMFLOAT4X4 gizmoCentroidMx;
+	XMFLOAT3 gizmoRotation;
+	XMFLOAT3 gizmoPosition;
+	XMFLOAT3 gizmoScale;
 };

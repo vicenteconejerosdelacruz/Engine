@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "AnimationSequencerModal.h"
 #include <imgui.h>
+#include <ImGuizmo.h>
 #include <ImEditor.h>
 #include <nlohmann/json.hpp>
 #include <Camera/Camera.h>
@@ -24,10 +25,12 @@ namespace Physics
 	extern std::vector<std::string> GetCollisionMasks();
 };
 
-void AnimationSequencerModal::Initialize(JUUID uuid)
+void AnimationSequencerModal::Initialize(ImVec2 seqPos, ImVec2 seqSize, JUUID uuid)
 {
 	using namespace Scene;
 
+	sequencerPos = seqPos;
+	sequencerSize = seqSize;
 	unit = 0;
 	asset = "";
 	count = 0U;
@@ -61,6 +64,13 @@ void AnimationSequencerModal::Initialize(JUUID uuid)
 	mousePreviewLeftClickPressed = false;
 	mousePreviewLeftClickLastCoords = ImVec2();
 	wheelCapture = false;
+	//gizmo
+	gizmoOperation = ImGuizmo::TRANSLATE;
+	gizmoMode = ImGuizmo::WORLD;
+	gizmoCentroidMx = XMFLOAT4X4();
+	gizmoRotation = XMFLOAT3();
+	gizmoPosition = XMFLOAT3();
+	gizmoScale = XMFLOAT3();
 
 	cameraUUID = getUUID();
 	ambientLightUUID = getUUID();
@@ -93,6 +103,8 @@ void AnimationSequencerModal::Initialize(JUUID uuid)
 
 nlohmann::json AnimationSequencerModal::GetModalLevelJson()
 {
+	ImVec2 camSize = GetModelPreviewCameraWidthHeight();
+
 	nlohmann::json modal = {
 		{ "cameras",
 			{
@@ -104,8 +116,8 @@ nlohmann::json AnimationSequencerModal::GetModalLevelJson()
 							{ "farZ", 100.0 },
 							{ "fovAngleY", 20.0 },
 							{ "nearZ", 0.01 },
-							{ "width", 1778 },
-							{ "height", 1000 }
+							{ "width", camSize.x },
+							{ "height", camSize.y }
 						}
 					},
 					{ "position", FromXMFLOAT3(cameraInitialPos) },
@@ -352,8 +364,17 @@ static ImVec2 modelPosAdj(0.0f, 21.0f);
 static ImVec2 sequencerSizeAdj(0.0f, -47.0f);
 static ImVec2 sequencerPosAdj(0.0f, 4.0f);
 static float titleBarH = 19.0f;
-void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec2 size)
+
+ImVec2 AnimationSequencerModal::GetModelPreviewCameraWidthHeight()
 {
+	return ImVec2(sequencerSize.y * 0.5f * 16.0f / 9.0f, sequencerSize.y * 0.5f);
+}
+
+void AnimationSequencerModal::DrawSequencer(const char* title)
+{
+	ImVec2 pos = sequencerPos;
+	ImVec2 size = sequencerSize;
+
 	Step();
 
 	ImGui::OpenPopup(title);
@@ -649,6 +670,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 				if (selectedTransformationKeyFrameType == SCET_Transformation)
 				{
 					DrawTransformationKeyFrameAttributes(*selectedTransformationKeyframe, keyFrameFrame, keyframePos, keyframeSize);
+					DrawKeyFrameGuizmo(gizmoCentroidMx, *selectedTransformationKeyframe, modelPos, modelSize);
 				}
 				else if (selectedTransformationKeyFrameType == SCET_BoneTransformation)
 				{
@@ -699,6 +721,9 @@ void AnimationSequencerModal::DrawSequencer(const char* title, ImVec2 pos, ImVec
 		keyFrameFrame = nextSelectedKeyFrameFrame;
 		nextSelectedTransformationKeyframe = nullptr;
 		nextSelectedKeyFrameFrame = -1;
+		XMVECTOR vec = XMLoadFloat3(&selectedTransformationKeyframe->position);
+		XMMATRIX cmx = XMMatrixTranslationFromVector(vec);
+		XMStoreFloat4x4(&gizmoCentroidMx, cmx);
 	}
 
 	if (nextSelectedElementTrigger != nullptr)
@@ -845,6 +870,12 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 	{
 		auto& pass = camera->renderPassesUUID.at(0);
 		bool mouseInPreviewArea = previewRect.Contains(mouse);
+		if ((ImGuizmo::IsOver() || ImGuizmo::IsUsing()) && adjustToBoundingBox)
+		{
+			mouseInPreviewArea = false;
+			mousePreviewLeftClickPressed = false;
+		}
+
 		if (mouseInPreviewArea)
 		{
 			if (!wheelCapture)
@@ -935,6 +966,117 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 	ImGui::PopStyleVar();
 }
 
+void AnimationSequencerModal::ResetGizmoVariableWorkers()
+{
+	gizmoRotation = XMFLOAT3();
+	gizmoPosition = XMFLOAT3();
+	gizmoScale = XMFLOAT3(1.0f, 1.0f, 1.0f);
+}
+
+void AnimationSequencerModal::DrawKeyFrameGuizmo(XMFLOAT4X4& world4x4, TransformationKeyFrame& keyframe, ImVec2 curPos, ImVec2 size)
+{
+	if (camera.empty()) return;
+
+	if (ImGui::IsKeyPressed(ImGuiKey_T)) // t ky
+	{
+		gizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
+		gizmoMode = ImGuizmo::MODE::WORLD;
+		ResetGizmoVariableWorkers();
+	}
+	if (ImGui::IsKeyPressed(ImGuiKey_R)) // r key
+	{
+		gizmoOperation = ImGuizmo::OPERATION::ROTATE;
+		gizmoMode = ImGuizmo::MODE::WORLD;
+		ResetGizmoVariableWorkers();
+	}
+	if (ImGui::IsKeyPressed(ImGuiKey_S)) // s Key
+	{
+		gizmoOperation = ImGuizmo::OPERATION::SCALE;
+		gizmoMode = ImGuizmo::MODE::LOCAL;
+		ResetGizmoVariableWorkers();
+	}
+
+	auto translateObjects = [&](XMFLOAT4X4 view, XMFLOAT4X4 proj)
+		{
+			XMFLOAT4X4 delta;
+			ImGuizmo::Manipulate(*view.m, *proj.m, gizmoOperation, gizmoMode, *world4x4.m, *delta.m, NULL, NULL, NULL);
+			XMMATRIX XMdelta = XMLoadFloat4x4(&delta);
+			XMVECTOR XMtranslation, XMrotation, XMscale;
+			XMMatrixDecompose(&XMscale, &XMrotation, &XMtranslation, XMdelta);
+
+			XMVECTOR len = XMVector3Length(XMtranslation);
+			if (len.m128_f32[0] < g_XMEpsilon.f[0])
+				return;
+
+			keyframe.position.x += XMtranslation.m128_f32[0];
+			keyframe.position.y += XMtranslation.m128_f32[1];
+			keyframe.position.z += XMtranslation.m128_f32[2];
+		};
+	auto rotateObjects = [&](XMFLOAT4X4 view, XMFLOAT4X4 proj)
+		{
+			XMFLOAT4X4 delta;
+			ImGuizmo::Manipulate(*view.m, *proj.m, gizmoOperation, gizmoMode, *world4x4.m, *delta.m, NULL, NULL, NULL);
+			XMMATRIX XMdelta = XMLoadFloat4x4(&delta);
+			XMVECTOR XMtranslation, XMrotation, XMscale;
+			XMMatrixDecompose(&XMscale, &XMrotation, &XMtranslation, XMdelta);
+
+			keyframe.rotation.x += XMConvertToDegrees(2.0f * XMrotation.m128_f32[0]);
+			keyframe.rotation.y += XMConvertToDegrees(2.0f * XMrotation.m128_f32[1]);
+			keyframe.rotation.z += XMConvertToDegrees(2.0f * XMrotation.m128_f32[2]);
+		};
+	auto scaleObjects = [&](XMFLOAT4X4 view, XMFLOAT4X4 proj)
+		{
+			XMFLOAT4X4 delta;
+			ImGuizmo::Manipulate(*view.m, *proj.m, gizmoOperation, gizmoMode, *world4x4.m, *delta.m, NULL, NULL, NULL);
+			XMMATRIX XMdelta = XMLoadFloat4x4(&delta);
+			XMVECTOR XMtranslation, XMrotation, XMscale;
+			XMMatrixDecompose(&XMscale, &XMrotation, &XMtranslation, XMdelta);
+
+			XMVECTOR len = XMVector3Length(XMscale);
+			if (len.m128_f32[0] < g_XMEpsilon.f[0])
+				return;
+
+			keyframe.scale.x *= XMscale.m128_f32[0];
+			keyframe.scale.y *= XMscale.m128_f32[1];
+			keyframe.scale.z *= XMscale.m128_f32[2];
+		};
+
+	std::unordered_map<ImGuizmo::OPERATION, std::function<void(XMFLOAT4X4, XMFLOAT4X4)>> operators =
+	{
+		{ ImGuizmo::OPERATION::TRANSLATE, translateObjects },
+		{ ImGuizmo::OPERATION::ROTATE, rotateObjects},
+		{ ImGuizmo::OPERATION::SCALE, scaleObjects }
+	};
+
+	BeginGizmoInteraction(camera, curPos, size, [&](XMFLOAT4X4 view, XMFLOAT4X4 proj)
+		{
+			operators.at(gizmoOperation)(view, proj);
+		}
+	);
+}
+
+void AnimationSequencerModal::BeginGizmoInteraction(CameraID camera, ImVec2 curPos, ImVec2 size, std::function<void(XMFLOAT4X4 view, XMFLOAT4X4 proj)> interaction)
+{
+	ImGuizmo::BeginFrame();
+	ImGuizmo::SetOrthographic(false);
+	ImGuizmo::AllowAxisFlip(false);
+	ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
+
+	ImGuiIO& io = ImGui::GetIO();
+	//ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+	ImGuizmo::SetRect(curPos.x, curPos.y, size.x, size.y);
+
+	ImGuizmo::SetID(1);
+
+	XMFLOAT4X4 view;
+	XMFLOAT4X4 proj;
+	XMStoreFloat4x4(&view, camera->view());
+	camera->perspectiveProjection.updateProjectionMatrix();
+	XMStoreFloat4x4(&proj, camera->perspectiveProjection.projectionMatrix);
+
+	interaction(view, proj);
+}
+
 void AnimationSequencerModal::DrawBoneTransformationKeyFrameAttributes(SequenceChannelElementBoneTransformation& boneTransformation, TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size)
 {
 	std::vector<std::string> bones = nostd::GetKeysFromMap(renderable->animable->animations->bonesOffsets);
@@ -968,14 +1110,19 @@ void AnimationSequencerModal::DrawBoneTransformationKeyFrameAttributes(SequenceC
 		ImGui::PushID("keyframe-position");
 		if (ImGui::BeginTable("keyframe-position-table", 3, defaultTableFlags))
 		{
+			bool reset = false;
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
-			ImGui::InputFloat("x", &keyframe.position.x, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("x", &keyframe.position.x, 0.0f, 0.0f, "%.3f");
 			ImGui::TableSetColumnIndex(1);
-			ImGui::InputFloat("y", &keyframe.position.y, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("y", &keyframe.position.y, 0.0f, 0.0f, "%.3f");
 			ImGui::TableSetColumnIndex(2);
-			ImGui::InputFloat("z", &keyframe.position.z, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("z", &keyframe.position.z, 0.0f, 0.0f, "%.3f");
 			ImGui::EndTable();
+			if (reset)
+			{
+				ResetGizmoVariableWorkers();
+			}
 		}
 		ImGui::PopID();
 
@@ -989,18 +1136,21 @@ void AnimationSequencerModal::DrawBoneTransformationKeyFrameAttributes(SequenceC
 			if (ImGui::SliderAngle("pitch", &pitch, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
 			{
 				keyframe.rotation.x = XMConvertToDegrees(pitch);
+				ResetGizmoVariableWorkers();
 			}
 			ImGui::TableSetColumnIndex(1);
 			float yaw = XMConvertToRadians(keyframe.rotation.y);
 			if (ImGui::SliderAngle("yaw", &yaw, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
 			{
 				keyframe.rotation.y = XMConvertToDegrees(yaw);
+				ResetGizmoVariableWorkers();
 			}
 			ImGui::TableSetColumnIndex(2);
 			float roll = XMConvertToRadians(keyframe.rotation.z);
 			if (ImGui::SliderAngle("roll", &roll, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
 			{
 				keyframe.rotation.z = XMConvertToDegrees(roll);
+				ResetGizmoVariableWorkers();
 			}
 			ImGui::EndTable();
 		}
@@ -1010,23 +1160,29 @@ void AnimationSequencerModal::DrawBoneTransformationKeyFrameAttributes(SequenceC
 		ImGui::PushID("keyframe-scale");
 		if (ImGui::BeginTable("keyframe-scale-table", 3, defaultTableFlags))
 		{
+			bool reset = false;
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
-			ImGui::InputFloat("x", &keyframe.scale.x, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("x", &keyframe.scale.x, 0.0f, 0.0f, "%.3f");
 			ImGui::TableSetColumnIndex(1);
-			ImGui::InputFloat("y", &keyframe.scale.y, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("y", &keyframe.scale.y, 0.0f, 0.0f, "%.3f");
 			ImGui::TableSetColumnIndex(2);
-			ImGui::InputFloat("z", &keyframe.scale.z, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("z", &keyframe.scale.z, 0.0f, 0.0f, "%.3f");
 			ImGui::EndTable();
+			if (reset)
+			{
+				ResetGizmoVariableWorkers();
+			}
 		}
 		ImGui::PopID();
 
 		ImGui::Text("ease");
 		ImGui::PushID("keyframe-easing");
 		std::string selectedEase = EasingToString.at(keyframe.easing);
-		ImGui::DrawComboSelection(selectedEase, nostd::GetKeysFromMap(StringToEasing), [&keyframe](std::string newEase)
+		ImGui::DrawComboSelection(selectedEase, nostd::GetKeysFromMap(StringToEasing), [&](std::string newEase)
 			{
 				keyframe.easing = StringToEasing.at(newEase);
+				ResetGizmoVariableWorkers();
 			}
 		);
 		ImGui::PopID();
@@ -1055,14 +1211,19 @@ void AnimationSequencerModal::DrawTransformationKeyFrameAttributes(Transformatio
 		ImGui::PushID("keyframe-position");
 		if (ImGui::BeginTable("keyframe-position-table", 3, defaultTableFlags))
 		{
+			bool reset = false;
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
-			ImGui::InputFloat("x", &keyframe.position.x, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("x", &keyframe.position.x, 0.0f, 0.0f, "%.3f");
 			ImGui::TableSetColumnIndex(1);
-			ImGui::InputFloat("y", &keyframe.position.y, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("y", &keyframe.position.y, 0.0f, 0.0f, "%.3f");
 			ImGui::TableSetColumnIndex(2);
-			ImGui::InputFloat("z", &keyframe.position.z, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("z", &keyframe.position.z, 0.0f, 0.0f, "%.3f");
 			ImGui::EndTable();
+			if (reset)
+			{
+				ResetGizmoVariableWorkers();
+			}
 		}
 		ImGui::PopID();
 
@@ -1076,18 +1237,21 @@ void AnimationSequencerModal::DrawTransformationKeyFrameAttributes(Transformatio
 			if (ImGui::SliderAngle("pitch", &pitch, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
 			{
 				keyframe.rotation.x = XMConvertToDegrees(pitch);
+				ResetGizmoVariableWorkers();
 			}
 			ImGui::TableSetColumnIndex(1);
 			float yaw = XMConvertToRadians(keyframe.rotation.y);
 			if (ImGui::SliderAngle("yaw", &yaw, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
 			{
 				keyframe.rotation.y = XMConvertToDegrees(yaw);
+				ResetGizmoVariableWorkers();
 			}
 			ImGui::TableSetColumnIndex(2);
 			float roll = XMConvertToRadians(keyframe.rotation.z);
 			if (ImGui::SliderAngle("roll", &roll, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
 			{
 				keyframe.rotation.z = XMConvertToDegrees(roll);
+				ResetGizmoVariableWorkers();
 			}
 			ImGui::EndTable();
 		}
@@ -1097,23 +1261,29 @@ void AnimationSequencerModal::DrawTransformationKeyFrameAttributes(Transformatio
 		ImGui::PushID("keyframe-scale");
 		if (ImGui::BeginTable("keyframe-scale-table", 3, defaultTableFlags))
 		{
+			bool reset = false;
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
-			ImGui::InputFloat("x", &keyframe.scale.x, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("x", &keyframe.scale.x, 0.0f, 0.0f, "%.3f");
 			ImGui::TableSetColumnIndex(1);
-			ImGui::InputFloat("y", &keyframe.scale.y, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("y", &keyframe.scale.y, 0.0f, 0.0f, "%.3f");
 			ImGui::TableSetColumnIndex(2);
-			ImGui::InputFloat("z", &keyframe.scale.z, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("z", &keyframe.scale.z, 0.0f, 0.0f, "%.3f");
 			ImGui::EndTable();
+			if (reset)
+			{
+				ResetGizmoVariableWorkers();
+			}
 		}
 		ImGui::PopID();
 
 		ImGui::Text("ease");
 		ImGui::PushID("keyframe-easing");
 		std::string selectedEase = EasingToString.at(keyframe.easing);
-		ImGui::DrawComboSelection(selectedEase, nostd::GetKeysFromMap(StringToEasing), [&keyframe](std::string newEase)
+		ImGui::DrawComboSelection(selectedEase, nostd::GetKeysFromMap(StringToEasing), [&](std::string newEase)
 			{
 				keyframe.easing = StringToEasing.at(newEase);
+				ResetGizmoVariableWorkers();
 			}
 		);
 		ImGui::PopID();
