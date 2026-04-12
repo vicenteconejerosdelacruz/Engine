@@ -83,6 +83,7 @@ namespace Editor {
 	void HandleEditorMouseMovements(SceneUnitId id);
 	std::set<std::string> GetOpenedScenes(bool skipDefault = true);
 	std::set<SceneUnitId> GetOpenedSceneUnitIds(bool skipDefault = true);
+	void ResizeEditorResources(unsigned int width, unsigned int height);
 
 	//Editor Drawing
 	void AddSceneUnitToEditor(SceneUnitId id);

@@ -267,7 +267,8 @@ namespace Scene
 		XMMATRIX scaleM = XMMatrixScalingFromVector(XMLoadFloat3(&scaleV));
 		XMMATRIX positionM = XMMatrixTranslationFromVector(XMLoadFloat3(&posV));
 		XMMATRIX worldM = XMMatrixMultiply(XMMatrixMultiply(scaleM, rotationM), positionM);
-		return (!animationUseTransformation()) ? worldM : XMMatrixMultiply(worldM, animationTransformation);
+		if (!animationUseTransformation()) return worldM;
+		return XMMatrixMultiply(animationTransformation, worldM);
 	}
 
 	void Renderable::CreateMeshInstances()

@@ -472,6 +472,9 @@ void ResizeWindow()
 		renderer->swapChainPass->Resize(HWNDWIDTH, HWNDHEIGHT);
 	}
 	ResizeScenePasses(HWNDWIDTH, HWNDHEIGHT);
+#if defined(_EDITOR)
+	ResizeEditorResources(HWNDWIDTH, HWNDHEIGHT);
+#endif
 }
 
 //DESTROY

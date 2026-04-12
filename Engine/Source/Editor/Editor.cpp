@@ -154,6 +154,8 @@ namespace Editor
 	std::unique_ptr<CommandsProcessor> commandListProcessor;
 	std::unique_ptr<CommandsProcessor> commandListPickingPassProcessor;
 
+	bool resizeRequired = false;
+
 	//workbench & loading
 	nlohmann::json workbench;
 	std::string workbenchSelectedLevel;
@@ -802,6 +804,17 @@ namespace Editor
 			}
 		);
 		return sceneUnitIds;
+	}
+
+	void ResizeEditorResources(unsigned int width, unsigned int height)
+	{
+		if (animationSequencer.showing)
+		{
+			ImVec2 WorkSize(width, height);
+			ImVec2 seqPos = ImVec2(WorkSize.x / sequencerAdjustment, WorkSize.y / sequencerAdjustment);
+			ImVec2 seqSize = ImVec2(WorkSize.x * (1.0f - (2.0f / sequencerAdjustment)), WorkSize.y * (1.0f - (2.0f / sequencerAdjustment)));
+			animationSequencer.Resize(seqPos, seqSize);
+		}
 	}
 
 	void AddSceneUnitToEditor(SceneUnitId unit)

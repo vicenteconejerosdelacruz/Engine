@@ -36,6 +36,7 @@ struct AnimationSequencerModal
 		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar;
 
 	void Initialize(ImVec2 seqPos, ImVec2 seqSize, JUUID uuid);
+	void Resize(ImVec2 seqPos, ImVec2 seqSize);
 	nlohmann::json GetModalLevelJson();
 	void DestroyStep();
 	void DestroySceneObjects();

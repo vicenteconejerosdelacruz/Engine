@@ -101,6 +101,20 @@ void AnimationSequencerModal::Initialize(ImVec2 seqPos, ImVec2 seqSize, JUUID uu
 	);
 }
 
+void AnimationSequencerModal::Resize(ImVec2 seqPos, ImVec2 seqSize)
+{
+	sequencerPos = seqPos;
+	sequencerSize = seqSize;
+	for (auto& rpi : camera->renderPassesUUID)
+	{
+		rpi->Resize(static_cast<unsigned int>(seqSize.x), static_cast<unsigned int>(seqSize.y));
+	}
+	auto p = camera->perspective();
+	p.width = seqSize.x;
+	p.height = seqSize.y;
+	camera->perspective(p);
+}
+
 nlohmann::json AnimationSequencerModal::GetModalLevelJson()
 {
 	ImVec2 camSize = GetModelPreviewCameraWidthHeight();
@@ -122,9 +136,11 @@ nlohmann::json AnimationSequencerModal::GetModalLevelJson()
 					},
 					{ "position", FromXMFLOAT3(cameraInitialPos) },
 					{ "freeposition", FromXMFLOAT3(cameraInitialPos) },
+					{ "bonecamposition", FromXMFLOAT3(cameraInitialPos) },
 					{ "projectionType", "Perspective" },
 					{ "rotation", FromXMFLOAT3(cameraInitialRot) },
 					{ "freerotation", FromXMFLOAT3(cameraInitialRot) },
+					{ "bonecamrotation", FromXMFLOAT3(cameraInitialRot) },
 					{ "speed", 0.05000000074505806 },
 					{ "uuid", cameraUUID },
 					{
@@ -866,7 +882,7 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 
 	ImRect previewRect(curPos, ImVec2(curPos.x + size.x, curPos.y + size.y));
 
-	ImGui::BeginChild("model-preview", size, 0);
+	ImGui::BeginChild("model-preview", size, 0, ImGuiWindowFlags_NoScrollbar);
 	{
 		auto& pass = camera->renderPassesUUID.at(0);
 		bool mouseInPreviewArea = previewRect.Contains(mouse);
@@ -1060,10 +1076,11 @@ void AnimationSequencerModal::BeginGizmoInteraction(CameraID camera, ImVec2 curP
 	ImGuizmo::BeginFrame();
 	ImGuizmo::SetOrthographic(false);
 	ImGuizmo::AllowAxisFlip(false);
-	ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
+	ImDrawList* drawList = ImGui::GetForegroundDrawList();
+	ImGuizmo::SetDrawlist(drawList);
+	drawList->PushClipRect(curPos, ImVec2(curPos.x + size.x, curPos.y + size.y), true);
 
 	ImGuiIO& io = ImGui::GetIO();
-	//ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 	ImGuizmo::SetRect(curPos.x, curPos.y, size.x, size.y);
 
 	ImGuizmo::SetID(1);
