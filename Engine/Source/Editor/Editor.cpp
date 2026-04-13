@@ -810,7 +810,7 @@ namespace Editor
 	{
 		if (animationSequencer.showing)
 		{
-			ImVec2 WorkSize(width, height);
+			ImVec2 WorkSize(static_cast<float>(width), static_cast<float>(height));
 			ImVec2 seqPos = ImVec2(WorkSize.x / sequencerAdjustment, WorkSize.y / sequencerAdjustment);
 			ImVec2 seqSize = ImVec2(WorkSize.x * (1.0f - (2.0f / sequencerAdjustment)), WorkSize.y * (1.0f - (2.0f / sequencerAdjustment)));
 			animationSequencer.Resize(seqPos, seqSize);

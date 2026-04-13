@@ -98,6 +98,7 @@ namespace Scene {
 		XMMATRIX view();
 		XMMATRIX projection();
 		void CopyProjection(CameraID cam);
+		std::tuple<unsigned int, unsigned int, bool> Project(XMVECTOR world_pos);
 
 		float projectionWidth();
 		float projectionRight();

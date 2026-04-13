@@ -255,6 +255,25 @@ namespace Scene
 		UpdateProjection();
 	}
 
+	std::tuple<unsigned int, unsigned int, bool> Camera::Project(XMVECTOR world_pos)
+	{
+		XMMATRIX viewM = view();
+		XMMATRIX projM = projection();
+		XMMATRIX viewProjection = XMMatrixMultiply(viewM, projM);
+		float projWidth = projectionWidth();
+		float projHeight = projectionHeight();
+
+		world_pos = XMVectorSetW(world_pos, 1.0f);
+		XMVECTOR clipSpacePos = XMVector4Transform(world_pos, viewProjection);
+		float w = XMVectorGetW(clipSpacePos);
+		XMVECTOR ndc = XMVectorScale(clipSpacePos, 1.0f / w);
+
+		float screenX = (XMVectorGetX(ndc) + 1.0f) * 0.5f * projWidth;
+		float screenY = (1.0f - XMVectorGetY(ndc)) * 0.5f * projHeight;
+
+		return std::make_tuple(static_cast<unsigned int>(screenX), static_cast<unsigned int>(screenY), clipSpacePos.m128_f32[3] < 0);
+	}
+
 	float Camera::projectionWidth()
 	{
 		switch (projectionType())

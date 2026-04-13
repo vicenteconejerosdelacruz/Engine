@@ -3,6 +3,7 @@
 #include "Animated.h"
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <Renderable/Renderable.h>
+#include <NoMath.h>
 
 namespace Animation {
 
@@ -182,7 +183,7 @@ namespace Animation {
 
 	void TraverseMultiplycationQueue(float time, std::string currentAnimation, std::unique_ptr<Animated>& animations, BonesTransformations& bonesTransformation, BonesTransformations& sequenceBoneTransformations)
 	{
-		TraverseMultiplycationQueue(time, animations->multiplyNavigator, animations->animationsBonesKeys[currentAnimation], bonesTransformation, animations->bonesOffsets, sequenceBoneTransformations, animations->rootNodeInverseTransform, XMMatrixIdentity());
+		TraverseMultiplycationQueue(time, animations->multiplyNavigator, animations->animationsBonesKeys[currentAnimation], bonesTransformation, animations->bonesOffsets, sequenceBoneTransformations, animations->rootNodeInverseTransform, animations->globalNodeTransforms, XMMatrixIdentity());
 	}
 
 	static const XMMATRIX BonesTransformationFlipmYZ = XMMatrixSet(
@@ -191,7 +192,7 @@ namespace Animation {
 		0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
 	);
-	void TraverseMultiplycationQueue(float time, MultiplyCmdQueue& cmds, BonesKeysMap& boneKeys, BonesTransformations& bonesTransformation, BonesTransformations& bonesOffsets, BonesTransformations& sequenceBoneTransformations, XMMATRIX& rootNodeInverseTransform, XMMATRIX parentTransformation)
+	void TraverseMultiplycationQueue(float time, MultiplyCmdQueue& cmds, BonesKeysMap& boneKeys, BonesTransformations& bonesTransformation, BonesTransformations& bonesOffsets, BonesTransformations& sequenceBoneTransformations, XMMATRIX& rootNodeInverseTransform, NodeTransformsMap& globalNodeTransforms, XMMATRIX parentTransformation)
 	{
 		auto execCmds = cmds;
 		std::stack<XMMATRIX> transformation;
@@ -228,15 +229,44 @@ namespace Animation {
 				}
 
 				transformation.push(XMMatrixMultiply(transformation.top(), nodeTransformation));
+				// --- NUEVO CÓDIGO ---
+				// Guardamos la matriz global del nodo en el espacio del modelo.
+				// Mantenemos el mismo orden de multiplicación que usas para el skinning, 
+				// pero SIN el bonesOffsets.
+				XMMATRIX modelSpaceNodeTransform = XMMatrixMultiply(rootNodeInverseTransform, transformation.top());
+				// (Nota: Si tu función TraverseMultiplycationQueue no pertenece a Animated, 
+				// tendrás que pasar globalNodeTransforms como parámetro).
+				globalNodeTransforms[node->name] = modelSpaceNodeTransform;
+				// --------------------
 
 				auto bone = bonesTransformation.find(node->name);
 				if (bone != bonesTransformation.end())
 				{
+					//Gemini
+					//Ese bonesOffsets[node->name] es la Inverse Bind Matrix.
+					//Su función es llevar un vértice desde el espacio de la malla al espacio local del hueso.
+					//Por lo tanto, al multiplicarla, pierdes la posición real del pivote del hueso en favor de la deformación de vértices.
 					bone->second = XMMatrixMultiply(rootNodeInverseTransform, XMMatrixMultiply(transformation.top(), bonesOffsets[node->name]));
 				}
 				execCmds.pop();
 			}
 		}
+	}
+
+	std::tuple<XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> GetBoneTransformation(XMMATRIX world, Animation::NodeTransformsMap& nodesTransformation, std::string bone)
+	{
+		XMMATRIX nodeSpace = nodesTransformation.at(bone);
+		XMMATRIX nodeWorldSpace = XMMatrixMultiply(XMMatrixTranspose(nodeSpace), world);
+		XMVECTOR nodeWorldScale, nodeWorldRotationQ, nodeWorldTranslation;
+		XMMatrixDecompose(&nodeWorldScale, &nodeWorldRotationQ, &nodeWorldTranslation, nodeWorldSpace);
+
+		XMFLOAT3 position;
+		XMStoreFloat3(&position, nodeWorldTranslation);
+		XMFLOAT3 scale;
+		XMStoreFloat3(&scale, nodeWorldScale);
+		XMFLOAT3 rotation = Quaternion2Euler(nodeWorldRotationQ);
+
+		return std::make_tuple(position, rotation, nodeWorldRotationQ, scale);
 	}
 
 	/*

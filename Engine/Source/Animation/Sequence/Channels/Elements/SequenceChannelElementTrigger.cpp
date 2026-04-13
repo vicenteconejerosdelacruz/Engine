@@ -67,12 +67,12 @@ void SequenceChannelElementTrigger::ApplyFrameTriggerAvatarValues(int frame, Ren
 	if (!triggerRenderable) return;
 
 	XMMATRIX world = renderable->world();
-	Animation::BonesTransformations& bonesTransformation = renderable->bonesTransformation;
 	bool visible = frame >= frameStart && frame <= frameEnd;
 	triggerRenderable->visible(visible);
 	triggerLines->visible(visible);
 
-	auto [fPos, fRot, tRotQ, fScl] = GetTransformation(world, bonesTransformation);
+	Animation::NodeTransformsMap& nodesTransformation = renderable->animable->animations->globalNodeTransforms;
+	auto [fPos, fRot, tRotQ, fScl] = GetTransformation(world, nodesTransformation);
 	triggerRenderable->position(fPos);
 	triggerRenderable->rotation(fRot);
 	triggerRenderable->rotationQ(tRotQ);
@@ -87,24 +87,24 @@ void SequenceChannelElementTrigger::ApplyFrameTriggerValues(int frame, Renderabl
 {
 	if (trigger.empty() || trigger.unit() == 0ULL || triggerBuilt == nullptr || triggerBuilt->load() == false) return;
 	XMMATRIX world = renderable->world();
-	Animation::BonesTransformations& bonesTransformation = renderable->bonesTransformation;
-	auto [fPos, fRot, tRotQ, fScl] = GetTransformation(world, bonesTransformation);
+	Animation::NodeTransformsMap& nodesTransformation = renderable->animable->animations->globalNodeTransforms;
+	auto [fPos, fRot, tRotQ, fScl] = GetTransformation(world, nodesTransformation);
 	trigger->at("position") = FromXMFLOAT3(fPos);
 	trigger->at("rotation") = FromXMFLOAT3(fRot);
 	trigger->rotationQ(tRotQ);
 }
 
-std::tuple<XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> SequenceChannelElementTrigger::GetTransformation(XMMATRIX world, Animation::BonesTransformations& bonesTransformation)
+std::tuple<XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> SequenceChannelElementTrigger::GetTransformation(XMMATRIX world, Animation::NodeTransformsMap& nodesTransformation)
 {
-	XMMATRIX boneSpace = bonesTransformation.at(bone);
-	XMMATRIX boneWorldSpace = XMMatrixMultiply(XMMatrixTranspose(boneSpace), world);
-	XMVECTOR boneWorldScale, boneWorldRotationQ, boneWorldTranslation;
-	XMMatrixDecompose(&boneWorldScale, &boneWorldRotationQ, &boneWorldTranslation, boneWorldSpace);
+	XMMATRIX nodeSpace = nodesTransformation.at(bone);
+	XMMATRIX nodeWorldSpace = XMMatrixMultiply(XMMatrixTranspose(nodeSpace), world);
+	XMVECTOR nodeWorldScale, nodeWorldRotationQ, nodeWorldTranslation;
+	XMMatrixDecompose(&nodeWorldScale, &nodeWorldRotationQ, &nodeWorldTranslation, nodeWorldSpace);
 
-	XMVECTOR tPos = XMVector3Transform(XMLoadFloat3(&position), boneWorldSpace);
+	XMVECTOR tPos = XMVector3Transform(XMLoadFloat3(&position), nodeWorldSpace);
 	XMVECTOR tScl = XMLoadFloat3(&scale);
 
-	XMVECTOR tRotQ = XMQuaternionMultiply(boneWorldRotationQ, XMQuaternionRotationRollPitchYaw(
+	XMVECTOR tRotQ = XMQuaternionMultiply(nodeWorldRotationQ, XMQuaternionRotationRollPitchYaw(
 		XMConvertToRadians(rotation.x),
 		XMConvertToRadians(rotation.y),
 		XMConvertToRadians(rotation.z))
@@ -113,14 +113,14 @@ std::tuple<XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> SequenceChannelElementTrigger
 	XMFLOAT3 fPos, fRot, fScl;
 	fRot = Quaternion2Euler(tRotQ); //we convert to euler without much purpose, but anyway
 	XMStoreFloat3(&fPos, tPos);
-	XMStoreFloat3(&fScl, XMVectorAbs(XMVectorMultiply(tScl, boneWorldScale)));
+	XMStoreFloat3(&fScl, XMVectorAbs(XMVectorMultiply(tScl, nodeWorldScale)));
 
 	return std::make_tuple(fPos, fRot, tRotQ, fScl);
 }
 
-nlohmann::json SequenceChannelElementTrigger::CreateTriggerJson(RenderableID renderable, XMMATRIX world, Animation::BonesTransformations& bonesTransformation)
+nlohmann::json SequenceChannelElementTrigger::CreateTriggerJson(RenderableID renderable, XMMATRIX world, Animation::NodeTransformsMap& nodesTransformation)
 {
-	auto [fPos, fRot, tRotQ, fScl] = GetTransformation(world, bonesTransformation);
+	auto [fPos, fRot, tRotQ, fScl] = GetTransformation(world, nodesTransformation);
 	JUUID uuid = getUUID();
 	auto bindings = renderable->GetScriptBindings();
 

@@ -142,7 +142,7 @@ void SequencePlayer::DestroySequenceTriggersAvatars()
 void SequencePlayer::CreateSequenceTriggers()
 {
 	XMMATRIX world = renderable->world();
-	Animation::BonesTransformations& bonesTransformation = renderable->bonesTransformation;
+	Animation::NodeTransformsMap& nodesTransformation = renderable->animable->animations->globalNodeTransforms;
 
 	auto triggers = sequence.GetTriggerElements();
 	if (triggers.size() == 0ULL) return;
@@ -152,7 +152,7 @@ void SequencePlayer::CreateSequenceTriggers()
 
 	for (auto* t : triggers)
 	{
-		triggersJ.push_back(t->CreateTriggerJson(renderable, world, bonesTransformation));
+		triggersJ.push_back(t->CreateTriggerJson(renderable, world, nodesTransformation));
 		t->trigger = MAKESUUUID(0ULL, triggersJ.back().at("uuid"));
 		t->triggerBuilt = std::make_unique<std::atomic_bool>(false);
 	}

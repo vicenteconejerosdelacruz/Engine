@@ -691,6 +691,23 @@ void AnimationSequencerModal::DrawSequencer(const char* title)
 				else if (selectedTransformationKeyFrameType == SCET_BoneTransformation)
 				{
 					DrawBoneTransformationKeyFrameAttributes(*selectedBoneTransformation, *selectedTransformationKeyframe, keyFrameFrame, keyframePos, keyframeSize);
+					auto& nodesTransforms = renderable->animable->animations->globalNodeTransforms;
+					auto [pos, a, b, c] = Animation::GetBoneTransformation(renderable->world(), nodesTransforms, selectedBoneTransformation->GetBone());
+					XMVECTOR vec = XMLoadFloat3(&pos);
+					XMMATRIX cmx = XMMatrixTranslationFromVector(vec);
+					XMStoreFloat4x4(&gizmoCentroidMx, cmx);
+					DrawKeyFrameGuizmo(gizmoCentroidMx, *selectedTransformationKeyframe, modelPos, modelSize);
+					auto [x, y, behind] = camera->Project(vec);
+					if (!behind)
+					{
+						ImGui::PushID("bone-name");
+						{
+							ImVec2 boneNamePos(modelPos.x + x, modelPos.y + y);
+							ImU32 color = rgba(131, 255, 139, 1);
+							ImGui::GetForegroundDrawList()->AddText(boneNamePos, color, selectedBoneTransformation->GetBone().c_str());
+						}
+						ImGui::PopID();
+					}
 				}
 			}
 
@@ -737,9 +754,12 @@ void AnimationSequencerModal::DrawSequencer(const char* title)
 		keyFrameFrame = nextSelectedKeyFrameFrame;
 		nextSelectedTransformationKeyframe = nullptr;
 		nextSelectedKeyFrameFrame = -1;
-		XMVECTOR vec = XMLoadFloat3(&selectedTransformationKeyframe->position);
-		XMMATRIX cmx = XMMatrixTranslationFromVector(vec);
-		XMStoreFloat4x4(&gizmoCentroidMx, cmx);
+		if (selectedTransformationKeyFrameType == SCET_Transformation)
+		{
+			XMVECTOR vec = XMLoadFloat3(&selectedTransformationKeyframe->position);
+			XMMATRIX cmx = XMMatrixTranslationFromVector(vec);
+			XMStoreFloat4x4(&gizmoCentroidMx, cmx);
+		}
 	}
 
 	if (nextSelectedElementTrigger != nullptr)
@@ -1079,6 +1099,7 @@ void AnimationSequencerModal::BeginGizmoInteraction(CameraID camera, ImVec2 curP
 	ImDrawList* drawList = ImGui::GetForegroundDrawList();
 	ImGuizmo::SetDrawlist(drawList);
 	drawList->PushClipRect(curPos, ImVec2(curPos.x + size.x, curPos.y + size.y), true);
+	ImGuizmo::SetGizmoSizeClipSpace(0.2f);
 
 	ImGuiIO& io = ImGui::GetIO();
 	ImGuizmo::SetRect(curPos.x, curPos.y, size.x, size.y);
@@ -1092,6 +1113,9 @@ void AnimationSequencerModal::BeginGizmoInteraction(CameraID camera, ImVec2 curP
 	XMStoreFloat4x4(&proj, camera->perspectiveProjection.projectionMatrix);
 
 	interaction(view, proj);
+
+	ImGuizmo::SetGizmoSizeClipSpace(0.1f);
+	drawList->PopClipRect();
 }
 
 void AnimationSequencerModal::DrawBoneTransformationKeyFrameAttributes(SequenceChannelElementBoneTransformation& boneTransformation, TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size)

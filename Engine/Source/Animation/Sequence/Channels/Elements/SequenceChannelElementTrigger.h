@@ -37,8 +37,8 @@ struct SequenceChannelElementTrigger : SequenceChannelElement
 	nlohmann::json json();
 	void ApplyFrameTriggerAvatarValues(int frame, RenderableID renderable);
 	void ApplyFrameTriggerValues(int frame, RenderableID renderable);
-	std::tuple<XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> GetTransformation(XMMATRIX world, Animation::BonesTransformations& bonesTransformation);
-	nlohmann::json CreateTriggerJson(RenderableID renderable, XMMATRIX world, Animation::BonesTransformations& bonesTransformation);
+	std::tuple<XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> GetTransformation(XMMATRIX world, Animation::NodeTransformsMap& nodesTransformation);
+	nlohmann::json CreateTriggerJson(RenderableID renderable, XMMATRIX world, Animation::NodeTransformsMap& nodesTransformation);
 
 	//attributes
 	XMFLOAT3 position;
