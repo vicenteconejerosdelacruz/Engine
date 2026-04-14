@@ -692,12 +692,10 @@ void AnimationSequencerModal::DrawSequencer(const char* title)
 				{
 					DrawBoneTransformationKeyFrameAttributes(*selectedBoneTransformation, *selectedTransformationKeyframe, keyFrameFrame, keyframePos, keyframeSize);
 					auto& nodesTransforms = renderable->animable->animations->globalNodeTransforms;
-					auto [pos, a, b, c] = Animation::GetBoneTransformation(renderable->world(), nodesTransforms, selectedBoneTransformation->GetBone());
-					XMVECTOR vec = XMLoadFloat3(&pos);
-					XMMATRIX cmx = XMMatrixTranslationFromVector(vec);
-					XMStoreFloat4x4(&gizmoCentroidMx, cmx);
+					auto [mm, pos, a, b, c] = Animation::GetBoneTransformation(renderable->world(), nodesTransforms, selectedBoneTransformation->GetBone());
+					XMStoreFloat4x4(&gizmoCentroidMx, mm);
 					DrawKeyFrameGuizmo(gizmoCentroidMx, *selectedTransformationKeyframe, modelPos, modelSize);
-					auto [x, y, behind] = camera->Project(vec);
+					auto [x, y, behind] = camera->Project(XMLoadFloat3(&pos));
 					if (!behind)
 					{
 						ImGui::PushID("bone-name");

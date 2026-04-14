@@ -89,5 +89,5 @@ namespace Animation
 
 	void TraverseMultiplycationQueue(float time, std::string currentAnimation, std::unique_ptr<Animated>& animations, BonesTransformations& bonesTransformation, BonesTransformations& sequenceBoneTransformations);
 	void TraverseMultiplycationQueue(float time, MultiplyCmdQueue& cmds, BonesKeysMap& boneKeys, BonesTransformations& bonesTransformation, BonesTransformations& bonesOffsets, BonesTransformations& sequenceBoneTransformations, XMMATRIX& rootNodeInverseTransform, NodeTransformsMap& globalNodeTransforms, XMMATRIX parentTransformation);
-	std::tuple<XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> GetBoneTransformation(XMMATRIX world, Animation::NodeTransformsMap& nodesTransformation, std::string bone);
+	std::tuple<XMMATRIX, XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> GetBoneTransformation(XMMATRIX world, Animation::NodeTransformsMap& nodesTransformation, std::string bone);
 }

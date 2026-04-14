@@ -253,7 +253,7 @@ namespace Animation {
 		}
 	}
 
-	std::tuple<XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> GetBoneTransformation(XMMATRIX world, Animation::NodeTransformsMap& nodesTransformation, std::string bone)
+	std::tuple<XMMATRIX, XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> GetBoneTransformation(XMMATRIX world, Animation::NodeTransformsMap& nodesTransformation, std::string bone)
 	{
 		XMMATRIX nodeSpace = nodesTransformation.at(bone);
 		XMMATRIX nodeWorldSpace = XMMatrixMultiply(XMMatrixTranspose(nodeSpace), world);
@@ -266,7 +266,7 @@ namespace Animation {
 		XMStoreFloat3(&scale, nodeWorldScale);
 		XMFLOAT3 rotation = Quaternion2Euler(nodeWorldRotationQ);
 
-		return std::make_tuple(position, rotation, nodeWorldRotationQ, scale);
+		return std::make_tuple(nodeWorldSpace, position, rotation, nodeWorldRotationQ, scale);
 	}
 
 	/*
