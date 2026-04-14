@@ -304,6 +304,9 @@ template<>
 JEdvEditorDrawerFunction DrawPreview<jedv_cook_physx_mesh>();
 
 template<>
+JEdvEditorDrawerFunction DrawPreview<jedv_create_from_mold>();
+
+template<>
 JEdvEditorDrawerFunction DrawEnum<PhysicsBehavior, jedv_t_physic_behavior>(
 	std::unordered_map<PhysicsBehavior, std::string>& EtoS,
 	std::unordered_map<std::string, PhysicsBehavior>& StoE

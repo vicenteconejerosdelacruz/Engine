@@ -1541,6 +1541,7 @@ namespace Templates
 		LoadTemplates(defaultTemplatesFolder, RenderPass::templateName, CreateRenderPass);
 		LoadTemplates(defaultTemplatesFolder, PhysicGeometry::templateName, CreatePhysicGeometry);
 		LoadTemplates(defaultTemplatesFolder, HtmlUI::templateName, CreateHtmlUI);
+		LoadTemplates(defaultTemplatesFolder, Mold::templateName, CreateMold);
 	}
 
 #if defined(_EDITOR)
@@ -1610,6 +1611,7 @@ namespace Templates
 		ReleaseShaderTemplates();
 		ReleasePhysicGeometryTemplates();
 		ReleaseHtmlUITemplates();
+		ReleaseMoldTemplates();
 	}
 
 	void TemplatesStep(DX::StepTimer& timer)
@@ -1674,6 +1676,12 @@ namespace Templates
 			{ T_HtmlUIs, [](JUUID uuid)
 				{
 					auto& t = GetHtmlUITemplate(uuid);
+					return static_cast<JTemplate*>(t.get());
+				}
+			},
+			{ T_Molds, [](JUUID uuid)
+				{
+					auto& t = GetMoldTemplate(uuid);
 					return static_cast<JTemplate*>(t.get());
 				}
 			},
@@ -1746,6 +1754,12 @@ namespace Templates
 					return str2JUUIDName(TemplateTypeToString.at(T_HtmlUIs), o->uuid(),o->name());
 				}
 			},
+			{ T_Molds, [str2JUUIDName](JUUID uuid)
+				{
+					MoldJsonID o = uuid;
+					return str2JUUIDName(TemplateTypeToString.at(T_Molds), o->uuid(),o->name());
+				}
+			},
 		};
 
 		std::vector<JUUIDName> templatesTypeList;
@@ -1771,6 +1785,7 @@ namespace Templates
 			{ T_RenderPasses, GetRenderPassAttributes },
 			{ T_PhysicGeometries, GetPhysicGeometryAttributes },
 			{ T_HtmlUIs, GetHtmlUIAttributes },
+			{ T_Molds, GetMoldAttributes },
 		};
 		return GetTAtts.at(t)();
 	}
@@ -1787,6 +1802,7 @@ namespace Templates
 			{ T_RenderPasses, GetRenderPassDrawers },
 			{ T_PhysicGeometries, GetPhysicGeometryDrawers },
 			{ T_HtmlUIs, GetHtmlUIDrawers },
+			{ T_Molds, GetMoldDrawers },
 		};
 		return GetTDrawers.at(t)();
 	}
@@ -1803,6 +1819,7 @@ namespace Templates
 			{ T_RenderPasses, GetRenderPassPreviewers },
 			{ T_PhysicGeometries, GetPhysicGeometryPreviewers },
 			{ T_HtmlUIs, GetHtmlUIPreviewers },
+			{ T_Molds, GetMoldPreviewers },
 		};
 		return GetTPreviewers.at(t)();
 	}
@@ -1819,6 +1836,7 @@ namespace Templates
 			{ T_RenderPasses, CreateRenderPassJson },
 			{ T_PhysicGeometries, CreatePhysicGeometryJson },
 			{ T_HtmlUIs, CreateHtmlUIJson },
+			{ T_Molds, CreateMoldJson },
 		};
 		return GetTJson.at(t)();
 	}
@@ -1875,6 +1893,12 @@ namespace Templates
 					{ "fileFolder" , defaultUIFolder }
 				});
 			}},
+			{ T_Molds, [] { return nlohmann::json(
+				{
+					{ "assetsFolder" , defaultMoldsFolder },
+					{ "fileFolder" , defaultMoldsFolder }
+				});
+			}},
 		};
 		return GetTJson.at(t)();
 	}
@@ -1891,6 +1915,7 @@ namespace Templates
 			{ T_RenderPasses, GetRenderPassRequiredAttributes },
 			{ T_PhysicGeometries, GetPhysicGeometryRequiredAttributes },
 			{ T_HtmlUIs, GetHtmlUIRequiredAttributes },
+			{ T_Molds, GetMoldRequiredAttributes },
 		};
 		return GetTRequiredAtts.at(t)();
 	}
@@ -1907,6 +1932,7 @@ namespace Templates
 			{ T_RenderPasses, GetRenderPassCreatorDrawers },
 			{ T_PhysicGeometries, GetPhysicGeometryCreatorDrawers },
 			{ T_HtmlUIs, GetHtmlUICreatorDrawers },
+			{ T_Molds, GetMoldCreatorDrawers },
 		};
 		return GetTDrawers.at(t)();
 	}
@@ -1923,6 +1949,7 @@ namespace Templates
 			{ T_RenderPasses, GetRenderPassCreatorValidator },
 			{ T_PhysicGeometries, GetPhysicGeometryCreatorValidator },
 			{ T_HtmlUIs, GetHtmlUICreatorValidator },
+			{ T_Molds, GetMoldCreatorValidator },
 		};
 		return GetTValidator.at(t)();
 	}
@@ -1949,6 +1976,7 @@ namespace Templates
 			{ T_RenderPasses,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateRenderPass); } },
 			{ T_PhysicGeometries,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreatePhysicGeometry); } },
 			{ T_HtmlUIs,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateHtmlUI); } },
+			{ T_Molds,[](nlohmann::json json) { CreateTemplateFromJson(json,Templates::CreateMold); } },
 		};
 		CreateT.at(t)(json);
 		Editor::MarkTemplatesPanelAssetsAsDirty();
@@ -1965,6 +1993,7 @@ namespace Templates
 			{ RenderPass::templateName, T_RenderPasses },
 			{ PhysicGeometry::templateName, T_PhysicGeometries },
 			{ HtmlUI::templateName, T_HtmlUIs },
+			{ Mold::templateName, T_Molds },
 		};
 		return GetT4F.at(file);
 	}
@@ -1980,6 +2009,7 @@ namespace Templates
 			{ T_RenderPasses, GetRenderPassName },
 			{ T_PhysicGeometries, GetPhysicGeometryName },
 			{ T_HtmlUIs, GetHtmlUIName },
+			{ T_Molds, GetMoldName },
 		};
 		return GetTName.at(t)(uuid);
 	}
@@ -1995,6 +2025,7 @@ namespace Templates
 			{ T_RenderPasses, RenderPass::templateName },
 			{ T_PhysicGeometries, PhysicGeometry::templateName },
 			{ T_HtmlUIs, HtmlUI::templateName },
+			{ T_Molds, Mold::templateName },
 		};
 		return defaultTemplatesFolder + GetF.at(t);
 	}
@@ -2013,6 +2044,7 @@ namespace Templates
 			{ T_RenderPasses, DeleteRenderPassTemplate },
 			{ T_PhysicGeometries, DeletePhysicGeometryTemplate },
 			{ T_HtmlUIs, DeleteHtmlUITemplate },
+			{ T_Molds, DeleteMoldTemplate },
 		};
 		DeleteT.at(t)(uuid);
 	}

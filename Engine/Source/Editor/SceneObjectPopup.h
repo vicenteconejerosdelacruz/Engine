@@ -5,6 +5,7 @@ struct SceneObjectPopup
 	void Draw();
 
 	bool show = false;
+	int openedCollapsableItem;
 	ImVec2 pos;
 	std::string name;
 	SceneUnitId id;

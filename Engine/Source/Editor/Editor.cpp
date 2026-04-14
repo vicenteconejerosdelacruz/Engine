@@ -1735,6 +1735,7 @@ namespace Editor
 		Templates::SaveTemplates(defaultTemplatesFolder, RenderPass::templateName, WriteRenderPasssJson);
 		Templates::SaveTemplates(defaultTemplatesFolder, PhysicGeometry::templateName, WritePhysicGeometrysJson);
 		Templates::SaveTemplates(defaultTemplatesFolder, HtmlUI::templateName, WriteHtmlUIsJson);
+		Templates::SaveTemplates(defaultTemplatesFolder, Mold::templateName, WriteMoldsJson);
 		templatesModified = false;
 	}
 
@@ -1865,6 +1866,7 @@ namespace Editor
 		SceneObject* object = GetSceneObjectPointer(id, uuid);
 
 		sceneObjectPopup.show = true;
+		sceneObjectPopup.openedCollapsableItem = 0;
 		sceneObjectPopup.pos = ImGui::GetMousePos();
 		sceneObjectPopup.pos.x -= 200;
 		sceneObjectPopup.name = std::string(object->at("name")) + "_copy";

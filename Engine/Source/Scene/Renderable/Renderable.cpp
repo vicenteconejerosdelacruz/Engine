@@ -233,6 +233,14 @@ namespace Scene
 		Scene::UnbindFromScene(unit, uuid(), cuuid);
 	}
 
+#if defined(_EDITOR)
+	void Renderable::DropJsonMoldAttributes(nlohmann::json& j)
+	{
+		SceneObject::DropJsonMoldAttributes(j);
+		j.at("cameras") = nlohmann::json::array({});
+	}
+#endif
+
 	XMVECTOR Renderable::positionV()
 	{
 		XMFLOAT3 pos = position();
@@ -935,6 +943,38 @@ namespace Scene
 		auto& Renderables = GetRenderables(id);
 		std::set<RenderableID> r;
 		std::transform(Renderables.begin(), Renderables.end(), std::inserter(r, r.begin()), [&](auto o) { return MAKESUUUID(id, o); });
+
+		auto checkCamera = [](RenderableID r)
+			{
+				if (!r->dirty(Renderable::Update_cameras)) return;
+				r->clean(Renderable::Update_cameras);
+
+				auto& prev = r->UpdatePrevValues.at("cameras");
+				std::vector<std::string> prevCams;
+				for (auto& it : prev.items())
+				{
+					if (it.value() != "")
+					{
+						prevCams.push_back(it.value());
+					}
+				}
+				auto& curr = r->at("cameras");
+				std::vector<std::string> currCams;
+				for (auto& it : curr.items())
+				{
+					if (it.value() != "")
+					{
+						currCams.push_back(it.value());
+					}
+				}
+				if (prevCams != currCams)
+				{
+					r->UnbindCameras();
+					r->BindCameras();
+				}
+			};
+
+		std::for_each(r.begin(), r.end(), checkCamera);
 
 		std::set<RenderableID> cleanRot;
 		std::for_each(r.begin(), r.end(), [&](auto& o)

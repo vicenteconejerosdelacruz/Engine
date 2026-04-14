@@ -26,6 +26,7 @@ enum TemplateType {
 	T_RenderPasses,
 	T_PhysicGeometries,
 	T_HtmlUIs,
+	T_Molds,
 };
 
 inline const std::unordered_map<TemplateType, std::string> TemplateTypeToString = {
@@ -37,6 +38,7 @@ inline const std::unordered_map<TemplateType, std::string> TemplateTypeToString 
 	{ T_RenderPasses, "RenderPasses"},
 	{ T_PhysicGeometries, "PhysicGeometries" },
 	{ T_HtmlUIs, "HtmlUIs" },
+	{ T_Molds, "Molds" },
 };
 
 inline const std::unordered_map<std::string, TemplateType> StringToTemplateType = {
@@ -48,6 +50,7 @@ inline const std::unordered_map<std::string, TemplateType> StringToTemplateType 
 	{ "RenderPasses", T_RenderPasses },
 	{ "PhysicGeometries", T_PhysicGeometries },
 	{ "HtmlUIs", T_HtmlUIs },
+	{ "Molds", T_Molds },
 };
 
 #if defined(_EDITOR)
@@ -60,6 +63,7 @@ inline const std::unordered_map<TemplateType, const char* > TemplateTypePanelMen
 	{ T_RenderPasses, ICON_FA_TV "RenderPasses"},
 	{ T_PhysicGeometries, ICON_FA_HOUSE_USER "PhysicGeometries" },
 	{ T_HtmlUIs, ICON_FA_COOKIE "HtmlUIs" },
+	//{ T_Molds, ICON_FA_COOKIE "Molds" },
 };
 #endif
 
@@ -98,3 +102,4 @@ namespace Templates
 #include <Mesh/Mesh.h>
 #include <PhysicGeometry.h>
 #include <HtmlUI/HtmlUI.h>
+#include <Mold/Mold.h>

@@ -5653,6 +5653,33 @@ JEdvEditorDrawerFunction DrawPreview<jedv_draw_animator_sequencer>()
 }
 
 template<>
+JEdvEditorDrawerFunction DrawPreview<jedv_create_from_mold>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			if (json.size() > 1ULL) return;
+
+			ImGui::Text("Create from mold");
+			ImGui::SameLine();
+			if (ImGui::Button(ICON_FA_RUNNING))
+			{
+				Scene::CreateSceneObjectFromMold(
+					Editor::currentSceneUnitId,
+					json.at(0)->at("uuid"),
+					[](SceneObjectType type, std::string name)
+					{
+						return nlohmann::json(
+							{
+								{ "name", name + "_ins" }
+							}
+						);
+					}
+				);
+			}
+		};
+}
+
+template<>
 JEdvEditorDrawerFunction DrawPreview<jedv_cook_physx_mesh>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)

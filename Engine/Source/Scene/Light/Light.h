@@ -172,6 +172,10 @@ namespace Scene {
 		Light(SceneUnitId id, nlohmann::json& json);
 		~Light() { Destroy(); }
 
+#if defined(_EDITOR)
+		void DropJsonMoldAttributes(nlohmann::json& j) override;
+#endif
+
 		void Destroy();
 
 		XMVECTOR positionV();

@@ -93,6 +93,10 @@ namespace Scene
 
 	struct SceneObject : JObject
 	{
+#if defined(_EDITOR)
+		virtual void DropJsonMoldAttributes(nlohmann::json& j) { j.at("uuid") = ""; }
+#endif
+
 		//lifecycle
 		SceneObject(SceneUnitId id, nlohmann::json& json) :JObject(json) { unit = id; soName = json.at("name"); }
 		virtual void Initialize() {};

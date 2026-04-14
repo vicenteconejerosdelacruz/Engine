@@ -86,6 +86,10 @@ namespace Scene {
 		Camera(SceneUnitId id, nlohmann::json& json);
 		~Camera() { Destroy(); }
 
+#if defined(_EDITOR)
+		void DropJsonMoldAttributes(nlohmann::json& j) override;
+#endif
+
 		XMVECTOR positionV();
 		void positionV(XMVECTOR v);
 		void updateRotationQ();

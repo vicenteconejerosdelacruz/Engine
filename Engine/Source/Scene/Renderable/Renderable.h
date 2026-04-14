@@ -77,6 +77,10 @@ namespace Scene
 		Renderable(SceneUnitId id, nlohmann::json& json);
 		~Renderable() { Destroy(); }
 
+#if defined(_EDITOR)
+		void DropJsonMoldAttributes(nlohmann::json& j) override;
+#endif
+
 		XMVECTOR positionV();
 		void updateRotationQ();
 		XMVECTOR rotationQ();

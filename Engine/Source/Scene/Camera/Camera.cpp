@@ -148,6 +148,14 @@ namespace Scene
 		updateRotationQ();
 	}
 
+#if defined(_EDITOR)
+	void Camera::DropJsonMoldAttributes(nlohmann::json& j)
+	{
+		SceneObject::DropJsonMoldAttributes(j);
+		j.at("shadowMapLight") = "";
+	}
+#endif
+
 	XMVECTOR Camera::positionV()
 	{
 		XMFLOAT3 pos = position();

@@ -1,0 +1,6 @@
+JCLASS(Mold, _)
+JTYPE(TemplateType, T_Molds)
+JEXPOSE(std::string, uuid, "", jedv_t_hidden, 0, false)
+JEXPOSE(std::string, name, "", jedv_t_te_htmlui_name, 0, true)
+JEXPOSE(std::string, path, "", jedv_t_htmls_filepath, 1, true)
+JPREVIEW(createFromMold, jedv_create_from_mold)

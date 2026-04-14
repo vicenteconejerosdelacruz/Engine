@@ -264,6 +264,7 @@ namespace Game::Brawler
 			{ "TakeHit", v8_wrap_call([&](JUUID enemyController, int damage) { TakeHit(enemyController, damage); }) },
 			{ "OnDeathAnimationEnd", v8_wrap_call([&] { OnDeathAnimationEnd(); }) },
 			{ "PlayPunchSound", v8_wrap_call([&](int punchIdx, int enemyHealth) { PlayPunchSound(punchIdx, enemyHealth); })},
+			{ "ThrowWeb", v8_wrap_call([&](std::string bone) { ThrowWeb(bone); })},
 		};
 	}
 
@@ -850,6 +851,9 @@ namespace Game::Brawler
 	void Venom::EnterWallToSwing()
 	{
 		venom->SetCurrentAnimation("WallToSwing");
+	}
+	void Venom::ThrowWeb(std::string bone)
+	{
 	}
 }
 

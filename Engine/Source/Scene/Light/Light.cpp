@@ -168,6 +168,14 @@ namespace Scene
 		Scene::UnbindFromScene(unit, uuid(), camera.uuid());
 	}
 
+#if defined(_EDITOR)
+	void Light::DropJsonMoldAttributes(nlohmann::json& j)
+	{
+		SceneObject::DropJsonMoldAttributes(j);
+		j.at("cameras") = nlohmann::json::array({});
+	}
+#endif
+
 	void Light::Destroy()
 	{
 		DestroyEditorPreview();

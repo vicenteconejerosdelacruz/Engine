@@ -101,7 +101,8 @@ enum JsonToEditorValueType
 	jedv_t_physic_behavior,
 	jedv_draw_renderpass_vector,
 	jedv_draw_animator_sequencer,
-	jedv_cook_physx_mesh
+	jedv_cook_physx_mesh,
+	jedv_create_from_mold
 };
 
 typedef std::function<void(std::string attribute, std::vector<JObject*>& json)> JEdvEditorDrawerFunction;

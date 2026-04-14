@@ -696,6 +696,12 @@
     <ClInclude Include="Animation\Sequence\Channels\Elements\TransformationKeyFrame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Templates\Mold\Mold.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Templates\MoldAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -1038,6 +1044,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Animation\Sequence\Channels\Elements\TransformationKeyFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Templates\Mold\Mold.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -10,6 +10,7 @@ static const std::string defaultPhysxCookingFolder = "Assets/cooking/";
 static const std::string defaultPhysxCookingSDFFolder = "Assets/cooking/sdf/";
 static const std::string defaultSoundsFolder = "Assets/sounds/";
 static const std::string defaultUIFolder = "Assets/html/";
+static const std::string defaultMoldsFolder = "Assets/molds/";
 static const std::vector<std::string> defaultTexturesFilters = {
 	"All Image files. (*.jpg,*jpeg,*.png)","JPEG files. (*.jpg,*jpeg)", "PNG files. (*.png)"
 };

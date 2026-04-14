@@ -243,6 +243,7 @@ namespace Game
 			//WallToSwing
 			bool ShouldWallToSwing();
 			void EnterWallToSwing();
+			void ThrowWeb(std::string bone);
 
 			//State machine
 			GameStatesMachine<VenomStates> vsm;

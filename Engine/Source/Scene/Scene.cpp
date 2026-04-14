@@ -5,6 +5,7 @@
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <Level.h>
 #include <unordered_map>
+#include <Application.h>
 
 extern std::unique_ptr<JRenderer> renderer;
 #if defined(_EDITOR)
@@ -118,6 +119,36 @@ namespace Scene
 			}, parentUnit, filename, data, levelLoaded, progress
 		);
 		levelThread.detach();
+	}
+
+	void CreateSceneObjectFromMold(
+		SceneUnitId parentUnit,
+		JUUID moldUUID,
+		std::function<nlohmann::json(SceneObjectType, std::string)> getInstanceAttributes
+	)
+	{
+		MoldJsonID mold = moldUUID;
+		std::filesystem::path filename = defaultMoldsFolder + mold->path();
+		nlohmann::json data = Level::GetLevelFromFile(filename);
+		for (auto& [soType, _] : JsonContainerToString)
+		{
+			if (!data.contains(soType))
+				continue;
+			for (auto& j : data.at(soType).items())
+			{
+				j.value().at("uuid") = getUUID();
+				nlohmann::json patch = getInstanceAttributes(StringToSceneObjectType.at(JsonContainerToString.at(soType)), j.value().at("name"));
+				j.value().merge_patch(patch);
+			}
+		}
+		AttachLevelIntoScene(parentUnit, mold->uuid(), data, [parentUnit](SceneUnitId id)
+			{
+#if defined(_EDITOR)
+				Editor::MarkScenePanelAssetsAsDirty();
+				Editor::MarkSceneUnitAsModified(parentUnit);
+#endif
+			}
+		);
 	}
 
 	std::unique_ptr<SceneUnit>& CreateScene(SceneUnitId unit, std::string unitName, unsigned int numProcessors)

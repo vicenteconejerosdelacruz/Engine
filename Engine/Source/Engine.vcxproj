@@ -441,6 +441,7 @@
     <ClInclude Include="JExpose\Scene\SceneControllerAtt.h" />
     <ClInclude Include="JExpose\Scene\TriggerAtt.h" />
     <ClInclude Include="JExpose\Templates\HtmlUIAtt.h" />
+    <ClInclude Include="JExpose\Templates\MoldAtt.h" />
     <ClInclude Include="JExpose\Templates\PhysicGeometryAtt.h" />
     <ClInclude Include="pch\DeleteHook.h" />
     <ClInclude Include="pch\GameEngineState.h" />
@@ -597,6 +598,7 @@
     <ClInclude Include="Templates\Mesh\Mesh.h" />
     <ClInclude Include="Templates\Model3D\Model3D.h" />
     <ClInclude Include="Physics\PhysicGeometry.h" />
+    <ClInclude Include="Templates\Mold\Mold.h" />
     <ClInclude Include="Templates\RenderPass\Override\MinMaxChainPass.h" />
     <ClInclude Include="Templates\RenderPass\Override\MinMaxChainResultPass.h" />
     <ClInclude Include="Templates\RenderPass\Override\OverridePass.h" />
@@ -725,6 +727,7 @@
     <ClCompile Include="Templates\Mesh\Mesh.cpp" />
     <ClCompile Include="Templates\Model3D\Model3D.cpp" />
     <ClCompile Include="Physics\PhysicGeometry.cpp" />
+    <ClCompile Include="Templates\Mold\Mold.cpp" />
     <ClCompile Include="Templates\RenderPass\Override\MinMaxChainPass.cpp" />
     <ClCompile Include="Templates\RenderPass\Override\MinMaxChainResultPass.cpp" />
     <ClCompile Include="Templates\RenderPass\Override\OverridePass.cpp" />
