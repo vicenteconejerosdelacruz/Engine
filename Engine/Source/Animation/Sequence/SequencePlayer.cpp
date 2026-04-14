@@ -133,8 +133,16 @@ void SequencePlayer::DestroySequenceTriggersAvatars()
 
 	for (auto* t : triggers)
 	{
-		t->triggerRenderable->markedForDelete = true;
-		t->triggerLines->markedForDelete = true;
+		if (t->triggerRenderable)
+		{
+			t->triggerRenderable->markedForDelete = true;
+			t->triggerRenderable.clear();
+		}
+		if (t->triggerLines)
+		{
+			t->triggerLines->markedForDelete = true;
+			t->triggerLines.clear();
+		}
 	}
 }
 #endif
