@@ -12,6 +12,9 @@ namespace ComputeShader
 {
 	struct RenderableBoundingBox : public ComputeInterface
 	{
+		bool canCompute;
+		bool hasSolution;
+		unsigned int solutionCounter = JRenderer::numFrames + 1;
 		ConstantsBufferID bonesCbv;
 		BoundingBox boundingBox;
 

@@ -31,6 +31,8 @@ namespace ComputeShader
 	RenderableBoundingBox::RenderableBoundingBox(RenderableID renderable) : ComputeInterface("BoundingBox_cs")
 	{
 		using namespace Animation;
+		canCompute = false;
+		hasSolution = false;
 		bonesCbv = GetAnimatedConstantsBuffer(renderable);
 		ShaderInstanceID shaderInstance = shader.shader(); //instance ID = json ID, yes this was on purpose
 
@@ -110,6 +112,11 @@ namespace ComputeShader
 			mesh->ExtendBoundingBox(boundingBox, extend);
 			extend = true;
 		}
+		GetLoadingProcessor(renderable.unit()).RunPostExecution([&]
+			{
+				canCompute = true;
+			}
+		);
 	}
 
 	RenderableBoundingBox::~RenderableBoundingBox()
@@ -216,5 +223,13 @@ namespace ComputeShader
 #if defined(_DEVELOPMENT)
 		PIXEndEvent(commandList.p);
 #endif
+		if (solutionCounter > 0)
+		{
+			solutionCounter--;
+		}
+		if (solutionCounter == 0)
+		{
+			hasSolution = true;
+		}
 	}
 }
