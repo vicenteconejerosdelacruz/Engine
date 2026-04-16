@@ -127,6 +127,7 @@ namespace Scene
 		void DestroyRenderPassPipelineStates(RenderPassInstanceID rp);
 
 		void CreateBoundingBox();
+		bool HasBoundingBoxComputed();
 		BoundingBox GetBoundingBox();
 
 		void WriteMaterialVariablesToConstantsBufferSpace(MaterialInstanceID material, ConstantsBufferID cbvData, unsigned int cbvFrameIndex);

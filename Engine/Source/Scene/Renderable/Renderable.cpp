@@ -305,7 +305,7 @@ namespace Scene
 				animable = model3D;
 			}
 
-			if (animable.empty())
+			if (!animable)
 			{
 				CreateBoundingBox();
 			}
@@ -602,6 +602,11 @@ namespace Scene
 		}
 	}
 
+	bool Renderable::HasBoundingBoxComputed()
+	{
+		return (!animable.empty()) ? boundingBoxCompute->hasSolution : true;
+	}
+
 	BoundingBox Renderable::GetBoundingBox()
 	{
 		BoundingBox& bb = animable.empty() ? boundingBox : boundingBoxCompute->boundingBox;
@@ -694,6 +699,7 @@ namespace Scene
 		sequencePlayer.ResetFrames();
 		sequencePlayer.ApplyFrameValues();
 		sequencePlayer.CreateSequenceTriggers();
+		StepAnimation(0.0f);
 		animationTimeFactor(timeFactor);
 	}
 
@@ -1138,12 +1144,19 @@ namespace Scene
 
 	void RunBoundingBoxComputeShaders(SceneUnitId id)
 	{
+		using namespace Scene;
+
 		if (!RenderableSUsceneObjects.contains(id)) return;
+
+		auto& scene = GetSceneUnit(id);
 		for (auto& [uuid, _] : RenderableSUsceneObjects.at(id))
 		{
 			RenderableID renderable = MAKESUUUID(id, uuid);
 
-			if (renderable->boundingBoxCompute.empty())
+			if (renderable->boundingBoxCompute.empty() ||
+				!renderable->boundingBoxCompute->canCompute ||
+				!renderable->RenderReady()
+				)
 				continue;
 
 			renderable->boundingBoxCompute->Compute(id);
@@ -1152,12 +1165,19 @@ namespace Scene
 
 	void RunBoundingBoxComputeShadersSolution(SceneUnitId id)
 	{
+		using namespace Scene;
+
 		if (!RenderableSUsceneObjects.contains(id)) return;
+
+		auto& scene = GetSceneUnit(id);
 		for (auto& [uuid, _] : RenderableSUsceneObjects.at(id))
 		{
 			RenderableID renderable = MAKESUUUID(id, uuid);
 
-			if (renderable->boundingBoxCompute.empty())
+			if (renderable->boundingBoxCompute.empty() ||
+				!renderable->boundingBoxCompute->canCompute ||
+				!renderable->RenderReady()
+				)
 				continue;
 
 			renderable->boundingBoxCompute->Solution(id);
