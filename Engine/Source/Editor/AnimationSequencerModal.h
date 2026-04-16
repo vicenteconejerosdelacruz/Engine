@@ -59,6 +59,7 @@ struct AnimationSequencerModal
 	void DrawModelPreview(ImVec2 curPos, ImVec2 size);
 	void ResetGizmoVariableWorkers();
 	void DrawKeyFrameGuizmo(XMFLOAT4X4& world4x4, TransformationKeyFrame& keyframe, ImVec2 curPos, ImVec2 size);
+	void DrawBoneKeyFrameGuizmo(XMFLOAT4X4& world4x4, TransformationKeyFrame& keyframe, ImVec2 curPos, ImVec2 size);
 	void BeginGizmoInteraction(CameraID camera, ImVec2 curPos, ImVec2 size, std::function<void(XMFLOAT4X4 view, XMFLOAT4X4 proj)> interaction);
 	void DrawBoneTransformationKeyFrameAttributes(SequenceChannelElementBoneTransformation& boneTransformation, TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size);
 	void DrawTransformationKeyFrameAttributes(TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size);

@@ -273,28 +273,31 @@ void AnimationSequencerModal::Step()
 		SetPlayerSequenceFrame();
 	}
 
-	if (flyMode == PreviewFlyMode_BoundingBox)
+	if (!(ImGuizmo::IsOver() || ImGuizmo::IsUsing()))
 	{
-		if (renderable->HasBoundingBoxComputed())
+		if (flyMode == PreviewFlyMode_BoundingBox)
+		{
+			if (renderable->HasBoundingBoxComputed())
+			{
+				float modelDistanceScale = camera->at("modelDistanceScale");
+				BoundingBox bb = renderable->GetBoundingBox();
+				camera->LookAtBoundingBox(bb, modelDistanceScale);
+			}
+		}
+		else if (flyMode == PreviewFlyMode_Bone)
 		{
 			float modelDistanceScale = camera->at("modelDistanceScale");
-			BoundingBox bb = renderable->GetBoundingBox();
+			auto& nodesTransforms = renderable->animable->animations->globalNodeTransforms;
+			auto [mm, pos, a, b, c] = Animation::GetBoneTransformation(renderable->world(), nodesTransforms, selectedBoneTransformation->GetBone());
+			BoundingBox bb(pos, { 0.1f,0.1f,0.1f });
 			camera->LookAtBoundingBox(bb, modelDistanceScale);
 		}
-	}
-	else if (flyMode == PreviewFlyMode_Bone)
-	{
-		float modelDistanceScale = camera->at("modelDistanceScale");
-		auto& nodesTransforms = renderable->animable->animations->globalNodeTransforms;
-		auto [mm, pos, a, b, c] = Animation::GetBoneTransformation(renderable->world(), nodesTransforms, selectedBoneTransformation->GetBone());
-		BoundingBox bb(pos, { 0.1f,0.1f,0.1f });
-		camera->LookAtBoundingBox(bb, modelDistanceScale);
-	}
-	else if (flyMode == PreviewFlyMode_Free)
-	{
-		camera->at("position") = camera->at("freeposition");
-		camera->at("rotation") = camera->at("freerotation");
-		camera->updateRotationQ();
+		else if (flyMode == PreviewFlyMode_Free)
+		{
+			camera->at("position") = camera->at("freeposition");
+			camera->at("rotation") = camera->at("freerotation");
+			camera->updateRotationQ();
+		}
 	}
 
 	camera->WriteConstantsBuffer(scene->Frame());
@@ -731,7 +734,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title)
 			{
 				if (selectedTransformationKeyFrameType == SCET_Transformation)
 				{
-					//do not use transformation for getting the world transformation as kM will already have this transformation already
+					//do not use transformation for getting the world transformation as kM will already have this transformation
 					XMMATRIX kM = selectedTransformation->GetTransformationInFrame(sequencePlayer.currentFrame);
 					renderable->animationUseTransformation(false);
 					XMMATRIX cmx = XMMatrixMultiply(kM, renderable->world());
@@ -746,7 +749,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title)
 					auto& nodesTransforms = renderable->animable->animations->globalNodeTransforms;
 					auto [mm, pos, a, b, c] = Animation::GetBoneTransformation(renderable->world(), nodesTransforms, selectedBoneTransformation->GetBone());
 					XMStoreFloat4x4(&gizmoCentroidMx, mm);
-					DrawKeyFrameGuizmo(gizmoCentroidMx, *selectedTransformationKeyframe, modelPos, modelSize);
+					DrawBoneKeyFrameGuizmo(gizmoCentroidMx, *selectedTransformationKeyframe, modelPos, modelSize);
 					auto [x, y, behind] = camera->Project(XMLoadFloat3(&pos));
 					if (!behind)
 					{
@@ -974,8 +977,6 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 				}
 				else if (flyMode == PreviewFlyMode_Free)
 				{
-					//freeposition
-					//freerotation
 					float step = io.MouseWheel;
 					XMFLOAT3 pos = ToXMFLOAT3(camera->at("freeposition"));
 					XMVECTOR posV = XMLoadFloat3(&pos) + camera->forward() * camera->at("wheelFactor") * step;
@@ -1005,7 +1006,7 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 			{
 				mousePreviewLeftClickPressed = false;
 			}
-			else
+			else if (!(ImGuizmo::IsOver() || ImGuizmo::IsUsing()))
 			{
 				ImVec2 delta(mouse.x - mousePreviewLeftClickLastCoords.x, mouse.y - mousePreviewLeftClickLastCoords.y);
 				mousePreviewLeftClickLastCoords = mouse;
@@ -1034,16 +1035,19 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 				}
 				else if (flyMode == PreviewFlyMode_Free)
 				{
-					XMFLOAT3 rotation = ToXMFLOAT3(camera->at("freerotation"));
-					XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(
-						XMConvertToRadians(rotation.x),
-						XMConvertToRadians(rotation.y),
-						XMConvertToRadians(rotation.z)
-					);
-					XMVECTOR qInc = XMQuaternionRotationRollPitchYaw(delta.y * 0.01f, delta.x * 0.01f, 0.0f);
-					XMVECTOR qNew = XMQuaternionNormalize(XMQuaternionMultiply(rotQ, qInc));
-					XMFLOAT3 euler = Quaternion2Euler(qNew);
-					camera->at("freerotation") = FromXMFLOAT3(euler);
+					if (std::fabsf(delta.x) > 0.01f || std::fabsf(delta.y) > 0.01f)
+					{
+						XMFLOAT3 rotation = ToXMFLOAT3(camera->at("freerotation"));
+						XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(
+							XMConvertToRadians(rotation.x),
+							XMConvertToRadians(rotation.y),
+							0.0f
+						);
+						XMVECTOR qInc = XMQuaternionRotationRollPitchYaw(delta.y * 0.01f, delta.x * 0.01f, 0.0f);
+						XMVECTOR qNew = XMQuaternionNormalize(XMQuaternionMultiply(rotQ, qInc));
+						XMFLOAT3 euler = Quaternion2Euler(qNew);
+						camera->at("freerotation") = FromXMFLOAT3(euler);
+					}
 				}
 			}
 		}
@@ -1169,12 +1173,20 @@ void AnimationSequencerModal::DrawKeyFrameGuizmo(XMFLOAT4X4& world4x4, Transform
 			XMFLOAT4X4 delta;
 			ImGuizmo::Manipulate(*view.m, *proj.m, gizmoOperation, gizmoMode, *world4x4.m, *delta.m, NULL, NULL, NULL);
 			XMMATRIX XMdelta = XMLoadFloat4x4(&delta);
+
 			XMVECTOR XMtranslation, XMrotation, XMscale;
 			XMMatrixDecompose(&XMscale, &XMrotation, &XMtranslation, XMdelta);
 
 			XMVECTOR len = XMVector3Length(XMtranslation);
 			if (len.m128_f32[0] < g_XMEpsilon.f[0])
 				return;
+
+			XMVECTOR det;
+			renderable->animationUseTransformation(false);
+			XMMATRIX invWorld = XMMatrixInverse(&det, renderable->world());
+			renderable->animationUseTransformation(true);
+
+			XMtranslation = XMVector3Transform(XMtranslation, invWorld);
 
 			keyframe.position.x += XMtranslation.m128_f32[0];
 			keyframe.position.y += XMtranslation.m128_f32[1];
@@ -1185,12 +1197,112 @@ void AnimationSequencerModal::DrawKeyFrameGuizmo(XMFLOAT4X4& world4x4, Transform
 			XMFLOAT4X4 delta;
 			ImGuizmo::Manipulate(*view.m, *proj.m, gizmoOperation, gizmoMode, *world4x4.m, *delta.m, NULL, NULL, NULL);
 			XMMATRIX XMdelta = XMLoadFloat4x4(&delta);
+
 			XMVECTOR XMtranslation, XMrotation, XMscale;
 			XMMatrixDecompose(&XMscale, &XMrotation, &XMtranslation, XMdelta);
 
-			keyframe.rotation.x += XMConvertToDegrees(2.0f * XMrotation.m128_f32[0]);
+			XMVECTOR len = XMVector3Length(XMrotation);
+			if (len.m128_f32[0] < g_XMEpsilon.f[0])
+				return;
+
+			keyframe.rotation.z += -XMConvertToDegrees(2.0f * XMrotation.m128_f32[0]);
 			keyframe.rotation.y += XMConvertToDegrees(2.0f * XMrotation.m128_f32[1]);
-			keyframe.rotation.z += XMConvertToDegrees(2.0f * XMrotation.m128_f32[2]);
+			keyframe.rotation.x += XMConvertToDegrees(2.0f * XMrotation.m128_f32[2]);
+		};
+	auto scaleObjects = [&](XMFLOAT4X4 view, XMFLOAT4X4 proj)
+		{
+			XMFLOAT4X4 delta;
+			ImGuizmo::Manipulate(*view.m, *proj.m, gizmoOperation, gizmoMode, *world4x4.m, *delta.m, NULL, NULL, NULL);
+			XMMATRIX XMdelta = XMLoadFloat4x4(&delta);
+			XMVECTOR XMtranslation, XMrotation, XMscale;
+			XMMatrixDecompose(&XMscale, &XMrotation, &XMtranslation, XMdelta);
+
+			XMVECTOR len = XMVector3Length(XMscale);
+			if (len.m128_f32[0] < g_XMEpsilon.f[0])
+				return;
+
+			keyframe.scale.x *= XMscale.m128_f32[0];
+			keyframe.scale.y *= XMscale.m128_f32[1];
+			keyframe.scale.z *= XMscale.m128_f32[2];
+		};
+
+	std::unordered_map<ImGuizmo::OPERATION, std::function<void(XMFLOAT4X4, XMFLOAT4X4)>> operators =
+	{
+		{ ImGuizmo::OPERATION::TRANSLATE, translateObjects },
+		{ ImGuizmo::OPERATION::ROTATE, rotateObjects},
+		{ ImGuizmo::OPERATION::SCALE, scaleObjects }
+	};
+
+	BeginGizmoInteraction(camera, curPos, size, [&](XMFLOAT4X4 view, XMFLOAT4X4 proj)
+		{
+			operators.at(gizmoOperation)(view, proj);
+		}
+	);
+}
+
+void AnimationSequencerModal::DrawBoneKeyFrameGuizmo(XMFLOAT4X4& world4x4, TransformationKeyFrame& keyframe, ImVec2 curPos, ImVec2 size)
+{
+	if (camera.empty()) return;
+
+	if (ImGui::IsKeyPressed(ImGuiKey_T)) // t ky
+	{
+		gizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
+		gizmoMode = ImGuizmo::MODE::LOCAL;
+		ResetGizmoVariableWorkers();
+	}
+	if (ImGui::IsKeyPressed(ImGuiKey_R)) // r key
+	{
+		gizmoOperation = ImGuizmo::OPERATION::ROTATE;
+		gizmoMode = ImGuizmo::MODE::LOCAL;
+		ResetGizmoVariableWorkers();
+	}
+	if (ImGui::IsKeyPressed(ImGuiKey_S)) // s Key
+	{
+		gizmoOperation = ImGuizmo::OPERATION::SCALE;
+		gizmoMode = ImGuizmo::MODE::LOCAL;
+		ResetGizmoVariableWorkers();
+	}
+
+	auto translateObjects = [&](XMFLOAT4X4 view, XMFLOAT4X4 proj)
+		{
+			XMFLOAT4X4 delta;
+			ImGuizmo::Manipulate(*view.m, *proj.m, gizmoOperation, gizmoMode, *world4x4.m, *delta.m, NULL, NULL, NULL);
+			XMMATRIX XMdelta = XMLoadFloat4x4(&delta);
+
+			XMVECTOR XMtranslation, XMrotation, XMscale;
+			XMMatrixDecompose(&XMscale, &XMrotation, &XMtranslation, XMdelta);
+
+			XMVECTOR len = XMVector3Length(XMtranslation);
+			if (len.m128_f32[0] < g_XMEpsilon.f[0])
+				return;
+
+			XMVECTOR det;
+			renderable->animationUseTransformation(false);
+			XMMATRIX invWorld = XMMatrixInverse(&det, renderable->world());
+			renderable->animationUseTransformation(true);
+
+			XMtranslation = XMVector3Transform(XMtranslation, invWorld);
+
+			keyframe.position.x += XMtranslation.m128_f32[0];
+			keyframe.position.y += XMtranslation.m128_f32[1];
+			keyframe.position.z += XMtranslation.m128_f32[2];
+		};
+	auto rotateObjects = [&](XMFLOAT4X4 view, XMFLOAT4X4 proj)
+		{
+			XMFLOAT4X4 delta;
+			ImGuizmo::Manipulate(*view.m, *proj.m, gizmoOperation, gizmoMode, *world4x4.m, *delta.m, NULL, NULL, NULL);
+			XMMATRIX XMdelta = XMLoadFloat4x4(&delta);
+
+			XMVECTOR XMtranslation, XMrotation, XMscale;
+			XMMatrixDecompose(&XMscale, &XMrotation, &XMtranslation, XMdelta);
+
+			XMVECTOR len = XMVector3Length(XMrotation);
+			if (len.m128_f32[0] < g_XMEpsilon.f[0])
+				return;
+
+			keyframe.rotation.z += -XMConvertToDegrees(2.0f * XMrotation.m128_f32[0]);
+			keyframe.rotation.y += XMConvertToDegrees(2.0f * XMrotation.m128_f32[1]);
+			keyframe.rotation.x += XMConvertToDegrees(2.0f * XMrotation.m128_f32[2]);
 		};
 	auto scaleObjects = [&](XMFLOAT4X4 view, XMFLOAT4X4 proj)
 		{
