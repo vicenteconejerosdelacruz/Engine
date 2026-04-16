@@ -5,6 +5,7 @@
 #include <Scene.h>
 #include <Renderer.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
+#include <NoMath.h>
 
 extern std::unique_ptr<JRenderer> renderer;
 
@@ -707,6 +708,64 @@ namespace Scene
 	void Camera::CalculateBoundingFrustum()
 	{
 		BoundingFrustum(projection()).Transform(boundingFrustum, world());
+	}
+
+	void Camera::LookAt(XMVECTOR target)
+	{
+		XMVECTOR eyePos = positionV();
+		XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+		XMVECTOR dir = XMVector3Normalize(XMVectorSubtract(target, eyePos));
+
+		if (XMVector3Equal(dir, up) || XMVector3Equal(dir, XMVectorNegate(up))) {
+			up = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); // Cambiamos el up temporalmente
+		}
+
+		XMMATRIX viewMatrix = XMMatrixLookAtLH(eyePos, target, up);
+		XMVECTOR det;
+		XMMATRIX worldMatrix = XMMatrixInverse(&det, viewMatrix);
+
+		XMVECTOR newRotationQ = XMQuaternionRotationMatrix(worldMatrix);
+
+		rotation(Quaternion2Euler(newRotationQ));
+		rotationQ(newRotationQ);
+	}
+
+	bool Camera::IsLookingAt(XMVECTOR targetPos, float epsilonDegrees)
+	{
+		XMVECTOR eyePos = positionV();
+		XMVECTOR toTarget = XMVector3Normalize(XMVectorSubtract(targetPos, eyePos));
+
+		XMVECTOR fw = forward();
+		XMVECTOR dotVec = XMVector3Dot(fw, toTarget);
+		float dot;
+		XMStoreFloat(&dot, dotVec);
+
+		float threshold = cosf(XMConvertToRadians(epsilonDegrees));
+
+		return dot >= threshold;
+	}
+
+	void Camera::LookAtBoundingBox(BoundingBox bb, float scale)
+	{
+		XMVECTOR bbCenter = XMLoadFloat3(&bb.Center);
+		XMVECTOR diff = bbCenter - positionV();
+
+		if (IsLookingAt(bbCenter) && XMVectorGetX(XMVector3Length(diff)) <= 0.001f)
+			return;
+
+		LookAt(bbCenter);
+
+		BoundingSphere bbs;
+		BoundingSphere::CreateFromBoundingBox(bbs, bb);
+		float fov = XMConvertToRadians(perspective().fovAngleY);
+		float distance = scale * (bbs.Radius * 2.0f) / (XMScalarSin(fov) / XMScalarCos(fov));
+
+		XMVECTOR camFwV = forward();
+		XMVECTOR camPosV = XMVectorSubtract(bbCenter, XMVectorScale(camFwV, distance));
+		XMFLOAT3 camPos;
+		XMStoreFloat3(&camPos, camPosV);
+		position(camPos);
+
 	}
 
 	void Camera::Destroy()

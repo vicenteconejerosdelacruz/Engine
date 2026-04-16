@@ -144,6 +144,10 @@ namespace Scene {
 
 		//Bounding Frustum
 		void CalculateBoundingFrustum();
+		//Adjust
+		void LookAt(XMVECTOR target);
+		void LookAtBoundingBox(BoundingBox bb, float scale = 1.0f);
+		bool IsLookingAt(XMVECTOR targetPos, float epsilonDegrees = 1.0f);
 
 		void Destroy();
 
