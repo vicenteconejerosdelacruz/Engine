@@ -24,6 +24,11 @@ inline void PrintXMFloat3(XMFLOAT3 v, std::string name = "")
 	OutputDebugStringA(std::string(name + std::string((name != "") ? ":" : "") + std::to_string(v.x) + "," + std::to_string(v.y) + "," + std::to_string(v.z) + "\n").c_str());
 }
 
+inline void PrintImVec2(ImVec2 v, std::string name = "")
+{
+	OutputDebugStringA(std::string(name + std::string((name != "") ? ":" : "") + std::to_string(v.x) + "," + std::to_string(v.y) + "\n").c_str());
+}
+
 inline std::string OutputV3(XMVECTOR V3)
 {
 	return std::string(std::to_string(V3.m128_f32[0]) + "," + std::to_string(V3.m128_f32[1]) + "," + std::to_string(V3.m128_f32[2]));
