@@ -287,8 +287,7 @@ void AnimationSequencerModal::Step()
 		else if (flyMode == PreviewFlyMode_Bone)
 		{
 			float modelDistanceScale = camera->at("modelDistanceScale");
-			auto& nodesTransforms = renderable->animable->animations->globalNodeTransforms;
-			auto [mm, pos, a, b, c] = Animation::GetBoneTransformation(renderable->world(), nodesTransforms, selectedBoneTransformation->GetBone());
+			auto [mm, pos, a, b, c] = renderable->GetBoneTransformation(selectedBoneTransformation->GetBone());
 			BoundingBox bb(pos, { 0.1f,0.1f,0.1f });
 			camera->LookAtBoundingBox(bb, modelDistanceScale);
 		}
@@ -746,8 +745,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title)
 				else if (selectedTransformationKeyFrameType == SCET_BoneTransformation)
 				{
 					DrawBoneTransformationKeyFrameAttributes(*selectedBoneTransformation, *selectedTransformationKeyframe, keyFrameFrame, keyframePos, keyframeSize);
-					auto& nodesTransforms = renderable->animable->animations->globalNodeTransforms;
-					auto [mm, pos, a, b, c] = Animation::GetBoneTransformation(renderable->world(), nodesTransforms, selectedBoneTransformation->GetBone());
+					auto [mm, pos, a, b, c] = renderable->GetBoneTransformation(selectedBoneTransformation->GetBone());
 					XMStoreFloat4x4(&gizmoCentroidMx, mm);
 					DrawBoneKeyFrameGuizmo(gizmoCentroidMx, *selectedTransformationKeyframe, modelPos, modelSize);
 					auto [x, y, behind] = camera->Project(XMLoadFloat3(&pos));
@@ -1024,8 +1022,7 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 				else if (flyMode == PreviewFlyMode_Bone)
 				{
 					float modelDistanceScale = camera->at("modelDistanceScale");
-					auto& nodesTransforms = renderable->animable->animations->globalNodeTransforms;
-					auto [mm, pos, a, b, c] = Animation::GetBoneTransformation(renderable->world(), nodesTransforms, selectedBoneTransformation->GetBone());
+					auto [mm, pos, a, b, c] = renderable->GetBoneTransformation(selectedBoneTransformation->GetBone());
 					XMVECTOR qInc = XMQuaternionRotationRollPitchYaw(delta.y * 0.01f, delta.x * 0.01f, 0.0f);
 					XMVECTOR bbp = XMLoadFloat3(&pos);
 					XMVECTOR invFw = -1.0f * camera->forward();

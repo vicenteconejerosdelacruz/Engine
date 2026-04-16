@@ -713,6 +713,12 @@ namespace Scene
 		TraverseMultiplycationQueue(animationTime(), animation(), animations, bonesTransformation, sequenceBoneTransformations);
 	}
 
+	std::tuple<XMMATRIX, XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> Renderable::GetBoneTransformation(std::string bone)
+	{
+		auto& nodesTransforms = animable->animations->globalNodeTransforms;
+		return Animation::GetBoneTransformation(world(), nodesTransforms, bone);
+	}
+
 	void Renderable::Destroy()
 	{
 		using namespace ComputeShader;

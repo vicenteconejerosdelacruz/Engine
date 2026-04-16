@@ -168,6 +168,7 @@ namespace Scene
 		void SetCurrentAnimation(SequencePlayer* sequencePlayer);
 		void SetCurrentAnimation(std::string anim, float startTime = 0.0f, float timeFactor = 1.0f, bool play = true, bool loop = false);
 		void StepAnimation(double elapsedSeconds);
+		std::tuple<XMMATRIX, XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> GetBoneTransformation(std::string bone);
 
 		//DESTROY
 		void Destroy();
