@@ -24,6 +24,13 @@ static inline std::unordered_map<std::string, SequencerModalPopup> StringToSeque
 	{ "Interact with Element", SMP_InteractWithElement }
 };
 
+enum PreviewFlyMode
+{
+	PreviewFlyMode_BoundingBox,
+	PreviewFlyMode_Bone,
+	PreviewFlyMode_Free
+};
+
 struct AnimationSequencerModal
 {
 	static inline ImGuiWindowFlags defaultChildFlag = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar |
@@ -41,6 +48,9 @@ struct AnimationSequencerModal
 	void DestroyStep();
 	void DestroySceneObjects();
 	void Step();
+	void WriteFloorColorConstantsBuffer();
+	void SetTriggersAvatarColors();
+	void SetPlayerSequenceFrame();
 	void DrawLoading();
 	void DrawSequencer(const char* title);
 	void DrawTitleBar(const char* title, ImVec2 pos, ImVec2 size, bool& exit);
@@ -106,13 +116,15 @@ struct AnimationSequencerModal
 	bool playingSequence = false;
 	float playingSequenceTime = 0.0f;
 	bool playingSequenceLoop = false;
-	bool adjustToBoundingBox = true;
+	PreviewFlyMode flyMode;
+	PreviewFlyMode prevFlyMode;
 
 	//timeline editor
 	//the "next" is because ImGui will change data if we set the pointer directly
 	TimelineEditor timelineEditor;
 	//keyframe transformation and bone transformation
 	SequenceChannelElementType selectedTransformationKeyFrameType;
+	SequenceChannelElementTransformation* selectedTransformation;
 	SequenceChannelElementBoneTransformation* selectedBoneTransformation;
 	TransformationKeyFrame* selectedTransformationKeyframe;
 	int keyFrameFrame;
@@ -135,6 +147,8 @@ struct AnimationSequencerModal
 	//preview model
 	bool mousePreviewLeftClickPressed;
 	ImVec2 mousePreviewLeftClickLastCoords;
+	bool mousePreviewRightClickPressed;
+	ImVec2 mousePreviewRightClickLastCoords;
 	bool wheelCapture;
 	std::vector<std::string> bones;
 

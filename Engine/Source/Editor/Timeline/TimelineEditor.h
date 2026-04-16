@@ -27,7 +27,7 @@ struct TimelineEditor
 	bool DrawPlusButton(ImVec2 pos, ImVec2 size, bool canInteract);
 	void DrawAddChannelButton(Sequence& sequence, ImVec2 pos, bool canInteract);
 	void DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract,
-		std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
+		std::function<void(SequenceChannelElementTransformation* transformation, TransformationKeyFrame*, int)> setTransformationKeyFrame,
 		std::function<void(SequenceChannelElementBoneTransformation*, TransformationKeyFrame*, int)> setBoneTransformationKeyFrame,
 		std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
 		std::function<void(int channel)> onChannelDeleted
@@ -36,7 +36,8 @@ struct TimelineEditor
 	void DrawHorizontalScrollbar(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract);
 	void DrawMarkers(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract);
 	void DrawSelectedFrameVerticalLine(ImVec2 timelinePos, ImVec2 timelineSize);
-	void DrawActionPopup(RenderableID renderable, Sequence& sequence, std::function<void(TransformationKeyFrame*, int frame)> setTransformationKeyFrame,
+	void DrawActionPopup(RenderableID renderable, Sequence& sequence,
+		std::function<void(SequenceChannelElementTransformation* transformation, TransformationKeyFrame*, int frame)> setTransformationKeyFrame,
 		std::function<void()> deleteTransformationKeyFrame,
 		std::function<void(SequenceChannelElementBoneTransformation*, TransformationKeyFrame*, int)> setBoneTransformationKeyFrame,
 		std::function<void()> deleteBoneTransformationKeyFrame,
@@ -44,7 +45,7 @@ struct TimelineEditor
 		std::function<void()> onTriggerAdded,
 		std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit);
 	void Draw(RenderableID renderable, Sequence& sequence, ImVec2 pos, ImVec2 size,
-		std::function<void(TransformationKeyFrame*, int frame)> setTransformationKeyFrame,
+		std::function<void(SequenceChannelElementTransformation* transformation, TransformationKeyFrame*, int frame)> setTransformationKeyFrame,
 		std::function<void()> deleteTransformationKeyFrame,
 		std::function<void(SequenceChannelElementBoneTransformation*, TransformationKeyFrame*, int)> setBoneTransformationKeyFrame,
 		std::function<void()> deleteBoneTransformationKeyFrame,

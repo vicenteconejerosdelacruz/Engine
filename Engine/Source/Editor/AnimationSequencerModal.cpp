@@ -49,7 +49,7 @@ void AnimationSequencerModal::Initialize(ImVec2 seqPos, ImVec2 seqSize, JUUID uu
 	playingSequence = false;
 	playingSequenceTime = 0.0f;
 	playingSequenceLoop = false;
-	adjustToBoundingBox = true;
+	flyMode = PreviewFlyMode_BoundingBox;
 	selectedTransformationKeyframe = nullptr;
 	keyFrameFrame = -1;
 	selectedElementTrigger = nullptr;
@@ -91,6 +91,12 @@ void AnimationSequencerModal::Initialize(ImVec2 seqPos, ImVec2 seqSize, JUUID uu
 			initializing = false;
 			bones = nostd::GetKeysFromMap(renderable->animable->animations->bonesOffsets);
 			bones.insert(bones.begin(), { "" });
+			WriteFloorColorConstantsBuffer();
+			Step();
+			for (unsigned int frame = 0U; frame < JRenderer::numFrames; frame++)
+			{
+				renderable->WriteAnimationConstantsBuffer(frame);
+			}
 		},
 		[&](std::string asset, unsigned int count, unsigned int total)
 		{
@@ -125,6 +131,7 @@ nlohmann::json AnimationSequencerModal::GetModalLevelJson()
 				{
 					{ "fitWindow", false },
 					{ "name", "cam-preview" },
+					{ "projectionType", "Perspective" },
 					{ "perspective",
 						{
 							{ "farZ", 100.0 },
@@ -134,13 +141,6 @@ nlohmann::json AnimationSequencerModal::GetModalLevelJson()
 							{ "height", camSize.y }
 						}
 					},
-					{ "position", FromXMFLOAT3(cameraInitialPos) },
-					{ "freeposition", FromXMFLOAT3(cameraInitialPos) },
-					{ "bonecamposition", FromXMFLOAT3(cameraInitialPos) },
-					{ "projectionType", "Perspective" },
-					{ "rotation", FromXMFLOAT3(cameraInitialRot) },
-					{ "freerotation", FromXMFLOAT3(cameraInitialRot) },
-					{ "bonecamrotation", FromXMFLOAT3(cameraInitialRot) },
 					{ "speed", 0.05000000074505806 },
 					{ "uuid", cameraUUID },
 					{
@@ -149,7 +149,14 @@ nlohmann::json AnimationSequencerModal::GetModalLevelJson()
 					{ "mouseController", false },
 					{ "useSwapChain", false },
 					{ "hidden", true },
-					{ "modelDistanceScale", 1.0f } //dynamic magic
+					{ "wheelFactor", 0.1f },
+					{ "modelDistanceScale", 1.0f },
+
+					{ "position", FromXMFLOAT3(cameraInitialPos) },
+					{ "rotation", FromXMFLOAT3(cameraInitialRot) },
+
+					{ "freeposition", FromXMFLOAT3(cameraInitialPos) },
+					{ "freerotation", FromXMFLOAT3(cameraInitialRot) },
 				}
 			}
 		},
@@ -258,97 +265,118 @@ void AnimationSequencerModal::Step()
 	using namespace Scene;
 
 	auto& scene = GetSceneUnit(unit);
-	XMFLOAT3 baseColor = ToXMFLOAT3(floor->at("floorColor"));
-	floor->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
-	floor->WriteConstantsBuffer(scene->Frame());
 	floor->renderNext({ renderable.uuid() });
 
 	if (selectedSequence != "")
 	{
-		Sequence& seq = sequencePlayer.sequence;
-		auto triggers = seq.GetTriggerElements();
-
-		renderable->renderNext({});
-		for (auto* t : triggers)
-		{
-			if (t->triggerRenderable)
-			{
-				renderable->renderNext({ t->triggerRenderable.uuid() });
-				t->triggerRenderable->renderNext({ t->triggerLines.uuid() });
-
-				XMFLOAT4 rgba = t->color;
-				XMFLOAT3 baseColor = { rgba.x,rgba.y,rgba.z };
-				XMFLOAT3 lineBaseColor = baseColor * 1.3f;
-				float alpha = rgba.w;
-				t->triggerRenderable->WriteConstantsBuffer("alpha", alpha, scene->Frame());
-				t->triggerRenderable->WriteConstantsBuffer("baseColor", baseColor, scene->Frame());
-				t->triggerRenderable->WriteConstantsBuffer(scene->Frame());
-				t->triggerLines->WriteConstantsBuffer("baseColor", lineBaseColor, scene->Frame());
-				t->triggerLines->WriteConstantsBuffer(scene->Frame());
-			}
-		}
-
-		if (playingSequence)
-		{
-			float totalTime = static_cast<float>(seq.totalFrames) / static_cast<float>(seq.framesPerSecond);
-			playingSequenceTime += static_cast<float>(timer.GetElapsedSeconds());
-			bool stopPlayer = false;
-
-			if (playingSequenceLoop)
-			{
-				playingSequenceTime = std::fmodf(playingSequenceTime, totalTime);
-			}
-			else
-			{
-				playingSequenceTime = std::min(playingSequenceTime, totalTime);
-				stopPlayer = playingSequenceTime == totalTime;
-			}
-			int frame = static_cast<int>(static_cast<float>(seq.totalFrames) * (playingSequenceTime / totalTime));
-			frame = std::clamp(frame, 0, seq.totalFrames);
-			timelineEditor.selectedFrameInTimeline = frame;
-			sequencePlayer.SetFrame(timelineEditor.GetFrame(seq));
-			if (stopPlayer)
-			{
-				playingSequence = false;
-			}
-		}
-		else
-		{
-			sequencePlayer.SetFrame(timelineEditor.GetFrame(seq), false);
-		}
-		sequencePlayer.ApplyFrameValues();
-		sequencePlayer.ApplyFrameTriggerAvatarValues();
+		SetTriggersAvatarColors();
+		SetPlayerSequenceFrame();
 	}
 
-	if (adjustToBoundingBox)
+	if (flyMode == PreviewFlyMode_BoundingBox)
 	{
-		//https://stackoverflow.com/a/32836605
-		BoundingBox modelBB = renderable->GetBoundingBox();
-		BoundingSphere modelBBS;
-		BoundingSphere::CreateFromBoundingBox(modelBBS, modelBB);
-
-		float modelDistanceScale = camera->at("modelDistanceScale");
-		float fov = XMConvertToRadians(camera->perspective().fovAngleY);
-		float distance = modelDistanceScale * (adjustToBoundingBox ? (modelBBS.Radius * 2.0f) / (XMScalarSin(fov) / XMScalarCos(fov)) : 1.0f);
-
-		XMVECTOR camFwV = camera->forward();
-		XMFLOAT3 BBPos = modelBB.Center;
-		XMVECTOR BBPosV = XMLoadFloat3(&BBPos);
-		XMVECTOR camPosV = XMVectorSubtract(BBPosV, XMVectorScale(camFwV, distance));
-		XMFLOAT3 camPos;
-		XMStoreFloat3(&camPos, camPosV);
-		camera->position(camPos);
+		if (renderable->HasBoundingBoxComputed())
+		{
+			float modelDistanceScale = camera->at("modelDistanceScale");
+			BoundingBox bb = renderable->GetBoundingBox();
+			camera->LookAtBoundingBox(bb, modelDistanceScale);
+		}
 	}
-	else
+	else if (flyMode == PreviewFlyMode_Bone)
+	{
+		float modelDistanceScale = camera->at("modelDistanceScale");
+		auto& nodesTransforms = renderable->animable->animations->globalNodeTransforms;
+		auto [mm, pos, a, b, c] = Animation::GetBoneTransformation(renderable->world(), nodesTransforms, selectedBoneTransformation->GetBone());
+		BoundingBox bb(pos, { 0.1f,0.1f,0.1f });
+		camera->LookAtBoundingBox(bb, modelDistanceScale);
+	}
+	else if (flyMode == PreviewFlyMode_Free)
 	{
 		camera->at("position") = camera->at("freeposition");
 		camera->at("rotation") = camera->at("freerotation");
+		camera->updateRotationQ();
 	}
-	camera->updateRotationQ();
 
 	camera->WriteConstantsBuffer(scene->Frame());
 	renderable->WriteConstantsBuffer(scene->Frame());
 	WriteConstantsBuffers(unit);
+}
+
+void AnimationSequencerModal::WriteFloorColorConstantsBuffer()
+{
+	using namespace Scene;
+
+	auto& scene = GetSceneUnit(unit);
+	XMFLOAT3 baseColor = ToXMFLOAT3(floor->at("floorColor"));
+	for (unsigned int frame = 0U; frame < JRenderer::numFrames; frame++)
+	{
+		floor->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, frame);
+		floor->WriteConstantsBuffer(frame);
+	}
+}
+
+void AnimationSequencerModal::SetTriggersAvatarColors()
+{
+	auto& scene = GetSceneUnit(unit);
+	Sequence& seq = sequencePlayer.sequence;
+	auto triggers = seq.GetTriggerElements();
+
+	renderable->renderNext({});
+	for (auto* t : triggers)
+	{
+		if (t->triggerRenderable)
+		{
+			renderable->renderNext({ t->triggerRenderable.uuid() });
+			t->triggerRenderable->renderNext({ t->triggerLines.uuid() });
+
+			XMFLOAT4 rgba = t->color;
+			XMFLOAT3 baseColor = { rgba.x,rgba.y,rgba.z };
+			XMFLOAT3 lineBaseColor = baseColor * 1.3f;
+			float alpha = rgba.w;
+			t->triggerRenderable->WriteConstantsBuffer("alpha", alpha, scene->Frame());
+			t->triggerRenderable->WriteConstantsBuffer("baseColor", baseColor, scene->Frame());
+			t->triggerRenderable->WriteConstantsBuffer(scene->Frame());
+			t->triggerLines->WriteConstantsBuffer("baseColor", lineBaseColor, scene->Frame());
+			t->triggerLines->WriteConstantsBuffer(scene->Frame());
+		}
+	}
+}
+
+void AnimationSequencerModal::SetPlayerSequenceFrame()
+{
+	auto& scene = GetSceneUnit(unit);
+	Sequence& seq = sequencePlayer.sequence;
+
+	if (playingSequence)
+	{
+		float totalTime = static_cast<float>(seq.totalFrames) / static_cast<float>(seq.framesPerSecond);
+		playingSequenceTime += static_cast<float>(timer.GetElapsedSeconds());
+		bool stopPlayer = false;
+
+		if (playingSequenceLoop)
+		{
+			playingSequenceTime = std::fmodf(playingSequenceTime, totalTime);
+		}
+		else
+		{
+			playingSequenceTime = std::min(playingSequenceTime, totalTime);
+			stopPlayer = playingSequenceTime == totalTime;
+		}
+		int frame = static_cast<int>(static_cast<float>(seq.totalFrames) * (playingSequenceTime / totalTime));
+		frame = std::clamp(frame, 0, seq.totalFrames);
+		timelineEditor.selectedFrameInTimeline = frame;
+		sequencePlayer.SetFrame(timelineEditor.GetFrame(seq));
+		if (stopPlayer)
+		{
+			playingSequence = false;
+		}
+	}
+	else
+	{
+		sequencePlayer.SetFrame(timelineEditor.GetFrame(seq), false);
+	}
+	sequencePlayer.ApplyFrameValues();
+	sequencePlayer.ApplyFrameTriggerAvatarValues();
 }
 
 void AnimationSequencerModal::DrawLoading()
@@ -390,6 +418,8 @@ void AnimationSequencerModal::DrawSequencer(const char* title)
 {
 	ImVec2 pos = sequencerPos;
 	ImVec2 size = sequencerSize;
+
+	auto& scene = GetSceneUnit(unit);
 
 	Step();
 
@@ -574,13 +604,23 @@ void AnimationSequencerModal::DrawSequencer(const char* title)
 	auto [keyframePos, keyframeSize] = getKeyframeValues();
 	auto [scriptEditPos, scriptEditSize] = getScriptEditValues();
 
-	auto transformationKeyFrameSelected = [&](TransformationKeyFrame* tkeyframe, int frame)
+	auto transformationKeyFrameSelected = [&](SequenceChannelElementTransformation* transformation, TransformationKeyFrame* tkeyframe, int frame)
 		{
+			selectedTransformation = transformation;
+			selectedBoneTransformation = nullptr;
 			selectedTransformationKeyframe = nullptr;
 			keyFrameFrame = -1;
 			nextSelectedTransformationKeyFrameType = SCET_Transformation;
 			nextSelectedTransformationKeyframe = tkeyframe;
 			nextSelectedKeyFrameFrame = frame;
+			if (flyMode != PreviewFlyMode_Free)
+			{
+				flyMode = PreviewFlyMode_BoundingBox;
+			}
+			else
+			{
+				prevFlyMode = PreviewFlyMode_BoundingBox;
+			}
 		};
 	auto transformationKeyFrameDeleted = [&]
 		{
@@ -589,12 +629,21 @@ void AnimationSequencerModal::DrawSequencer(const char* title)
 		};
 	auto boneTransformationKeyFrameSelected = [&](SequenceChannelElementBoneTransformation* boneTransformation, TransformationKeyFrame* tkeyframe, int frame)
 		{
+			selectedTransformation = nullptr;
 			selectedBoneTransformation = boneTransformation;
 			selectedTransformationKeyframe = nullptr;
 			keyFrameFrame = -1;
 			nextSelectedTransformationKeyFrameType = SCET_BoneTransformation;
 			nextSelectedTransformationKeyframe = tkeyframe;
 			nextSelectedKeyFrameFrame = frame;
+			if (flyMode != PreviewFlyMode_Free)
+			{
+				flyMode = PreviewFlyMode_Bone;
+			}
+			else
+			{
+				prevFlyMode = PreviewFlyMode_Bone;
+			}
 		};
 	auto boneTransformationKeyFrameDeleted = [&]
 		{
@@ -666,9 +715,6 @@ void AnimationSequencerModal::DrawSequencer(const char* title)
 			if (!selectedSequence.empty())
 			{
 				DrawTimelineController(timeControllerPos, timeControllerSize, sequencePlayer.sequence);
-			}
-			if (!selectedSequence.empty())
-			{
 				timelineEditor.Draw(renderable, sequencePlayer.sequence, sequencerPos, sequencerSize,
 					transformationKeyFrameSelected,
 					transformationKeyFrameDeleted,
@@ -685,6 +731,12 @@ void AnimationSequencerModal::DrawSequencer(const char* title)
 			{
 				if (selectedTransformationKeyFrameType == SCET_Transformation)
 				{
+					//do not use transformation for getting the world transformation as kM will already have this transformation already
+					XMMATRIX kM = selectedTransformation->GetTransformationInFrame(sequencePlayer.currentFrame);
+					renderable->animationUseTransformation(false);
+					XMMATRIX cmx = XMMatrixMultiply(kM, renderable->world());
+					renderable->animationUseTransformation(true);
+					XMStoreFloat4x4(&gizmoCentroidMx, cmx);
 					DrawTransformationKeyFrameAttributes(*selectedTransformationKeyframe, keyFrameFrame, keyframePos, keyframeSize);
 					DrawKeyFrameGuizmo(gizmoCentroidMx, *selectedTransformationKeyframe, modelPos, modelSize);
 				}
@@ -752,12 +804,6 @@ void AnimationSequencerModal::DrawSequencer(const char* title)
 		keyFrameFrame = nextSelectedKeyFrameFrame;
 		nextSelectedTransformationKeyframe = nullptr;
 		nextSelectedKeyFrameFrame = -1;
-		if (selectedTransformationKeyFrameType == SCET_Transformation)
-		{
-			XMVECTOR vec = XMLoadFloat3(&selectedTransformationKeyframe->position);
-			XMMATRIX cmx = XMMatrixTranslationFromVector(vec);
-			XMStoreFloat4x4(&gizmoCentroidMx, cmx);
-		}
 	}
 
 	if (nextSelectedElementTrigger != nullptr)
@@ -904,7 +950,7 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 	{
 		auto& pass = camera->renderPassesUUID.at(0);
 		bool mouseInPreviewArea = previewRect.Contains(mouse);
-		if ((ImGuizmo::IsOver() || ImGuizmo::IsUsing()) && adjustToBoundingBox)
+		if ((ImGuizmo::IsOver() || ImGuizmo::IsUsing()))
 		{
 			mouseInPreviewArea = false;
 			mousePreviewLeftClickPressed = false;
@@ -918,19 +964,34 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 			}
 			else
 			{
-				if (adjustToBoundingBox)
+				if (flyMode == PreviewFlyMode_BoundingBox || flyMode == PreviewFlyMode_Bone)
 				{
 					float modelDistanceScale = camera->at("modelDistanceScale");
-					modelDistanceScale -= io.MouseWheel;
+					float wheelFactor = camera->at("wheelFactor");
+					modelDistanceScale -= io.MouseWheel * modelDistanceScale * wheelFactor;
 					modelDistanceScale = std::max(modelDistanceScale, 0.1f);
 					camera->at("modelDistanceScale") = modelDistanceScale;
-					Step();
+				}
+				else if (flyMode == PreviewFlyMode_Free)
+				{
+					//freeposition
+					//freerotation
+					float step = io.MouseWheel;
+					XMFLOAT3 pos = ToXMFLOAT3(camera->at("freeposition"));
+					XMVECTOR posV = XMLoadFloat3(&pos) + camera->forward() * camera->at("wheelFactor") * step;
+					XMStoreFloat3(&pos, posV);
+					camera->at("freeposition") = FromXMFLOAT3(pos);
 				}
 			}
 			if (ImGui::IsMouseDown(0) && !mousePreviewLeftClickPressed)
 			{
 				mousePreviewLeftClickPressed = true;
 				mousePreviewLeftClickLastCoords = mouse;
+			}
+			if (ImGui::IsMouseDown(1) && !mousePreviewRightClickPressed)
+			{
+				mousePreviewRightClickPressed = true;
+				mousePreviewRightClickLastCoords = mouse;
 			}
 		}
 		else
@@ -948,13 +1009,72 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 			{
 				ImVec2 delta(mouse.x - mousePreviewLeftClickLastCoords.x, mouse.y - mousePreviewLeftClickLastCoords.y);
 				mousePreviewLeftClickLastCoords = mouse;
-				if (adjustToBoundingBox)
+				if (flyMode == PreviewFlyMode_BoundingBox)
 				{
-					XMFLOAT3 camRot = camera->rotation();
-					camRot.y += delta.x;
-					camRot.x += delta.y;
-					camera->rotation(camRot);
-					Step();
+					float modelDistanceScale = camera->at("modelDistanceScale");
+					XMVECTOR qInc = XMQuaternionRotationRollPitchYaw(delta.y * 0.01f, delta.x * 0.01f, 0.0f);
+					BoundingBox bb = renderable->GetBoundingBox();
+					XMVECTOR bbp = XMLoadFloat3(&bb.Center);
+					XMVECTOR invFw = -1.0f * camera->forward();
+					invFw = XMVector3Rotate(invFw, qInc) * modelDistanceScale;
+					camera->positionV(invFw + bbp);
+					camera->LookAt(bbp);
+				}
+				else if (flyMode == PreviewFlyMode_Bone)
+				{
+					float modelDistanceScale = camera->at("modelDistanceScale");
+					auto& nodesTransforms = renderable->animable->animations->globalNodeTransforms;
+					auto [mm, pos, a, b, c] = Animation::GetBoneTransformation(renderable->world(), nodesTransforms, selectedBoneTransformation->GetBone());
+					XMVECTOR qInc = XMQuaternionRotationRollPitchYaw(delta.y * 0.01f, delta.x * 0.01f, 0.0f);
+					XMVECTOR bbp = XMLoadFloat3(&pos);
+					XMVECTOR invFw = -1.0f * camera->forward();
+					invFw = XMVector3Rotate(invFw, qInc) * modelDistanceScale;
+					camera->positionV(invFw + bbp);
+					camera->LookAt(bbp);
+				}
+				else if (flyMode == PreviewFlyMode_Free)
+				{
+					XMFLOAT3 rotation = ToXMFLOAT3(camera->at("freerotation"));
+					XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(
+						XMConvertToRadians(rotation.x),
+						XMConvertToRadians(rotation.y),
+						XMConvertToRadians(rotation.z)
+					);
+					XMVECTOR qInc = XMQuaternionRotationRollPitchYaw(delta.y * 0.01f, delta.x * 0.01f, 0.0f);
+					XMVECTOR qNew = XMQuaternionNormalize(XMQuaternionMultiply(rotQ, qInc));
+					XMFLOAT3 euler = Quaternion2Euler(qNew);
+					camera->at("freerotation") = FromXMFLOAT3(euler);
+				}
+			}
+		}
+		if (mousePreviewRightClickPressed)
+		{
+			if (!ImGui::IsMouseDown(1))
+			{
+				mousePreviewRightClickPressed = false;
+			}
+			else
+			{
+				ImVec2 delta(mouse.x - mousePreviewRightClickLastCoords.x, mouse.y - mousePreviewRightClickLastCoords.y);
+				mousePreviewRightClickLastCoords = mouse;
+				if (flyMode == PreviewFlyMode_Free)
+				{
+					XMFLOAT3 rotation = ToXMFLOAT3(camera->at("freerotation"));
+					XMVECTOR rotQ = XMQuaternionRotationRollPitchYaw(
+						XMConvertToRadians(rotation.x),
+						XMConvertToRadians(rotation.y),
+						XMConvertToRadians(rotation.z)
+					);
+					XMVECTOR dir = { 0.0f, 0.0f, 1.0f,0.0f };
+					XMVECTOR fw = XMVector3Normalize(XMVector3Rotate(dir, rotQ));
+					XMVECTOR up = { 0.0f, 1.0f, 0.0f,0.0f };
+					up = XMVector3Normalize(XMVector3Rotate(up, rotQ));
+					XMVECTOR right = XMVector3Cross(fw, up);
+					XMVECTOR disp = -up * delta.y * 0.01f - right * delta.x * 0.01f;
+					XMFLOAT3 pos = ToXMFLOAT3(camera->at("freeposition"));
+					XMVECTOR posV = XMLoadFloat3(&pos) + disp;
+					XMStoreFloat3(&pos, posV);
+					camera->at("freeposition") = FromXMFLOAT3(pos);
 				}
 			}
 		}
@@ -974,25 +1094,39 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 	ImGui::SetNextWindowSize(attsSize, 0);
 	ImGui::BeginChild("camera-atts", attsSize, 0);
 	{
-		ImGui::Text("camera");
-		ImGui::Checkbox("Adjust camera", &adjustToBoundingBox);
-		Camera* cam = (Camera*)GetSceneObjectPointer(unit, camera.uuid());
-		if (adjustToBoundingBox)
+
+		ImGui::Text("floor");
+		std::vector<JObject*> floorV({ GetSceneObjectPointer(unit,floor.uuid()) });
+		XMFLOAT3 a = ToXMFLOAT3(floor->at("floorColor"));
+		DrawValue<XMFLOAT3, jedv_t_color_float3>()("floorColor", floorV);
+		XMFLOAT3 b = ToXMFLOAT3(floor->at("floorColor"));
+		if (!(a.x == b.x && a.y == b.y && a.z == b.z))
 		{
-			std::vector<JObject*> camV({ cam });
-			DrawValue<XMFLOAT3, jedv_t_float3_angle>()("rotation", camV);
-			DrawValue<float, jedv_t_float>()("modelDistanceScale", camV);
+			WriteFloorColorConstantsBuffer();
 		}
-		else
+
+		bool adjustToBoundingBox = flyMode != PreviewFlyMode_Free;
+		ImGui::Text("camera");
+		if (ImGui::Checkbox("Adjust camera", &adjustToBoundingBox))
 		{
+			if (!adjustToBoundingBox)
+			{
+				prevFlyMode = flyMode;
+				flyMode = PreviewFlyMode_Free;
+			}
+			else
+			{
+				flyMode = prevFlyMode;
+			}
+		}
+		if (!adjustToBoundingBox)
+		{
+			Camera* cam = (Camera*)GetSceneObjectPointer(unit, camera.uuid());
 			std::vector<JObject*> camV({ cam });
 			DrawValue<XMFLOAT3, jedv_t_float3>()("freeposition", camV);
 			DrawValue<XMFLOAT3, jedv_t_float3_angle>()("freerotation", camV);
 		}
 
-		ImGui::Text("floor");
-		std::vector<JObject*> floorV({ GetSceneObjectPointer(unit,floor.uuid()) });
-		DrawValue<XMFLOAT3, jedv_t_color_float3>()("floorColor", floorV);
 	}
 	ImGui::EndChild();
 

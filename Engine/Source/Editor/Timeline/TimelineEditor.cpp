@@ -130,7 +130,7 @@ void TimelineEditor::DrawAddChannelButton(Sequence& sequence, ImVec2 pos, bool c
 }
 
 void TimelineEditor::DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract,
-	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
+	std::function<void(SequenceChannelElementTransformation* transformation, TransformationKeyFrame*, int)> setTransformationKeyFrame,
 	std::function<void(SequenceChannelElementBoneTransformation*, TransformationKeyFrame*, int)> setBoneTransformationKeyFrame,
 	std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
 	std::function<void(int channel)> onChannelDeleted
@@ -201,7 +201,8 @@ void TimelineEditor::DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2
 
 	if (deleteChannelId != -1)
 	{
-		setTransformationKeyFrame(nullptr, -1);
+		auto& [channel, frame] = selectedChannelFrame;
+		setTransformationKeyFrame(sequence.sequenceChannels.at(channel).GetTransformationElementAtFrame(frame), nullptr, -1);
 		DeleteChannel(sequence, deleteChannelId, timelinePos, timelineSize);
 		onChannelDeleted(deleteChannelId);
 	}
@@ -219,7 +220,7 @@ void TimelineEditor::DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2
 
 		if (!boneTransformation)
 		{
-			setTransformationKeyFrame(elemKeyFrame, frame);
+			setTransformationKeyFrame(sequence.sequenceChannels.at(channel).GetTransformationElementAtFrame(frame), elemKeyFrame, frame);
 		}
 		else
 		{
@@ -496,7 +497,7 @@ void TimelineEditor::DrawSelectedFrameVerticalLine(ImVec2 timelinePos, ImVec2 ti
 }
 
 void TimelineEditor::DrawActionPopup(RenderableID renderable, Sequence& sequence,
-	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
+	std::function<void(SequenceChannelElementTransformation* transformation, TransformationKeyFrame*, int)> setTransformationKeyFrame,
 	std::function<void()> deleteTransformationKeyFrame,
 	std::function<void(SequenceChannelElementBoneTransformation*, TransformationKeyFrame*, int)> setBoneTransformationKeyFrame,
 	std::function<void()> deleteBoneTransformationKeyFrame,
@@ -589,13 +590,13 @@ void TimelineEditor::DrawActionPopup(RenderableID renderable, Sequence& sequence
 			{
 				AddKeyframeToTransformationElementInFrameAtChannel(sequence, channel, frame);
 				TransformationKeyFrame& keyFrame = sequence.sequenceChannels.at(channel).GetTransformationElementAtFrame(frame)->keyFrames.at(frame);
-				setTransformationKeyFrame(&keyFrame, frame);
+				setTransformationKeyFrame(sequence.sequenceChannels.at(channel).GetTransformationElementAtFrame(frame), &keyFrame, frame);
 				popup = TP_None;
 			}
 			},
 			{ IP_Transformation_RemoveKeyframe, [this, &sequence, channel, frame,deleteTransformationKeyFrame,setTransformationKeyFrame]()
 			{
-				setTransformationKeyFrame(nullptr,-1);
+				setTransformationKeyFrame(sequence.sequenceChannels.at(channel).GetTransformationElementAtFrame(frame), nullptr,-1);
 				RemoveKeyframeFromTransformationElementInFrameAtChannel(sequence, channel, frame);
 				deleteTransformationKeyFrame();
 				popup = TP_None;
@@ -702,7 +703,7 @@ void TimelineEditor::DrawActionPopup(RenderableID renderable, Sequence& sequence
 }
 
 void TimelineEditor::Draw(RenderableID renderable, Sequence& sequence, ImVec2 pos, ImVec2 size,
-	std::function<void(TransformationKeyFrame*, int)> setTransformationKeyFrame,
+	std::function<void(SequenceChannelElementTransformation* transformation, TransformationKeyFrame*, int)> setTransformationKeyFrame,
 	std::function<void()> deleteTransformationKeyFrame,
 	std::function<void(SequenceChannelElementBoneTransformation*, TransformationKeyFrame*, int)> setBoneTransformationKeyFrame,
 	std::function<void()> deleteBoneTransformationKeyFrame,
