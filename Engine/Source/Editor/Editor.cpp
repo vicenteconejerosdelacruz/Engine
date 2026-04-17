@@ -2374,9 +2374,9 @@ namespace Editor
 #endif
 		if (!selectedSceneObjects.contains(id)) return;
 
-		if (selectedSceneObjects.at(id).size() == 0ULL)
+		if (selectedSceneObjects.at(id).size() == 0ULL || IsPlaying(id))
 		{
-			if (!boundingBox.at(id).empty())
+			if (boundingBox.at(id))
 			{
 				boundingBox.at(id)->visible(false);
 			}
