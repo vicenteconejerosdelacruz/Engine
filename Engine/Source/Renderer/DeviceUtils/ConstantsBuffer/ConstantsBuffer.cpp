@@ -43,8 +43,10 @@ namespace DeviceUtils
 		csuDescriptorHeap->FreeDescriptor(cpuHandle, gpuHandle);
 	}
 
+	static std::mutex constantsBufferMutex;
 	ConstantsBufferID CreateConstantsBuffer(size_t bufferSize, unsigned int numDescriptors, std::string cbName)
 	{
+		std::lock_guard<std::mutex> lock(constantsBufferMutex);
 		ConstantsBufferID constantsBufferID = getUUID();
 		std::unique_ptr<ConstantsBuffer> cbvData = std::make_unique<ConstantsBuffer>(bufferSize, cbName);
 
@@ -91,11 +93,13 @@ namespace DeviceUtils
 
 	void DestroyConstantsBuffer(ConstantsBufferID ConstantsBufferID)
 	{
+		std::lock_guard<std::mutex> lock(constantsBufferMutex);
 		constantsBuffers.erase(ConstantsBufferID());
 	}
 
 	void DestroyConstantsBuffer()
 	{
+		std::lock_guard<std::mutex> lock(constantsBufferMutex);
 		constantsBuffers.clear();
 	}
 
