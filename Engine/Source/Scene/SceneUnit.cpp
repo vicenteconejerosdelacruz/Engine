@@ -24,7 +24,7 @@ namespace Scene
 		isolated = false;
 		binder.unit = unit;
 #if defined(_EDITOR)
-		canBuildAssetsTree = std::make_unique<std::atomic_bool>(false);
+		canBuildAssetsTree = std::make_unique<std::atomic_uint>(0U);
 #endif
 		CreateShadowMapResources(id);
 	}
@@ -257,12 +257,22 @@ namespace Scene
 #if defined(_EDITOR)
 	bool SceneUnit::CanBuildAssetsTree()
 	{
-		return canBuildAssetsTree->load();
+		return canBuildAssetsTree->load() == 0U;
 	}
 
 	void SceneUnit::SetCanBuildAssetsTree(bool value)
 	{
-		canBuildAssetsTree->store(value);
+		unsigned int stored_value = canBuildAssetsTree->load();
+		if (!value)
+		{
+			stored_value++;
+		}
+		else
+		{
+			assert(stored_value != 0U);
+			stored_value--;
+		}
+		canBuildAssetsTree->store(stored_value);
 	}
 #endif
 };

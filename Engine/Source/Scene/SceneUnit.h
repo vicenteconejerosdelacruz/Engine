@@ -85,7 +85,7 @@ namespace Scene
 		std::function<void()> deleteCallback;
 		bool isolated;
 #if defined(_EDITOR)
-		std::unique_ptr<std::atomic_bool> canBuildAssetsTree;
+		std::unique_ptr<std::atomic_uint> canBuildAssetsTree;
 #endif
 
 		//Scene

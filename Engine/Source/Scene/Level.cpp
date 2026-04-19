@@ -117,6 +117,7 @@ namespace Scene::Level
 		using namespace Scene;
 #if defined(_EDITOR)
 		using namespace Editor;
+		scene->SetCanBuildAssetsTree(false);
 
 		SceneUnitId id = scene->Id();
 
