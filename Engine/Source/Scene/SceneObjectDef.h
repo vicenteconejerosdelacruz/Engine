@@ -90,6 +90,7 @@
 #define RENAME_ON_DELETION(SOClass) \
 markedForDelete.Hook([&]\
 	{\
+		lifecycleState->wait(false);\
 		Rename##SOClass##SceneObject(SUuuid(), "delete-" + uuid());\
 	}\
 )

@@ -61,6 +61,7 @@ namespace Scene
 #include <Attributes/JUpdate.h>
 #include <RenderableAtt.h>
 #include <JEnd.h>
+		lifecycleState->store(false);
 		RENAME_ON_DELETION(Renderable);
 	}
 
@@ -134,6 +135,8 @@ namespace Scene
 
 		BindCameras();
 		BindShadowMapCameras();
+		lifecycleState->store(true);
+		lifecycleState->notify_all();
 	}
 
 	void Renderable::Bind(JUUID uuid)

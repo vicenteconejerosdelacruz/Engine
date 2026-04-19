@@ -98,7 +98,12 @@ namespace Scene
 #endif
 
 		//lifecycle
-		SceneObject(SceneUnitId id, nlohmann::json& json) :JObject(json) { unit = id; soName = json.at("name"); }
+		SceneObject(SceneUnitId id, nlohmann::json& json) :JObject(json)
+		{
+			lifecycleState = std::make_unique<std::atomic_bool>(true);
+			unit = id;
+			soName = json.at("name");
+		}
 		virtual void Initialize() {};
 		virtual void SetInitialConditions() {};
 		virtual void BindToScene() {};
@@ -139,6 +144,9 @@ namespace Scene
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return false; }
 		virtual std::map<std::string, ScriptBinding> GetScriptBindingOptions();
 #endif
+		//lifecycle
+		std::unique_ptr<std::atomic_bool> lifecycleState;
+
 		//scene unit for which this scene object belongs
 		SceneUnitId unit;
 		std::string soName;
