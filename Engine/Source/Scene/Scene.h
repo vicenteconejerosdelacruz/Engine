@@ -68,9 +68,11 @@ namespace Scene
 
 	void MoveSceneObjectUnit(JUUID uuid, SceneUnitId fromId, SceneUnitId toId);
 
+	static inline std::mutex sceneObjectMutex;
 	template<SceneObjectType T, typename J>
 	inline void CreateJsonSceneObject(SceneUnitId id, nlohmann::json& json, auto getTypesSceneObjects)
 	{
+		std::lock_guard<std::mutex> lock(sceneObjectMutex);
 		JUUID uuid = json.at("uuid");
 		JNAME name = json.at("name");
 
@@ -102,6 +104,7 @@ namespace Scene
 	template<SceneObjectType T, typename J>
 	inline void DeleteJsonSceneObject(SceneUnitId id, JUUID uuid, auto getTypesSceneObjects)
 	{
+		std::lock_guard<std::mutex> lock(sceneObjectMutex);
 		auto& uuidSet = GetSceneObjects(id, T);
 		auto& typesMap = GetSceneObjectsTypes(id);
 		auto& sceneObjects = getTypesSceneObjects(id);
