@@ -19,9 +19,12 @@ namespace Templates {
 		meshes.insert_or_assign(uuid, name);
 	}
 
+	static std::mutex refTrackMutex;
 	std::unique_ptr<MeshInstance>& GetMeshInstance(SceneUnitId id, nlohmann::json& json)
 	{
 		using namespace Mesh;
+
+		std::lock_guard<std::mutex> lock(refTrackMutex);
 
 		//is not a real uuid but we need some identifier for meshes that can be repeated
 		JUUID uuid = json.at("primitive");
@@ -48,6 +51,7 @@ namespace Templates {
 	std::unique_ptr<MeshInstance>& GetMeshInstance(JUUID uuid)
 	{
 		using namespace Mesh;
+		std::lock_guard<std::mutex> lock(refTrackMutex);
 		return  refTracker.FindValue(uuid);
 	}
 
@@ -55,6 +59,7 @@ namespace Templates {
 	{
 		using namespace Mesh;
 		using namespace Scene;
+		std::lock_guard<std::mutex> lock(refTrackMutex);
 		return refTracker.AddRef(uuid, [&]()
 			{
 				std::unique_ptr<MeshInstance> instance = std::make_unique<MeshInstance>();
@@ -102,6 +107,7 @@ namespace Templates {
 	bool MeshInstanceExists(JUUID uuid)
 	{
 		using namespace Mesh;
+		std::lock_guard<std::mutex> lock(refTrackMutex);
 		return refTracker.Has(uuid);
 	}
 
@@ -127,6 +133,7 @@ namespace Templates {
 	void DestroyMeshInstance(JUUID uuid)
 	{
 		using namespace Mesh;
+		std::lock_guard<std::mutex> lock(refTrackMutex);
 		refTracker.RemoveRef(uuid);
 	}
 
