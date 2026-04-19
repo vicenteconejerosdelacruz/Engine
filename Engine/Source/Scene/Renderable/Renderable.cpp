@@ -63,6 +63,7 @@ namespace Scene
 #include <JEnd.h>
 		lifecycleState->store(false);
 		RENAME_ON_DELETION(Renderable);
+		animationStepLock = std::make_unique<std::atomic_bool>(false);
 	}
 
 	void Renderable::create_rotation(XMFLOAT3 v)
@@ -726,7 +727,12 @@ namespace Scene
 		using namespace Animation;
 		auto& animations = animable->animations;
 
+		if (animationStepLock->load() == true)
+			animationStepLock->wait(true);
+		animationStepLock->store(true);
 		TraverseMultiplycationQueue(animationTime(), animation(), animations, bonesTransformation, sequenceBoneTransformations);
+		animationStepLock->store(false);
+		animationStepLock->notify_one();
 	}
 
 	std::tuple<XMMATRIX, XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> Renderable::GetBoneTransformation(std::string bone)
@@ -988,6 +994,7 @@ namespace Scene
 		auto& Renderables = GetRenderables(id);
 		std::set<RenderableID> r;
 		std::transform(Renderables.begin(), Renderables.end(), std::inserter(r, r.begin()), [&](auto o) { return MAKESUUUID(id, o); });
+		std::erase_if(r, [](RenderableID r) { return !SceneObjectExists(r()) || !r->RenderReady(); });
 
 		auto checkCamera = [](RenderableID r)
 			{

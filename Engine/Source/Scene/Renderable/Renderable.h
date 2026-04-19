@@ -208,6 +208,7 @@ namespace Scene
 		RenderableRootSignatures rootSignatures;
 		RenderablePipelineStates pipelineStates;
 		//Animations
+		std::unique_ptr<std::atomic_bool> animationStepLock;
 		Model3DInstanceID animable;
 		Animation::BonesTransformations bonesTransformation;
 		XMMATRIX animationTransformation;
