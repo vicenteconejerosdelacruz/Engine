@@ -75,14 +75,26 @@ namespace DeviceUtils
 					{ SO_Cameras, [&](CameraID c) { makeReady(c); }},
 					{ SO_Lights, [&](LightID l) { makeReady(l); }},
 				};
+
+				std::vector<std::tuple<SceneObjectType, SUUUID>> toClean;
 				for (auto& [type, uuidset] : loadingPool)
 				{
 					for (auto& uuid : uuidset)
 					{
+						if (!SceneObjectExists(uuid))
+							continue;
 						loadedMap.at(type)(uuid);
+						toClean.push_back(std::make_tuple(type, uuid));
 					}
 				}
-				loadingPool.clear();
+				for (auto& wipe : toClean)
+				{
+					loadingPool.at(std::get<0>(wipe)).erase(std::get<1>(wipe));
+					if (loadingPool.at(std::get<0>(wipe)).size() == 0ULL)
+					{
+						loadingPool.erase(std::get<0>(wipe));
+					}
+				}
 				for (auto& cb : postExecutionCallbacks)
 				{
 					cb();
