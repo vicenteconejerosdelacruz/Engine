@@ -140,11 +140,13 @@ namespace Scene::Level
 
 		unsigned int count = 0U;
 
+		std::vector<std::tuple<SceneObjectType, SUUUID>> objectsToLoad;
+
 		LoadSceneObjects(scene, data, SceneObjectTypeJsonContainer.at(SO_Renderables), [&](nlohmann::json& json)
 			{
 				progress(json.at("name"), count, total);
 				CreateRenderable(id, json);
-				loading.LoadingPoolInsert(SO_Renderables, MAKESUUUID(id, JUUID(json.at("uuid"))));
+				objectsToLoad.push_back(std::make_tuple(SO_Renderables, MAKESUUUID(id, JUUID(json.at("uuid")))));
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -153,7 +155,7 @@ namespace Scene::Level
 			{
 				progress(json.at("name"), count, total);
 				CreateCamera(id, json);
-				loading.LoadingPoolInsert(SO_Cameras, MAKESUUUID(id, JUUID(json.at("uuid"))));
+				objectsToLoad.push_back(std::make_tuple(SO_Cameras, MAKESUUUID(id, JUUID(json.at("uuid")))));
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -162,7 +164,7 @@ namespace Scene::Level
 			{
 				progress(json.at("name"), count, total);
 				CreateLight(id, json);
-				loading.LoadingPoolInsert(SO_Lights, MAKESUUUID(id, JUUID(json.at("uuid"))));
+				objectsToLoad.push_back(std::make_tuple(SO_Lights, MAKESUUUID(id, JUUID(json.at("uuid")))));
 				count++;
 				progress(json.at("name"), count, total);
 			}
@@ -229,6 +231,15 @@ namespace Scene::Level
 			CopySceneUnitEditorCameraRenderPasses(id);
 		}
 #endif
+
+		for (auto& intoThePool : objectsToLoad)
+		{
+			loading.LoadingPoolInsert(
+				std::get<0>(intoThePool),
+				std::get<1>(intoThePool)
+			);
+		}
+
 		loading.CloseCommandList();
 		loading.ExecuteCommandList();
 #if defined(_EDITOR)
