@@ -278,8 +278,21 @@ namespace Scene
 		XMMATRIX scaleM = XMMatrixScalingFromVector(XMLoadFloat3(&scaleV));
 		XMMATRIX positionM = XMMatrixTranslationFromVector(XMLoadFloat3(&posV));
 		XMMATRIX worldM = XMMatrixMultiply(XMMatrixMultiply(scaleM, rotationM), positionM);
-		if (!animationUseTransformation()) return worldM;
-		return XMMatrixMultiply(animationTransformation, worldM);
+		XMMATRIX animT = (!animationUseTransformation()) ? worldM : XMMatrixMultiply(animationTransformation, worldM);
+		if (attachedTo().empty())
+		{
+			return animT;
+		}
+		if (attachedBone().empty())
+		{
+			return XMMatrixMultiply(animT, RenderableID(unit, attachedTo())->world());
+		}
+		else
+		{
+			RenderableID parent(unit, attachedTo());
+			auto [mm, pos, a, b, c] = parent->GetBoneTransformation(attachedBone());
+			return XMMatrixMultiply(animT, mm);
+		}
 	}
 
 	void Renderable::CreateMeshInstances()
@@ -718,8 +731,25 @@ namespace Scene
 
 	std::tuple<XMMATRIX, XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> Renderable::GetBoneTransformation(std::string bone)
 	{
+		if (bone.empty())
+		{
+			return std::make_tuple<XMMATRIX, XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3>(
+				XMMatrixIdentity(),
+				{ 0.0f, 0.0f, 0.0f },
+				{ 0.0f, 0.0f, 0.0f },
+				XMQuaternionIdentity(),
+				{ 1.0f, 1.0f, 1.0f }
+			);
+		}
 		auto& nodesTransforms = animable->animations->globalNodeTransforms;
 		return Animation::GetBoneTransformation(world(), nodesTransforms, bone);
+	}
+
+	std::vector<std::string> Renderable::GetBones()
+	{
+		std::vector<std::string> bones = nostd::GetKeysFromMap(animable->animations->bonesParents);
+		std::sort(bones.begin(), bones.end(), [](std::string a, std::string b) { return a < b; });
+		return bones;
 	}
 
 	void Renderable::Destroy()

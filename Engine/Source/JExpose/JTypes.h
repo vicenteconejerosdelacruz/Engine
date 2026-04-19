@@ -81,6 +81,8 @@ enum JsonToEditorValueType
 	jedv_t_te_model3d,
 	jedv_t_te_model3d_name,
 	jedv_t_te_model3d_vector,
+	jedv_t_controller_model3d_bone,
+	jedv_t_attachment_model3d_bone,
 	jedv_t_te_renderpass,
 	jedv_t_te_renderpass_name,
 	jedv_t_te_renderpass_vector,

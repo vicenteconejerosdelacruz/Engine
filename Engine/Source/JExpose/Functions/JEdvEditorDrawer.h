@@ -201,6 +201,10 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_shader>();
 template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_model3d>();
 template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_controller_model3d_bone>();
+template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_attachment_model3d_bone>();
+template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_sound>();
 template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_texture>();

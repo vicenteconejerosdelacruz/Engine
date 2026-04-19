@@ -1959,6 +1959,83 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_model3d>()
 }
 
 template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_controller_model3d_bone>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			if (json.size() > 1) return;
+
+			Controller* controller = static_cast<Controller*>(json.at(0));
+			RenderableID r = controller->sceneObject;
+			std::vector<std::string> bones = r->GetBones();
+
+			auto updateBone = [&](std::string boneName)
+				{
+					json.at(0)->at(attribute) = boneName;
+					Editor::MarkSceneUnitAsModified(Editor::currentSceneUnitId);
+				};
+
+			std::string tableName = attribute + "-table";
+			if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+			{
+				ImGui::TableNextRow();
+
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text(attribute.c_str());
+
+				std::string bone = json.at(0)->at(attribute);
+				ImGui::TableSetColumnIndex(1);
+				ImGui::DrawComboSelection(bone, bones, updateBone);
+
+				ImGui::EndTable();
+			}
+		};
+}
+
+template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_attachment_model3d_bone>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			if (json.size() > 1) return;
+
+			bool empty = !json.at(0)->contains("attachedTo") || std::string(json.at(0)->at("attachedTo")).empty();
+
+			std::vector<std::string> bones;
+
+			if (!empty)
+			{
+				RenderableID r(Editor::currentSceneUnitId, json.at(0)->at("attachedTo"));
+				bones = r->GetBones();
+			}
+
+			auto updateBone = [&](std::string boneName)
+				{
+					json.at(0)->at(attribute) = boneName;
+					Editor::MarkSceneUnitAsModified(Editor::currentSceneUnitId);
+				};
+
+			std::string tableName = attribute + "-table";
+			if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+			{
+				ImGui::TableNextRow();
+
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text(attribute.c_str());
+
+				if (!empty)
+				{
+					std::string bone = json.at(0)->at(attribute);
+					ImGui::TableSetColumnIndex(1);
+					ImGui::DrawComboSelection(bone, bones, updateBone);
+				}
+
+				ImGui::EndTable();
+			}
+		};
+}
+
+template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_sound>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
