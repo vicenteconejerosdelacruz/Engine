@@ -110,7 +110,12 @@ bool TimelineEditor::DrawPlusButton(ImVec2 pos, ImVec2 size, bool canInteract)
 	return ret;
 };
 
-void TimelineEditor::DrawAddChannelButton(Sequence& sequence, ImVec2 pos, bool canInteract)
+void TimelineEditor::DrawAddChannelButton(
+	Sequence& sequence,
+	ImVec2 pos,
+	bool canInteract,
+	std::function<void(unsigned int channel)> onChannelAdded
+)
 {
 	ImVec2 addChannelButtonPos(pos.x + 5, pos.y + 2);
 	ImVec2 addChannelButtonSize(markersBgHeight - 6, markersBgHeight - 6);
@@ -125,6 +130,7 @@ void TimelineEditor::DrawAddChannelButton(Sequence& sequence, ImVec2 pos, bool c
 		{
 			channels.back().SetPosAfter(channels.at(last));
 		}
+		onChannelAdded(last);
 	}
 	ImGui::PopID();
 }
@@ -711,6 +717,7 @@ void TimelineEditor::Draw(RenderableID renderable, Sequence& sequence, ImVec2 po
 	std::function<void()> onTriggerAdded,
 	std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
 	std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit,
+	std::function<void(int channel)> onChannelAdded,
 	std::function<void(int channel)> onChannelDeleted
 )
 {
@@ -725,7 +732,7 @@ void TimelineEditor::Draw(RenderableID renderable, Sequence& sequence, ImVec2 po
 	bool canInteract = popup == TP_None;
 	bool draging = elementDrag || elementDragLeftBoundary || elementDragRightBoundary;
 	DrawBackground(pos, size);
-	DrawAddChannelButton(sequence, pos, canInteract && !markerMouseDrag && !draging);
+	DrawAddChannelButton(sequence, pos, canInteract && !markerMouseDrag && !draging, onChannelAdded);
 	DrawTimeline(sequence, timelinePos, timelineSize, canInteract && !markerMouseDrag && !draging, setTransformationKeyFrame, setBoneTransformationKeyFrame, setElementTrigger, onChannelDeleted);
 	DrawMarkers(sequence, timelinePos, timelineSize, canInteract && !draging);
 	DrawSelectedFrameVerticalLine(timelinePos, timelineSize);

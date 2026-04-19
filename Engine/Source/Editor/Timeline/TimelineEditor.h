@@ -25,7 +25,12 @@ struct TimelineEditor
 	void DrawRect(ImVec2 pos, ImVec2 size, ImU32 color);
 	void DrawBackground(ImVec2 pos, ImVec2 size);
 	bool DrawPlusButton(ImVec2 pos, ImVec2 size, bool canInteract);
-	void DrawAddChannelButton(Sequence& sequence, ImVec2 pos, bool canInteract);
+	void DrawAddChannelButton(
+		Sequence& sequence,
+		ImVec2 pos,
+		bool canInteract,
+		std::function<void(unsigned int channel)> onChannelAdded
+	);
 	void DrawTimeline(Sequence& sequence, ImVec2 timelinePos, ImVec2 timelineSize, bool canInteract,
 		std::function<void(SequenceChannelElementTransformation* transformation, TransformationKeyFrame*, int)> setTransformationKeyFrame,
 		std::function<void(SequenceChannelElementBoneTransformation*, TransformationKeyFrame*, int)> setBoneTransformationKeyFrame,
@@ -53,6 +58,7 @@ struct TimelineEditor
 		std::function<void()> onTriggerAdded,
 		std::function<void(SequenceChannelElementTrigger*)> setElementTrigger,
 		std::function<void(int channel, int frame, bool onEnterScript, SequenceChannelElementTrigger*)> setTriggerScriptToEdit,
+		std::function<void(int channel)> onChannelAdded,
 		std::function<void(int channel)> onChannelDeleted
 	);
 

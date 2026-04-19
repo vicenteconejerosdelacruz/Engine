@@ -286,10 +286,13 @@ void AnimationSequencerModal::Step()
 		}
 		else if (flyMode == PreviewFlyMode_Bone)
 		{
-			float modelDistanceScale = camera->at("modelDistanceScale");
-			auto [mm, pos, a, b, c] = renderable->GetBoneTransformation(selectedBoneTransformation->GetBone());
-			BoundingBox bb(pos, { 0.1f,0.1f,0.1f });
-			camera->LookAtBoundingBox(bb, modelDistanceScale);
+			if (selectedBoneTransformation != nullptr && !selectedBoneTransformation->GetBone().empty())
+			{
+				float modelDistanceScale = camera->at("modelDistanceScale");
+				auto [mm, pos, a, b, c] = renderable->GetBoneTransformation(selectedBoneTransformation->GetBone());
+				BoundingBox bb(pos, { 0.1f,0.1f,0.1f });
+				camera->LookAtBoundingBox(bb, modelDistanceScale);
+			}
 		}
 		else if (flyMode == PreviewFlyMode_Free)
 		{
@@ -657,12 +660,23 @@ void AnimationSequencerModal::DrawSequencer(const char* title)
 			selectedElementTrigger = nullptr;
 			nextSelectedElementTrigger = elementTrigger;
 		};
+	auto onAddChannel = [&](int channel)
+		{
+			nextSelectedTransformationKeyframe = nullptr;
+			selectedTransformationKeyframe = nullptr;
+			nextSelectedElementTrigger = nullptr;
+			selectedElementTrigger = nullptr;
+			selectedTransformation = nullptr;
+			selectedBoneTransformation = nullptr;
+		};
 	auto onDeleteChannel = [&](int channel)
 		{
 			nextSelectedTransformationKeyframe = nullptr;
 			selectedTransformationKeyframe = nullptr;
 			nextSelectedElementTrigger = nullptr;
 			selectedElementTrigger = nullptr;
+			selectedTransformation = nullptr;
+			selectedBoneTransformation = nullptr;
 		};
 	auto setScriptToEdit = [&](int channel, int frame, SequenceChannelElementScript* scriptToEdit)
 		{
@@ -726,6 +740,7 @@ void AnimationSequencerModal::DrawSequencer(const char* title)
 					onTriggerAdded,
 					setElementTrigger,
 					setTriggerScriptToEdit,
+					onAddChannel,
 					onDeleteChannel
 				);
 			}
@@ -1362,6 +1377,7 @@ void AnimationSequencerModal::BeginGizmoInteraction(CameraID camera, ImVec2 curP
 void AnimationSequencerModal::DrawBoneTransformationKeyFrameAttributes(SequenceChannelElementBoneTransformation& boneTransformation, TransformationKeyFrame& keyframe, int keyFrameFrame, ImVec2 pos, ImVec2 size)
 {
 	std::vector<std::string> bones = nostd::GetKeysFromMap(renderable->animable->animations->bonesOffsets);
+	bones.insert(bones.begin(), "");
 
 	const int defaultTableFlags = ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_NoPadInnerX;
 
@@ -1710,27 +1726,6 @@ void AnimationSequencerModal::DrawElementTriggerAttributes(SequenceChannelElemen
 			ImGui::EndTable();
 		}
 		ImGui::PopID();
-		/*
-		if (ImGui::CollapsingHeader("objectMask"))
-		{
-			ImGui::PushID("trigger-objectMask");
-			if (ImGui::BeginTable("trigger-objectMask", 1, defaultTableFlags))
-			{
-
-			}
-			ImGui::PopID();
-		}
-
-		if (ImGui::CollapsingHeader("collisionMask"))
-		{
-			ImGui::PushID("trigger-collisionMask");
-			if (ImGui::BeginTable("trigger-collisionMask", 1, defaultTableFlags))
-			{
-
-			}
-			ImGui::PopID();
-		}
-		*/
 	}
 	ImGui::EndChild();
 
