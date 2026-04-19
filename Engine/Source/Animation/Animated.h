@@ -50,11 +50,11 @@ namespace Animation
 		std::vector<KeyFrame> rotation;
 	};
 
-	typedef std::unordered_map<std::string, BoneKeys> BonesKeysMap;
-	typedef std::unordered_map<std::string, BonesKeysMap> AnimationBonesKeys;
-	typedef std::unordered_map<std::string, std::string> ParentBones;
-	typedef std::unordered_map<std::string, HierarchyNode*> BoneNodePointer;
-	typedef std::unordered_map<std::string, XMMATRIX> NodeTransformsMap;
+	typedef std::map<std::string, BoneKeys> BonesKeysMap;
+	typedef std::map<std::string, BonesKeysMap> AnimationBonesKeys;
+	typedef std::map<std::string, std::string> ParentBones;
+	typedef std::map<std::string, HierarchyNode*> BoneNodePointer;
+	typedef std::map<std::string, XMMATRIX> NodeTransformsMap;
 
 	typedef std::pair<HierarchyNode*, bool> MultiplyCmd;
 	typedef std::queue<MultiplyCmd> MultiplyCmdQueue;
