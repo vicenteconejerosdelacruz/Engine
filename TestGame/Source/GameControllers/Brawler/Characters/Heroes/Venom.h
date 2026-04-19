@@ -50,6 +50,7 @@ namespace Game
 			{ "Falling", VS_Falling },
 			{ "Death", VS_Death },
 			{ "WallToSwing", VS_WallToSwing },
+			{ "Swing", VS_Swing },
 		};
 
 		enum WallMovementAxis
@@ -139,6 +140,7 @@ namespace Game
 
 			//Step
 			void Step(float delta) override;
+
 			//Physics
 			void OnStaticContactEvent(JUUID physicObject, unsigned int event);
 			void OnCharacterHitEvent(PxFilterData fd);
@@ -160,6 +162,9 @@ namespace Game
 			void RunningJumpMoveForward(float sideSpeed);
 			void CrawlOnWall(float sideSpeed);
 			//bool AttachedToWall();
+
+			//Web
+			void UpdateWeb(XMVECTOR bonePos, XMVECTOR fixedPoint, XMFLOAT3 scale);
 
 			//Intro
 			void EnterIntro();
@@ -243,18 +248,28 @@ namespace Game
 			//WallToSwing
 			bool ShouldWallToSwing();
 			void EnterWallToSwing();
-			void ThrowWeb(std::string bone);
+			void WallToSwing();
+			void LeaveWallToSwing();
+			void ThrowWeb();
+
+			//Swing
+			void EnterSwing();
+			void Swing();
+			void LeaveSwing();
+			bool ShouldFallFromSwing();
+			bool ShouldContinueSwinging();
 
 			//State machine
 			GameStatesMachine<VenomStates> vsm;
 
 			//Initial States
 			XMFLOAT3 venomScale;
-			CharacterLookingTo lookingTo = CLT_Right;
 			int initialHealth;
 
 			//SceneObjects
 			RenderableID venom;
+			RenderableID web;
+
 			//CameraID camera;
 			PhysicSceneID physicScene;
 			PhysicObjectID physicObject;
@@ -281,8 +296,15 @@ namespace Game
 			int jumpDashAnimationIdx;
 			float jumpDashTimeLeft = 0.0f;
 
-			//WebSwing
+			//WallToSwing
 			std::unique_ptr<tween> webTweens[3];
+			bool webTweenCreated = false;
+			XMVECTOR webAttachedPos;
+
+			//Swing
+			std::unique_ptr<tween> swingTimeTween;
+			float distanceToSwing;
+			bool continueSwinging;
 		};
 	};
 };

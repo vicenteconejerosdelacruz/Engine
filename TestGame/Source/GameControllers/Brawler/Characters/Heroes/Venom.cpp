@@ -80,10 +80,13 @@ namespace Game::Brawler
 				{ VS_Falling, [&](auto* sm, VenomStates prevState) { EnterFalling(); }},
 				{ VS_Death, [&](auto* sm, VenomStates prevState) { EnterDeath(); }},
 				{ VS_WallToSwing, [&](auto* sm, VenomStates prevState) { EnterWallToSwing(); }},
+				{ VS_Swing, [&](auto* sm, VenomStates prevState) { EnterSwing(); }},
 			},
 			.onLeave = {
 				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { LeaveAttack1(); }},
 				{ VS_CrawlOnWall, [&](auto* sm, VenomStates prevState) { LeaveCrawlOnWall(); }},
+				{ VS_Swing, [&](auto* sm, VenomStates prevState) { LeaveSwing(); }},
+				{ VS_WallToSwing, [&](auto* sm, VenomStates prevState) { LeaveWallToSwing(); }},
 			},
 			.onStep = {
 				{ VS_None, [&](auto* sm) { venomScale = venom->scale(); vsm.ChangeState(VS_Intro); }},
@@ -98,6 +101,8 @@ namespace Game::Brawler
 				{ VS_WallIdle, [&](auto* sm) { WallIdle(); } },
 				{ VS_CrawlOnWall, [&](auto* sm) { CrawlOnWall(); } },
 				{ VS_Falling, [&](auto* sm) { Falling(); }},
+				{ VS_WallToSwing, [&](auto* sm) { WallToSwing(); }},
+				{ VS_Swing, [&](auto* sm) { Swing(); }},
 			}
 		};
 		initialHealth = health();
@@ -107,6 +112,7 @@ namespace Game::Brawler
 	void Venom::SetInitialConditions()
 	{
 		health(initialHealth);
+		blockedWallMovementMask(0U);
 		vsm.currentState = VS_None;
 		venomScale = { 0.0f,0.0f,0.0f };
 		leftStick = XMVectorZero();
@@ -119,6 +125,13 @@ namespace Game::Brawler
 		newAttack1 = false;
 		currentAttack1Animation = 0;
 		canAttachToWall(false);
+		for (unsigned int i = 0; i < 3; i++)
+		{
+			webTweens[i] = nullptr;
+		}
+		webTweenCreated = false;
+		swingTimeTween = nullptr;
+		continueSwinging = false;
 	}
 
 #if defined(_EDITOR)
@@ -264,7 +277,7 @@ namespace Game::Brawler
 			{ "TakeHit", v8_wrap_call([&](JUUID enemyController, int damage) { TakeHit(enemyController, damage); }) },
 			{ "OnDeathAnimationEnd", v8_wrap_call([&] { OnDeathAnimationEnd(); }) },
 			{ "PlayPunchSound", v8_wrap_call([&](int punchIdx, int enemyHealth) { PlayPunchSound(punchIdx, enemyHealth); })},
-			{ "ThrowWeb", v8_wrap_call([&](std::string bone) { ThrowWeb(bone); })},
+			{ "ThrowWeb", v8_wrap_call([&] { ThrowWeb(); })},
 		};
 	}
 
@@ -285,7 +298,7 @@ namespace Game::Brawler
 		}
 	}
 
-	static const std::set<VenomStates> noUpdateLookToStates({ VS_Intro,VS_WallToSwing });
+	static const std::set<VenomStates> noUpdateLookToStates({ VS_Intro,VS_WallToSwing, VS_Swing });
 	void Venom::UpdateLookTo()
 	{
 		if (noUpdateLookToStates.contains(vsm.currentState)) return;
@@ -301,6 +314,7 @@ namespace Game::Brawler
 			{
 				scale.z = -venomScale.z;
 				venom->scale(scale);
+				lookingTo(CLT_Left);
 			}
 		}
 		else if (len > 0.0f)
@@ -310,6 +324,7 @@ namespace Game::Brawler
 			{
 				scale.z = venomScale.z;
 				venom->scale(scale);
+				lookingTo(CLT_Right);
 			}
 		}
 	}
@@ -366,6 +381,17 @@ namespace Game::Brawler
 		}
 		CharacterMoveXYPlane(stickMovement, gameUpdateFrequency, sideSpeed);
 	}
+
+	//Web
+	//void Venom::UpdateWeb(XMVECTOR bonePos, XMVECTOR fixedPoint)
+	//{
+	//	XMVECTOR dir = XMVectorSubtract(fixedPoint, bonePos);
+	//	XMVECTOR distVec = XMVector3Length(dir);
+	//	float L;
+	//	XMStoreFloat(&L, distVec);
+	//
+	//	XMVECTOR dirNormal = XMVector3Normalize(dir);
+	//}
 
 	//Intro
 	void Venom::EnterIntro()
@@ -848,12 +874,166 @@ namespace Game::Brawler
 	{
 		return fromWallSwingStates.contains(vsm.currentState) && buttons.rightShoulder == GamePad::ButtonStateTracker::PRESSED;
 	}
+
 	void Venom::EnterWallToSwing()
 	{
 		venom->SetCurrentAnimation("WallToSwing");
 	}
-	void Venom::ThrowWeb(std::string bone)
+
+	void Venom::UpdateWeb(XMVECTOR bonePos, XMVECTOR fixedPoint, XMFLOAT3 scale)
 	{
+		XMVECTOR dir = XMVectorScale(XMVectorSubtract(fixedPoint, bonePos), scale.y);
+		XMVECTOR distVec = XMVector3Length(dir);
+		float L;
+		XMStoreFloat(&L, distVec);
+
+		XMVECTOR dirNormal = XMVector3Normalize(dir);
+
+		XMVECTOR focus = dirNormal;
+		XMVECTOR upAux = XMVectorSet(0, 0, 1, 0);
+		if (abs(XMVectorGetY(dirNormal)) > 0.99f) upAux = XMVectorSet(1, 0, 0, 0);
+
+		XMMATRIX lookAt = XMMatrixLookToLH(XMVectorZero(), focus, upAux);
+
+		XMMATRIX rotM = XMMatrixTranspose(lookAt);
+		rotM = XMMatrixRotationX(XM_PIDIV2) * rotM;
+		XMVECTOR rotQ = XMQuaternionRotationMatrix(rotM);
+
+		XMVECTOR posV = bonePos + XMVectorScale(dir, webScaleAdj() + 0.5f);
+		XMFLOAT3 pos;
+		XMStoreFloat3(&pos, posV);
+
+		web->scale(XMFLOAT3(scale.x, L, scale.z));
+		web->rotationQ(rotQ);
+		web->position(pos);
+	}
+
+	void Venom::WallToSwing()
+	{
+		if (webTweenCreated == true)
+		{
+			float sclx = webTweens[0]->step();
+			float scly = webTweens[1]->step();
+			float sclz = webTweens[2]->step();
+
+			auto [mm, bonePos, a, b, c] = venom->GetBoneTransformation(webBone());
+
+			XMVECTOR bonePosV = XMLoadFloat3(&bonePos);
+			UpdateWeb(bonePosV, webAttachedPos, XMFLOAT3(sclx, scly, sclz));
+			if (scly == 1.0f)
+			{
+				vsm.ChangeState(VS_Swing);
+			}
+		}
+	}
+
+	void Venom::LeaveWallToSwing()
+	{
+		webTweenCreated = false;
+	}
+
+	void Venom::ThrowWeb()
+	{
+		OutputDebugStringA("ThrowWeb\n");
+		auto [mm, pos, a, b, c] = venom->GetBoneTransformation(webBone());
+
+		CharacterLookingTo clt = lookingTo();
+		float angle = throwWebAngle() * ((clt == CLT_Left) ? 1.0f : -1.0f);
+
+		XMVECTOR rot = XMQuaternionRotationRollPitchYaw(0.0f, 0.0f, XMConvertToRadians(angle));
+		XMVECTOR up = { 0.0f,1.0f,0.0f,0.0f };
+		webAttachedPos = XMLoadFloat3(&pos) + XMVector3Rotate(up, rot) * throwWebMaxScale().y;
+		distanceToSwing = 2.0f * std::fabsf(XMVectorGetX(webAttachedPos) - pos.x);
+
+		//JUUID webUUID = "web_" + std::to_string(numWebs++);
+		web = MAKESUUUID(unit, getUUID());
+		//web = MAKESUUUID(unit, webUUID);
+		Scene::CreateSceneObjectFromMold(unit, webMold(),
+			[&](SceneObjectType type, std::string name)
+			{
+				return nlohmann::json(
+					{
+						{ "name", web.uuid() + "_ins"},
+						{ "uuid", web.uuid() },
+						{ "position", FromXMFLOAT3(pos) },
+						{ "cameras", venom->cameras() },
+						{ "scale", FromXMFLOAT3(throwWebMinScale()) },
+						{ "rotation", {0.0f, 0.0f, angle } }
+					}
+				);
+			}
+		);
+
+		webTweens[0] = std::make_unique<tween>(throwWebMinScale().x, throwWebMaxScale().x, static_cast<int>(1000.0f * throwWebTime()), tween::easing::linear);
+		webTweens[1] = std::make_unique<tween>(0.0f, 1.0f, static_cast<int>(1000.0f * throwWebTime()), tween::easing::linear);
+		webTweens[2] = std::make_unique<tween>(throwWebMinScale().z, throwWebMaxScale().z, static_cast<int>(1000.0f * throwWebTime()), tween::easing::linear);
+		webTweenCreated = true;
+	}
+
+	//Swing
+	void Venom::EnterSwing()
+	{
+		venom->SetCurrentAnimation("Swing");
+		swingTimeTween = std::make_unique<tween>(0.0f, 1.0f, static_cast<int>(1000.0f * swingTime()));
+		continueSwinging = false;
+	}
+
+	void Venom::Swing()
+	{
+		float dt = -swingTimeTween->current_value;
+		dt += swingTimeTween->step();
+
+		if (ShouldContinueSwinging())
+		{
+			LeaveSwing(); //<-not really i just nead to clear the resources
+			ThrowWeb();
+			EnterSwing();
+			return;
+		}
+		if (ShouldFallFromSwing())
+		{
+			vsm.ChangeState(VS_Falling);
+			return;
+		}
+
+		CharacterLookingTo clt = lookingTo();
+		float dxS = (clt == CLT_Left) ? -1.0f : 1.0f;
+		float dx = dxS * distanceToSwing * dt;
+
+		XMVECTOR disp = { dx ,0.0,0.0f,0.0f };
+		CharacterMoveXYPlane(disp, 1.0f, 1.0f);
+
+		//now we can update the web
+		auto [mm, bonePos, a, b, c] = venom->GetBoneTransformation(webBone());
+
+		XMVECTOR bonePosV = XMLoadFloat3(&bonePos);
+		XMFLOAT3 scl = throwWebMaxScale();
+		scl.y = 1.0f;
+		UpdateWeb(bonePosV, webAttachedPos, scl);
+
+		//capture if continue swinging
+		if (swingTimeTween->current_value >= swingThreshold())
+		{
+			continueSwinging = (buttons.rightShoulder == GamePad::ButtonStateTracker::PRESSED);
+		}
+	}
+
+	void Venom::LeaveSwing()
+	{
+		continueSwinging = false;
+		webTweenCreated = false;
+		web->markedForDelete = true;
+		web.clear();
+	}
+
+	bool Venom::ShouldFallFromSwing()
+	{
+		return (buttons.b == GamePad::ButtonStateTracker::PRESSED) || (swingTimeTween->current_value == swingTimeTween->target_value);
+	}
+
+	bool Venom::ShouldContinueSwinging()
+	{
+		return continueSwinging;
 	}
 }
 
