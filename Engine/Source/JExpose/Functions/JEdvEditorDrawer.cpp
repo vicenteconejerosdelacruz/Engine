@@ -968,8 +968,20 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_htmls_filepath>()
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
 			EditorDrawFilePath(attribute, json, ICON_FA_FILE_UPLOAD, defaultUIFolder,
-				{ "HTML files. (*.wav)" },
+				{ "HTML files. (*.html)" },
 				{ "*.html" }
+			);
+		};
+}
+
+template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_mold_filepath>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			EditorDrawFilePath(attribute, json, ICON_FA_FILE_UPLOAD, defaultMoldsFolder,
+				{ "JSON files. (*.json)" },
+				{ "*.json" }
 			);
 		};
 }
@@ -1761,6 +1773,7 @@ template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_sound_name>
 template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_texture_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
 template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_physycgeometry_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
 template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_htmlui_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
+template<> JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_mold_name>() { return DrawNonEmptyValue([] {Editor::MarkTemplatesPanelAssetsAsDirty(); }); }
 
 void DrawResourceSelection(
 	std::string attribute,
@@ -2117,6 +2130,15 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_htmlui>()
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
 			DrawResourceSelection(attribute, json, Templates::GetHtmlUIName, SortUUIDNameByName(Templates::GetHtmlUIsUUIDsNames), ICON_FA_FILE_UPLOAD, ImGui::OpenTemplate);
+		};
+}
+
+template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_te_mold>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			DrawResourceSelection(attribute, json, Templates::GetMoldName, SortUUIDNameByName(Templates::GetMoldsUUIDsNames), ICON_FA_FILE_UPLOAD, ImGui::OpenTemplate);
 		};
 }
 
