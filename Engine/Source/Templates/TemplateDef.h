@@ -82,8 +82,10 @@
 	TEMPDEF_DELETE(TemplateName)
 
 #define TEMPDEF_REFTRACKER(TemplateName) static RefTracker<JUUID, std::unique_ptr<TemplateName##Instance>> refTracker;\
+static std::mutex refTrackMutex;\
 std::unique_ptr<TemplateName##Instance>& Create##TemplateName##Instance(JUUID templateUUID, std::function<std::unique_ptr<TemplateName##Instance>()> newRefCallback)\
 {\
+	std::lock_guard<std::mutex> lock(refTrackMutex);\
 	if (refTracker.Has(templateUUID))\
 	{\
 		std::unique_ptr<TemplateName##Instance>& instance = refTracker.FindValue(templateUUID);\
@@ -97,6 +99,7 @@ std::unique_ptr<TemplateName##Instance>& Create##TemplateName##Instance(JUUID te
 }\
 std::unique_ptr<TemplateName##Instance>& Create##TemplateName##Instance(JUUID templateUUID, JUUID instanceKey, std::function<std::unique_ptr<TemplateName##Instance>()> newRefCallback)\
 {\
+	std::lock_guard<std::mutex> lock(refTrackMutex);\
 	if (refTracker.Has(instanceKey))\
 	{\
 		std::unique_ptr<TemplateName##Instance>& instance = refTracker.FindValue(instanceKey);\
@@ -110,6 +113,7 @@ std::unique_ptr<TemplateName##Instance>& Create##TemplateName##Instance(JUUID te
 }\
 std::unique_ptr<TemplateName##Instance>& Create##TemplateName##Instance(JUUID templateUUID)\
 {\
+	std::lock_guard<std::mutex> lock(refTrackMutex);\
 	return Create##TemplateName##Instance(templateUUID, [templateUUID]\
 		{\
 			return std::make_unique<TemplateName##Instance>(templateUUID);\
@@ -118,6 +122,7 @@ std::unique_ptr<TemplateName##Instance>& Create##TemplateName##Instance(JUUID te
 }\
 bool Delete##TemplateName##Instance(JUUID instanceKey)\
 {\
+	std::lock_guard<std::mutex> lock(refTrackMutex);\
 	if (refTracker.Has(instanceKey))\
 	{\
 		refTracker.RemoveRef(instanceKey);\
@@ -127,9 +132,11 @@ bool Delete##TemplateName##Instance(JUUID instanceKey)\
 }\
 std::unique_ptr<TemplateName##Instance>& Get##TemplateName##Instance(JUUID instanceKey)\
 {\
+	std::lock_guard<std::mutex> lock(refTrackMutex);\
 	return refTracker.FindValue(instanceKey);\
 }\
 void Clear##TemplateName##Instances()\
 {\
+	std::lock_guard<std::mutex> lock(refTrackMutex);\
 	refTracker.Clear();\
 }
