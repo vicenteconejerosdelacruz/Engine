@@ -144,8 +144,11 @@ namespace Scene
 		AttachLevelIntoScene(parentUnit, mold->uuid(), data, [parentUnit](SceneUnitId id)
 			{
 #if defined(_EDITOR)
-				Editor::MarkScenePanelAssetsAsDirty();
-				Editor::MarkSceneUnitAsModified(parentUnit);
+				if (!Editor::IsPlaying(parentUnit))
+				{
+					Editor::MarkScenePanelAssetsAsDirty();
+					Editor::MarkSceneUnitAsModified(parentUnit);
+				}
 #endif
 			}
 		);
