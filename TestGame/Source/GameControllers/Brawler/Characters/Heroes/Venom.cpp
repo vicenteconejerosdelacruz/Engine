@@ -537,6 +537,7 @@ namespace Game::Brawler
 		canJump = false;
 		downSpeed += jumpSpeed();
 		touchingDown = false;
+		GetBrawlerCamera()->followY(canAttachToWall());
 	}
 
 	void Venom::Jumping()
