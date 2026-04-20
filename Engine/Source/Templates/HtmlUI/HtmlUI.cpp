@@ -125,7 +125,10 @@ namespace Templates
 	{
 		RefPtr<View> view = nullptr;
 		DeleteRenderToTexture(rt_texture);
-		DestroyRenderPassInstance(resolvePass);
+		if (resolvePass)
+		{
+			resolvePass->MarkForDelete();
+		}
 		uploadBuffer = nullptr;
 	}
 

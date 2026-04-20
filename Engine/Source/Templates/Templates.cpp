@@ -1593,12 +1593,12 @@ namespace Templates
 
 	void DestroyTemplatesInstances()
 	{
+		ClearHtmlUIInstances();
 		ClearRenderPassInstances();
 		ClearTextureInstances();
 		ClearMaterialInstances();
 		ClearShaderInstances();
 		ClearPhysicGeometryInstances();
-		ClearHtmlUIInstances();
 	}
 
 	void DestroyTemplates()

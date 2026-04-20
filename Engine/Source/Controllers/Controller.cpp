@@ -246,7 +246,7 @@ namespace Game
 			for (auto sit = it->second.begin(); sit != it->second.end();)
 			{
 				if (std::get<0>(*sit) == uuid)
-					it->second.erase(*sit);
+					sit = it->second.erase(sit);
 				else
 					sit++;
 			}

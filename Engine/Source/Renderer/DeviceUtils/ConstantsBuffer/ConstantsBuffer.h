@@ -8,7 +8,7 @@ namespace DeviceUtils
 {
 	struct ConstantsBuffer;
 
-	static constexpr unsigned int csuNumDescriptorsInFrame = 1000;
+	static constexpr unsigned int csuNumDescriptorsInFrame = 10000;
 
 	inline static const std::string CameraConstantBufferName = "camera";
 	inline static const std::string LightConstantBufferName = "lights";
