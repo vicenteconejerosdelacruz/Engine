@@ -16,10 +16,3 @@
 //#include <tchar.h>
 
 #include "EngineInc.h"
-
-namespace Editor
-{
-	extern void SetEditorCamera(CameraID camera);
-	extern void ShowEditorController(bool show);
-	//extern void ShowEditorPanel(bool show);
-};
