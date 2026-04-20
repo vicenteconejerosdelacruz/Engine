@@ -7,7 +7,7 @@
 #include <Sequence/AnimationSequences.h>
 #include <Sequence/SequencePlayer.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
-#include <Renderable/RenderableBoundingBox.h>
+//#include <Renderable/RenderableBoundingBox.h>
 #include <PhysicObject.h>
 #include <NoV8.h>
 
@@ -231,7 +231,7 @@ namespace Scene
 		std::set<CameraID> bindedCameras;
 
 		BoundingBox boundingBox;
-		RenderableBoundingBoxID boundingBoxCompute; //used for animables
+		//RenderableBoundingBoxID boundingBoxCompute; //used for animables
 	};
 
 	SODECL_FULL(Renderable);
@@ -244,8 +244,8 @@ namespace Scene
 	void DestroyRenderables();
 	void DestroyRenderables(SceneUnitId id);
 	void DeleteRenderable(SceneUnitId id, JUUID uuid);
-	void RunBoundingBoxComputeShaders(SceneUnitId id);
-	void RunBoundingBoxComputeShadersSolution(SceneUnitId id);
+	//void RunBoundingBoxComputeShaders(SceneUnitId id);
+	//void RunBoundingBoxComputeShadersSolution(SceneUnitId id);
 #if defined(_EDITOR)
 	void WriteRenderablesJson(SceneUnitId id, nlohmann::json& json);
 #endif

@@ -104,7 +104,7 @@ namespace Scene
 		if (!animable.empty())
 		{
 			AttachAnimation(SUuuid(), model3D->animations);
-			boundingBoxCompute = CreateRenderableBoundingBox(MAKESUUUID(unit, uuid()));
+			//boundingBoxCompute = CreateRenderableBoundingBox(MAKESUUUID(unit, uuid()));
 			sequencePlayer.renderable = SUuuid();
 		}
 
@@ -194,11 +194,11 @@ namespace Scene
 
 		UnbindCameras();
 		Scene::UnbindFromScene(unit, uuid());
-		if (!boundingBoxCompute.empty())
-		{
-			DeleteRenderableBoundingBox(boundingBoxCompute());
-			boundingBoxCompute.clear();
-		}
+		//if (!boundingBoxCompute.empty())
+		//{
+		//	DeleteRenderableBoundingBox(boundingBoxCompute());
+		//	boundingBoxCompute.clear();
+		//}
 		if (animationPlayers.contains(MAKESUUUID(unit, uuid())))
 		{
 			animationPlayers.erase(MAKESUUUID(unit, uuid()));
@@ -643,15 +643,32 @@ namespace Scene
 
 	bool Renderable::HasBoundingBoxComputed()
 	{
-		return (!animable.empty()) ? boundingBoxCompute->hasSolution : true;
+		//return (!animable.empty()) ? boundingBoxCompute->hasSolution : true;
+		return true;
 	}
 
 	BoundingBox Renderable::GetBoundingBox()
 	{
+		if (!animable)
+		{
+			BoundingBox& bb = boundingBox;
+			BoundingBox bbw;
+			bb.Transform(bbw, world());
+			return bbw;
+		}
+		else
+		{
+			BoundingBox bb(AABBCenter(), AABBExtent());
+			BoundingBox bbw;
+			bb.Transform(bbw, world());
+			return bbw;
+		}
+		/*
 		BoundingBox& bb = animable.empty() ? boundingBox : boundingBoxCompute->boundingBox;
 		BoundingBox bbw;
 		bb.Transform(bbw, world());
 		return bbw;
+		*/
 	}
 
 	void Renderable::WriteMaterialVariablesToConstantsBufferSpace(MaterialInstanceID material, ConstantsBufferID cbvData, unsigned int cbvFrameIndex)
@@ -821,11 +838,11 @@ namespace Scene
 #endif
 
 			DeleteModel3DInstance(model3D());
-			if (!boundingBoxCompute.empty())
-			{
-				DeleteRenderableBoundingBox(boundingBoxCompute());
-				boundingBoxCompute.clear();
-			}
+			//if (!boundingBoxCompute.empty())
+			//{
+			//	DeleteRenderableBoundingBox(boundingBoxCompute());
+			//	boundingBoxCompute.clear();
+			//}
 		}
 
 		if (at("physicObject").is_string())
@@ -1210,6 +1227,7 @@ namespace Scene
 		r->markedForDelete = true;
 	}
 
+	/*
 	void RunBoundingBoxComputeShaders(SceneUnitId id)
 	{
 		using namespace Scene;
@@ -1230,7 +1248,9 @@ namespace Scene
 			renderable->boundingBoxCompute->Compute(id);
 		}
 	}
+	*/
 
+	/*
 	void RunBoundingBoxComputeShadersSolution(SceneUnitId id)
 	{
 		using namespace Scene;
@@ -1251,6 +1271,7 @@ namespace Scene
 			renderable->boundingBoxCompute->Solution(id);
 		}
 	}
+	*/
 
 #if defined(_EDITOR)
 	void WriteRenderablesJson(SceneUnitId id, nlohmann::json& json)

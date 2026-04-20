@@ -245,13 +245,13 @@ namespace Scene
 	{
 		using namespace Scene;
 		ResetComputeCommandList();
-		RunBoundingBoxComputeShaders(id);
+		//RunBoundingBoxComputeShaders(id);
 	}
 
 	void SceneUnit::SolveComputeShaders()
 	{
 		using namespace Scene;
-		RunBoundingBoxComputeShadersSolution(id);
+		//RunBoundingBoxComputeShadersSolution(id);
 		CloseSubmitAndNextComputeCommandList();
 	}
 #if defined(_EDITOR)
