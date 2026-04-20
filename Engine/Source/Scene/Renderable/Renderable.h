@@ -134,8 +134,16 @@ namespace Scene
 		template<typename T>
 		void WriteConstantsBuffer(std::string constantName, T& data, unsigned int backbufferIndex, unsigned int slot = 0U, size_t offset = 0ULL)
 		{
+			if (constantsBuffersLock->load() == true)
+				constantsBuffersLock->wait(true);
+
+			constantsBuffersLock->store(true);
+
 			for (auto& [rp, meshMaterials] : materials)
 			{
+				if (!constantsBuffers.contains(rp))
+					continue;
+
 				for (unsigned int mesh = 0; mesh < meshMaterials.size(); mesh++)
 				{
 					auto& vsVars = meshMaterials.at(mesh)->vertexShaderInstanceID->constantsBuffersVariables;
@@ -158,6 +166,9 @@ namespace Scene
 					}
 				}
 			}
+
+			constantsBuffersLock->store(false);
+			constantsBuffersLock->notify_one();
 		};
 		void WriteAnimationConstantsBuffer(unsigned int frame);
 		void WriteConstantsBuffer(unsigned int frame);
@@ -205,6 +216,7 @@ namespace Scene
 		RenderableMeshes meshes;
 		RenderableMaterials materials;
 		RenderableConstantsBuffer constantsBuffers;
+		std::unique_ptr<std::atomic_bool> constantsBuffersLock;
 		RenderableRootSignatures rootSignatures;
 		RenderablePipelineStates pipelineStates;
 		//Animations

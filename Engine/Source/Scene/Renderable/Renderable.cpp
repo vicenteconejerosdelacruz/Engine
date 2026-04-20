@@ -64,6 +64,7 @@ namespace Scene
 		lifecycleState->store(false);
 		RENAME_ON_DELETION(Renderable);
 		animationStepLock = std::make_unique<std::atomic_bool>(false);
+		constantsBuffersLock = std::make_unique<std::atomic_bool>(false);
 	}
 
 	void Renderable::create_rotation(XMFLOAT3 v)
@@ -436,6 +437,8 @@ namespace Scene
 
 	void Renderable::CreateConstantsBuffersInstances(CameraID cam)
 	{
+
+
 		for (auto& rp : GetCameraRenderPasses(cam))
 		{
 			CreateRenderPassConstantsBuffersInstances(rp);
@@ -444,8 +447,17 @@ namespace Scene
 
 	void Renderable::CreateRenderPassConstantsBuffersInstances(RenderPassInstanceID pass)
 	{
+		if (constantsBuffersLock->load() == true)
+			constantsBuffersLock->wait(true);
+
+		constantsBuffersLock->store(true);
+
 		if (constantsBuffers.contains(pass))
+		{
+			constantsBuffersLock->store(false);
+			constantsBuffersLock->notify_one();
 			return;
+		}
 
 		for (unsigned int i = 0; i < meshes.size(); i++)
 		{
@@ -463,14 +475,24 @@ namespace Scene
 				constantsBuffers[pass][i].push_back(cbuffer);
 			}
 		}
+		constantsBuffersLock->store(false);
+		constantsBuffersLock->notify_one();
 	}
 
 	void Renderable::DestroyConstantsBuffersInstances(CameraID cam)
 	{
+		if (constantsBuffersLock->load() == true)
+			constantsBuffersLock->wait(true);
+
+		constantsBuffersLock->store(true);
+
 		for (auto& rp : GetCameraRenderPasses(cam))
 		{
 			DestroyRenderPassConstantsBuffersInstances(rp);
 		}
+
+		constantsBuffersLock->store(false);
+		constantsBuffersLock->notify_one();
 	}
 
 	void Renderable::DestroyRenderPassConstantsBuffersInstances(RenderPassInstanceID pass)
