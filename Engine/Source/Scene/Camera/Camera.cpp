@@ -642,7 +642,7 @@ namespace Scene
 			}
 		}
 
-		Editor::HideBillboards(unit);
+		HideBillboards(unit);
 #endif
 
 		//create the renderable set recursivelly
@@ -699,12 +699,15 @@ namespace Scene
 					}
 				}
 
-				Editor::ShowBillboards(unit);
-
-				std::set<RenderableID> billboards = Editor::GetBillboards(unit);
-				for (auto it = billboards.begin(); it != billboards.end(); it++)
+				if (!IsPlaying(unit))
 				{
-					drawRenderable(*it);
+					ShowBillboards(unit);
+
+					std::set<RenderableID> billboards = Editor::GetBillboards(unit);
+					for (auto it = billboards.begin(); it != billboards.end(); it++)
+					{
+						drawRenderable(*it);
+					}
 				}
 #endif
 			};
