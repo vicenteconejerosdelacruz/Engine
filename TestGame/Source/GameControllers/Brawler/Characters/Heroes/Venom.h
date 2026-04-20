@@ -217,7 +217,7 @@ namespace Game
 			void EnterJumpDash();
 			void JumpDash();
 
-			//GrabWall
+			//
 			bool ShouldGrabWall();
 			void EnterGrabWall();
 

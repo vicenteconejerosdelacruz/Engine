@@ -546,6 +546,11 @@ namespace Game::Brawler
 			vsm.ChangeState(VS_JumpKick);
 			return;
 		}
+		else if (ShouldGrabWall())
+		{
+			vsm.ChangeState(VS_WallIdle);
+			return;
+		}
 
 		XMVECTOR len = XMVector3Length(leftStick);
 		float l = XMVectorGetX(len);
@@ -754,6 +759,7 @@ namespace Game::Brawler
 	void Venom::EnterWallIdle()
 	{
 		venom->SetCurrentAnimation("WallIdle", 0.0f, 1.0f, true, true);
+		GetBrawlerCamera()->followY(true);
 	}
 
 	void Venom::WallIdle()
@@ -841,6 +847,11 @@ namespace Game::Brawler
 		if (ShouldJumpKick())
 		{
 			vsm.ChangeState(VS_JumpKick);
+			return;
+		}
+		else if (ShouldGrabWall())
+		{
+			vsm.ChangeState(VS_WallIdle);
 			return;
 		}
 
