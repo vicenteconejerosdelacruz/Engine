@@ -47,6 +47,7 @@ namespace Game::Brawler
 		lastAttackerHealthChanged(false);
 		lastAttackerHealth(100);
 		lastAttackerName("");
+		heroScore(0);
 	}
 
 #if defined(_EDITOR)
@@ -126,6 +127,14 @@ namespace Game::Brawler
 		lastAttackerName(bc->name());
 		lastAttackerHealth(bc->health());
 		lastAttackerHealthChanged(true);
+	}
+
+	void BrawlerScene::AddScore(int scoreToAdd)
+	{
+		heroScore(scoreToAdd + heroScore());
+		std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'SCORE_UPDATE', value: " + std::to_string(heroScore()) + " } })); ";
+		HtmlUIInstanceID instance = venomUIInstance();
+		instance->EvaluateScript(js);
 	}
 
 	void BrawlerScene::UpdateHeroHealthUI()

@@ -31,7 +31,7 @@ function EnemyHud({ picture, title, hp }) {
 }
 
 function App() {
-  const [hero, setHero] = useState({ hp: 100, name: 'Vicente', img: 'img_venom.webp', score:1000 });
+  const [hero, setHero] = useState({ hp: 100, name: 'Vicente', img: 'img_venom.webp', score:0 });
   const [enemy, setEnemy] = useState({ hp: 100, name: '', img: 'enemy.png', active: false });
   
   useEffect(() => {
@@ -41,6 +41,7 @@ function App() {
       if (e.detail.type === 'ENEMY_HP') setEnemy(prev => ({ ...prev, hp: e.detail.value }));
       if (e.detail.type === 'NEW_ENEMY') setEnemy(prev => ({ ...prev, name: e.detail.name, active: true }));
       if (e.detail.type === 'REMOVE_ENEMY') setEnemy(prev => ({ ...prev, name: '', active: false }));
+      if (e.detail.type === 'SCORE_UPDATE') setHero(prev => ({ ...prev, score: e.detail.value }));
     };
 
     window.addEventListener('engineUpdate', handleEngineUpdate);

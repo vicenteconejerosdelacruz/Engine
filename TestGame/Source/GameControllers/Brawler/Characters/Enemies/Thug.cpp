@@ -107,7 +107,12 @@ namespace Game::Brawler
 	{
 		if (tsm.currentState == TS_Death) return;
 		health(std::max(0, health() - damage));
-		GetBrawlerSceneController()->UpdateEnemy(uuid());
+		auto* brawler = GetBrawlerSceneController();
+		brawler->UpdateEnemy(uuid());
+		if (health() == 0)
+		{
+			brawler->AddScore(score());
+		}
 	}
 
 	//Step
