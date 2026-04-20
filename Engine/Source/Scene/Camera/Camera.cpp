@@ -15,7 +15,11 @@ namespace Editor
 	extern void SelectCamera(CameraID camera);
 	extern RenderableID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
 	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
+	extern std::set<RenderableID> GetBillboards(SceneUnitId id);
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
+	extern void ShowBillboards(SceneUnitId id);
+	extern void HideBillboards(SceneUnitId id);
+
 	extern bool IsPlaying(SceneUnitId id);
 
 	extern bool StaticBodiesSceneUnitRegistered(SceneUnitId id);
@@ -637,6 +641,8 @@ namespace Scene
 				phO->visible(false);
 			}
 		}
+
+		Editor::HideBillboards(unit);
 #endif
 
 		//create the renderable set recursivelly
@@ -662,14 +668,16 @@ namespace Scene
 
 		auto draw = [&](SceneUnitId unit, auto& rpi)
 			{
-
+				auto drawRenderable = [&](RenderableID renderable)
+					{
+						if (renderable->checkBoundingBox() && boundingFrustum.Contains(renderable->GetBoundingBox()) == ContainmentType::DISJOINT)
+							return;
+						//OutputDebugStringA(std::string(rpi->renderPassTemplate->name() + ":" + renderable->name() + "\n").c_str());
+						renderable->Render(unit, rpi, SUuuid());
+					};
 				for (auto it = renVecSet.begin(); it != renVecSet.end(); it++)
 				{
-					RenderableID renderable = *it;
-					if (renderable->checkBoundingBox() && boundingFrustum.Contains(renderable->GetBoundingBox()) == ContainmentType::DISJOINT)
-						continue;
-					//OutputDebugStringA(std::string(rpi->renderPassTemplate->name() + ":" + renderable->name() + "\n").c_str());
-					renderable->Render(unit, rpi, SUuuid());
+					drawRenderable(*it);
 				}
 
 #if defined(_EDITOR)
@@ -689,6 +697,14 @@ namespace Scene
 						//triggers can be picked
 						if (phO->behavior() != PB_Trigger && !phO->boundary) { phO->visible(false); }
 					}
+				}
+
+				Editor::ShowBillboards(unit);
+
+				std::set<RenderableID> billboards = Editor::GetBillboards(unit);
+				for (auto it = billboards.begin(); it != billboards.end(); it++)
+				{
+					drawRenderable(*it);
 				}
 #endif
 			};

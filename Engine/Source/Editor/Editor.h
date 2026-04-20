@@ -182,6 +182,7 @@ namespace Editor {
 	//Billboards
 	RenderableID CreateBillboardFromMaterials(SceneUnitId id, CameraID camera, std::string name, std::string material, std::string pickingMaterial);
 	void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
+	std::set<RenderableID> GetBillboards(SceneUnitId id);
 	RenderableID GetBillboard(SceneUnitId id, JUUID sceneObject);
 	void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 	void CreateRegisteredBillboards(SceneUnitId id);

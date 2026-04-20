@@ -2841,6 +2841,19 @@ namespace Editor
 		billboards.at(id).billboardRegistry.insert_or_assign(sceneObject, MAKESUUUID(id, ""));
 	}
 
+	std::set<RenderableID> GetBillboards(SceneUnitId id)
+	{
+		std::set<RenderableID> billboardset;
+		std::transform(
+			billboards.at(id).billboardRegistry.begin(),
+			billboards.at(id).billboardRegistry.end(),
+			std::inserter(billboardset, billboardset.begin()),
+			[](auto& pair) { return pair.second; }
+		);
+		std::erase_if(billboardset, [](auto r) { return !r; });
+		return billboardset;
+	}
+
 	RenderableID GetBillboard(SceneUnitId id, JUUID sceneObject)
 	{
 #if !defined(_EDITOR_BILLBOARD)
