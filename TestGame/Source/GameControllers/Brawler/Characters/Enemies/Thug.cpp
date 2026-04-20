@@ -55,15 +55,14 @@ namespace Game::Brawler
 			}
 		};
 
-		thugInitialLookTo = lookingTo();
 		initialHealth = health();
 		SetInitialConditions();
 	}
 
 	void Thug::SetInitialConditions()
 	{
+		BrawlerCharacter::SetInitialConditions();
 		tsm.currentState = TS_None;
-		lookingTo(thugInitialLookTo);
 		health(initialHealth);
 		heroController.clear();
 		heroRenderable.clear();

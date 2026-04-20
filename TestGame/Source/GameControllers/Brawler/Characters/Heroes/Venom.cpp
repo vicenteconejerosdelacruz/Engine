@@ -111,6 +111,7 @@ namespace Game::Brawler
 
 	void Venom::SetInitialConditions()
 	{
+		Hero::SetInitialConditions();
 		health(initialHealth);
 		blockedWallMovementMask(0U);
 		vsm.currentState = VS_None;

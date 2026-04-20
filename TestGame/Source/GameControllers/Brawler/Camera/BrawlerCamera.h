@@ -43,6 +43,8 @@ namespace Game
 			RenderableID venomR;
 			float Ycam2venom;
 			float YcamInitial;
+			bool initialFollowX;
+			bool initialFollowY;
 		};
 	};
 };

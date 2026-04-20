@@ -56,6 +56,9 @@ namespace Game::Brawler
 #include <Brawler/BrawlerSceneAtt.h>
 #include <JEnd.h>
 		Controller::WriteJson(j);
+		j.at("camera") = "";
+		j.at("heroes") = nlohmann::json::array({});
+		j.at("enemies") = nlohmann::json::array({});
 	}
 #endif
 

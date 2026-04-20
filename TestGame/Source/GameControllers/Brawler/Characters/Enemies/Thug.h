@@ -116,7 +116,6 @@ namespace Game
 
 			//Initial States
 			XMFLOAT3 thugScale;
-			CharacterLookingTo thugInitialLookTo;
 			int initialHealth;
 
 			//SceneObjects

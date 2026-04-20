@@ -48,9 +48,12 @@ namespace Game
 
 			//Constructor and Binding
 			BrawlerCharacter(nlohmann::json& json);
+			void SetInitialConditions() override;
+
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
 			DECL_CONTROLLER_DRAWER(BrawlerCharacter, Controller);
+			CharacterLookingTo initialLookingTo;
 #endif
 		};
 	};

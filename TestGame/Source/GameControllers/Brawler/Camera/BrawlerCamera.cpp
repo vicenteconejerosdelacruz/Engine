@@ -22,10 +22,14 @@ namespace Game::Brawler
 #include <Attributes/JUpdate.h>
 #include <Brawler/BrawlerCameraAtt.h>
 #include <JEnd.h>
+		initialFollowX = followX();
+		initialFollowY = followY();
 	}
 
 	void BrawlerCamera::SetInitialConditions()
 	{
+		followX(initialFollowX);
+		followY(initialFollowY);
 	}
 
 #if defined(_EDITOR)
@@ -47,6 +51,8 @@ namespace Game::Brawler
 		YcamInitial = camera->position().y;
 		Ycam2venom = YcamInitial - venomR->position().y;
 		GetController<Brawler::BrawlerScene>(unit, sceneController())->RegisterCamera(uuid());
+
+		SetInitialConditions();
 	}
 
 	void BrawlerCamera::Unmap()

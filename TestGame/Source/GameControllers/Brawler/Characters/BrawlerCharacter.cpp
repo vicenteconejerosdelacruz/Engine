@@ -18,6 +18,16 @@ namespace Game::Brawler
 #include <Attributes/JUpdate.h>
 #include <Brawler/BrawlerCharacterAtt.h>
 #include <JEnd.h>
+#if defined(_EDITOR)
+		initialLookingTo = lookingTo();
+#endif
+	}
+
+	void BrawlerCharacter::SetInitialConditions()
+	{
+#if defined(_EDITOR)
+		lookingTo(initialLookingTo);
+#endif
 	}
 
 #if defined(_EDITOR)
