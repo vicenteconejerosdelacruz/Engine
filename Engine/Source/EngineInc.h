@@ -9,12 +9,6 @@
 #include "Renderer/Renderer.h"
 #include "Scene/Scene.h"
 #include "Scene/Level.h"
-//#include "Templates/Templates.h"
-//#include "Templates/RenderPass/RenderPass.h"
-//#include "Templates/Sound/Sound.h"
-//#include "Scene/Camera/Camera.h"
-//#include "Scene/Light/Light.h"
-//#include "Scripting/Scripting.h"
 #include "Controllers/Controller.h"
 #if defined(_EDITOR)
 #include "Editor/Editor.h"
