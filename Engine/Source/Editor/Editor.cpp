@@ -2844,6 +2844,9 @@ namespace Editor
 	std::set<RenderableID> GetBillboards(SceneUnitId id)
 	{
 		std::set<RenderableID> billboardset;
+		if (!billboards.contains(id))
+			return billboardset;
+
 		std::transform(
 			billboards.at(id).billboardRegistry.begin(),
 			billboards.at(id).billboardRegistry.end(),
