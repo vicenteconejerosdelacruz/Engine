@@ -1,0 +1,498 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B5D04E33-8821-3BB5-AA2B-FF93440660B4}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>unit</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\bin\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">unit.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">unit</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\bin\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">unit.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">unit</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\bin\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">unit.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">unit</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\bin\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">unit.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">unit</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\.;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zlib;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\pugixml\src;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\..\contrib\rapidjson\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj /source-charset:utf-8</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4244</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING;_DEBUG;ASSIMP_BUILD_NO_M3D_IMPORTER;ASSIMP_BUILD_NO_M3D_EXPORTER;ASSIMP_BUILD_NO_VRML_IMPORTER;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;ASSIMP_BUILD_NO_C4D_IMPORTER;RAPIDJSON_HAS_STDSTRING=1;RAPIDJSON_NOMEMBERITERATORCLASS;ASSIMP_TEST_MODELS_DIR="C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models";ASSIMP_TEST_MODELS_NONBSD_DIR="C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models-nonbsd";CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING;ASSIMP_BUILD_NO_M3D_IMPORTER;ASSIMP_BUILD_NO_M3D_EXPORTER;ASSIMP_BUILD_NO_VRML_IMPORTER;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;ASSIMP_BUILD_NO_C4D_IMPORTER;RAPIDJSON_HAS_STDSTRING=1;RAPIDJSON_NOMEMBERITERATORCLASS;ASSIMP_TEST_MODELS_DIR=\"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models\";ASSIMP_TEST_MODELS_NONBSD_DIR=\"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models-nonbsd\";CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\.;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zlib;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\pugixml\src;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\..\contrib\rapidjson\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\.;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zlib;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\pugixml\src;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\..\contrib\rapidjson\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\lib\Debug\assimp-vc143-mtd.lib;..\contrib\zlib\Debug\zlibstaticd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4;C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/$(Configuration);/lib;/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/lib/Debug/unit.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/bin/Debug/unit.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\.;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zlib;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\pugixml\src;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\..\contrib\rapidjson\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj /source-charset:utf-8</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4244</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING;NDEBUG;ASSIMP_BUILD_NO_M3D_IMPORTER;ASSIMP_BUILD_NO_M3D_EXPORTER;ASSIMP_BUILD_NO_VRML_IMPORTER;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;ASSIMP_BUILD_NO_C4D_IMPORTER;RAPIDJSON_HAS_STDSTRING=1;RAPIDJSON_NOMEMBERITERATORCLASS;ASSIMP_TEST_MODELS_DIR="C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models";ASSIMP_TEST_MODELS_NONBSD_DIR="C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models-nonbsd";CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING;NDEBUG;ASSIMP_BUILD_NO_M3D_IMPORTER;ASSIMP_BUILD_NO_M3D_EXPORTER;ASSIMP_BUILD_NO_VRML_IMPORTER;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;ASSIMP_BUILD_NO_C4D_IMPORTER;RAPIDJSON_HAS_STDSTRING=1;RAPIDJSON_NOMEMBERITERATORCLASS;ASSIMP_TEST_MODELS_DIR=\"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models\";ASSIMP_TEST_MODELS_NONBSD_DIR=\"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models-nonbsd\";CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\.;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zlib;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\pugixml\src;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\..\contrib\rapidjson\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\.;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zlib;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\pugixml\src;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\..\contrib\rapidjson\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\lib\Release\assimp-vc143-mt.lib;..\contrib\zlib\Release\zlibstatic.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4;C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/$(Configuration);/lib;/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/lib/Release/unit.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/bin/Release/unit.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\.;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zlib;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\pugixml\src;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\..\contrib\rapidjson\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj /source-charset:utf-8</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <DisableSpecificWarnings>4244</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING;NDEBUG;ASSIMP_BUILD_NO_M3D_IMPORTER;ASSIMP_BUILD_NO_M3D_EXPORTER;ASSIMP_BUILD_NO_VRML_IMPORTER;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;ASSIMP_BUILD_NO_C4D_IMPORTER;RAPIDJSON_HAS_STDSTRING=1;RAPIDJSON_NOMEMBERITERATORCLASS;ASSIMP_TEST_MODELS_DIR="C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models";ASSIMP_TEST_MODELS_NONBSD_DIR="C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models-nonbsd";CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING;NDEBUG;ASSIMP_BUILD_NO_M3D_IMPORTER;ASSIMP_BUILD_NO_M3D_EXPORTER;ASSIMP_BUILD_NO_VRML_IMPORTER;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;ASSIMP_BUILD_NO_C4D_IMPORTER;RAPIDJSON_HAS_STDSTRING=1;RAPIDJSON_NOMEMBERITERATORCLASS;ASSIMP_TEST_MODELS_DIR=\"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models\";ASSIMP_TEST_MODELS_NONBSD_DIR=\"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models-nonbsd\";CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\.;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zlib;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\pugixml\src;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\..\contrib\rapidjson\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\.;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zlib;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\pugixml\src;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\..\contrib\rapidjson\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\lib\MinSizeRel\assimp-vc143-mt.lib;..\contrib\zlib\MinSizeRel\zlibstatic.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4;C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/$(Configuration);/lib;/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/lib/MinSizeRel/unit.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/bin/MinSizeRel/unit.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\.;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zlib;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\pugixml\src;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\..\contrib\rapidjson\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj /source-charset:utf-8</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4244</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING;NDEBUG;ASSIMP_BUILD_NO_M3D_IMPORTER;ASSIMP_BUILD_NO_M3D_EXPORTER;ASSIMP_BUILD_NO_VRML_IMPORTER;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;ASSIMP_BUILD_NO_C4D_IMPORTER;RAPIDJSON_HAS_STDSTRING=1;RAPIDJSON_NOMEMBERITERATORCLASS;ASSIMP_TEST_MODELS_DIR="C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models";ASSIMP_TEST_MODELS_NONBSD_DIR="C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models-nonbsd";CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING;NDEBUG;ASSIMP_BUILD_NO_M3D_IMPORTER;ASSIMP_BUILD_NO_M3D_EXPORTER;ASSIMP_BUILD_NO_VRML_IMPORTER;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;ASSIMP_BUILD_NO_C4D_IMPORTER;RAPIDJSON_HAS_STDSTRING=1;RAPIDJSON_NOMEMBERITERATORCLASS;ASSIMP_TEST_MODELS_DIR=\"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models\";ASSIMP_TEST_MODELS_NONBSD_DIR=\"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/models-nonbsd\";CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\.;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zlib;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\pugixml\src;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\..\contrib\rapidjson\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\.;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zlib;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\pugixml\src;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\..\contrib\rapidjson\include;C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\lib\RelWithDebInfo\assimp-vc143-mt.lib;..\contrib\zlib\RelWithDebInfo\zlibstatic.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4;C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/$(Configuration);/lib;/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/lib/RelWithDebInfo/unit.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/bin/RelWithDebInfo/unit.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4 -BC:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4 --check-stamp-file C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4 -BC:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4 --check-stamp-file C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4 -BC:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4 --check-stamp-file C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4 -BC:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4 --check-stamp-file C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\CCompilerTest.c" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Main.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Version.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Base64.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSimd.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utIOSystem.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utIOStreamBuffer.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utIssues.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utAnim.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\AssimpAPITest.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\AssimpAPITest_aiMatrix3x3.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\AssimpAPITest_aiMatrix4x4.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\AssimpAPITest_aiQuaternion.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\AssimpAPITest_aiVector2D.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\AssimpAPITest_aiVector3D.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\MathTest.cpp" />
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\MathTest.h" />
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\RandomNumberGeneration.h" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utBatchLoader.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utDefaultIOStream.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utFastAtof.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utMetadata.cpp" />
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\SceneDiffer.h" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\SceneDiffer.cpp" />
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\UTLogStream.h" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\AbstractImportExportBase.cpp" />
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\TestIOSystem.h" />
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\TestModelFactory.h" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utTypes.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utVersion.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utParsingUtils.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utProfiler.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSharedPPData.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utStringUtils.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utMaybe.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utMesh.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utStandardShapes.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\uiScene.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utLineSplitter.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utSpatialSort.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utAssertHandler.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utXmlParser.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utBase64.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utHash.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utBaseProcess.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utLogger.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Geometry\utGeometryUtils.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\Assxml\utAssxmlImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utLWSImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utLWOImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSMDImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utglTFImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utglTF2ImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utHMPImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utIFCImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utFBXImporterExporter.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utImporter.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utExporter.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ut3DImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ut3DSImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utACImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utAMFImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utASEImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utD3MFImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utQ3DImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSTLImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utXImporterExporter.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utX3DImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utDXFImporterExporter.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utPMXImporter.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utPLYImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utObjImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utObjTools.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utOpenGEXImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSIBImporter.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utBlenderIntermediate.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utBlendImportAreaLight.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utBlenderImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utBlendImportMaterials.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utBlenderWork.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utBVHImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utCSMImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utB3DImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utMDCImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utAssbinImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utAssjsonImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utCOBImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utOgreImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utQ3BSPFileImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utOFFImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utNFFImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utXGLImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utMD2Importer.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utMD5Importer.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utMDLImporter.cpp" />
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\MDL\MDLHL1TestFiles.h" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\MDL\utMDLImporter_HL1_ImportSettings.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\MDL\utMDLImporter_HL1_Materials.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\MDL\utMDLImporter_HL1_Nodes.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\RAW\utRAWImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\Terragen\utTerragenImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\Pbrt\utPbrtImportExport.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utMaterialSystem.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utMatrix3x3.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utMatrix4x4.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utVector3.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utImproveCacheLocality.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utFixInfacingNormals.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utGenNormals.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utTriangulate.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utTextureTransform.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utRemoveRedundantMaterials.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utRemoveVCProcess.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utScaleProcess.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utArmaturePopulate.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utJoinVertices.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utRemoveComments.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utRemoveComponent.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utVertexTriangleAdjacency.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSplitLargeMeshes.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utFindDegenerates.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utFindInvalidData.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utLimitBoneWeights.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utPretransformVertices.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utScenePreprocessor.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utTargetAnimation.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSortByPType.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSceneCombiner.cpp" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utGenBoundingBoxesProcess.cpp" />
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Tools\TestTools.h" />
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest\src\gtest-all.cc" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\ZERO_CHECK.vcxproj">
+      <Project>{0BEFC7D6-93B3-3FB0-9AEA-3A5558D87061}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\assimp.vcxproj">
+      <Project>{D31170CD-6E7C-3185-B9B4-55B9514F9D24}</Project>
+      <Name>assimp</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zlib\zlibstatic.vcxproj">
+      <Project>{47CAC588-E174-353D-A2B7-C42C44C4352F}</Project>
+      <Name>zlibstatic</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

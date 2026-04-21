@@ -1,0 +1,631 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeDetermineSystem.cmake:205 (message)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    message: |
+      The system is: Windows - 10.0.26200 - AMD64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      Versi├│n de MSBuild 17.14.40+3e7442088 para .NET Framework
+      Compilaci├│n iniciada a las 21-04-2026 13:55:10.
+      
+      Proyecto "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\3.31.0-rc2\\CompilerIdC\\CompilerIdC.vcxproj" en nodo 1 (destinos predeterminados).
+      PrepareForBuild:
+        Creando directorio "Debug\\".
+        Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+        Creando directorio "Debug\\CompilerIdC.tlog\\".
+      InitializeBuildStatus:
+        Se crear├í "Debug\\CompilerIdC.tlog\\unsuccessfulbuild" porque se especific├│ "AlwaysCreate".
+        Aplicando tarea Touch a "Debug\\CompilerIdC.tlog\\unsuccessfulbuild".
+      ClCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TC /FC /errorReport:queue CMakeCCompilerId.c
+        CMakeCCompilerId.c
+      Link:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdC.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdC.lib" /MACHINE:X64 Debug\\CMakeCCompilerId.obj
+        CompilerIdC.vcxproj -> C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\3.31.0-rc2\\CompilerIdC\\CompilerIdC.exe
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_C_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_C_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        Se eliminar├í el archivo "Debug\\CompilerIdC.tlog\\unsuccessfulbuild".
+        Aplicando tarea Touch a "Debug\\CompilerIdC.tlog\\CompilerIdC.lastbuildstate".
+      Compilaci├│n del proyecto terminada "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\3.31.0-rc2\\CompilerIdC\\CompilerIdC.vcxproj" (destinos predeterminados).
+      
+      Compilaci├│n correcta.
+          0 Advertencia(s)
+          0 Errores
+      
+      Tiempo transcurrido 00:00:00.93
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.vcxproj"
+      
+      The C compiler identification is MSVC, found in:
+        C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/3.31.0-rc2/CompilerIdC/CompilerIdC.exe
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      Versi├│n de MSBuild 17.14.40+3e7442088 para .NET Framework
+      Compilaci├│n iniciada a las 21-04-2026 13:55:11.
+      
+      Proyecto "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\3.31.0-rc2\\CompilerIdCXX\\CompilerIdCXX.vcxproj" en nodo 1 (destinos predeterminados).
+      PrepareForBuild:
+        Creando directorio "Debug\\".
+        Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+        Creando directorio "Debug\\CompilerIdCXX.tlog\\".
+      InitializeBuildStatus:
+        Se crear├í "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild" porque se especific├│ "AlwaysCreate".
+        Aplicando tarea Touch a "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild".
+      ClCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TP /FC /errorReport:queue CMakeCXXCompilerId.cpp
+        CMakeCXXCompilerId.cpp
+      Link:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdCXX.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdCXX.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdCXX.lib" /MACHINE:X64 Debug\\CMakeCXXCompilerId.obj
+        CompilerIdCXX.vcxproj -> C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\3.31.0-rc2\\CompilerIdCXX\\CompilerIdCXX.exe
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_CXX_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_CXX_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        Se eliminar├í el archivo "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild".
+        Aplicando tarea Touch a "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.lastbuildstate".
+      Compilaci├│n del proyecto terminada "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\3.31.0-rc2\\CompilerIdCXX\\CompilerIdCXX.vcxproj" (destinos predeterminados).
+      
+      Compilaci├│n correcta.
+          0 Advertencia(s)
+          0 Errores
+      
+      Tiempo transcurrido 00:00:00.54
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.vcxproj"
+      
+      The CXX compiler identification is MSVC, found in:
+        C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/3.31.0-rc2/CompilerIdCXX/CompilerIdCXX.exe
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:74 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-ijoeph"
+      binary: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-ijoeph"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-ijoeph'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_a507e.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Versi├│n de MSBuild 17.14.40+3e7442088 para .NET Framework
+        Compilaci├│n iniciada a las 21-04-2026 13:55:12.
+        
+        Proyecto "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-ijoeph\\cmTC_a507e.vcxproj" en nodo 1 (destinos predeterminados).
+        PrepareForBuild:
+          Creando directorio "cmTC_a507e.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creando directorio "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-ijoeph\\Debug\\".
+          Creando directorio "cmTC_a507e.dir\\Debug\\cmTC_a507e.tlog\\".
+        InitializeBuildStatus:
+          Se crear├í "cmTC_a507e.dir\\Debug\\cmTC_a507e.tlog\\unsuccessfulbuild" porque se especific├│ "AlwaysCreate".
+          Aplicando tarea Touch a "cmTC_a507e.dir\\Debug\\cmTC_a507e.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_a507e.dir\\Debug\\\\" /Fd"cmTC_a507e.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-3.31\\Modules\\CMakeCCompilerABI.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35223 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_a507e.dir\\Debug\\\\" /Fd"cmTC_a507e.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-3.31\\Modules\\CMakeCCompilerABI.c"
+          CMakeCCompilerABI.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-ijoeph\\Debug\\cmTC_a507e.exe" /INCREMENTAL /ILK:"cmTC_a507e.dir\\Debug\\cmTC_a507e.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-ijoeph/Debug/cmTC_a507e.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-ijoeph/Debug/cmTC_a507e.lib" /MACHINE:X64  /machine:x64 cmTC_a507e.dir\\Debug\\CMakeCCompilerABI.obj
+          cmTC_a507e.vcxproj -> C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-ijoeph\\Debug\\cmTC_a507e.exe
+        FinalizeBuildStatus:
+          Se eliminar├í el archivo "cmTC_a507e.dir\\Debug\\cmTC_a507e.tlog\\unsuccessfulbuild".
+          Aplicando tarea Touch a "cmTC_a507e.dir\\Debug\\cmTC_a507e.tlog\\cmTC_a507e.lastbuildstate".
+        Compilaci├│n del proyecto terminada "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-ijoeph\\cmTC_a507e.vcxproj" (destinos predeterminados).
+        
+        Compilaci├│n correcta.
+            0 Advertencia(s)
+            0 Errores
+        
+        Tiempo transcurrido 00:00:00.54
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:218 (message)"
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(\\.[a-z]+)?|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(\\.[a-z]+)?|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'C': C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/Internal/CMakeDetermineLinkerId.cmake:40 (message)"
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:255 (cmake_determine_linker_id)"
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    message: |
+      Running the C compiler's linker: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.44.35223.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:74 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-8m4yzz"
+      binary: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-8m4yzz"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-8m4yzz'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_001d8.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Versi├│n de MSBuild 17.14.40+3e7442088 para .NET Framework
+        Compilaci├│n iniciada a las 21-04-2026 13:55:13.
+        
+        Proyecto "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-8m4yzz\\cmTC_001d8.vcxproj" en nodo 1 (destinos predeterminados).
+        PrepareForBuild:
+          Creando directorio "cmTC_001d8.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creando directorio "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-8m4yzz\\Debug\\".
+          Creando directorio "cmTC_001d8.dir\\Debug\\cmTC_001d8.tlog\\".
+        InitializeBuildStatus:
+          Se crear├í "cmTC_001d8.dir\\Debug\\cmTC_001d8.tlog\\unsuccessfulbuild" porque se especific├│ "AlwaysCreate".
+          Aplicando tarea Touch a "cmTC_001d8.dir\\Debug\\cmTC_001d8.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_001d8.dir\\Debug\\\\" /Fd"cmTC_001d8.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-3.31\\Modules\\CMakeCXXCompilerABI.cpp"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35223 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_001d8.dir\\Debug\\\\" /Fd"cmTC_001d8.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-3.31\\Modules\\CMakeCXXCompilerABI.cpp"
+          CMakeCXXCompilerABI.cpp
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-8m4yzz\\Debug\\cmTC_001d8.exe" /INCREMENTAL /ILK:"cmTC_001d8.dir\\Debug\\cmTC_001d8.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-8m4yzz/Debug/cmTC_001d8.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-8m4yzz/Debug/cmTC_001d8.lib" /MACHINE:X64  /machine:x64 cmTC_001d8.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_001d8.vcxproj -> C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-8m4yzz\\Debug\\cmTC_001d8.exe
+        FinalizeBuildStatus:
+          Se eliminar├í el archivo "cmTC_001d8.dir\\Debug\\cmTC_001d8.tlog\\unsuccessfulbuild".
+          Aplicando tarea Touch a "cmTC_001d8.dir\\Debug\\cmTC_001d8.tlog\\cmTC_001d8.lastbuildstate".
+        Compilaci├│n del proyecto terminada "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-8m4yzz\\cmTC_001d8.vcxproj" (destinos predeterminados).
+        
+        Compilaci├│n correcta.
+            0 Advertencia(s)
+            0 Errores
+        
+        Tiempo transcurrido 00:00:00.53
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:218 (message)"
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(\\.[a-z]+)?|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(\\.[a-z]+)?|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'CXX': C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/Internal/CMakeDetermineLinkerId.cmake:40 (message)"
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:255 (cmake_determine_linker_id)"
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:107 (PROJECT)"
+    message: |
+      Running the CXX compiler's linker: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.44.35223.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "contrib/zlib/CMakeLists.txt:35 (check_include_file)"
+    checks:
+      - "Looking for sys/types.h"
+    directories:
+      source: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-1woysj"
+      binary: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-1woysj"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/cmake-modules"
+    buildResult:
+      variable: "HAVE_SYS_TYPES_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-1woysj'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_d1d28.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Versi├│n de MSBuild 17.14.40+3e7442088 para .NET Framework
+        Compilaci├│n iniciada a las 21-04-2026 13:55:14.
+        
+        Proyecto "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-1woysj\\cmTC_d1d28.vcxproj" en nodo 1 (destinos predeterminados).
+        PrepareForBuild:
+          Creando directorio "cmTC_d1d28.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creando directorio "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-1woysj\\Debug\\".
+          Creando directorio "cmTC_d1d28.dir\\Debug\\cmTC_d1d28.tlog\\".
+        InitializeBuildStatus:
+          Se crear├í "cmTC_d1d28.dir\\Debug\\cmTC_d1d28.tlog\\unsuccessfulbuild" porque se especific├│ "AlwaysCreate".
+          Aplicando tarea Touch a "cmTC_d1d28.dir\\Debug\\cmTC_d1d28.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_d1d28.dir\\Debug\\\\" /Fd"cmTC_d1d28.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-1woysj\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35223 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_d1d28.dir\\Debug\\\\" /Fd"cmTC_d1d28.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-1woysj\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-1woysj\\Debug\\cmTC_d1d28.exe" /INCREMENTAL /ILK:"cmTC_d1d28.dir\\Debug\\cmTC_d1d28.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-1woysj/Debug/cmTC_d1d28.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-1woysj/Debug/cmTC_d1d28.lib" /MACHINE:X64  /machine:x64 cmTC_d1d28.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_d1d28.vcxproj -> C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-1woysj\\Debug\\cmTC_d1d28.exe
+        FinalizeBuildStatus:
+          Se eliminar├í el archivo "cmTC_d1d28.dir\\Debug\\cmTC_d1d28.tlog\\unsuccessfulbuild".
+          Aplicando tarea Touch a "cmTC_d1d28.dir\\Debug\\cmTC_d1d28.tlog\\cmTC_d1d28.lastbuildstate".
+        Compilaci├│n del proyecto terminada "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-1woysj\\cmTC_d1d28.vcxproj" (destinos predeterminados).
+        
+        Compilaci├│n correcta.
+            0 Advertencia(s)
+            0 Errores
+        
+        Tiempo transcurrido 00:00:00.52
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "contrib/zlib/CMakeLists.txt:36 (check_include_file)"
+    checks:
+      - "Looking for stdint.h"
+    directories:
+      source: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-44howd"
+      binary: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-44howd"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/cmake-modules"
+    buildResult:
+      variable: "HAVE_STDINT_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-44howd'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_b942c.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Versi├│n de MSBuild 17.14.40+3e7442088 para .NET Framework
+        Compilaci├│n iniciada a las 21-04-2026 13:55:15.
+        
+        Proyecto "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-44howd\\cmTC_b942c.vcxproj" en nodo 1 (destinos predeterminados).
+        PrepareForBuild:
+          Creando directorio "cmTC_b942c.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creando directorio "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-44howd\\Debug\\".
+          Creando directorio "cmTC_b942c.dir\\Debug\\cmTC_b942c.tlog\\".
+        InitializeBuildStatus:
+          Se crear├í "cmTC_b942c.dir\\Debug\\cmTC_b942c.tlog\\unsuccessfulbuild" porque se especific├│ "AlwaysCreate".
+          Aplicando tarea Touch a "cmTC_b942c.dir\\Debug\\cmTC_b942c.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_b942c.dir\\Debug\\\\" /Fd"cmTC_b942c.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-44howd\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35223 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_b942c.dir\\Debug\\\\" /Fd"cmTC_b942c.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-44howd\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-44howd\\Debug\\cmTC_b942c.exe" /INCREMENTAL /ILK:"cmTC_b942c.dir\\Debug\\cmTC_b942c.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-44howd/Debug/cmTC_b942c.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-44howd/Debug/cmTC_b942c.lib" /MACHINE:X64  /machine:x64 cmTC_b942c.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_b942c.vcxproj -> C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-44howd\\Debug\\cmTC_b942c.exe
+        FinalizeBuildStatus:
+          Se eliminar├í el archivo "cmTC_b942c.dir\\Debug\\cmTC_b942c.tlog\\unsuccessfulbuild".
+          Aplicando tarea Touch a "cmTC_b942c.dir\\Debug\\cmTC_b942c.tlog\\cmTC_b942c.lastbuildstate".
+        Compilaci├│n del proyecto terminada "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-44howd\\cmTC_b942c.vcxproj" (destinos predeterminados).
+        
+        Compilaci├│n correcta.
+            0 Advertencia(s)
+            0 Errores
+        
+        Tiempo transcurrido 00:00:00.51
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "contrib/zlib/CMakeLists.txt:37 (check_include_file)"
+    checks:
+      - "Looking for stddef.h"
+    directories:
+      source: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-dnevfj"
+      binary: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-dnevfj"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/cmake-modules"
+    buildResult:
+      variable: "HAVE_STDDEF_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-dnevfj'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_7baaa.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Versi├│n de MSBuild 17.14.40+3e7442088 para .NET Framework
+        Compilaci├│n iniciada a las 21-04-2026 13:55:16.
+        
+        Proyecto "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-dnevfj\\cmTC_7baaa.vcxproj" en nodo 1 (destinos predeterminados).
+        PrepareForBuild:
+          Creando directorio "cmTC_7baaa.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creando directorio "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-dnevfj\\Debug\\".
+          Creando directorio "cmTC_7baaa.dir\\Debug\\cmTC_7baaa.tlog\\".
+        InitializeBuildStatus:
+          Se crear├í "cmTC_7baaa.dir\\Debug\\cmTC_7baaa.tlog\\unsuccessfulbuild" porque se especific├│ "AlwaysCreate".
+          Aplicando tarea Touch a "cmTC_7baaa.dir\\Debug\\cmTC_7baaa.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_7baaa.dir\\Debug\\\\" /Fd"cmTC_7baaa.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-dnevfj\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35223 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_7baaa.dir\\Debug\\\\" /Fd"cmTC_7baaa.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-dnevfj\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-dnevfj\\Debug\\cmTC_7baaa.exe" /INCREMENTAL /ILK:"cmTC_7baaa.dir\\Debug\\cmTC_7baaa.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-dnevfj/Debug/cmTC_7baaa.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-dnevfj/Debug/cmTC_7baaa.lib" /MACHINE:X64  /machine:x64 cmTC_7baaa.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_7baaa.vcxproj -> C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-dnevfj\\Debug\\cmTC_7baaa.exe
+        FinalizeBuildStatus:
+          Se eliminar├í el archivo "cmTC_7baaa.dir\\Debug\\cmTC_7baaa.tlog\\unsuccessfulbuild".
+          Aplicando tarea Touch a "cmTC_7baaa.dir\\Debug\\cmTC_7baaa.tlog\\cmTC_7baaa.lastbuildstate".
+        Compilaci├│n del proyecto terminada "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-dnevfj\\cmTC_7baaa.vcxproj" (destinos predeterminados).
+        
+        Compilaci├│n correcta.
+            0 Advertencia(s)
+            0 Errores
+        
+        Tiempo transcurrido 00:00:00.52
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CheckTypeSize.cmake:156 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CheckTypeSize.cmake:283 (__check_type_size_impl)"
+      - "contrib/zlib/CMakeLists.txt:55 (check_type_size)"
+    checks:
+      - "Check size of off64_t"
+    directories:
+      source: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-wnscff"
+      binary: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-wnscff"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/cmake-modules"
+    buildResult:
+      variable: "HAVE_OFF64_T"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-wnscff'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_aff30.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Versi├│n de MSBuild 17.14.40+3e7442088 para .NET Framework
+        Compilaci├│n iniciada a las 21-04-2026 13:55:17.
+        
+        Proyecto "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\cmTC_aff30.vcxproj" en nodo 1 (destinos predeterminados).
+        PrepareForBuild:
+          Creando directorio "cmTC_aff30.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creando directorio "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\Debug\\".
+          Creando directorio "cmTC_aff30.dir\\Debug\\cmTC_aff30.tlog\\".
+        InitializeBuildStatus:
+          Se crear├í "cmTC_aff30.dir\\Debug\\cmTC_aff30.tlog\\unsuccessfulbuild" porque se especific├│ "AlwaysCreate".
+          Aplicando tarea Touch a "cmTC_aff30.dir\\Debug\\cmTC_aff30.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D HAVE_SYS_TYPES_H /D HAVE_STDINT_H /D HAVE_STDDEF_H /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_aff30.dir\\Debug\\\\" /Fd"cmTC_aff30.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\OFF64_T.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35223 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D HAVE_SYS_TYPES_H /D HAVE_STDINT_H /D HAVE_STDDEF_H /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_aff30.dir\\Debug\\\\" /Fd"cmTC_aff30.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\OFF64_T.c"
+          OFF64_T.c
+        C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\OFF64_T.c(29,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\cmTC_aff30.vcxproj]
+        C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\OFF64_T.c(30,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\cmTC_aff30.vcxproj]
+        C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\OFF64_T.c(31,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\cmTC_aff30.vcxproj]
+        C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\OFF64_T.c(32,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\cmTC_aff30.vcxproj]
+        C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\OFF64_T.c(33,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\cmTC_aff30.vcxproj]
+        Compilaci├│n del proyecto terminada "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\cmTC_aff30.vcxproj" (destinos predeterminados) -- ERROR.
+        
+        ERROR al compilar.
+        
+        "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\cmTC_aff30.vcxproj" (destino predeterminado) (1) ->
+        (ClCompile destino) -> 
+          C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\OFF64_T.c(29,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\cmTC_aff30.vcxproj]
+          C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\OFF64_T.c(30,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\cmTC_aff30.vcxproj]
+          C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\OFF64_T.c(31,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\cmTC_aff30.vcxproj]
+          C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\OFF64_T.c(32,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\cmTC_aff30.vcxproj]
+          C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\OFF64_T.c(33,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wnscff\\cmTC_aff30.vcxproj]
+        
+            0 Advertencia(s)
+            5 Errores
+        
+        Tiempo transcurrido 00:00:00.36
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CheckFunctionExists.cmake:93 (try_compile)"
+      - "contrib/zlib/CMakeLists.txt:64 (check_function_exists)"
+    checks:
+      - "Looking for fseeko"
+    directories:
+      source: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-lojelx"
+      binary: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-lojelx"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/cmake-modules"
+    buildResult:
+      variable: "HAVE_FSEEKO"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-lojelx'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_a5fef.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Versi├│n de MSBuild 17.14.40+3e7442088 para .NET Framework
+        Compilaci├│n iniciada a las 21-04-2026 13:55:17.
+        
+        Proyecto "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-lojelx\\cmTC_a5fef.vcxproj" en nodo 1 (destinos predeterminados).
+        PrepareForBuild:
+          Creando directorio "cmTC_a5fef.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creando directorio "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-lojelx\\Debug\\".
+          Creando directorio "cmTC_a5fef.dir\\Debug\\cmTC_a5fef.tlog\\".
+        InitializeBuildStatus:
+          Se crear├í "cmTC_a5fef.dir\\Debug\\cmTC_a5fef.tlog\\unsuccessfulbuild" porque se especific├│ "AlwaysCreate".
+          Aplicando tarea Touch a "cmTC_a5fef.dir\\Debug\\cmTC_a5fef.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=fseeko /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_a5fef.dir\\Debug\\\\" /Fd"cmTC_a5fef.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-lojelx\\CheckFunctionExists.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35223 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=fseeko /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_a5fef.dir\\Debug\\\\" /Fd"cmTC_a5fef.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-lojelx\\CheckFunctionExists.c"
+          CheckFunctionExists.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-lojelx\\Debug\\cmTC_a5fef.exe" /INCREMENTAL /ILK:"cmTC_a5fef.dir\\Debug\\cmTC_a5fef.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-lojelx/Debug/cmTC_a5fef.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-lojelx/Debug/cmTC_a5fef.lib" /MACHINE:X64  /machine:x64 cmTC_a5fef.dir\\Debug\\CheckFunctionExists.obj
+        CheckFunctionExists.obj : error LNK2019: unresolved external symbol fseeko referenced in function main [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-lojelx\\cmTC_a5fef.vcxproj]
+        C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-lojelx\\Debug\\cmTC_a5fef.exe : fatal error LNK1120: 1 unresolved externals [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-lojelx\\cmTC_a5fef.vcxproj]
+        Compilaci├│n del proyecto terminada "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-lojelx\\cmTC_a5fef.vcxproj" (destinos predeterminados) -- ERROR.
+        
+        ERROR al compilar.
+        
+        "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-lojelx\\cmTC_a5fef.vcxproj" (destino predeterminado) (1) ->
+        (Link destino) -> 
+          CheckFunctionExists.obj : error LNK2019: unresolved external symbol fseeko referenced in function main [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-lojelx\\cmTC_a5fef.vcxproj]
+          C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-lojelx\\Debug\\cmTC_a5fef.exe : fatal error LNK1120: 1 unresolved externals [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-lojelx\\cmTC_a5fef.vcxproj]
+        
+            0 Advertencia(s)
+            2 Errores
+        
+        Tiempo transcurrido 00:00:00.47
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.31/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "contrib/zlib/CMakeLists.txt:72 (check_include_file)"
+    checks:
+      - "Looking for unistd.h"
+    directories:
+      source: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-wkz57f"
+      binary: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-wkz57f"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/cmake-modules"
+    buildResult:
+      variable: "Z_HAVE_UNISTD_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/CMakeScratch/TryCompile-wkz57f'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_06530.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Versi├│n de MSBuild 17.14.40+3e7442088 para .NET Framework
+        Compilaci├│n iniciada a las 21-04-2026 13:55:18.
+        
+        Proyecto "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wkz57f\\cmTC_06530.vcxproj" en nodo 1 (destinos predeterminados).
+        PrepareForBuild:
+          Creando directorio "cmTC_06530.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creando directorio "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wkz57f\\Debug\\".
+          Creando directorio "cmTC_06530.dir\\Debug\\cmTC_06530.tlog\\".
+        InitializeBuildStatus:
+          Se crear├í "cmTC_06530.dir\\Debug\\cmTC_06530.tlog\\unsuccessfulbuild" porque se especific├│ "AlwaysCreate".
+          Aplicando tarea Touch a "cmTC_06530.dir\\Debug\\cmTC_06530.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_06530.dir\\Debug\\\\" /Fd"cmTC_06530.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wkz57f\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35223 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_06530.dir\\Debug\\\\" /Fd"cmTC_06530.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wkz57f\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wkz57f\\CheckIncludeFile.c(1,10): error C1083: Cannot open include file: 'unistd.h': No such file or directory [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wkz57f\\cmTC_06530.vcxproj]
+        Compilaci├│n del proyecto terminada "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wkz57f\\cmTC_06530.vcxproj" (destinos predeterminados) -- ERROR.
+        
+        ERROR al compilar.
+        
+        "C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wkz57f\\cmTC_06530.vcxproj" (destino predeterminado) (1) ->
+        (ClCompile destino) -> 
+          C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wkz57f\\CheckIncludeFile.c(1,10): error C1083: Cannot open include file: 'unistd.h': No such file or directory [C:\\Users\\vicen\\source\\repos\\vicenteconejerosdelacruz\\Engine\\SDKs\\assimp\\assimp-6.0.4\\CMakeFiles\\CMakeScratch\\TryCompile-wkz57f\\cmTC_06530.vcxproj]
+        
+            0 Advertencia(s)
+            1 Errores
+        
+        Tiempo transcurrido 00:00:00.31
+        
+      exitCode: 1
+...

@@ -1,0 +1,13 @@
+C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/uninstall.dir
+C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/UpdateAssimpLibsDebugSymbolsAndDLLs.dir
+C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/INSTALL.dir
+C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/ALL_BUILD.dir
+C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/CMakeFiles/ZERO_CHECK.dir
+C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/contrib/zlib/CMakeFiles/zlibstatic.dir
+C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/contrib/zlib/CMakeFiles/INSTALL.dir
+C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/contrib/zlib/CMakeFiles/ALL_BUILD.dir
+C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/code/CMakeFiles/assimp.dir
+C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/code/CMakeFiles/INSTALL.dir
+C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/CMakeFiles/unit.dir
+C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/CMakeFiles/INSTALL.dir
+C:/Users/vicen/source/repos/vicenteconejerosdelacruz/Engine/SDKs/assimp/assimp-6.0.4/test/headercheck/CMakeFiles/INSTALL.dir

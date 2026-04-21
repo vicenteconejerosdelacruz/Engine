@@ -1,0 +1,435 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\CCompilerTest.c">
+      <Filter>UnitTests\Compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Version.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Base64.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSimd.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utIOSystem.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utIOStreamBuffer.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utIssues.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utAnim.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\AssimpAPITest.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\AssimpAPITest_aiMatrix3x3.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\AssimpAPITest_aiMatrix4x4.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\AssimpAPITest_aiQuaternion.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\AssimpAPITest_aiVector2D.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\AssimpAPITest_aiVector3D.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\MathTest.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utBatchLoader.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utDefaultIOStream.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utFastAtof.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utMetadata.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\SceneDiffer.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\AbstractImportExportBase.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utTypes.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utVersion.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utParsingUtils.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utProfiler.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSharedPPData.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utStringUtils.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utMaybe.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utMesh.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utStandardShapes.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\uiScene.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utLineSplitter.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utSpatialSort.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utAssertHandler.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utXmlParser.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utBase64.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utHash.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utBaseProcess.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Common\utLogger.cpp">
+      <Filter>UnitTests\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Geometry\utGeometryUtils.cpp">
+      <Filter>UnitTests\GeometryTools</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\Assxml\utAssxmlImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utLWSImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utLWOImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSMDImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utglTFImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utglTF2ImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utHMPImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utIFCImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utFBXImporterExporter.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utImporter.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utExporter.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ut3DImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ut3DSImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utACImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utAMFImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utASEImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utD3MFImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utQ3DImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSTLImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utXImporterExporter.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utX3DImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utDXFImporterExporter.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utPMXImporter.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utPLYImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utObjImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utObjTools.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utOpenGEXImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSIBImporter.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utBlenderIntermediate.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utBlendImportAreaLight.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utBlenderImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utBlendImportMaterials.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utBlenderWork.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utBVHImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utCSMImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utB3DImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utMDCImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utAssbinImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utAssjsonImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utCOBImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utOgreImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utQ3BSPFileImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utOFFImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utNFFImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utXGLImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utMD2Importer.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utMD5Importer.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\utMDLImporter.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\MDL\utMDLImporter_HL1_ImportSettings.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\MDL\utMDLImporter_HL1_Materials.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\MDL\utMDLImporter_HL1_Nodes.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\RAW\utRAWImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\Terragen\utTerragenImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\Pbrt\utPbrtImportExport.cpp">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utMaterialSystem.cpp">
+      <Filter>UnitTests\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utMatrix3x3.cpp">
+      <Filter>UnitTests\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utMatrix4x4.cpp">
+      <Filter>UnitTests\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utVector3.cpp">
+      <Filter>UnitTests\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utImproveCacheLocality.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utFixInfacingNormals.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utGenNormals.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utTriangulate.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utTextureTransform.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utRemoveRedundantMaterials.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utRemoveVCProcess.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utScaleProcess.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utArmaturePopulate.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utJoinVertices.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utRemoveComments.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utRemoveComponent.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utVertexTriangleAdjacency.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSplitLargeMeshes.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utFindDegenerates.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utFindInvalidData.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utLimitBoneWeights.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utPretransformVertices.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utScenePreprocessor.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utTargetAnimation.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSortByPType.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utSceneCombiner.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\utGenBoundingBoxesProcess.cpp">
+      <Filter>UnitTests\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\googletest\googletest\src\gtest-all.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\MathTest.h">
+      <Filter>UnitTests\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\RandomNumberGeneration.h">
+      <Filter>UnitTests\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\SceneDiffer.h">
+      <Filter>UnitTests\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\UTLogStream.h">
+      <Filter>UnitTests\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\TestIOSystem.h">
+      <Filter>UnitTests\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\TestModelFactory.h">
+      <Filter>UnitTests\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\ImportExport\MDL\MDLHL1TestFiles.h">
+      <Filter>UnitTests\ImportExport</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\unit\Tools\TestTools.h">
+      <Filter>UnitTests\Tools</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\test\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{340A683E-1AA0-38F6-9C30-630E378472B6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UnitTests">
+      <UniqueIdentifier>{650D9CA8-8A03-3029-9FDE-38A8CF0D1F50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UnitTests\Common">
+      <UniqueIdentifier>{7BE7790A-E706-3A14-BA04-2BCBA06A4EDB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UnitTests\Compiler">
+      <UniqueIdentifier>{869637F4-BDF7-3D37-901A-333EE9C16EB0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UnitTests\GeometryTools">
+      <UniqueIdentifier>{1E54415C-24F7-31C0-945A-33913A9CCCBD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UnitTests\ImportExport">
+      <UniqueIdentifier>{47A5C291-548C-3DB0-A833-1C87564F98F5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UnitTests\Material">
+      <UniqueIdentifier>{9F514B82-1576-31B5-ADB2-9E51FAD38925}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UnitTests\Math">
+      <UniqueIdentifier>{1DCEF48A-75E5-3EC0-9826-74D4F768B20A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UnitTests\PostProcess">
+      <UniqueIdentifier>{13A3BC7A-DDE7-3CD3-BF00-7282E2E91C29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UnitTests\Tools">
+      <UniqueIdentifier>{38BB5A44-B97D-3D40-8714-B6E83B5E8E36}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

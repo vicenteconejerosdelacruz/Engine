@@ -1,0 +1,1970 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Assimp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\CApi\CInterfaceIOWrapper.cpp">
+      <Filter>CApi</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Compression.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\BaseImporter.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\BaseProcess.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\PostStepRegistry.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\ImporterRegistry.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\DefaultIOStream.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\IOSystem.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\DefaultIOSystem.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\ZipArchiveIOSystem.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Importer.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\SGSpatialSort.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\VertexTriangleAdjacency.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\SpatialSort.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\SceneCombiner.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\ScenePreprocessor.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\SkeletonMeshBuilder.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\StandardShapes.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\TargetAnimation.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\RemoveComments.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Subdivision.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\scene.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Bitmap.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Version.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\CreateAnimMesh.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\simd.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\material.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\AssertHandler.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Exceptional.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Base64.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Geometry\GeometryUtils.cpp">
+      <Filter>Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\DefaultLogger.cpp">
+      <Filter>Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Exporter.cpp">
+      <Filter>Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\CApi\AssimpCExport.cpp">
+      <Filter>Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\CalcTangentsProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\ComputeUVMappingProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\ConvertToLHProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\EmbedTexturesProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\FindDegenerates.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\FindInstancesProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\FindInvalidDataProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\FixNormalsStep.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\DropFaceNormalsProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\GenFaceNormalsProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\GenVertexNormalsProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\PretransformVertices.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\ImproveCacheLocality.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\JoinVerticesProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\LimitBoneWeightsProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\RemoveRedundantMaterials.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\RemoveVCProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\SortByPTypeProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\SplitLargeMeshes.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\TextureTransform.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\TriangulateProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\ValidateDataStructure.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\OptimizeGraph.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\OptimizeMeshes.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\DeboneProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\ProcessHelper.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\MakeVerboseFormat.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\ScaleProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\ArmaturePopulate.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\GenBoundingBoxesProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\SplitByBoneCountProcess.cpp">
+      <Filter>PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Material\MaterialSystem.cpp">
+      <Filter>MaterialSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\STEPParser\STEPFileReader.cpp">
+      <Filter>STEPParser</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\STEPParser\STEPFileEncoding.cpp">
+      <Filter>STEPParser</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTFCommon\glTFCommon.cpp">
+      <Filter>glTFCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\AMF\AMFImporter.cpp">
+      <Filter>AssetLib\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\AMF\AMFImporter_Geometry.cpp">
+      <Filter>AssetLib\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\AMF\AMFImporter_Material.cpp">
+      <Filter>AssetLib\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\AMF\AMFImporter_Postprocess.cpp">
+      <Filter>AssetLib\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3DS\3DSConverter.cpp">
+      <Filter>AssetLib\3DS</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3DS\3DSLoader.cpp">
+      <Filter>AssetLib\3DS</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\AC\ACLoader.cpp">
+      <Filter>AssetLib\AC</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\ASE\ASELoader.cpp">
+      <Filter>AssetLib\ASE</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\ASE\ASEParser.cpp">
+      <Filter>AssetLib\ASE</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Assbin\AssbinLoader.cpp">
+      <Filter>AssetLib\ASSBIN</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\B3D\B3DImporter.cpp">
+      <Filter>AssetLib\B3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\BVH\BVHLoader.cpp">
+      <Filter>AssetLib\BVH</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Collada\ColladaHelper.cpp">
+      <Filter>AssetLib\COLLADA</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Collada\ColladaLoader.cpp">
+      <Filter>AssetLib\COLLADA</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Collada\ColladaParser.cpp">
+      <Filter>AssetLib\COLLADA</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\DXF\DXFLoader.cpp">
+      <Filter>AssetLib\DXF</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\CSM\CSMLoader.cpp">
+      <Filter>AssetLib\CSM</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\HMP\HMPLoader.cpp">
+      <Filter>AssetLib\HMP</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Irr\IRRMeshLoader.cpp">
+      <Filter>AssetLib\IRRMESH</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Irr\IRRShared.cpp">
+      <Filter>AssetLib\IRRMESH</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IQM\IQMImporter.cpp">
+      <Filter>AssetLib\IQM</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Irr\IRRLoader.cpp">
+      <Filter>AssetLib\IRR</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\LWO\LWOAnimation.cpp">
+      <Filter>AssetLib\LWO</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\LWO\LWOBLoader.cpp">
+      <Filter>AssetLib\LWO</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\LWO\LWOLoader.cpp">
+      <Filter>AssetLib\LWO</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\LWO\LWOMaterial.cpp">
+      <Filter>AssetLib\LWO</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\LWS\LWSLoader.cpp">
+      <Filter>AssetLib\LWS</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MD2\MD2Loader.cpp">
+      <Filter>AssetLib\MD2</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MD3\MD3Loader.cpp">
+      <Filter>AssetLib\MD3</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MD5\MD5Loader.cpp">
+      <Filter>AssetLib\MD5</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MD5\MD5Parser.cpp">
+      <Filter>AssetLib\MD5</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDC\MDCLoader.cpp">
+      <Filter>AssetLib\MDC</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\MDLLoader.cpp">
+      <Filter>AssetLib\MDL</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\MDLMaterialLoader.cpp">
+      <Filter>AssetLib\MDL</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\HalfLife\HL1MDLLoader.cpp">
+      <Filter>AssetLib\MDL</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\HalfLife\UniqueNameGenerator.cpp">
+      <Filter>AssetLib\MDL</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\NFF\NFFLoader.cpp">
+      <Filter>AssetLib\NFF</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\NDO\NDOLoader.cpp">
+      <Filter>AssetLib\NDO</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\OFF\OFFLoader.cpp">
+      <Filter>AssetLib\OFF</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Obj\ObjFileImporter.cpp">
+      <Filter>AssetLib\OBJ</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Obj\ObjFileMtlImporter.cpp">
+      <Filter>AssetLib\OBJ</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Obj\ObjFileParser.cpp">
+      <Filter>AssetLib\OBJ</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ogre\OgreImporter.cpp">
+      <Filter>AssetLib\OGRE</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ogre\OgreStructs.cpp">
+      <Filter>AssetLib\OGRE</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ogre\OgreBinarySerializer.cpp">
+      <Filter>AssetLib\OGRE</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ogre\OgreXmlSerializer.cpp">
+      <Filter>AssetLib\OGRE</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ogre\OgreMaterial.cpp">
+      <Filter>AssetLib\OGRE</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\OpenGEX\OpenGEXImporter.cpp">
+      <Filter>AssetLib\OPENGEX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ply\PlyLoader.cpp">
+      <Filter>AssetLib\PLY</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ply\PlyParser.cpp">
+      <Filter>AssetLib\PLY</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MS3D\MS3DLoader.cpp">
+      <Filter>AssetLib\MS3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\COB\COBLoader.cpp">
+      <Filter>AssetLib\COB</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderLoader.cpp">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderDNA.cpp">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderScene.cpp">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderModifier.cpp">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderBMesh.cpp">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderTessellator.cpp">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderCustomData.cpp">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IFC\IFCLoader.cpp">
+      <Filter>AssetLib\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IFC\IFCReaderGen1_2x3.cpp">
+      <Filter>AssetLib\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IFC\IFCReaderGen2_2x3.cpp">
+      <Filter>AssetLib\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IFC\IFCUtil.cpp">
+      <Filter>AssetLib\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IFC\IFCGeometry.cpp">
+      <Filter>AssetLib\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IFC\IFCMaterial.cpp">
+      <Filter>AssetLib\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IFC\IFCProfile.cpp">
+      <Filter>AssetLib\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IFC\IFCCurve.cpp">
+      <Filter>AssetLib\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IFC\IFCBoolean.cpp">
+      <Filter>AssetLib\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IFC\IFCOpenings.cpp">
+      <Filter>AssetLib\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\XGL\XGLLoader.cpp">
+      <Filter>AssetLib\XGL</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXImporter.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXParser.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXTokenizer.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXConverter.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXDocument.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXProperties.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXMeshGeometry.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXMaterial.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXModel.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXAnimation.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXNodeAttribute.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXDeformer.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXBinaryTokenizer.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXDocumentUtil.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Q3D\Q3DLoader.cpp">
+      <Filter>AssetLib\Q3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Q3BSP\Q3BSPFileParser.cpp">
+      <Filter>AssetLib\Q3BSP</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Q3BSP\Q3BSPFileImporter.cpp">
+      <Filter>AssetLib\Q3BSP</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Raw\RawLoader.cpp">
+      <Filter>AssetLib\RAW</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\SIB\SIBImporter.cpp">
+      <Filter>AssetLib\SIB</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\SMD\SMDLoader.cpp">
+      <Filter>AssetLib\SMD</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\STL\STLLoader.cpp">
+      <Filter>AssetLib\STL</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Terragen\TerragenLoader.cpp">
+      <Filter>AssetLib\TERRAGEN</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Unreal\UnrealLoader.cpp">
+      <Filter>AssetLib\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X\XFileImporter.cpp">
+      <Filter>AssetLib\X</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X\XFileParser.cpp">
+      <Filter>AssetLib\X</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DImporter.cpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DImporter_Geometry2D.cpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DImporter_Geometry3D.cpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DImporter_Group.cpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DImporter_Light.cpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DImporter_Metadata.cpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DImporter_Networking.cpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DImporter_Postprocess.cpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DImporter_Rendering.cpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DImporter_Shape.cpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DImporter_Texturing.cpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DGeoHelper.cpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DXmlHelper.cpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\VRML\VrmlConverter.cpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF\glTFImporter.cpp">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF2\glTF2Importer.cpp">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3MF\XmlSerializer.cpp">
+      <Filter>AssetLib\3MF</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3MF\D3MFImporter.cpp">
+      <Filter>AssetLib\3MF</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3MF\D3MFOpcPackage.cpp">
+      <Filter>AssetLib\3MF</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MMD\MMDImporter.cpp">
+      <Filter>AssetLib\MMD</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MMD\MMDPmxParser.cpp">
+      <Filter>AssetLib\MMD</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Obj\ObjExporter.cpp">
+      <Filter>AssetLib\OBJ</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\OpenGEX\OpenGEXExporter.cpp">
+      <Filter>AssetLib\OPENGEX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ply\PlyExporter.cpp">
+      <Filter>AssetLib\PLY</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3DS\3DSExporter.cpp">
+      <Filter>AssetLib\3DS</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Assbin\AssbinExporter.cpp">
+      <Filter>AssetLib\ASSBIN</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Assbin\AssbinFileWriter.cpp">
+      <Filter>AssetLib\ASSBIN</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Assxml\AssxmlExporter.cpp">
+      <Filter>AssetLib\ASSXML</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Assxml\AssxmlFileWriter.cpp">
+      <Filter>AssetLib\ASSXML</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Collada\ColladaExporter.cpp">
+      <Filter>AssetLib\COLLADA</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXExporter.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXExportNode.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXExportProperty.cpp">
+      <Filter>AssetLib\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\STL\STLExporter.cpp">
+      <Filter>AssetLib\STL</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X\XFileExporter.cpp">
+      <Filter>AssetLib\X</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DExporter.cpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF\glTFExporter.cpp">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF2\glTF2Exporter.cpp">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3MF\D3MFExporter.cpp">
+      <Filter>AssetLib\3MF</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Pbrt\PbrtExporter.cpp">
+      <Filter>AssetLib\PBRT</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Assjson\cencode.c">
+      <Filter>AssetLib\ASSJSON</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Assjson\json_exporter.cpp">
+      <Filter>AssetLib\ASSJSON</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Assjson\mesh_splitter.cpp">
+      <Filter>AssetLib\ASSJSON</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Step\StepExporter.cpp">
+      <Filter>AssetLib\STEP</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\unzip\ioapi.c">
+      <Filter>Contrib\unzip</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\unzip\unzip.c">
+      <Filter>Contrib\unzip</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\poly2tri\poly2tri\common\shapes.cc">
+      <Filter>Contrib\Poly2Tri</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\poly2tri\poly2tri\sweep\advancing_front.cc">
+      <Filter>Contrib\Poly2Tri</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\poly2tri\poly2tri\sweep\cdt.cc">
+      <Filter>Contrib\Poly2Tri</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\poly2tri\poly2tri\sweep\sweep.cc">
+      <Filter>Contrib\Poly2Tri</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\poly2tri\poly2tri\sweep\sweep_context.cc">
+      <Filter>Contrib\Poly2Tri</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\clipper\clipper.cpp">
+      <Filter>Contrib\Clipper</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\openddlparser\code\OpenDDLParser.cpp">
+      <Filter>Contrib\openddl_parser</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\openddlparser\code\DDLNode.cpp">
+      <Filter>Contrib\openddl_parser</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\openddlparser\code\OpenDDLCommon.cpp">
+      <Filter>Contrib\openddl_parser</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\openddlparser\code\OpenDDLExport.cpp">
+      <Filter>Contrib\openddl_parser</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\openddlparser\code\Value.cpp">
+      <Filter>Contrib\openddl_parser</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\openddlparser\code\OpenDDLStream.cpp">
+      <Filter>Contrib\openddl_parser</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcArithmeticCodec.cpp">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcDynamicVectorDecoder.cpp">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcDynamicVectorEncoder.cpp">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcTools.cpp">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcTriangleFans.cpp">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zip\src\zip.c">
+      <Filter>ziplib</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\pugixml\src\pugixml.cpp">
+      <Filter>Contrib\Pugixml</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\CApi\CInterfaceIOWrapper.h">
+      <Filter>CApi</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\StbCommon.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Compression.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\BaseProcess.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Importer.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\ScenePrivate.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\DefaultProgressHandler.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\PolyTools.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Maybe.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\IFF.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\VertexTriangleAdjacency.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\ScenePreprocessor.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\StackAllocator.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\StackAllocator.inl">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\TargetAnimation.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\simd.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Geometry\GeometryUtils.h">
+      <Filter>Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\DefaultLogger.hpp">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\LogStream.hpp">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\Logger.hpp">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\NullLogger.hpp">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\Win32DebugLogStream.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\FileLogStream.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Common\StdOStreamLogStream.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\BlobIOSystem.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\CalcTangentsProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\ComputeUVMappingProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\ConvertToLHProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\EmbedTexturesProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\FindDegenerates.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\FindInstancesProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\FindInvalidDataProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\FixNormalsStep.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\DropFaceNormalsProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\GenFaceNormalsProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\GenVertexNormalsProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\PretransformVertices.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\ImproveCacheLocality.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\JoinVerticesProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\LimitBoneWeightsProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\RemoveRedundantMaterials.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\RemoveVCProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\SortByPTypeProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\SplitLargeMeshes.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\TextureTransform.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\TriangulateProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\ValidateDataStructure.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\OptimizeGraph.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\OptimizeMeshes.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\DeboneProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\ProcessHelper.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\MakeVerboseFormat.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\ScaleProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\ArmaturePopulate.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\GenBoundingBoxesProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\PostProcessing\SplitByBoneCountProcess.h">
+      <Filter>PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Material\MaterialSystem.h">
+      <Filter>MaterialSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\STEPParser\STEPFileReader.h">
+      <Filter>STEPParser</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\STEPParser\STEPFileEncoding.h">
+      <Filter>STEPParser</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTFCommon\glTFCommon.h">
+      <Filter>glTFCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\AMF\AMFImporter.hpp">
+      <Filter>AssetLib\AMF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\AMF\AMFImporter_Node.hpp">
+      <Filter>AssetLib\AMF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3DS\3DSHelper.h">
+      <Filter>AssetLib\3DS</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3DS\3DSLoader.h">
+      <Filter>AssetLib\3DS</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\AC\ACLoader.h">
+      <Filter>AssetLib\AC</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\ASE\ASELoader.h">
+      <Filter>AssetLib\ASE</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\ASE\ASEParser.h">
+      <Filter>AssetLib\ASE</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Assbin\AssbinLoader.h">
+      <Filter>AssetLib\ASSBIN</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\B3D\B3DImporter.h">
+      <Filter>AssetLib\B3D</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\BVH\BVHLoader.h">
+      <Filter>AssetLib\BVH</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Collada\ColladaHelper.h">
+      <Filter>AssetLib\COLLADA</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Collada\ColladaLoader.h">
+      <Filter>AssetLib\COLLADA</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Collada\ColladaParser.h">
+      <Filter>AssetLib\COLLADA</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\DXF\DXFLoader.h">
+      <Filter>AssetLib\DXF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\DXF\DXFHelper.h">
+      <Filter>AssetLib\DXF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\CSM\CSMLoader.h">
+      <Filter>AssetLib\CSM</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\HMP\HMPFileData.h">
+      <Filter>AssetLib\HMP</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\HMP\HMPLoader.h">
+      <Filter>AssetLib\HMP</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\HMP\HalfLifeFileData.h">
+      <Filter>AssetLib\HMP</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Irr\IRRMeshLoader.h">
+      <Filter>AssetLib\IRRMESH</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Irr\IRRShared.h">
+      <Filter>AssetLib\IRRMESH</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IQM\iqm.h">
+      <Filter>AssetLib\IQM</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IQM\IQMImporter.h">
+      <Filter>AssetLib\IQM</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Irr\IRRLoader.h">
+      <Filter>AssetLib\IRR</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\LWO\LWOAnimation.h">
+      <Filter>AssetLib\LWO</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\LWO\LWOFileData.h">
+      <Filter>AssetLib\LWO</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\LWO\LWOLoader.h">
+      <Filter>AssetLib\LWO</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\LWS\LWSLoader.h">
+      <Filter>AssetLib\LWS</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MD2\MD2FileData.h">
+      <Filter>AssetLib\MD2</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MD2\MD2Loader.h">
+      <Filter>AssetLib\MD2</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MD2\MD2NormalTable.h">
+      <Filter>AssetLib\MD2</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MD3\MD3FileData.h">
+      <Filter>AssetLib\MD3</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MD3\MD3Loader.h">
+      <Filter>AssetLib\MD3</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MD5\MD5Loader.h">
+      <Filter>AssetLib\MD5</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MD5\MD5Parser.h">
+      <Filter>AssetLib\MD5</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDC\MDCFileData.h">
+      <Filter>AssetLib\MDC</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDC\MDCLoader.h">
+      <Filter>AssetLib\MDC</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDC\MDCNormalTable.h">
+      <Filter>AssetLib\MDC</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\MDLDefaultColorMap.h">
+      <Filter>AssetLib\MDL</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\MDLFileData.h">
+      <Filter>AssetLib\MDL</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\MDLLoader.h">
+      <Filter>AssetLib\MDL</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\HalfLife\HalfLifeMDLBaseHeader.h">
+      <Filter>AssetLib\MDL</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\HalfLife\HL1DataBuffer.h">
+      <Filter>AssetLib\MDL</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\HalfLife\HL1FileData.h">
+      <Filter>AssetLib\MDL</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\HalfLife\HL1MDLLoader.h">
+      <Filter>AssetLib\MDL</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\HalfLife\HL1ImportDefinitions.h">
+      <Filter>AssetLib\MDL</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\HalfLife\HL1ImportSettings.h">
+      <Filter>AssetLib\MDL</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\HalfLife\HL1MeshTrivert.h">
+      <Filter>AssetLib\MDL</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\HalfLife\LogFunctions.h">
+      <Filter>AssetLib\MDL</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MDL\HalfLife\UniqueNameGenerator.h">
+      <Filter>AssetLib\MDL</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\NFF\NFFLoader.h">
+      <Filter>AssetLib\NFF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\NDO\NDOLoader.h">
+      <Filter>AssetLib\NDO</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\OFF\OFFLoader.h">
+      <Filter>AssetLib\OFF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Obj\ObjFileData.h">
+      <Filter>AssetLib\OBJ</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Obj\ObjFileImporter.h">
+      <Filter>AssetLib\OBJ</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Obj\ObjFileMtlImporter.h">
+      <Filter>AssetLib\OBJ</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Obj\ObjFileParser.h">
+      <Filter>AssetLib\OBJ</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Obj\ObjTools.h">
+      <Filter>AssetLib\OBJ</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ogre\OgreImporter.h">
+      <Filter>AssetLib\OGRE</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ogre\OgreStructs.h">
+      <Filter>AssetLib\OGRE</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ogre\OgreParsingUtils.h">
+      <Filter>AssetLib\OGRE</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ogre\OgreBinarySerializer.h">
+      <Filter>AssetLib\OGRE</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ogre\OgreXmlSerializer.h">
+      <Filter>AssetLib\OGRE</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\OpenGEX\OpenGEXImporter.h">
+      <Filter>AssetLib\OPENGEX</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\OpenGEX\OpenGEXStructs.h">
+      <Filter>AssetLib\OPENGEX</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ply\PlyLoader.h">
+      <Filter>AssetLib\PLY</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ply\PlyParser.h">
+      <Filter>AssetLib\PLY</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MS3D\MS3DLoader.h">
+      <Filter>AssetLib\MS3D</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\COB\COBLoader.h">
+      <Filter>AssetLib\COB</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\COB\COBScene.h">
+      <Filter>AssetLib\COB</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderLoader.h">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderDNA.h">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderDNA.inl">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderScene.h">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderSceneGen.h">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderIntermediate.h">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderModifier.h">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderBMesh.h">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderTessellator.h">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Blender\BlenderCustomData.h">
+      <Filter>AssetLib\BLEND</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IFC\IFCLoader.h">
+      <Filter>AssetLib\IFC</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IFC\IFCReaderGen_2x3.h">
+      <Filter>AssetLib\IFC</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\IFC\IFCUtil.h">
+      <Filter>AssetLib\IFC</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\XGL\XGLLoader.h">
+      <Filter>AssetLib\XGL</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXCompileConfig.h">
+      <Filter>AssetLib\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXImporter.h">
+      <Filter>AssetLib\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXParser.h">
+      <Filter>AssetLib\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXTokenizer.h">
+      <Filter>AssetLib\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXImportSettings.h">
+      <Filter>AssetLib\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXConverter.h">
+      <Filter>AssetLib\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXDocument.h">
+      <Filter>AssetLib\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXProperties.h">
+      <Filter>AssetLib\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXMeshGeometry.h">
+      <Filter>AssetLib\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Q3D\Q3DLoader.h">
+      <Filter>AssetLib\Q3D</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Q3BSP\Q3BSPFileData.h">
+      <Filter>AssetLib\Q3BSP</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Q3BSP\Q3BSPFileParser.h">
+      <Filter>AssetLib\Q3BSP</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Q3BSP\Q3BSPFileImporter.h">
+      <Filter>AssetLib\Q3BSP</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Raw\RawLoader.h">
+      <Filter>AssetLib\RAW</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\SIB\SIBImporter.h">
+      <Filter>AssetLib\SIB</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\SMD\SMDLoader.h">
+      <Filter>AssetLib\SMD</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\STL\STLLoader.h">
+      <Filter>AssetLib\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Terragen\TerragenLoader.h">
+      <Filter>AssetLib\TERRAGEN</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Unreal\UnrealLoader.h">
+      <Filter>AssetLib\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X\XFileHelper.h">
+      <Filter>AssetLib\X</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X\XFileImporter.h">
+      <Filter>AssetLib\X</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X\XFileParser.h">
+      <Filter>AssetLib\X</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DImporter.hpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DImporter_Macro.hpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DImporter_Node.hpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DGeoHelper.h">
+      <Filter>AssetLib\X3D</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DXmlHelper.h">
+      <Filter>AssetLib\X3D</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF\glTFAsset.h">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF\glTFAsset.inl">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF\glTFAssetWriter.h">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF\glTFAssetWriter.inl">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF\glTFImporter.h">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF2\glTF2Asset.h">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF2\glTF2Asset.inl">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF2\glTF2AssetWriter.h">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF2\glTF2AssetWriter.inl">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF2\glTF2Importer.h">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3MF\3MFTypes.h">
+      <Filter>AssetLib\3MF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3MF\XmlSerializer.h">
+      <Filter>AssetLib\3MF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3MF\D3MFImporter.h">
+      <Filter>AssetLib\3MF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3MF\D3MFOpcPackage.h">
+      <Filter>AssetLib\3MF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3MF\3MFXmlTags.h">
+      <Filter>AssetLib\3MF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MMD\MMDCpp14.h">
+      <Filter>AssetLib\MMD</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MMD\MMDImporter.h">
+      <Filter>AssetLib\MMD</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MMD\MMDPmdParser.h">
+      <Filter>AssetLib\MMD</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MMD\MMDPmxParser.h">
+      <Filter>AssetLib\MMD</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\MMD\MMDVmdParser.h">
+      <Filter>AssetLib\MMD</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Obj\ObjExporter.h">
+      <Filter>AssetLib\OBJ</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\OpenGEX\OpenGEXExporter.h">
+      <Filter>AssetLib\OPENGEX</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Ply\PlyExporter.h">
+      <Filter>AssetLib\PLY</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3DS\3DSExporter.h">
+      <Filter>AssetLib\3DS</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Assbin\AssbinExporter.h">
+      <Filter>AssetLib\ASSBIN</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Assbin\AssbinFileWriter.h">
+      <Filter>AssetLib\ASSBIN</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Assxml\AssxmlExporter.h">
+      <Filter>AssetLib\ASSXML</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Assxml\AssxmlFileWriter.h">
+      <Filter>AssetLib\ASSXML</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Collada\ColladaExporter.h">
+      <Filter>AssetLib\COLLADA</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXExporter.h">
+      <Filter>AssetLib\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXExportNode.h">
+      <Filter>AssetLib\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXExportProperty.h">
+      <Filter>AssetLib\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\STL\STLExporter.h">
+      <Filter>AssetLib\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X\XFileExporter.h">
+      <Filter>AssetLib\X</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\X3D\X3DExporter.hpp">
+      <Filter>AssetLib\X3D</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF\glTFExporter.h">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\glTF2\glTF2Exporter.h">
+      <Filter>AssetLib\GLTF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\3MF\D3MFExporter.h">
+      <Filter>AssetLib\3MF</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\Pbrt\PbrtExporter.h">
+      <Filter>AssetLib\PBRT</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Assjson\cencode.h">
+      <Filter>AssetLib\ASSJSON</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Assjson\mesh_splitter.h">
+      <Filter>AssetLib\ASSJSON</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\Step\StepExporter.h">
+      <Filter>AssetLib\STEP</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\AssetLib\FBX\FBXCommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\unzip\crypt.h">
+      <Filter>Contrib\unzip</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\unzip\ioapi.h">
+      <Filter>Contrib\unzip</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\unzip\unzip.h">
+      <Filter>Contrib\unzip</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\poly2tri\poly2tri\common\shapes.h">
+      <Filter>Contrib\Poly2Tri</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\poly2tri\poly2tri\common\utils.h">
+      <Filter>Contrib\Poly2Tri</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\poly2tri\poly2tri\sweep\advancing_front.h">
+      <Filter>Contrib\Poly2Tri</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\poly2tri\poly2tri\sweep\cdt.h">
+      <Filter>Contrib\Poly2Tri</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\poly2tri\poly2tri\sweep\sweep.h">
+      <Filter>Contrib\Poly2Tri</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\poly2tri\poly2tri\sweep\sweep_context.h">
+      <Filter>Contrib\Poly2Tri</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\clipper\clipper.hpp">
+      <Filter>Contrib\Clipper</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\openddlparser\include\openddlparser\OpenDDLParser.h">
+      <Filter>Contrib\openddl_parser</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\openddlparser\include\openddlparser\OpenDDLParserUtils.h">
+      <Filter>Contrib\openddl_parser</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\openddlparser\include\openddlparser\OpenDDLCommon.h">
+      <Filter>Contrib\openddl_parser</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\openddlparser\include\openddlparser\OpenDDLExport.h">
+      <Filter>Contrib\openddl_parser</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\openddlparser\include\openddlparser\OpenDDLStream.h">
+      <Filter>Contrib\openddl_parser</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\openddlparser\include\openddlparser\DDLNode.h">
+      <Filter>Contrib\openddl_parser</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\openddlparser\include\openddlparser\Value.h">
+      <Filter>Contrib\openddl_parser</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcAdjacencyInfo.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcArithmeticCodec.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcBinaryStream.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcCommon.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcDVEncodeParams.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcDynamicVectorDecoder.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcDynamicVectorEncoder.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcDynamicVector.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcFIFO.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcIndexedFaceSet.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcIndexedFaceSet.inl">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcSC3DMCDecoder.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcSC3DMCDecoder.inl">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcSC3DMCEncodeParams.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcSC3DMCEncoder.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcSC3DMCEncoder.inl">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcTimer.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcTriangleFans.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcTriangleListDecoder.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcTriangleListDecoder.inl">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcTriangleListEncoder.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcTriangleListEncoder.inl">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcVector.h">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\Open3DGC\o3dgcVector.inl">
+      <Filter>Contrib\open3dgc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zip\src\miniz.h">
+      <Filter>ziplib</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\zip\src\zip.h">
+      <Filter>ziplib</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\pugixml\src\pugiconfig.hpp">
+      <Filter>Contrib\Pugixml</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\pugixml\src\pugixml.hpp">
+      <Filter>Contrib\Pugixml</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\contrib\stb\stb_image.h">
+      <Filter>Contrib\stb</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\anim.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\aabb.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\ai_assert.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\camera.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\color4.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\color4.inl">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\config.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\ColladaMetaData.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\commonMetaData.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\defs.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\cfileio.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\light.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\material.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\material.inl">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\matrix3x3.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\matrix3x3.inl">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\matrix4x4.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\matrix4x4.inl">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\mesh.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\ObjMaterial.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\pbrmaterial.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\GltfMaterial.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\postprocess.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\quaternion.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\quaternion.inl">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\scene.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\metadata.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\texture.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\types.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\vector2.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\vector2.inl">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\vector3.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\vector3.inl">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\version.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\cimport.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\AssertHandler.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\importerdesc.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\Importer.hpp">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\ProgressHandler.hpp">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\IOStream.hpp">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\IOSystem.hpp">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\cexport.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\Exporter.hpp">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\DefaultIOStream.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\DefaultIOSystem.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\ZipArchiveIOSystem.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\SceneCombiner.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\fast_atof.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\qnan.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\BaseImporter.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\Hash.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\MemoryIOWrapper.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\ParsingUtils.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\StreamReader.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\StreamWriter.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\StringComparison.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\StringUtils.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\SGSpatialSort.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\GenericProperty.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\SpatialSort.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\SkeletonMeshBuilder.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\SmallVector.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\SmoothingGroups.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\SmoothingGroups.inl">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\StandardShapes.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\RemoveComments.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\Subdivision.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\Vertex.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\LineSplitter.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\TinyFormatter.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\Profiler.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\LogAux.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\Bitmap.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\XMLTools.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\IOStreamBuffer.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\CreateAnimMesh.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\XmlParser.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\MathFunctions.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\Exceptional.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\ByteSwapper.h">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\Base64.hpp">
+      <Filter>include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\Compiler\pushpack1.h">
+      <Filter>Compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\Compiler\poppack1.h">
+      <Filter>Compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\include\assimp\Compiler\pstdint.h">
+      <Filter>Compiler</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="C:\Users\vicen\source\repos\vicenteconejerosdelacruz\Engine\SDKs\assimp\assimp-6.0.4\code\res\assimp.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="AssetLib">
+      <UniqueIdentifier>{AE2F6ACE-6F03-32D2-8F96-1A2717753DC3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\3D">
+      <UniqueIdentifier>{5DD9AD86-A23C-3090-B976-5FF4ABC938E4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\3DS">
+      <UniqueIdentifier>{313C51AC-E902-3655-B4BC-679F4D1C944A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\3MF">
+      <UniqueIdentifier>{6CACA440-4A32-389B-BAA7-0D8094627800}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\AC">
+      <UniqueIdentifier>{65ADBEF4-47E2-3E8F-8486-8080E1F3C27D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\AMF">
+      <UniqueIdentifier>{F2A3D563-F5CF-3C17-92CB-D41A28E07120}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\ASE">
+      <UniqueIdentifier>{176A1FE0-72E9-399E-83DF-C919C4693CB8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\ASSBIN">
+      <UniqueIdentifier>{920A9109-A578-3A33-B525-DD63F210BB25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\ASSJSON">
+      <UniqueIdentifier>{B4267A04-988B-30C2-A2EA-DCBB2D538DAD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\ASSXML">
+      <UniqueIdentifier>{7D3808EB-77C6-326A-A12B-531E0CD5DDEF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\B3D">
+      <UniqueIdentifier>{8C3EFB12-1797-30E1-AD5D-EAC9E2368D7E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\BLEND">
+      <UniqueIdentifier>{785465AD-A84E-376E-B025-600DEAE9CFBB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\BVH">
+      <UniqueIdentifier>{3D76BDD9-B949-3908-9ED8-5A15EBE7627E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\COB">
+      <UniqueIdentifier>{FB334268-8302-34AA-B52A-4C3C98298B85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\COLLADA">
+      <UniqueIdentifier>{E4A0C49B-2728-33F9-8925-39E8A80249E4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\CSM">
+      <UniqueIdentifier>{B80D0813-73CB-3BC5-8D59-19B0D7D83C13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\DXF">
+      <UniqueIdentifier>{F6606AE1-BFE4-3327-99A3-F5114794C538}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\FBX">
+      <UniqueIdentifier>{2146033D-8804-3261-8D8B-CDD4943F6CF1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\GLTF">
+      <UniqueIdentifier>{04A2AAFE-6D55-32F8-A315-BDBBFE999887}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\HMP">
+      <UniqueIdentifier>{61AD985D-28A2-3864-945E-F238E750030D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\IFC">
+      <UniqueIdentifier>{42079665-4E55-3BB5-B746-9D3F33621EB5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\IQM">
+      <UniqueIdentifier>{7F91D138-69F0-3224-A3C8-A44A4CADDEB7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\IRR">
+      <UniqueIdentifier>{8FFC6740-9295-39AA-9BFC-BE20B917740C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\IRRMESH">
+      <UniqueIdentifier>{26548A53-C2FC-356E-89BF-5DC40639B031}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\LWO">
+      <UniqueIdentifier>{512587AB-ACFE-349C-BB50-2B43A0BFD622}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\LWS">
+      <UniqueIdentifier>{87E72308-A474-310D-A7AA-CBDD53739317}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\MD2">
+      <UniqueIdentifier>{CAAF59A4-BC93-3149-B45B-6EC2AA50A8EF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\MD3">
+      <UniqueIdentifier>{4F6884FB-5A95-3074-A0F7-E6A0673DF567}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\MD5">
+      <UniqueIdentifier>{874F815E-2F0B-30FC-81D2-B0B7D92295C8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\MDC">
+      <UniqueIdentifier>{FD99804C-CA6D-3DEC-B369-C818D813E122}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\MDL">
+      <UniqueIdentifier>{27CEE163-1126-3464-8AD4-9A3430C66B6B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\MMD">
+      <UniqueIdentifier>{610492A8-A7CE-3619-B867-97FA6EC4F41C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\MS3D">
+      <UniqueIdentifier>{12D2CA5C-D4EA-329A-BA49-DCC45498038F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\NDO">
+      <UniqueIdentifier>{E67BDC49-F844-315A-BF7A-C863F353FDC0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\NFF">
+      <UniqueIdentifier>{52C00BD7-19E6-3A23-B837-29286D3965E5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\OBJ">
+      <UniqueIdentifier>{DD99E4A8-96F9-34AC-9A0F-1C125D7BE4F4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\OFF">
+      <UniqueIdentifier>{82A11731-848B-346E-8AC8-64E8E25A68C0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\OGRE">
+      <UniqueIdentifier>{6155BD9F-A7E0-338B-85AE-9C28BCABE445}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\OPENGEX">
+      <UniqueIdentifier>{1D76BC27-2600-3E7A-8418-1F7633441EFC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\PBRT">
+      <UniqueIdentifier>{BD93968B-D663-318E-8BD4-960257659432}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\PLY">
+      <UniqueIdentifier>{E076AD9F-5EC1-3A83-92FC-A55958DC8E4A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\Q3BSP">
+      <UniqueIdentifier>{88415D9B-7FAF-3C05-8DFD-DAB4CCEC5A45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\Q3D">
+      <UniqueIdentifier>{24662E08-F5A7-30BA-8319-AB59B9A352E1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\RAW">
+      <UniqueIdentifier>{F5B7FE55-368E-339F-A26F-0E1B48CCD036}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\SIB">
+      <UniqueIdentifier>{A29DB4E8-02A5-38E7-A396-25710BFA4E50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\SMD">
+      <UniqueIdentifier>{6F0232A9-03D5-383C-AA85-BFF38B165C50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\STEP">
+      <UniqueIdentifier>{F47AF051-A1C6-34DE-8297-BC89D2309884}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\STL">
+      <UniqueIdentifier>{989F3320-A956-33D8-A52D-751B340208C6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\TERRAGEN">
+      <UniqueIdentifier>{323BE0B4-5D31-3EBE-B705-531246A965E7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\X">
+      <UniqueIdentifier>{460DF24A-CC9C-34F9-9F56-9D9AFCDBD107}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\X3D">
+      <UniqueIdentifier>{F61F04C6-2CEE-3864-9475-F83F72E4DC9A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetLib\XGL">
+      <UniqueIdentifier>{1B22DE0F-383E-35F2-99C0-E0B845B4BA24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CApi">
+      <UniqueIdentifier>{2F791AE0-8610-3339-8E22-8BBA8A16AA30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{138C89D9-4571-3B7D-9BED-BF998F125ED1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Compiler">
+      <UniqueIdentifier>{CADDB291-D35C-399E-9BD5-A48A5132EC27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Contrib">
+      <UniqueIdentifier>{7DC8404D-EA6D-35F4-8518-A1397F5CEF1C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Contrib\Clipper">
+      <UniqueIdentifier>{68F02983-BE31-39D6-B866-30F144F56998}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Contrib\Poly2Tri">
+      <UniqueIdentifier>{6A05D702-AF15-3BB1-A711-8B5734D94592}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Contrib\Pugixml">
+      <UniqueIdentifier>{862C7AB5-2868-3D16-B4FC-55EF582585C4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Contrib\open3dgc">
+      <UniqueIdentifier>{2C2A985F-F00C-372E-8639-6B86F00F59F1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Contrib\openddl_parser">
+      <UniqueIdentifier>{2BF62891-F666-3461-AC51-04CFC4B8E255}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Contrib\stb">
+      <UniqueIdentifier>{BF7E377D-C785-33CB-B6D8-0F8F9C396289}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Contrib\unzip">
+      <UniqueIdentifier>{E54CE1E5-CD7E-38D2-B71D-1A3F42AE1A8D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Exporter">
+      <UniqueIdentifier>{E5140C05-D91A-3E8E-A446-44C10592B4C7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Geometry">
+      <UniqueIdentifier>{B7CB3ECC-476A-3129-88BF-8E368D13A3DF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{A47596C8-8875-3CB2-8968-CF034EC0A5A0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Logging">
+      <UniqueIdentifier>{CC4BAAE7-846B-33B2-A5DC-6E12F3382D24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MaterialSystem">
+      <UniqueIdentifier>{0749B7EA-7DF7-3225-8C26-C45CFD1A2FF8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PostProcessing">
+      <UniqueIdentifier>{D4F3DB73-481D-37AC-8565-ECBF0C410129}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="STEPParser">
+      <UniqueIdentifier>{F153CB4D-A116-3EAE-BCC8-929D371A58AB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{340A683E-1AA0-38F6-9C30-630E378472B6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="glTFCommon">
+      <UniqueIdentifier>{47190D3A-D165-30EF-827F-536B4B8D56B3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{3AFE5E02-7CF2-37DC-ADD5-FCCAC1F769AA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\assimp">
+      <UniqueIdentifier>{247BB620-839D-398E-8E79-8471D7A9F980}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ziplib">
+      <UniqueIdentifier>{D3DD59AC-CEE6-3A3F-998F-758CA2F3BB1D}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
