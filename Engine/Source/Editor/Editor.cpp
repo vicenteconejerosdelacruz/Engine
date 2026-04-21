@@ -2915,6 +2915,9 @@ namespace Editor
 
 	void ShowBillboards(SceneUnitId id)
 	{
+		if (!billboards.contains(id))
+			return;
+
 		auto& reg = billboards.at(id).billboardRegistry;
 
 		for (auto it = reg.begin(); it != reg.end(); it++)
@@ -2932,6 +2935,9 @@ namespace Editor
 
 	void HideBillboards(SceneUnitId id)
 	{
+		if (!billboards.contains(id))
+			return;
+
 		auto& reg = billboards.at(id).billboardRegistry;
 
 		for (auto it = reg.begin(); it != reg.end(); it++)
