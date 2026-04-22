@@ -947,7 +947,10 @@ namespace Game::Brawler
 
 	void Venom::ThrowWeb()
 	{
-		OutputDebugStringA("ThrowWeb\n");
+		SoundFXID sfx = SoundFXID(unit, throwWebSound().at(0));
+		sfx->Stop();
+		sfx->Play();
+
 		auto [mm, pos, a, b, c] = venom->GetBoneTransformation(webBone());
 
 		CharacterLookingTo clt = lookingTo();
@@ -958,9 +961,7 @@ namespace Game::Brawler
 		webAttachedPos = XMLoadFloat3(&pos) + XMVector3Rotate(up, rot) * throwWebMaxScale().y;
 		distanceToSwing = 2.0f * std::fabsf(XMVectorGetX(webAttachedPos) - pos.x);
 
-		//JUUID webUUID = "web_" + std::to_string(numWebs++);
 		web = MAKESUUUID(unit, getUUID());
-		//web = MAKESUUUID(unit, webUUID);
 		Scene::CreateSceneObjectFromMold(unit, webMold(),
 			[&](SceneObjectType type, std::string name)
 			{

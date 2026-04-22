@@ -23,6 +23,7 @@ JEXPOSE_TRANSFORM(XMFLOAT3, swingWebMaxScale, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3
 JEXPOSE_TRANSFORM(XMFLOAT3, swingWebMaxTime, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(1.0f, 1.0f, 1.0f), jedv_t_float3, 1, false)
 JEXPOSE(JUUID, webMold, "", jedv_t_te_mold, 1, false)
 JEXPOSE(std::string, webBone, "", jedv_t_controller_model3d_bone, 1, false)
+JEXPOSE_VECTOR(JUUID, throwWebSound, {}, jedv_t_so_soundeffect_vector, 1, false)
 JEXPOSE(float, throwWebTime, 0.3f, jedv_t_float, 1, false)
 JEXPOSE_TRANSFORM(XMFLOAT3, throwWebMinScale, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(1.0f, 1.0f, 1.0f), jedv_t_float3, 1, false)
 JEXPOSE_TRANSFORM(XMFLOAT3, throwWebMaxScale, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(1.0f, 1.0f, 1.0f), jedv_t_float3, 1, false)
