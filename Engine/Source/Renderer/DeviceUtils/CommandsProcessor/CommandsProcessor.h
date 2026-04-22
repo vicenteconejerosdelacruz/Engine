@@ -8,9 +8,20 @@ namespace DeviceUtils
 {
 	struct CommandsProcessor
 	{
-
 		CommandsProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t capacity, size_t id = nostd::threadIdHash());
-		bool IsOpen() { return openedFrames.at(frame)->load(); }
+		~CommandsProcessor();
+
+		//Gemini
+		// 2. IMPORTANTE: Habilitar movimiento explícitamente
+		// Al definir el destructor, estos se borran automáticamente, hay que pedirlos de vuelta.
+		CommandsProcessor(CommandsProcessor&&) noexcept = default;
+		CommandsProcessor& operator=(CommandsProcessor&&) noexcept = default;
+
+		// 3. Bloquear copia (obligatorio por el atomic y unique_ptr)
+		CommandsProcessor(const CommandsProcessor&) = delete;
+		CommandsProcessor& operator=(const CommandsProcessor&) = delete;
+
+		volatile bool IsOpen() { return openedFrames.at(frame)->load(); }
 		CComPtr<ID3D12GraphicsCommandList2>& GetCommandList();
 		void ResetCommandList();
 		void CloseCommandList();
@@ -18,6 +29,7 @@ namespace DeviceUtils
 		void Next();
 		void LoadingPoolInsert(SceneObjectType type, SUUUID uuid);
 		void RunPostExecution(std::function<void()> cb);
+		void RunPreDeletion(std::function<void()> cb);
 
 		size_t id;
 		std::vector<CComPtr<ID3D12CommandAllocator>> commandAllocators;
@@ -26,5 +38,6 @@ namespace DeviceUtils
 		unsigned int frame;
 		std::map<SceneObjectType, std::set<SUUUID>> loadingPool;
 		std::vector<std::function<void()>> postExecutionCallbacks;
+		std::vector<std::function<void()>> preDeletionCallbacks;
 	};
 }

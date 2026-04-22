@@ -33,6 +33,14 @@ namespace DeviceUtils
 		frame = 0U;
 	}
 
+	CommandsProcessor::~CommandsProcessor()
+	{
+		for (auto& cb : preDeletionCallbacks)
+		{
+			cb();
+		}
+	}
+
 	CComPtr<ID3D12GraphicsCommandList2>& CommandsProcessor::GetCommandList()
 	{
 		return commandLists.at(frame);
@@ -41,19 +49,21 @@ namespace DeviceUtils
 	void CommandsProcessor::ResetCommandList()
 	{
 		using namespace DeviceUtils;
-		openedFrames.at(frame)->wait(true);
-		openedFrames.at(frame)->store(true);
+		if (openedFrames.at(frame)->load() == true)
+		{
+			openedFrames.at(frame)->wait(true);
+		}
 		auto& commandAllocator = commandAllocators[frame];
 		commandAllocator->Reset();
 		auto& commandList = commandLists[frame];
 		ID3D12DescriptorHeap* ppHeaps[] = { GetCSUDescriptorHeap() };
 		commandList->Reset(commandAllocator, nullptr);
 		commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+		openedFrames.at(frame)->store(true);
 	}
 
 	void CommandsProcessor::CloseCommandList()
 	{
-		openedFrames.at(frame)->wait(false);
 		auto& commandList = commandLists[frame];
 		DX::ThrowIfFailed(commandList->Close());
 	}
@@ -101,6 +111,7 @@ namespace DeviceUtils
 				}
 				postExecutionCallbacks.clear();
 				openedFrames.at(frameIndex)->store(false);
+				openedFrames.at(frameIndex)->notify_one();
 			}
 		);
 	}
@@ -118,5 +129,10 @@ namespace DeviceUtils
 	void CommandsProcessor::RunPostExecution(std::function<void()> cb)
 	{
 		postExecutionCallbacks.push_back(cb);
+	}
+
+	void CommandsProcessor::RunPreDeletion(std::function<void()> cb)
+	{
+		preDeletionCallbacks.push_back(cb);
 	}
 }
