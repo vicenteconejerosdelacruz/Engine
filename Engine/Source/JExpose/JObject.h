@@ -14,7 +14,7 @@ struct JObject : nlohmann::json
 
 	std::map<std::string, std::tuple<size_t, bool>> UpdateFlagsMap;
 	std::map<std::string, nlohmann::json> UpdatePrevValues;
-	unsigned int updateFlag = 0U;
+	size_t updateFlag = 0U;
 
 	JObject(nlohmann::json& json) :nlohmann::json(json) {}
 	nlohmann::json json()
@@ -62,7 +62,7 @@ struct JObject : nlohmann::json
 
 	bool dirty(size_t flag) const
 	{
-		return !!(updateFlag & (1 << flag));
+		return !!(updateFlag & (1ULL << flag));
 	}
 
 	bool dirty(std::vector<size_t> flags)
@@ -72,12 +72,12 @@ struct JObject : nlohmann::json
 
 	void flag(size_t flag)
 	{
-		updateFlag |= (1 << flag);
+		updateFlag |= (1ULL << flag);
 	}
 
 	void clean(size_t flag)
 	{
-		updateFlag &= ~(1 << flag);
+		updateFlag &= ~(1ULL << flag);
 	}
 
 	void clean(std::vector<size_t> flags)
