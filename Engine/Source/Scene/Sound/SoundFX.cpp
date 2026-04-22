@@ -12,8 +12,8 @@ namespace Editor
 	extern void RegisterBillboard(SceneUnitId id, JUUID sceneObject);
 	extern void DestroyBillboard(SceneUnitId id, JUUID sceneObject);
 	extern void MarkScenePanelAssetsAsDirty();
-	extern bool IsPlaying(SceneUnitId unit);
-	extern bool IsPaused(SceneUnitId unit);
+	extern bool IsPlaying(SceneUnitId id);
+	extern bool IsPaused(SceneUnitId id);
 }
 #endif
 

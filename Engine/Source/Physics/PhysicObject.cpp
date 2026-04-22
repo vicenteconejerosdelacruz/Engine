@@ -9,6 +9,7 @@
 namespace Editor
 {
 	extern CameraID GetLevelCamera(SceneUnitId id);
+	extern bool IsPlaying(SceneUnitId id);
 	extern void BindRenderableToPickingPass(RenderableID r);
 	extern void SelectTrigger(TriggerID trigger);
 	extern void SelectBoundary(BoundaryID boundary);
@@ -1323,7 +1324,10 @@ namespace Physics
 		std::for_each(phOs.begin(), phOs.end(), checkVelocity);
 		std::for_each(phOs.begin(), phOs.end(), checkPxFilterData);
 #if defined(_EDITOR)
-		std::for_each(phOs.begin(), phOs.end(), updateColors);
+		if (!Editor::IsPlaying(id))
+		{
+			std::for_each(phOs.begin(), phOs.end(), updateColors);
+		}
 #endif
 	}
 

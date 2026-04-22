@@ -15,8 +15,8 @@ using namespace Scene;
 #if defined(_EDITOR)
 namespace Editor
 {
-	extern bool IsPlaying(SceneUnitId unit);
-	extern bool IsPaused(SceneUnitId unit);
+	extern bool IsPlaying(SceneUnitId id);
+	extern bool IsPaused(SceneUnitId id);
 }
 using namespace Editor;
 #endif
