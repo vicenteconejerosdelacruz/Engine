@@ -285,7 +285,8 @@ namespace Editor
 		);
 		CreateRenderable(id, jbox);
 		boundingBox[id]->BindToScene();
-		GetLoadingProcessor(id).LoadingPoolInsert(SO_Renderables, boundingBox[id]());
+		LoadingProcessor loading = CreateLoadingProcessor();
+		loading.cmd.LoadingPoolInsert(SO_Renderables, boundingBox[id]());
 	}
 
 	void CreateSceneUnitBillboards(SceneUnitId id)
@@ -2829,7 +2830,8 @@ namespace Editor
 		);
 		CreateRenderable(id, jbillboard);
 		RenderableID renderable = MAKESUUUID(id, uuid);
-		GetLoadingProcessor(id).LoadingPoolInsert(SO_Renderables, renderable());
+		LoadingProcessor loading = CreateLoadingProcessor();
+		loading.cmd.LoadingPoolInsert(SO_Renderables, renderable());
 		return renderable;
 	}
 

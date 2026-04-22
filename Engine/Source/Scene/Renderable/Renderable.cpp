@@ -1060,6 +1060,7 @@ namespace Scene
 				}
 				if (prevCams != currCams)
 				{
+					LoadingProcessor loading = CreateLoadingProcessor();
 					r->UnbindCameras();
 					r->BindCameras();
 				}

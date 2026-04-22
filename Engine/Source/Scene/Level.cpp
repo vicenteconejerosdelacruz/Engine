@@ -127,8 +127,7 @@ namespace Scene::Level
 		}
 #endif
 
-		auto& loading = GetLoadingProcessor();
-		loading.ResetCommandList();
+		auto loading = CreateLoadingProcessor();
 
 		CreateSceneUnitSceneObjects(id);
 
@@ -234,14 +233,12 @@ namespace Scene::Level
 
 		for (auto& intoThePool : objectsToLoad)
 		{
-			loading.LoadingPoolInsert(
+			loading.cmd.LoadingPoolInsert(
 				std::get<0>(intoThePool),
 				std::get<1>(intoThePool)
 			);
 		}
 
-		loading.CloseCommandList();
-		loading.ExecuteCommandList();
 #if defined(_EDITOR)
 		scene->SetCanBuildAssetsTree(true);
 #endif

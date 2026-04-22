@@ -60,14 +60,28 @@ namespace Templates {
 		using namespace Mesh;
 		using namespace Scene;
 		std::lock_guard<std::mutex> lock(refTrackMutex);
-		return refTracker.AddRef(uuid, [&]()
+		return refTracker.AddRef(uuid, [&, id]()
 			{
 				std::unique_ptr<MeshInstance> instance = std::make_unique<MeshInstance>();
 				instance->uuid = uuid;
 				instance->vertexClass = vertexClass;
-				auto& commandList = GetLoadingProcessor().GetCommandList();
+				auto loading = CreateLoadingProcessor();
+				auto& cmd = loading.cmd;
+				auto& commandList = cmd.GetCommandList();
+
 				InitializeVertexBufferView(renderer->d3dDevice, commandList, vertexData, vertexSize, verticesCount, instance->vbvData);
 				InitializeIndexBufferView(renderer->d3dDevice, commandList, indices, indicesCount, instance->ibvData);
+
+				JUUID uuid = instance->uuid;
+
+				cmd.RunPreDeletion([uuid]
+					{
+						auto& mesh = GetMeshInstance(uuid);
+						mesh->vbvData.vertexBufferUpload = nullptr;
+						mesh->ibvData.indexBufferUpload = nullptr;
+					}
+				);
+
 				return instance;
 			}
 		);

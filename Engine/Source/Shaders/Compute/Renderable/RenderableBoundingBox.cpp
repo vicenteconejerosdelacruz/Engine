@@ -112,11 +112,11 @@ namespace ComputeShader
 			mesh->ExtendBoundingBox(boundingBox, extend);
 			extend = true;
 		}
-		GetLoadingProcessor(renderable.unit()).RunPostExecution([&]
-			{
-				canCompute = true;
-			}
-		);
+		//GetLoadingProcessor().RunPostExecution([&]
+		//	{
+		//		canCompute = true;
+		//	}
+		//);
 	}
 
 	RenderableBoundingBox::~RenderableBoundingBox()

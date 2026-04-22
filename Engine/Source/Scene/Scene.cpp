@@ -49,24 +49,49 @@ namespace Scene
 	std::map<SceneUnitId, SceneUnitId> attachedUnits; //<Attached, Destination>
 	std::set<SceneUnitId> renderableSceneUnits;
 	std::map<size_t, CommandsProcessor> loadingProcessor;
+	std::map<size_t, std::unique_ptr<std::atomic_uint>> loadingProcessorDepth;
+	std::set<std::tuple<unsigned int, size_t>> loadingProcessorsToDelete;
 
-	std::tuple<size_t, CommandsProcessor&> CreateLoadingProcessor()
+	LoadingProcessor::LoadingProcessor(CommandsProcessor& p_cmd, std::unique_ptr<std::atomic_uint>& p_depth) :cmd(p_cmd), depth(p_depth)
 	{
-		size_t thread_id = nostd::threadIdHash();
-		loadingProcessor.insert_or_assign(thread_id, CommandsProcessor(renderer->d3dDevice, 1));
-		return std::tie(thread_id, loadingProcessor.at(thread_id));
+		threadId = nostd::threadIdHash();
+		unsigned int prev = depth->fetch_add(1U);
+		if (prev == 0U)
+		{
+			cmd.ResetCommandList();
+		}
 	}
 
-	CommandsProcessor& GetLoadingProcessor(size_t id)
+	LoadingProcessor::~LoadingProcessor()
 	{
-		id = id ? id : nostd::threadIdHash();
-		return loadingProcessor.at(id);
+		size_t id = threadId;
+		unsigned int prev = loadingProcessorDepth.at(id)->fetch_sub(1U);
+		if (prev == 1U)
+		{
+			cmd.CloseCommandList();
+			cmd.ExecuteCommandList();
+			cmd.RunPostExecution([id]
+				{
+					DestroyLoadingProcessor(id);
+				}
+			);
+		}
 	}
 
-	void DestroyLoadingProcessor(size_t id)
+	LoadingProcessor CreateLoadingProcessor()
 	{
-		id = id ? id : nostd::threadIdHash();
-		loadingProcessor.erase(id);
+		size_t id = nostd::threadIdHash();
+		if (!loadingProcessor.contains(id))
+		{
+			loadingProcessor.insert_or_assign(id, CommandsProcessor(renderer->d3dDevice, 1));
+			loadingProcessorDepth.insert_or_assign(id, std::make_unique<std::atomic_uint>(0U));
+		}
+		return LoadingProcessor(loadingProcessor.at(id), loadingProcessorDepth.at(id));
+	}
+
+	void DestroyLoadingProcessor(size_t threadId)
+	{
+		loadingProcessorsToDelete.insert(std::make_tuple(JRenderer::numFrames, threadId));
 	}
 
 	void CreateSceneLevelAsync(std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
@@ -78,7 +103,6 @@ namespace Scene
 				SceneUnitId id = nostd::threadIdHash();
 
 				auto& scene = CreateScene(id, filename, JRenderer::numFrames);
-				auto [lid, _] = CreateLoadingProcessor();
 
 				LoadLevel(scene, filename, data, progress);
 				levelLoaded(id);
@@ -96,7 +120,6 @@ namespace Scene
 				SceneUnitId unit = nostd::threadIdHash();
 				auto& scene = CreateScene(unit, filename);
 				scene->SetIsolated(true);
-				auto [lid, _] = CreateLoadingProcessor();
 
 				LoadLevel(scene, filename, data, progress);
 				levelLoaded(unit);
@@ -112,7 +135,6 @@ namespace Scene
 		std::thread levelThread([](SceneUnitId parentUnit, std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 			{
 				auto& scene = GetSceneUnit(parentUnit);
-				auto [lid, _] = CreateLoadingProcessor();
 
 				LoadLevel(scene, filename, data, progress);
 				levelLoaded(parentUnit);
@@ -157,7 +179,6 @@ namespace Scene
 	std::unique_ptr<SceneUnit>& CreateScene(SceneUnitId unit, std::string unitName, unsigned int numProcessors)
 	{
 		scenesUnits.insert_or_assign(unit, std::make_unique<SceneUnit>(unit, unitName));
-		//scenesUnits.at(unit)->InitLoadingProcessor(renderer->d3dDevice, unit, 1U);
 		if (numProcessors > 0U)
 		{
 			scenesUnits.at(unit)->InitFrame2FrameProcessor(renderer->d3dDevice, numProcessors, unit);
@@ -238,6 +259,28 @@ namespace Scene
 		for (auto& id : scenesToDelete)
 		{
 			DestroyScene(id);
+		}
+	}
+
+	void LoadingProcessorsStep()
+	{
+		for (auto it = loadingProcessorsToDelete.begin(); it != loadingProcessorsToDelete.end();)
+		{
+			auto [count, id] = *it;
+
+			if (count > 0)
+			{
+				auto nextIt = std::next(it);
+				loadingProcessorsToDelete.erase(it);
+				loadingProcessorsToDelete.insert({ count - 1, id });
+				it = nextIt;
+			}
+			else
+			{
+				loadingProcessor.erase(id);
+				loadingProcessorDepth.erase(id);
+				it = loadingProcessorsToDelete.erase(it);
+			}
 		}
 	}
 

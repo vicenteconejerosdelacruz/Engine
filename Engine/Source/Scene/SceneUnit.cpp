@@ -172,7 +172,6 @@ namespace Scene
 
 	void SceneUnit::SubmitCommandList()
 	{
-		commandsProcessor->RunPostExecution(RunTextureUploadFreeResources);
 		commandsProcessor->ExecuteCommandList();
 	}
 
@@ -262,17 +261,15 @@ namespace Scene
 
 	void SceneUnit::SetCanBuildAssetsTree(bool value)
 	{
-		unsigned int stored_value = canBuildAssetsTree->load();
 		if (!value)
 		{
-			stored_value++;
+			canBuildAssetsTree->fetch_add(1U);
 		}
 		else
 		{
-			assert(stored_value != 0U);
-			stored_value--;
+			unsigned int prev = canBuildAssetsTree->fetch_sub(1U);
+			assert(prev != 0);
 		}
-		canBuildAssetsTree->store(stored_value);
 	}
 #endif
 };

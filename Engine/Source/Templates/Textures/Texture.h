@@ -90,8 +90,6 @@ namespace Templates
 
 	TEMPDECL_FULL(Texture);
 
-	void RunTextureUploadFreeResources();
-	void PushTextureUploadFreeResourceCallback(unsigned int steps, std::function<void()> callback);
 	DXGI_FORMAT GetTextureFormat(std::filesystem::path path);
 	void Create2DDDSFile(TextureJson& json);
 	void CreateArrayDDSFile(TextureJson& json);

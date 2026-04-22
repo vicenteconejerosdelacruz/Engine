@@ -442,6 +442,7 @@ void AppStep()
 	);
 	UIStep();
 	Render();
+	LoadingProcessorsStep();
 }
 
 //RENDER

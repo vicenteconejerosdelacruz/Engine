@@ -72,27 +72,6 @@ namespace Templates
 	TEMPDEF_REFTRACKER(Texture);
 	std::vector<std::tuple<unsigned int, std::function<void()>>> textureUploadResourcesFreeCallback;
 
-	void RunTextureUploadFreeResources()
-	{
-		for (auto it = textureUploadResourcesFreeCallback.begin(); it != textureUploadResourcesFreeCallback.end();)
-		{
-			auto& [steps, callback] = *it;
-			steps--;
-			if (steps == 0U)
-			{
-				callback();
-				it = textureUploadResourcesFreeCallback.erase(it);
-				continue;
-			}
-			it++;
-		}
-	}
-
-	void PushTextureUploadFreeResourceCallback(unsigned int steps, std::function<void()> callback)
-	{
-		textureUploadResourcesFreeCallback.push_back(std::make_tuple(steps, callback));
-	}
-
 	DXGI_FORMAT GetTextureFormat(std::filesystem::path path)
 	{
 		using namespace Utils;
@@ -524,13 +503,6 @@ namespace Templates
 #endif
 		std::string pathS = path.string();
 		CreateTextureResource(commandList, pathS, tex->format(), tex->type(), tex->numFrames(), tex->mipLevels(), startFrame);
-		//SI CREO UN CRATE DESDE EL CREADOR ESTO SE CAE
-		PushTextureUploadFreeResourceCallback(2U, [&]
-			{
-				//OutputDebugStringA(std::string("off-loading:" + tex->name() + "\n").c_str());
-				//upload = nullptr;
-			}
-		);
 	}
 #endif
 
@@ -559,15 +531,15 @@ namespace Templates
 		}
 #endif
 		std::string pathS = path.string();
-		auto& commandList = GetLoadingProcessor().GetCommandList();
+		auto loading = CreateLoadingProcessor();
+		auto& cmd = loading.cmd;
+		auto& commandList = cmd.GetCommandList();
 		CreateTextureResource(commandList, pathS, tex->format(), tex->type(), tex->numFrames(), tex->mipLevels(), startFrame);
-		////SI CREO UN CRATE DESDE EL CREADOR ESTO SE CAE
-		//PushTextureUploadFreeResourceCallback(2U, [&]
-		//	{
-		//		//OutputDebugStringA(std::string("off-loading:" + tex->name() + "\n").c_str());
-		//		//upload = nullptr;
-		//	}
-		//);
+		cmd.RunPreDeletion([&]
+			{
+				upload = nullptr;
+			}
+		);
 	}
 
 	void TextureInstance::CreateTextureResource(CComPtr<ID3D12GraphicsCommandList2>& commandList, std::string& path, DXGI_FORMAT format, TextureType type, unsigned int numFrames, unsigned int nMipMaps, unsigned int firstArraySlice)
