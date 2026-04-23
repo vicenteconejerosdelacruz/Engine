@@ -1,89 +1,14 @@
-BUGS:
--si no existe una camara como mousecontroller se cae la creacion de billboards
-	-los billboards deben ser creados cuando cambia algo de la escena y no a partir del Initialize
--si parto modo juego y maximizo durante la carga, no se reajusta
-
-TODO:
-
--Editor
-	-Quitar una textura de un material no funciona
--Revivir GameMode(No Editor)
-	-mostrar nivel con un escenario
-		-usar a venom
-			-saltar
-				-A: (Jump_Start_F_C -> Jump_Land_C)
-			-atacar
-				-X:(103511_Attack01 <-> 103511_Attack02)
-				-Y:(103511_Attack03)
-				
-NICE TO HAVE:
-
-DONE:
--Hacer que las luces y sombras esten atachadas a una camara
--Editor
-	-Agegar Modo PlayInEditor
-	-Agregar secuenciador de animaciones
-		-que permita modificar escalar las animaciones
--Revivir GameMode(No Editor)
-	-splash screen
-	-barra de carga
-	-mostrar nivel con un escenario
-		-usar a venom
-			-idle (Idle_C)
-			-caminar en 4 ejes (Walk_Fwd_C)
-			-correr (Run_Fwd_C)
--Interaccion de Gizmos de ImGuizmo con la posibilidad de combinar todos los objetos que sean seleccionables
-	-Renderables: todos
-	-SoundFX: sonidos 3d
-	-Luces: spot, point
-	-Cameras: todas
--el navegador de render passes de la camara no tiene limites positivos
--Revivir el IBL
-	-cambiar las texturas de ibl para que provengan de la camara
-	-ibl toggle
-	-revivir la construccion de las texturas ibl
--Revivir el pipeline HDR
--se perdio el preview de los renderpasses en las camaras
--arreglar los niveles
--manejar referencias rotas
-	-Renderable
-		-cameras
-		-model
-		-material
-	-Camera	
-		-renderPass
-	-SoundFX
-		-soundEffect
--generalizar los billboards
-	-arreglar el shader para que el porte siempre sea fijo y no utilice ese hack feo
--grabar templates
-	-si se quiere cerrar el editor y los templates han sido editados. dar la opcion de guardarlos
--eliminar templates
-	-buscar referencias a los templates dentro de todas las escenas
-	-buscar referencias a los templates dentro de otras escenas
-	-buscar referencias a los templates dentro de otros templates
--formato correcto de Tex2D para shadowmaps
-	-https://www.gamedev.net/forums/topic/666986-direct3d-12-documentation-is-now-public/?page=13
--formato de depth target D24
--eliminar objetos de la escena
--creacion de templates
-	-Shader
-	-Material
-	-RenderPass
-	-Sound
-	-Model3D
-	-Texture
-		-2D
-		-Array
-		-Cube
-		-Skybox
--Guardado de niveles y de assets
-	-registro de timestamp de modificacion
-		-si edite objetos y no se han grabado si salgo del nivel o quiero cerrar se me advierta y se me de la oportunidad de grabar antes de proseguir con la accion
--Si al material de un renderable se le cambia alguna propiedad, volver a hacer pick sobre este renderable hace crash
--Hacer testing con objetos que tengan blending
--si cambio los render passes de una camara(2 render passes y quito uno) y cierro la app esto causa un assert por que existen instancias de materiales dando vueltas
-	-era que no se manejaba bien el refCount de las instancias en RefTracker
--Camaras con RenderToTexture como resultado final muestren al final del modo edicion un preview del rendering donde se pueda seleccionar el renderPass a mostrar
--crear un template de modelo 3d. crear un renderable de ese modelo hace que se caiga
-	-agregado JObject::json para poder crear templates que aceptan un json. por alguna razon la serializacion pura de derivados no sirve
+-parametrizar las animaciones de los thugs
+-Agregar woman thug
+-Tener 3 vidas
+-Hacer gameover si pierde
+-poder continuar con el game over
+-terminar nivel si todos los enemigos murieron
+-Hacer que el nivel tenga rondas de enemigo
+	-Thug_01
+	-mover izquierda
+	-Thug_02
+	->mover izquierda
+	-Thug_01 + Thug_02
+	->mover derecha
+	->Thug_01 + Thug_01 + Thug_02

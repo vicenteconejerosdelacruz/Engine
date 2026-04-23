@@ -210,7 +210,7 @@ namespace Game::Brawler
 
 	void Thug::EnterIdle()
 	{
-		thug->SetCurrentAnimation("ThugIdle", 0.0f, 1.0f, true, true);
+		thug->SetCurrentAnimation(idleAnimation(), 0.0f, 1.0f, true, true);
 	}
 
 	void Thug::LeaveIdle()
@@ -238,7 +238,7 @@ namespace Game::Brawler
 
 	void Thug::EnterCombatIdle()
 	{
-		thug->SetCurrentAnimation("ThugCombatIdle", 0.0f, combatIdleTimeFactor(), true, true);
+		thug->SetCurrentAnimation(combatIdleAnimation(), 0.0f, combatIdleTimeFactor(), true, true);
 	}
 
 	void Thug::CombatIdle()
@@ -333,22 +333,22 @@ namespace Game::Brawler
 			}
 		))
 		{
-			thug->SetCurrentAnimation("ThugCombatMoveFw", 0.0f, combatMoveFwTimeFactor(), true, false);
+			thug->SetCurrentAnimation(combatMoveFwAnimation(), 0.0f, combatMoveFwTimeFactor(), true, false);
 		}
 		else if (diff.m128_f32[2] > 0.0f)
 		{
-			thug->SetCurrentAnimation("ThugCombatMoveFar", 0.0f, combatMoveNearFarTimeFactor(), true, false);
+			thug->SetCurrentAnimation(combatMoveFarAnimation(), 0.0f, combatMoveNearFarTimeFactor(), true, false);
 		}
 		else
 		{
-			thug->SetCurrentAnimation("ThugCombatMoveNear", 0.0f, combatMoveNearFarTimeFactor(), true, false);
+			thug->SetCurrentAnimation(combatMoveNearAnimation(), 0.0f, combatMoveNearFarTimeFactor(), true, false);
 		}
 	}
 
 	//CombatPunch
 	void Thug::EnterCombatPunch()
 	{
-		thug->SetCurrentAnimation("ThugCombatPunch", 0.0f, combatPunchTimeFactor(), true, false);
+		thug->SetCurrentAnimation(combatPunchAnimation(), 0.0f, combatPunchTimeFactor(), true, false);
 	}
 
 	void Thug::CombatPunch()
@@ -376,7 +376,7 @@ namespace Game::Brawler
 	void Thug::EnterDeath()
 	{
 		GetBrawlerSceneController()->UnRegisterEnemy(uuid());
-		thug->SetCurrentAnimation("ThugDeath", 0.0f, deathTimeFactor());
+		thug->SetCurrentAnimation(deathAnimation(), 0.0f, deathTimeFactor());
 	}
 
 	void Thug::OnDeathAnimationEnd()

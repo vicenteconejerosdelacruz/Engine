@@ -1142,6 +1142,13 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 			DrawValue<XMFLOAT3, jedv_t_float3>()("freeposition", camV);
 			DrawValue<XMFLOAT3, jedv_t_float3_angle>()("freerotation", camV);
 		}
+		else
+		{
+			Renderable* ren = (Renderable*)GetSceneObjectPointer(unit, renderable.uuid());
+			std::vector<JObject*> renV({ ren });
+			DrawValue<XMFLOAT3, jedv_t_float3>()("AABBCenter", renV);
+			DrawValue<XMFLOAT3, jedv_t_float3>()("AABBExtent", renV);
+		}
 
 	}
 	ImGui::EndChild();

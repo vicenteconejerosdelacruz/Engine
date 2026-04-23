@@ -2051,7 +2051,8 @@ namespace Editor
 
 	void DrawPickedObjectsGizmo(SceneUnitId id, CameraID camera)
 	{
-		if (!gizmos.contains(id)) return;
+		ImGuiIO& io = ImGui::GetIO();
+		if (!gizmos.contains(id) || io.WantCaptureKeyboard || io.WantTextInput || io.WantCaptureMouseUnlessPopupClose) return;
 
 		if (ImGui::IsKeyPressed(ImGuiKey_T)) // t ky
 		{
