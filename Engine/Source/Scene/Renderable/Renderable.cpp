@@ -1062,6 +1062,7 @@ namespace Scene
 				{
 					LoadingProcessor loading = CreateLoadingProcessor();
 					r->UnbindCameras();
+					r->BindShadowMapCameras();
 					r->BindCameras();
 				}
 			};
