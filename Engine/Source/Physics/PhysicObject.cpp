@@ -62,6 +62,20 @@ namespace Physics
 	std::map<JUUID, std::function<void(PxFilterData)>> characterHitSubscriber;
 
 #if defined(_EDITOR)
+	XMFLOAT4 behaviorColors(PhysicSceneID scene, PhysicsBehavior behavior)
+	{
+		std::map<PhysicsBehavior, XMFLOAT4> colors =
+		{
+			{ PB_Static, scene->staticColor() },
+			{ PB_Dynamic, scene->dynamicColor() },
+			{ PB_Character, scene->characterColor() },
+			{ PB_Trigger, scene->triggerColor() },
+		};
+		return colors.at(behavior);
+	}
+#endif
+
+#if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
 #include <PhysicObjectAtt.h>
@@ -158,6 +172,8 @@ namespace Physics
 	void PhysicObject::CreatePhysicsBehavior()
 	{
 		PhysicGeometryJsonID jg = geometry();
+		if (!jg)
+			return;
 
 		std::map<std::tuple<PhysicsBehavior, bool>, std::function<void()>> builders =
 		{
@@ -752,7 +768,7 @@ namespace Physics
 	//Renderable representation
 	void PhysicObject::CreatePhysicsAvatar()
 	{
-		if (renderableShape) return;
+		if (renderableShape || geometry().empty()) return;
 
 		std::map<PhysicsBehavior, std::function<void()>> builder =
 		{
@@ -874,6 +890,12 @@ namespace Physics
 					renderableShape->OnPick = [&] {Editor::SelectTrigger(boundary->SUuuid()); };
 					renderableLines->rotationQ(rotQ);
 					renderableShape->rotationQ(rotQ);
+					PhysicSceneID scene = MAKESUUUID(renderableShape.unit(), *GetPhysicScenes(renderableShape.unit()).begin());
+					for (unsigned int frame = 0U; frame < JRenderer::numFrames; frame++)
+					{
+						UpdatePhysicsAvatarColor(frame, overrideColor() ? color() : behaviorColors(scene, behavior()));
+					}
+					UpdatePhysicsAvatarTransformation();
 				}
 				RegisterStaticBody(uuid());
 				avatarBuilt = true;
@@ -906,6 +928,12 @@ namespace Physics
 				using namespace Editor;
 				RegisterDynamicBody(uuid());
 				avatarBuilt = true;
+				PhysicSceneID scene = MAKESUUUID(renderableShape.unit(), *GetPhysicScenes(renderableShape.unit()).begin());
+				for (unsigned int frame = 0U; frame < JRenderer::numFrames; frame++)
+				{
+					UpdatePhysicsAvatarColor(frame, overrideColor() ? color() : behaviorColors(scene, behavior()));
+				}
+				UpdatePhysicsAvatarTransformation();
 			}
 		);
 	}
@@ -937,6 +965,12 @@ namespace Physics
 				using namespace Editor;
 				RegisterCharacter(uuid());
 				avatarBuilt = true;
+				PhysicSceneID scene = MAKESUUUID(renderableShape.unit(), *GetPhysicScenes(renderableShape.unit()).begin());
+				for (unsigned int frame = 0U; frame < JRenderer::numFrames; frame++)
+				{
+					UpdatePhysicsAvatarColor(frame, overrideColor() ? color() : behaviorColors(scene, behavior()));
+				}
+				UpdatePhysicsAvatarTransformation();
 			}
 		);
 	}
@@ -970,6 +1004,12 @@ namespace Physics
 				renderableShape->OnPick = [&] {Editor::SelectTrigger(trigger->SUuuid()); };
 				RegisterTrigger(uuid());
 				avatarBuilt = true;
+				PhysicSceneID scene = MAKESUUUID(renderableShape.unit(), *GetPhysicScenes(renderableShape.unit()).begin());
+				for (unsigned int frame = 0U; frame < JRenderer::numFrames; frame++)
+				{
+					UpdatePhysicsAvatarColor(frame, overrideColor() ? color() : behaviorColors(scene, behavior()));
+				}
+				UpdatePhysicsAvatarTransformation();
 			}
 		);
 	}
@@ -1305,17 +1345,14 @@ namespace Physics
 				p->clean({ PhysicObject::Update_objectMask,PhysicObject::Update_collisionMask });
 			};
 #if defined(_EDITOR)
-		std::map<PhysicsBehavior, XMFLOAT4> behaviorColors =
-		{
-			{ PB_Static, scene->staticColor() },
-			{ PB_Dynamic, scene->dynamicColor() },
-			{ PB_Character, scene->characterColor() },
-			{ PB_Trigger, scene->triggerColor() },
-		};
 
 		auto updateColors = [=](PhysicObjectID p)
 			{
-				p->UpdatePhysicsAvatarColor(frame, p->overrideColor() ? p->color() : behaviorColors.at(p->behavior()));
+				if (!Editor::IsPlaying(id) && (p->dirty(PhysicObject::Update_overrideColor) || p->dirty(PhysicObject::Update_color)))
+				{
+					p->UpdatePhysicsAvatarColor(frame, p->overrideColor() ? p->color() : behaviorColors(scene, p->behavior()));
+					p->clean({ PhysicObject::Update_overrideColor, PhysicObject::Update_color });
+				}
 			};
 #endif
 
@@ -1324,10 +1361,8 @@ namespace Physics
 		std::for_each(phOs.begin(), phOs.end(), checkVelocity);
 		std::for_each(phOs.begin(), phOs.end(), checkPxFilterData);
 #if defined(_EDITOR)
-		if (!Editor::IsPlaying(id))
-		{
-			std::for_each(phOs.begin(), phOs.end(), updateColors);
-		}
+
+		std::for_each(phOs.begin(), phOs.end(), updateColors);
 #endif
 	}
 
@@ -1355,10 +1390,12 @@ namespace Physics
 	{
 		triggerContactSubscribers.insert_or_assign(trigger, callback);
 	}
+
 	void UnregisterTriggerContactCallback(TriggerID trigger)
 	{
 		triggerContactSubscribers.erase(trigger);
 	}
+
 	void CallTriggerContactCallback(TriggerID trigger, SUUUID sceneObject, unsigned int event)
 	{
 		if (!triggerContactSubscribers.contains(trigger)) return;
