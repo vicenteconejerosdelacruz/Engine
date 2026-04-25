@@ -31,16 +31,16 @@ function EnemyHud({ picture, title, hp }) {
 }
 
 function App() {
-  const [hero, setHero] = useState({ hp: 100, name: 'Vicente', img: 'img_venom.webp', score:0 });
-  const [enemy, setEnemy] = useState({ hp: 100, name: '', img: 'enemy.png', active: false });
+  const [hero, setHero] = useState({ hp: 100, name: 'Venom', img: 'heroes/venom.webp', score:0 });
+  const [enemy, setEnemy] = useState({ hp: 100, name: '', img: '', active: false });
   
   useEffect(() => {
     // Escuchar actualizaciones desde C++ (EvaluateScript)
     const handleEngineUpdate = (e) => {
       if (e.detail.type === 'HERO_HP') setHero(prev => ({ ...prev, hp: e.detail.value }));
       if (e.detail.type === 'ENEMY_HP') setEnemy(prev => ({ ...prev, hp: e.detail.value }));
-      if (e.detail.type === 'NEW_ENEMY') setEnemy(prev => ({ ...prev, name: e.detail.name, active: true }));
-      if (e.detail.type === 'REMOVE_ENEMY') setEnemy(prev => ({ ...prev, name: '', active: false }));
+      if (e.detail.type === 'NEW_ENEMY') setEnemy(prev => ({ ...prev, name: e.detail.name, active: true, img:`enemies/${e.detail.name.toLowerCase()}.png` }));
+      if (e.detail.type === 'REMOVE_ENEMY') setEnemy(prev => ({ ...prev, name: '', img:'', active: false }));
       if (e.detail.type === 'SCORE_UPDATE') setHero(prev => ({ ...prev, score: e.detail.value }));
     };
 
