@@ -61,6 +61,22 @@ struct ControllerBinding
 	{
 		return uuid == other.uuid && name == other.name;
 	}
+	bool operator!() const
+	{
+		return uuid.empty();
+	}
+	bool operator!()
+	{
+		return uuid.empty();
+	}
+	explicit operator bool() const
+	{
+		return !uuid.empty();
+	}
+	explicit operator bool()
+	{
+		return !uuid.empty();
+	}
 
 	ControllerBinding& operator=(const ControllerBinding& other)
 	{
