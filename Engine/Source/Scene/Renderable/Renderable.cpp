@@ -127,6 +127,7 @@ namespace Scene
 		}
 
 		updateRotationQ();
+		deleteFrames = JRenderer::numFrames;
 	}
 
 	void Renderable::BindToScene()
@@ -1163,6 +1164,12 @@ namespace Scene
 
 		for (auto renderable : todelete)
 		{
+			if (renderable->deleteFrames > 0U)
+			{
+				renderable->deleteFrames--;
+				continue;
+			}
+
 			auto list = GetPhysicsObjectsBySceneObjectUUID(renderable->SUuuid());
 			for (PhysicObjectID phO : list)
 			{

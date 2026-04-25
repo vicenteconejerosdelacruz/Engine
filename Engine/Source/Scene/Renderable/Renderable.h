@@ -206,6 +206,7 @@ namespace Scene
 
 		//State
 		DeleteHook markedForDelete;
+		unsigned int deleteFrames;
 		bool renderReady = false;
 		bool renderException = false;
 		//Transformation
