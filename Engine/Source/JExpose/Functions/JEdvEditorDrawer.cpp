@@ -570,6 +570,424 @@ void EditorDrawVector(
 		reset(resetUUID);
 }
 
+void EditorDrawStringVector(std::string attribute, std::vector<JObject*>& json)
+{
+	if (json.size() > 1ULL) return;
+
+	auto setValue = [attribute, &json](unsigned int index, std::string value)
+		{
+			for (auto& j : json)
+			{
+				nlohmann::json cpy = j->at(attribute);
+				cpy.at(index) = value;
+				nlohmann::json patch = { { attribute, cpy } };
+				j->JUpdate(patch);
+			}
+		};
+	auto append = [attribute, &json](unsigned int index)
+		{
+			auto push_back = [attribute, &json](std::string value)
+				{
+					for (auto& j : json)
+					{
+						nlohmann::json cpy = j->at(attribute);
+						cpy.push_back("");
+						nlohmann::json patch = { { attribute, cpy } };
+						j->JUpdate(patch);
+					}
+				};
+			auto fit = [attribute, &json](unsigned int index, std::string value)
+				{
+					auto& v0 = json.at(0)->at(attribute);
+					std::vector<std::string> v1;
+					v1.insert(v1.begin(), v0.begin(), std::next(v0.begin(), index));
+					v1.push_back(value);
+					v1.insert(v1.end(), std::next(v0.begin(), index), v0.end());
+
+					for (auto& j : json)
+					{
+						nlohmann::json patch = { { attribute, v1 } };
+						j->JUpdate(patch);
+					}
+				};
+
+			unsigned int size = static_cast<unsigned int>(json.at(0)->at(attribute).size());
+			//only push_back if the vector is empty or if we are gonna push after the last item, otherwise we need to fit the values between
+			if (size == 0U || index == size)
+			{
+				push_back("");
+			}
+			else
+			{
+				fit(index, "");
+			}
+		};
+	auto remove = [attribute, &json](unsigned int index)
+		{
+			for (auto& j : json)
+			{
+				nlohmann::json value = j->at(attribute);
+				value.erase(index);
+				nlohmann::json patch = { { attribute, value } };
+				j->JUpdate(patch);
+			}
+		};
+	auto swap = [attribute, &json](unsigned int from, unsigned int to)
+		{
+			std::string valueFrom = json.at(0)->at(attribute).at(from);
+			std::string valueTo = json.at(0)->at(attribute).at(to);
+			for (auto& j : json)
+			{
+				nlohmann::json value = j->at(attribute);
+				value.at(from) = valueTo;
+				value.at(to) = valueFrom;
+				nlohmann::json patch = { {attribute,value} };
+				j->JUpdate(patch);
+			}
+		};
+	auto reset = [attribute, &json](std::string value)
+		{
+			for (auto& j : json)
+			{
+				j->JUpdate({ {attribute,nlohmann::json::array({ value })} });
+			}
+		};
+	ImGui::PushID(attribute.c_str());
+
+	int removeIndex = -1;
+	std::string resetUUID = "";
+
+	bool allEq = true;
+
+	std::string tableName = "tables-" + attribute + "-table";
+	if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+	{
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text(attribute.c_str());
+		ImGui::TableSetColumnIndex(1);
+
+		bool disabled = !allEq;
+
+		ImGui::DrawItemWithEnabledState([disabled, append]()
+			{
+				ImGui::PushID("PlusTop");
+				if (ImGui::Button(ICON_FA_PLUS, ImVec2(ImGui::GetContentRegionAvail().x, 20.0f)) && !disabled)
+				{
+					append(0);
+				}
+				ImGui::PopID();
+			}
+		, allEq);
+
+		if (allEq)
+		{
+			unsigned int numItems = static_cast<unsigned int>(json.at(0)->at(attribute).size());
+
+			for (unsigned int index = 0U; index < numItems; index++)
+			{
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+
+				//draw the plus button to append items
+				ImGui::PushID((std::string("PlusLeft-") + std::to_string(index)).c_str());
+				if (ImGui::Button(ICON_FA_PLUS))
+				{
+					append(index);
+				}
+				ImGui::PopID();
+
+				//draw the minus button to delete items
+				ImGui::SameLine();
+				ImGui::PushID((std::string("DeleteLeft-") + std::to_string(index)).c_str());
+				if (ImGui::Button(ICON_FA_TIMES))
+				{
+					removeIndex = index;
+				}
+				ImGui::PopID();
+
+				//if there is more than a single item we enable the swap buttons
+				if (numItems > 1U)
+				{
+					bool canSwapUp = index > 0;
+					bool canSwapDown = (index < numItems - 1);
+
+					//draw the swap arrow to move something up
+					ImGui::SameLine();
+					ImGui::PushID((std::string("UpLeft-") + std::to_string(index)).c_str());
+					ImGui::DrawItemWithEnabledState([index, swap, canSwapUp]()
+						{
+							if (ImGui::Button(ICON_FA_ARROW_UP) && (index != 0) && canSwapUp)
+							{
+								swap(index, index - 1);
+							}
+						}
+					, index != 0 && canSwapUp);
+					ImGui::PopID();
+
+					//draw the swap arrow to move something down
+					ImGui::SameLine();
+					ImGui::PushID((std::string("DownLeft-") + std::to_string(index)).c_str());
+					ImGui::DrawItemWithEnabledState([index, numItems, swap, canSwapDown]()
+						{
+							if (ImGui::Button(ICON_FA_ARROW_DOWN) && (index != (numItems - 1)) && canSwapDown)
+							{
+								swap(index, index + 1);
+							}
+						}
+					, index != (numItems - 1) && canSwapDown);
+					ImGui::PopID();
+				}
+
+				//move to second column where the actual list is displayed
+				ImGui::TableSetColumnIndex(1);
+
+				std::string curr_value = json.at(0)->at(attribute).at(index);
+
+				std::string valueId = attribute + "-" + std::to_string(index);
+				ImGui::PushID(valueId.c_str());
+				if (ImGui::InputText("##", &curr_value))
+				{
+					setValue(index, curr_value);
+				}
+				ImGui::PopID();
+			}
+
+			if (numItems >= 1U)
+			{
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(1);
+				ImGui::DrawItemWithEnabledState([disabled, numItems, append]()
+					{
+						ImGui::PushID("PlusBottom");
+						if (ImGui::Button(ICON_FA_PLUS, ImVec2(ImGui::GetContentRegionAvail().x, 20.0f)) && !disabled)
+						{
+							append(numItems);
+						}
+						ImGui::PopID();
+					}
+				, allEq);
+			}
+		}
+
+		ImGui::EndTable();
+	}
+	ImGui::PopID();
+
+	if (removeIndex != -1)
+		remove(removeIndex);
+	if (resetUUID != "")
+		reset(resetUUID);
+}
+
+void EditorDrawFloatVector(std::string attribute, std::vector<JObject*>& json)
+{
+	if (json.size() > 1ULL) return;
+
+	auto setValue = [attribute, &json](unsigned int index, float value)
+		{
+			for (auto& j : json)
+			{
+				nlohmann::json cpy = j->at(attribute);
+				cpy.at(index) = value;
+				nlohmann::json patch = { { attribute, cpy } };
+				j->JUpdate(patch);
+			}
+		};
+	auto append = [attribute, &json](unsigned int index)
+		{
+			auto push_back = [attribute, &json](float value)
+				{
+					for (auto& j : json)
+					{
+						nlohmann::json cpy = j->at(attribute);
+						cpy.push_back(1.0f);
+						nlohmann::json patch = { { attribute, cpy } };
+						j->JUpdate(patch);
+					}
+				};
+			auto fit = [attribute, &json](unsigned int index, float value)
+				{
+					auto& v0 = json.at(0)->at(attribute);
+					std::vector<float> v1;
+					v1.insert(v1.begin(), v0.begin(), std::next(v0.begin(), index));
+					v1.push_back(value);
+					v1.insert(v1.end(), std::next(v0.begin(), index), v0.end());
+
+					for (auto& j : json)
+					{
+						nlohmann::json patch = { { attribute, v1 } };
+						j->JUpdate(patch);
+					}
+				};
+
+			unsigned int size = static_cast<unsigned int>(json.at(0)->at(attribute).size());
+			//only push_back if the vector is empty or if we are gonna push after the last item, otherwise we need to fit the values between
+			if (size == 0U || index == size)
+			{
+				push_back(1.0f);
+			}
+			else
+			{
+				fit(index, 1.0f);
+			}
+		};
+	auto remove = [attribute, &json](unsigned int index)
+		{
+			for (auto& j : json)
+			{
+				nlohmann::json value = j->at(attribute);
+				value.erase(index);
+				nlohmann::json patch = { { attribute, value } };
+				j->JUpdate(patch);
+			}
+		};
+	auto swap = [attribute, &json](unsigned int from, unsigned int to)
+		{
+			float valueFrom = json.at(0)->at(attribute).at(from);
+			float valueTo = json.at(0)->at(attribute).at(to);
+			for (auto& j : json)
+			{
+				nlohmann::json value = j->at(attribute);
+				value.at(from) = valueTo;
+				value.at(to) = valueFrom;
+				nlohmann::json patch = { {attribute,value} };
+				j->JUpdate(patch);
+			}
+		};
+	auto reset = [attribute, &json](float value)
+		{
+			for (auto& j : json)
+			{
+				j->JUpdate({ {attribute,nlohmann::json::array({ value })} });
+			}
+		};
+	ImGui::PushID(attribute.c_str());
+
+	int removeIndex = -1;
+	std::string resetUUID = "";
+
+	bool allEq = true;
+
+	std::string tableName = "tables-" + attribute + "-table";
+	if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+	{
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text(attribute.c_str());
+		ImGui::TableSetColumnIndex(1);
+
+		bool disabled = !allEq;
+
+		ImGui::DrawItemWithEnabledState([disabled, append]()
+			{
+				ImGui::PushID("PlusTop");
+				if (ImGui::Button(ICON_FA_PLUS, ImVec2(ImGui::GetContentRegionAvail().x, 20.0f)) && !disabled)
+				{
+					append(0);
+				}
+				ImGui::PopID();
+			}
+		, allEq);
+
+		if (allEq)
+		{
+			unsigned int numItems = static_cast<unsigned int>(json.at(0)->at(attribute).size());
+
+			for (unsigned int index = 0U; index < numItems; index++)
+			{
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+
+				//draw the plus button to append items
+				ImGui::PushID((std::string("PlusLeft-") + std::to_string(index)).c_str());
+				if (ImGui::Button(ICON_FA_PLUS))
+				{
+					append(index);
+				}
+				ImGui::PopID();
+
+				//draw the minus button to delete items
+				ImGui::SameLine();
+				ImGui::PushID((std::string("DeleteLeft-") + std::to_string(index)).c_str());
+				if (ImGui::Button(ICON_FA_TIMES))
+				{
+					removeIndex = index;
+				}
+				ImGui::PopID();
+
+				//if there is more than a single item we enable the swap buttons
+				if (numItems > 1U)
+				{
+					bool canSwapUp = index > 0;
+					bool canSwapDown = (index < numItems - 1);
+
+					//draw the swap arrow to move something up
+					ImGui::SameLine();
+					ImGui::PushID((std::string("UpLeft-") + std::to_string(index)).c_str());
+					ImGui::DrawItemWithEnabledState([index, swap, canSwapUp]()
+						{
+							if (ImGui::Button(ICON_FA_ARROW_UP) && (index != 0) && canSwapUp)
+							{
+								swap(index, index - 1);
+							}
+						}
+					, index != 0 && canSwapUp);
+					ImGui::PopID();
+
+					//draw the swap arrow to move something down
+					ImGui::SameLine();
+					ImGui::PushID((std::string("DownLeft-") + std::to_string(index)).c_str());
+					ImGui::DrawItemWithEnabledState([index, numItems, swap, canSwapDown]()
+						{
+							if (ImGui::Button(ICON_FA_ARROW_DOWN) && (index != (numItems - 1)) && canSwapDown)
+							{
+								swap(index, index + 1);
+							}
+						}
+					, index != (numItems - 1) && canSwapDown);
+					ImGui::PopID();
+				}
+
+				//move to second column where the actual list is displayed
+				ImGui::TableSetColumnIndex(1);
+
+				float curr_value = json.at(0)->at(attribute).at(index);
+
+				std::string valueId = attribute + "-" + std::to_string(index);
+				ImGui::PushID(valueId.c_str());
+				if (ImGui::InputFloat("##", &curr_value))
+				{
+					setValue(index, curr_value);
+				}
+				ImGui::PopID();
+			}
+
+			if (numItems >= 1U)
+			{
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(1);
+				ImGui::DrawItemWithEnabledState([disabled, numItems, append]()
+					{
+						ImGui::PushID("PlusBottom");
+						if (ImGui::Button(ICON_FA_PLUS, ImVec2(ImGui::GetContentRegionAvail().x, 20.0f)) && !disabled)
+						{
+							append(numItems);
+						}
+						ImGui::PopID();
+					}
+				, allEq);
+			}
+		}
+
+		ImGui::EndTable();
+	}
+	ImGui::PopID();
+
+	if (removeIndex != -1)
+		remove(removeIndex);
+}
+
 void EditorDrawColor3(std::string attribute, JObject* json, std::vector<std::string> labels)
 {
 	auto update = [attribute, &json](auto value)
@@ -1419,6 +1837,24 @@ JEdvEditorDrawerFunction DrawValue<float, jedv_t_float>()
 				ImGui::EndTable();
 			}
 			ImGui::PopID();
+		};
+}
+
+template<>
+JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_string>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			EditorDrawStringVector(attribute, json);
+		};
+}
+
+template<>
+JEdvEditorDrawerFunction DrawVector<float, jedv_t_float>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			EditorDrawFloatVector(attribute, json);
 		};
 }
 

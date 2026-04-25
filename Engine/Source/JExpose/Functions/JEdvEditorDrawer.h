@@ -242,6 +242,10 @@ JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_renderable_vector>();
 template<>
 JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_so_soundeffect_vector>();
 template<>
+JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_string>();
+template<>
+JEdvEditorDrawerFunction DrawVector<float, jedv_t_float>();
+template<>
 JEdvEditorDrawerFunction DrawVector<MeshMaterial, jedv_t_vector>();
 
 struct MaterialSamplerDesc;
