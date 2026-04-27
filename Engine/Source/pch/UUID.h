@@ -12,6 +12,9 @@ using SUUUID = std::tuple<SceneUnitId, JUUID>;
 
 #define MAKESUUUID(id,juuid) std::make_tuple(id,juuid)
 #define FROMSUUUID(tup) std::get<0>(tup),std::get<1>(tup)
+#define SUUUIDSTR(tup) std::string(std::to_string(std::get<0>(tup))+"/"+std::get<1>(tup))
+#define SUUUIDUNIT(tup) std::get<0>(tup)
+#define SUUUIDUUID(tup) std::get<1>(tup)
 
 template<typename T, std::unique_ptr<T>& F(JUUID)>
 struct TUUID {
