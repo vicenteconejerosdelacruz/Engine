@@ -585,6 +585,13 @@ namespace Editor
 					{
 						currentSceneUnitId = nextSceneUnitId;
 					}
+
+					Isolate* isolate = Scripting::GetIsolate();
+					v8::Locker locker(isolate);
+					v8::Isolate::Scope isolate_scope(isolate);
+					v8::HandleScope handle_scope(isolate);
+					isolate->LowMemoryNotification();
+
 					onCloseScene();
 				}
 			);

@@ -113,6 +113,7 @@ namespace Scene
 #if defined(_EDITOR)
 		OnPick = [&] { Editor::SelectRenderable(SUuuid()); };
 #endif
+		SceneObject::Initialize();
 	}
 
 	void Renderable::SetInitialConditions()

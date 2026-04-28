@@ -58,7 +58,7 @@ namespace Scene
 
 		PhysicScene(SceneUnitId id, nlohmann::json& json);
 		~PhysicScene() { Destroy(); }
-		virtual void Initialize();
+		void Initialize() override;
 		virtual void BindToScene();
 		virtual void UnbindFromScene();
 

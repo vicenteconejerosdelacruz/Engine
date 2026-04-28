@@ -70,7 +70,7 @@ namespace Scene
 		void rotationQ(XMVECTOR Q);
 
 		~Trigger() { Destroy(); }
-		virtual void Initialize();
+		void Initialize() override;
 		virtual void BindToScene();
 		virtual void UnbindFromScene();
 

@@ -104,7 +104,7 @@ namespace Scene
 			unit = id;
 			soName = json.at("name");
 		}
-		virtual void Initialize() {};
+		virtual void Initialize();
 		virtual void SetInitialConditions() {};
 		virtual void BindToScene() {};
 		virtual void Bind(JUUID uuid) {}
@@ -134,6 +134,7 @@ namespace Scene
 		virtual v8_context_creators GetV8ContextCreators() { return {}; }
 		virtual v8_functions_creators GetV8FunctionsCreators() { return {}; }
 		virtual std::vector<ScriptBinding> GetScriptBindings() { return {}; }
+		void CreateSceneObjectScriptTemplate();
 
 #if defined(_EDITOR)
 		//Billboard
@@ -151,6 +152,10 @@ namespace Scene
 		SceneUnitId unit;
 		std::string soName;
 		std::vector<std::function<void()>> destroyCallbacks;
+
+		//Scripting
+		Global<ObjectTemplate> objectTemplate;
+		v8_att_context att_context;
 	};
 };
 

@@ -31,14 +31,14 @@ namespace nov8
 		console->Set(context, v8::String::NewFromUtf8(isolate, "log").ToLocalChecked(), FunctionTemplate::New(isolate, ConsoleLog)->GetFunction(context).ToLocalChecked()).Check();;
 		context->Global()->Set(context, v8::String::NewFromUtf8(isolate, "console").ToLocalChecked(), console).Check();
 	}
-	void AddTemplateJsonAttributes(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, v8_templates_creators& attributeCreator, JObject& json, std::string path)
+	void AddTemplateJsonAttributes(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_context& att_context, v8_templates_creators& attributeCreator, JObject& json, std::string path)
 	{
 		for (auto& [attribute, creator] : attributeCreator)
 		{
 			creator(isolate, tmpl, att_context, json, path, attribute);
 		}
 	}
-	void AddTemplateFunctions(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, v8_functions_creators& functionsCreator, JObject& json, std::string objectName, std::string path)
+	void AddTemplateFunctions(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_context& att_context, v8_functions_creators& functionsCreator, JObject& json, std::string objectName, std::string path)
 	{
 		v8_att_functions& att_functions = att_context.att_functions;
 		for (auto& [funcName, func] : functionsCreator)
@@ -122,7 +122,7 @@ namespace nov8
 
 	v8_get v8_get_json_controller(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, std::string attribute)
 	{
-		return[=](Local<Name> property, const PropertyCallbackInfo<Value>& info) mutable
+		return[&att_context, path, flag, jobject, json, attribute](Local<Name> property, const PropertyCallbackInfo<Value>& info) mutable
 			{
 				Isolate* isolate = info.GetIsolate();
 				Local<Context> context = isolate->GetCurrentContext();
@@ -136,10 +136,11 @@ namespace nov8
 					v8_functions_creators functions_creators = controller->GetV8FunctionsCreators();
 
 					Local<ObjectTemplate> controller_tmpl = ObjectTemplate::New(isolate);
+					Global<ObjectTemplate> controller_gtmpl(isolate, controller_tmpl);
 					//Add Attributes
-					AddTemplateJsonAttributes(isolate, controller_tmpl, att_context, template_creators, *controller.get(), path);
+					AddTemplateJsonAttributes(isolate, controller_gtmpl, att_context, template_creators, *controller.get(), path);
 					//Add Functions
-					AddTemplateFunctions(isolate, controller_tmpl, att_context, functions_creators, *controller.get(), name, path);
+					AddTemplateFunctions(isolate, controller_gtmpl, att_context, functions_creators, *controller.get(), name, path);
 
 					Local<Object> controller_obj = controller_tmpl->NewInstance(context).ToLocalChecked();
 					controller_map_obj->Set(context, v8_name(isolate, name), controller_obj);
@@ -151,7 +152,7 @@ namespace nov8
 
 	v8_get v8_get_json_scriptbinding(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, unsigned int idx)
 	{
-		return[=](Local<Name> property, const PropertyCallbackInfo<Value>& info) mutable
+		return[&att_context, path, flag, jobject, json, idx](Local<Name> property, const PropertyCallbackInfo<Value>& info) mutable
 			{
 				using namespace Scene;
 				SceneObject* so = static_cast<SceneObject*>(jobject);
@@ -160,6 +161,7 @@ namespace nov8
 				Isolate* isolate = info.GetIsolate();
 				Local<Context> context = isolate->GetCurrentContext();
 				Local<ObjectTemplate> binding_map_tmpl = ObjectTemplate::New(isolate);
+				Global<ObjectTemplate> binding_map_gtmpl(isolate, binding_map_tmpl);
 
 				v8_att_functions& att_functions = att_context.att_functions;
 
@@ -172,11 +174,11 @@ namespace nov8
 					v8_functions_creators functions_creators = so->GetV8FunctionsCreators();
 
 					//Add toJSON
-					AddFunctionToTemplate(isolate, binding_map_tmpl, att_functions, binded->SUuuid_str(), "toJSON", v8_toJSON(so));
+					AddFunctionToTemplate(isolate, binding_map_gtmpl, att_functions, binded->SUuuid_str(), "toJSON", v8_toJSON(so));
 					//Add Attributes
-					AddTemplateJsonAttributes(isolate, binding_map_tmpl, att_context, template_creators, *binded, path);
+					AddTemplateJsonAttributes(isolate, binding_map_gtmpl, att_context, template_creators, *binded, path);
 					//Add Functions
-					AddTemplateFunctions(isolate, binding_map_tmpl, att_context, functions_creators, *binded, sb.bindingName, path);
+					AddTemplateFunctions(isolate, binding_map_gtmpl, att_context, functions_creators, *binded, sb.bindingName, path);
 				}
 				break;
 				case BT_Controller:
@@ -187,11 +189,11 @@ namespace nov8
 					v8_functions_creators functions_creators = controller->GetV8FunctionsCreators();
 
 					//Add toJSON
-					AddFunctionToTemplate(isolate, binding_map_tmpl, att_functions, controller->uuid(), "toJSON", v8_toJSON(controller.get()));
+					AddFunctionToTemplate(isolate, binding_map_gtmpl, att_functions, controller->uuid(), "toJSON", v8_toJSON(controller.get()));
 					//Add Attributes
-					AddTemplateJsonAttributes(isolate, binding_map_tmpl, att_context, template_creators, *controller.get(), path);
+					AddTemplateJsonAttributes(isolate, binding_map_gtmpl, att_context, template_creators, *controller.get(), path);
 					//Add Functions
-					AddTemplateFunctions(isolate, binding_map_tmpl, att_context, functions_creators, *controller.get(), sb.bindingName, path);
+					AddTemplateFunctions(isolate, binding_map_gtmpl, att_context, functions_creators, *controller.get(), sb.bindingName, path);
 				}
 				break;
 				case BT_PhysicObject:
@@ -202,9 +204,9 @@ namespace nov8
 					v8_functions_creators functions_creators = phO->GetV8FunctionsCreators();
 
 					//Add Attributes
-					AddTemplateJsonAttributes(isolate, binding_map_tmpl, att_context, template_creators, *phO.get(), path);
+					AddTemplateJsonAttributes(isolate, binding_map_gtmpl, att_context, template_creators, *phO.get(), path);
 					//Add Functions
-					AddTemplateFunctions(isolate, binding_map_tmpl, att_context, functions_creators, *phO.get(), sb.bindingName, path);
+					AddTemplateFunctions(isolate, binding_map_gtmpl, att_context, functions_creators, *phO.get(), sb.bindingName, path);
 				}
 				break;
 				}
@@ -222,18 +224,20 @@ namespace nov8
 			};
 	}
 
-	void AddFunctionToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_functions& att_functions, std::string path, std::string functionName, v8_function func)
+	void AddFunctionToTemplate(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_functions& att_functions, std::string path, std::string functionName, v8_function func)
 	{
 		std::string jptr = path + "." + functionName + "()";
 		att_functions.insert_or_assign(jptr, func);
-		tmpl->Set(isolate, functionName.c_str(), FunctionTemplate::New(isolate, v8_call_function, v8_external(isolate, &att_functions.at(jptr))));
+		Local<ObjectTemplate> jtmpl = Local<ObjectTemplate>::New(isolate, tmpl);
+		jtmpl->Set(isolate, functionName.c_str(), FunctionTemplate::New(isolate, v8_call_function, v8_external(isolate, &att_functions.at(jptr))));
 	}
 
-	void AddFunctionToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_functions& att_functions, std::string path, std::string attribute, std::string functionName, v8_function func)
+	void AddFunctionToTemplate(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_functions& att_functions, std::string path, std::string attribute, std::string functionName, v8_function func)
 	{
 		std::string jptr = path + "/" + attribute + "." + functionName + "()";
 		att_functions.insert_or_assign(jptr, func);
-		tmpl->Set(isolate, functionName.c_str(), FunctionTemplate::New(isolate, v8_call_function, v8_external(isolate, &att_functions.at(jptr))));
+		Local<ObjectTemplate> jtmpl = Local<ObjectTemplate>::New(isolate, tmpl);
+		jtmpl->Set(isolate, functionName.c_str(), FunctionTemplate::New(isolate, v8_call_function, v8_external(isolate, &att_functions.at(jptr))));
 	}
 
 	//indexed

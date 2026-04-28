@@ -24,14 +24,14 @@ namespace nov8
 	using v8_idx_set = std::function<void(uint32_t, Local<Value>, const PropertyCallbackInfo<Value>&)>;
 	using v8_idx_qry = std::function<void(uint32_t, const PropertyCallbackInfo<Integer>&)>;
 	using v8_idx_enum = std::function<void(const PropertyCallbackInfo<Array>&)>;
-	using v8_accessor = std::tuple<v8_get, v8_set, Local<Object>>;
+	using v8_accessor = std::tuple<v8_get, v8_set, Global<Object>>;
 	using v8_function = std::function<void(const FunctionCallbackInfo<Value>&)>;
 	using v8_idx_handler = std::tuple<v8_idx_get, v8_idx_set, v8_idx_qry, v8_idx_enum>;
 
-	using v8_att_templates = std::map<std::string, Local<ObjectTemplate>>;
-	using v8_att_accessors = std::map<std::string, v8_accessor>;
+	using v8_att_templates = std::map<std::string, Global<ObjectTemplate>>;
+	using v8_att_accessors = std::map<std::string, std::unique_ptr<v8_accessor>>;
 	using v8_att_functions = std::map<std::string, v8_function>;
-	using v8_att_idx_handlers = std::map<std::string, v8_idx_handler>;
+	using v8_att_idx_handlers = std::map<std::string, std::unique_ptr<v8_idx_handler>>;
 	struct v8_att_context
 	{
 		v8_att_templates att_templates;
@@ -39,7 +39,7 @@ namespace nov8
 		v8_att_functions att_functions;
 		v8_att_idx_handlers att_idx_handlers;
 	};
-	using v8_template_attribute = std::function<void(Isolate*, Local<ObjectTemplate>&, v8_att_context&, JObject&, std::string, std::string)>;
+	using v8_template_attribute = std::function<void(Isolate*, Global<ObjectTemplate>&, v8_att_context&, JObject&, std::string, std::string)>;
 	using v8_context_attribute = std::function<void(Isolate* isolate, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)>;
 	using v8_templates_creators = std::map<std::string, v8_template_attribute>;
 	using v8_functions_creators = std::map<std::string, v8_function>;
@@ -69,8 +69,8 @@ namespace nov8
 	//console.log
 	void ConsoleLog(const FunctionCallbackInfo<Value>& info);
 	void AddConsoleToContext(Isolate* isolate, Local<Context> context);
-	void AddTemplateJsonAttributes(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, v8_templates_creators& attributeCreator, JObject& json, std::string path);
-	void AddTemplateFunctions(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, v8_functions_creators& functionsCreator, JObject& json, std::string objectName, std::string path);
+	void AddTemplateJsonAttributes(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_context& att_context, v8_templates_creators& attributeCreator, JObject& json, std::string path);
+	void AddTemplateFunctions(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_context& att_context, v8_functions_creators& functionsCreator, JObject& json, std::string objectName, std::string path);
 	void AddContextJsonAttributes(Isolate* isolate, Local<Context> context, v8_att_context& att_context, v8_context_creators& attributeCreator, JObject& json, std::string path);
 
 	//utils
@@ -141,8 +141,8 @@ namespace nov8
 			std::apply(func, args);
 			};
 	}
-	void AddFunctionToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_functions& att_functions, std::string path, std::string functionName, v8_function func);
-	void AddFunctionToTemplate(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_functions& att_functions, std::string path, std::string attribute, std::string functionName, v8_function func);
+	void AddFunctionToTemplate(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_functions& att_functions, std::string path, std::string functionName, v8_function func);
+	void AddFunctionToTemplate(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_functions& att_functions, std::string path, std::string attribute, std::string functionName, v8_function func);
 	template<typename T>
 	inline void AddFunctionToObject(Isolate* isolate, Local<Context>& context, v8_att_functions& att_functions, std::string path, std::string name, v8_function func, T& object)
 	{
@@ -491,8 +491,21 @@ namespace nov8
 	{
 		return [=](Local<Name> property, const PropertyCallbackInfo<Value>& info)
 			{
-				Local<Object>& data = std::get<2>(*static_cast<v8_accessor*>(Local<External>::Cast(info.Data())->Value()));
-				info.GetReturnValue().Set(data);
+				Isolate* isolate = info.GetIsolate();
+				v8_accessor* accessor = static_cast<v8_accessor*>(Local<External>::Cast(info.Data())->Value());
+				Global<Object>& global_data = std::get<2>(*accessor);
+
+				if (!global_data.IsEmpty()) {
+					// Esta es la conversión que le faltaba a tu código:
+					Local<Object> local_data = Local<Object>::New(isolate, global_data);
+					info.GetReturnValue().Set(local_data);
+				}
+				else {
+					// Si el global está vacío, devolvemos null o undefined
+					info.GetReturnValue().SetNull();
+				}
+				//Local<Object>& data = std::get<2>(*static_cast<v8_accessor*>(Local<External>::Cast(info.Data())->Value()));
+				//info.GetReturnValue().Set(data);
 			};
 	}
 	template<>
@@ -557,20 +570,42 @@ namespace nov8
 	template<typename T>
 	inline v8_accessor v8_create_accessor(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, std::string attribute, Local<Object> object = Local<Object>())
 	{
+		v8::Isolate* isolate = v8::Isolate::GetCurrent();
+
+		// 2. Creamos el Global vacío
+		v8::Global<v8::Object> global_obj;
+
+		// 3. Si nos pasaron un objeto local, lo hacemos persistente
+		if (!object.IsEmpty()) {
+			global_obj.Reset(isolate, object);
+		}
+
+		// 4. Devolvemos la tupla con el Global (coincidiendo con el nuevo alias)
 		return std::make_tuple(
 			v8_get_json<T>(att_context, path, flag, jobject, json, attribute),
 			v8_set_json<T>(att_context, path, flag, jobject, json, attribute),
-			object
+			std::move(global_obj) // Movemos el global a la tupla
 		);
 	}
 
 	template<typename T>
 	inline v8_accessor v8_create_accessor(v8_att_context& att_context, std::string path, size_t flag, JObject* jobject, nlohmann::json* json, unsigned int idx, Local<Object> object = Local<Object>())
 	{
+		v8::Isolate* isolate = v8::Isolate::GetCurrent();
+
+		// 2. Creamos el Global vacío
+		v8::Global<v8::Object> global_obj;
+
+		// 3. Si nos pasaron un objeto local, lo hacemos persistente
+		if (!object.IsEmpty()) {
+			global_obj.Reset(isolate, object);
+		}
+
+		// 4. Devolvemos la tupla con el Global (coincidiendo con el nuevo alias)
 		return std::make_tuple(
 			v8_get_json<T>(att_context, path, flag, jobject, json, idx),
 			v8_set_json<T>(att_context, path, flag, jobject, json, idx),
-			object
+			std::move(global_obj) // Movemos el global a la tupla
 		);
 	}
 
@@ -641,47 +676,63 @@ namespace nov8
 	template<typename T, size_t flag>
 	struct v8_template
 	{
-		inline static void json_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+		inline static void json_attribute(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 		{
 			v8_att_accessors& att_accessors = att_context.att_accessors;
 			std::string jptr = path + "/" + attribute;
-			att_accessors.insert_or_assign(jptr, v8_create_accessor<T>(att_context, jptr, flag, &json, &json, attribute));
-			tmpl->SetAccessor(v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
+
+			att_accessors.insert_or_assign(jptr, std::make_unique<v8_accessor>(
+				v8_create_accessor<T>(att_context, jptr, flag, &json, &json, attribute)
+			));
+
+			Local<ObjectTemplate> jtmpl = Local<ObjectTemplate>::New(isolate, tmpl);
+			jtmpl->SetAccessor(v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, att_accessors.at(jptr).get()));
 		};
-		inline static void json_enum_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+		inline static void json_enum_attribute(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 		{
 			v8_template<std::string, flag>::json_attribute(isolate, tmpl, att_context, json, path, attribute);
 		}
-		inline static void json_set_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+		inline static void json_set_attribute(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 		{
 			v8_att_accessors& att_accessors = att_context.att_accessors;
-			v8_att_functions& att_functions = att_context.att_functions;
+			std::string jptr = path + "/" + attribute;
 
-			std::string jptr = path + "/" + attribute;
-			att_accessors.insert_or_assign(jptr, v8_create_accessor<std::set<T>>(att_context, jptr, flag, &json, &json, attribute));
-			tmpl->SetAccessor(v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
+			att_accessors.insert_or_assign(jptr, std::make_unique<v8_accessor>(
+				v8_create_accessor<std::set<T>>(att_context, jptr, flag, &json, &json, attribute))
+			);
+			Local<ObjectTemplate> jtmpl = Local<ObjectTemplate>::New(isolate, tmpl);
+			jtmpl->SetAccessor(v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, att_accessors.at(jptr).get()));
 		}
-		inline static void json_vector_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+		inline static void json_vector_attribute(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 		{
 			v8_att_accessors& att_accessors = att_context.att_accessors;
+			std::string jptr = path + "/" + attribute;
 
-			std::string jptr = path + "/" + attribute;
-			att_accessors.insert_or_assign(jptr, v8_create_accessor<std::vector<T>>(att_context, jptr, flag, &json, &json, attribute));
-			tmpl->SetAccessor(v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
+			att_accessors.insert_or_assign(jptr, std::make_unique<v8_accessor>(
+				v8_create_accessor<std::vector<T>>(att_context, jptr, flag, &json, &json, attribute))
+			);
+			Local<ObjectTemplate> jtmpl = Local<ObjectTemplate>::New(isolate, tmpl);
+			jtmpl->SetAccessor(v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, att_accessors.at(jptr).get()));
 		}
-		inline static void json_object_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+		inline static void json_object_attribute(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 		{
 			v8_att_accessors& att_accessors = att_context.att_accessors;
 			std::string jptr = path + "/" + attribute;
-			att_accessors.insert_or_assign(jptr, v8_create_accessor<T>(att_context, jptr, flag, &json, &json, attribute));
-			tmpl->SetAccessor(v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
+			att_accessors.insert_or_assign(jptr, std::make_unique<v8_accessor>(
+				v8_create_accessor<T>(att_context, jptr, flag, &json, &json, attribute))
+			);
+			Local<ObjectTemplate> jtmpl = Local<ObjectTemplate>::New(isolate, tmpl);
+			jtmpl->SetAccessor(v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, att_accessors.at(jptr).get()));
 		}
 	};
+
 	template<size_t flag>
 	struct v8_template<XMFLOAT3, flag>
 	{
-		inline static void json_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+		inline static void json_attribute(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 		{
+			HandleScope handle_scope(isolate);
+
 			v8_att_idx_handlers& att_idx_handlers = att_context.att_idx_handlers;
 			v8_att_functions& att_functions = att_context.att_functions;
 			v8_att_templates& att_templates = att_context.att_templates;
@@ -689,23 +740,36 @@ namespace nov8
 
 			std::string jptr = path + "/" + attribute;
 
-			att_idx_handlers.insert_or_assign(jptr, v8_create_idx_handler<XMFLOAT3>(att_context, jptr, flag, &json, &json, attribute));
+			att_idx_handlers.insert_or_assign(jptr, std::make_unique<v8_idx_handler>(
+				v8_create_idx_handler<XMFLOAT3>(att_context, jptr, flag, &json, &json, attribute))
+			);
+
 			Local<ObjectTemplate> xmf3_idx_tmpl = ObjectTemplate::New(isolate);
-			xmf3_idx_tmpl->SetIndexedPropertyHandler(v8_idx_getter, v8_idx_setter, v8_idx_query, nullptr, v8_idx_enumerator, v8_external(isolate, &att_idx_handlers.at(jptr)));
+			xmf3_idx_tmpl->SetIndexedPropertyHandler(v8_idx_getter, v8_idx_setter, v8_idx_query, nullptr, v8_idx_enumerator, v8_external(isolate, att_idx_handlers.at(jptr).get()));
 
 			std::string jptr_length = jptr + "/length";
-			att_accessors.insert_or_assign(jptr_length, std::make_tuple(v8_fixed_size(3), nullptr, Local<Object>()));
-			xmf3_idx_tmpl->SetAccessor(v8_name(isolate, "length"), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr_length)));
+			att_accessors.insert_or_assign(jptr_length, std::make_unique<v8_accessor>(
+				std::make_tuple(v8_fixed_size(3), nullptr, Global<Object>()))
+			);
+			xmf3_idx_tmpl->SetAccessor(v8_name(isolate, "length"), v8_getter, v8_setter, v8_external(isolate, att_accessors.at(jptr_length).get()));
 
-			AddFunctionToTemplate(isolate, xmf3_idx_tmpl, att_functions, path, attribute, "toJSON", v8_toJSON(&json, attribute));
-			att_templates.insert_or_assign(jptr, xmf3_idx_tmpl);
+			att_templates[jptr].Reset(isolate, xmf3_idx_tmpl);
+			AddFunctionToTemplate(isolate, att_templates.at(jptr), att_functions, path, attribute, "toJSON", v8_toJSON(&json, attribute));
+
+			//Local<ObjectTemplate> parent_tmpl = Local<ObjectTemplate>::New(isolate, tmpl);
+			//parent_tmpl->SetAccessor(
+			//	v8_name(isolate, attribute),
+			//	v8_getter,
+			//	v8_setter,
+			//	v8_external(isolate, att_accessors.at(jptr).get()) // Necesitas haber creado un accessor para 'attribute' antes
+			//);
 		}
 	};
 
 	template<size_t flag>
 	struct v8_template<MeshMaterial, flag>
 	{
-		inline static void json_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+		inline static void json_attribute(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 		{
 			v8_att_templates& att_templates = att_context.att_templates;
 			v8_att_accessors& att_accessors = att_context.att_accessors;
@@ -713,33 +777,42 @@ namespace nov8
 
 			//:/meshMaterial
 			std::string jptr = path + "/" + attribute;
-			Local<ObjectTemplate> meshMaterial_tmpl = ObjectTemplate::New(isolate);
-			att_templates.insert_or_assign(jptr, meshMaterial_tmpl);
-			att_accessors.insert_or_assign(jptr, v8_create_accessor<MeshMaterial>(att_context, jptr, flag, &json, &json, attribute));
+			Local<ObjectTemplate> meshMaterial_tmpl = Local<ObjectTemplate>::New(isolate, tmpl);
+			att_templates[jptr].Reset(isolate, meshMaterial_tmpl);
+			att_accessors.insert_or_assign(jptr, std::make_unique<v8_accessor>(
+				v8_create_accessor<MeshMaterial>(att_context, jptr, flag, &json, &json, attribute))
+			);
 
 			//:/meshMaterial/material
 			std::string material_jptr = jptr + "/material";
-			att_accessors.insert_or_assign(material_jptr, v8_create_accessor<MeshMaterial>(att_context, material_jptr, flag, &json, &json.at(attribute), "material"));
-			meshMaterial_tmpl->SetAccessor(v8_name(isolate, "material"), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(material_jptr)));
-			AddFunctionToTemplate(isolate, meshMaterial_tmpl, att_functions, jptr, "material", "toJSON", v8_toJSON(&json, "material"));
+			att_accessors.insert_or_assign(material_jptr, std::make_unique<v8_accessor>(
+				v8_create_accessor<MeshMaterial>(att_context, material_jptr, flag, &json, &json.at(attribute), "material"))
+			);
+			meshMaterial_tmpl->SetAccessor(v8_name(isolate, "material"), v8_getter, v8_setter, v8_external(isolate, att_accessors.at(material_jptr).get()));
+			AddFunctionToTemplate(isolate, att_templates.at(jptr), att_functions, jptr, "material", "toJSON", v8_toJSON(&json, "material"));
 
 			//:/meshMaterial/mesh
 			std::string mesh_jptr = jptr + "/mesh";
 			Local<ObjectTemplate> meshMaterial_mesh_tmpl = ObjectTemplate::New(isolate);
-			att_templates.insert_or_assign(mesh_jptr, meshMaterial_mesh_tmpl);
-			att_accessors.insert_or_assign(mesh_jptr, v8_create_accessor<MeshMaterial>(att_context, mesh_jptr, flag, &json, &json.at(attribute), "mesh"));
+			att_templates[mesh_jptr].Reset(isolate, meshMaterial_mesh_tmpl);
+			att_accessors.insert_or_assign(mesh_jptr, std::make_unique<v8_accessor>(
+				v8_create_accessor<MeshMaterial>(att_context, mesh_jptr, flag, &json, &json.at(attribute), "mesh"))
+			);
 
 			//:/meshMaterial/mesh/primitive
 			std::string primitive_jptr = mesh_jptr + "/primitive";
-			att_accessors.insert_or_assign(primitive_jptr, v8_create_accessor<MeshMaterial>(att_context, primitive_jptr, flag, &json, &json.at(attribute).at("mesh"), "primitive"));
-			meshMaterial_mesh_tmpl->SetAccessor(v8_name(isolate, "primitive"), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(primitive_jptr)));
-			AddFunctionToTemplate(isolate, meshMaterial_tmpl, att_functions, mesh_jptr, "primitive", "toJSON", v8_toJSON(&json.at(attribute).at("mesh"), "primitive"));
+			att_accessors.insert_or_assign(primitive_jptr, std::make_unique<v8_accessor>(
+				v8_create_accessor<MeshMaterial>(att_context, primitive_jptr, flag, &json, &json.at(attribute).at("mesh"), "primitive"))
+			);
+			meshMaterial_mesh_tmpl->SetAccessor(v8_name(isolate, "primitive"), v8_getter, v8_setter, v8_external(isolate, att_accessors.at(primitive_jptr).get()));
+			AddFunctionToTemplate(isolate, att_templates.at(jptr), att_functions, mesh_jptr, "primitive", "toJSON", v8_toJSON(&json.at(attribute).at("mesh"), "primitive"));
 		}
 	};
+
 	template<size_t flag>
 	struct v8_template<Game::Controller, flag>
 	{
-		inline static void json_object_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+		inline static void json_object_attribute(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 		{
 			v8_att_templates& att_templates = att_context.att_templates;
 			v8_att_accessors& att_accessors = att_context.att_accessors;
@@ -748,23 +821,28 @@ namespace nov8
 			//:/controllers
 			std::string jptr = path + "/" + attribute;
 			Local<ObjectTemplate> controllers_tmpl = ObjectTemplate::New(isolate);
-			att_templates.insert_or_assign(jptr, controllers_tmpl);
-			att_accessors.insert_or_assign(jptr, v8_create_accessor<Game::Controller>(att_context, jptr, flag, &json, &json, attribute));
+			att_templates[jptr].Reset(isolate, controllers_tmpl);
+			att_accessors.insert_or_assign(jptr, std::make_unique<v8_accessor>(
+				v8_create_accessor<Game::Controller>(att_context, jptr, flag, &json, &json, attribute))
+			);
 
 			//:/controllers/[controller_name]
 			for (auto& [name, uuid] : json.at(attribute).items())
 			{
 				std::string controller_jptr = jptr + "/" + name;
 				Local<ObjectTemplate> controller_inst_tmpl = ObjectTemplate::New(isolate);
-				att_templates.insert_or_assign(controller_jptr, controller_inst_tmpl);
-				att_accessors.insert_or_assign(controller_jptr, v8_create_accessor<Game::Controller>(att_context, controller_jptr, flag, &json, &json.at(attribute), name));
+				att_templates[controller_jptr].Reset(isolate, controller_inst_tmpl);
+				att_accessors.insert_or_assign(controller_jptr, std::make_unique<v8_accessor>(
+					v8_create_accessor<Game::Controller>(att_context, controller_jptr, flag, &json, &json.at(attribute), name))
+				);
 			}
 		}
 	};
+
 	template<size_t flag>
 	struct v8_template<ScriptBinding, flag>
 	{
-		inline static void json_vector_attribute(Isolate* isolate, Local<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
+		inline static void json_vector_attribute(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 		{
 			v8_att_templates& att_templates = att_context.att_templates;
 			v8_att_accessors& att_accessors = att_context.att_accessors;
@@ -775,11 +853,14 @@ namespace nov8
 				ScriptBinding sb(json.at(attribute).at(i));
 				std::string binding_jptr = path + "/" + attribute + "/" + sb.bindingName;
 				Local<ObjectTemplate> binding_tmpl = ObjectTemplate::New(isolate);
-				att_templates.insert_or_assign(binding_jptr, binding_tmpl);
-				att_accessors.insert_or_assign(binding_jptr, v8_create_accessor<ScriptBinding>(att_context, binding_jptr, flag, &json, &json.at(attribute), i));
+				att_templates[binding_jptr].Reset(isolate, binding_tmpl);
+				att_accessors.insert_or_assign(binding_jptr, std::make_unique<v8_accessor>(
+					v8_create_accessor<ScriptBinding>(att_context, binding_jptr, flag, &json, &json.at(attribute), i))
+				);
 			}
 		}
 	};
+
 
 	//these functions are crafted for JObject derivations for the Local<Object>
 	template<typename T, size_t flag>
@@ -791,6 +872,7 @@ namespace nov8
 		inline static void json_vector_attribute(Isolate* isolate, v8_att_context& att_context, JObject& json, std::string path, std::string attribute) {}
 		inline static void json_object_attribute(Isolate* isolate, v8_att_context& att_context, JObject& json, std::string path, std::string attribute) {}
 	};
+
 	template<size_t flag>
 	struct v8_context<XMFLOAT3, flag>
 	{
@@ -800,14 +882,18 @@ namespace nov8
 			v8_att_accessors& att_accessors = att_context.att_accessors;
 			std::string jptr = path + "/" + attribute;
 
-			Local<Object> inst = att_templates.at(jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
+			v8::Local<v8::ObjectTemplate> local_tpl = v8::Local<v8::ObjectTemplate>::New(isolate, att_templates.at(jptr));
+			Local<Object> inst = local_tpl->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
 			Local<Array> dummyArray = Array::New(isolate, 0);
 			inst->SetPrototype(isolate->GetCurrentContext(), dummyArray);
 
-			att_accessors.insert_or_assign(jptr, v8_create_accessor<XMFLOAT3>(att_context, jptr, flag, &json, &json, attribute, inst));
-			isolate->GetCurrentContext()->Global()->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
+			att_accessors.insert_or_assign(jptr, std::make_unique<v8_accessor>(
+				v8_create_accessor<XMFLOAT3>(att_context, jptr, flag, &json, &json, attribute, inst))
+			);
+			isolate->GetCurrentContext()->Global()->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, att_accessors.at(jptr).get()));
 		}
 	};
+
 	template<size_t flag>
 	struct v8_context<MeshMaterial, flag>
 	{
@@ -818,15 +904,21 @@ namespace nov8
 
 			//:/meshMaterial
 			std::string jptr = path + "/" + attribute;
-			Local<Object> inst = att_templates.at(jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
-			att_accessors.insert_or_assign(jptr, v8_create_accessor<MeshMaterial>(att_context, jptr, flag, &json, &json, attribute, inst));
-			isolate->GetCurrentContext()->Global()->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
+			Local<ObjectTemplate> local_jtpl = Local<ObjectTemplate>::New(isolate, att_templates.at(jptr));
+			Local<Object> inst = local_jtpl->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
+			att_accessors.insert_or_assign(jptr, std::make_unique<v8_accessor>(
+				v8_create_accessor<MeshMaterial>(att_context, jptr, flag, &json, &json, attribute, inst))
+			);
+			isolate->GetCurrentContext()->Global()->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, att_accessors.at(jptr).get()));
 
 			//:/meshMaterial/mesh
 			std::string mesh_jptr = jptr + "/mesh";
-			Local<Object> mesh_inst = att_templates.at(mesh_jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
-			att_accessors.insert_or_assign(mesh_jptr, v8_create_accessor<MeshMaterial>(att_context, mesh_jptr, flag, &json, &json, attribute, mesh_inst));
-			inst->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, "mesh"), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(mesh_jptr)));
+			Local<ObjectTemplate> local_mesh_jtpl = Local<ObjectTemplate>::New(isolate, att_templates.at(mesh_jptr));
+			Local<Object> mesh_inst = local_mesh_jtpl->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
+			att_accessors.insert_or_assign(mesh_jptr, std::make_unique<v8_accessor>(
+				v8_create_accessor<MeshMaterial>(att_context, mesh_jptr, flag, &json, &json, attribute, mesh_inst))
+			);
+			inst->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, "mesh"), v8_getter, v8_setter, v8_external(isolate, att_accessors.at(mesh_jptr).get()));
 		}
 	};
 
@@ -840,20 +932,27 @@ namespace nov8
 
 			//:/controllers
 			std::string jptr = path + "/" + attribute;
-			Local<Object> inst = att_templates.at(jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
-			att_accessors.insert_or_assign(jptr, v8_create_accessor<Game::Controller>(att_context, jptr, flag, &json, &json, attribute, inst));
-			isolate->GetCurrentContext()->Global()->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(jptr)));
+			Local<ObjectTemplate> local_jtpl = Local<ObjectTemplate>::New(isolate, att_templates.at(jptr));
+			Local<Object> inst = local_jtpl->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
+			att_accessors.insert_or_assign(jptr, std::make_unique<v8_accessor>(
+				v8_create_accessor<Game::Controller>(att_context, jptr, flag, &json, &json, attribute, inst))
+			);
+			isolate->GetCurrentContext()->Global()->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, attribute), v8_getter, v8_setter, v8_external(isolate, att_accessors.at(jptr).get()));
 
 			//:/controllers/[controller_name]
 			for (auto& [name, uuid] : json.at(attribute).items())
 			{
 				std::string controller_jptr = jptr + "/" + name;
-				Local<Object> controller_inst = att_templates.at(controller_jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
-				att_accessors.insert_or_assign(controller_jptr, v8_create_accessor<Game::Controller>(att_context, controller_jptr, flag, &json, &json, attribute, controller_inst));
-				inst->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, name), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(controller_jptr)));
+				Local<ObjectTemplate> controller_jtpl = Local<ObjectTemplate>::New(isolate, att_templates.at(controller_jptr));
+				Local<Object> controller_inst = controller_jtpl->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
+				att_accessors.insert_or_assign(controller_jptr, std::make_unique<v8_accessor>(
+					v8_create_accessor<Game::Controller>(att_context, controller_jptr, flag, &json, &json, attribute, controller_inst))
+				);
+				inst->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, name), v8_getter, v8_setter, v8_external(isolate, att_accessors.at(controller_jptr).get()));
 			}
 		}
 	};
+
 	template<size_t flag>
 	struct v8_context<ScriptBinding, flag>
 	{
@@ -868,9 +967,12 @@ namespace nov8
 				ScriptBinding sb(json.at(attribute).at(i));
 				std::string binding_jptr = path + "/" + attribute + "/" + sb.bindingName;
 
-				Local<Object> inst = att_templates.at(binding_jptr)->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
-				att_accessors.insert_or_assign(binding_jptr, v8_create_accessor<ScriptBinding>(att_context, binding_jptr, flag, &json, &json.at(attribute), i, inst));
-				isolate->GetCurrentContext()->Global()->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, sb.bindingName), v8_getter, v8_setter, v8_external(isolate, &att_accessors.at(binding_jptr)));
+				Local<ObjectTemplate> binding_jtpl = Local<ObjectTemplate>::New(isolate, att_templates.at(binding_jptr));
+				Local<Object> inst = binding_jtpl->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
+				att_accessors.insert_or_assign(binding_jptr, std::make_unique<v8_accessor>(
+					v8_create_accessor<ScriptBinding>(att_context, binding_jptr, flag, &json, &json.at(attribute), i, inst))
+				);
+				isolate->GetCurrentContext()->Global()->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, sb.bindingName), v8_getter, v8_setter, v8_external(isolate, att_accessors.at(binding_jptr).get()));
 			}
 		}
 	};

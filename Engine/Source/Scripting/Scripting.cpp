@@ -52,22 +52,25 @@ namespace Scripting
 		return isolate;
 	}
 
-	Local<Context> CreateSceneObjectScriptContext(Isolate* isolate, SceneObject* so, v8_att_context& att_context)
+	void CreateSceneObjectScriptTemplate(Isolate* isolate, Global<ObjectTemplate>& tmpl, SceneObject* so, v8_att_context& att_context)
 	{
-		Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
-
 		v8_att_functions& att_functions = att_context.att_functions;
 
 		std::string suuuid_str = so->SUuuid_str();
-		AddFunctionToTemplate(isolate, global, att_functions, suuuid_str, "toJSON", v8_toJSON(so));
+		AddFunctionToTemplate(isolate, tmpl, att_functions, suuuid_str, "toJSON", v8_toJSON(so));
 
-		v8_templates_creators templateAttributeCreator = GetSceneObjectV8TemplatesCreators(so->SUuuid());
-		v8_context_creators contextAttributeCreator = GetSceneObjectV8ContextCreators(so->SUuuid());
+		v8_templates_creators templateAttributeCreator = so->GetV8TemplatesCreators();
+		AddTemplateJsonAttributes(isolate, tmpl, att_context, templateAttributeCreator, *so, suuuid_str);
+	}
 
-		AddTemplateJsonAttributes(isolate, global, att_context, templateAttributeCreator, *so, suuuid_str);
-		Local<Context> context = Context::New(isolate, nullptr, global);
+	Local<Context> CreateSceneObjectScriptContext(Isolate* isolate, Local<ObjectTemplate>& tmpl, SceneObject* so, v8_att_context& att_context)
+	{
+		Local<Context> context = Context::New(isolate, nullptr, tmpl);
 		v8::Context::Scope context_scope(context);
 		AddConsoleToContext(isolate, context);
+
+		std::string suuuid_str = so->SUuuid_str();
+		v8_context_creators contextAttributeCreator = so->GetV8ContextCreators();
 		AddContextJsonAttributes(isolate, context, att_context, contextAttributeCreator, *so, suuuid_str);
 
 		return context;
@@ -76,18 +79,22 @@ namespace Scripting
 	void RunScript(std::string script, SUUUID suuuid)
 	{
 #if defined(_EDITOR)
-		if (!IsPlaying(std::get<0>(suuuid)) || IsPaused(std::get<0>(suuuid)))
+		SceneUnitId id = SUUUIDUNIT(suuuid);
+		if (!IsPlaying(id) || IsPaused(id))
 		{
 			return;
 		}
 #endif
 		if (script.empty()) return;
 
+		Locker locker(isolate);
 		Isolate::Scope isolate_scope(isolate);
 		HandleScope handle_scope(isolate);
 
-		v8_att_context att_context;
-		Local<Context> context = CreateSceneObjectScriptContext(isolate, GetSceneObjectPointer(suuuid), att_context);
+		SceneObject* so = GetSceneObjectPointer(suuuid);
+
+		Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
+		Local<Context> context = CreateSceneObjectScriptContext(isolate, global, so, so->att_context);
 
 		Context::Scope context_scope(context);
 

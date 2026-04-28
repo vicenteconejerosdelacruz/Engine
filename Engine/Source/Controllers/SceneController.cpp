@@ -72,7 +72,7 @@ namespace Scene
 #include <SceneControllerAtt.h>
 #include <JEnd.h>
 
-		//CreatePhysicsScene(SUuuid());
+		SceneObject::Initialize();
 	}
 
 	void SceneController::BindToScene()

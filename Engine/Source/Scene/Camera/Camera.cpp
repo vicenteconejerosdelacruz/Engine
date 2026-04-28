@@ -146,6 +146,7 @@ namespace Scene
 			CreateShadowMapsConstantsBuffer();
 		}
 		SetInitialConditions();
+		SceneObject::Initialize();
 	}
 
 	void Camera::SetInitialConditions()

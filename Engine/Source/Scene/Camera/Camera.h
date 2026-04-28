@@ -124,7 +124,7 @@ namespace Scene {
 		void ResizePasses(unsigned int width, unsigned int height);
 		void UpdateProjection();
 
-		virtual void Initialize();
+		void Initialize() override;
 		virtual void SetInitialConditions();
 		virtual void BindToScene();
 		virtual void Bind(JUUID uuid);

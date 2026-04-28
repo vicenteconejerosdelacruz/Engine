@@ -87,7 +87,7 @@ namespace Scene
 		void rotationQ(XMVECTOR Q);
 		XMMATRIX world();
 
-		virtual void Initialize();
+		void Initialize() override;
 		virtual void SetInitialConditions();
 		virtual void BindToScene();
 		virtual void Bind(JUUID uuid);

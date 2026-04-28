@@ -186,7 +186,7 @@ namespace Scene {
 		XMVECTOR fw();
 
 		//CREATE
-		virtual void Initialize();
+		void Initialize() override;
 		virtual void SetInitialConditions();
 		virtual void BindToScene();
 		void BindCameras();

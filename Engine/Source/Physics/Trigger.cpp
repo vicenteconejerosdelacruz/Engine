@@ -122,6 +122,7 @@ namespace Scene
 #include <TrackUUID/JInsert.h>
 #include <TriggerAtt.h>
 #include <JEnd.h>
+		SceneObject::Initialize();
 	}
 
 	void Trigger::BindToScene()
@@ -188,11 +189,37 @@ namespace Scene
 	void Trigger::OnTriggerEvent(SUUUID sceneObject, unsigned int event)
 	{
 		using namespace Scripting;
+		using namespace nov8;
+
+		auto v8Bind = [this](std::tuple<unsigned int, ScriptBinding> sbT)
+			{
+				Isolate* isolate = Scripting::GetIsolate();
+				Locker locker(isolate);
+				Isolate::Scope isolate_scope(isolate);
+				HandleScope handle_scope(isolate);
+
+				v8_att_templates& att_templates = this->att_context.att_templates;
+				v8_att_accessors& att_accessors = this->att_context.att_accessors;
+
+				unsigned int id = std::get<0>(sbT);
+				ScriptBinding sb = std::get<1>(sbT);
+
+				//:[bindingName]
+				std::string path = std::to_string(this->unit) + "/" + this->Juuid();
+				std::string attribute = "bindings";
+				std::string binding_jptr = path + "/" + attribute + "/" + sb.bindingName;
+				Local<ObjectTemplate> binding_tmpl = ObjectTemplate::New(isolate);
+				att_templates[binding_jptr].Reset(isolate, binding_tmpl);
+				att_accessors.insert_or_assign(binding_jptr, std::make_unique<v8_accessor>(
+					v8_create_accessor<ScriptBinding>(this->att_context, binding_jptr, Trigger::Update_bindings, this, &this->at(attribute), id))
+				);
+			};
+
+		std::vector<ScriptBinding> current_bindings = bindings();
 		SceneObject* so = GetSceneObjectPointer(sceneObject);
+		std::vector<ScriptBinding> extra_bindings = so->GetScriptBindings();
+		std::vector<std::tuple<unsigned int, ScriptBinding>> v8_bindings;
 
-		auto current_bindings = bindings();
-
-		auto extra_bindings = so->GetScriptBindings();
 		bool add_extra = false;
 		if (extra_bindings.size() > 0ULL)
 		{
@@ -202,14 +229,24 @@ namespace Scene
 					return sb.bindingName;
 				}
 			);
+			unsigned int idx = static_cast<unsigned int>(skips.size());
 			for (auto& sb : extra_bindings)
 			{
 				if (skips.contains(sb.bindingName))
 					continue;
+
 				current_bindings.push_back(sb);
+				v8_bindings.push_back(std::make_tuple(idx, sb));
 				add_extra = true;
 			}
-			bindings(current_bindings);
+			if (add_extra)
+			{
+				bindings(current_bindings);
+				for (auto& v8b : v8_bindings)
+				{
+					v8Bind(v8b);
+				}
+			}
 		}
 
 		if (event & PxPairFlag::eNOTIFY_TOUCH_FOUND)

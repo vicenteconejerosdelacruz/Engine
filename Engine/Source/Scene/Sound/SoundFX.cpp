@@ -110,6 +110,7 @@ namespace Scene
 		}
 #endif
 		SetInitialConditions();
+		SceneObject::Initialize();
 	}
 
 	void SoundFX::SetInitialConditions()

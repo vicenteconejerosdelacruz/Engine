@@ -56,7 +56,7 @@ namespace Scene
 
 		SceneController(SceneUnitId id, nlohmann::json& json);
 		~SceneController() { Destroy(); }
-		virtual void Initialize();
+		void Initialize() override;
 		virtual void BindToScene();
 		virtual void UnbindFromScene();
 

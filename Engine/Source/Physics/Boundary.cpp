@@ -92,6 +92,7 @@ namespace Scene
 #include <BoundaryAtt.h>
 #include <JEnd.h>
 		updateRotationQ();
+		SceneObject::Initialize();
 	}
 
 	void Boundary::BindToScene()

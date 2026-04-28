@@ -92,6 +92,7 @@ namespace Scene
 #include <JEnd.h>
 
 		CreatePhysicsScene(SUuuid());
+		SceneObject::Initialize();
 	}
 
 	void PhysicScene::BindToScene()

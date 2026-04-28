@@ -64,7 +64,7 @@ namespace Scene
 
 		Boundary(SceneUnitId id, nlohmann::json& json);
 		~Boundary() { Destroy(); }
-		virtual void Initialize();
+		void Initialize() override;
 		virtual void BindToScene();
 		virtual void UnbindFromScene();
 
