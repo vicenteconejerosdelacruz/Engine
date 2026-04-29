@@ -34,6 +34,13 @@ namespace Scene
 	void SceneObject::Destroy()
 	{
 		using namespace v8;
+
+		auto& scene = GetSceneUnit(unit);
+		if (!scene->MarkedForDelete())
+		{
+			scene->EraseFromScriptingSceneTemplate(this);
+		}
+
 		Isolate* isolate = Scripting::GetIsolate();
 		Locker locker(isolate);
 		Isolate::Scope isolate_scope(isolate);

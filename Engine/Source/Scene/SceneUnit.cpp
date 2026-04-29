@@ -78,6 +78,7 @@ namespace Scene
 
 	void SceneUnit::DestroySceneObjects()
 	{
+		ClearScriptingSceneTemplate();
 		DestroyTriggers(id);
 		DestroyBoundaries(id);
 		DestroyRenderables(id);
@@ -272,4 +273,103 @@ namespace Scene
 		}
 	}
 #endif
+
+	void SceneUnit::CreateScriptingSceneTemplate()
+	{
+		using namespace v8;
+		using namespace nov8;
+
+		Isolate* isolate = Scripting::GetIsolate();
+		Locker locker(isolate);
+		Isolate::Scope isolate_scope(isolate);
+		HandleScope handle_scope(isolate);
+
+		Local<ObjectTemplate> localSceneTemplate = ObjectTemplate::New(isolate);
+		sceneTemplate.Reset(isolate, localSceneTemplate);
+
+		for (auto& [type, uuidset] : sceneObjects)
+		{
+			Local<ObjectTemplate> localContainerTemplate = ObjectTemplate::New(isolate);
+			containersTemplates[type].Reset(isolate, localContainerTemplate);
+
+			std::string containerName = SceneObjectTypeJsonContainer.at(type);
+			localSceneTemplate->Set(v8_name(isolate, containerName), localContainerTemplate);
+
+			for (auto& uuid : uuidset)
+			{
+				SceneObject* so = GetSceneObjectPointer(MAKESUUUID(id, uuid));
+				if (!so || so->objectTemplate.IsEmpty()) continue;
+
+				Local<ObjectTemplate> localSOTemplate = Local<ObjectTemplate>::New(isolate, so->objectTemplate);
+				localContainerTemplate->Set(v8_name(isolate, so->soName), localSOTemplate);
+			}
+		}
+	}
+
+	void SceneUnit::ClearScriptingSceneTemplate()
+	{
+		if (!sceneTemplate.IsEmpty()) {
+			Isolate* isolate = Scripting::GetIsolate();
+			Locker locker(isolate);
+			Isolate::Scope isolate_scope(isolate);
+
+			sceneTemplate.Reset();
+		}
+	}
+
+	Global<ObjectTemplate>& SceneUnit::GetScriptingSceneTemplate()
+	{
+		return sceneTemplate;
+	}
+
+	void SceneUnit::AddToScriptingSceneTemplate(SceneObject* so)
+	{
+		using namespace v8;
+		using namespace nov8;
+
+		Isolate* isolate = Scripting::GetIsolate();
+		Locker locker(isolate);
+		Isolate::Scope isolate_scope(isolate);
+		HandleScope handle_scope(isolate);
+
+		SceneObjectType type = so->JType();
+		Local<ObjectTemplate> container = Local<ObjectTemplate>::New(isolate, containersTemplates.at(type));
+		Local<ObjectTemplate> item = Local<ObjectTemplate>::New(isolate, so->objectTemplate);
+		container->Set(v8_name(isolate, so->soName), item);
+	}
+
+	void SceneUnit::EraseFromScriptingSceneTemplate(SceneObject* so)
+	{
+		using namespace v8;
+
+		Isolate* isolate = Scripting::GetIsolate();
+		Locker locker(isolate);
+		Isolate::Scope isolate_scope(isolate);
+		HandleScope handle_scope(isolate);
+
+		SceneObjectType type = so->JType();
+
+		if (!containersTemplates.count(type))
+			return;
+
+		Local<ObjectTemplate> newContainerTmpl = ObjectTemplate::New(isolate);
+		containersTemplates[type].Reset(isolate, newContainerTmpl);
+
+		Local<ObjectTemplate> localSceneTmpl = Local<ObjectTemplate>::New(isolate, sceneTemplate);
+		std::string containerName = SceneObjectTypeJsonContainer.at(type);
+		localSceneTmpl->Set(v8_name(isolate, containerName), newContainerTmpl);
+
+		auto& uuidset = sceneObjects.at(type);
+		for (auto& uuid : uuidset)
+		{
+			if (uuid == so->Juuid()) continue;
+
+			SceneObject* otherSo = GetSceneObjectPointer(MAKESUUUID(id, uuid));
+			if (!otherSo || otherSo->objectTemplate.IsEmpty())
+				continue;
+
+			Local<ObjectTemplate> soTmpl = Local<ObjectTemplate>::New(isolate, otherSo->objectTemplate);
+			newContainerTmpl->Set(v8_name(isolate, otherSo->soName), soTmpl);
+		}
+	}
 };

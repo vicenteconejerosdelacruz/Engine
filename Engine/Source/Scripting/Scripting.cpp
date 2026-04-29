@@ -76,6 +76,14 @@ namespace Scripting
 		return context;
 	}
 
+	void AddSceneHierarchyToContext(Isolate* isolate, Local<Context>& context, SceneUnitId id)
+	{
+		auto& scene = GetSceneUnit(id);
+		Local<ObjectTemplate> sceneTemplate = Local<ObjectTemplate>::New(isolate, scene->GetScriptingSceneTemplate());
+		Local<Object> sceneInstance = sceneTemplate->NewInstance(context).ToLocalChecked();
+		context->Global()->Set(context, v8::String::NewFromUtf8(isolate, "scene").ToLocalChecked(), sceneInstance).Check();
+	}
+
 	void RunScript(std::string script, SUUUID suuuid)
 	{
 #if defined(_EDITOR)
@@ -95,6 +103,7 @@ namespace Scripting
 
 		Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
 		Local<Context> context = CreateSceneObjectScriptContext(isolate, global, so, so->att_context);
+		AddSceneHierarchyToContext(isolate, context, id);
 
 		Context::Scope context_scope(context);
 

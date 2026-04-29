@@ -46,6 +46,7 @@ namespace Game
 namespace Scene
 {
 	std::map<SceneUnitId, std::unique_ptr<SceneUnit>> scenesUnits;
+	std::map<SceneUnitId, std::unique_ptr<std::atomic_uint>> levelThreadsStack;
 	std::map<SceneUnitId, SceneUnitId> attachedUnits; //<Attached, Destination>
 	std::set<SceneUnitId> renderableSceneUnits;
 	std::map<size_t, CommandsProcessor> loadingProcessor;
@@ -98,14 +99,31 @@ namespace Scene
 	{
 		using namespace Scene::Level;
 
-		std::thread levelThread([](std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
-			{
-				SceneUnitId id = nostd::threadIdHash();
+		SceneUnitId id = nostd::threadIdHash();
 
+		levelThreadsStack.insert_or_assign(id, std::make_unique<std::atomic_uint>(1U));
+
+		std::thread levelThread([id](std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
+			{
 				auto& scene = CreateScene(id, filename, JRenderer::numFrames);
 
 				LoadLevel(scene, filename, data, progress);
-				levelLoaded(id);
+
+				if (levelThreadsStack.at(id)->fetch_sub(1U) == 1U)
+				{
+					scene->CreateScriptingSceneTemplate();
+					levelLoaded(id);
+				}
+				else
+				{
+					unsigned int current;
+					while ((current = levelThreadsStack.at(id)->load()) != 0U)
+					{
+						levelThreadsStack.at(id)->wait(current);
+					}
+					scene->CreateScriptingSceneTemplate();
+					levelLoaded(id);
+				}
 			}, filename, data, levelLoaded, progress
 		);
 		levelThread.detach();
@@ -132,11 +150,19 @@ namespace Scene
 	{
 		using namespace Scene::Level;
 
-		std::thread levelThread([](SceneUnitId parentUnit, std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
+		levelThreadsStack.at(parentUnit)->fetch_add(1U);
+
+		std::thread levelThread([=](SceneUnitId parentUnit, std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 			{
 				auto& scene = GetSceneUnit(parentUnit);
 
 				LoadLevel(scene, filename, data, progress);
+
+				if (levelThreadsStack.at(parentUnit)->fetch_sub(1U) == 1)
+				{
+					levelThreadsStack.at(parentUnit)->notify_all();
+				}
+
 				levelLoaded(parentUnit);
 			}, parentUnit, filename, data, levelLoaded, progress
 		);

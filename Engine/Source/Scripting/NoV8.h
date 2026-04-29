@@ -771,6 +771,7 @@ namespace nov8
 	{
 		inline static void json_attribute(Isolate* isolate, Global<ObjectTemplate>& tmpl, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 		{
+			/*
 			v8_att_templates& att_templates = att_context.att_templates;
 			v8_att_accessors& att_accessors = att_context.att_accessors;
 			v8_att_functions& att_functions = att_context.att_functions;
@@ -806,6 +807,7 @@ namespace nov8
 			);
 			meshMaterial_mesh_tmpl->SetAccessor(v8_name(isolate, "primitive"), v8_getter, v8_setter, v8_external(isolate, att_accessors.at(primitive_jptr).get()));
 			AddFunctionToTemplate(isolate, att_templates.at(jptr), att_functions, mesh_jptr, "primitive", "toJSON", v8_toJSON(&json.at(attribute).at("mesh"), "primitive"));
+			*/
 		}
 	};
 
@@ -899,6 +901,7 @@ namespace nov8
 	{
 		inline static void json_attribute(Isolate* isolate, v8_att_context& att_context, JObject& json, std::string path, std::string attribute)
 		{
+			/*
 			v8_att_templates& att_templates = att_context.att_templates;
 			v8_att_accessors& att_accessors = att_context.att_accessors;
 
@@ -919,6 +922,7 @@ namespace nov8
 				v8_create_accessor<MeshMaterial>(att_context, mesh_jptr, flag, &json, &json, attribute, mesh_inst))
 			);
 			inst->SetAccessor(isolate->GetCurrentContext(), v8_name(isolate, "mesh"), v8_getter, v8_setter, v8_external(isolate, att_accessors.at(mesh_jptr).get()));
+			*/
 		}
 	};
 
