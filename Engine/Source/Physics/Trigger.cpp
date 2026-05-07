@@ -104,6 +104,11 @@ namespace Scene
 #include <Attributes/JUpdate.h>
 #include <TriggerAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
+#include <TriggerAtt.h>
+#include <JEnd.h>
+
 		(*this)["behavior"] = PhysicsBehaviorToString.at(PB_Trigger);
 		RENAME_ON_DELETION(Trigger);
 	}
@@ -191,93 +196,36 @@ namespace Scene
 		using namespace Scripting;
 		using namespace nov8;
 
-		auto v8Bind = [this](std::tuple<unsigned int, ScriptBinding> sbT)
+		std::vector<ScriptBinding> cbindings = bindings();
+		auto bindTriggerContext = [&sceneObject, &cbindings](Local<Context> context, Isolate* isolate, std::unique_ptr<SceneUnitScripting>& scriptData)
 			{
-				Isolate* isolate = Scripting::GetIsolate();
-				Locker locker(isolate);
-				Isolate::Scope isolate_scope(isolate);
-				HandleScope handle_scope(isolate);
+				//attach the touched object controllers
+				std::set<JUUIDName> controllers = GetControllersUUIDNamesBySceneObjectUUID(sceneObject);
+				BindSceneObjectControllers(context, isolate, scriptData, controllers);
 
-				v8_att_templates& att_templates = this->att_context.att_templates;
-				v8_att_accessors& att_accessors = this->att_context.att_accessors;
+				std::vector<ScriptBinding> scriptBindedControllers;
+				std::copy_if(cbindings.begin(), cbindings.end(), std::back_inserter(scriptBindedControllers), [](auto& sb) { return sb.bindingType == BT_Controller; });
 
-				unsigned int id = std::get<0>(sbT);
-				ScriptBinding sb = std::get<1>(sbT);
-
-				//:[bindingName]
-				std::string path = std::to_string(this->unit) + "/" + this->Juuid();
-				std::string attribute = "bindings";
-				std::string binding_jptr = path + "/" + attribute + "/" + sb.bindingName;
-				Local<ObjectTemplate> binding_tmpl = ObjectTemplate::New(isolate);
-				att_templates[binding_jptr].Reset(isolate, binding_tmpl);
-				att_accessors.insert_or_assign(binding_jptr, std::make_unique<v8_accessor>(
-					v8_create_accessor<ScriptBinding>(this->att_context, binding_jptr, Trigger::Update_bindings, this, &this->at(attribute), id))
-				);
+				//solve the binding (controller.uuid, binding.bindingName)
+				std::set<JUUIDName> bindedControllers;
+				for (auto& sb : scriptBindedControllers)
+				{
+					SceneObject* ptr = GetSceneObjectPointer(MAKESUUUID(SUUUIDUNIT(sceneObject), sb.uuid));
+					JUUID uuid = ptr->at("controllers").at(sb.controllerName);
+					bindedControllers.insert(std::make_tuple(uuid, sb.bindingName));
+				}
+				//attach the binded controllers
+				BindSceneObjectControllers(context, isolate, scriptData, bindedControllers);
 			};
-
-		std::vector<ScriptBinding> current_bindings = bindings();
-		SceneObject* so = GetSceneObjectPointer(sceneObject);
-		std::vector<ScriptBinding> extra_bindings = so->GetScriptBindings();
-		std::vector<std::tuple<unsigned int, ScriptBinding>> v8_bindings;
-
-		bool add_extra = false;
-		if (extra_bindings.size() > 0ULL)
-		{
-			std::set<JNAME> skips;
-			std::transform(current_bindings.begin(), current_bindings.end(), std::inserter(skips, skips.begin()), [&](ScriptBinding& sb)
-				{
-					return sb.bindingName;
-				}
-			);
-			unsigned int idx = static_cast<unsigned int>(skips.size());
-			for (auto& sb : extra_bindings)
-			{
-				if (skips.contains(sb.bindingName))
-					continue;
-
-				current_bindings.push_back(sb);
-				v8_bindings.push_back(std::make_tuple(idx, sb));
-				add_extra = true;
-			}
-			if (add_extra)
-			{
-				bindings(current_bindings);
-				for (auto& v8b : v8_bindings)
-				{
-					v8Bind(v8b);
-				}
-			}
-		}
 
 		if (event & PxPairFlag::eNOTIFY_TOUCH_FOUND)
 		{
-			Scripting::RunScript(onEnter(), SUuuid());
+			Scripting::RunScript(onEnter(), SUuuid(), bindTriggerContext);
 		}
 		else if (event & PxPairFlag::eNOTIFY_TOUCH_LOST)
 		{
-			Scripting::RunScript(onLeave(), SUuuid());
+			Scripting::RunScript(onLeave(), SUuuid(), bindTriggerContext);
 		}
-
-		bindings(current_bindings);
-	}
-
-	//Scripting
-	v8_templates_creators Trigger::GetV8TemplatesCreators()
-	{
-		v8_templates_creators creators;
-#include <Attributes/JV8Templates.h>
-#include <TriggerAtt.h>
-#include <JEnd.h>
-		return creators;
-	}
-
-	v8_context_creators Trigger::GetV8ContextCreators()
-	{
-		v8_context_creators creators;
-#include <Attributes/JV8Context.h>
-#include <TriggerAtt.h>
-#include <JEnd.h>
-		return creators;
 	}
 
 	void TriggersStep(SceneUnitId unit)

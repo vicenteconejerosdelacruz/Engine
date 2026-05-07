@@ -56,6 +56,10 @@ namespace Templates {
 #include <ShaderAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JV8Att.h>
+#include <ShaderAtt.h>
+#include <JEnd.h>
+
 		Shader::fileNameToShaderTemplate.insert({ path(),uuid() });
 	}
 

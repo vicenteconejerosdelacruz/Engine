@@ -37,6 +37,10 @@ namespace Game
 #include <ControllerAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JV8Att.h>
+#include <ControllerAtt.h>
+#include <JEnd.h>
+
 		uuid(getUUID());
 	}
 
@@ -70,24 +74,6 @@ namespace Game
 	void Controller::Map(SUUUID so) { unit = std::get<0>(so); sceneObject = so; }
 
 	void Controller::Unmap() { std::get<0>(sceneObject) = 0; std::get<1>(sceneObject).clear(); }
-
-	v8_templates_creators Controller::GetV8TemplatesCreators()
-	{
-		v8_templates_creators creators;
-#include <Attributes/JV8Templates.h>
-#include <ControllerAtt.h>
-#include <JEnd.h>
-		return creators;
-	}
-
-	v8_context_creators Controller::GetV8ContextCreators()
-	{
-		v8_context_creators creators;
-#include <Attributes/JV8Context.h>
-#include <ControllerAtt.h>
-#include <JEnd.h>
-		return creators;
-	}
 
 #if defined(_EDITOR)
 	std::map<unsigned int, std::set<JUUID>> GetControllersPrioritySet(bool ignoreEditorPlay)
@@ -212,6 +198,11 @@ namespace Game
 	std::set<JUUID> GetControllersBySceneObjectUUID(SUUUID uuid)
 	{
 		return(controllerUUIDBySUUUID.contains(uuid)) ? controllerUUIDBySUUUID.at(uuid) : std::set<JUUID>();
+	}
+
+	std::set<JUUIDName> GetControllersUUIDNamesBySceneObjectUUID(SUUUID uuid)
+	{
+		return (controllerUUIDNameBySUUUID.contains(uuid)) ? controllerUUIDNameBySUUUID.at(uuid) : std::set<JUUIDName>();
 	}
 
 	void DestroyControllers()

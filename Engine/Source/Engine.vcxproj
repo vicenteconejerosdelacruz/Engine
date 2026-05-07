@@ -428,8 +428,8 @@
     <ClInclude Include="EngineInc.h" />
     <ClInclude Include="Game\BootLevel\BootLevel.h" />
     <ClInclude Include="Game\Game.h" />
-    <ClInclude Include="JExpose\Attributes\JV8Context.h" />
-    <ClInclude Include="JExpose\Attributes\JV8Templates.h" />
+    <ClInclude Include="JExpose\Attributes\JStr2Flag.h" />
+    <ClInclude Include="JExpose\Attributes\JV8Att.h" />
     <ClInclude Include="JExpose\Controllers\ControllerAtt.h" />
     <ClInclude Include="JExpose\Physics\PhysicObjectAtt.h" />
     <ClInclude Include="JExpose\Primitives\CapsuleAtt.h" />
@@ -470,8 +470,6 @@
     <ClInclude Include="JExpose\Attributes\JFlags.h" />
     <ClInclude Include="JExpose\Attributes\JDecl.h" />
     <ClInclude Include="JExpose\Creator\JRequired.h" />
-    <ClInclude Include="JExpose\Scripting\JExpose.h" />
-    <ClInclude Include="JExpose\Scripting\JScriptBind.h" />
     <ClInclude Include="JExpose\TrackUUID\JClear.h" />
     <ClInclude Include="JExpose\TrackUUID\JClearUnit.h" />
     <ClInclude Include="JExpose\TrackUUID\JDecl.h" />
@@ -570,6 +568,7 @@
     <ClInclude Include="Scene\SceneObjectDef.h" />
     <ClInclude Include="Scene\SceneUnit.h" />
     <ClInclude Include="Scene\Sound\SoundFX.h" />
+    <ClInclude Include="Scripting\SceneUnitScripting.h" />
     <ClInclude Include="Scripting\ScriptBinding.h" />
     <ClInclude Include="Scripting\Scripting.h" />
     <ClInclude Include="Shaders\Compiler\CompilerQueue.h" />
@@ -657,6 +656,7 @@
     <ClCompile Include="JExpose\Functions\JEdvCreatorDrawer.cpp" />
     <ClCompile Include="JExpose\Functions\JEdvCreatorValidator.cpp" />
     <ClCompile Include="JExpose\Functions\JEdvEditorDrawer.cpp" />
+    <ClCompile Include="JExpose\JObject.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">Create</PrecompiledHeader>
@@ -711,6 +711,7 @@
     <ClCompile Include="Scene\SceneObject.cpp" />
     <ClCompile Include="Scene\SceneUnit.cpp" />
     <ClCompile Include="Scene\Sound\SoundFX.cpp" />
+    <ClCompile Include="Scripting\SceneUnitScripting.cpp" />
     <ClCompile Include="Scripting\Scripting.cpp" />
     <ClCompile Include="Shaders\Compiler\CustomIncludeHandler.cpp" />
     <ClCompile Include="Shaders\Compiler\ShaderCompiler.cpp" />

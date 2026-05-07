@@ -111,7 +111,7 @@ namespace Scene
 
 				if (levelThreadsStack.at(id)->fetch_sub(1U) == 1U)
 				{
-					scene->CreateScriptingSceneTemplate();
+					Scripting::CreateScriptingSceneTemplate(id);
 					levelLoaded(id);
 				}
 				else
@@ -121,7 +121,7 @@ namespace Scene
 					{
 						levelThreadsStack.at(id)->wait(current);
 					}
-					scene->CreateScriptingSceneTemplate();
+					Scripting::CreateScriptingSceneTemplate(id);
 					levelLoaded(id);
 				}
 			}, filename, data, levelLoaded, progress
@@ -135,12 +135,29 @@ namespace Scene
 
 		std::thread levelThread([](std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 			{
-				SceneUnitId unit = nostd::threadIdHash();
-				auto& scene = CreateScene(unit, filename);
+				SceneUnitId id = nostd::threadIdHash();
+
+				levelThreadsStack.insert_or_assign(id, std::make_unique<std::atomic_uint>(1U));
+
+				auto& scene = CreateScene(id, filename);
 				scene->SetIsolated(true);
 
 				LoadLevel(scene, filename, data, progress);
-				levelLoaded(unit);
+				if (levelThreadsStack.at(id)->fetch_sub(1U) == 1U)
+				{
+					Scripting::CreateScriptingSceneTemplate(id);
+					levelLoaded(id);
+				}
+				else
+				{
+					unsigned int current;
+					while ((current = levelThreadsStack.at(id)->load()) != 0U)
+					{
+						levelThreadsStack.at(id)->wait(current);
+					}
+					Scripting::CreateScriptingSceneTemplate(id);
+					levelLoaded(id);
+				}
 			}, filename, data, levelLoaded, progress
 		);
 		levelThread.detach();
@@ -405,6 +422,11 @@ namespace Scene
 	SceneObjectType GetSceneObjectType(SceneUnitId id, JUUID uuid)
 	{
 		return scenesUnits.at(id)->GetSceneObjectTypes().at(uuid);
+	}
+
+	SceneObjectType GetSceneObjectType(SUUUID suuuid)
+	{
+		return GetSceneObjectType(FROMSUUUID(suuuid));
 	}
 
 	bool SceneObjectExists(SceneUnitId id, JUUID uuid)
@@ -923,16 +945,6 @@ namespace Scene
 		return GetSceneObjectPointer(FROMSUUUID(suuid));
 	}
 
-	v8_templates_creators GetSceneObjectV8TemplatesCreators(SUUUID suuuid)
-	{
-		return GetSceneObjectPointer(suuuid)->GetV8TemplatesCreators();
-	}
-
-	v8_context_creators GetSceneObjectV8ContextCreators(SUUUID suuuid)
-	{
-		return GetSceneObjectPointer(suuuid)->GetV8ContextCreators();
-	}
-
 	SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid)
 	{
 		std::map<SceneObjectType, std::function<SceneObject* (SceneUnitId id, JUUID uuid)>> getP =
@@ -989,6 +1001,78 @@ namespace Scene
 
 		SceneObjectType type = GetSceneObjectType(id, uuid);
 		return getP.at(type)(id, uuid);
+	}
+
+	SceneObject* GetSceneObjectPointerByName(SceneUnitId id, SceneObjectType type, JNAME name)
+	{
+		std::map<SceneObjectType, std::function<SceneObject* (SceneUnitId id, JNAME name)>> getSceneObject =
+		{
+			{ SO_Renderables, [](SceneUnitId id, JNAME name)
+			{
+				return (*GetRenderableIDByName(id, name)).get();
+			}
+			},
+			{ SO_Cameras, [](SceneUnitId id, JNAME name)
+			{
+				return (*GetCameraIDByName(id, name)).get();
+			}
+			},
+			{ SO_Lights, [](SceneUnitId id, JNAME name)
+			{
+				return (*GetLightIDByName(id, name)).get();
+			}
+			},
+			{ SO_SoundEffects, [](SceneUnitId id, JNAME name)
+			{
+				return (*GetSoundFXIDByName(id, name)).get();
+			}
+			},
+			{ SO_PhysicScenes, [](SceneUnitId id, JNAME name)
+			{
+				return (*GetPhysicSceneIDByName(id, name)).get();
+			}
+			},
+			{ SO_Triggers, [](SceneUnitId id, JNAME name)
+			{
+				return (*GetTriggerIDByName(id, name)).get();
+			}
+			},
+			{ SO_Boundaries, [](SceneUnitId id, JNAME name)
+			{
+				return (*GetBoundaryIDByName(id, name)).get();
+			}
+			},
+			{ SO_SceneControllers, [](SceneUnitId id, JNAME name)
+			{
+				return (*GetSceneControllerIDByName(id, name)).get();
+			}
+			},
+		};
+
+		return getSceneObject.at(type)(id, name);
+	}
+
+	std::vector<JNAME> GetSceneObjectsNames(SceneUnitId id, SceneObjectType typeToGet)
+	{
+		std::vector<JNAME> names;
+		auto uuids = GetSceneObjects(id, typeToGet);
+		for (auto& uuid : uuids)
+		{
+			names.push_back(GetSceneObjectPointer(id, uuid)->at("name"));
+		}
+		return names;
+	}
+
+	void CreateSceneObjectsMemberFunctionTemplates(Isolate* isolate, SceneUnitId id)
+	{
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, Renderable::GetClassName(), Renderable::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, Light::GetClassName(), Light::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, Camera::GetClassName(), Camera::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, SoundFX::GetClassName(), SoundFX::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, PhysicScene::GetClassName(), PhysicScene::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, Trigger::GetClassName(), Trigger::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, Boundary::GetClassName(), Boundary::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, SceneController::GetClassName(), SceneController::RegisterScript);
 	}
 
 #if defined(_EDITOR)

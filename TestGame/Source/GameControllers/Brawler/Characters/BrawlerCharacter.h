@@ -42,6 +42,11 @@ namespace Game
 #include <Attributes/JFlags.h>
 #include <Brawler/BrawlerCharacterAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JStr2Flag.h>
+#include <Brawler/BrawlerCharacterAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <Brawler/BrawlerCharacterAtt.h>
 #include <JEnd.h>

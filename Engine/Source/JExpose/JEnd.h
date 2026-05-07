@@ -25,6 +25,12 @@ return created; }
 };
 #endif
 
+#ifdef JEXPOSE_ATT_STR_TO_FLAG
+#undef JEXPOSE_ATT_STR_TO_FLAG
+};
+std::unordered_map<std::string, size_t> GetStringToFlags() override { return StringToFlags; }
+#endif
+
 #ifdef JEXPOSE_ATT_UPDATE
 #undef JEXPOSE_ATT_UPDATE
 };
@@ -34,12 +40,8 @@ return created; }
 #undef JEXPOSE_ATT_DESTROY
 #endif
 
-#ifdef JEXPOSE_ATT_V8_TEMPLATES
-#undef JEXPOSE_ATT_V8_TEMPLATES
-#endif
-
-#ifdef JEXPOSE_ATT_V8_CONTEXT
-#undef JEXPOSE_ATT_V8_CONTEXT
+#ifdef JEXPOSE_V8_ATT
+#undef JEXPOSE_V8_ATT
 #endif
 
 #ifdef JEXPOSE_EDITOR_DRAWERS_DECL

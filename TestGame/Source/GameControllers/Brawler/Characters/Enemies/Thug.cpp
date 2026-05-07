@@ -30,7 +30,12 @@ namespace Game::Brawler
 #include <Attributes/JInit.h>
 #include <Brawler/ThugAtt.h>
 #include <JEnd.h>
+
 #include <Attributes/JUpdate.h>
+#include <Brawler/ThugAtt.h>
+#include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
 #include <Brawler/ThugAtt.h>
 #include <JEnd.h>
 
@@ -57,6 +62,16 @@ namespace Game::Brawler
 
 		initialHealth = health();
 		SetInitialConditions();
+	}
+
+	void Thug::RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script)
+	{
+		v8_register_method<Thug>(isolate, tpl, "EvaluateNextFollowMovement", script, [](Thug* self) { if (self) self->EvaluateNextFollowMovement(); });
+		v8_register_method<Thug>(isolate, tpl, "CombatIdleNextState", script, [](Thug* self) { if (self) self->CombatIdleNextState(); });
+		v8_register_method<Thug>(isolate, tpl, "OnCombatPunchAnimationEnd", script, [](Thug* self) { if (self) self->OnCombatPunchAnimationEnd(); });
+		v8_register_method<Thug>(isolate, tpl, "TakeHit", script, [](Thug* self, int damage) { if (self) self->TakeHit(damage); });
+		v8_register_method<Thug>(isolate, tpl, "OnDeathAnimationEnd", script, [](Thug* self) { if (self) self->OnDeathAnimationEnd(); });
+		v8_register_method<Thug>(isolate, tpl, "PlayPunchSound", script, [](Thug* self) { if (self) self->PlayPunchSound(); });
 	}
 
 	void Thug::SetInitialConditions()
@@ -130,37 +145,6 @@ namespace Game::Brawler
 		{
 			tsm.ChangeState(TS_Death);
 		}
-	}
-
-	//JS binding
-	v8_templates_creators Thug::GetV8TemplatesCreators()
-	{
-		v8_templates_creators creators = BrawlerCharacter::GetV8TemplatesCreators();
-#include <Attributes/JV8Templates.h>
-#include <Brawler/ThugAtt.h>
-#include <JEnd.h>
-		return creators;
-	}
-
-	v8_context_creators Thug::GetV8ContextCreators()
-	{
-		v8_context_creators creators = BrawlerCharacter::GetV8ContextCreators();
-#include <Attributes/JV8Context.h>
-#include <Brawler/ThugAtt.h>
-#include <JEnd.h>
-		return creators;
-	}
-
-	v8_functions_creators Thug::GetV8FunctionsCreators()
-	{
-		return {
-			{ "EvaluateNextFollowMovement", v8_wrap_call([&] { EvaluateNextFollowMovement(); }) },
-			{ "CombatIdleNextState", v8_wrap_call([&] { CombatIdleNextState(); }) },
-			{ "OnCombatPunchAnimationEnd", v8_wrap_call([&] { OnCombatPunchAnimationEnd(); }) },
-			{ "TakeHit", v8_wrap_call([&](int damage) { TakeHit(damage); }) },
-			{ "OnDeathAnimationEnd", v8_wrap_call([&] { OnDeathAnimationEnd(); }) },
-			{ "PlayPunchSound", v8_wrap_call([&] { PlayPunchSound(); })},
-		};
 	}
 
 	void Thug::CharacterMoveXZPlane(XMVECTOR displacement, float dt, float sideSpeed, XMFLOAT3 gravity)

@@ -34,4 +34,14 @@ namespace Game
 		JUUID uuid = RegisterController(name, sceneObject, controller);
 		return uuid;
 	}
+
+	void CreateControllersMemberFunctionTemplates(Isolate* isolate, SceneUnitId id)
+	{
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, SpinYaw::GetClassName(), SpinYaw::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, ThirdPersonCharacter::GetClassName(), ThirdPersonCharacter::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, BrawlerScene::GetClassName(), BrawlerScene::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, BrawlerCamera::GetClassName(), BrawlerCamera::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, Venom::GetClassName(), Venom::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, Thug::GetClassName(), Thug::RegisterScript);
+	}
 };

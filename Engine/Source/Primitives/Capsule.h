@@ -23,6 +23,10 @@ namespace Primitives
 #include <CapsuleAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <CapsuleAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <CapsuleAtt.h>
 #include <JEnd.h>

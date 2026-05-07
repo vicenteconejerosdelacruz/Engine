@@ -67,6 +67,10 @@ namespace Templates
 #include <ShaderAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <ShaderAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <ShaderAtt.h>
 #include <JEnd.h>

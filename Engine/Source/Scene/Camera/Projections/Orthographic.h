@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SimpleMath.h>
+#include <nlohmann/json.hpp>
 
 using namespace DirectX;
 
@@ -100,3 +101,12 @@ namespace Scene::CameraProjections {
 		};
 	}
 };
+using namespace Scene::CameraProjections;
+
+inline void to_json(nlohmann::json& j, const Orthographic& p) {
+	j = FromOrthographic(p);
+}
+
+inline void from_json(const nlohmann::json& j, Orthographic& p) {
+	p = ToOrthographic(const_cast<nlohmann::json&>(j));
+}

@@ -22,7 +22,12 @@ namespace Game::Test
 #include <Attributes/JInit.h>
 #include <Test/SpinYawAtt.h>
 #include <JEnd.h>
+
 #include <Attributes/JUpdate.h>
+#include <Test/SpinYawAtt.h>
+#include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
 #include <Test/SpinYawAtt.h>
 #include <JEnd.h>
 	}

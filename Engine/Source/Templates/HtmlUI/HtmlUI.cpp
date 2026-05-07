@@ -39,6 +39,10 @@ namespace Templates
 #include <Attributes/JUpdate.h>
 #include <HtmlUIAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
+#include <HtmlUIAtt.h>
+#include <JEnd.h>
 	}
 
 #if defined(_EDITOR)

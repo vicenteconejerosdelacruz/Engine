@@ -164,6 +164,10 @@ namespace Scene {
 #include <LightAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <LightAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <LightAtt.h>
 #include <JEnd.h>

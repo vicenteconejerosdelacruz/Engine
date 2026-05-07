@@ -74,6 +74,10 @@ namespace Templates
 #include <TextureAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <TextureAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <TextureAtt.h>
 #include <JEnd.h>

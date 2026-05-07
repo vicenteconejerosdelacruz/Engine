@@ -15,9 +15,15 @@ namespace Game::Brawler
 #include <Attributes/JInit.h>
 #include <Brawler/BrawlerCharacterAtt.h>
 #include <JEnd.h>
+
 #include <Attributes/JUpdate.h>
 #include <Brawler/BrawlerCharacterAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
+#include <Brawler/BrawlerCharacterAtt.h>
+#include <JEnd.h>
+
 #if defined(_EDITOR)
 		initialLookingTo = lookingTo();
 #endif

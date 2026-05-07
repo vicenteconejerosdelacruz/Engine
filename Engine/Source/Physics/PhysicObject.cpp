@@ -93,6 +93,10 @@ namespace Physics
 #include <PhysicObjectAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JV8Att.h>
+#include <PhysicObjectAtt.h>
+#include <JEnd.h>
+
 		InheritGeometryAttributes();
 	}
 
@@ -1418,5 +1422,8 @@ namespace Physics
 	{
 		if (characterHitSubscriber.contains(destObject))
 			characterHitSubscriber.at(destObject)(filterData);
+	}
+	void CreatePhysicObjectMemberFunctionTemplates(Isolate* isolate, SceneUnitId id)
+	{
 	}
 };

@@ -136,6 +136,10 @@ namespace Templates
 #include <RenderPassAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <RenderPassAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <RenderPassAtt.h>
 #include <JEnd.h>

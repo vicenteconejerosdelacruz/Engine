@@ -79,6 +79,10 @@ namespace Scene {
 #include <CameraAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <CameraAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <CameraAtt.h>
 #include <JEnd.h>

@@ -60,6 +60,10 @@ namespace Templates
 #include <SoundAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <SoundAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <SoundAtt.h>
 #include <JEnd.h>

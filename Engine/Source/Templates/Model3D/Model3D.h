@@ -57,6 +57,10 @@ namespace Templates
 #include <Model3DAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <Model3DAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <Model3DAtt.h>
 #include <JEnd.h>

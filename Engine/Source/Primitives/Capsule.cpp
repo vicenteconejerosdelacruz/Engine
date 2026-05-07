@@ -40,6 +40,10 @@ namespace Primitives
 #include <CapsuleAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JV8Att.h>
+#include <CapsuleAtt.h>
+#include <JEnd.h>
+
 		teselationPoints = capsuleBasePoints;
 		NormalizePoints(teselationPoints, 0.5f);
 		teselationIndices = capsuleBaseIndices;

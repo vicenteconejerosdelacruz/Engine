@@ -56,6 +56,10 @@ namespace Templates
 #include <PhysicGeometryAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <PhysicGeometryAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <PhysicGeometryAtt.h>
 #include <JEnd.h>

@@ -63,6 +63,10 @@ namespace Primitives
 #include <SphereAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JV8Att.h>
+#include <SphereAtt.h>
+#include <JEnd.h>
+
 		teselationPoints = icosahedronNNPoints;
 		NormalizePoints(teselationPoints, 0.5f);
 		teselationIndices = icosahedronIndices;

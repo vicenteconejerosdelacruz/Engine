@@ -59,6 +59,11 @@ namespace Scene
 #include <Attributes/JUpdate.h>
 #include <BoundaryAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
+#include <BoundaryAtt.h>
+#include <JEnd.h>
+
 		(*this)["behavior"] = PhysicsBehaviorToString.at(PB_Static);
 		RENAME_ON_DELETION(Boundary);
 	}

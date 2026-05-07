@@ -23,6 +23,10 @@ namespace Primitives
 #include <SphereAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <SphereAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <SphereAtt.h>
 #include <JEnd.h>

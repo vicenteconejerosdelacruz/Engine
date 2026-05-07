@@ -53,6 +53,10 @@ namespace Templates
 #include <Attributes/JUpdate.h>
 #include <Model3DAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
+#include <Model3DAtt.h>
+#include <JEnd.h>
 	}
 
 #if defined(_EDITOR)

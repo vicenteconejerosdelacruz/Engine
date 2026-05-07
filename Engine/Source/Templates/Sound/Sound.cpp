@@ -108,6 +108,10 @@ namespace Templates
 #include <Attributes/JUpdate.h>
 #include <SoundAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
+#include <SoundAtt.h>
+#include <JEnd.h>
 	}
 
 #if defined(_EDITOR)

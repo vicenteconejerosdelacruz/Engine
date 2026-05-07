@@ -14,7 +14,12 @@ namespace Game::Brawler
 #include <Attributes/JInit.h>
 #include <Brawler/HeroAtt.h>
 #include <JEnd.h>
+
 #include <Attributes/JUpdate.h>
+#include <Brawler/HeroAtt.h>
+#include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
 #include <Brawler/HeroAtt.h>
 #include <JEnd.h>
 	}

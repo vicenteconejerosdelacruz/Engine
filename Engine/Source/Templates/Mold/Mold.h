@@ -51,6 +51,10 @@ namespace Templates
 #include <MoldAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <MoldAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <MoldAtt.h>
 #include <JEnd.h>

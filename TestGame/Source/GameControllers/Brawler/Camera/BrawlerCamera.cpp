@@ -19,9 +19,15 @@ namespace Game::Brawler
 #include <Attributes/JInit.h>
 #include <Brawler/BrawlerCameraAtt.h>
 #include <JEnd.h>
+
 #include <Attributes/JUpdate.h>
 #include <Brawler/BrawlerCameraAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
+#include <Brawler/BrawlerCameraAtt.h>
+#include <JEnd.h>
+
 		initialFollowX = followX();
 		initialFollowY = followY();
 	}
@@ -86,33 +92,6 @@ namespace Game::Brawler
 		}
 
 		camera->position(p);
-	}
-
-	//JS binding
-	v8_templates_creators BrawlerCamera::GetV8TemplatesCreators()
-	{
-		v8_templates_creators creators = Controller::GetV8TemplatesCreators();
-#include <Attributes/JV8Templates.h>
-#include <Brawler/BrawlerCameraAtt.h>
-#include <JEnd.h>
-		return creators;
-	}
-
-	v8_context_creators BrawlerCamera::GetV8ContextCreators()
-	{
-		v8_context_creators creators = Controller::GetV8ContextCreators();
-#include <Attributes/JV8Context.h>
-#include <Brawler/BrawlerCameraAtt.h>
-#include <JEnd.h>
-		return creators;
-	}
-
-	v8_functions_creators BrawlerCamera::GetV8FunctionsCreators()
-	{
-		return {
-			//{ "StopCameraFollow", v8_wrap_call([&] { follow = false; }) },
-			//{ "StartCameraFollow", v8_wrap_call([&] { follow = true; }) },
-		};
 	}
 }
 

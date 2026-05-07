@@ -2,6 +2,7 @@
 #include "Scripting.h"
 #include <SceneObject.h>
 #include <NoV8.h>
+#include "SceneUnitScripting.h"
 
 using namespace v8;
 using namespace nov8;
@@ -21,6 +22,8 @@ namespace Editor
 using namespace Editor;
 #endif
 
+
+std::map<SceneUnitId, std::unique_ptr<SceneUnitScripting>> scenesScripts;
 namespace Scripting
 {
 	static std::unique_ptr<Platform> platform;
@@ -52,101 +55,165 @@ namespace Scripting
 		return isolate;
 	}
 
-	void CreateSceneObjectScriptTemplate(Isolate* isolate, Global<ObjectTemplate>& tmpl, SceneObject* so, v8_att_context& att_context)
+	SceneUnitScripting* GetSceneUnitScripting(SceneUnitId id)
 	{
-		v8_att_functions& att_functions = att_context.att_functions;
-
-		std::string suuuid_str = so->SUuuid_str();
-		AddFunctionToTemplate(isolate, tmpl, att_functions, suuuid_str, "toJSON", v8_toJSON(so));
-
-		v8_templates_creators templateAttributeCreator = so->GetV8TemplatesCreators();
-		AddTemplateJsonAttributes(isolate, tmpl, att_context, templateAttributeCreator, *so, suuuid_str);
+		return scenesScripts.contains(id) ? scenesScripts.at(id).get() : nullptr;
 	}
 
-	Local<Context> CreateSceneObjectScriptContext(Isolate* isolate, Local<ObjectTemplate>& tmpl, SceneObject* so, v8_att_context& att_context)
+	void CreateScriptingSceneTemplate(SceneUnitId id)
 	{
-		Local<Context> context = Context::New(isolate, nullptr, tmpl);
-		v8::Context::Scope context_scope(context);
-		AddConsoleToContext(isolate, context);
-
-		std::string suuuid_str = so->SUuuid_str();
-		v8_context_creators contextAttributeCreator = so->GetV8ContextCreators();
-		AddContextJsonAttributes(isolate, context, att_context, contextAttributeCreator, *so, suuuid_str);
-
-		return context;
+		scenesScripts[id] = std::make_unique<SceneUnitScripting>(id);
+		scenesScripts[id]->Create(Scripting::GetIsolate());
 	}
 
-	void AddSceneHierarchyToContext(Isolate* isolate, Local<Context>& context, SceneUnitId id)
+	std::string SafePath(std::string path)
 	{
-		auto& scene = GetSceneUnit(id);
-		Local<ObjectTemplate> sceneTemplate = Local<ObjectTemplate>::New(isolate, scene->GetScriptingSceneTemplate());
-		Local<Object> sceneInstance = sceneTemplate->NewInstance(context).ToLocalChecked();
-		context->Global()->Set(context, v8::String::NewFromUtf8(isolate, "scene").ToLocalChecked(), sceneInstance).Check();
+		if (!path.empty() && path[0] != '/')
+		{
+			path = "/" + path;
+		}
+		return path;
 	}
 
-	void RunScript(std::string script, SUUUID suuuid)
+	Local<Object> Scripting::WrapProxy(Isolate* isolate, SceneUnitScripting& script, JObject* owner, std::string path, size_t flag)
 	{
-#if defined(_EDITOR)
+		//EscapableHandleScope to allow the object create in this function to be alive outside this function
+		EscapableHandleScope scope(isolate);
+		Local<Context> context = isolate->GetCurrentContext();
+
+		path = SafePath(path);
+
+		//create the trace data using the proxies. this should be moved to SceneUnitScripting
+		V8PropertyProxy* proxyData = new V8PropertyProxy();
+		proxyData->owner = owner;
+		proxyData->jsonPath = path;
+		proxyData->dirtyFlag = flag;
+		proxyData->script = &script;
+
+		Local<ObjectTemplate> tmpl = script.proxyTemplate.Get(isolate);
+		Local<Object> proxyInst = tmpl->NewInstance(context).ToLocalChecked();
+
+		proxyInst->SetAlignedPointerInInternalField(0, proxyData);
+
+		//Memory management (Weak Callback)
+		//create a persistent handle so v8 can trace the lifetime of the specific object
+		//use UniquePersistent to automatically clean proxyInst if the scope get's closed
+		UniquePersistent<Object> persistent(isolate, proxyInst);
+
+		persistent.SetWeak(proxyData, [](const WeakCallbackInfo<V8PropertyProxy>& data) {
+			//this get's triggered by the V8 garbage collector
+			V8PropertyProxy* p = data.GetParameter();
+			delete p; // free the memory
+			}, WeakCallbackType::kParameter);
+
+		//Ensure proxyInst exists after this function
+		return scope.Escape(proxyInst);
+	}
+
+	void RunScript(std::string script, SUUUID suuuid,
+		std::function<void(Local<Context> context, Isolate* isolate, std::unique_ptr<SceneUnitScripting>& scriptData)> contextBinder
+	)
+	{
+		if (script.empty()) return;
+
 		SceneUnitId id = SUUUIDUNIT(suuuid);
+
+		assert(scenesScripts.contains(id));
+
+#if defined(_EDITOR)
 		if (!IsPlaying(id) || IsPaused(id))
 		{
 			return;
 		}
 #endif
-		if (script.empty()) return;
 
+		//lock the isolate in this thread
 		Locker locker(isolate);
+		//mark the isolate for this stack as active
 		Isolate::Scope isolate_scope(isolate);
+		//make a HandleScope to manage garbage collection
 		HandleScope handle_scope(isolate);
 
-		SceneObject* so = GetSceneObjectPointer(suuuid);
+		//create the global template
+		Local<ObjectTemplate> globalTmpl = ObjectTemplate::New(isolate);
 
-		Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
-		Local<Context> context = CreateSceneObjectScriptContext(isolate, global, so, so->att_context);
-		AddSceneHierarchyToContext(isolate, context, id);
-
+		//create the context
+		Local<Context> context = v8::Context::New(isolate, nullptr, globalTmpl);
 		Context::Scope context_scope(context);
+		Local<Object> global = context->Global();
 
-		//create the source code as a local string
-		Local<v8::String> source = v8::String::NewFromUtf8(isolate, script.c_str()).ToLocalChecked();
-		Local<Script> runnable = Script::Compile(context, source).ToLocalChecked();
-		//run the code and capture it's result
-		v8::TryCatch try_catch(isolate);
+		//Bind the console
+		AddConsoleToContext(isolate, context);
+
+		//get the SceneUnit
+		auto& scene = GetSceneUnit(id);
+
+		//get the script data
+		auto& scriptData = scenesScripts.at(id);
+
+		//instantiate the scene template and set the id of the scene unit as it's internal field 0
+		Local<Object> sceneInst = scriptData->sceneTemplate.Get(isolate)->NewInstance(context).ToLocalChecked();
+		sceneInst->SetAlignedPointerInInternalField(0, scene.get());
+
+		for (auto const& [type, name] : SceneObjectTypeJsonContainer)
+		{
+			//create instances for the containers
+			Local<ObjectTemplate> cTmpl = scriptData->containersTemplates[type].Get(isolate);
+			Local<Object> cInst = cTmpl->NewInstance(context).ToLocalChecked();
+
+			//set the sceneUnit pointer and the type of the container as internal fields
+			cInst->SetAlignedPointerInInternalField(0, scene.get());
+			cInst->SetInternalField(1, Integer::New(isolate, static_cast<int>(type)));
+
+			//set the container instance as an attribute of the scene instance
+			sceneInst->Set(context, v8_name(isolate, name), cInst).Check();
+		}
+
+		//attach the scene to the global
+		global->Set(context, v8_name(isolate, "scene"), sceneInst).Check();
+
+		//Bind the Controllers of the SceneObject
+		std::set<JUUIDName> controllers = GetControllersUUIDNamesBySceneObjectUUID(suuuid);
+		BindSceneObjectControllers(context, isolate, scriptData, controllers);
+
+		//call the binder function for other bindings
+		contextBinder(context, isolate, scriptData);
+
+		//now we can execute the script
+		ExecuteSource(context, script);
+	}
+
+	void BindSceneObjectControllers(Local<Context> context, Isolate* isolate, std::unique_ptr<SceneUnitScripting>& scriptData, std::set<JUUIDName> controllers)
+	{
+		for (auto [uuid, name] : controllers)
+		{
+			Controller* controller = GetController<Controller>(uuid);
+			context->Global()->Set(
+				context,
+				v8_string(isolate, name),
+				Scripting::WrapJObject<Controller>(isolate, *scriptData.get(), controller)
+			);
+		}
+	}
+
+	void ExecuteSource(Local<Context>& context, std::string script)
+	{
+		Local<String> source = v8_string(isolate, script.c_str());
+		Local<Script> runnable;
+
+		TryCatch try_catch(isolate);
+
+		if (!Script::Compile(context, source).ToLocal(&runnable))
+		{
+			v8_report_exception(isolate, &try_catch);
+			return;
+		}
 
 		Local<Value> result;
 		if (!runnable->Run(context).ToLocal(&result))
 		{
-#if defined(_DEVELOPMENT)
-			v8::String::Utf8Value exception(isolate, try_catch.Exception());
-			v8::Local<v8::Message> message = try_catch.Message();
-			if (!message.IsEmpty()) {
-				int line_number = message->GetLineNumber(context).FromMaybe(-1);
-				v8::String::Utf8Value filename(isolate, message->GetScriptResourceName());
-
-				std::string linenumstr = "Error en " + std::string(*filename) + ", linea " + std::to_string(line_number) + "\n";
-				OutputDebugStringA(linenumstr.c_str());
-
-				// Imprimir el Stack Trace completo si está disponible
-				v8::Local<v8::Value> stack_trace;
-				if (try_catch.StackTrace(context).ToLocal(&stack_trace)) {
-					v8::String::Utf8Value stack_str(isolate, stack_trace);
-					std::string stacktrace = "Stack Trace:\n" + std::string(*stack_str) + "\n";
-					OutputDebugStringA(stacktrace.c_str());
-				}
-			}
-#endif
-		}
-		else
-		{
-#if defined(_DEVELOPMENT)
-			//print result if not undefined
-			v8::String::Utf8Value utf8(isolate, result);
-			if (std::string(*utf8) != "undefined")
-			{
-				std::string resultStr = std::string("result:") + *utf8 + "\n";
-				OutputDebugStringA(resultStr.c_str());
-			}
-#endif
+			v8_report_exception(isolate, &try_catch);
+			return;
 		}
 	}
 }

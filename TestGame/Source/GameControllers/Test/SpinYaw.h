@@ -19,6 +19,11 @@ namespace Game
 #include <Attributes/JFlags.h>
 #include <Test/SpinYawAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JStr2Flag.h>
+#include <Test/SpinYawAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <Test/SpinYawAtt.h>
 #include <JEnd.h>

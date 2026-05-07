@@ -12,7 +12,6 @@ namespace Scene
 {
 	void SceneObject::Initialize()
 	{
-		CreateSceneObjectScriptTemplate();
 	}
 
 	void SceneObject::JUpdate(nlohmann::json p)
@@ -33,27 +32,6 @@ namespace Scene
 
 	void SceneObject::Destroy()
 	{
-		using namespace v8;
-
-		auto& scene = GetSceneUnit(unit);
-		if (!scene->MarkedForDelete())
-		{
-			scene->EraseFromScriptingSceneTemplate(this);
-		}
-
-		Isolate* isolate = Scripting::GetIsolate();
-		Locker locker(isolate);
-		Isolate::Scope isolate_scope(isolate);
-		HandleScope handle_scope(isolate);
-
-		for (auto& [_, tpl] : att_context.att_templates)
-		{
-			tpl.Reset();
-		}
-		att_context.att_accessors.clear();
-		att_context.att_functions.clear();
-		att_context.att_idx_handlers.clear();
-
 		for (auto& cb : destroyCallbacks)
 		{
 			cb();
@@ -68,17 +46,4 @@ namespace Scene
 		};
 	}
 #endif
-
-	void SceneObject::CreateSceneObjectScriptTemplate()
-	{
-		using namespace Scripting;
-
-		Isolate* isolate = GetIsolate();
-		Locker locker(isolate);
-		Isolate::Scope isolate_scope(isolate);
-		HandleScope handle_scope(isolate);
-		Local<ObjectTemplate> localTemplate = ObjectTemplate::New(isolate);
-		objectTemplate = Global<ObjectTemplate>(isolate, localTemplate);
-		Scripting::CreateSceneObjectScriptTemplate(isolate, objectTemplate, this, att_context);
-	}
 }

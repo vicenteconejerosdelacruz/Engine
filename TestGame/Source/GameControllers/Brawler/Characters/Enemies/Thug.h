@@ -35,6 +35,7 @@ namespace Game
 #include <Attributes/JOrder.h>
 #include <Brawler/ThugAtt.h>
 #include <JEnd.h>
+
 #include <Editor/JDrawersDecl.h>
 #include <Brawler/ThugAtt.h>
 #include <JEnd.h>
@@ -48,6 +49,11 @@ namespace Game
 #include <Attributes/JFlags.h>
 #include <Brawler/ThugAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JStr2Flag.h>
+#include <Brawler/ThugAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <Brawler/ThugAtt.h>
 #include <JEnd.h>
@@ -56,6 +62,7 @@ namespace Game
 
 			//Constructor and Binding
 			Thug(nlohmann::json& json);
+			static void RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script);
 			void SetInitialConditions() override;
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
@@ -66,11 +73,6 @@ namespace Game
 
 			//Step
 			virtual void Step(float delta);
-
-			//JS binding
-			v8_templates_creators GetV8TemplatesCreators() override;
-			v8_context_creators GetV8ContextCreators() override;
-			v8_functions_creators GetV8FunctionsCreators() override;
 
 			//States
 			void TakeHit(int damage);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SimpleMath.h>
+#include <nlohmann/json.hpp>
 
 namespace Scene::CameraProjections {
 
@@ -78,3 +79,12 @@ namespace Scene::CameraProjections {
 		};
 	}
 };
+using namespace Scene::CameraProjections;
+
+inline void to_json(nlohmann::json& j, const Perspective &p) {
+	j = FromPerspective(p);
+}
+
+inline void from_json(const nlohmann::json& j, Perspective& p) {
+	p = ToPerspective(const_cast<nlohmann::json&>(j));
+}

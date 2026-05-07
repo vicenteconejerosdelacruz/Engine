@@ -25,6 +25,11 @@ namespace Game::Brawler
 #include <Attributes/JUpdate.h>
 #include <Brawler/BrawlerSceneAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
+#include <Brawler/BrawlerSceneAtt.h>
+#include <JEnd.h>
+
 		SetInitialConditions();
 	}
 
@@ -74,6 +79,11 @@ namespace Game::Brawler
 	void BrawlerScene::Unmap()
 	{
 		Controller::Unmap();
+	}
+
+	//States
+	void BrawlerScene::OnStartGame()
+	{
 	}
 
 	//Step

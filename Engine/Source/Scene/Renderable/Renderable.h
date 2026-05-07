@@ -69,6 +69,10 @@ namespace Scene
 #include <RenderableAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <RenderableAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <RenderableAtt.h>
 #include <JEnd.h>
@@ -190,12 +194,10 @@ namespace Scene
 		void RenderReady(bool value);
 
 		//Scripting
-		virtual v8_templates_creators GetV8TemplatesCreators();
-		virtual v8_context_creators GetV8ContextCreators();
+		std::vector<ScriptBinding> GetScriptBindings() override;
 #if defined(_EDITOR)
 		virtual std::map<std::string, ScriptBinding> GetScriptBindingOptions();
 #endif
-		std::vector<ScriptBinding> GetScriptBindings() override;
 
 #if defined(_EDITOR)
 		std::function<void()> OnPick;

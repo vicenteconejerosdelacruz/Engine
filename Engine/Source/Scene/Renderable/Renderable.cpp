@@ -61,6 +61,11 @@ namespace Scene
 #include <Attributes/JUpdate.h>
 #include <RenderableAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
+#include <RenderableAtt.h>
+#include <JEnd.h>
+
 		lifecycleState->store(false);
 		RENAME_ON_DELETION(Renderable);
 		animationStepLock = std::make_unique<std::atomic_bool>(false);
@@ -980,23 +985,14 @@ namespace Scene
 		renderReady = value;
 	}
 
-	//Scripting
-	v8_templates_creators Renderable::GetV8TemplatesCreators()
+	std::vector<ScriptBinding> Renderable::GetScriptBindings()
 	{
-		v8_templates_creators creators;
-#include <Attributes/JV8Templates.h>
-#include <RenderableAtt.h>
-#include <JEnd.h>
-		return creators;
-	}
-
-	v8_context_creators Renderable::GetV8ContextCreators()
-	{
-		v8_context_creators creators;
-#include <Attributes/JV8Context.h>
-#include <RenderableAtt.h>
-#include <JEnd.h>
-		return creators;
+		std::vector<ScriptBinding> bindings;
+		for (auto& [name, _] : at("controllers").items())
+		{
+			bindings.push_back(ScriptBinding(uuid(), name, name));
+		}
+		return bindings;
 	}
 
 #if defined(_EDITOR)
@@ -1019,16 +1015,6 @@ namespace Scene
 		return options;
 	}
 #endif
-
-	std::vector<ScriptBinding> Renderable::GetScriptBindings()
-	{
-		std::vector<ScriptBinding> bindings;
-		for (auto& [name, _] : at("controllers").items())
-		{
-			bindings.push_back(ScriptBinding(uuid(), name, name));
-		}
-		return bindings;
-	}
 
 	void RenderablesStep(SceneUnitId id, float dt)
 	{

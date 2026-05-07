@@ -81,6 +81,10 @@ namespace Scene
 #include <Attributes/JUpdate.h>
 #include <CameraAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
+#include <CameraAtt.h>
+#include <JEnd.h>
 		RENAME_ON_DELETION(Camera);
 	}
 

@@ -20,6 +20,10 @@ namespace Primitives
 #include <Attributes/JUpdate.h>
 #include <ConeAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
+#include <ConeAtt.h>
+#include <JEnd.h>
 	}
 
 #if defined(_EDITOR)

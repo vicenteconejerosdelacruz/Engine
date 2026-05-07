@@ -100,6 +100,14 @@ inline nlohmann::json FromControllerBinding(ControllerBinding sb)
 	return sb.ToJSON();
 }
 
+inline void to_json(nlohmann::json& j, const ControllerBinding& d) {
+	j = const_cast<ControllerBinding&>(d).ToJSON();
+}
+
+inline void from_json(const nlohmann::json& j, ControllerBinding& d) {
+	d = ControllerBinding(const_cast<nlohmann::json&>(j));
+}
+
 using namespace nov8;
 namespace Game
 {
@@ -120,6 +128,10 @@ namespace Game
 #include <ControllerAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <ControllerAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <ControllerAtt.h>
 #include <JEnd.h>
@@ -137,11 +149,6 @@ namespace Game
 		virtual void Map(SUUUID so);
 		virtual void Unmap();
 		virtual void Step(float delta) {};
-		//Scripting
-		virtual v8_templates_creators GetV8TemplatesCreators();
-		virtual v8_context_creators GetV8ContextCreators();
-		virtual v8_functions_creators GetV8FunctionsCreators() { return {}; }
-		//Rendering
 		virtual void Render(SceneUnitId id) {};
 
 		SceneUnitId unit;
@@ -161,6 +168,7 @@ namespace Game
 	std::set<JUUID> GetControllersInSceneUnit(SceneUnitId id);
 	std::unique_ptr<Controller>& GetController(JUUID uuid);
 	std::set<JUUID> GetControllersBySceneObjectUUID(SUUUID uuid);
+	std::set<JUUIDName> GetControllersUUIDNamesBySceneObjectUUID(SUUUID uuid);
 	void DestroyControllers();
 	void DestroyController(JUUID uuid);
 	void StepControllers(DX::StepTimer& timer);
@@ -183,4 +191,5 @@ namespace Game
 
 	extern std::vector<std::string> GetControllers();
 	extern JUUID CreateController(std::string name, SUUUID sceneObject, nlohmann::json& json);
+	extern void CreateControllersMemberFunctionTemplates(Isolate* isolate, SceneUnitId id);
 };

@@ -34,7 +34,12 @@ namespace Game::ThirdPerson
 #include <Attributes/JInit.h>
 #include <ThirdPerson/ThirdPersonCharacterAtt.h>
 #include <JEnd.h>
+
 #include <Attributes/JUpdate.h>
+#include <ThirdPerson/ThirdPersonCharacterAtt.h>
+#include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
 #include <ThirdPerson/ThirdPersonCharacterAtt.h>
 #include <JEnd.h>
 	}

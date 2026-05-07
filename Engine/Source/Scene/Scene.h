@@ -70,6 +70,7 @@ namespace Scene
 	std::set<JUUID>& GetUnboundedSceneObjects(SceneUnitId id);
 
 	SceneObjectType GetSceneObjectType(SceneUnitId id, JUUID uuid);
+	SceneObjectType GetSceneObjectType(SUUUID suuuid);
 
 	void CreateSceneObject(SceneUnitId id, SceneObjectType so, nlohmann::json json);
 
@@ -158,9 +159,11 @@ namespace Scene
 
 	SceneObject* GetSceneObjectPointer(SceneUnitId id, JUUID uuid);
 	SceneObject* GetSceneObjectPointer(SUUUID suuid);
+	SceneObject* GetSceneObjectPointerByName(SceneUnitId id, SceneObjectType type, JNAME name);
+	std::vector<JNAME> GetSceneObjectsNames(SceneUnitId id, SceneObjectType type);
 
-	v8_templates_creators GetSceneObjectV8TemplatesCreators(SUUUID suuuid);
-	v8_context_creators GetSceneObjectV8ContextCreators(SUUUID suuuid);
+	//Scripting
+	void CreateSceneObjectsMemberFunctionTemplates(Isolate* isolate, SceneUnitId id);
 
 #if defined(_EDITOR)
 	//for drawing the panel

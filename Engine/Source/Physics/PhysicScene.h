@@ -52,6 +52,10 @@ namespace Scene
 #include <PhysicSceneAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <PhysicSceneAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <PhysicSceneAtt.h>
 #include <JEnd.h>

@@ -72,6 +72,10 @@ namespace Physics
 #include <PhysicObjectAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <PhysicObjectAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <PhysicObjectAtt.h>
 #include <JEnd.h>
@@ -123,11 +127,6 @@ namespace Physics
 		nlohmann::json CreateFromTrigger(std::string name, JUUID uuid, JUUID camId, std::string material);
 #endif
 
-		//Scripting
-		virtual v8_templates_creators GetV8TemplatesCreators() { return {}; }
-		virtual v8_context_creators GetV8ContextCreators() { return {}; }
-		virtual v8_functions_creators GetV8FunctionsCreators() { return {}; }
-
 		RenderableID renderable;
 		TriggerID trigger;
 		BoundaryID boundary;
@@ -166,6 +165,8 @@ namespace Physics
 	void RegisterCharacterHitCallback(JUUID object, std::function<void(PxFilterData)> callback);
 	void UnregisterCharacterHitCallback(JUUID object);
 	void CallCharacterHitCallback(JUUID destObject, PxFilterData filterData);
+	//Scripting
+	void CreatePhysicObjectMemberFunctionTemplates(Isolate* isolate, SceneUnitId id);
 
 	DEF_TEMPLATE_ID(PhysicObject, GetPhysicObject);
 };

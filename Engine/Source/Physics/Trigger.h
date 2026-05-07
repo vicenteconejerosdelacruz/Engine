@@ -59,6 +59,10 @@ namespace Scene
 #include <TriggerAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <TriggerAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <TriggerAtt.h>
 #include <JEnd.h>
@@ -83,10 +87,6 @@ namespace Scene
 		BoundingBox GetBoundingBox();
 #endif
 		void OnTriggerEvent(SUUUID sceneObject, unsigned int event);
-
-		//Scripting
-		virtual v8_templates_creators GetV8TemplatesCreators();
-		virtual v8_context_creators GetV8ContextCreators();
 
 		//State
 		DeleteHook markedForDelete;

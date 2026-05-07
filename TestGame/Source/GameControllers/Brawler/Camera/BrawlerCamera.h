@@ -9,6 +9,7 @@ namespace Game
 #include <Attributes/JOrder.h>
 #include <Brawler/BrawlerCameraAtt.h>
 #include <JEnd.h>
+
 #include <Editor/JDrawersDecl.h>
 #include <Brawler/BrawlerCameraAtt.h>
 #include <JEnd.h>
@@ -19,6 +20,11 @@ namespace Game
 #include <Attributes/JFlags.h>
 #include <Brawler/BrawlerCameraAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JStr2Flag.h>
+#include <Brawler/BrawlerCameraAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <Brawler/BrawlerCameraAtt.h>
 #include <JEnd.h>
@@ -33,10 +39,6 @@ namespace Game
 			void Map(SUUUID so) override;
 			void Unmap() override;
 			void Step(float delta) override;
-			//JS binding
-			v8_templates_creators GetV8TemplatesCreators() override;
-			v8_context_creators GetV8ContextCreators() override;
-			v8_functions_creators GetV8FunctionsCreators() override;
 
 			//object to interact with
 			CameraID camera;

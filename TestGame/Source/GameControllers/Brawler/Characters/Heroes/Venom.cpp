@@ -57,7 +57,12 @@ namespace Game::Brawler
 #include <Attributes/JInit.h>
 #include <Brawler/VenomAtt.h>
 #include <JEnd.h>
+
 #include <Attributes/JUpdate.h>
+#include <Brawler/VenomAtt.h>
+#include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
 #include <Brawler/VenomAtt.h>
 #include <JEnd.h>
 
@@ -109,6 +114,22 @@ namespace Game::Brawler
 		SetInitialConditions();
 	}
 
+	void Venom::RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script)
+	{
+		v8_register_method<Venom>(isolate, tpl, "PlayerReady", script, [](Venom* self) { if (self) self->VenomReady(); });
+		v8_register_method<Venom>(isolate, tpl, "StartNextPunchWindow", script, [](Venom* self) { if (self) self->StartVenomNextPunchWindow(); });
+		v8_register_method<Venom>(isolate, tpl, "EvaluateNextPunch", script, [](Venom* self) { if (self) self->EvaluateVenomNextPunch(); });
+		v8_register_method<Venom>(isolate, tpl, "SwitchToState", script, [](Venom* self, std::string state) { if (self) self->vsm.ChangeState(stringToVenomStates.at(state)); });
+		v8_register_method<Venom>(isolate, tpl, "BeginJump", script, [](Venom* self) { if (self) self->VenomBeginJump(); });
+		v8_register_method<Venom>(isolate, tpl, "EndJumpLanding", script, [](Venom* self) { if (self) self->VenomEndJumpLanding(); });
+		v8_register_method<Venom>(isolate, tpl, "BeginRunJump", script, [](Venom* self) { if (self) self->VenomBeginRunJump(); });
+		v8_register_method<Venom>(isolate, tpl, "RunJumpLanding", script, [](Venom* self) { if (self) self->VenomRunJumpLanding(); });
+		v8_register_method<Venom>(isolate, tpl, "TakeHit", script, [](Venom* self, JUUID enemyController, int damage) { if (self) self->TakeHit(enemyController, damage); });
+		v8_register_method<Venom>(isolate, tpl, "OnDeathAnimationEnd", script, [](Venom* self) { if (self) self->OnDeathAnimationEnd(); });
+		v8_register_method<Venom>(isolate, tpl, "PlayPunchSound", script, [](Venom* self, int punchIdx, int enemyHealth) { if (self) self->PlayPunchSound(punchIdx, enemyHealth); });
+		v8_register_method<Venom>(isolate, tpl, "ThrowWeb", script, [](Venom* self) { if (self) self->ThrowWeb(); });
+	}
+
 	void Venom::SetInitialConditions()
 	{
 		Hero::SetInitialConditions();
@@ -149,7 +170,7 @@ namespace Game::Brawler
 	{
 		using namespace Scene;
 		Hero::Map(so);
-		SceneObjectType type = GetSceneObjectType(FROMSUUUID(so));
+		SceneObjectType type = GetSceneObjectType(so);
 
 		if (type == SO_Renderables)
 		{
@@ -243,43 +264,6 @@ namespace Game::Brawler
 		{
 			brawlerCam->followY(false);
 		}
-	}
-
-	//JS binding
-	v8_templates_creators Venom::GetV8TemplatesCreators()
-	{
-		v8_templates_creators creators = Hero::GetV8TemplatesCreators();
-#include <Attributes/JV8Templates.h>
-#include <Brawler/VenomAtt.h>
-#include <JEnd.h>
-		return creators;
-	}
-
-	v8_context_creators Venom::GetV8ContextCreators()
-	{
-		v8_context_creators creators = Hero::GetV8ContextCreators();
-#include <Attributes/JV8Context.h>
-#include <Brawler/VenomAtt.h>
-#include <JEnd.h>
-		return creators;
-	}
-
-	v8_functions_creators Venom::GetV8FunctionsCreators()
-	{
-		return {
-			{ "PlayerReady", v8_wrap_call([&] { VenomReady(); }) },
-			{ "StartNextPunchWindow", v8_wrap_call([&] { StartVenomNextPunchWindow(); }) },
-			{ "EvaluateNextPunch", v8_wrap_call([&] { EvaluateVenomNextPunch(); }) },
-			{ "SwitchToState", v8_wrap_call([&](std::string state) { vsm.ChangeState(stringToVenomStates.at(state)); }) },
-			{ "BeginJump", v8_wrap_call([&] { VenomBeginJump(); }) },
-			{ "EndJumpLanding", v8_wrap_call([&] { VenomEndJumpLanding(); }) },
-			{ "BeginRunJump", v8_wrap_call([&] { VenomBeginRunJump(); }) },
-			{ "RunJumpLanding", v8_wrap_call([&] { VenomRunJumpLanding(); }) },
-			{ "TakeHit", v8_wrap_call([&](JUUID enemyController, int damage) { TakeHit(enemyController, damage); }) },
-			{ "OnDeathAnimationEnd", v8_wrap_call([&] { OnDeathAnimationEnd(); }) },
-			{ "PlayPunchSound", v8_wrap_call([&](int punchIdx, int enemyHealth) { PlayPunchSound(punchIdx, enemyHealth); })},
-			{ "ThrowWeb", v8_wrap_call([&] { ThrowWeb(); })},
-		};
 	}
 
 	//Joystick

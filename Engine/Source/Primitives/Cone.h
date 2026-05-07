@@ -23,6 +23,10 @@ namespace Primitives
 #include <ConeAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <ConeAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <ConeAtt.h>
 #include <JEnd.h>

@@ -112,6 +112,10 @@ namespace Templates
 #include <MaterialAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <MaterialAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <MaterialAtt.h>
 #include <JEnd.h>

@@ -61,6 +61,10 @@ namespace Templates
 #include <Attributes/JUpdate.h>
 #include <RenderPassAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
+#include <RenderPassAtt.h>
+#include <JEnd.h>
 	}
 
 #if defined(_EDITOR)

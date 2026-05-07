@@ -82,13 +82,6 @@ namespace Scene
 		void SetCanBuildAssetsTree(bool value);
 #endif
 
-		//Scripting
-		void CreateScriptingSceneTemplate();
-		void ClearScriptingSceneTemplate();
-		Global<ObjectTemplate>& GetScriptingSceneTemplate();
-		void AddToScriptingSceneTemplate(SceneObject* so);
-		void EraseFromScriptingSceneTemplate(SceneObject* so);
-
 	private:
 		SceneUnitId id;
 		std::string unitName;
@@ -109,9 +102,5 @@ namespace Scene
 		//f2f
 		std::unique_ptr<CommandsProcessor> commandsProcessor;
 		std::unique_ptr<CommandsProcessor> computeProcessor;
-
-		//Scripting
-		Global<ObjectTemplate> sceneTemplate;
-		std::map<SceneObjectType, Global<ObjectTemplate>> containersTemplates;
 	};
 };

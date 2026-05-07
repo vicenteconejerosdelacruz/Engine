@@ -22,6 +22,10 @@ namespace Primitives
 #include <CubeAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <CubeAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <CubeAtt.h>
 #include <JEnd.h>

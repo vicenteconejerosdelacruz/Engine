@@ -28,6 +28,10 @@ namespace Game
 #include <Brawler/BrawlerSceneAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <Brawler/BrawlerSceneAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <Brawler/BrawlerSceneAtt.h>
 #include <JEnd.h>
@@ -42,8 +46,12 @@ namespace Game
 			void Map(SUUUID so) override;
 			void Unmap() override;
 
+			//States
+			void OnStartGame();
+
 			//Step
 			void Step(float delta) override;
+
 			//Rendering
 			void Render(SceneUnitId id) override;
 

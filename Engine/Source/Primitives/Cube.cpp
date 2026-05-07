@@ -71,6 +71,10 @@ namespace Primitives
 #include <Attributes/JUpdate.h>
 #include <CubeAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
+#include <CubeAtt.h>
+#include <JEnd.h>
 	}
 
 #if defined(_EDITOR)

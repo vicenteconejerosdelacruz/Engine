@@ -45,6 +45,10 @@ namespace Scene
 #include <SoundFXAtt.h>
 #include <JEnd.h>
 
+#include <Attributes/JStr2Flag.h>
+#include <SoundFXAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <SoundFXAtt.h>
 #include <JEnd.h>

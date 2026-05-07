@@ -19,6 +19,11 @@ namespace Game
 #include <Attributes/JFlags.h>
 #include <ThirdPerson/ThirdPersonCharacterAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JStr2Flag.h>
+#include <ThirdPerson/ThirdPersonCharacterAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <ThirdPerson/ThirdPersonCharacterAtt.h>
 #include <JEnd.h>

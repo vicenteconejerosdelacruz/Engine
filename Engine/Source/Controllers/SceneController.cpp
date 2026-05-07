@@ -52,6 +52,11 @@ namespace Scene
 #include <Attributes/JUpdate.h>
 #include <SceneControllerAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JV8Att.h>
+#include <SceneControllerAtt.h>
+#include <JEnd.h>
+
 		RENAME_ON_DELETION(SceneController);
 	}
 
@@ -101,16 +106,6 @@ namespace Scene
 
 	void SceneControllerStep(SceneUnitId id, float step)
 	{
-		//if (GetCountFromSceneControllers(id) == 0ULL) return;
-
-		//UpdatePhysicObjects(id);
-
-		//if (step == 0.0f) return;
-
-		//SceneControllerID scene = MAKESUUUID(id, *GetSceneControllers(id).begin());
-		//scene->pxScene->simulate(gameUpdateFrequency);
-		//scene->pxScene->fetchResults(true);
-		//UpdateRenderablesFromGlobalPose(id);
 	}
 
 	void DestroySceneControllers()

@@ -243,12 +243,6 @@
     <ClInclude Include="EngineInc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Scripting\JExpose.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="JExpose\Scripting\JScriptBind.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="JExpose\Editor\JWriteJson.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -645,12 +639,6 @@
     <ClInclude Include="Scripting\NoV8.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Attributes\JV8Templates.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="JExpose\Attributes\JV8Context.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Scripting\ScriptBinding.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -700,6 +688,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="JExpose\Templates\MoldAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Attributes\JStr2Flag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Attributes\JV8Att.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scripting\SceneUnitScripting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1047,6 +1044,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Templates\Mold\Mold.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JExpose\JObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scripting\SceneUnitScripting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

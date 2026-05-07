@@ -93,6 +93,11 @@ namespace Game
 #include <Attributes/JFlags.h>
 #include <Brawler/VenomAtt.h>
 #include <JEnd.h>
+
+#include <Attributes/JStr2Flag.h>
+#include <Brawler/VenomAtt.h>
+#include <JEnd.h>
+
 #include <Attributes/JDecl.h>
 #include <Brawler/VenomAtt.h>
 #include <JEnd.h>
@@ -127,6 +132,7 @@ namespace Game
 
 			//Constructor and Binding
 			Venom(nlohmann::json& json);
+			static void RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script);
 			void SetInitialConditions() override;
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
@@ -144,11 +150,6 @@ namespace Game
 			//Physics
 			void OnStaticContactEvent(JUUID physicObject, unsigned int event);
 			void OnCharacterHitEvent(PxFilterData fd);
-
-			//JS binding
-			v8_templates_creators GetV8TemplatesCreators() override;
-			v8_context_creators GetV8ContextCreators() override;
-			v8_functions_creators GetV8FunctionsCreators() override;
 
 			//Joystick
 			void UpdateLeftStickVector();

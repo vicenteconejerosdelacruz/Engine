@@ -150,3 +150,11 @@ inline nlohmann::json FromDepthStencilDesc(DepthStencilDesc r)
 {
 	return r.json();
 }
+
+inline void to_json(nlohmann::json& j, const DepthStencilDesc& d) {
+	j = const_cast<DepthStencilDesc&>(d).json();
+}
+
+inline void from_json(const nlohmann::json& j, DepthStencilDesc& d) {
+	d = DepthStencilDesc(const_cast<nlohmann::json&>(j));
+}
