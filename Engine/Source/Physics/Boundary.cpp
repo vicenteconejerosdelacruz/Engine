@@ -237,6 +237,7 @@ namespace Scene
 
 				b->physicObject->color(b->color());
 				b->physicObject->overrideColor(b->overrideColor());
+				b->physicObject->flag(std::vector<std::size_t>({ PhysicObject::Update_overrideColor, PhysicObject::Update_color }));
 
 				b->clean({ Boundary::Update_overrideColor, Boundary::Update_color });
 			};
@@ -265,6 +266,13 @@ namespace Scene
 
 				b->clean(Boundary::Update_collisionMask);
 			};
+		auto checkCollisionEnabled = [](BoundaryID b)
+			{
+				if (!b->dirty(Boundary::Update_collisionEnabled) || !b->physicObject->shape) return;
+
+				b->physicObject->shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, b->collisionEnabled());
+				b->clean(Boundary::Update_collisionEnabled);
+			};
 
 		std::for_each(bs.begin(), bs.end(), checkForPosRot);
 		std::for_each(bs.begin(), bs.end(), checkForScale);
@@ -275,6 +283,7 @@ namespace Scene
 		std::for_each(bs.begin(), bs.end(), checkObjectMask);
 		std::for_each(bs.begin(), bs.end(), checkCollisionMask);
 		std::for_each(bs.begin(), bs.end(), checkForDelete);
+		std::for_each(bs.begin(), bs.end(), checkCollisionEnabled);
 	}
 
 	void DestroyBoundaries()
