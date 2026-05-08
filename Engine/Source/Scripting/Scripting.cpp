@@ -193,6 +193,7 @@ namespace Scripting
 				v8_string(isolate, name),
 				Scripting::WrapJObject<Controller>(isolate, *scriptData.get(), controller)
 			);
+			controller->BindNestedControllers(context, isolate, scriptData);
 		}
 	}
 

@@ -150,6 +150,8 @@ namespace Game
 		virtual void Unmap();
 		virtual void Step(float delta) {};
 		virtual void Render(SceneUnitId id) {};
+		//Scripting
+		virtual void BindNestedControllers(Local<Context> context, Isolate* isolate, std::unique_ptr<SceneUnitScripting>& scriptData) {}
 
 		SceneUnitId unit;
 		SUUUID sceneObject;
