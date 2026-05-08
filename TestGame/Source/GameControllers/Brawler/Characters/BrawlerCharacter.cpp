@@ -45,4 +45,17 @@ namespace Game::Brawler
 		Controller::WriteJson(j);
 	}
 #endif
+	void BrawlerCharacter::BindNestedControllers(Local<Context> context, Isolate* isolate, std::unique_ptr<SceneUnitScripting>& scriptData)
+	{
+		std::set<JNAME> names = { sceneController().name };
+		std::set<JUUIDName> soControllers = GetControllersUUIDNamesBySceneObjectUUID(MAKESUUUID(unit, sceneController().uuid));
+		std::set<JUUIDName> controllers;
+		std::copy_if(soControllers.begin(), soControllers.end(), std::inserter(controllers, controllers.begin()), [&](JUUIDName un)
+			{
+				return names.contains(std::get<1>(un));
+			}
+		);
+
+		Scripting::BindSceneObjectControllers(context, isolate, scriptData, controllers);
+	}
 };

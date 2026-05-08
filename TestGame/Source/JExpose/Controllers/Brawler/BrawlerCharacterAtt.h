@@ -1,5 +1,6 @@
 JCLASS(BrawlerCharacter, _)
 JEXPOSE(std::string, name, "name", jedv_t_string, 1, false)
+JEXPOSE_TRANSFORM(ControllerBinding, sceneController, ToControllerBinding, FromControllerBinding, {}, jedv_t_so_controller_instance, 1, false)
 JEXPOSE_ENUM(CharacterLookingTo, lookingTo, CLT_Right, jedv_t_enum, 1, false)
 JEXPOSE(int, health, 100, jedv_t_integer, 1, false)
 JEXPOSE_TRANSFORM(XMFLOAT3, lookToSwapVector, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(1.0f, 1.0f, 1.0f), jedv_t_float3, 1, false)

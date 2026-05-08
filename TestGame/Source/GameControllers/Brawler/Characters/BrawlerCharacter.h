@@ -60,6 +60,8 @@ namespace Game
 			DECL_CONTROLLER_DRAWER(BrawlerCharacter, Controller);
 			CharacterLookingTo initialLookingTo;
 #endif
+			//Scripting
+			void BindNestedControllers(Local<Context> context, Isolate* isolate, std::unique_ptr<SceneUnitScripting>& scriptData) override;
 		};
 	};
 };

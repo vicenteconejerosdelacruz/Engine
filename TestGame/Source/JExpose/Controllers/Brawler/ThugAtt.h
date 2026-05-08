@@ -1,5 +1,4 @@
 JCLASS(Thug, _)
-JEXPOSE_TRANSFORM(ControllerBinding, sceneController, ToControllerBinding, FromControllerBinding, {}, jedv_t_so_controller_instance, 1, false)
 JEXPOSE(std::string, idleAnimation, "", jedv_t_string, 1, false)
 JEXPOSE(std::string, combatIdleAnimation, "", jedv_t_string, 1, false)
 JEXPOSE(std::string, combatMoveFwAnimation, "", jedv_t_string, 1, false)
