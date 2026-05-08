@@ -67,6 +67,10 @@ void JObject::flag(size_t flag)
 {
 	updateFlag |= (1ULL << flag);
 }
+void JObject::flag(std::vector<size_t> flags)
+{
+	std::for_each(flags.begin(), flags.end(), [&](size_t f) { flag(f); });
+}
 void JObject::flag(std::string key)
 {
 	flag(GetStringToFlags().at(key));

@@ -24,6 +24,7 @@ struct JObject : nlohmann::json
 	bool dirty(size_t flag) const;
 	bool dirty(std::vector<size_t> flags);
 	void flag(size_t flag);
+	void flag(std::vector<size_t> flags);
 	void flag(std::string key);
 	void clean(size_t flag);
 	void clean(std::vector<size_t> flags);
