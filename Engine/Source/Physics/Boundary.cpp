@@ -135,12 +135,14 @@ namespace Scene
 		nlohmann::json data =
 		{
 			{ "behavior", "Static" },
+			{ "collisionEnabled", collisionEnabled() },
+			{ "kinematic", kinematic() },
 			{ "geometry", geometry() },
 			{ "color", FromXMFLOAT4(color()) },
 			{ "overrideColor", overrideColor() },
 			{ "skipRendering", skipRendering() },
 			{ "objectMask", objectMask() },
-			{ "collisionMask", collisionMask() }
+			{ "collisionMask", collisionMask() },
 		};
 
 		std::string pOname = name() + "-physicObject";
@@ -246,6 +248,7 @@ namespace Scene
 				if (!b->dirty(Boundary::Update_skipRendering)) return;
 
 				b->physicObject->skipRendering(b->skipRendering());
+				b->physicObject->flag(PhysicObject::Update_skipRendering);
 
 				b->clean(Boundary::Update_skipRendering);
 			};
@@ -255,6 +258,7 @@ namespace Scene
 				if (!t->dirty(Boundary::Update_objectMask)) return;
 
 				t->physicObject->objectMask(t->objectMask());
+				t->physicObject->flag(PhysicObject::Update_objectMask);
 
 				t->clean(Boundary::Update_objectMask);
 			};
@@ -263,15 +267,27 @@ namespace Scene
 				if (!b->dirty(Boundary::Update_collisionMask)) return;
 
 				b->physicObject->collisionMask(b->collisionMask());
+				b->physicObject->flag(PhysicObject::Update_collisionMask);
 
 				b->clean(Boundary::Update_collisionMask);
 			};
 		auto checkCollisionEnabled = [](BoundaryID b)
 			{
-				if (!b->dirty(Boundary::Update_collisionEnabled) || !b->physicObject->shape) return;
+				if (!b->dirty(Boundary::Update_collisionEnabled)) return;
 
-				b->physicObject->shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, b->collisionEnabled());
+				b->physicObject->collisionEnabled(b->collisionEnabled());
+				b->physicObject->flag(PhysicObject::Update_collisionEnabled);
+
 				b->clean(Boundary::Update_collisionEnabled);
+			};
+		auto checkKinematic = [](BoundaryID b)
+			{
+				if (!b->dirty(Boundary::Update_kinematic)) return;
+
+				b->physicObject->kinematic(b->kinematic());
+				b->physicObject->flag(PhysicObject::Update_kinematic);
+
+				b->clean(Boundary::Update_kinematic);
 			};
 
 		std::for_each(bs.begin(), bs.end(), checkForPosRot);
@@ -284,6 +300,7 @@ namespace Scene
 		std::for_each(bs.begin(), bs.end(), checkCollisionMask);
 		std::for_each(bs.begin(), bs.end(), checkForDelete);
 		std::for_each(bs.begin(), bs.end(), checkCollisionEnabled);
+		std::for_each(bs.begin(), bs.end(), checkKinematic);
 	}
 
 	void DestroyBoundaries()

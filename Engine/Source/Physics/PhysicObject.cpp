@@ -220,18 +220,36 @@ namespace Physics
 		PxQuat localRotQ = (ApplyGeometryLocalPoseTransformation.contains(meshName)) ?
 			ApplyGeometryLocalPoseTransformation.at(meshName)(localRot) : ToPxQuat(localRot);
 
+		PxRigidDynamic* dynamicActor = nullptr;
 		//create the PxActor & the PxShape
-		actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
+		if (!kinematic())
+		{
+			actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
+		}
+		else
+		{
+			actor = gPhysics->createRigidDynamic(PxTransform(ToPxVec3(pos)));
+			dynamicActor = actor->is<PxRigidDynamic>();
+			dynamicActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+		}
 		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
 		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), localRotQ));
 		shape->setSimulationFilterData(GetPxFilterData());
-
-		//set the actor position and rotation
-		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+		shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, collisionEnabled());
 
 		//add the actor to the scene
 		PhysicSceneID scene = MAKESUUUID((renderable ? renderable.unit() : boundary.unit()), *GetPhysicScenes((renderable ? renderable.unit() : boundary.unit())).begin());
 		scene->pxScene->addActor(*actor);
+
+		//set the actor position and rotation
+		if (!kinematic())
+		{
+			actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+		}
+		else
+		{
+			dynamicActor->setKinematicTarget(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+		}
 
 		//assign user data to this physic object
 		shape->userData = this;
@@ -263,13 +281,33 @@ namespace Physics
 		//create the PxActor
 		actor = gPhysics->createRigidDynamic(PxTransform(PxIdentity));
 
+		//set as kinematic if needed
+		PxRigidDynamic* dynamicActor = nullptr;
+		if (kinematic())
+		{
+			dynamicActor = actor->is<PxRigidDynamic>();
+			dynamicActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+		}
+
 		//create the PxShape
 		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
 		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), localRotQ));
 		shape->setSimulationFilterData(GetPxFilterData());
+		shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, collisionEnabled());
+
+		//add the actor to the scene
+		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		scene->pxScene->addActor(*actor);
 
 		//set the actor position and rotation
-		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+		if (!kinematic())
+		{
+			actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+		}
+		else
+		{
+			dynamicActor->setKinematicTarget(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+		}
 
 		//set the body(actor) density and compute it's inertia
 		PxRigidBody* pxBody = (PxRigidBody*)actor;
@@ -279,10 +317,6 @@ namespace Physics
 		PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
 		pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
 		pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
-
-		//add the actor to the scene
-		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
-		scene->pxScene->addActor(*actor);
 
 		//assign user data to this physic object
 		actor->userData = this;
@@ -375,6 +409,7 @@ namespace Physics
 		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material, PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION);
 		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), localRotQ));
 		shape->setSimulationFilterData(GetPxFilterData());
+		shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, collisionEnabled());
 
 		//set the actor position and rotation
 		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
@@ -405,18 +440,37 @@ namespace Physics
 		XMFLOAT3 pos = renderable->position();
 		XMVECTOR rot = renderable->rotationQ();
 
+		PxRigidDynamic* dynamicActor = nullptr;
 		//create the PxActor & the PxShape
-		actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
+		if (!kinematic())
+		{
+			actor = gPhysics->createRigidStatic(PxTransform(ToPxVec3(pos)));
+		}
+		else
+		{
+			actor = gPhysics->createRigidDynamic(PxTransform(ToPxVec3(pos)));
+			dynamicActor = actor->is<PxRigidDynamic>();
+			dynamicActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+		}
+
 		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
 		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
 		shape->setSimulationFilterData(GetPxFilterData());
-
-		//set the actor position and rotation
-		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+		shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, collisionEnabled());
 
 		//add the actor to the scene
 		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
 		scene->pxScene->addActor(*actor);
+
+		//set the actor position and rotation
+		if(!kinematic())
+		{
+			actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+		}
+		else
+		{
+			dynamicActor->setKinematicTarget(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+		}
 
 		//assign user data to this physic object
 		actor->userData = this;
@@ -442,14 +496,35 @@ namespace Physics
 
 		//create the PxActor
 		actor = gPhysics->createRigidDynamic(PxTransform(PxIdentity));
+		
+		//set as kinematic if needed
+		PxRigidDynamic* dynamicActor = nullptr;
+		if (kinematic())
+		{
+			dynamicActor = actor->is<PxRigidDynamic>();
+			dynamicActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+		}
 
 		//create the PxShape
 		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
 		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
 		shape->setSimulationFilterData(GetPxFilterData());
+		shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, collisionEnabled());
+
+
+		//add the actor to the scene
+		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
+		scene->pxScene->addActor(*actor);
 
 		//set the actor position and rotation
-		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+		if (!kinematic())
+		{
+			actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+		}
+		else
+		{
+			dynamicActor->setKinematicTarget(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+		}
 
 		//set the body(actor) density and compute it's inertia
 		PxRigidBody* pxBody = (PxRigidBody*)actor;
@@ -459,10 +534,6 @@ namespace Physics
 		PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
 		pxDynamic->setLinearVelocity(ToPxVec3(linearVelocity()));
 		pxDynamic->setAngularVelocity(ToPxVec3(angularVelocity()));
-
-		//add the actor to the scene
-		PhysicSceneID scene = MAKESUUUID(renderable.unit(), *GetPhysicScenes(renderable.unit()).begin());
-		scene->pxScene->addActor(*actor);
 
 		//assign user data to this physic object
 		actor->userData = this;
@@ -498,6 +569,7 @@ namespace Physics
 		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material, PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION);
 		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
 		shape->setSimulationFilterData(GetPxFilterData());
+		shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, collisionEnabled());
 
 		//set the actor position and rotation
 		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
@@ -1359,6 +1431,24 @@ namespace Physics
 				}
 			};
 #endif
+		auto checkCollisionEnabled = [](PhysicObjectID p)
+			{
+				if (!p->dirty(PhysicObject::Update_collisionEnabled) || !p->shape) return;
+
+				p->shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, p->collisionEnabled());
+
+				p->clean(Boundary::Update_collisionEnabled);
+			};
+		auto checkKinematic = [](PhysicObjectID p)
+			{
+				if (!p->dirty(PhysicObject::Update_kinematic)) return;
+
+				p->DestroyPhysicsBehavior();
+				p->CreatePhysicsBehavior();
+				p->UpdatePhysicsAvatarTransformation();
+
+				p->clean(PhysicObject::Update_kinematic);
+			};
 
 		std::for_each(phOs.begin(), phOs.end(), checkLocalPose);
 		std::for_each(phOs.begin(), phOs.end(), checkBehaviorGeom);
