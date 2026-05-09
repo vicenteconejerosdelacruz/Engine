@@ -3405,6 +3405,11 @@ namespace Editor
 		scriptEditModal.Init(object, attribute);
 	}
 
+	void StartScriptEdition(std::string att, std::string script, std::function<void(std::string)> writer)
+	{
+		scriptEditModal.Init(att, script, writer);
+	}
+
 	void OpenScriptBindingSelector(JObject* object, std::string attribute, int index, ScriptBinding sb)
 	{
 		using namespace Scene;

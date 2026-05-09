@@ -12,9 +12,21 @@ namespace Editor
 
 void ScriptEditModal::Init(JObject* j, std::string att)
 {
+	mode = ScriptEditModalMode::Mode_JObject;
 	json = j;
 	attribute = att;
 	script = j->at(att);
+	write = nullptr;
+	SimpleModal::Init(ImVec2(0.8f, 0.75f), attribute);
+}
+
+void ScriptEditModal::Init(std::string att, std::string script, std::function<void(std::string)> writer)
+{
+	mode = ScriptEditModalMode::Mode_Callback;
+	json = nullptr;
+	attribute = att;
+	this->script = script;
+	write = writer;
 	SimpleModal::Init(ImVec2(0.8f, 0.75f), attribute);
 }
 
@@ -36,7 +48,15 @@ void ScriptEditModal::Draw()
 		[&]
 		{
 			showing = false;
-			json->at(attribute) = script;
+			if(mode== ScriptEditModalMode::Mode_JObject)
+			{
+				json->at(attribute) = script;
+			}
+			else
+			{
+				write(script);
+				write = nullptr;
+			}
 			Editor::MarkSceneUnitAsModified(Editor::currentSceneUnitId);
 		}
 	);
