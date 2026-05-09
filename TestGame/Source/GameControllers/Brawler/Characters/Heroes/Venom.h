@@ -270,6 +270,7 @@ namespace Game
 			//SceneObjects
 			RenderableID venom;
 			RenderableID web;
+			XMVECTOR posDelta;
 
 			//CameraID camera;
 			PhysicSceneID physicScene;

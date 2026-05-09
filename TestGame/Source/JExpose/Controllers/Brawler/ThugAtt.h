@@ -1,5 +1,6 @@
 JCLASS(Thug, _)
 JEXPOSE(std::string, idleAnimation, "", jedv_t_string, 1, false)
+JEXPOSE(bool, combatEnabled, false, jedv_t_boolean, 1, false)
 JEXPOSE(std::string, combatIdleAnimation, "", jedv_t_string, 1, false)
 JEXPOSE(std::string, combatMoveFwAnimation, "", jedv_t_string, 1, false)
 JEXPOSE(std::string, combatMoveFarAnimation, "", jedv_t_string, 1, false)

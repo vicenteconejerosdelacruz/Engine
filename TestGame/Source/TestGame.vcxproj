@@ -69,89 +69,89 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Editor_Development|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Editor_SoftDebug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Editor_Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Editor_Development|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Editor_SoftDebug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Editor_Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -439,7 +439,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;_DEVELOPMENT;HAS_DIRECTXTK12;_EDITOR;DIRECTX_TEX_VERSION=207;TOOL_VERSION=DIRECTX_TEX_VERSION;NOMINMAX;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;V8_ENABLE_SANDBOX;V8_ENABLE_CHECKS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>JExpose/Controllers;GamePhysics;../../Engine/Source;../../Engine/Source/Scene;../../Engine/Source/JExpose;../../Engine/Source/Editor;../../Engine/Source/pch;../../Engine/Source/Controllers;../../Engine/Source/Physics;../../Engine/Source/UI;../../Engine/Source/Templates;../../Engine/Source/Common;../../Engine/Source/Primitives;../../Engine/Source/JExpose/Scene;../../Engine/Source/JExpose/Templates;../../Engine/Source/JExpose/Primitives;../../Engine/Source/JExpose/Physics;../../Engine/Source/JExpose/Controllers;../../Engine/Source/Renderer;../../Engine/Source/Scripting;../../Engine/Source/Animation;../../Engine/Source/Shaders/Compute;../../SDKs/dxc/dxc_2024_07_31/inc;../../SDKs/assimp/assimp-6.0.4/build/include;../../SDKs/assimp/assimp-6.0.4/include;../../SDKs/DirectXTK12/Inc;../../SDKs/imgui;../../SDKs/imgui/backends;../../SDKs/imguizmo;../../SDKs/tween;../../SDKs/DirectXTex/DirectXTex;../../SDKs/DirectXTex/Texconv;../../SDKs/DirectXTex/Texdiag;../../SDKs/DirectXTex/Texassemble;../../SDKs/DirectXTex/Common;../../SDKs/DirectXTex/CmdLineHelpers;../../SDKs/v8pp-2.1.1/packages/v8-v143-x64.9.8.177.4/include;../../SDKs/v8pp-2.1.1;../../SDKs/v8pp-2.1.1/out;../../SDKs/PhysX/physx/include;../../SDKs/ultralight/ultralight-free-sdk-1.4.0-win-x64/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>JExpose/Controllers;GamePhysics;GameControllers;../../Engine/Source;../../Engine/Source/Scene;../../Engine/Source/JExpose;../../Engine/Source/Editor;../../Engine/Source/pch;../../Engine/Source/Controllers;../../Engine/Source/Physics;../../Engine/Source/UI;../../Engine/Source/Templates;../../Engine/Source/Common;../../Engine/Source/Primitives;../../Engine/Source/JExpose/Scene;../../Engine/Source/JExpose/Templates;../../Engine/Source/JExpose/Primitives;../../Engine/Source/JExpose/Physics;../../Engine/Source/JExpose/Controllers;../../Engine/Source/Renderer;../../Engine/Source/Scripting;../../Engine/Source/Animation;../../Engine/Source/Shaders/Compute;../../SDKs/dxc/dxc_2024_07_31/inc;../../SDKs/assimp/assimp-6.0.4/build/include;../../SDKs/assimp/assimp-6.0.4/include;../../SDKs/DirectXTK12/Inc;../../SDKs/imgui;../../SDKs/imgui/backends;../../SDKs/imguizmo;../../SDKs/tween;../../SDKs/DirectXTex/DirectXTex;../../SDKs/DirectXTex/Texconv;../../SDKs/DirectXTex/Texdiag;../../SDKs/DirectXTex/Texassemble;../../SDKs/DirectXTex/Common;../../SDKs/DirectXTex/CmdLineHelpers;../../SDKs/v8pp-2.1.1/packages/v8-v143-x64.9.8.177.4/include;../../SDKs/v8pp-2.1.1;../../SDKs/v8pp-2.1.1/out;../../SDKs/PhysX/physx/include;../../SDKs/ultralight/ultralight-free-sdk-1.4.0-win-x64/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -513,6 +513,7 @@
     <ClInclude Include="GameControllers\Brawler\Camera\BrawlerCamera.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\BrawlerCharacter.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\Heroes\Hero.h" />
+    <ClInclude Include="GameControllers\Brawler\Rounds\BrawlerRound.h" />
     <ClInclude Include="GameControllers\Brawler\Scene\BrawlerScene.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\Enemies\Thug.h" />
     <ClInclude Include="GameControllers\Test\SpinYaw.h" />
@@ -527,6 +528,7 @@
     <ClInclude Include="JExpose\Controllers\ThirdPerson\ThirdPersonCharacterAtt.h" />
     <ClInclude Include="JExpose\Controllers\Brawler\ThugAtt.h" />
     <ClInclude Include="JExpose\Controllers\Brawler\VenomAtt.h" />
+    <ClInclude Include="JExpose\Editor\JEdvBrawlerDrawer.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
@@ -543,6 +545,7 @@
     <ClCompile Include="GameControllers\ThirdPerson\ThirdPersonCharacter.cpp" />
     <ClCompile Include="GameControllers\Brawler\Characters\Heroes\Venom.cpp" />
     <ClCompile Include="GamePhysics\GamePhysics.cpp" />
+    <ClCompile Include="JExpose\Editor\JEdvBrawlerDrawer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">pch.h</PrecompiledHeaderFile>

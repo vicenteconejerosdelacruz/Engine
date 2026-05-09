@@ -203,6 +203,9 @@ namespace Game::Brawler
 
 	void Thug::Idle()
 	{
+		if (!combatEnabled())
+			return;
+
 		if (ShouldCombatIdle())
 		{
 			tsm.ChangeState(TS_CombatIdle);

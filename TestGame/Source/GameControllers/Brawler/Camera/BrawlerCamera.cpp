@@ -36,6 +36,12 @@ namespace Game::Brawler
 	{
 		followX(initialFollowX);
 		followY(initialFollowY);
+		leftBoundaryB = MAKESUUUID(unit, leftBoundary());
+		rightBoundaryB = MAKESUUUID(unit, rightBoundary());
+		topBoundaryB = MAKESUUUID(unit, topBoundary());
+		leftBoundaryPO = leftBoundaryB->physicObject;
+		rightBoundaryPO = rightBoundaryB->physicObject;
+		topBoundaryPO = topBoundaryB->physicObject;
 	}
 
 #if defined(_EDITOR)
@@ -53,11 +59,17 @@ namespace Game::Brawler
 		Controller::Map(so);
 
 		camera = so;
-		venomR = MAKESUUUID(std::get<0>(so), venom());
+		heroes[0] = MAKESUUUID(std::get<0>(so), venom());
 		YcamInitial = camera->position().y;
-		Ycam2venom = YcamInitial - venomR->position().y;
+		Ycam2venom = YcamInitial - heroes[0]->position().y;
 		GetController<Brawler::BrawlerScene>(unit, sceneController())->RegisterCamera(uuid());
-
+		ControllerBinding cb(
+			{
+				{ "uuid",venom() },
+				{ "name","venom" }
+			}
+		);
+		venomC = GetController<Brawler::Venom>(unit, cb);
 		SetInitialConditions();
 	}
 
@@ -65,7 +77,8 @@ namespace Game::Brawler
 	{
 		Controller::Unmap();
 		camera.clear();
-		venomR.clear();
+		heroes[0].clear();
+		heroes[1].clear();
 	}
 
 	void BrawlerCamera::Step(float delta)
@@ -77,6 +90,8 @@ namespace Game::Brawler
 
 		XMFLOAT3 p = camera->position();
 
+		p.x += XMVectorGetX(venomC->posDelta);
+		/*
 		if (followX())
 		{
 			p.x = venomR->position().x;
@@ -90,6 +105,7 @@ namespace Game::Brawler
 		{
 			p.y = YcamInitial;
 		}
+		*/
 
 		camera->position(p);
 	}

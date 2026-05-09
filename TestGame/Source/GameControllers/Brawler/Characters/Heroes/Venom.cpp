@@ -137,6 +137,7 @@ namespace Game::Brawler
 		blockedWallMovementMask(0U);
 		vsm.currentState = VS_None;
 		venomScale = { 0.0f,0.0f,0.0f };
+		posDelta = XMVectorZero();
 		leftStick = XMVectorZero();
 		runningJumpLeftStick = XMVectorZero();
 		downSpeed = 0.0f;
@@ -227,7 +228,7 @@ namespace Game::Brawler
 		{
 			buttons.Reset();
 		}
-
+		posDelta = XMVectorZero();
 		if (vsm.currentState != VS_Death)
 		{
 			XMVECTOR XMpos, XMrot, XMscl;
@@ -317,10 +318,22 @@ namespace Game::Brawler
 	//Movement
 	void Venom::CharacterMoveXZPlane(XMVECTOR stickDisplacement, float dt, float sideSpeed, XMFLOAT3 gravity)
 	{
+		PxExtendedVec3 posBefore = physicObject->controller->getPosition();
+
 		XMVECTOR downDisp = { 0.0f, fixedDownDisplacement() + downSpeed * dt, 0.0f };
 		XMVECTOR move = XMVector3Normalize(stickDisplacement) * sideSpeed * dt;
 		move += downDisp;
+
 		PxControllerCollisionFlags colFlag = physicObject->MoveCharacter(move, dt);
+
+		PxExtendedVec3 posAfter = physicObject->controller->getPosition();
+
+		posDelta = {
+			(float)(posAfter.x - posBefore.x),
+			(float)(posAfter.y - posBefore.y),
+			(float)(posAfter.z - posBefore.z)
+		};
+
 		touchingDown = !!(colFlag & PxControllerCollisionFlag::Enum::eCOLLISION_DOWN);
 		if (!!(colFlag & PxControllerCollisionFlag::Enum::eCOLLISION_UP))
 		{
@@ -331,9 +344,18 @@ namespace Game::Brawler
 
 	void Venom::CharacterMoveXYPlane(XMVECTOR stickDisplacement, float dt, float sideSpeed)
 	{
+		PxExtendedVec3 posBefore = physicObject->controller->getPosition();
+		
 		XMVECTOR move = stickDisplacement * sideSpeed * dt;
-		//PrintXMVector(move, "move");
 		PxControllerCollisionFlags colFlag = physicObject->MoveCharacter(move, dt);
+		
+		PxExtendedVec3 posAfter = physicObject->controller->getPosition();
+
+		posDelta = {
+			(float)(posAfter.x - posBefore.x),
+			(float)(posAfter.y - posBefore.y),
+			(float)(posAfter.z - posBefore.z)
+		};
 	}
 
 	void Venom::MoveForward(float sideSpeed)
@@ -366,17 +388,6 @@ namespace Game::Brawler
 		}
 		CharacterMoveXYPlane(stickMovement, gameUpdateFrequency, sideSpeed);
 	}
-
-	//Web
-	//void Venom::UpdateWeb(XMVECTOR bonePos, XMVECTOR fixedPoint)
-	//{
-	//	XMVECTOR dir = XMVectorSubtract(fixedPoint, bonePos);
-	//	XMVECTOR distVec = XMVector3Length(dir);
-	//	float L;
-	//	XMStoreFloat(&L, distVec);
-	//
-	//	XMVECTOR dirNormal = XMVector3Normalize(dir);
-	//}
 
 	//Intro
 	void Venom::EnterIntro()

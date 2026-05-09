@@ -1,5 +1,6 @@
 #pragma once
 #include <Controller.h>
+//#include "../Rounds/BrawlerRound.h"
 
 namespace Game
 {
@@ -14,7 +15,7 @@ namespace Game
 #include <Brawler/BrawlerCameraAtt.h>
 #include <JEnd.h>
 #endif
-
+		struct Venom;
 		struct BrawlerCamera : Controller
 		{
 #include <Attributes/JFlags.h>
@@ -42,11 +43,18 @@ namespace Game
 
 			//object to interact with
 			CameraID camera;
-			RenderableID venomR;
+			RenderableID heroes[2];
+			Venom* venomC;
 			float Ycam2venom;
 			float YcamInitial;
 			bool initialFollowX;
 			bool initialFollowY;
+			BoundaryID leftBoundaryB;
+			BoundaryID rightBoundaryB;
+			BoundaryID topBoundaryB;
+			PhysicObjectID leftBoundaryPO;
+			PhysicObjectID rightBoundaryPO;
+			PhysicObjectID topBoundaryPO;
 		};
 	};
 };

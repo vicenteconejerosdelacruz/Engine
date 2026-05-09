@@ -5,6 +5,7 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include "../Camera/BrawlerCamera.h"
+#include "../Rounds/BrawlerRound.h"
 
 namespace Game
 {
@@ -19,6 +20,7 @@ namespace Game
 #include <Editor/JDrawersDecl.h>
 #include <Brawler/BrawlerSceneAtt.h>
 #include <JEnd.h>
+		//std::map<std::string, JEdvEditorDrawerFunction> GetBrawlerSceneDrawers();
 
 #endif
 
