@@ -298,9 +298,9 @@ namespace Scene
 #endif
 		std::for_each(bs.begin(), bs.end(), checkObjectMask);
 		std::for_each(bs.begin(), bs.end(), checkCollisionMask);
-		std::for_each(bs.begin(), bs.end(), checkForDelete);
 		std::for_each(bs.begin(), bs.end(), checkCollisionEnabled);
 		std::for_each(bs.begin(), bs.end(), checkKinematic);
+		std::for_each(bs.begin(), bs.end(), checkForDelete);
 	}
 
 	void DestroyBoundaries()
