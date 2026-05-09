@@ -157,6 +157,8 @@ namespace Game
 		SUUUID sceneObject;
 	};
 
+	std::map<JUUID, std::unique_ptr<Controller>>& GetControllersUUIDs();
+	std::map<SUUUID, std::set<JUUIDName>>& GetControllerUUIDNameBySUUUID();
 #if defined(_EDITOR)
 	std::map<unsigned int, std::set<JUUID>> GetControllersPrioritySet(bool ignoreEditorPlay = false);
 	std::map<unsigned int, std::set<JUUID>> GetControllersPrioritySet(SceneUnitId id, bool ignoreEditorPlay = false);
@@ -167,6 +169,28 @@ namespace Game
 	JUUID RegisterController(std::string controllerName, SUUUID sceneObject, std::unique_ptr<Controller>& controller);
 	void MapControllers(SceneUnitId id);
 	std::vector<JUUIDName> GetControllersInstancesInSceneUnit(SceneUnitId id);
+	template<typename T>
+	std::vector<JUUIDName> GetDerivedControllersInstancesInSceneUnit(SceneUnitId id)
+	{
+		std::vector<JUUIDName> controllers;
+		auto& uuid2ctrl = GetControllersUUIDs();
+		auto& suuid2ctrlsuuidName = GetControllerUUIDNameBySUUUID();
+		for (auto& [uuid,ctrl]: uuid2ctrl)
+		{
+			if (ctrl->unit != id || !dynamic_cast<T*>(ctrl.get())) continue;
+			auto& uuidNameSet = suuid2ctrlsuuidName.at(ctrl->sceneObject);
+			for (auto [uuidInSet, nameInSet] : uuidNameSet)
+			{
+				if (uuidInSet == uuid)
+				{
+					controllers.push_back(std::make_tuple(std::get<1>(ctrl->sceneObject), nameInSet));
+					break;
+				}
+			}
+		}
+		SortUUIDByName(controllers);
+		return controllers;
+	}
 	std::set<JUUID> GetControllersInSceneUnit(SceneUnitId id);
 	std::unique_ptr<Controller>& GetController(JUUID uuid);
 	std::set<JUUID> GetControllersBySceneObjectUUID(SUUUID uuid);

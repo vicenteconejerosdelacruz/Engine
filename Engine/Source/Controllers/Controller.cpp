@@ -75,6 +75,16 @@ namespace Game
 
 	void Controller::Unmap() { std::get<0>(sceneObject) = 0; std::get<1>(sceneObject).clear(); }
 
+	std::map<JUUID, std::unique_ptr<Controller>>& GetControllersUUIDs()
+	{
+		return controllersUUIDs;
+	}
+
+	std::map<SUUUID, std::set<JUUIDName>>& GetControllerUUIDNameBySUUUID()
+	{
+		return controllerUUIDNameBySUUUID;
+	}
+
 #if defined(_EDITOR)
 	std::map<unsigned int, std::set<JUUID>> GetControllersPrioritySet(bool ignoreEditorPlay)
 #else
