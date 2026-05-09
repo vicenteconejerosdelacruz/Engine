@@ -606,7 +606,7 @@ bool EditorCreatorDrawFilePath(
 	bool ret = false;
 	auto getFilePath = [attribute, &json]()
 		{
-			return json.at(attribute);
+			return std::string(json.at(attribute));
 		};
 	auto setFilePath = [&ret, attribute, &json](std::string path)
 		{
@@ -654,7 +654,7 @@ bool EditorCreatorDrawFilePath(
 	bool ret = false;
 	auto getFilePath = [attribute, &json, attIndex]()
 		{
-			return json.at(attribute).at(attIndex);
+			return std::string(json.at(attribute).at(attIndex));
 		};
 	auto setFilePath = [&ret, attribute, &json, attIndex](std::string path)
 		{

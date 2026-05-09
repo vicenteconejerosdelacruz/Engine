@@ -1309,7 +1309,7 @@ void EditorDrawFilePath(
 				path.insert(j->at(attribute));
 				if (path.size() > 1ULL) return std::string();
 			}
-			return *path.begin();
+			return std::string(*path.begin());
 		};
 	auto setFilePath = [attribute, &json](std::string path)
 		{
