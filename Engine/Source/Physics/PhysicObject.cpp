@@ -1021,13 +1021,16 @@ namespace Physics
 		bool visible = Editor::CharactersShouldDraw(unit());
 
 		XMFLOAT3 renPosition = renderable->position() + localPosition();
+		float radius = 2.0f * static_cast<float>(at("radius"));
+		float height = 2.0f * static_cast<float>(at("halfHeight"));
+		XMFLOAT3 renScale = { radius,height,radius };
 
 		nlohmann::json lines = CreateFromRenderable(
 			renderable->name() + "-char-lines", renderableLines.uuid(), camera.uuid(),
-			"Translucent_wired", visible, renPosition, { 0.0f,0.0f,0.0f }, { 1.0f,1.0f,1.0f });
+			"Translucent_wired", visible, renPosition, { 0.0f,0.0f,0.0f }, renScale);
 		nlohmann::json shape = CreateFromRenderable(
 			renderable->name() + "-char-shape", renderableShape.uuid(), camera.uuid(),
-			"Translucent", visible, renPosition, { 0.0f,0.0f,0.0f }, { 1.0f,1.0f,1.0f });
+			"Translucent", visible, renPosition, { 0.0f,0.0f,0.0f }, renScale);
 
 		shape["renderNext"] = { renderableLines.uuid() };
 
@@ -1421,7 +1424,6 @@ namespace Physics
 				p->clean({ PhysicObject::Update_objectMask,PhysicObject::Update_collisionMask });
 			};
 #if defined(_EDITOR)
-
 		auto updateColors = [=](PhysicObjectID p)
 			{
 				if (!Editor::IsPlaying(id) && (p->dirty(PhysicObject::Update_overrideColor) || p->dirty(PhysicObject::Update_color)))

@@ -5959,6 +5959,8 @@ JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
 					physicObject->JUpdate(new_atts);
 					physicObject->DestroyPhysicsBehavior();
 					physicObject->CreatePhysicsBehavior();
+					physicObject->DestroyPhysicsAvatar();
+					physicObject->CreatePhysicsAvatar();
 				};
 			auto addPhysicsBehavior = [&]()
 				{
