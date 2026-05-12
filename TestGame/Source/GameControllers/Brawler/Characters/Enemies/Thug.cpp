@@ -333,6 +333,8 @@ namespace Game::Brawler
 		}
 		else
 		{
+			PickHeroToFight();
+
 			UpdateLookTo();
 
 			// 1. Obtenemos el vector de movimiento calculado
