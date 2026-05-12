@@ -90,3 +90,9 @@ inline void MatrixDump(std::string matrixName, DirectX::XMFLOAT4X4 m)
 	OutputDebugStringA(matrixDump.c_str());
 }
 
+template<typename T>
+void PrintUniquePtr(std::string ptrName, std::unique_ptr<T>& ptr)
+{
+	std::string addr = std::format("{} address: {}\n", ptrName, (void*)ptr.get());
+	OutputDebugStringA(addr.c_str());
+}
