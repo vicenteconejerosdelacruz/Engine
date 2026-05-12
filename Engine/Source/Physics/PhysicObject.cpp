@@ -409,7 +409,7 @@ namespace Physics
 		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material, PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION);
 		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), localRotQ));
 		shape->setSimulationFilterData(GetPxFilterData());
-		shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, collisionEnabled());
+		shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, collisionEnabled());
 
 		//set the actor position and rotation
 		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
@@ -463,7 +463,7 @@ namespace Physics
 		scene->pxScene->addActor(*actor);
 
 		//set the actor position and rotation
-		if(!kinematic())
+		if (!kinematic())
 		{
 			actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
 		}
@@ -496,7 +496,7 @@ namespace Physics
 
 		//create the PxActor
 		actor = gPhysics->createRigidDynamic(PxTransform(PxIdentity));
-		
+
 		//set as kinematic if needed
 		PxRigidDynamic* dynamicActor = nullptr;
 		if (kinematic())
@@ -569,7 +569,7 @@ namespace Physics
 		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material, PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION);
 		shape->setLocalPose(PxTransform(ToPxVec3(localPosition()), ToPxQuat(localRotation())));
 		shape->setSimulationFilterData(GetPxFilterData());
-		shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, collisionEnabled());
+		shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, collisionEnabled());
 
 		//set the actor position and rotation
 		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
@@ -1020,9 +1020,9 @@ namespace Physics
 		bool visible = Editor::CharactersShouldDraw(unit());
 
 		XMFLOAT3 renPosition = renderable->position() + localPosition();
-		float radius = 2.0f * static_cast<float>(at("radius"));
+		float xzscale = 2.0f * static_cast<float>(at("radius"));
 		float height = 2.0f * static_cast<float>(at("halfHeight"));
-		XMFLOAT3 renScale = { radius,height,radius };
+		XMFLOAT3 renScale = { xzscale,height,xzscale };
 
 		nlohmann::json lines = CreateFromRenderable(
 			renderable->name() + "-char-lines", renderableLines.uuid(), camera.uuid(),
