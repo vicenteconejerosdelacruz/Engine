@@ -71,7 +71,7 @@ void SequenceChannelElementTrigger::ApplyFrameTriggerAvatarValues(int frame, Ren
 	triggerRenderable->visible(visible);
 	triggerLines->visible(visible);
 
-	Animation::NodeTransformsMap& nodesTransformation = renderable->animable->animations->globalNodeTransforms;
+	Animation::NodeTransformsMap& nodesTransformation = renderable->globalNodeTransforms;
 	auto [fPos, fRot, tRotQ, fScl] = GetTransformation(world, nodesTransformation);
 	triggerRenderable->position(fPos);
 	triggerRenderable->rotation(fRot);
@@ -87,7 +87,7 @@ void SequenceChannelElementTrigger::ApplyFrameTriggerValues(int frame, Renderabl
 {
 	if (trigger.empty() || trigger.unit() == 0ULL || triggerBuilt == nullptr || triggerBuilt->load() == false) return;
 	XMMATRIX world = renderable->world();
-	Animation::NodeTransformsMap& nodesTransformation = renderable->animable->animations->globalNodeTransforms;
+	Animation::NodeTransformsMap& nodesTransformation = renderable->globalNodeTransforms;
 	auto [fPos, fRot, tRotQ, fScl] = GetTransformation(world, nodesTransformation);
 	trigger->at("position") = FromXMFLOAT3(fPos);
 	trigger->at("rotation") = FromXMFLOAT3(fRot);

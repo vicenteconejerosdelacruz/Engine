@@ -181,9 +181,9 @@ namespace Animation {
 		return ToMatrix(keyFrames[0].key);
 	}
 
-	void TraverseMultiplycationQueue(float time, std::string currentAnimation, std::unique_ptr<Animated>& animations, BonesTransformations& bonesTransformation, BonesTransformations& sequenceBoneTransformations)
+	void TraverseMultiplycationQueue(float time, std::string currentAnimation, std::unique_ptr<Animated>& animations, BonesTransformations& bonesTransformation, BonesTransformations& sequenceBoneTransformations, NodeTransformsMap& globalNodeTransforms)
 	{
-		TraverseMultiplycationQueue(time, animations->multiplyNavigator, animations->animationsBonesKeys[currentAnimation], bonesTransformation, animations->bonesOffsets, sequenceBoneTransformations, animations->rootNodeInverseTransform, animations->globalNodeTransforms, XMMatrixIdentity());
+		TraverseMultiplycationQueue(time, animations->multiplyNavigator, animations->animationsBonesKeys[currentAnimation], bonesTransformation, animations->bonesOffsets, sequenceBoneTransformations, animations->rootNodeInverseTransform, globalNodeTransforms, XMMatrixIdentity());
 	}
 
 	static const XMMATRIX BonesTransformationFlipmYZ = XMMatrixSet(

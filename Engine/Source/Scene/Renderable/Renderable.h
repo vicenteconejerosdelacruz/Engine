@@ -226,6 +226,7 @@ namespace Scene
 		std::unique_ptr<std::atomic_bool> animationStepLock;
 		Model3DInstanceID animable;
 		Animation::BonesTransformations bonesTransformation;
+		Animation::NodeTransformsMap globalNodeTransforms;
 		XMMATRIX animationTransformation;
 		AnimationSequences animationsSequences;
 		SequencePlayer sequencePlayer;

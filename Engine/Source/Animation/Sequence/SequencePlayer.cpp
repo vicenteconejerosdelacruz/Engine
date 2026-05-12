@@ -150,7 +150,7 @@ void SequencePlayer::DestroySequenceTriggersAvatars()
 void SequencePlayer::CreateSequenceTriggers()
 {
 	XMMATRIX world = renderable->world();
-	Animation::NodeTransformsMap& nodesTransformation = renderable->animable->animations->globalNodeTransforms;
+	Animation::NodeTransformsMap& nodesTransformation = renderable->globalNodeTransforms;
 
 	auto triggers = sequence.GetTriggerElements();
 	if (triggers.size() == 0ULL) return;

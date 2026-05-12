@@ -64,7 +64,6 @@ namespace Animation
 		AnimationLengthMap animationsLength;
 		BonesTransformations bonesOffsets;
 		XMMATRIX rootNodeInverseTransform;
-		NodeTransformsMap globalNodeTransforms;
 
 		AnimationBonesKeys animationsBonesKeys;
 		HierarchyNode rootHierarchy;
@@ -87,7 +86,7 @@ namespace Animation
 	ConstantsBufferID GetAnimatedConstantsBuffer(RenderableID renderable);
 	void WriteBoneTransformationsToConstantsBuffer(RenderableID renderable, BonesTransformations& bonesTransformation, unsigned int backbufferIndex);
 
-	void TraverseMultiplycationQueue(float time, std::string currentAnimation, std::unique_ptr<Animated>& animations, BonesTransformations& bonesTransformation, BonesTransformations& sequenceBoneTransformations);
+	void TraverseMultiplycationQueue(float time, std::string currentAnimation, std::unique_ptr<Animated>& animations, BonesTransformations& bonesTransformation, BonesTransformations& sequenceBoneTransformations, NodeTransformsMap& globalNodeTransforms);
 	void TraverseMultiplycationQueue(float time, MultiplyCmdQueue& cmds, BonesKeysMap& boneKeys, BonesTransformations& bonesTransformation, BonesTransformations& bonesOffsets, BonesTransformations& sequenceBoneTransformations, XMMATRIX& rootNodeInverseTransform, NodeTransformsMap& globalNodeTransforms, XMMATRIX parentTransformation);
 	std::tuple<XMMATRIX, XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> GetBoneTransformation(XMMATRIX world, Animation::NodeTransformsMap& nodesTransformation, std::string bone);
 }

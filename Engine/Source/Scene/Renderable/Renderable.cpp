@@ -776,7 +776,7 @@ namespace Scene
 		if (animationStepLock->load() == true)
 			animationStepLock->wait(true);
 		animationStepLock->store(true);
-		TraverseMultiplycationQueue(animationTime(), animation(), animations, bonesTransformation, sequenceBoneTransformations);
+		TraverseMultiplycationQueue(animationTime(), animation(), animations, bonesTransformation, sequenceBoneTransformations, globalNodeTransforms);
 		animationStepLock->store(false);
 		animationStepLock->notify_one();
 	}
@@ -793,7 +793,7 @@ namespace Scene
 				{ 1.0f, 1.0f, 1.0f }
 			);
 		}
-		auto& nodesTransforms = animable->animations->globalNodeTransforms;
+		auto& nodesTransforms = globalNodeTransforms;
 		return Animation::GetBoneTransformation(world(), nodesTransforms, bone);
 	}
 
