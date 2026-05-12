@@ -197,6 +197,10 @@ struct TSUUUID {
 	{
 		return SUuuid;
 	}
+	bool empty() const
+	{
+		return std::get<1>(SUuuid).empty();
+	}
 	bool operator!() const
 	{
 		return empty();
@@ -212,10 +216,6 @@ struct TSUUUID {
 	explicit operator bool()
 	{
 		return validator ? (validator() && !empty()) : !empty();
-	}
-	bool empty()
-	{
-		return std::get<1>(SUuuid).empty();
 	}
 	void clear()
 	{
