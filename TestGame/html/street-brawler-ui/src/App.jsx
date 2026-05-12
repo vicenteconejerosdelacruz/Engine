@@ -39,7 +39,8 @@ function App() {
     const handleEngineUpdate = (e) => {
       if (e.detail.type === 'HERO_HP') setHero(prev => ({ ...prev, hp: e.detail.value }));
       if (e.detail.type === 'ENEMY_HP') setEnemy(prev => ({ ...prev, hp: e.detail.value }));
-      if (e.detail.type === 'NEW_ENEMY') setEnemy(prev => ({ ...prev, name: e.detail.name, active: true, img:`enemies/${e.detail.name.toLowerCase()}.png` }));
+      if (e.detail.type === 'NEW_ENEMY') setEnemy(prev => ({ ...prev, name: e.detail.name, active: true, img:`enemies/${e.detail.picture.toLowerCase()}.png` }));
+      //if (e.detail.type === 'NEW_ENEMY') setEnemy(prev => ({ ...prev, name: e.detail.name, active: true, img:`enemies/${e.detail.name.toLowerCase()}.png` }));
       if (e.detail.type === 'REMOVE_ENEMY') setEnemy(prev => ({ ...prev, name: '', img:'', active: false }));
       if (e.detail.type === 'SCORE_UPDATE') setHero(prev => ({ ...prev, score: e.detail.value }));
     };
