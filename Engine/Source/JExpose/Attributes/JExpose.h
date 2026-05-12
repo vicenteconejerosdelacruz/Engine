@@ -342,7 +342,7 @@
 	{\
 		std::vector<std::reference_wrapper<std::unique_ptr<TYPE>>> m; \
 		nlohmann::json& j = (*this)[#ATT]; \
-		for (size_t index; index < j.size(); index++)\
+		for (size_t index=0ULL; index < j.size(); index++)\
 		{\
 			m.push_back(Get##TYPE(j.at(index))); \
 		}\
