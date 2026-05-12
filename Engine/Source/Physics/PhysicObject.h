@@ -105,7 +105,7 @@ namespace Physics
 		void UpdateRenderableFromGlobalPose();
 		void UpdateGlobalPoseFromRenderable();
 		void UpdateGlobalPoseFromTrigger();
-		PxControllerCollisionFlags MoveCharacter(XMVECTOR disp, float delta);
+		PxControllerCollisionFlags MoveCharacter(XMVECTOR disp, float delta, PxControllerFilters filters = PxControllerFilters());
 
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);

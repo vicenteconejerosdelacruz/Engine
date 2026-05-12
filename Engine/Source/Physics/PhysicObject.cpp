@@ -762,12 +762,11 @@ namespace Physics
 #endif
 	}
 
-	PxControllerCollisionFlags  PhysicObject::MoveCharacter(XMVECTOR disp, float delta)
+	PxControllerCollisionFlags PhysicObject::MoveCharacter(XMVECTOR disp, float delta, PxControllerFilters filters)
 	{
 		if (!controller || !built) return (PxControllerCollisionFlags)0U;
 
 		PxVec3 pxdisp = ToPxVec3(disp);
-		PxControllerFilters filters;
 		return controller->move(pxdisp, 0.01f, delta, filters);
 	}
 
