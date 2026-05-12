@@ -1,9 +1,10 @@
 #pragma once
 #include "../BrawlerCharacter.h"
 #include <GameStateMachine.h>
-#include <unordered_map>
-#include <string>
 #include <nlohmann/json.hpp>
+#include <string>
+#include <unordered_map>
+#include <Brawler/Scene/BrawlerScene.h>
 
 namespace Game
 {
@@ -33,11 +34,11 @@ namespace Game
 
 #if defined(_EDITOR)
 #include <Attributes/JOrder.h>
-#include <Brawler/ThugAtt.h>
+#include "ThugAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <Brawler/ThugAtt.h>
+#include "ThugAtt.h"
 #include <JEnd.h>
 #endif
 
@@ -47,18 +48,19 @@ namespace Game
 		struct Thug : BrawlerCharacter
 		{
 #include <Attributes/JFlags.h>
-#include <Brawler/ThugAtt.h>
+#include "ThugAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <Brawler/ThugAtt.h>
+#include "ThugAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <Brawler/ThugAtt.h>
+#include "ThugAtt.h"
 #include <JEnd.h>
 
-			BrawlerScene* GetBrawlerSceneController();
+
+			//BrawlerScene* GetBrawlerSceneController();
 
 			//Constructor and Binding
 			Thug(nlohmann::json& json);
@@ -76,6 +78,8 @@ namespace Game
 
 			//States
 			void TakeHit(int damage);
+			void PickHeroToFight();
+
 			//Movement
 			void CharacterMoveXZPlane(XMVECTOR displacement, float dt, float sideSpeed, XMFLOAT3 gravity);
 
@@ -84,23 +88,22 @@ namespace Game
 			bool IsInAttackRange();
 
 			//Idle
-			bool ShouldIdle();
+			//bool ShouldIdle();
 			void EnterIdle();
 			void LeaveIdle();
 			void Idle();
 
 			//CombatIdle
-			bool ShouldCombatIdle();
 			void EnterCombatIdle();
 			void CombatIdle();
 			void CombatIdleNextState();
 
 			//CombatFollow
-			bool ShouldCombatFollow();
 			void EnterCombatFollow();
 			void CombatFollow();
+			XMVECTOR CalculateSteeringDirection();
 			void MoveTowardHero(float speed);
-			void EvaluateNextFollowMovement();
+			float EvaluateNextFollowMovement(XMVECTOR actualMovementDir);
 
 			//CombatPunch
 			void EnterCombatPunch();
@@ -121,14 +124,12 @@ namespace Game
 			int initialHealth;
 
 			//SceneObjects
-			RenderableID thug;
+			//RenderableID thug;
 			PhysicSceneID physicScene;
 			PhysicObjectID physicObject;
 
 			//Picked hero
-			JUUID heroController;
-			RenderableID heroRenderable;
-			XMFLOAT3 heroAttackOffset;
+			EnemyAttackOption pickedHero;
 		};
 	};
 };

@@ -520,14 +520,14 @@
     <ClInclude Include="GameControllers\ThirdPerson\ThirdPersonCharacter.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\Heroes\Venom.h" />
     <ClInclude Include="GamePhysics\GamePhysics.h" />
-    <ClInclude Include="JExpose\Controllers\Brawler\BrawlerCharacterAtt.h" />
-    <ClInclude Include="JExpose\Controllers\Brawler\BrawlerCameraAtt.h" />
-    <ClInclude Include="JExpose\Controllers\Brawler\BrawlerSceneAtt.h" />
-    <ClInclude Include="JExpose\Controllers\Brawler\HeroAtt.h" />
+    <ClInclude Include="GameControllers\Brawler\Characters\BrawlerCharacterAtt.h" />
+    <ClInclude Include="GameControllers\Brawler\Camera\BrawlerCameraAtt.h" />
+    <ClInclude Include="GameControllers\Brawler\Scene\BrawlerSceneAtt.h" />
+    <ClInclude Include="GameControllers\Brawler\Characters\Heroes\HeroAtt.h" />
     <ClInclude Include="JExpose\Controllers\Test\SpinYawAtt.h" />
     <ClInclude Include="JExpose\Controllers\ThirdPerson\ThirdPersonCharacterAtt.h" />
-    <ClInclude Include="JExpose\Controllers\Brawler\ThugAtt.h" />
-    <ClInclude Include="JExpose\Controllers\Brawler\VenomAtt.h" />
+    <ClInclude Include="GameControllers\Brawler\Characters\Enemies\ThugAtt.h" />
+    <ClInclude Include="GameControllers\Brawler\Characters\Heroes\VenomAtt.h" />
     <ClInclude Include="JExpose\Editor\JEdvBrawlerDrawer.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
@@ -545,7 +545,6 @@
     <ClCompile Include="GameControllers\ThirdPerson\ThirdPersonCharacter.cpp" />
     <ClCompile Include="GameControllers\Brawler\Characters\Heroes\Venom.cpp" />
     <ClCompile Include="GamePhysics\GamePhysics.cpp" />
-    <ClCompile Include="JExpose\Editor\JEdvBrawlerDrawer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">pch.h</PrecompiledHeaderFile>

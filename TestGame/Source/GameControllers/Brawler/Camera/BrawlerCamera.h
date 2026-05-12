@@ -8,26 +8,26 @@ namespace Game
 	{
 #if defined(_EDITOR)
 #include <Attributes/JOrder.h>
-#include <Brawler/BrawlerCameraAtt.h>
+#include "BrawlerCameraAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <Brawler/BrawlerCameraAtt.h>
+#include "BrawlerCameraAtt.h"
 #include <JEnd.h>
 #endif
 		struct Venom;
 		struct BrawlerCamera : Controller
 		{
 #include <Attributes/JFlags.h>
-#include <Brawler/BrawlerCameraAtt.h>
+#include "BrawlerCameraAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <Brawler/BrawlerCameraAtt.h>
+#include "BrawlerCameraAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <Brawler/BrawlerCameraAtt.h>
+#include "BrawlerCameraAtt.h"
 #include <JEnd.h>
 
 			BrawlerCamera(nlohmann::json& json);
@@ -49,12 +49,12 @@ namespace Game
 			float YcamInitial;
 			bool initialFollowX;
 			bool initialFollowY;
-			BoundaryID leftBoundaryB;
-			BoundaryID rightBoundaryB;
-			BoundaryID topBoundaryB;
-			PhysicObjectID leftBoundaryPO;
-			PhysicObjectID rightBoundaryPO;
-			PhysicObjectID topBoundaryPO;
+			//BoundaryID leftBoundaryB;
+			//BoundaryID rightBoundaryB;
+			//BoundaryID topBoundaryB;
+			//PhysicObjectID leftBoundaryPO;
+			//PhysicObjectID rightBoundaryPO;
+			//PhysicObjectID topBoundaryPO;
 		};
 	};
 };

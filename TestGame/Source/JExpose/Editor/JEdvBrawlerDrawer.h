@@ -46,11 +46,12 @@ inline JEdvEditorDrawerFunction DrawVector<BrawlerRound, jedv_t_vector>()
 	return[](std::string attribute, std::vector<JObject*>& json)
 		{
 			if (json.size() > 1ULL) return;
-			
+
 			std::map<std::string, ControllerBinding> selectables = GetSelectableThugsControllers();
 			std::set<ControllerBinding> bindedControllers = GetBindedControllersInRounds(*json.at(0), attribute);
 
 			int deleteRound = -1;
+			std::tuple<int, int> deleteEnemySlot(-1, -1);
 
 			ImGui::Text(attribute.c_str());
 
@@ -91,7 +92,7 @@ inline JEdvEditorDrawerFunction DrawVector<BrawlerRound, jedv_t_vector>()
 					}
 					ImGui::PopID();
 				};
-			auto drawEnemySlot = [&selectables,&bindedControllers](nlohmann::json& round, unsigned int slot)
+			auto drawEnemySlot = [&selectables, &bindedControllers, &deleteEnemySlot](nlohmann::json& round, unsigned int round_idx, unsigned int slot)
 				{
 					ControllerBinding selected;
 					if (slot < round.at("enemies").size())
@@ -101,9 +102,9 @@ inline JEdvEditorDrawerFunction DrawVector<BrawlerRound, jedv_t_vector>()
 					std::map<std::string, ControllerBinding> availableSelectables;
 					std::copy_if(selectables.begin(), selectables.end(),
 						std::inserter(availableSelectables, availableSelectables.end()),
-						[&bindedControllers,&selected](auto& pair)
+						[&bindedControllers, &selected](auto& pair)
 						{
-							return !bindedControllers.contains(pair.second) || (selected && pair.second==selected);
+							return !bindedControllers.contains(pair.second) || (selected && pair.second == selected);
 						}
 					);
 
@@ -112,10 +113,21 @@ inline JEdvEditorDrawerFunction DrawVector<BrawlerRound, jedv_t_vector>()
 					{
 						ImGui::DrawComboSelection(selected, availableSelectables, [&](std::string option)
 							{
-								if(slot<round.at("enemies").size())
+								if (option == "")
+								{
+									deleteEnemySlot = std::make_tuple(
+										static_cast<int>(round_idx),
+										static_cast<int>(slot)
+									);
+								}
+								else if (slot < round.at("enemies").size())
+								{
 									round.at("enemies").at(slot) = FromControllerBinding(selectables.at(option));
+								}
 								else
+								{
 									round.at("enemies").push_back(FromControllerBinding(selectables.at(option)));
+								}
 								Editor::MarkSceneUnitAsModified(Editor::currentSceneUnitId);
 							}
 						);
@@ -130,7 +142,7 @@ inline JEdvEditorDrawerFunction DrawVector<BrawlerRound, jedv_t_vector>()
 						unsigned int size = static_cast<unsigned int>(json.at(0)->at(attribute).at(index).at("enemies").size());
 						for (unsigned int i = 0; i <= size; i++)
 						{
-							drawEnemySlot(json.at(0)->at(attribute).at(index), i);
+							drawEnemySlot(json.at(0)->at(attribute).at(index), index, i);
 						}
 					}
 					ImGui::PopID();
@@ -178,6 +190,10 @@ inline JEdvEditorDrawerFunction DrawVector<BrawlerRound, jedv_t_vector>()
 			if (deleteRound != -1)
 			{
 
+			}
+			if (std::get<0>(deleteEnemySlot) != -1 && std::get<1>(deleteEnemySlot) != -1)
+			{
+				json.at(0)->at(attribute).at(std::get<0>(deleteEnemySlot)).at("enemies").erase(std::get<1>(deleteEnemySlot));
 			}
 		};
 }

@@ -37,14 +37,16 @@ namespace Game::Brawler
 
 #if defined(_EDITOR)
 #include <Editor/JDrawersDef.h>
-#include <Brawler/VenomAtt.h>
+#include "VenomAtt.h"
 #include <JEnd.h>
 #endif
 
+	/*
 	BrawlerCamera* Venom::GetBrawlerCamera()
 	{
 		return Game::GetController<BrawlerScene>(unit, sceneController())->GetCameraController();
 	}
+	*/
 
 	VenomStates Venom::GetState()
 	{
@@ -55,15 +57,15 @@ namespace Game::Brawler
 	Venom::Venom(nlohmann::json& json) : Hero(json)
 	{
 #include <Attributes/JInit.h>
-#include <Brawler/VenomAtt.h>
+#include "VenomAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <Brawler/VenomAtt.h>
+#include "VenomAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <Brawler/VenomAtt.h>
+#include "VenomAtt.h"
 #include <JEnd.h>
 
 		vsm = {
@@ -94,7 +96,7 @@ namespace Game::Brawler
 				{ VS_WallToSwing, [&](auto* sm, VenomStates prevState) { LeaveWallToSwing(); }},
 			},
 			.onStep = {
-				{ VS_None, [&](auto* sm) { venomScale = venom->scale(); vsm.ChangeState(VS_Intro); }},
+				{ VS_None, [&](auto* sm) { venomScale = renderable->scale(); vsm.ChangeState(VS_Intro); }},
 				{ VS_Idle, [&](auto* sm) { Idle(); }},
 				{ VS_Walking, [&](auto* sm) { Walking(); }},
 				{ VS_Running, [&](auto* sm) { Running(); }},
@@ -161,7 +163,7 @@ namespace Game::Brawler
 	void Venom::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <Brawler/VenomAtt.h>
+#include "VenomAtt.h"
 #include <JEnd.h>
 		Hero::WriteJson(j);
 	}
@@ -175,11 +177,11 @@ namespace Game::Brawler
 
 		if (type == SO_Renderables)
 		{
-			venom = so;
+			renderable = so;
 		}
 		GetController<BrawlerScene>(unit, sceneController())->RegisterHero(uuid());
 		physicScene = MAKESUUUID(unit, *GetPhysicScenes(unit).begin());
-		physicObject = venom->at("physicObject").at(0);
+		physicObject = renderable->at("physicObject").at(0);
 		RegisterContactCallback(PB_Static, physicObject(), [&](JUUID uuid, unsigned int event)
 			{
 				OnStaticContactEvent(uuid, event);
@@ -198,14 +200,13 @@ namespace Game::Brawler
 		Hero::Unmap();
 		UnregisterContactCallback(PB_Static, physicObject());
 		UnregisterCharacterHitCallback(physicObject());
-		venom.clear();
 		physicScene.clear();
 		physicObject.clear();
 	}
 
 	void Venom::TakeHit(JUUID enemyController, int damage)
 	{
-		health(std::max(0, health() - damage));
+		//health(std::max(0, health() - damage));
 		GetController<BrawlerScene>(unit, sceneController())->HeroTookHit(enemyController, health());
 	}
 
@@ -232,7 +233,7 @@ namespace Game::Brawler
 		if (vsm.currentState != VS_Death)
 		{
 			XMVECTOR XMpos, XMrot, XMscl;
-			XMMatrixDecompose(&XMscl, &XMrot, &XMpos, venom->animationTransformation);
+			XMMatrixDecompose(&XMscl, &XMrot, &XMpos, renderable->animationTransformation);
 
 			UpdateLeftStickVector();
 			UpdateLookTo();
@@ -258,13 +259,13 @@ namespace Game::Brawler
 		//skips contacts if the character is in a wall state
 		if (nonFloorStates.contains(vsm.currentState))
 			return;
-
+		/*
 		BrawlerCamera* brawlerCam = GetBrawlerCamera();
 
 		if ((CM_Floor & fd.word0) && brawlerCam->followY())
 		{
 			brawlerCam->followY(false);
-		}
+		}*/
 	}
 
 	//Joystick
@@ -295,21 +296,21 @@ namespace Game::Brawler
 
 		if (len < 0.0f)
 		{
-			XMFLOAT3 scale = venom->scale();
+			XMFLOAT3 scale = renderable->scale();
 			if (scale.z > 0.0f)
 			{
 				scale.z = -venomScale.z;
-				venom->scale(scale);
+				renderable->scale(scale);
 				lookingTo(CLT_Left);
 			}
 		}
 		else if (len > 0.0f)
 		{
-			XMFLOAT3 scale = venom->scale();
+			XMFLOAT3 scale = renderable->scale();
 			if (scale.z < 0.0f)
 			{
 				scale.z = venomScale.z;
-				venom->scale(scale);
+				renderable->scale(scale);
 				lookingTo(CLT_Right);
 			}
 		}
@@ -345,10 +346,10 @@ namespace Game::Brawler
 	void Venom::CharacterMoveXYPlane(XMVECTOR stickDisplacement, float dt, float sideSpeed)
 	{
 		PxExtendedVec3 posBefore = physicObject->controller->getPosition();
-		
+
 		XMVECTOR move = stickDisplacement * sideSpeed * dt;
 		PxControllerCollisionFlags colFlag = physicObject->MoveCharacter(move, dt);
-		
+
 		PxExtendedVec3 posAfter = physicObject->controller->getPosition();
 
 		posDelta = {
@@ -392,8 +393,8 @@ namespace Game::Brawler
 	//Intro
 	void Venom::EnterIntro()
 	{
-		venom->animationUseTransformation(true);
-		venom->SetCurrentAnimation("Intro", 0.0f, 1.0f, true, false);
+		renderable->animationUseTransformation(true);
+		renderable->SetCurrentAnimation("Intro", 0.0f, 1.0f, true, false);
 	}
 
 	void Venom::VenomReady()
@@ -412,8 +413,8 @@ namespace Game::Brawler
 	void Venom::EnterIdle()
 	{
 		canJump = true;
-		venom->animationUseTransformation(false);
-		venom->SetCurrentAnimation("Idle", 0.0f, 1.0f, true, true);
+		renderable->animationUseTransformation(false);
+		renderable->SetCurrentAnimation("Idle", 0.0f, 1.0f, true, true);
 	}
 
 	void Venom::Idle()
@@ -450,7 +451,7 @@ namespace Game::Brawler
 
 	void Venom::EnterWalking()
 	{
-		venom->SetCurrentAnimation("Walk", 0.0f, 1.0f, true, true);
+		renderable->SetCurrentAnimation("Walk", 0.0f, 1.0f, true, true);
 	}
 
 	void Venom::Walking()
@@ -487,7 +488,7 @@ namespace Game::Brawler
 
 	void Venom::EnterRunning()
 	{
-		venom->SetCurrentAnimation("Run", 0.0f, 1.0f, true, true);
+		renderable->SetCurrentAnimation("Run", 0.0f, 1.0f, true, true);
 	}
 
 	void Venom::Running()
@@ -521,18 +522,18 @@ namespace Game::Brawler
 
 	void Venom::EnterJumping()
 	{
-		venom->animationUseTransformation(true);
-		venom->SetCurrentAnimation("JumpBegin");
+		renderable->animationUseTransformation(true);
+		renderable->SetCurrentAnimation("JumpBegin");
 	}
 
 	void Venom::VenomBeginJump()
 	{
-		venom->SetCurrentAnimation("JumpLoop", 0.0f, 1.0f, true, true);
+		renderable->SetCurrentAnimation("JumpLoop", 0.0f, 1.0f, true, true);
 		jumping = true;
 		canJump = false;
 		downSpeed += jumpSpeed();
 		touchingDown = false;
-		GetBrawlerCamera()->followY(canAttachToWall());
+		//GetBrawlerCamera()->followY(canAttachToWall());
 	}
 
 	void Venom::Jumping()
@@ -563,13 +564,13 @@ namespace Game::Brawler
 	void Venom::EnterRunningJump()
 	{
 		runningJumpLeftStick = leftStick;
-		venom->animationUseTransformation(true);
-		venom->SetCurrentAnimation("RunJumpBegin");
+		renderable->animationUseTransformation(true);
+		renderable->SetCurrentAnimation("RunJumpBegin");
 	}
 
 	void Venom::VenomBeginRunJump()
 	{
-		venom->SetCurrentAnimation("RunJumpLoop");
+		renderable->SetCurrentAnimation("RunJumpLoop");
 		runningJumpTimeLeft = runningJumpTime();
 	}
 
@@ -587,7 +588,7 @@ namespace Game::Brawler
 			runningJumpTimeLeft = std::max(runningJumpTimeLeft - dt, 0.0f);
 			if (runningJumpTimeLeft == 0.0f)
 			{
-				venom->SetCurrentAnimation("RunJumpLanding");
+				renderable->SetCurrentAnimation("RunJumpLanding");
 			}
 		}
 		RunningJumpMoveForward(runSpeed());
@@ -612,7 +613,7 @@ namespace Game::Brawler
 	void Venom::EnterAttack1()
 	{
 		auto animation = Attack1Animations.at(currentAttack1Animation);
-		venom->SetCurrentAnimation(animation);
+		renderable->SetCurrentAnimation(animation);
 		currentAttack1Animation = (currentAttack1Animation + 1) % Attack1Animations.size();
 	}
 
@@ -686,8 +687,8 @@ namespace Game::Brawler
 
 	void Venom::EnterJumpKick()
 	{
-		venom->animationUseTransformation(true);
-		venom->SetCurrentAnimation("JumpKick");
+		renderable->animationUseTransformation(true);
+		renderable->SetCurrentAnimation("JumpKick");
 	}
 
 	void Venom::JumpKick()
@@ -715,8 +716,8 @@ namespace Game::Brawler
 		jumpDashTimeLeft = jumpDashTime();
 		jumpDashAnimationIdx = std::rand() % DashAnimations.size();
 		std::string dashAnim = DashAnimations.at(jumpDashAnimationIdx);
-		venom->animationUseTransformation(true);
-		venom->SetCurrentAnimation(dashAnim);
+		renderable->animationUseTransformation(true);
+		renderable->SetCurrentAnimation(dashAnim);
 	}
 
 	void Venom::JumpDash()
@@ -727,7 +728,7 @@ namespace Game::Brawler
 			jumpDashTimeLeft = std::max(jumpDashTimeLeft - dt, 0.0f);
 			if (jumpDashTimeLeft == 0.0f)
 			{
-				venom->SetCurrentAnimation(DashLandingAnimations.at(jumpDashAnimationIdx));
+				renderable->SetCurrentAnimation(DashLandingAnimations.at(jumpDashAnimationIdx));
 			}
 		}
 		RunningJumpMoveForward(runSpeed());
@@ -741,9 +742,9 @@ namespace Game::Brawler
 
 	void Venom::EnterGrabWall()
 	{
-		venom->animationUseTransformation(true);
-		venom->SetCurrentAnimation("FloorToWall");
-		GetBrawlerCamera()->followY(true);
+		renderable->animationUseTransformation(true);
+		renderable->SetCurrentAnimation("FloorToWall");
+		//GetBrawlerCamera()->followY(true);
 	}
 
 	//WallIdle
@@ -754,8 +755,8 @@ namespace Game::Brawler
 
 	void Venom::EnterWallIdle()
 	{
-		venom->SetCurrentAnimation("WallIdle", 0.0f, 1.0f, true, true);
-		GetBrawlerCamera()->followY(true);
+		renderable->SetCurrentAnimation("WallIdle", 0.0f, 1.0f, true, true);
+		//GetBrawlerCamera()->followY(true);
 	}
 
 	void Venom::WallIdle()
@@ -784,12 +785,12 @@ namespace Game::Brawler
 
 	void Venom::EnterCrawlOnWall()
 	{
-		venom->SetCurrentAnimation("WallCrawl", 0.0f, 1.0f, true, true);
+		renderable->SetCurrentAnimation("WallCrawl", 0.0f, 1.0f, true, true);
 	}
 
 	void Venom::LeaveCrawlOnWall()
 	{
-		venom->animationTimeFactor(1.0f);
+		renderable->animationTimeFactor(1.0f);
 	}
 
 	void Venom::CrawlOnWall()
@@ -819,19 +820,19 @@ namespace Game::Brawler
 		XMVECTOR len = XMVector3Length(leftStick);
 		float l = std::clamp(len.m128_f32[0], 0.0f, 1.0f);
 		float tf = std::lerp(wallMoveMinTimeFactor(), wallMoveMaxTimeFactor(), l);
-		venom->animationTimeFactor(tf);
+		renderable->animationTimeFactor(tf);
 	}
 
 	//DetachFromWall
 	void Venom::EnterDetachFromWall()
 	{
-		venom->SetCurrentAnimation("DetachFromWall");
+		renderable->SetCurrentAnimation("DetachFromWall");
 	}
 
 	//Fall
 	void Venom::EnterFalling()
 	{
-		venom->SetCurrentAnimation("JumpLoop", 0.0f, 1.0f, true, true);
+		renderable->SetCurrentAnimation("JumpLoop", 0.0f, 1.0f, true, true);
 		jumping = true;
 		canJump = false;
 		downSpeed = 0.0f;
@@ -870,7 +871,7 @@ namespace Game::Brawler
 
 	void Venom::EnterDeath()
 	{
-		venom->SetCurrentAnimation("Death", 0.0f, deathTimeFactor());
+		renderable->SetCurrentAnimation("Death", 0.0f, deathTimeFactor());
 	}
 
 	void Venom::OnDeathAnimationEnd()
@@ -885,7 +886,7 @@ namespace Game::Brawler
 
 	void Venom::EnterWallToSwing()
 	{
-		venom->SetCurrentAnimation("WallToSwing");
+		renderable->SetCurrentAnimation("WallToSwing");
 	}
 
 	void Venom::UpdateWeb(XMVECTOR bonePos, XMVECTOR fixedPoint, XMFLOAT3 scale)
@@ -924,7 +925,7 @@ namespace Game::Brawler
 			float scly = webTweens[1]->step();
 			float sclz = webTweens[2]->step();
 
-			auto [mm, bonePos, a, b, c] = venom->GetBoneTransformation(webBone());
+			auto [mm, bonePos, a, b, c] = renderable->GetBoneTransformation(webBone());
 
 			XMVECTOR bonePosV = XMLoadFloat3(&bonePos);
 			UpdateWeb(bonePosV, webAttachedPos, XMFLOAT3(sclx, scly, sclz));
@@ -946,7 +947,7 @@ namespace Game::Brawler
 		sfx->Stop();
 		sfx->Play();
 
-		auto [mm, pos, a, b, c] = venom->GetBoneTransformation(webBone());
+		auto [mm, pos, a, b, c] = renderable->GetBoneTransformation(webBone());
 
 		CharacterLookingTo clt = lookingTo();
 		float angle = throwWebAngle() * ((clt == CLT_Left) ? 1.0f : -1.0f);
@@ -965,7 +966,7 @@ namespace Game::Brawler
 						{ "name", web.uuid() + "_ins"},
 						{ "uuid", web.uuid() },
 						{ "position", FromXMFLOAT3(pos) },
-						{ "cameras", venom->cameras() },
+						{ "cameras", renderable->cameras() },
 						{ "scale", FromXMFLOAT3(throwWebMinScale()) },
 						{ "rotation", {0.0f, 0.0f, angle } }
 					}
@@ -982,7 +983,7 @@ namespace Game::Brawler
 	//Swing
 	void Venom::EnterSwing()
 	{
-		venom->SetCurrentAnimation("Swing");
+		renderable->SetCurrentAnimation("Swing");
 		swingTimeTween = std::make_unique<tween>(0.0f, 1.0f, static_cast<int>(1000.0f * swingTime()));
 		continueSwinging = false;
 	}
@@ -1013,7 +1014,7 @@ namespace Game::Brawler
 		CharacterMoveXYPlane(disp, 1.0f, 1.0f);
 
 		//now we can update the web
-		auto [mm, bonePos, a, b, c] = venom->GetBoneTransformation(webBone());
+		auto [mm, bonePos, a, b, c] = renderable->GetBoneTransformation(webBone());
 
 		XMVECTOR bonePosV = XMLoadFloat3(&bonePos);
 		XMFLOAT3 scl = throwWebMaxScale();

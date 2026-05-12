@@ -1,0 +1,5 @@
+JCLASS(Hero, _)
+JEXPOSE_TRANSFORM(XMFLOAT3, farLeftAttackOffset, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(0.0f, 0.0f, 0.0f), jedv_t_float3, 1, false)
+JEXPOSE_TRANSFORM(XMFLOAT3, farRightAttackOffset, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(0.0f, 0.0f, 0.0f), jedv_t_float3, 1, false)
+JEXPOSE_TRANSFORM(XMFLOAT3, nearLeftAttackOffset, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(0.0f, 0.0f, 0.0f), jedv_t_float3, 1, false)
+JEXPOSE_TRANSFORM(XMFLOAT3, nearRightAttackOffset, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(0.0f, 0.0f, 0.0f), jedv_t_float3, 1, false)

@@ -1,1 +1,0 @@
-JCLASS(Hero, _)

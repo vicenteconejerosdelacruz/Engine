@@ -10,22 +10,22 @@ namespace Game::Brawler
 {
 #if defined(_EDITOR)
 #include <Editor/JDrawersDef.h>
-#include <Brawler/BrawlerCameraAtt.h>
+#include "BrawlerCameraAtt.h"
 #include <JEnd.h>
 #endif
 
 	BrawlerCamera::BrawlerCamera(nlohmann::json& json) : Controller(json)
 	{
 #include <Attributes/JInit.h>
-#include <Brawler/BrawlerCameraAtt.h>
+#include "BrawlerCameraAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <Brawler/BrawlerCameraAtt.h>
+#include "BrawlerCameraAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <Brawler/BrawlerCameraAtt.h>
+#include "BrawlerCameraAtt.h"
 #include <JEnd.h>
 
 		initialFollowX = followX();
@@ -36,19 +36,19 @@ namespace Game::Brawler
 	{
 		followX(initialFollowX);
 		followY(initialFollowY);
-		leftBoundaryB = MAKESUUUID(unit, leftBoundary());
-		rightBoundaryB = MAKESUUUID(unit, rightBoundary());
-		topBoundaryB = MAKESUUUID(unit, topBoundary());
-		leftBoundaryPO = leftBoundaryB->physicObject;
-		rightBoundaryPO = rightBoundaryB->physicObject;
-		topBoundaryPO = topBoundaryB->physicObject;
+		//leftBoundaryB = MAKESUUUID(unit, leftBoundary());
+		//rightBoundaryB = MAKESUUUID(unit, rightBoundary());
+		//topBoundaryB = MAKESUUUID(unit, topBoundary());
+		//leftBoundaryPO = leftBoundaryB->physicObject;
+		//rightBoundaryPO = rightBoundaryB->physicObject;
+		//topBoundaryPO = topBoundaryB->physicObject;
 	}
 
 #if defined(_EDITOR)
 	void BrawlerCamera::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <Brawler/BrawlerCameraAtt.h>
+#include "BrawlerCameraAtt.h"
 #include <JEnd.h>
 		Controller::WriteJson(j);
 	}
@@ -62,6 +62,7 @@ namespace Game::Brawler
 		heroes[0] = MAKESUUUID(std::get<0>(so), venom());
 		YcamInitial = camera->position().y;
 		Ycam2venom = YcamInitial - heroes[0]->position().y;
+		/*
 		GetController<Brawler::BrawlerScene>(unit, sceneController())->RegisterCamera(uuid());
 		ControllerBinding cb(
 			{
@@ -70,6 +71,7 @@ namespace Game::Brawler
 			}
 		);
 		venomC = GetController<Brawler::Venom>(unit, cb);
+		*/
 		SetInitialConditions();
 	}
 
@@ -83,6 +85,7 @@ namespace Game::Brawler
 
 	void BrawlerCamera::Step(float delta)
 	{
+		return;
 #if defined(_EDITOR)
 		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
 			return;

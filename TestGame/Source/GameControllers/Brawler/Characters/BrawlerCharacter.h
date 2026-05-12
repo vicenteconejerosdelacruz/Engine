@@ -30,30 +30,32 @@ namespace Game
 
 #if defined(_EDITOR)
 #include <Attributes/JOrder.h>
-#include <Brawler/BrawlerCharacterAtt.h>
+#include "BrawlerCharacterAtt.h"
 #include <JEnd.h>
+
 #include <Editor/JDrawersDecl.h>
-#include <Brawler/BrawlerCharacterAtt.h>
+#include "BrawlerCharacterAtt.h"
 #include <JEnd.h>
 #endif
 
 		struct BrawlerCharacter : Controller
 		{
 #include <Attributes/JFlags.h>
-#include <Brawler/BrawlerCharacterAtt.h>
+#include "BrawlerCharacterAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <Brawler/BrawlerCharacterAtt.h>
+#include "BrawlerCharacterAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <Brawler/BrawlerCharacterAtt.h>
+#include "BrawlerCharacterAtt.h"
 #include <JEnd.h>
 
 			//Constructor and Binding
 			BrawlerCharacter(nlohmann::json& json);
 			void SetInitialConditions() override;
+			void Unmap() override;
 
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
@@ -62,6 +64,8 @@ namespace Game
 #endif
 			//Scripting
 			void BindNestedControllers(Local<Context> context, Isolate* isolate, std::unique_ptr<SceneUnitScripting>& scriptData) override;
+
+			RenderableID renderable;
 		};
 	};
 };

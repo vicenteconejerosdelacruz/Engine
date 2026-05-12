@@ -15,7 +15,7 @@ inline BrawlerRound ToBrawlerRound(nlohmann::json& j)
 	BrawlerRound p;
 	if(j.contains("enemies"))
 	{
-		for (unsigned int i = 0; i < j.at("enemies"); i++)
+		for (unsigned int i = 0; i < j.at("enemies").size(); i++)
 		{
 			p.enemies.push_back(ControllerBinding(j.at("enemies").at(i)));
 		}

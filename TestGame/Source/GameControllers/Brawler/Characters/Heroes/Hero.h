@@ -7,25 +7,26 @@ namespace Game
 	{
 #if defined(_EDITOR)
 #include <Attributes/JOrder.h>
-#include <Brawler/HeroAtt.h>
+#include "HeroAtt.h"
 #include <JEnd.h>
+
 #include <Editor/JDrawersDecl.h>
-#include <Brawler/HeroAtt.h>
+#include "HeroAtt.h"
 #include <JEnd.h>
 #endif
 
 		struct Hero : BrawlerCharacter
 		{
 #include <Attributes/JFlags.h>
-#include <Brawler/HeroAtt.h>
+#include "HeroAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <Brawler/HeroAtt.h>
+#include "HeroAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <Brawler/HeroAtt.h>
+#include "HeroAtt.h"
 #include <JEnd.h>
 
 			Hero(nlohmann::json& json);
@@ -33,6 +34,9 @@ namespace Game
 			void WriteJson(nlohmann::json& j) override;
 			DECL_CONTROLLER_DRAWER(Hero, BrawlerCharacter);
 #endif
+			void Map(SUUUID so) override;
+
+			float capsuleRadius;
 		};
 	};
 };

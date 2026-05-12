@@ -27,7 +27,7 @@
     <ClInclude Include="TestGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Controllers\Brawler\VenomAtt.h">
+    <ClInclude Include="GameControllers\Brawler\Characters\Heroes\VenomAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="JExpose\Controllers\Test\SpinYawAtt.h">
@@ -48,7 +48,7 @@
     <ClInclude Include="GamePhysics\GamePhysics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Controllers\Brawler\BrawlerCameraAtt.h">
+    <ClInclude Include="GameControllers\Brawler\Camera\BrawlerCameraAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameControllers\Brawler\Camera\BrawlerCamera.h">
@@ -57,25 +57,25 @@
     <ClInclude Include="GameControllers\Brawler\Characters\Enemies\Thug.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Controllers\Brawler\ThugAtt.h">
+    <ClInclude Include="GameControllers\Brawler\Characters\Enemies\ThugAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameControllers\Brawler\Scene\BrawlerScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Controllers\Brawler\BrawlerSceneAtt.h">
+    <ClInclude Include="GameControllers\Brawler\Scene\BrawlerSceneAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameControllers\Brawler\Characters\Heroes\Hero.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Controllers\Brawler\BrawlerCharacterAtt.h">
+    <ClInclude Include="GameControllers\Brawler\Characters\BrawlerCharacterAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameControllers\Brawler\Characters\BrawlerCharacter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Controllers\Brawler\HeroAtt.h">
+    <ClInclude Include="GameControllers\Brawler\Characters\Heroes\HeroAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="JExpose\Editor\JEdvBrawlerDrawer.h">
@@ -120,9 +120,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameControllers\Brawler\Characters\BrawlerCharacter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="JExpose\Editor\JEdvBrawlerDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

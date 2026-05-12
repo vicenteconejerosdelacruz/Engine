@@ -82,24 +82,25 @@ namespace Game
 
 #if defined(_EDITOR)
 #include <Attributes/JOrder.h>
-#include <Brawler/VenomAtt.h>
+#include "VenomAtt.h"
 #include <JEnd.h>
+
 #include <Editor/JDrawersDecl.h>
-#include <Brawler/VenomAtt.h>
+#include "VenomAtt.h"
 #include <JEnd.h>
 #endif
 		struct Venom : Hero
 		{
 #include <Attributes/JFlags.h>
-#include <Brawler/VenomAtt.h>
+#include "VenomAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <Brawler/VenomAtt.h>
+#include "VenomAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <Brawler/VenomAtt.h>
+#include "VenomAtt.h"
 #include <JEnd.h>
 
 			static inline std::vector<std::string> Attack1Animations =
@@ -127,7 +128,7 @@ namespace Game
 				{ WMA_Right, [](auto& v) { v.m128_f32[0] = std::min(v.m128_f32[0],0.0f); } },
 			};
 
-			BrawlerCamera* GetBrawlerCamera();
+			//BrawlerCamera* GetBrawlerCamera();
 			VenomStates GetState();
 
 			//Constructor and Binding
@@ -268,7 +269,7 @@ namespace Game
 			int initialHealth;
 
 			//SceneObjects
-			RenderableID venom;
+			//RenderableID venom;
 			RenderableID web;
 			XMVECTOR posDelta;
 
