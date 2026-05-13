@@ -56,6 +56,7 @@ namespace Scene
 		SoundFX(SceneUnitId id, nlohmann::json& json);
 		~SoundFX() { Destroy(); }
 		void Initialize() override;
+		static void RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script);
 		virtual void SetInitialConditions();
 		virtual void BindToScene();
 		virtual void UnbindFromScene();

@@ -118,6 +118,14 @@ namespace Scene
 		SceneObject::Initialize();
 	}
 
+	void SoundFX::RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script)
+	{
+		v8_register_method<SoundFX>(isolate, tpl, "Play", script, [](SoundFX* self) { if (self) self->Play(); });
+		v8_register_method<SoundFX>(isolate, tpl, "Stop", script, [](SoundFX* self) { if (self) self->Stop(); });
+		v8_register_method<SoundFX>(isolate, tpl, "Pause", script, [](SoundFX* self) { if (self) self->Pause(); });
+		v8_register_method<SoundFX>(isolate, tpl, "Resume", script, [](SoundFX* self) { if (self) self->Resume(); });
+	}
+
 	void SoundFX::SetInitialConditions()
 	{
 		updateRotationQ();
