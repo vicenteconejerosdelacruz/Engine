@@ -13,7 +13,7 @@ struct BrawlerRound
 inline BrawlerRound ToBrawlerRound(nlohmann::json& j)
 {
 	BrawlerRound p;
-	if(j.contains("enemies"))
+	if (j.contains("enemies"))
 	{
 		for (unsigned int i = 0; i < j.at("enemies").size(); i++)
 		{
@@ -21,7 +21,7 @@ inline BrawlerRound ToBrawlerRound(nlohmann::json& j)
 		}
 	}
 	if (j.contains("onStart")) p.onStart = j.at("onStart");
-	if (j.contains("onEnd")) p.onStart = j.at("onEnd");
+	if (j.contains("onEnd")) p.onEnd = j.at("onEnd");
 	return p;
 }
 

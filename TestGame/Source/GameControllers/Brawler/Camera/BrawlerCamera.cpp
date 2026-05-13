@@ -14,6 +14,11 @@ namespace Game::Brawler
 #include <JEnd.h>
 #endif
 
+	static BrawlerScene* GetBrawlerScene(BrawlerCamera* cam)
+	{
+		return GetController<BrawlerScene>(cam->unit, cam->sceneController());
+	}
+
 	BrawlerCamera::BrawlerCamera(nlohmann::json& json) : Controller(json)
 	{
 #include <Attributes/JInit.h>
@@ -27,21 +32,20 @@ namespace Game::Brawler
 #include <Attributes/JV8Att.h>
 #include "BrawlerCameraAtt.h"
 #include <JEnd.h>
-
-		initialFollowX = followX();
-		initialFollowY = followY();
 	}
 
 	void BrawlerCamera::SetInitialConditions()
 	{
-		followX(initialFollowX);
-		followY(initialFollowY);
-		//leftBoundaryB = MAKESUUUID(unit, leftBoundary());
-		//rightBoundaryB = MAKESUUUID(unit, rightBoundary());
-		//topBoundaryB = MAKESUUUID(unit, topBoundary());
-		//leftBoundaryPO = leftBoundaryB->physicObject;
-		//rightBoundaryPO = rightBoundaryB->physicObject;
-		//topBoundaryPO = topBoundaryB->physicObject;
+		followLeft(false);
+		followRight(false);
+		followUp(false);
+		followDown(false);
+		leftBoundaryB = MAKESUUUID(unit, leftBoundary());
+		rightBoundaryB = MAKESUUUID(unit, rightBoundary());
+		topBoundaryB = MAKESUUUID(unit, topBoundary());
+		leftBoundaryPO = leftBoundaryB->physicObject;
+		rightBoundaryPO = rightBoundaryB->physicObject;
+		topBoundaryPO = topBoundaryB->physicObject;
 	}
 
 #if defined(_EDITOR)
@@ -59,19 +63,10 @@ namespace Game::Brawler
 		Controller::Map(so);
 
 		camera = so;
-		heroes[0] = MAKESUUUID(std::get<0>(so), venom());
-		YcamInitial = camera->position().y;
-		Ycam2venom = YcamInitial - heroes[0]->position().y;
-		/*
-		GetController<Brawler::BrawlerScene>(unit, sceneController())->RegisterCamera(uuid());
-		ControllerBinding cb(
-			{
-				{ "uuid",venom() },
-				{ "name","venom" }
-			}
-		);
-		venomC = GetController<Brawler::Venom>(unit, cb);
-		*/
+		auto* scene = GetBrawlerScene(this);
+		RenderableID heroR = GetController<Hero>(*scene->heroes().begin())->sceneObject;
+		cameraOffset = XMVectorSubtract(camera->positionV(), heroR->positionV());
+
 		SetInitialConditions();
 	}
 
@@ -79,38 +74,105 @@ namespace Game::Brawler
 	{
 		Controller::Unmap();
 		camera.clear();
-		heroes[0].clear();
-		heroes[1].clear();
 	}
 
 	void BrawlerCamera::Step(float delta)
 	{
-		return;
 #if defined(_EDITOR)
 		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
 			return;
 #endif
+		BrawlerScene* scene = GetBrawlerScene(this);
+		const std::set<JUUID>& heroIDs = scene->heroes();
 
-		XMFLOAT3 p = camera->position();
+		if (heroIDs.empty())
+			return;
 
-		p.x += XMVectorGetX(venomC->posDelta);
-		/*
-		if (followX())
+		// 1. Calcular el centro de la caja que contiene a todos los héroes
+		float minX = FLT_MAX, maxX = -FLT_MAX;
+		float minY = FLT_MAX, maxY = -FLT_MAX;
+		float minZ = FLT_MAX, maxZ = -FLT_MAX;
+
+		for (const auto& id : heroIDs)
 		{
-			p.x = venomR->position().x;
+			Hero* hero = GetController<Hero>(id);
+			if (!hero)
+				continue;
+
+			RenderableID heroR = hero->sceneObject;
+			XMVECTOR pos = heroR->positionV();
+
+			float x = XMVectorGetX(pos);
+			float y = XMVectorGetY(pos);
+			float z = XMVectorGetZ(pos);
+
+			if (x < minX) minX = x; if (x > maxX) maxX = x;
+			if (y < minY) minY = y; if (y > maxY) maxY = y;
+			if (z < minZ) minZ = z; if (z > maxZ) maxZ = z;
 		}
 
-		if (followY())
-		{
-			p.y = venomR->position().y + Ycam2venom;
-		}
-		else
-		{
-			p.y = YcamInitial;
-		}
-		*/
+		// Centro del grupo (El punto en el mundo que queremos que esté en el centro de la pantalla)
+		float targetX = (minX + maxX) * 0.5f;
+		float targetY = (minY + maxY) * 0.5f;
+		float targetZ = (minZ + maxZ) * 0.5f;
 
-		camera->position(p);
+		// 2. Posición actual de la cámara
+		XMVECTOR camPosV = camera->positionV();
+		float curCamX = XMVectorGetX(camPosV);
+		float curCamY = XMVectorGetY(camPosV);
+		float curCamZ = XMVectorGetZ(camPosV);
+
+		// 3. Obtener el desplazamiento fijo que define tu vista
+		// Este vector determina la distancia y el ángulo relativo al objetivo.
+		float offsetX = XMVectorGetX(cameraOffset);
+		float offsetY = XMVectorGetY(cameraOffset);
+		float offsetZ = XMVectorGetZ(cameraOffset);
+
+		// 4. CALCULAR POSICIÓN DESEADA DE LA CÁMARA
+		// Sumamos el offset al centro de los héroes
+		float desiredCamX = targetX + offsetX;
+		float desiredCamY = targetY + offsetY;
+		//float desiredCamZ = targetZ + offsetZ;
+		float desiredCamZ = curCamZ;
+
+		// 5. FILTRADO CON LAS FUNCIONES DE CONTROL
+		// Comparamos hacia dónde quiere ir la cámara respecto a dónde está ahora
+
+		// Eje X: Desplazamiento lateral
+		if (desiredCamX < curCamX && !followLeft())  desiredCamX = curCamX;
+		if (desiredCamX > curCamX && !followRight()) desiredCamX = curCamX;
+
+		// Eje Y: Desplazamiento vertical (Salto o elevación)
+		if (desiredCamY > curCamY && !followUp())    desiredCamY = curCamY;
+		if (desiredCamY < curCamY && !followDown())  desiredCamY = curCamY;
+
+		// Eje Z: Desplazamiento en profundidad
+		// (Aplica tus flags aquí si el movimiento Far/Near también debe bloquearse)
+
+		// 6. Aplicar movimiento suave (Lerp)
+		float lerpFactor = std::clamp(smoothing() * delta, 0.0f, 1.0f);
+		XMVECTOR nextPos = XMVectorSet(desiredCamX, desiredCamY, desiredCamZ, 0.0f);
+
+		XMVECTOR lerpedPosV = XMVectorLerp(camPosV, nextPos, lerpFactor);
+		XMFLOAT3 lerpedPos;
+		XMStoreFloat3(&lerpedPos, lerpedPosV);
+
+		XMVECTOR diff = XMVectorSubtract(lerpedPosV, camPosV);
+
+		MoveCameraBoundary(diff, leftBoundaryB);
+		MoveCameraBoundary(diff, rightBoundaryB);
+		MoveCameraBoundary(diff, topBoundaryB);
+
+		camera->position(lerpedPos);
+	}
+
+	void BrawlerCamera::MoveCameraBoundary(XMVECTOR diff, BoundaryID boundary)
+	{
+		XMVECTOR newPos = XMVectorAdd(boundary->positionV(), diff);
+		XMFLOAT3 xmnewPos;
+		XMStoreFloat3(&xmnewPos, newPos);
+		boundary->position(xmnewPos);
+		boundary->flag(Boundary::Update_position);
 	}
 }
 

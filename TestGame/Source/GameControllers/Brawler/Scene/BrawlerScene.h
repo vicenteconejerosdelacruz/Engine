@@ -94,6 +94,7 @@ namespace Game
 
 			//States
 			void OnStartRound(unsigned int round = 0U);
+			void OnEndRound();
 
 			//Heroes
 			void RegisterHero(JUUID heroController);
@@ -106,6 +107,7 @@ namespace Game
 			void Render(SceneUnitId id) override;
 
 			//UI
+			std::string BuildEvalScript(std::string type, nlohmann::json data);
 			void CreateVenomUI(SceneUnitId id);
 			void UpdateVenomUI(SceneUnitId id);
 			void HeroTookHit(JUUID enemy, int newHealth);
@@ -113,17 +115,11 @@ namespace Game
 			void AddScore(int scoreToAdd);
 			void UpdateHeroHealthUI();
 			void UpdateEnemyUI();
+			void ShowLeftArrowSign();
+			void HideLeftArrowSign();
+			void ShowRightArrowSign();
+			void HideRightArrowSign();
 
-			//Camera
-			//void RegisterCamera(JUUID camController);
-
-			//Enemies
-			//void RegisterEnemy(JUUID enemyController);
-			//void UnRegisterEnemy(JUUID enemyController);
-			//bool HeroesReadyToFight();
-			//std::tuple<JUUID, XMFLOAT3> PickHeroToFight(JUUID enemyController);
-
-			//EnemyAttackPoint GetNearHeroAttackPoint(JUUID hero, XMVECTOR heroPos, JUUID enemy, XMVECTOR enemyPos);
 			XMVECTOR GetHeroCombatPositionInSide(JUUID heroID, XMVECTOR heroPos, EnemiesAttackSides side, int queueIndex);
 			std::tuple<EnemiesAttackSides, float, bool, bool, int> GetNearHeroAttackPointInSide(JUUID heroID, XMVECTOR heroPos, JUUID enemyID, XMVECTOR enemyPos, bool lookLeft);
 			std::tuple<EnemiesAttackSides, float, bool, bool, int> GetNearHeroAttackPoint(JUUID heroID, XMVECTOR heroPos, JUUID enemyID, XMVECTOR enemyPos);
@@ -131,10 +127,7 @@ namespace Game
 			XMVECTOR GetHeroCombatPositionInQueue(EnemyAttackOption& attack);
 			void RegisterEnemyInAttackQueue(JUUID enemyID, EnemyAttackOption& attack);
 			void UnregisterEnemyFromAttackQueue(JUUID enemyID, EnemyAttackOption& attack);
-			//Camera
-			//BrawlerCamera* GetCameraController();
-
-			//std::map<JUUID, std::map<EnemiesAttackSides, AttackSlots>> heroesAttackers;
+			void EnemyDeath(JUUID enemyID, EnemyAttackOption& attack);
 
 			//HeroID, HeroAttackersQueue
 			std::map<JUUID, HeroAttackersQueues> heroesAttackersQueues;

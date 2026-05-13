@@ -37,6 +37,10 @@ namespace Game::Brawler
 	void BrawlerScene::RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script)
 	{
 		v8_register_method<BrawlerScene>(isolate, tpl, "HeroReady", script, [](BrawlerScene* self, JUUID heroUUID) { if (self) self->HeroReady(heroUUID); });
+		v8_register_method<BrawlerScene>(isolate, tpl, "ShowLeftArrowSign", script, [](BrawlerScene* self) { if (self) self->ShowLeftArrowSign(); });
+		v8_register_method<BrawlerScene>(isolate, tpl, "HideLeftArrowSign", script, [](BrawlerScene* self) { if (self) self->HideLeftArrowSign(); });
+		v8_register_method<BrawlerScene>(isolate, tpl, "ShowRightArrowSign", script, [](BrawlerScene* self) { if (self) self->ShowRightArrowSign(); });
+		v8_register_method<BrawlerScene>(isolate, tpl, "HideRightArrowSign", script, [](BrawlerScene* self) { if (self) self->HideRightArrowSign(); });
 	}
 
 	void BrawlerScene::SetInitialConditions()
@@ -95,6 +99,7 @@ namespace Game::Brawler
 	{
 		currentRound(round);
 		BrawlerRound cround = rounds().at(round);
+		enemiesInCurrentRound(static_cast<unsigned int>(cround.enemies.size()));
 		for (auto& cb : cround.enemies)
 		{
 			if (!cb) continue;
@@ -102,6 +107,13 @@ namespace Game::Brawler
 			Thug* thug = GetController<Thug>(unit, cb);
 			thug->combatEnabled(true);
 		}
+		Scripting::RunScript(cround.onStart, sceneObject);
+	}
+
+	void BrawlerScene::OnEndRound()
+	{
+		BrawlerRound cround = rounds().at(currentRound());
+		Scripting::RunScript(cround.onEnd, sceneObject);
 	}
 
 	//Heroes
@@ -138,6 +150,20 @@ namespace Game::Brawler
 	}
 
 	//UI
+	std::string BrawlerScene::BuildEvalScript(std::string type, nlohmann::json data)
+	{
+		nlohmann::json event =
+		{
+			{ "detail", {{ "type", type }}}
+		};
+		for (auto it = data.begin(); it != data.end(); ++it) {
+			event["detail"][it.key()] = it.value();
+		}
+		std::string eventStr = event.dump();
+		std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', " + eventStr + "));";
+		return js;
+	}
+
 	void BrawlerScene::CreateVenomUI(SceneUnitId id)
 	{
 		venomUIInstance(venomUI() + "-" + getUUID());
@@ -179,7 +205,11 @@ namespace Game::Brawler
 	void BrawlerScene::AddScore(int scoreToAdd)
 	{
 		heroScore(scoreToAdd + heroScore());
-		std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'SCORE_UPDATE', value: " + std::to_string(heroScore()) + " } })); ";
+		std::string js = BuildEvalScript("SCORE_UPDATE",
+			{
+				{ "value", std::to_string(heroScore()) }
+			}
+		);
 		HtmlUIInstanceID instance = venomUIInstance();
 		instance->EvaluateScript(js);
 	}
@@ -188,28 +218,22 @@ namespace Game::Brawler
 	{
 		if (heroHealthChanged())
 		{
-			std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'HERO_HP', value: " + std::to_string(heroHealth()) + " } })); ";
+			std::string js = BuildEvalScript("HERO_HP",
+				{
+					{ "value", std::to_string(heroHealth()) }
+				}
+			);
 			HtmlUIInstanceID instance = venomUIInstance();
 			instance->EvaluateScript(js);
 			heroHealthChanged(false);
 		}
 	}
 
-	std::string BuildEvalScript(std::string type, nlohmann::json data)
-	{
-		nlohmann::json event =
-		{
-
-		};
-
-		return event;
-	}
-
 	void BrawlerScene::UpdateEnemyUI()
 	{
 		if (lastAttackerDied())
 		{
-			std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'REMOVE_ENEMY' } })); ";
+			std::string js = BuildEvalScript("REMOVE_ENEMY", {});
 			HtmlUIInstanceID instance = venomUIInstance();
 			instance->EvaluateScript(js);
 			lastAttackerDied(false);
@@ -217,32 +241,71 @@ namespace Game::Brawler
 
 		if (newAttacker())
 		{
-			//nlohmann::json event =
-			//{ {
-			//	"details",
-			//	{
-			//		{ "type", "NEW_ENEMY" },
-			//		{ "name", lastAttackerName() },
-			//		{ "picture", lastAttackerPicture() }
-			//	}
-			//} };
-			std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'NEW_ENEMY', name:'" + lastAttackerName() + "', picture:'" + lastAttackerPicture() + "' } })); ";
-			//std::string update = event.dump();
-			//std::replace(update.begin(), update.end(), '\"', '\'');
-			//std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate',";
-			//js += update;
-			//js += "))";
+			std::string js = BuildEvalScript("NEW_ENEMY",
+				{
+					{ "name", lastAttackerName() },
+					{ "picture", lastAttackerPicture() }
+				}
+			);
 			HtmlUIInstanceID instance = venomUIInstance();
 			instance->EvaluateScript(js);
 			newAttacker(false);
 		}
 		if (lastAttackerHealthChanged())
 		{
-			std::string js = "window.dispatchEvent(new CustomEvent('engineUpdate', { detail: { type: 'ENEMY_HP', value: " + std::to_string(lastAttackerHealth()) + " } })); ";
+			std::string js = BuildEvalScript("ENEMY_HP",
+				{
+					{ "value", std::to_string(lastAttackerHealth()) }
+				}
+			);
 			HtmlUIInstanceID instance = venomUIInstance();
 			instance->EvaluateScript(js);
 			lastAttackerHealthChanged(false);
 		}
+	}
+
+	void BrawlerScene::ShowLeftArrowSign()
+	{
+		std::string js = BuildEvalScript("ARROW_LEFT",
+			{
+				{ "value", true }
+			}
+		);
+		HtmlUIInstanceID instance = venomUIInstance();
+		instance->EvaluateScript(js);
+	}
+
+	void BrawlerScene::HideLeftArrowSign()
+	{
+		std::string js = BuildEvalScript("ARROW_LEFT",
+			{
+				{ "value", false }
+			}
+		);
+		HtmlUIInstanceID instance = venomUIInstance();
+		instance->EvaluateScript(js);
+	}
+
+	void BrawlerScene::ShowRightArrowSign()
+	{
+		std::string js = BuildEvalScript("ARROW_RIGHT",
+			{
+				{ "value", true }
+			}
+		);
+		HtmlUIInstanceID instance = venomUIInstance();
+		instance->EvaluateScript(js);
+	}
+
+	void BrawlerScene::HideRightArrowSign()
+	{
+		std::string js = BuildEvalScript("ARROW_RIGHT",
+			{
+				{ "value", false }
+			}
+		);
+		HtmlUIInstanceID instance = venomUIInstance();
+		instance->EvaluateScript(js);
 	}
 
 	XMVECTOR BrawlerScene::GetHeroCombatPositionInSide(JUUID heroID, XMVECTOR heroPos, EnemiesAttackSides side, int queueIndex)
@@ -628,6 +691,16 @@ namespace Game::Brawler
 		// 6. Resetear el estado de la opción de ataque pasada por referencia
 		attack.isAlreadyAttached = false;
 		attack.queueIndex = 0;
+	}
+
+	void BrawlerScene::EnemyDeath(JUUID enemyID, EnemyAttackOption& attack)
+	{
+		UnregisterEnemyFromAttackQueue(enemyID, attack);
+		enemiesInCurrentRound(enemiesInCurrentRound() - 1U);
+		if (enemiesInCurrentRound() == 0U)
+		{
+			OnEndRound();
+		}
 	}
 };
 

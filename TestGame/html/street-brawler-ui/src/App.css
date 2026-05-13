@@ -1,9 +1,16 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 .hud-layer {
   position: absolute;
-  top: 20px;
-  left: 20px;
+  padding-top: 25px;
   display: flex;
   pointer-events: none; /* Deja que los clics pasen al juego si no hay botones */
+  width: 100%;
+  height: 100vh;
 }
 
 .character-hud
@@ -16,8 +23,7 @@
 }
 
 .character-hud.enemy {
-  right: -430px;
-  top: 0px;
+  left:420px;
 }
 
 .unit-display {
@@ -106,4 +112,30 @@
   position: absolute;
   right: 7px;
   top: 72px;
+}
+
+@keyframes arcadeBlink {
+  50% { opacity: 0; }
+}
+
+.arrow img {
+  width: 100px;
+  height: 100px;
+  animation: arcadeBlink 0.5s step-start infinite;
+}
+
+.arrow.right img {
+  transform: scaleX(-1); /* Voltea la flecha horizontalmente */
+}
+
+.arrow.left {
+  position: absolute;
+  top:120px;
+  left: 20px;
+}
+
+.arrow.right {
+  position: absolute;
+  top:120px;
+  right:20px;
 }

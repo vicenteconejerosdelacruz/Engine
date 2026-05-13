@@ -30,9 +30,30 @@ function EnemyHud({ picture, title, hp }) {
   );
 }
 
+function LeftArrow({ active }) {
+  if(active)
+    return (
+      <div className={`arrow left ${active ? 'active' : ''}`}>
+        <img src="signals/left-arrow.png" alt="Left Arrow" />
+      </div>
+    );
+  else return null;
+}
+
+function RightArrow({ active }) {
+  if(active)
+    return (
+      <div className={`arrow right ${active ? 'active' : ''}`}>
+        <img src="signals/left-arrow.png" alt="Right Arrow" />
+      </div>
+    );
+  else return null;
+}
+
 function App() {
   const [hero, setHero] = useState({ hp: 100, name: 'Venom', img: 'heroes/venom.webp', score:0 });
   const [enemy, setEnemy] = useState({ hp: 100, name: '', img: '', active: false });
+  const [arrows, setArrows] = useState({ left: false, right: false });
   
   useEffect(() => {
     // Escuchar actualizaciones desde C++ (EvaluateScript)
@@ -43,6 +64,8 @@ function App() {
       //if (e.detail.type === 'NEW_ENEMY') setEnemy(prev => ({ ...prev, name: e.detail.name, active: true, img:`enemies/${e.detail.name.toLowerCase()}.png` }));
       if (e.detail.type === 'REMOVE_ENEMY') setEnemy(prev => ({ ...prev, name: '', img:'', active: false }));
       if (e.detail.type === 'SCORE_UPDATE') setHero(prev => ({ ...prev, score: e.detail.value }));
+      if (e.detail.type === 'ARROW_LEFT') setArrows(prev => ({ ...prev, left: e.detail.value }));
+      if (e.detail.type === 'ARROW_RIGHT') setArrows(prev => ({ ...prev, right: e.detail.value }));
     };
 
     window.addEventListener('engineUpdate', handleEngineUpdate);
@@ -52,6 +75,8 @@ function App() {
     <div className="hud-layer">
         <HeroHud hero={true} picture={hero.img} title={hero.score} hp={hero.hp} />
         {enemy.active && <EnemyHud hero={false} picture={enemy.img} title={enemy.name} hp={enemy.hp} />}
+        <LeftArrow active={arrows.left} />
+        <RightArrow active={arrows.right} />
     </div>
   );
 }

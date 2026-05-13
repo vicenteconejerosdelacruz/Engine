@@ -40,21 +40,21 @@ namespace Game
 			void Map(SUUUID so) override;
 			void Unmap() override;
 			void Step(float delta) override;
+			void MoveCameraBoundary(XMVECTOR diff, BoundaryID boundary);
 
 			//object to interact with
 			CameraID camera;
-			RenderableID heroes[2];
-			Venom* venomC;
-			float Ycam2venom;
-			float YcamInitial;
-			bool initialFollowX;
-			bool initialFollowY;
-			//BoundaryID leftBoundaryB;
-			//BoundaryID rightBoundaryB;
-			//BoundaryID topBoundaryB;
-			//PhysicObjectID leftBoundaryPO;
-			//PhysicObjectID rightBoundaryPO;
-			//PhysicObjectID topBoundaryPO;
+			XMVECTOR cameraOffset;
+			//RenderableID heroes[2];
+			//Venom* venomC;
+			//float Ycam2venom;
+			//float YcamInitial;
+			BoundaryID leftBoundaryB;
+			BoundaryID rightBoundaryB;
+			BoundaryID topBoundaryB;
+			PhysicObjectID leftBoundaryPO;
+			PhysicObjectID rightBoundaryPO;
+			PhysicObjectID topBoundaryPO;
 		};
 	};
 };

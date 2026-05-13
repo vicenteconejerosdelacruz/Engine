@@ -521,7 +521,7 @@ namespace Game::Brawler
 
 	void Thug::EnterDeath()
 	{
-		//GetBrawlerScene(this)->UnRegisterEnemy(uuid());
+		GetBrawlerScene(this)->EnemyDeath(uuid(), pickedHero);
 		renderable->SetCurrentAnimation(deathAnimation(), 0.0f, deathTimeFactor());
 	}
 
