@@ -61,7 +61,6 @@ function App() {
       if (e.detail.type === 'HERO_HP') setHero(prev => ({ ...prev, hp: e.detail.value }));
       if (e.detail.type === 'ENEMY_HP') setEnemy(prev => ({ ...prev, hp: e.detail.value }));
       if (e.detail.type === 'NEW_ENEMY') setEnemy(prev => ({ ...prev, name: e.detail.name, active: true, img:`enemies/${e.detail.picture.toLowerCase()}.png` }));
-      //if (e.detail.type === 'NEW_ENEMY') setEnemy(prev => ({ ...prev, name: e.detail.name, active: true, img:`enemies/${e.detail.name.toLowerCase()}.png` }));
       if (e.detail.type === 'REMOVE_ENEMY') setEnemy(prev => ({ ...prev, name: '', img:'', active: false }));
       if (e.detail.type === 'SCORE_UPDATE') setHero(prev => ({ ...prev, score: e.detail.value }));
       if (e.detail.type === 'ARROW_LEFT') setArrows(prev => ({ ...prev, left: e.detail.value }));
@@ -74,7 +73,7 @@ function App() {
   return (
     <div className="hud-layer">
         <HeroHud hero={true} picture={hero.img} title={hero.score} hp={hero.hp} />
-        {enemy.active && <EnemyHud hero={false} picture={enemy.img} title={enemy.name} hp={enemy.hp} />}
+        {enemy.active && <EnemyHud key={enemy.name} hero={false} picture={enemy.img} title={enemy.name} hp={enemy.hp} />}
         <LeftArrow active={arrows.left} />
         <RightArrow active={arrows.right} />
     </div>
