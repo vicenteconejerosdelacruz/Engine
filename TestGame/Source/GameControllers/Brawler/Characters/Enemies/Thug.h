@@ -79,6 +79,7 @@ namespace Game
 			//States
 			void TakeHit(int damage);
 			void PickHeroToFight();
+			void UnregisterFromCombat();
 
 			//Movement
 			void CharacterMoveXZPlane(XMVECTOR displacement, float dt, float sideSpeed, XMFLOAT3 gravity);
@@ -88,7 +89,6 @@ namespace Game
 			bool IsInAttackRange();
 
 			//Idle
-			//bool ShouldIdle();
 			void EnterIdle();
 			void LeaveIdle();
 			void Idle();
@@ -102,7 +102,6 @@ namespace Game
 			void EnterCombatFollow();
 			void CombatFollow();
 			XMVECTOR CalculateSteeringDirection();
-			void MoveTowardHero(float speed);
 			float EvaluateNextFollowMovement(XMVECTOR actualMovementDir);
 
 			//CombatPunch
@@ -124,12 +123,11 @@ namespace Game
 			int initialHealth;
 
 			//SceneObjects
-			//RenderableID thug;
 			PhysicSceneID physicScene;
 			PhysicObjectID physicObject;
 
 			//Picked hero
-			EnemyAttackOption pickedHero;
+			JUUID pickedHeroID;
 		};
 	};
 };

@@ -4,6 +4,8 @@
 #include <StepTimer.h>
 #include <NoStd.h>
 #include <SimpleMath.h>
+#include <GamePhysics.h>
+#include <Brawler/Characters/Heroes/Hero.h>
 #if defined(_EDITOR)
 #include <Editor.h>
 #endif
@@ -85,7 +87,7 @@ namespace Game::Brawler
 		BrawlerCharacter::SetInitialConditions();
 		tsm.currentState = TS_None;
 		health(initialHealth);
-		pickedHero = EnemyAttackOption();
+		pickedHeroID.clear();
 		combatEnabled(false);
 	}
 
@@ -98,7 +100,6 @@ namespace Game::Brawler
 		BrawlerCharacter::WriteJson(j);
 	}
 #endif
-#include <GamePhysics.h>
 
 	void Thug::Map(SUUUID so)
 	{
@@ -111,8 +112,14 @@ namespace Game::Brawler
 			renderable = so;
 		}
 
-		physicScene = MAKESUUUID(unit, *GetPhysicScenes(unit).begin());
-		physicObject = renderable->at("physicObject").at(0);
+		if (GetCountFromPhysicScenes(unit) > 0ULL)
+		{
+			physicScene = MAKESUUUID(unit, *GetPhysicScenes(unit).begin());
+			if (renderable->at("physicObject").size() > 0ULL)
+			{
+				physicObject = renderable->at("physicObject").at(0);
+			}
+		}
 
 		SetInitialConditions();
 	}
@@ -136,14 +143,48 @@ namespace Game::Brawler
 
 	void Thug::PickHeroToFight()
 	{
-		BrawlerScene* brawler = GetBrawlerScene(this);
-		EnemyAttackOption attack = brawler->PickHeroToFight(uuid());
-		if (pickedHero != attack)
+		BrawlerScene* scene = GetBrawlerScene(this);
+		const auto& heroIDs = scene->heroes();
+
+		if (heroIDs.empty()) return;
+
+		// Buscamos al héroe más cercano que tenga slots libres
+		JUUID bestHero;
+		float closestDist = FLT_MAX;
+
+		for (const auto& hID : heroIDs)
 		{
-			brawler->UnregisterEnemyFromAttackQueue(uuid(), pickedHero);
-			brawler->RegisterEnemyInAttackQueue(uuid(), attack);
+			Hero* hero = GetController<Hero>(hID);
+			if (!hero) continue;
+
+			// Regla de oro: ¿Puede este héroe recibir más atacantes?
+			// Ponemos un límite de 2 o 3 para que no se amontonen
+			if (scene->CanJoinCombat(hID, 3))
+			{
+				RenderableID heroR = hero->sceneObject;
+				float dist = XMVectorGetX(XMVector3Length(XMVectorSubtract(heroR->positionV(), renderable->positionV())));
+				if (dist < closestDist)
+				{
+					closestDist = dist;
+					bestHero = hID;
+				}
+			}
 		}
-		pickedHero = attack;
+
+		if (!bestHero.empty())
+		{
+			// Guardamos nuestro objetivo
+			pickedHeroID = bestHero;
+			// IMPORTANTE: Nos registramos en la escena para obtener un slot
+			scene->RegisterThugInCombat(bestHero, uuid());
+		}
+	}
+
+	void Thug::UnregisterFromCombat()
+	{
+		auto* scene = GetBrawlerScene(this);
+		scene->UnregisterThugFromCombat(uuid());
+		pickedHeroID.clear();
 	}
 
 	//Step
@@ -153,6 +194,8 @@ namespace Game::Brawler
 		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
 			return;
 #endif
+		if (physicObject.empty())
+			return;
 
 		float dt = static_cast<float>(timer.GetElapsedSeconds());
 		std::string Rname = renderable->name();
@@ -192,10 +235,11 @@ namespace Game::Brawler
 
 	void Thug::UpdateLookTo()
 	{
-		if (!pickedHero)
+		if (pickedHeroID.empty())
 			return;
 
-		float dx = pickedHero.heroRenderable->position().x - renderable->position().x;
+		RenderableID heroRenderable = GetController<Hero>(pickedHeroID)->sceneObject;
+		float dx = heroRenderable->position().x - renderable->position().x;
 		if (dx > 0.0f)
 		{
 			if (lookingTo() == CLT_Left)
@@ -218,41 +262,51 @@ namespace Game::Brawler
 
 	bool Thug::IsInAttackRange()
 	{
-		if (!pickedHero)
+		// 1. Verificación de seguridad
+		if (pickedHeroID.empty())
 			return false;
 
-		BrawlerScene* brawler = GetBrawlerScene(this);
-		XMVECTOR heroPos = brawler->GetHeroCombatPositionInQueue(pickedHero);
-		XMVECTOR myPos = renderable->positionV();
+		Hero* hero = GetController<Hero>(pickedHeroID);
+		if (!hero)
+			return false;
 
-		// 1. Vector diferencia en el plano XZ
-		XMVECTOR diff = XMVectorSubtract(heroPos, myPos);
+		// 2. Acceso a Renderables (Arquitectura Engine)
+		RenderableID myR = this->sceneObject;
+		RenderableID heroR = hero->sceneObject;
+
+		XMVECTOR myPos = myR->positionV();
+		XMVECTOR actualHeroPos = heroR->positionV();
+
+		// 3. Vector diferencia en el plano XZ
+		XMVECTOR diff = XMVectorSubtract(actualHeroPos, myPos);
 		static const XMVECTORF32 MaskXZ = { 1.0f, 0.0f, 1.0f, 0.0f };
-		diff = XMVectorMultiply(diff, MaskXZ);
+		XMVECTOR diffXZ = XMVectorMultiply(diff, MaskXZ);
 
-		// 2. Extraer componentes
-		float diffX = fabsf(XMVectorGetX(diff));
-		float diffZ = fabsf(XMVectorGetZ(diff));
-
-		// 3. Validación de Distancia Circular Máxima
-		float lenSq = XMVectorGetX(XMVector3LengthSq(diff));
+		// 4. Validación de Distancia (Rango de ataque)
+		float lenSq = XMVectorGetX(XMVector3LengthSq(diffXZ));
 		float combatDist = combatMinDistanceToAttack();
 
+		// Si está más lejos de lo que permiten sus puños, fuera
 		if (lenSq > (combatDist * combatDist))
 			return false;
 
-		// 4. Validación de Alineación (Ángulo + Tolerancia fija)
-		// tan(10°) ≈ 0.1763
-		const float tan10deg = 0.176326f;
+		// 5. Validación de Alineación (El "Carril" del Brawler)
+		// Extraemos componentes para validar la profundidad (Z)
+		float diffX = fabsf(XMVectorGetX(diffXZ));
+		float diffZ = fabsf(XMVectorGetZ(diffXZ));
 
-		// Tolerancia fija en Z (ejemplo: 0.1 unidades). 
-		// Esto permite atacar si estás muy cerca aunque el ángulo sea "grande".
+		// Tan(10°) ≈ 0.1763. Define un cono de ataque frontal.
+		const float tan10deg = 0.176326f;
+		// Tolerancia fija en Z para ataques muy cercanos.
 		const float zTolerance = 0.1f;
 
-		// Es válido si:
-		// a) Está dentro del ángulo de 10 grados respecto a la X
-		// b) O si la diferencia en Z es menor a la tolerancia fija (está en el mismo carril)
+		// Es válido si el enemigo está alineado en el carril Z respecto al héroe
 		bool isAlignedZ = (diffZ <= (diffX * tan10deg)) || (diffZ <= zTolerance);
+
+		// 6. Validación de altura (Y) - Failsafe para saltos
+		float diffY = fabsf(XMVectorGetY(actualHeroPos) - XMVectorGetY(myPos));
+		if (diffY > 1.0f)
+			return false;
 
 		return isAlignedZ;
 	}
@@ -265,7 +319,8 @@ namespace Game::Brawler
 
 	void Thug::EnterIdle()
 	{
-		renderable->SetCurrentAnimation(idleAnimation(), 0.0f, 1.0f, true, true);
+		renderable->SetCurrentAnimation(idleAnimation(), 0.0f, idleTimeFactor(), true, true);
+		UnregisterFromCombat();
 	}
 
 	void Thug::LeaveIdle()
@@ -322,172 +377,137 @@ namespace Game::Brawler
 	void Thug::EnterCombatFollow()
 	{
 		PickHeroToFight();
-		//EvaluateNextFollowMovement();
 	}
 
 	void Thug::CombatFollow()
 	{
+		// Si no tenemos héroe o el que teníamos ya no es válido, buscamos uno
+		if (pickedHeroID.empty())
+		{
+			PickHeroToFight();
+			if (pickedHeroID.empty())
+				return; // No hay nadie a quien pelear
+		}
+
 		if (IsInAttackRange())
 		{
 			tsm.ChangeState(TS_CombatPunch);
 		}
 		else
 		{
-			PickHeroToFight();
-
 			UpdateLookTo();
 
-			// 1. Obtenemos el vector de movimiento calculado
+			// 1. Calculamos la dirección usando el Steering que ya tenemos
 			XMVECTOR currentMoveDir = CalculateSteeringDirection();
 
-			// 2. Evaluamos qué animación tocar y obtenemos la velocidad asociada
+			// 2. Evaluamos animación y velocidad (Near/Far/Fw)
 			float adaptiveSpeed = EvaluateNextFollowMovement(currentMoveDir);
 
-			// 3. Movemos al personaje con la velocidad adaptada
+			// 3. Movemos al personaje
 			CharacterMoveXZPlane(currentMoveDir, gameUpdateFrequency, adaptiveSpeed, physicScene->gravity());
-
 		}
 	}
 
 	XMVECTOR Thug::CalculateSteeringDirection()
 	{
 		BrawlerScene* brawler = GetBrawlerScene(this);
-		XMVECTOR targetPos = brawler->GetHeroCombatPositionInQueue(pickedHero);
-		XMVECTOR myPos = renderable->positionV();
-		XMVECTOR actualHeroPos = pickedHero.heroRenderable->positionV();
 
-		XMVECTOR toTarget = XMVectorMultiply({ 1.0f, 0.0f, 1.0f, 0.0f }, XMVectorSubtract(targetPos, myPos));
-		XMVECTOR toHero = XMVectorMultiply({ 1.0f, 0.0f, 1.0f, 0.0f }, XMVectorSubtract(actualHeroPos, myPos));
+		// 1. Obtenemos el punto exacto que nos toca según nuestro índice de slot
+		// Esta función ya nos devuelve la posición (Frente, Espalda, etc.)
+		XMVECTOR targetPos = brawler->GetHeroCombatPositionForThug(pickedHeroID, uuid());
+
+		XMVECTOR myPos = renderable->positionV();
+		Hero* hero = GetController<Hero>(pickedHeroID);
+		RenderableID heroR = hero->sceneObject;
+		XMVECTOR actualHeroPos = heroR->positionV();
+
+		// 2. Proyectamos vectores en el plano XZ (ignoramos altura para el steering)
+		XMVECTOR maskXZ = { 1.0f, 0.0f, 1.0f, 0.0f };
+		XMVECTOR toTarget = XMVectorMultiply(maskXZ, XMVectorSubtract(targetPos, myPos));
+		XMVECTOR toHero = XMVectorMultiply(maskXZ, XMVectorSubtract(actualHeroPos, myPos));
 
 		float distToHero = XMVectorGetX(XMVector3Length(toHero));
 		float distToTarget = XMVectorGetX(XMVector3Length(toTarget));
-		const float avoidRadius = pickedHero.heroRadius * 2.0f + 0.2f;
 
+		// El radio de evitación (el cuerpo del héroe)
+		const float avoidRadius = hero->capsuleRadius * 2.0f + 0.2f;
+
+		// 3. LÓGICA DE EVITACIÓN (Steering)
+		// Si el héroe está entre nosotros y el target, y estamos cerca de su radio
 		if (distToHero < distToTarget && distToHero < avoidRadius * 2.0f)
 		{
+			// Calculamos hacia qué lado rodear
 			XMVECTOR cross = XMVector3Cross(toTarget, toHero);
 			float side = XMVectorGetY(cross);
 
 			XMVECTOR avoidanceDir;
-			if (side > 0)
+			if (side > 0) // El héroe está a nuestra derecha, rodeamos por la izquierda
 				avoidanceDir = XMVectorSet(-XMVectorGetZ(toHero), 0.0f, XMVectorGetX(toHero), 0.0f);
-			else
+			else         // El héroe está a nuestra izquierda, rodeamos por la derecha
 				avoidanceDir = XMVectorSet(XMVectorGetZ(toHero), 0.0f, -XMVectorGetX(toHero), 0.0f);
 
-			float weight = 1.0f - (distToHero / (avoidRadius * 2.0f));
-			return XMVector3Normalize(XMVectorLerp(XMVector3Normalize(toTarget), XMVector3Normalize(avoidanceDir), weight));
+			// Mezclamos el camino directo al target con el camino de evitación
+			// A menor distancia del héroe, más peso tiene la evitación (curva más cerrada)
+			float weight = 1.0f - std::clamp(distToHero / (avoidRadius * 2.0f), 0.0f, 1.0f);
+
+			XMVECTOR normTarget = XMVector3Normalize(toTarget);
+			XMVECTOR normAvoid = XMVector3Normalize(avoidanceDir);
+
+			return XMVector3Normalize(XMVectorLerp(normTarget, normAvoid, weight));
 		}
 
+		// Si el camino está despejado, vamos directo al target del slot
 		return XMVector3Normalize(toTarget);
 	}
 
-	void Thug::MoveTowardHero(float speed)
-	{
-		if (!pickedHero) return;
-
-		BrawlerScene* brawler = GetBrawlerScene(this);
-		XMVECTOR targetPos = brawler->GetHeroCombatPositionInQueue(pickedHero);
-		XMVECTOR myPos = renderable->positionV();
-
-		// Posición actual del héroe (no el punto de la cola)
-		XMVECTOR actualHeroPos = pickedHero.heroRenderable->positionV();
-
-		// 1. Vector hacia el objetivo y vector hacia el centro del héroe
-		XMVECTOR toTarget = XMVectorMultiply({ 1.0f, 0.0f, 1.0f, 0.0f }, XMVectorSubtract(targetPos, myPos));
-		XMVECTOR toHero = XMVectorMultiply({ 1.0f, 0.0f, 1.0f, 0.0f }, XMVectorSubtract(actualHeroPos, myPos));
-
-		float distToHero = XMVectorGetX(XMVector3Length(toHero));
-		float distToTarget = XMVectorGetX(XMVector3Length(toTarget));
-
-		// 2. Definir radio de evitación (Radio de la cápsula del héroe + margen)
-		// Supongamos que el radio es 1.0f, añadimos 0.5f de margen
-		const float avoidRadius = pickedHero.heroRadius * 2.0f + 0.2f;
-
-		XMVECTOR finalDisp;
-
-		// 3. ¿El héroe está en medio? 
-		// Si la distancia al héroe es menor que la del objetivo, y estamos lo suficientemente cerca para chocar
-		if (distToHero < distToTarget && distToHero < avoidRadius * 2.0f)
-		{
-			// Calculamos el producto cruz para saber si el héroe está a la izquierda o derecha de nuestro camino
-			XMVECTOR cross = XMVector3Cross(toTarget, toHero);
-			float side = XMVectorGetY(cross);
-
-			// Generamos un vector perpendicular (Normal) para rodear
-			// Si side > 0, el héroe está a la derecha, nos movemos a la izquierda y viceversa
-			XMVECTOR avoidanceDir;
-			if (side > 0)
-				avoidanceDir = XMVectorSet(-XMVectorGetZ(toHero), 0.0f, XMVectorGetX(toHero), 0.0f);
-			else
-				avoidanceDir = XMVectorSet(XMVectorGetZ(toHero), 0.0f, -XMVectorGetX(toHero), 0.0f);
-
-			avoidanceDir = XMVector3Normalize(avoidanceDir);
-
-			// Mezclamos el movimiento hacia el objetivo con el de evitación (Curva)
-			// A más cerca del héroe, más fuerza de evitación
-			float weight = 1.0f - (distToHero / (avoidRadius * 2.0f));
-			finalDisp = XMVector3Normalize(XMVectorLerp(XMVector3Normalize(toTarget), avoidanceDir, weight));
-		}
-		else
-		{
-			finalDisp = XMVector3Normalize(toTarget);
-		}
-
-		CharacterMoveXZPlane(finalDisp, gameUpdateFrequency, speed, physicScene->gravity());
-	}
-	/*
-	void Thug::MoveTowardHero(float speed)
-	{
-		if (!pickedHero)
-			return;
-
-		BrawlerScene* brawler = GetBrawlerScene(this);
-		XMVECTOR heroPos = brawler->GetHeroCombatPositionInQueue(pickedHero);
-		XMVECTOR myPos = renderable->positionV();
-		XMVECTOR diff = XMVectorMultiply({ 1.0f,0.0f,1.0f,0.0f }, XMVectorSubtract(heroPos, myPos));
-		XMVECTOR disp = XMVector3Normalize(diff);
-		CharacterMoveXZPlane(disp, gameUpdateFrequency, speed, physicScene->gravity());
-	}
-	*/
-
 	float Thug::EvaluateNextFollowMovement(XMVECTOR actualMovementDir)
 	{
-		if (!pickedHero) return walkSpeed(); // Velocidad base por defecto
+		if (pickedHeroID.empty()) return walkSpeed(); // Velocidad base por defecto
 
+		// 1. Normalizamos la dirección de movimiento en el plano XZ
 		XMVECTOR movementDir = XMVector3Normalize(XMVectorMultiply({ 1.0f, 0.0f, 1.0f, 0.0f }, actualMovementDir));
+
+		// 2. Usamos el vector derecha (1,0,0) como referencia para el ángulo
 		XMVECTOR right = { 1.0f, 0.0f, 0.0f, 0.0f };
 		XMVECTOR radians = XMVector3AngleBetweenVectors(movementDir, right);
 		float degree = XMConvertToDegrees(XMVectorGetX(radians));
 
+		// 3. Umbral para decidir si el movimiento es "Horizontal" o "Profundidad"
+		// combatMoveNearFarAngle suele ser unos 45-60 grados
 		float nearFarThreshold = combatMoveNearFarAngle();
+
+		// Es horizontal si el ángulo está cerca de 0° (derecha) o 180° (izquierda)
 		bool isHorizontal = (degree <= nearFarThreshold) || (degree >= 180.0f - nearFarThreshold);
 
 		if (isHorizontal)
 		{
+			// CAMINAR DE FRENTE (Hacia los lados del héroe)
 			if (!followAnimationPlaying() || renderable->animationSequence() != combatMoveFwAnimation())
 			{
 				renderable->SetCurrentAnimation(combatMoveFwAnimation(), 0.0f, combatMoveFwTimeFactor(), true, false);
 				followAnimationPlaying(true);
 			}
-			return walkSpeed(); // Velocidad estándar para caminar de frente
+			return walkSpeed();
 		}
-		else if (XMVectorGetZ(movementDir) > 0.0f) // Fondo
+		else if (XMVectorGetZ(movementDir) > 0.0f)
 		{
+			// CAMINAR HACIA EL FONDO (Z positivo)
 			if (!followAnimationPlaying() || renderable->animationSequence() != combatMoveFarAnimation())
 			{
 				renderable->SetCurrentAnimation(combatMoveFarAnimation(), 0.0f, combatMoveNearFarTimeFactor(), true, false);
 				followAnimationPlaying(true);
 			}
-			return combatMoveFarSpeed(); // Nueva función/variable que definas
+			return combatMoveFarSpeed();
 		}
-		else // Cámara
+		else
 		{
+			// CAMINAR HACIA LA CÁMARA (Z negativo)
 			if (!followAnimationPlaying() || renderable->animationSequence() != combatMoveNearAnimation())
 			{
 				renderable->SetCurrentAnimation(combatMoveNearAnimation(), 0.0f, combatMoveNearFarTimeFactor(), true, false);
 				followAnimationPlaying(true);
 			}
-			return combatMoveNearSpeed(); // Nueva función/variable que definas
+			return combatMoveNearSpeed();
 		}
 	}
 
@@ -521,8 +541,8 @@ namespace Game::Brawler
 
 	void Thug::EnterDeath()
 	{
-		GetBrawlerScene(this)->EnemyDeath(uuid(), pickedHero);
 		renderable->SetCurrentAnimation(deathAnimation(), 0.0f, deathTimeFactor());
+		UnregisterFromCombat();
 	}
 
 	void Thug::OnDeathAnimationEnd()

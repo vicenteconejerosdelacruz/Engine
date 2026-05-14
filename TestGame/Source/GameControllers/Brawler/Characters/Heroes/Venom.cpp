@@ -181,17 +181,20 @@ namespace Game::Brawler
 		}
 		GetController<BrawlerScene>(unit, sceneController())->RegisterHero(uuid());
 		physicScene = MAKESUUUID(unit, *GetPhysicScenes(unit).begin());
-		physicObject = renderable->at("physicObject").at(0);
-		RegisterContactCallback(PB_Static, physicObject(), [&](JUUID uuid, unsigned int event)
-			{
-				OnStaticContactEvent(uuid, event);
-			}
-		);
-		RegisterCharacterHitCallback(physicObject(), [&](PxFilterData fd)
-			{
-				OnCharacterHitEvent(fd);
-			}
-		);
+		if (renderable->physicObject().size() > 0ULL)
+		{
+			physicObject = renderable->at("physicObject").at(0);
+			RegisterContactCallback(PB_Static, physicObject(), [&](JUUID uuid, unsigned int event)
+				{
+					OnStaticContactEvent(uuid, event);
+				}
+			);
+			RegisterCharacterHitCallback(physicObject(), [&](PxFilterData fd)
+				{
+					OnCharacterHitEvent(fd);
+				}
+			);
+		}
 		SetInitialConditions();
 	}
 

@@ -42,7 +42,10 @@ namespace Game::Brawler
 		if (type == SO_Renderables)
 		{
 			RenderableID r = so;
-			capsuleRadius = static_cast<float>(r->physicObject().at(0).get()->at("radius"));
+			if (r->physicObject().size() > 0)
+			{
+				capsuleRadius = static_cast<float>(r->physicObject().at(0).get()->at("radius"));
+			}
 		}
 	}
 };

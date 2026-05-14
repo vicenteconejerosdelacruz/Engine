@@ -7,50 +7,6 @@
 #include <string>
 #include <unordered_map>
 
-enum EnemiesAttackSides
-{
-	EAS_FarLeft,
-	EAS_FarRight,
-	EAS_NearLeft,
-	EAS_NearRight,
-};
-
-static inline std::unordered_map<EnemiesAttackSides, std::string> EnemiesAttackSidesToString =
-{
-	{ EAS_FarLeft, "FarLeft" },
-	{ EAS_FarRight, "FarRight" },
-	{ EAS_NearLeft, "NearLeft" },
-	{ EAS_NearRight, "NearRight" },
-};
-
-static inline std::unordered_map<std::string, EnemiesAttackSides> StringToEnemiesAttackSides =
-{
-	{ "FarLeft", EAS_FarLeft },
-	{ "FarRight", EAS_FarRight },
-	{ "NearLeft", EAS_NearLeft },
-	{ "NearRight", EAS_NearRight },
-};
-
-struct AttackersQueue
-{
-	std::set<JUUID> attached;
-	std::map<JUUID, unsigned int> attachedIndex;
-	std::vector<XMVECTOR> offsets;
-};
-
-struct HeroAttackersQueues
-{
-	AttackersQueue farLeft;
-	AttackersQueue farRight;
-	AttackersQueue nearLeft;
-	AttackersQueue nearRight;
-};
-
-// <Lado, DistanciaSq, PuedeAtacar, YaEstaAtachado, IndiceEnCola>
-using EnemyAttackPoint = std::tuple<EnemiesAttackSides, float, bool, bool, int>;
-
-struct EnemyAttackOption;
-
 namespace Game
 {
 	namespace Brawler
@@ -120,23 +76,17 @@ namespace Game
 			void ShowRightArrowSign();
 			void HideRightArrowSign();
 
-			XMVECTOR GetHeroCombatPositionInSide(JUUID heroID, XMVECTOR heroPos, EnemiesAttackSides side, int queueIndex);
-			std::tuple<EnemiesAttackSides, float, bool, bool, int> GetNearHeroAttackPointInSide(JUUID heroID, XMVECTOR heroPos, JUUID enemyID, XMVECTOR enemyPos, bool lookLeft);
-			std::tuple<EnemiesAttackSides, float, bool, bool, int> GetNearHeroAttackPoint(JUUID heroID, XMVECTOR heroPos, JUUID enemyID, XMVECTOR enemyPos);
-			EnemyAttackOption PickHeroToFight(JUUID enemyController);
-			XMVECTOR GetHeroCombatPositionInQueue(EnemyAttackOption& attack);
-			void RegisterEnemyInAttackQueue(JUUID enemyID, EnemyAttackOption& attack);
-			void UnregisterEnemyFromAttackQueue(JUUID enemyID, EnemyAttackOption& attack);
-			void EnemyDeath(JUUID enemyID, EnemyAttackOption& attack);
+			//Combat system
+			void RegisterThugInCombat(JUUID heroID, JUUID thugID);
+			void UnregisterThugFromCombat(JUUID thugID);
+			int GetThugCombatSlotIndex(JUUID heroID, JUUID thugID);
+			XMVECTOR GetHeroCombatPositionForThug(JUUID heroID, JUUID thugID);
+			bool CanJoinCombat(JUUID heroID, int maxAttackers = 4);
 
-			//HeroID, HeroAttackersQueue
-			std::map<JUUID, HeroAttackersQueues> heroesAttackersQueues;
-			//ThugId, AttackersQueue*
-			std::map<JUUID, AttackersQueue*> enemiesAttackQueue;
-			//ThudID, HeroID
-			std::map<JUUID, JUUID> heroToAttackByEnemy;
-			//ThuhgID, tuple<HeroID, HeroRenderableID, Offset, attackMode>
-			std::map<JUUID, std::tuple<JUUID, RenderableID, XMVECTOR, bool>> enemiesCurrentOptions;
+			struct CombatQueue {
+				std::vector<JUUID> attackers;
+			};
+			std::map<JUUID, CombatQueue> m_activeCombats;
 		};
 	};
 };
@@ -145,17 +95,7 @@ struct EnemyAttackOption {
 	JUUID heroID;
 	RenderableID heroRenderable;
 	float heroRadius;
-	EnemiesAttackSides side;
-	bool canAttack;
-	bool isAlreadyAttached;
-	int queueIndex;
+	bool canAttack; // ¿El slot está lleno? (Ej: máximo 4 enemigos por héroe)
 
-	// Constructor por defecto
-	EnemyAttackOption();
-
-	EnemyAttackOption(JUUID id, RenderableID renderable, float radius, EnemiesAttackSides s, bool can, bool attached, int idx);
-
-	// Validez: El string no debe estar vacío Y el RenderableID debe ser válido
-	explicit operator bool() const;
-	bool operator==(const EnemyAttackOption& other) const;
+	explicit operator bool() const { return !heroID.empty(); } // Según tu implementación de JUUID
 };
