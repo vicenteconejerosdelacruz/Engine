@@ -51,6 +51,7 @@ enum JsonToEditorValueType
 	jedv_t_boolean,
 	jedv_t_animation_sequence,
 	jedv_t_animation,
+	jedv_t_controller_animation_sequence,
 	jedv_t_tex_dimension,
 	jedv_t_lighttype,
 	jedv_t_dxgi_format,

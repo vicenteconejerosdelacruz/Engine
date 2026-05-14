@@ -221,6 +221,8 @@ JEdvEditorDrawerFunction DrawValue<bool, jedv_t_boolean>();
 template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_animation_sequence>();
 template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_controller_animation_sequence>();
+template<>
 JEdvEditorDrawerFunction DrawValue<unsigned int, jedv_t_tex_dimension>();
 
 template<>

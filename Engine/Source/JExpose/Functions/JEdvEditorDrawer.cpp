@@ -2824,6 +2824,7 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_animation_sequence>()
 					);
 					std::vector<std::string> sequences;
 					std::copy_if(seqs.begin(), seqs.end(), std::back_inserter(sequences), [](auto& s) { return s != ""; });
+					std::sort(sequences.begin(), sequences.end());
 					sequences.insert(sequences.begin(), "");
 
 					ImGui::DrawComboSelection(curSeq, sequences, [animable](std::string newSequence)
@@ -2858,6 +2859,56 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_animation_sequence>()
 				{
 					ImGui::Separator();
 				}
+			}
+		};
+}
+
+template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_controller_animation_sequence>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			if (json.size() > 1ULL) return;
+			Controller* controller = dynamic_cast<Controller*>(json.at(0));
+			RenderableID animable = controller->sceneObject;
+
+			std::string curSeq = json.at(0)->at(attribute);//animable->animationSequence();
+			std::vector<std::string> seqs;
+			std::transform(
+				animable->animationsSequences.sequences.begin(),
+				animable->animationsSequences.sequences.end(),
+				std::back_inserter(seqs), [](auto& pair)
+				{
+					return pair.first;
+				}
+			);
+			std::vector<std::string> sequences;
+			std::copy_if(seqs.begin(), seqs.end(), std::back_inserter(sequences), [](auto& s) { return s != ""; });
+			std::sort(sequences.begin(), sequences.end());
+			sequences.insert(sequences.begin(), "");
+
+			std::string tableName = attribute + "-table";
+			if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+			{
+				ImGui::TableNextRow();
+
+				ImGui::TableSetColumnIndex(0);
+
+				ImGui::Text(attribute.c_str());
+
+				ImGui::TableSetColumnIndex(1);
+
+				std::string id2Push = attribute + "-selection";
+				ImGui::PushID(id2Push.c_str());
+
+				ImGui::SetNextItemWidth(-1.0f);
+				ImGui::DrawComboSelection(curSeq, sequences, [&json, attribute](std::string newSequence)
+					{
+						json.at(0)->at(attribute) = newSequence;
+					}
+				);
+				ImGui::PopID();
+				ImGui::EndTable();
 			}
 		};
 }
