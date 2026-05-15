@@ -43,6 +43,7 @@ enum JsonToEditorValueType
 	jedv_t_float2_angle,
 	jedv_t_float2_dimension,
 	jedv_t_float3,
+	jedv_t_float3_f6,
 	jedv_t_float3_angle,
 	jedv_t_float4,
 	jedv_t_color_float3,

@@ -55,6 +55,7 @@ namespace Game
 			//Heroes
 			void RegisterHero(JUUID heroController);
 			void HeroReady(JUUID heroUUID);
+			void DecreaseEnemiesInRound(int count);
 
 			//Step
 			void Step(float delta) override;

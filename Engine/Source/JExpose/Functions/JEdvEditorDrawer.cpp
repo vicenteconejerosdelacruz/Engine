@@ -2010,6 +2010,15 @@ JEdvEditorDrawerFunction DrawValue<XMFLOAT3, jedv_t_float3>()
 }
 
 template<>
+JEdvEditorDrawerFunction DrawValue<XMFLOAT3, jedv_t_float3_f6>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			EditorDrawFloatArray(attribute, json, { "x","y","z" }, "%.6f");
+		};
+}
+
+template<>
 JEdvEditorDrawerFunction DrawValue<XMFLOAT3, jedv_t_float3_angle>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)

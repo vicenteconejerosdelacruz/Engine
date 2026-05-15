@@ -37,6 +37,7 @@ namespace Game::Brawler
 	void BrawlerScene::RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script)
 	{
 		v8_register_method<BrawlerScene>(isolate, tpl, "HeroReady", script, [](BrawlerScene* self, JUUID heroUUID) { if (self) self->HeroReady(heroUUID); });
+		v8_register_method<BrawlerScene>(isolate, tpl, "OnStartRound", script, [](BrawlerScene* self, unsigned int round) { if (self) self->OnStartRound(round); });
 		v8_register_method<BrawlerScene>(isolate, tpl, "ShowLeftArrowSign", script, [](BrawlerScene* self) { if (self) self->ShowLeftArrowSign(); });
 		v8_register_method<BrawlerScene>(isolate, tpl, "HideLeftArrowSign", script, [](BrawlerScene* self) { if (self) self->HideLeftArrowSign(); });
 		v8_register_method<BrawlerScene>(isolate, tpl, "ShowRightArrowSign", script, [](BrawlerScene* self) { if (self) self->ShowRightArrowSign(); });
@@ -127,6 +128,18 @@ namespace Game::Brawler
 		if (heroes_size() == ready_heroes_size())
 		{
 			OnStartRound();
+		}
+	}
+
+	void BrawlerScene::DecreaseEnemiesInRound(int count)
+	{
+		int numEnemies = enemiesInCurrentRound();
+		numEnemies += count;
+		numEnemies = std::max(numEnemies, 0);
+		enemiesInCurrentRound(static_cast<unsigned int>(numEnemies));
+		if (numEnemies == 0)
+		{
+			OnEndRound();
 		}
 	}
 

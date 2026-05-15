@@ -149,6 +149,8 @@ JEdvEditorDrawerFunction DrawValue<XMFLOAT2, jedv_t_float2_angle>();
 template<>
 JEdvEditorDrawerFunction DrawValue<XMFLOAT3, jedv_t_float3>();
 template<>
+JEdvEditorDrawerFunction DrawValue<XMFLOAT3, jedv_t_float3_f6>();
+template<>
 JEdvEditorDrawerFunction DrawValue<XMFLOAT3, jedv_t_float3_angle>();
 template<>
 JEdvEditorDrawerFunction DrawValue<XMFLOAT3, jedv_t_color_float3>();

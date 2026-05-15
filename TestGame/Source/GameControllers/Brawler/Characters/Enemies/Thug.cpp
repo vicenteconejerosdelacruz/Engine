@@ -543,6 +543,7 @@ namespace Game::Brawler
 	{
 		renderable->SetCurrentAnimation(deathAnimation(), 0.0f, deathTimeFactor());
 		UnregisterFromCombat();
+		GetBrawlerScene(this)->DecreaseEnemiesInRound(-1);
 	}
 
 	void Thug::OnDeathAnimationEnd()

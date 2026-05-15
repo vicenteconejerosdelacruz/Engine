@@ -1147,7 +1147,7 @@ void AnimationSequencerModal::DrawModelPreview(ImVec2 curPos, ImVec2 size)
 			Renderable* ren = (Renderable*)GetSceneObjectPointer(unit, renderable.uuid());
 			std::vector<JObject*> renV({ ren });
 			DrawValue<XMFLOAT3, jedv_t_float3>()("AABBCenter", renV);
-			DrawValue<XMFLOAT3, jedv_t_float3>()("AABBExtent", renV);
+			DrawValue<XMFLOAT3, jedv_t_float3_f6>()("AABBExtent", renV);
 		}
 
 	}
@@ -1468,11 +1468,11 @@ void AnimationSequencerModal::DrawBoneTransformationKeyFrameAttributes(SequenceC
 			bool reset = false;
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
-			reset |= ImGui::InputFloat("x", &keyframe.scale.x, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("x", &keyframe.scale.x, 0.0f, 0.0f, "%.6f");
 			ImGui::TableSetColumnIndex(1);
-			reset |= ImGui::InputFloat("y", &keyframe.scale.y, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("y", &keyframe.scale.y, 0.0f, 0.0f, "%.6f");
 			ImGui::TableSetColumnIndex(2);
-			reset |= ImGui::InputFloat("z", &keyframe.scale.z, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("z", &keyframe.scale.z, 0.0f, 0.0f, "%.6f");
 			ImGui::EndTable();
 			if (reset)
 			{
@@ -1569,11 +1569,11 @@ void AnimationSequencerModal::DrawTransformationKeyFrameAttributes(Transformatio
 			bool reset = false;
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
-			reset |= ImGui::InputFloat("x", &keyframe.scale.x, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("x", &keyframe.scale.x, 0.0f, 0.0f, "%.6f");
 			ImGui::TableSetColumnIndex(1);
-			reset |= ImGui::InputFloat("y", &keyframe.scale.y, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("y", &keyframe.scale.y, 0.0f, 0.0f, "%.6f");
 			ImGui::TableSetColumnIndex(2);
-			reset |= ImGui::InputFloat("z", &keyframe.scale.z, 0.0f, 0.0f, "%.3f");
+			reset |= ImGui::InputFloat("z", &keyframe.scale.z, 0.0f, 0.0f, "%.6f");
 			ImGui::EndTable();
 			if (reset)
 			{
@@ -1684,11 +1684,11 @@ void AnimationSequencerModal::DrawElementTriggerAttributes(SequenceChannelElemen
 		{
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
-			ImGui::InputFloat("x", &elementTrigger.scale.x, 0.0f, 0.0f, "%.3f");
+			ImGui::InputFloat("x", &elementTrigger.scale.x, 0.0f, 0.0f, "%.6f");
 			ImGui::TableSetColumnIndex(1);
-			ImGui::InputFloat("y", &elementTrigger.scale.y, 0.0f, 0.0f, "%.3f");
+			ImGui::InputFloat("y", &elementTrigger.scale.y, 0.0f, 0.0f, "%.6f");
 			ImGui::TableSetColumnIndex(2);
-			ImGui::InputFloat("z", &elementTrigger.scale.z, 0.0f, 0.0f, "%.3f");
+			ImGui::InputFloat("z", &elementTrigger.scale.z, 0.0f, 0.0f, "%.6f");
 			ImGui::EndTable();
 		}
 		ImGui::PopID();
