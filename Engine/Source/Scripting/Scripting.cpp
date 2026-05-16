@@ -26,7 +26,7 @@ using namespace Editor;
 std::map<SceneUnitId, std::unique_ptr<SceneUnitScripting>> scenesScripts;
 namespace Scripting
 {
-	static std::unique_ptr<Platform> platform;
+	static std::unique_ptr<v8::Platform> platform;
 	static Isolate* isolate = nullptr;
 
 	void InitScripting(const char* path)
@@ -199,7 +199,7 @@ namespace Scripting
 
 	void ExecuteSource(Local<Context>& context, std::string script)
 	{
-		Local<String> source = v8_string(isolate, script.c_str());
+		Local<v8::String> source = v8_string(isolate, script.c_str());
 		Local<Script> runnable;
 
 		TryCatch try_catch(isolate);

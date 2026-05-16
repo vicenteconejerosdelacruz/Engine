@@ -38,7 +38,7 @@ namespace nov8
 	//utils
 	Local<Value> v8_json_parse(Isolate* isolate, nlohmann::json& json)
 	{
-		Local<String> v8_json_str = v8_string(isolate, json.dump());
+		Local<v8::String> v8_json_str = v8_string(isolate, json.dump());
 		Local<Value> json_object;
 		if (JSON::Parse(isolate->GetCurrentContext(), v8_json_str).ToLocal(&json_object))
 			return json_object;
@@ -51,12 +51,12 @@ namespace nov8
 
 	std::string v8_name(Isolate* isolate, Local<Name> name)
 	{
-		Local<String> v8String = name->ToString(isolate->GetCurrentContext()).ToLocalChecked();
+		Local<v8::String> v8String = name->ToString(isolate->GetCurrentContext()).ToLocalChecked();
 		v8::String::Utf8Value utf8(isolate, v8String);
 		return *utf8;
 	}
 
-	Local<String> v8_string(Isolate* isolate, std::string str)
+	Local<v8::String> v8_string(Isolate* isolate, std::string str)
 	{
 		return v8::String::NewFromUtf8(isolate, str.c_str()).ToLocalChecked();
 	}
