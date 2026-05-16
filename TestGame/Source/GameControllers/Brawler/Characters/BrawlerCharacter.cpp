@@ -1,6 +1,13 @@
 #include "pch.h"
 #include "BrawlerCharacter.h"
 
+#if defined(_EDITOR)
+namespace Editor
+{
+	bool IsPlaying(SceneUnitId unit);
+};
+#endif
+
 namespace Game::Brawler
 {
 #if defined(_EDITOR)
@@ -40,6 +47,21 @@ namespace Game::Brawler
 	void BrawlerCharacter::Unmap()
 	{
 		renderable.clear();
+	}
+
+	void BrawlerCharacter::Step(float delta)
+	{
+		Controller::Step(delta);
+#if defined(_EDITOR)
+		if (dirty(BrawlerCharacter::Update_lookingTo))
+		{
+			if (!Editor::IsPlaying(unit))
+			{
+				initialLookingTo = lookingTo();
+			}
+			clean(BrawlerCharacter::Update_lookingTo);
+		}
+#endif
 	}
 
 #if defined(_EDITOR)

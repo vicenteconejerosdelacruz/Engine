@@ -56,6 +56,7 @@ namespace Game
 			BrawlerCharacter(nlohmann::json& json);
 			void SetInitialConditions() override;
 			void Unmap() override;
+			void Step(float delta) override;
 
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
