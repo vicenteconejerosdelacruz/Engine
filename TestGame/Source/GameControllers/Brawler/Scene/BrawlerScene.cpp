@@ -145,8 +145,7 @@ namespace Game::Brawler
 
 	//Step
 	void BrawlerScene::Step(float delta)
-	{
-	}
+	{}
 
 	//Rendering
 	void BrawlerScene::Render(SceneUnitId id)
@@ -376,30 +375,50 @@ namespace Game::Brawler
 		Hero* hero = GetController<Hero>(heroID);
 		if (!hero) return XMVectorZero();
 
-		// Acceso según tu arquitectura
 		RenderableID heroR = hero->sceneObject;
-
 		int slotIndex = GetThugCombatSlotIndex(heroID, thugID);
+
+		// Failsafe
 		if (slotIndex == -1) return heroR->positionV();
 
 		XMVECTOR heroPos = heroR->positionV();
-		//XMVECTOR forward = heroR->forwardV();
-		XMVECTOR forward = { 1.0f,0.0f,0.0f,0.0f };
-		XMVECTOR right = XMVector3Cross(XMVectorSet(0, 1, 0, 0), forward);
 
-		float combatDist = 1.5f;
-		float sideDist = 1.2f;
+		// Eje X global para alineación horizontal de arcade clásico 2.5D
+		XMVECTOR worldRight = { 1.0f, 0.0f, 0.0f, 0.0f };
+
+		// La distancia fija a la que se posicionarán TODOS los enemigos de los lados
+		float baseSideDist = 1.4f;
+
+		// Repartición de flancos: pares a la derecha, impares a la izquierda
+		bool isRightSide = (slotIndex % 2 == 0);
 
 		XMVECTOR targetPos;
-		switch (slotIndex)
+		if (isRightSide)
 		{
-		case 0: targetPos = XMVectorAdd(heroPos, XMVectorScale(forward, combatDist)); break;
-		case 1: targetPos = XMVectorSubtract(heroPos, XMVectorScale(forward, combatDist)); break;
-		case 2: targetPos = XMVectorAdd(heroPos, XMVectorScale(right, sideDist)); break;
-		case 3: targetPos = XMVectorSubtract(heroPos, XMVectorScale(right, sideDist)); break;
-		default: targetPos = heroPos; break;
+			// Todos los del lado derecho van exactamente al mismo punto X
+			targetPos = XMVectorAdd(heroPos, XMVectorScale(worldRight, baseSideDist));
+		}
+		else
+		{
+			// Todos los del lado izquierdo van exactamente al mismo punto X
+			targetPos = XMVectorSubtract(heroPos, XMVectorScale(worldRight, baseSideDist));
 		}
 
+		// OPCIONAL PARA EL OVERLAP: 
+		// Si van exactamente a la misma coordenada X y Z, se taparán de forma idéntica.
+		// Si quieres que se sobrepongan pero con un levísimo desfase en el carril (Z) 
+		// para que se vean ambas siluetas en pantalla (muy común en Streets of Rage), 
+		// puedes descomentar las siguientes líneas:
+		/*
+		int depthInQueue = slotIndex / 2; // 0 para el primero, 1 para el segundo del mismo lado...
+		if (depthInQueue > 0)
+		{
+			float tinyZOffset = (slotIndex % 4 == 2) ? 0.15f : -0.15f;
+			targetPos = XMVectorAdd(targetPos, XMVectorSet(0.0f, 0.0f, tinyZOffset, 0.0f));
+		}
+		*/
+
+		// Forzamos que compartan la altura Y del suelo del héroe
 		return XMVectorSetY(targetPos, XMVectorGetY(heroPos));
 	}
 

@@ -157,9 +157,8 @@ namespace Game::Brawler
 			Hero* hero = GetController<Hero>(hID);
 			if (!hero) continue;
 
-			// Regla de oro: ¿Puede este héroe recibir más atacantes?
-			// Ponemos un límite de 2 o 3 para que no se amontonen
-			if (scene->CanJoinCombat(hID, 3))
+			// Permitimos un máximo de 4 atacantes repartidos (2 por lado)
+			if (scene->CanJoinCombat(hID, 4))
 			{
 				RenderableID heroR = hero->sceneObject;
 				float dist = XMVectorGetX(XMVector3Length(XMVectorSubtract(heroR->positionV(), renderable->positionV())));
@@ -324,8 +323,7 @@ namespace Game::Brawler
 	}
 
 	void Thug::LeaveIdle()
-	{
-	}
+	{}
 
 	void Thug::Idle()
 	{
