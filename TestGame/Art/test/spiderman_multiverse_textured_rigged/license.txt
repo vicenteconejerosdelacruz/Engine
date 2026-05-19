@@ -1,0 +1,11 @@
+Model Information:
+* title:	Spiderman Multiverse (Textured) (Rigged)
+* source:	https://sketchfab.com/3d-models/spiderman-multiverse-textured-rigged-9f5e4a9caa7a49fe831bd4777b09ab07
+* author:	CAPTAAINR (https://sketchfab.com/CAPTAAINR)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Spiderman Multiverse (Textured) (Rigged)" (https://sketchfab.com/3d-models/spiderman-multiverse-textured-rigged-9f5e4a9caa7a49fe831bd4777b09ab07) by CAPTAAINR (https://sketchfab.com/CAPTAAINR) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
