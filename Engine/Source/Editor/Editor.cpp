@@ -162,6 +162,7 @@ namespace Editor
 	LoadingProgress loadingProgress;
 
 	bool templatesModified = false;
+	std::mutex templatesTreeMutex;
 
 	bool initialized = false;
 	bool maximized = true;
@@ -1865,6 +1866,7 @@ namespace Editor
 				[&](JUUID uuid) {return GetSceneObjectPointer(id, uuid); }
 			);
 		}
+		std::lock_guard<std::mutex> lock(Editor::templatesTreeMutex);
 		templateEdition.BuildAssetsTree(GetTemplatesTypesList, GetJTemplatePointer);
 	}
 
@@ -1884,8 +1886,7 @@ namespace Editor
 	}
 
 	void OpenPopupForTemplate(JUUID uuid)
-	{
-	}
+	{}
 
 	//SceneObjects Panel
 	void OnChangeSceneObjectTab(std::string newTab)

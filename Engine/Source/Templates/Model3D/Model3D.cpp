@@ -16,6 +16,7 @@ using namespace Animation;
 namespace Editor
 {
 	extern void MarkTemplatesPanelAssetsAsDirty();
+	extern std::mutex templatesTreeMutex;
 };
 #endif
 
@@ -127,6 +128,7 @@ namespace Templates
 
 	Model3DInstance::Model3DInstance(SceneUnitId id, JUUID uuid, JUUID objectUUID)
 	{
+		std::lock_guard<std::mutex> lock(Editor::templatesTreeMutex);
 		model3D = uuid;
 		LoadModel3DInstance(id);
 	}
