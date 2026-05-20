@@ -44,30 +44,14 @@ void SceneObjectPopup::Draw()
 			nlohmann::json j;
 			so->WriteJson(j);
 			so->DropJsonMoldAttributes(j);
-			nlohmann::json mold = {};
-			mold[SceneObjectTypeJsonContainer.at(type)] = nlohmann::json::array({ j });
-			std::string content = mold.dump(4);
-			std::string fileName = name + ".json";
-
-			//first create the directory if needed
-			std::filesystem::path directory(defaultMoldsFolder);
-			std::filesystem::create_directory(directory);
-
-			//then create the json level file
-			const std::string finalFilename = defaultMoldsFolder + fileName;
-			std::filesystem::path path(finalFilename);
-			std::string pathStr = path.generic_string();
-			std::ofstream file;
-			file.open(pathStr);
-			file.write(content.c_str(), content.size());
-			file.close();
 
 			nlohmann::json moldTemplate =
 			{
 				{ "uuid", getUUID() },
 				{ "name", name },
-				{ "path", fileName }
 			};
+			moldTemplate[SceneObjectTypeJsonContainer.at(type)] = nlohmann::json::array({ j });
+
 			CreateMold(moldTemplate);
 			Editor::MarkTemplatesPanelAssetsAsDirty();
 			show = false;

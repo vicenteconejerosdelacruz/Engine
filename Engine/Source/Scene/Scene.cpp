@@ -193,17 +193,18 @@ namespace Scene
 	)
 	{
 		MoldJsonID mold = moldUUID;
-		std::filesystem::path filename = defaultMoldsFolder + mold->path();
-		nlohmann::json data = Level::GetLevelFromFile(filename);
+		nlohmann::json data = nlohmann::json({});
 		for (auto& [soType, _] : JsonContainerToString)
 		{
-			if (!data.contains(soType))
+			if (!mold->contains(soType))
 				continue;
-			for (auto& j : data.at(soType).items())
+			for (auto& js : mold->at(soType).items())
 			{
-				j.value().at("uuid") = getUUID();
-				nlohmann::json patch = getInstanceAttributes(StringToSceneObjectType.at(JsonContainerToString.at(soType)), j.value().at("name"));
-				j.value().merge_patch(patch);
+				nlohmann::json j = js.value();
+				j.at("uuid") = getUUID();
+				nlohmann::json patch = getInstanceAttributes(StringToSceneObjectType.at(JsonContainerToString.at(soType)), j.at("name"));
+				j.merge_patch(patch);
+				data[soType].push_back(j);
 			}
 		}
 		AttachLevelIntoScene(parentUnit, mold->uuid(), data, [parentUnit](SceneUnitId id)
