@@ -78,23 +78,7 @@ namespace Scene
 	void Light::LoadShadowMap()
 	{
 		InsertLightIntoShadowMapLights(unit, uuid());
-		/*
-		auto& scene = GetSceneUnit(unit);
-		scene->ResetLoadingCommandList();
-		scene->SetLoading(true);
-		scene->SetCanSubmitLoading(false);
 
-		CreateShadowMap();
-		BindSceneObjects(scene->Id());
-		BindRenderablesToShadowMapCamera();
-		auto cams = cameras();
-		for (auto& uuid : cams)
-		{
-			CameraID cam = MAKESUUUID(unit, uuid);
-			cam->BindLightWithShadowMap(SUuuid());
-		}
-		scene->SetCanSubmitLoading(true);
-		*/
 #if defined(_EDITOR)
 		EditorPreview(1 << Light::Update_hasShadowMaps);
 #endif
