@@ -129,6 +129,8 @@ int EngineConsoleMain()
 
 int APIENTRY EngineWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
+	SetThreadDescription(GetCurrentThread(), L"Main Thread");
+
 	timer.SetFixedTimeStep(true);
 	timer.SetTargetElapsedSeconds(gameUpdateFrequency);
 
