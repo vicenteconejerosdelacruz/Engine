@@ -131,31 +131,32 @@ namespace ComputeShader
 		CComPtr<ID3D12GraphicsCommandList2>& commandList = scene->GetComputeCommandList();
 
 #if defined(_DEVELOPMENT)
-		PIXBeginEvent(commandList.p, 0, L"PreFilteredEnvironmentMap Compute");
+		{
+			PIXScopedEvent(commandList.p, 0, L"PreFilteredEnvironmentMap Compute");
 #endif
 
-		shader.SetComputeState(unit);
+			shader.SetComputeState(unit);
 
-		unsigned int faceW = faceWidth;
-		unsigned int faceH = faceHeight;
-		for (unsigned int i = 0; i < mipsResultsGpuHandle.size(); i++)
-		{
-			auto& mipResCB = mipsResultsCB.at(i);
-			unsigned int threadsX = std::max(faceW / 8, 1U);
-			unsigned int threadsY = std::max(faceH / 8, 1U);
-			float roughness = static_cast<float>(i) / static_cast<float>(numMipMaps);
-			XMFLOAT4 cb0Params = { roughness, static_cast<float>(i), static_cast<float>(faceWidth), static_cast<float>(faceW) };
-			mipResCB->push<XMFLOAT4>(cb0Params, 0);
-			commandList->SetComputeRootDescriptorTable(0, mipResCB->gpu_xhandle.at(0));
-			commandList->SetComputeRootDescriptorTable(1, mipsResultsGpuHandle.at(i));
-			commandList->SetComputeRootDescriptorTable(2, envMapCubeGpuHandle);
-			commandList->Dispatch(threadsX, threadsY, numFaces);
-			faceW = std::max(faceW >> 1, 1U);
-			faceH = std::max(faceH >> 1, 1U);
-		}
+			unsigned int faceW = faceWidth;
+			unsigned int faceH = faceHeight;
+			for (unsigned int i = 0; i < mipsResultsGpuHandle.size(); i++)
+			{
+				auto& mipResCB = mipsResultsCB.at(i);
+				unsigned int threadsX = std::max(faceW / 8, 1U);
+				unsigned int threadsY = std::max(faceH / 8, 1U);
+				float roughness = static_cast<float>(i) / static_cast<float>(numMipMaps);
+				XMFLOAT4 cb0Params = { roughness, static_cast<float>(i), static_cast<float>(faceWidth), static_cast<float>(faceW) };
+				mipResCB->push<XMFLOAT4>(cb0Params, 0);
+				commandList->SetComputeRootDescriptorTable(0, mipResCB->gpu_xhandle.at(0));
+				commandList->SetComputeRootDescriptorTable(1, mipsResultsGpuHandle.at(i));
+				commandList->SetComputeRootDescriptorTable(2, envMapCubeGpuHandle);
+				commandList->Dispatch(threadsX, threadsY, numFaces);
+				faceW = std::max(faceW >> 1, 1U);
+				faceH = std::max(faceH >> 1, 1U);
+			}
 
 #if defined(_DEVELOPMENT)
-		PIXEndEvent(commandList.p);
+		}
 #endif
 	}
 

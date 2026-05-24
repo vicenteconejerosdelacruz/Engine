@@ -4,8 +4,7 @@
 namespace Templates
 {
 	MinMaxChainPass::MinMaxChainPass(CameraID cam, unsigned int rpI, RenderPassJsonID rpT, RenderPassInstanceID rp) : OverridePass(cam, rpI, rpT, rp)
-	{
-	}
+	{}
 
 	void MinMaxChainPass::Initialize()
 	{
@@ -56,23 +55,24 @@ namespace Templates
 		auto& fsQuadMesh = GetMeshInstance(fsQuad);
 
 #if defined(_DEVELOPMENT)
-		PIXBeginEvent(commandList.p, 0, "MinMaxChainPassQuad");
+		{
+			PIXScopedEvent(commandList.p, 0, "MinMaxChainPassQuad");
 #endif
 
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		commandList->SetGraphicsRootSignature(rootSignature);
-		commandList->SetPipelineState(pipelineState);
+			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			commandList->SetGraphicsRootSignature(rootSignature);
+			commandList->SetPipelineState(pipelineState);
 
-		commandList->SetGraphicsRootDescriptorTable(0, fsCB->gpu_xhandle.at(scene->Frame()));
-		commandList->SetGraphicsRootDescriptorTable(1, shadowMapChainGpuHandle1);
-		commandList->SetGraphicsRootDescriptorTable(2, shadowMapChainGpuHandle2);
+			commandList->SetGraphicsRootDescriptorTable(0, fsCB->gpu_xhandle.at(scene->Frame()));
+			commandList->SetGraphicsRootDescriptorTable(1, shadowMapChainGpuHandle1);
+			commandList->SetGraphicsRootDescriptorTable(2, shadowMapChainGpuHandle2);
 
-		commandList->IASetVertexBuffers(0, 1, &fsQuadMesh->vbvData.vertexBufferView);
-		commandList->IASetIndexBuffer(&fsQuadMesh->ibvData.indexBufferView);
-		commandList->DrawIndexedInstanced(fsQuadMesh->ibvData.indexBufferView.SizeInBytes / sizeof(unsigned int), 1, 0, 0, 0);
+			commandList->IASetVertexBuffers(0, 1, &fsQuadMesh->vbvData.vertexBufferView);
+			commandList->IASetIndexBuffer(&fsQuadMesh->ibvData.indexBufferView);
+			commandList->DrawIndexedInstanced(fsQuadMesh->ibvData.indexBufferView.SizeInBytes / sizeof(unsigned int), 1, 0, 0, 0);
 
 #if defined(_DEVELOPMENT)
-		PIXEndEvent(commandList.p);
+		}
 #endif
 	}
 }

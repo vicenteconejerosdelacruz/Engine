@@ -69,9 +69,18 @@ namespace DeviceUtils
 
 	void SwapChainPass::Pass(SceneUnitId unit, std::function<void(SceneUnitId)> renderCallback, bool clearRTV, XMVECTORF32 clearColor)
 	{
-		BeginRenderPass(unit, depthStencilViewDescriptorHeap, clearRTV, clearColor);
-		renderCallback(unit);
-		EndRenderPass(unit);
+#if defined(_DEVELOPMENT)
+		{
+			auto& sceneUnit = GetSceneUnit(unit);
+			auto& commandList = sceneUnit->GetCommandList();
+			PIXScopedEvent(commandList.p, 0, name.c_str());
+#endif
+			BeginRenderPass(unit, depthStencilViewDescriptorHeap, clearRTV, clearColor);
+			renderCallback(unit);
+			EndRenderPass(unit);
+#if defined(_DEVELOPMENT)
+		}
+#endif
 	}
 
 	void SwapChainPass::BeginRenderPass(SceneUnitId unit, CComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap, bool clearRTV, XMVECTORF32 clearColor)
@@ -82,10 +91,6 @@ namespace DeviceUtils
 		unsigned int frame = sceneUnit->Frame();
 		auto& commandList = sceneUnit->GetCommandList();
 		auto& backBuffer = renderTargets[frame];
-
-#if defined(_DEVELOPMENT)
-		PIXBeginEvent(commandList.p, 0, name.c_str());
-#endif
 
 		//transition the back buffer from present to render target so it's allowed to draw
 		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -153,10 +158,6 @@ namespace DeviceUtils
 
 		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 		commandList->ResourceBarrier(1, &barrier);
-
-#if defined(_DEVELOPMENT)
-		PIXEndEvent(commandList.p);
-#endif
 	}
 
 	void SwapChainPass::ReleaseResources()

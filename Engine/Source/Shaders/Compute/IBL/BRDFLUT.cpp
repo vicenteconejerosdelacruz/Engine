@@ -53,16 +53,17 @@ namespace ComputeShader
 		CComPtr<ID3D12GraphicsCommandList2>& commandList = scene->GetComputeCommandList();
 
 #if defined(_DEVELOPMENT)
-		PIXBeginEvent(commandList.p, 0, L"BRDFLUT Compute");
+		{
+			PIXScopedEvent(commandList.p, 0, L"BRDFLUT Compute");
 #endif
 
-		shader.SetComputeState(unit);
+			shader.SetComputeState(unit);
 
-		commandList->SetComputeRootDescriptorTable(0, resultGpuHandle);
-		commandList->Dispatch(8, 8, 1);
+			commandList->SetComputeRootDescriptorTable(0, resultGpuHandle);
+			commandList->Dispatch(8, 8, 1);
 
 #if defined(_DEVELOPMENT)
-		PIXEndEvent(commandList.p);
+		}
 #endif
 	}
 

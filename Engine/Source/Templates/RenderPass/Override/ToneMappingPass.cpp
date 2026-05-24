@@ -81,33 +81,34 @@ namespace Templates
 		auto& fsQuadMesh = GetMeshInstance(fsQuad);
 
 #if defined(_DEVELOPMENT)
-		PIXBeginEvent(commandList.p, 0, "ResolvePassQuad");
+		{
+			PIXScopedEvent(commandList.p, 0, "ResolvePassQuad");
 #endif
 
-		DeviceUtils::UAVResource(commandList, luminanceHistogramAverage->average);
-		DeviceUtils::TransitionResource(commandList, luminanceHistogramAverage->average,
-			D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_UNORDERED_ACCESS
-		);
+			DeviceUtils::UAVResource(commandList, luminanceHistogramAverage->average);
+			DeviceUtils::TransitionResource(commandList, luminanceHistogramAverage->average,
+				D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_UNORDERED_ACCESS
+			);
 
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		commandList->SetGraphicsRootSignature(rootSignature);
-		commandList->SetPipelineState(pipelineState);
+			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			commandList->SetGraphicsRootSignature(rootSignature);
+			commandList->SetPipelineState(pipelineState);
 
-		unsigned int camSlot = 0U;
-		camera->cameraCb->SetRootDescriptorTable(commandList, camSlot, scene->Frame());
-		commandList->SetGraphicsRootDescriptorTable(1, prevPassRTT->gpuTextureHandle);
-		commandList->SetGraphicsRootDescriptorTable(2, luminanceHistogramAverage->averageReadGpuHandle);
+			unsigned int camSlot = 0U;
+			camera->cameraCb->SetRootDescriptorTable(commandList, camSlot, scene->Frame());
+			commandList->SetGraphicsRootDescriptorTable(1, prevPassRTT->gpuTextureHandle);
+			commandList->SetGraphicsRootDescriptorTable(2, luminanceHistogramAverage->averageReadGpuHandle);
 
-		commandList->IASetVertexBuffers(0, 1, &fsQuadMesh->vbvData.vertexBufferView);
-		commandList->IASetIndexBuffer(&fsQuadMesh->ibvData.indexBufferView);
-		commandList->DrawIndexedInstanced(fsQuadMesh->ibvData.indexBufferView.SizeInBytes / sizeof(unsigned int), 1, 0, 0, 0);
+			commandList->IASetVertexBuffers(0, 1, &fsQuadMesh->vbvData.vertexBufferView);
+			commandList->IASetIndexBuffer(&fsQuadMesh->ibvData.indexBufferView);
+			commandList->DrawIndexedInstanced(fsQuadMesh->ibvData.indexBufferView.SizeInBytes / sizeof(unsigned int), 1, 0, 0, 0);
 
-		DeviceUtils::TransitionResource(commandList, luminanceHistogramAverage->average,
-			D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COMMON
-		);
+			DeviceUtils::TransitionResource(commandList, luminanceHistogramAverage->average,
+				D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COMMON
+			);
 
 #if defined(_DEVELOPMENT)
-		PIXEndEvent(commandList.p);
+		}
 #endif
 	}
 }

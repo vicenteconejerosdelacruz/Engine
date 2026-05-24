@@ -100,17 +100,18 @@ namespace ComputeShader
 		CComPtr<ID3D12GraphicsCommandList2>& commandList = scene->GetComputeCommandList();
 
 #if defined(_DEVELOPMENT)
-		PIXBeginEvent(commandList.p, 0, L"DiffuseIrradianceMap Compute");
+		{
+			PIXScopedEvent(commandList.p, 0, L"DiffuseIrradianceMap Compute");
 #endif
 
-		shader.SetComputeState(unit);
+			shader.SetComputeState(unit);
 
-		commandList->SetComputeRootDescriptorTable(0, resultGpuHandle);
-		commandList->SetComputeRootDescriptorTable(1, envMapCubeGpuHandle);
-		commandList->Dispatch(8, 8, 6);
+			commandList->SetComputeRootDescriptorTable(0, resultGpuHandle);
+			commandList->SetComputeRootDescriptorTable(1, envMapCubeGpuHandle);
+			commandList->Dispatch(8, 8, 6);
 
 #if defined(_DEVELOPMENT)
-		PIXEndEvent(commandList.p);
+		}
 #endif
 	}
 

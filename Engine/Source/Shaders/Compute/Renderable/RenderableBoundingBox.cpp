@@ -148,29 +148,30 @@ namespace ComputeShader
 		CComPtr<ID3D12GraphicsCommandList2>& commandList = scene->GetComputeCommandList();
 
 #if defined(_DEVELOPMENT)
-		PIXBeginEvent(commandList.p, 0, L"RenderableBoundingBox Compute");
+		{
+			PIXScopedEvent(commandList.p, 0, L"RenderableBoundingBox Compute");
 #endif
 
-		shader.SetComputeState(unit);
+			shader.SetComputeState(unit);
 
-		//0 : the number of vertices
-		//1 : UAV for the bones transformation <- as all the meshes shares the same matrices we can just set once
-		//2 : bounding box center and extents <- this is the output UAV
-		//3 : UAV for the vertices of the mesh
-		unsigned int backBufferIndex = scene->Frame();
-		commandList->SetComputeRootDescriptorTable(1, bonesCbv->gpu_xhandle[backBufferIndex]);
+			//0 : the number of vertices
+			//1 : UAV for the bones transformation <- as all the meshes shares the same matrices we can just set once
+			//2 : bounding box center and extents <- this is the output UAV
+			//3 : UAV for the vertices of the mesh
+			unsigned int backBufferIndex = scene->Frame();
+			commandList->SetComputeRootDescriptorTable(1, bonesCbv->gpu_xhandle[backBufferIndex]);
 
-		for (unsigned int i = 0; i < verticesCpuHandles.size(); i++)
-		{
-			auto& cbv = constantsBuffers[i];
-			commandList->SetComputeRootDescriptorTable(0, cbv->gpu_xhandle[0]);
-			commandList->SetComputeRootDescriptorTable(2, resultGpuHandle[i]);
-			commandList->SetComputeRootDescriptorTable(3, verticesGpuHandles[i]);
-			commandList->Dispatch(1, 1, 1);
-		}
+			for (unsigned int i = 0; i < verticesCpuHandles.size(); i++)
+			{
+				auto& cbv = constantsBuffers[i];
+				commandList->SetComputeRootDescriptorTable(0, cbv->gpu_xhandle[0]);
+				commandList->SetComputeRootDescriptorTable(2, resultGpuHandle[i]);
+				commandList->SetComputeRootDescriptorTable(3, verticesGpuHandles[i]);
+				commandList->Dispatch(1, 1, 1);
+			}
 
 #if defined(_DEVELOPMENT)
-		PIXEndEvent(commandList.p);
+		}
 #endif
 	}
 
@@ -186,42 +187,43 @@ namespace ComputeShader
 		CComPtr<ID3D12GraphicsCommandList2>& commandList = GetSceneUnit(unit)->GetComputeCommandList();
 
 #if defined(_DEVELOPMENT)
-		PIXBeginEvent(commandList.p, 0, L"RenderableBoundingBox Solution");
+		{
+			PIXScopedEvent(commandList.p, 0, L"RenderableBoundingBox Solution");
 #endif
 
-		for (unsigned int i = 0; i < verticesCpuHandles.size(); i++)
-		{
-			DeviceUtils::TransitionResource(commandList, resources[i], D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_SOURCE);
-			DeviceUtils::TransitionResource(commandList, readBackResources[i], D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
-			commandList->CopyResource(readBackResources[i], resources[i]);
-
-			readBackResources[i]->Map(0, &range, reinterpret_cast<void**>(&mem));
-
-			XMFLOAT3 center = { mem[0].x, mem[0].y , mem[0].z };
-			XMFLOAT3 extents = { mem[1].x, mem[1].y , mem[1].z };
-
-			BoundingBox gpuBBox = BoundingBox(center, extents);
-
-			if (i == 0)
+			for (unsigned int i = 0; i < verticesCpuHandles.size(); i++)
 			{
-				boundingBox = gpuBBox;
-			}
-			else
-			{
-				BoundingBox out;
-				BoundingBox::CreateMerged(out, boundingBox, gpuBBox);
-				boundingBox = out;
-			}
+				DeviceUtils::TransitionResource(commandList, resources[i], D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_SOURCE);
+				DeviceUtils::TransitionResource(commandList, readBackResources[i], D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+				commandList->CopyResource(readBackResources[i], resources[i]);
 
-			D3D12_RANGE emptyRange{ 0, 0 };
-			readBackResources[i]->Unmap(0, &emptyRange);
+				readBackResources[i]->Map(0, &range, reinterpret_cast<void**>(&mem));
 
-			DeviceUtils::TransitionResource(commandList, resources[i], D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COMMON);
-			DeviceUtils::TransitionResource(commandList, readBackResources[i], D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON);
-		}
+				XMFLOAT3 center = { mem[0].x, mem[0].y , mem[0].z };
+				XMFLOAT3 extents = { mem[1].x, mem[1].y , mem[1].z };
+
+				BoundingBox gpuBBox = BoundingBox(center, extents);
+
+				if (i == 0)
+				{
+					boundingBox = gpuBBox;
+				}
+				else
+				{
+					BoundingBox out;
+					BoundingBox::CreateMerged(out, boundingBox, gpuBBox);
+					boundingBox = out;
+				}
+
+				D3D12_RANGE emptyRange{ 0, 0 };
+				readBackResources[i]->Unmap(0, &emptyRange);
+
+				DeviceUtils::TransitionResource(commandList, resources[i], D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COMMON);
+				DeviceUtils::TransitionResource(commandList, readBackResources[i], D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON);
+			}
 
 #if defined(_DEVELOPMENT)
-		PIXEndEvent(commandList.p);
+		}
 #endif
 		if (solutionCounter > 0)
 		{

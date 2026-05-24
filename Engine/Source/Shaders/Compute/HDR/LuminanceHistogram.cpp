@@ -78,27 +78,28 @@ namespace ComputeShader
 		CComPtr<ID3D12GraphicsCommandList2>& commandList = scene->GetComputeCommandList();
 
 #if defined(_DEVELOPMENT)
-		PIXBeginEvent(commandList.p, 0, L"LuminanceHistogram Compute");
+		{
+			PIXScopedEvent(commandList.p, 0, L"LuminanceHistogram Compute");
 #endif
 
-		//Clear UAV
-		unsigned int clearValue[] = { 0U,0U,0U,0U };
-		commandList->ClearUnorderedAccessViewUint(resultGpuHandle, resultClearCpuHandle, resource, clearValue, 0, nullptr);
+			//Clear UAV
+			unsigned int clearValue[] = { 0U,0U,0U,0U };
+			commandList->ClearUnorderedAccessViewUint(resultGpuHandle, resultClearCpuHandle, resource, clearValue, 0, nullptr);
 
-		//after clearing the uav we can compute
-		shader.SetComputeState(unit);
+			//after clearing the uav we can compute
+			shader.SetComputeState(unit);
 
-		auto& rtt = GetRenderToTexture(rttUUID);
+			auto& rtt = GetRenderToTexture(rttUUID);
 
-		commandList->SetComputeRootDescriptorTable(0, constantsBuffers->gpu_xhandle[0]);
-		commandList->SetComputeRootDescriptorTable(1, resultGpuHandle);
-		commandList->SetComputeRootDescriptorTable(2, rtt->gpuTextureHandle);
-		unsigned int numDispatchX = (rtt->width / 16U) + ((rtt->width % 16U) ? 1U : 0U);
-		unsigned int numDispatchY = (rtt->height / 16U) + ((rtt->height % 16U) ? 1U : 0U);
-		commandList->Dispatch(numDispatchX, numDispatchY, 1);
+			commandList->SetComputeRootDescriptorTable(0, constantsBuffers->gpu_xhandle[0]);
+			commandList->SetComputeRootDescriptorTable(1, resultGpuHandle);
+			commandList->SetComputeRootDescriptorTable(2, rtt->gpuTextureHandle);
+			unsigned int numDispatchX = (rtt->width / 16U) + ((rtt->width % 16U) ? 1U : 0U);
+			unsigned int numDispatchY = (rtt->height / 16U) + ((rtt->height % 16U) ? 1U : 0U);
+			commandList->Dispatch(numDispatchX, numDispatchY, 1);
 
 #if defined(_DEVELOPMENT)
-		PIXEndEvent(commandList.p);
+		}
 #endif
 	}
 }

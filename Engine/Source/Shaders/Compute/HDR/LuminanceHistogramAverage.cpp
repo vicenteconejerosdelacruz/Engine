@@ -83,19 +83,20 @@ namespace ComputeShader
 		CComPtr<ID3D12GraphicsCommandList2>& commandList = scene->GetComputeCommandList();
 
 #if defined(_DEVELOPMENT)
-		PIXBeginEvent(commandList.p, 0, L"LuminanceHistogramAverage Compute");
+		{
+			PIXScopedEvent(commandList.p, 0, L"LuminanceHistogramAverage Compute");
 #endif
 
-		//after clearing the uav we can compute
-		shader.SetComputeState(unit);
+			//after clearing the uav we can compute
+			shader.SetComputeState(unit);
 
-		commandList->SetComputeRootDescriptorTable(0, constantsBuffers->gpu_xhandle[0]);
-		commandList->SetComputeRootDescriptorTable(1, histogramGpuHandle);
-		commandList->SetComputeRootDescriptorTable(2, averageGpuHandle);
-		commandList->Dispatch(1, 1, 1);
+			commandList->SetComputeRootDescriptorTable(0, constantsBuffers->gpu_xhandle[0]);
+			commandList->SetComputeRootDescriptorTable(1, histogramGpuHandle);
+			commandList->SetComputeRootDescriptorTable(2, averageGpuHandle);
+			commandList->Dispatch(1, 1, 1);
 
 #if defined(_DEVELOPMENT)
-		PIXEndEvent(commandList.p);
+		}
 #endif
 	}
 }

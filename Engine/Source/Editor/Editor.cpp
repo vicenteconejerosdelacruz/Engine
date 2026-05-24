@@ -860,88 +860,89 @@ namespace Editor
 		TransitionResource(commandList, backBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 #if defined(_DEVELOPMENT)
-		PIXBeginEvent(commandList.p, 0, L"Draw Editor");
+		{
+			PIXScopedEvent(commandList.p, 0, L"Draw Editor");
 #endif
-		commandList->RSSetViewports(1, &renderer->screenViewport);
-		commandList->RSSetScissorRects(1, &renderer->scissorRect);
+			commandList->RSSetViewports(1, &renderer->screenViewport);
+			commandList->RSSetScissorRects(1, &renderer->scissorRect);
 
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(pass->rtvDescriptorHeap->descriptorHeap->GetCPUDescriptorHandleForHeapStart(), backBufferIndex, pass->rtvDescriptorHeap->descriptorSize);
-		commandList->OMSetRenderTargets(1, &rtv, false, nullptr);
-		if (GetSceneUnitsCount() == 0ULL)
-		{
-			XMVECTORF32 clearColor = DirectX::Colors::Black;
-			commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
-		}
-
-		// Start the Dear ImGui frame
-		ImGui_ImplDX12_NewFrame();
-		ImGui_ImplWin32_NewFrame();
-		ImGui::NewFrame();
-		ImGuizmo::BeginFrame();
-
-		Editor::NonGameMode = false;
-
-		if (currentSceneUnitId != 0 && sceneObjectEdition.contains(currentSceneUnitId) && sceneObjectEdition.at(currentSceneUnitId).selectedNextFrame != "")
-		{
-			OpenSceneObject(sceneObjectEdition.at(currentSceneUnitId).selectedNextFrame);
-			sceneObjectEdition.at(currentSceneUnitId).selectedNextFrame = "";
-		}
-
-		if (templateEdition.selectedNextFrame != "")
-		{
-			OpenTemplate(templateEdition.selectedNextFrame);
-			templateEdition.selectedNextFrame = "";
-		}
-
-		DrawApplicationBar();
-		DrawLevelSelectorModal();
-		DrawGameController();
-		DrawPhysicsController();
-		DrawLevelsTabs();
-
-		if (!!currentSceneUnitId && !IsPlaying(currentSceneUnitId))
-		{
-			DrawRightPanel();
-
-			SwitchToSceneUnitEditorCamera(currentSceneUnitId);
-			DrawPickedObjectsGizmo(currentSceneUnitId, MAKESUUUID(Editor::currentSceneUnitId, *GetSwapChainCameras(currentSceneUnitId).begin()));
-			SwitchToSceneUnitEditorPlayCamera(currentSceneUnitId);
-
-			if (sceneObjectModal.creating)
-				sceneObjectModal.DrawCreationPopup(SceneObjectsTypePanelMenuItems.at(sceneObjectModal.type));
-			if (templateModal.creating)
-				templateModal.DrawCreationPopup(TemplateTypePanelMenuItems.at(templateModal.type));
-			if (deletePrompt.showing)
-				deletePrompt.DrawPrompt("Delete Template");
-			if (animationSequencer.showing)
+			CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(pass->rtvDescriptorHeap->descriptorHeap->GetCPUDescriptorHandleForHeapStart(), backBufferIndex, pass->rtvDescriptorHeap->descriptorSize);
+			commandList->OMSetRenderTargets(1, &rtv, false, nullptr);
+			if (GetSceneUnitsCount() == 0ULL)
 			{
-				animationSequencer.DrawSequencer("Animation Sequencer");
+				XMVECTORF32 clearColor = DirectX::Colors::Black;
+				commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 			}
-			if (animationSequencer.destroying)
-			{
-				animationSequencer.DestroyStep();
-			}
-			else if (animationSequencer.initializing)
-			{
-				animationSequencer.DrawLoading();
-			}
-			sceneObjectPopup.Draw();
-			scriptEditModal.Draw();
-			scriptBindingModal.Draw();
-		}
-		if (yesNoCancelModal.Showing())
-		{
-			yesNoCancelModal.Draw();
-		}
 
-		// Rendering
-		ImGui::Render();
+			// Start the Dear ImGui frame
+			ImGui_ImplDX12_NewFrame();
+			ImGui_ImplWin32_NewFrame();
+			ImGui::NewFrame();
+			ImGuizmo::BeginFrame();
 
-		// Render Dear ImGui graphics
-		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
+			Editor::NonGameMode = false;
+
+			if (currentSceneUnitId != 0 && sceneObjectEdition.contains(currentSceneUnitId) && sceneObjectEdition.at(currentSceneUnitId).selectedNextFrame != "")
+			{
+				OpenSceneObject(sceneObjectEdition.at(currentSceneUnitId).selectedNextFrame);
+				sceneObjectEdition.at(currentSceneUnitId).selectedNextFrame = "";
+			}
+
+			if (templateEdition.selectedNextFrame != "")
+			{
+				OpenTemplate(templateEdition.selectedNextFrame);
+				templateEdition.selectedNextFrame = "";
+			}
+
+			DrawApplicationBar();
+			DrawLevelSelectorModal();
+			DrawGameController();
+			DrawPhysicsController();
+			DrawLevelsTabs();
+
+			if (false && !!currentSceneUnitId && !IsPlaying(currentSceneUnitId))
+			{
+				DrawRightPanel();
+
+				SwitchToSceneUnitEditorCamera(currentSceneUnitId);
+				DrawPickedObjectsGizmo(currentSceneUnitId, MAKESUUUID(Editor::currentSceneUnitId, *GetSwapChainCameras(currentSceneUnitId).begin()));
+				SwitchToSceneUnitEditorPlayCamera(currentSceneUnitId);
+
+				if (sceneObjectModal.creating)
+					sceneObjectModal.DrawCreationPopup(SceneObjectsTypePanelMenuItems.at(sceneObjectModal.type));
+				if (templateModal.creating)
+					templateModal.DrawCreationPopup(TemplateTypePanelMenuItems.at(templateModal.type));
+				if (deletePrompt.showing)
+					deletePrompt.DrawPrompt("Delete Template");
+				if (animationSequencer.showing)
+				{
+					animationSequencer.DrawSequencer("Animation Sequencer");
+				}
+				if (animationSequencer.destroying)
+				{
+					animationSequencer.DestroyStep();
+				}
+				else if (animationSequencer.initializing)
+				{
+					animationSequencer.DrawLoading();
+				}
+				sceneObjectPopup.Draw();
+				scriptEditModal.Draw();
+				scriptBindingModal.Draw();
+			}
+			if (yesNoCancelModal.Showing())
+			{
+				yesNoCancelModal.Draw();
+			}
+
+			// Rendering
+			ImGui::Render();
+
+			// Render Dear ImGui graphics
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
 
 #if defined(_DEVELOPMENT)
-		PIXEndEvent(commandList.p);
+		}
 #endif
 
 		TransitionResource(commandList, backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
@@ -2676,31 +2677,32 @@ namespace Editor
 		auto& commandList = commandListPickingPassProcessor->GetCommandList();
 
 #if defined(_DEVELOPMENT)
-		PIXBeginEvent(commandList.p, 0, L"Scene Picker");
+		{
+			PIXScopedEvent(commandList.p, 0, L"Scene Picker");
 #endif
 
-		mousePicking.pickingPass.at(id)->renderToTexturePass->Pass(id, [&](SceneUnitId unit)
-			{
-				unsigned int objectId = 1U;
-				for (JUUID uuid : GetRenderables(id))
+			mousePicking.pickingPass.at(id)->renderToTexturePass->Pass(id, [&](SceneUnitId unit)
 				{
-					RenderableID r = MAKESUUUID(id, uuid);
-					if (!r->visible()
+					unsigned int objectId = 1U;
+					for (JUUID uuid : GetRenderables(id))
+					{
+						RenderableID r = MAKESUUUID(id, uuid);
+						if (!r->visible()
 #if defined(_EDITOR_BOUNDINGBOX)
-						|| boundingBox.at(id).uuid() == r->uuid()
+							|| boundingBox.at(id).uuid() == r->uuid()
 #endif
-						) continue;
+							) continue;
 
-					//OutputDebugStringA(("RenderPickingPass:" + r->name() + ":" + std::to_string(objectId) + "\n").c_str());
-					r->WriteConstantsBuffer("objectId", objectId, backBufferIndex);
-					r->Render(id, mousePicking.pickingPass.at(id), camera);
-					objectId++;
+						//OutputDebugStringA(("RenderPickingPass:" + r->name() + ":" + std::to_string(objectId) + "\n").c_str());
+						r->WriteConstantsBuffer("objectId", objectId, backBufferIndex);
+						r->Render(id, mousePicking.pickingPass.at(id), camera);
+						objectId++;
+					}
 				}
-			}
-		);
+			);
 
 #if defined(_DEVELOPMENT)
-		PIXEndEvent(commandList.p);
+		}
 #endif
 		commandListPickingPassProcessor->CloseCommandList();
 		commandListPickingPassProcessor->ExecuteCommandList();

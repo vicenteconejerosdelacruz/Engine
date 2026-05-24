@@ -100,19 +100,24 @@ namespace DeviceUtils {
 
 	void RenderToTexturePass::Pass(SceneUnitId unit, std::function<void(SceneUnitId)> renderCallback, XMVECTORF32 clearColor)
 	{
-		BeginRenderPass(unit, clearColor);
-		renderCallback(unit);
-		EndRenderPass(unit);
+#if defined(_DEVELOPMENT)
+		{
+			auto& sceneUnit = GetSceneUnit(unit);
+			auto& commandList = sceneUnit->GetCommandList();
+			PIXScopedEvent(commandList.p, 0, name.c_str());
+#endif
+			BeginRenderPass(unit, clearColor);
+			renderCallback(unit);
+			EndRenderPass(unit);
+#if defined(_DEVELOPMENT)
+		}
+#endif
 	}
 
 	void RenderToTexturePass::BeginRenderPass(SceneUnitId unit, XMVECTORF32 clearColor)
 	{
 		using namespace Scene;
 		auto& commandList = GetSceneUnit(unit)->GetCommandList();
-
-#if defined(_DEVELOPMENT)
-		PIXBeginEvent(commandList.p, 0, name.c_str());
-#endif
 
 		//transition the texture resources from pixel shader resource to render target
 		std::vector<CD3DX12_RESOURCE_BARRIER> barriers;
@@ -162,9 +167,6 @@ namespace DeviceUtils {
 		{
 			commandList->ResourceBarrier(static_cast<unsigned int>(barriers.size()), barriers.data());
 		}
-#if defined(_DEVELOPMENT)
-		PIXEndEvent(commandList.p);
-#endif
 	}
 
 	void RenderToTexturePass::Destroy()

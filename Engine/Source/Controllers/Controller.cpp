@@ -270,6 +270,14 @@ namespace Game
 		{
 			for (auto& uuid : uuidset)
 			{
+#if defined(_DEVELOPMENT)
+				SceneUnitId unit = std::get<0>(controllersSUUUID.at(uuid));
+				auto& scene = GetSceneUnit(unit);
+				auto& commandList = scene->GetCommandList();
+				std::string StepControllersEvent = "StepControllers:" + std::to_string(unit) + ":" + uuid;
+				PIXScopedEvent(commandList.p, 0, nostd::StringToWString(StepControllersEvent).c_str());
+#endif
+
 				controllersUUIDs.at(uuid)->Step(dt);
 			}
 		}
