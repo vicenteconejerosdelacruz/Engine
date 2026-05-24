@@ -123,7 +123,7 @@ void JRenderer::Present() {
 	using namespace DeviceUtils;
 
 	//present
-	DX::ThrowIfFailed(swapChain->Present(1, 0));
+	DX::ThrowIfFailed(swapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING));
 	frameFenceValues[backBufferIndex] = Signal(commandQueue, fence, fenceValue);
 	backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
