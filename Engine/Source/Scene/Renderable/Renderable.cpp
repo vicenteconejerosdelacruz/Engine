@@ -123,6 +123,8 @@ namespace Scene
 
 	void Renderable::SetInitialConditions()
 	{
+		lastAnimationTime = 0.0f;
+		forceAnimation = true;
 		animationTransformation = XMMatrixIdentity();
 
 		if (!animable.empty())
@@ -764,6 +766,7 @@ namespace Scene
 		sequencePlayer.CreateSequenceTriggers();
 		StepAnimation(0.0f);
 		animationTimeFactor(timeFactor);
+		forceAnimation = true;
 	}
 
 	void Renderable::StepAnimation(double elapsedSeconds)
@@ -772,6 +775,12 @@ namespace Scene
 
 		using namespace Animation;
 		auto& animations = animable->animations;
+
+		if (lastAnimationTime == animationTime() && !forceAnimation)
+			return;
+
+		forceAnimation = false;
+		lastAnimationTime = animationTime();
 
 		if (animationStepLock->load() == true)
 			animationStepLock->wait(true);
@@ -880,97 +889,97 @@ namespace Scene
 		{
 			PIXScopedEvent(commandList.p, 0, name().c_str());
 #endif
-		auto& meshesMaterials = materials.at(renderPass);
-		auto& meshesRootSignatures = rootSignatures.at(renderPass);
-		auto& meshesPipelineStates = pipelineStates.at(renderPass);
+			auto& meshesMaterials = materials.at(renderPass);
+			auto& meshesRootSignatures = rootSignatures.at(renderPass);
+			auto& meshesPipelineStates = pipelineStates.at(renderPass);
 
-		auto setConstantsBuffersDescriptorTables = [&](auto& cbuffers, unsigned int& slot)
-			{
-				for (auto& cbuffer : cbuffers) {
-					cbuffer->SetRootDescriptorTable(commandList, slot, frame);
-				}
-			};
-		auto setCameraConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
-			{
-				if (!camera.empty() && material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->CBV.camera; })) {
-					camera->cameraCb->SetRootDescriptorTable(commandList, slot, frame);
-				}
-			};
-		auto setLightsConstantsBufferDescriptorTable = [&](MaterialInstanceID material, unsigned int& slot)
-			{
-				if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->CBV.light; })) {
-					camera->GetLightsConstantsBuffer()->SetRootDescriptorTable(commandList, slot, frame);
-				}
-			};
-		auto setShadowMapsConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
-			{
-				if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->CBV.lightsShadowMap; })) {
-					if (camera->SceneHasShadowMaps())
-						return camera->GetShadowMapsConstantsBuffer()->SetRootDescriptorTable(commandList, slot, frame);
-					slot++;
-				}
-			};
-		auto setSkinningConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
-			{
-				if (material->ShaderInstanceHasRegister([this](ShaderInstanceID binary) { return binary->CBV.animation; })) {
-					if (!animable.empty())
-						return GetAnimatedConstantsBuffer(SUuuid())->SetRootDescriptorTable(commandList, slot, frame);
-					slot++;
-				}
-			};
-		auto setUAVRootDescriptorTable = [&](auto& material, unsigned int& slot)
-			{
-				material->SetUAVRootDescriptorTable(commandList, slot);
-			};
-		auto setIBLRootDescriptorTable = [&](auto& material, unsigned int& slot)
-			{
-				if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return
-					(binary->SRV.iblIrradiance == -1 || binary->SRV.iblPrefiteredEnv == -1 || binary->SRV.iblBRDFLUT == -1) ? -1 : 1; })
-					)
+			auto setConstantsBuffersDescriptorTables = [&](auto& cbuffers, unsigned int& slot)
 				{
-					camera->SetIBLRootDescriptorTables(commandList, slot);
-				}
-			};
-		auto setSRVRootDescriptorTable = [&](auto& material, unsigned int& slot)
+					for (auto& cbuffer : cbuffers) {
+						cbuffer->SetRootDescriptorTable(commandList, slot, frame);
+					}
+				};
+			auto setCameraConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
+				{
+					if (!camera.empty() && material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->CBV.camera; })) {
+						camera->cameraCb->SetRootDescriptorTable(commandList, slot, frame);
+					}
+				};
+			auto setLightsConstantsBufferDescriptorTable = [&](MaterialInstanceID material, unsigned int& slot)
+				{
+					if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->CBV.light; })) {
+						camera->GetLightsConstantsBuffer()->SetRootDescriptorTable(commandList, slot, frame);
+					}
+				};
+			auto setShadowMapsConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
+				{
+					if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->CBV.lightsShadowMap; })) {
+						if (camera->SceneHasShadowMaps())
+							return camera->GetShadowMapsConstantsBuffer()->SetRootDescriptorTable(commandList, slot, frame);
+						slot++;
+					}
+				};
+			auto setSkinningConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
+				{
+					if (material->ShaderInstanceHasRegister([this](ShaderInstanceID binary) { return binary->CBV.animation; })) {
+						if (!animable.empty())
+							return GetAnimatedConstantsBuffer(SUuuid())->SetRootDescriptorTable(commandList, slot, frame);
+						slot++;
+					}
+				};
+			auto setUAVRootDescriptorTable = [&](auto& material, unsigned int& slot)
+				{
+					material->SetUAVRootDescriptorTable(commandList, slot);
+				};
+			auto setIBLRootDescriptorTable = [&](auto& material, unsigned int& slot)
+				{
+					if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return
+						(binary->SRV.iblIrradiance == -1 || binary->SRV.iblPrefiteredEnv == -1 || binary->SRV.iblBRDFLUT == -1) ? -1 : 1; })
+						)
+					{
+						camera->SetIBLRootDescriptorTables(commandList, slot);
+					}
+				};
+			auto setSRVRootDescriptorTable = [&](auto& material, unsigned int& slot)
+				{
+					material->SetSRVRootDescriptorTable(commandList, slot);
+				};
+			auto setShadowMapsSRVDescriptorTable = [&](auto& material, unsigned int& slot)
+				{
+					if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->SRV.lightsShadowMap; })) {
+						if (camera->SceneHasShadowMaps())
+							return commandList->SetGraphicsRootDescriptorTable(slot, GetShadowMapGpuDescriptorHandleStart(unit));
+						slot++;
+					}
+				};
+
+			for (unsigned int i = 0; i < meshes.size(); i++)
 			{
-				material->SetSRVRootDescriptorTable(commandList, slot);
-			};
-		auto setShadowMapsSRVDescriptorTable = [&](auto& material, unsigned int& slot)
-			{
-				if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->SRV.lightsShadowMap; })) {
-					if (camera->SceneHasShadowMaps())
-						return commandList->SetGraphicsRootDescriptorTable(slot, GetShadowMapGpuDescriptorHandleStart(unit));
-					slot++;
-				}
-			};
+				if (skipMeshes_contains(i)) continue;
 
-		for (unsigned int i = 0; i < meshes.size(); i++)
-		{
-			if (skipMeshes_contains(i)) continue;
+				commandList->IASetPrimitiveTopology(topology());
+				commandList->SetGraphicsRootSignature(meshesRootSignatures.at(i));
+				commandList->SetPipelineState(meshesPipelineStates.at(i));
 
-			commandList->IASetPrimitiveTopology(topology());
-			commandList->SetGraphicsRootSignature(meshesRootSignatures.at(i));
-			commandList->SetPipelineState(meshesPipelineStates.at(i));
+				auto& material = meshesMaterials.at(i);
+				auto& cbuffers = constantsBuffers.at(renderPass).at(i);
+				unsigned int slot = 0U;
 
-			auto& material = meshesMaterials.at(i);
-			auto& cbuffers = constantsBuffers.at(renderPass).at(i);
-			unsigned int slot = 0U;
+				setConstantsBuffersDescriptorTables(cbuffers, slot);
+				setCameraConstantsBufferDescriptorTable(material, slot);
+				setLightsConstantsBufferDescriptorTable(material, slot);
+				setShadowMapsConstantsBufferDescriptorTable(material, slot);
+				setSkinningConstantsBufferDescriptorTable(material, slot);
+				setUAVRootDescriptorTable(material, slot);
+				setIBLRootDescriptorTable(material, slot);
+				setSRVRootDescriptorTable(material, slot);
+				setShadowMapsSRVDescriptorTable(material, slot);
 
-			setConstantsBuffersDescriptorTables(cbuffers, slot);
-			setCameraConstantsBufferDescriptorTable(material, slot);
-			setLightsConstantsBufferDescriptorTable(material, slot);
-			setShadowMapsConstantsBufferDescriptorTable(material, slot);
-			setSkinningConstantsBufferDescriptorTable(material, slot);
-			setUAVRootDescriptorTable(material, slot);
-			setIBLRootDescriptorTable(material, slot);
-			setSRVRootDescriptorTable(material, slot);
-			setShadowMapsSRVDescriptorTable(material, slot);
-
-			auto& mesh = meshes.at(i);
-			commandList->IASetVertexBuffers(0, 1, &mesh->vbvData.vertexBufferView);
-			commandList->IASetIndexBuffer(&mesh->ibvData.indexBufferView);
-			commandList->DrawIndexedInstanced(mesh->ibvData.indexBufferView.SizeInBytes / sizeof(unsigned int), 1, 0, 0, 0);
-		}
+				auto& mesh = meshes.at(i);
+				commandList->IASetVertexBuffers(0, 1, &mesh->vbvData.vertexBufferView);
+				commandList->IASetIndexBuffer(&mesh->ibvData.indexBufferView);
+				commandList->DrawIndexedInstanced(mesh->ibvData.indexBufferView.SizeInBytes / sizeof(unsigned int), 1, 0, 0, 0);
+			}
 #if defined(_DEVELOPMENT)
 		}
 #endif

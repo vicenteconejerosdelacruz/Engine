@@ -223,6 +223,8 @@ namespace Scene
 		RenderableRootSignatures rootSignatures;
 		RenderablePipelineStates pipelineStates;
 		//Animations
+		float lastAnimationTime;
+		bool forceAnimation;
 		std::unique_ptr<std::atomic_bool> animationStepLock;
 		Model3DInstanceID animable;
 		Animation::BonesTransformations bonesTransformation;
