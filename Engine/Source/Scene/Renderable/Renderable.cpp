@@ -877,7 +877,8 @@ namespace Scene
 		auto& commandList = scene->GetCommandList();
 
 #if defined(_DEVELOPMENT)
-		PIXBeginEvent(commandList.p, 0, name().c_str());
+		{
+			PIXScopedEvent(commandList.p, 0, name().c_str());
 #endif
 		auto& meshesMaterials = materials.at(renderPass);
 		auto& meshesRootSignatures = rootSignatures.at(renderPass);
@@ -971,7 +972,7 @@ namespace Scene
 			commandList->DrawIndexedInstanced(mesh->ibvData.indexBufferView.SizeInBytes / sizeof(unsigned int), 1, 0, 0, 0);
 		}
 #if defined(_DEVELOPMENT)
-		PIXEndEvent(commandList.p);
+		}
 #endif
 	}
 
