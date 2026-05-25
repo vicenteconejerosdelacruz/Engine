@@ -683,6 +683,12 @@ namespace Scene
 		for (auto& [unit, scene] : scenesUnits)
 		{
 			if (scene->MarkedForDelete()) continue;
+
+#if defined(_DEVELOPMENT)
+			auto& commandList = scene->GetCommandList();
+			std::string sceneObjectsStepEvent = "SceneObjectsStep:" + std::to_string(unit);
+			PIXScopedEvent(commandList.p, 0, nostd::StringToWString(sceneObjectsStepEvent).c_str());
+#endif
 			float dt = static_cast<FLOAT>(timer.GetElapsedSeconds());
 #if defined(_EDITOR)
 			Editor::UpdateBoundingBox(unit);
@@ -749,28 +755,30 @@ namespace Scene
 				};
 
 #if defined(_DEVELOPMENT)
+			{
 			std::string shadowMapEvent = "ShadowMap:" + l->name();
-			PIXBeginEvent(commandList.p, 0, nostd::StringToWString(shadowMapEvent).c_str());
+				PIXScopedEvent(commandList.p, 0, nostd::StringToWString(shadowMapEvent).c_str());
 #endif
 
 			l->RenderShadowMap(renderSceneShadowMap);
 
 #if defined(_DEVELOPMENT)
-			PIXEndEvent(commandList.p);
+			}
 #endif
 
 #if defined(_EDITOR)
 			if (l->shadowMapMinMaxChainRenderPass.empty() || l->destroySMChain) continue;
 
 #if defined(_DEVELOPMENT)
+				{
 			std::string shadowMapMinMaxEvent = "ShadowMapMinMaxChain:" + l->name();
-			PIXBeginEvent(commandList.p, 0, nostd::StringToWString(shadowMapMinMaxEvent).c_str());
+					PIXScopedEvent(commandList.p, 0, nostd::StringToWString(shadowMapMinMaxEvent).c_str());
 #endif
 
 			l->RenderShadowMapMinMaxChain();
 
 #if defined(_DEVELOPMENT)
-			PIXEndEvent(commandList.p);
+				}
 #endif
 
 #endif
@@ -821,11 +829,12 @@ namespace Scene
 		{
 			CameraID cam = MAKESUUUID(id, uuid);
 #if defined(_DEVELOPMENT)
-			PIXBeginEvent(commandList.p, 0, std::string("nonSwapChain:" + cam->name()).c_str());
+			{
+				PIXScopedEvent(commandList.p, 0, std::string("nonSwapChain:" + cam->name()).c_str());
 #endif
 			cam->Render();
 #if defined(_DEVELOPMENT)
-			PIXEndEvent(commandList.p);
+			}
 #endif
 		}
 
@@ -847,11 +856,12 @@ namespace Scene
 			JUUID camUUID = *GetSwapChainCameras(id).begin();
 			auto& cam = GetFromSwapChainCameras(id, camUUID);
 #if defined(_DEVELOPMENT)
-			PIXBeginEvent(commandList.p, 0, std::string("SwapChain:" + cam->name()).c_str());
+			{
+				PIXScopedEvent(commandList.p, 0, std::string("SwapChain:" + cam->name()).c_str());
 #endif
 			cam->Render();
 #if defined(_DEVELOPMENT)
-			PIXEndEvent(commandList.p);
+			}
 #endif
 		}
 	}
