@@ -45,11 +45,11 @@ namespace Animation {
 				}
 				for (auto rotation = (*channel)->mRotationKeys; rotation < ((*channel)->mRotationKeys + (*channel)->mNumRotationKeys); rotation++)
 				{
-					animationBonesKeys[animName][nodeName].rotation.push_back({ static_cast<FLOAT>(rotation->mTime), { rotation->mValue.x, rotation->mValue.y, rotation->mValue.z, rotation->mValue.w } });
+					animationBonesKeys[animName][nodeName].rotations.push_back({ static_cast<FLOAT>(rotation->mTime), { rotation->mValue.x, rotation->mValue.y, rotation->mValue.z, rotation->mValue.w } });
 				}
 				for (auto scale = (*channel)->mScalingKeys; scale < ((*channel)->mScalingKeys + (*channel)->mNumScalingKeys); scale++)
 				{
-					animationBonesKeys[animName][nodeName].scaling.push_back({ static_cast<FLOAT>(scale->mTime), { scale->mValue.x, scale->mValue.y, scale->mValue.z } });
+					animationBonesKeys[animName][nodeName].scales.push_back({ static_cast<FLOAT>(scale->mTime), { scale->mValue.x, scale->mValue.y, scale->mValue.z } });
 				}
 			}
 		}
@@ -128,8 +128,7 @@ namespace Animation {
 	}
 
 	void DestroyAnimated(SceneUnitId id)
-	{
-	}
+	{}
 
 	void AttachAnimation(RenderableID renderable, std::unique_ptr<Animated>& animated)
 	{
@@ -217,8 +216,8 @@ namespace Animation {
 				auto keys = boneKeys.find(node->name);
 				if (keys != boneKeys.end())
 				{
-					XMMATRIX scaling = InterpolateKeys(XMMatrixScalingFromVector, XMVectorLerp, time, keys->second.scaling);
-					XMMATRIX rotation = InterpolateKeys(XMMatrixRotationQuaternion, XMQuaternionSlerp, time, keys->second.rotation);
+					XMMATRIX scaling = InterpolateKeys(XMMatrixScalingFromVector, XMVectorLerp, time, keys->second.scales);
+					XMMATRIX rotation = InterpolateKeys(XMMatrixRotationQuaternion, XMQuaternionSlerp, time, keys->second.rotations);
 					XMMATRIX translation = InterpolateKeys(XMMatrixTranslationFromVector, XMVectorLerp, time, keys->second.positions);
 					nodeTransformation = XMMatrixTranspose(XMMatrixMultiply(scaling, XMMatrixMultiply(rotation, translation)));
 				}

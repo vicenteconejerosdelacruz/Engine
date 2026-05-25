@@ -46,8 +46,8 @@ namespace Animation
 	struct BoneKeys
 	{
 		std::vector<KeyFrame> positions;
-		std::vector<KeyFrame> scaling;
-		std::vector<KeyFrame> rotation;
+		std::vector<KeyFrame> scales;
+		std::vector<KeyFrame> rotations;
 	};
 
 	typedef std::map<std::string, BoneKeys> BonesKeysMap;
