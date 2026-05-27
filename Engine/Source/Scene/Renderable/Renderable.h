@@ -182,6 +182,7 @@ namespace Scene
 		void RebuildAnimationSequences();
 		void SetCurrentAnimation(SequencePlayer* sequencePlayer);
 		void SetCurrentAnimation(std::string anim, float startTime = 0.0f, float timeFactor = 1.0f, bool play = true, bool loop = false);
+		void CreateAnimationThread();
 		void StepAnimation(double elapsedSeconds);
 		std::tuple<XMMATRIX, XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> GetBoneTransformation(std::string bone);
 		std::vector<std::string> GetBones();
@@ -226,6 +227,8 @@ namespace Scene
 		float lastAnimationTime;
 		bool forceAnimation;
 		std::unique_ptr<std::atomic_bool> animationStepLock;
+		std::unique_ptr<std::atomic_bool> animationThreadAlive;
+		std::thread animationThread;
 		Model3DInstanceID animable;
 		Animation::BonesTransformations bonesTransformation;
 		Animation::NodeTransformsMap globalNodeTransforms;

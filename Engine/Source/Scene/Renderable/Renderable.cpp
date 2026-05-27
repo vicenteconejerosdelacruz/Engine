@@ -111,6 +111,7 @@ namespace Scene
 			AttachAnimation(SUuuid(), model3D->animations);
 			//boundingBoxCompute = CreateRenderableBoundingBox(MAKESUUUID(unit, uuid()));
 			sequencePlayer.renderable = SUuuid();
+			CreateAnimationThread();
 		}
 
 		SetInitialConditions();
@@ -704,6 +705,7 @@ namespace Scene
 		WriteConstantsBuffer("world", w, frame);
 	}
 
+	//Animation
 	void Renderable::CreateAnimationSequences()
 	{
 		std::unique_ptr<Model3DJson>& mdl = GetModel3DTemplate(model());
@@ -769,12 +771,39 @@ namespace Scene
 		forceAnimation = true;
 	}
 
+	void Renderable::CreateAnimationThread()
+	{
+		animationThreadAlive = std::make_unique<std::atomic_bool>(true);
+		animationThread = std::thread([](Renderable* r)
+			{
+				auto& scene = GetSceneUnit(r->unit);
+				std::string animationThreadEvent = "CreateAnimationThread:" + r->name() + ":" + r->uuid();
+				while (r->animationThreadAlive->load())
+				{
+					using namespace Animation;
+
+					r->animationStepLock->wait(false);
+
+					if (!r->animationThreadAlive->load()) break;
+
+					auto& animations = r->animable->animations;
+
+#if defined(_DEVELOPMENT)
+					PIXScopedEvent(0, nostd::StringToWString(animationThreadEvent).c_str());
+#endif
+					TraverseMultiplycationQueue(r->animationTime(), r->animation(), animations, r->bonesTransformation, r->sequenceBoneTransformations, r->globalNodeTransforms);
+
+					r->animationStepLock->store(false);
+					r->animationStepLock->notify_one();
+				}
+			}
+		, this);
+		animationThread.detach();
+	}
+
 	void Renderable::StepAnimation(double elapsedSeconds)
 	{
 		if (animable.empty()) return;
-
-		using namespace Animation;
-		auto& animations = animable->animations;
 
 		if (lastAnimationTime == animationTime() && !forceAnimation)
 			return;
@@ -782,12 +811,18 @@ namespace Scene
 		forceAnimation = false;
 		lastAnimationTime = animationTime();
 
+		animationStepLock->wait(true);
+		animationStepLock->store(true);
+		animationStepLock->notify_one();
+
+		/*
 		if (animationStepLock->load() == true)
 			animationStepLock->wait(true);
 		animationStepLock->store(true);
 		TraverseMultiplycationQueue(animationTime(), animation(), animations, bonesTransformation, sequenceBoneTransformations, globalNodeTransforms);
 		animationStepLock->store(false);
 		animationStepLock->notify_one();
+		*/
 	}
 
 	std::tuple<XMMATRIX, XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> Renderable::GetBoneTransformation(std::string bone)
@@ -816,6 +851,17 @@ namespace Scene
 	void Renderable::Destroy()
 	{
 		using namespace ComputeShader;
+
+		if (animationThreadAlive)
+		{
+			animationThreadAlive->store(false);
+			animationStepLock->store(true);
+			animationStepLock->notify_one();
+			if (animationThread.joinable())
+			{
+				animationThread.join();
+			}
+		}
 
 		for (auto& [rp, vec0] : materials)
 		{
