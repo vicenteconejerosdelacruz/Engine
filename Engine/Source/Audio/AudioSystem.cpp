@@ -25,6 +25,9 @@ namespace AudioSystem {
 
 	void UpdateAudio()
 	{
+#if defined(_DEVELOPMENT)
+		PIXScopedEvent(0, L"UpdateAudio");
+#endif
 		GetAudioEngine()->Update();
 	}
 

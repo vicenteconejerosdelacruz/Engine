@@ -146,6 +146,10 @@ namespace Animation {
 
 	void WriteBoneTransformationsToConstantsBuffer(RenderableID renderable, BonesTransformations& bonesTransformation, unsigned int backbufferIndex)
 	{
+#if defined(_DEVELOPMENT)
+		std::string writeBonesEvent = "writeBonesToCB(" + renderable->name() + ")";
+		PIXScopedEvent(0, nostd::StringToWString(writeBonesEvent).c_str());
+#endif
 		using namespace DeviceUtils;
 		auto bonesCbv = GetAnimatedConstantsBuffer(renderable);
 
