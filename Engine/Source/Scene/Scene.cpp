@@ -595,11 +595,25 @@ namespace Scene
 			}
 		};
 
+		std::unordered_map<SceneObjectType, std::set<JUUID>> bindingMap;
 		std::set<JUUID> uuids = GetUnboundedSceneObjects(id);
 		for (auto& uuid : uuids)
 		{
-			typeBinder.at(GetSceneObjectType(id, uuid))(id, uuid);
+			bindingMap[GetSceneObjectType(id, uuid)].insert(uuid);
 		}
+
+		std::vector<SceneObjectType> bindingOrder = { SO_Cameras, SO_Lights, SO_SceneControllers, SO_PhysicScenes, SO_Triggers, SO_Boundaries, SO_Renderables, SO_SoundEffects };
+
+		for (auto type : bindingOrder)
+		{
+			if (!bindingMap.contains(type))
+				continue;
+			for (auto& uuid : bindingMap.at(type))
+			{
+				typeBinder.at(type)(id, uuid);
+			}
+		}
+
 		GetUnboundedSceneObjects(id).clear();
 	}
 
@@ -786,26 +800,26 @@ namespace Scene
 
 #if defined(_DEVELOPMENT)
 			{
-			std::string shadowMapEvent = "ShadowMap:" + l->name();
+				std::string shadowMapEvent = "ShadowMap:" + l->name();
 				PIXScopedEvent(commandList.p, 0, nostd::StringToWString(shadowMapEvent).c_str());
 #endif
 
-			l->RenderShadowMap(renderSceneShadowMap);
+				l->RenderShadowMap(renderSceneShadowMap);
 
 #if defined(_DEVELOPMENT)
 			}
 #endif
 
 #if defined(_EDITOR)
-			if (l->shadowMapMinMaxChainRenderPass.empty() || l->destroySMChain) continue;
+				if (l->shadowMapMinMaxChainRenderPass.empty() || l->destroySMChain) continue;
 
 #if defined(_DEVELOPMENT)
 				{
-			std::string shadowMapMinMaxEvent = "ShadowMapMinMaxChain:" + l->name();
+					std::string shadowMapMinMaxEvent = "ShadowMapMinMaxChain:" + l->name();
 					PIXScopedEvent(commandList.p, 0, nostd::StringToWString(shadowMapMinMaxEvent).c_str());
 #endif
 
-			l->RenderShadowMapMinMaxChain();
+					l->RenderShadowMapMinMaxChain();
 
 #if defined(_DEVELOPMENT)
 				}
@@ -862,7 +876,7 @@ namespace Scene
 			{
 				PIXScopedEvent(commandList.p, 0, std::string("nonSwapChain:" + cam->name()).c_str());
 #endif
-			cam->Render();
+				cam->Render();
 #if defined(_DEVELOPMENT)
 			}
 #endif
@@ -889,7 +903,7 @@ namespace Scene
 			{
 				PIXScopedEvent(commandList.p, 0, std::string("SwapChain:" + cam->name()).c_str());
 #endif
-			cam->Render();
+				cam->Render();
 #if defined(_DEVELOPMENT)
 			}
 #endif

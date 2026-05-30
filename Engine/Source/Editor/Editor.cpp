@@ -331,6 +331,12 @@ namespace Editor
 			editorCameraUUID[id]->MoveForward(cameraEditorDistance);
 			editorCameraUUID[id]->WriteConstantsBuffer(scene->Frame());
 
+			//we also need the constants buffers of the lights and the shadow maps of the original camera
+			editorCameraUUID[id]->lightsCB = levelCameraUUID[id]->lightsCB;
+			editorCameraUUID[id]->lights = levelCameraUUID[id]->lights;
+			editorCameraUUID[id]->shadowMapsCB = levelCameraUUID[id]->shadowMapsCB;
+			editorCameraUUID[id]->lightsWithShadowMaps = levelCameraUUID[id]->lightsWithShadowMaps;
+
 			//restore cameras mapping
 			EraseCameraFromMouseCameras(id, editorCameraUUID[id].uuid());
 			EraseCameraFromSwapChainCameras(id, editorCameraUUID[id].uuid());
@@ -985,7 +991,9 @@ namespace Editor
 		auto& scene = GetSceneUnit(id);
 		editorCameraUUID[id]->renderables = levelCameraUUID[id]->renderables;
 		editorCameraUUID[id]->iblTextures = levelCameraUUID[id]->iblTextures;
+		editorCameraUUID[id]->lightsCB = levelCameraUUID[id]->lightsCB;
 		editorCameraUUID[id]->lights = levelCameraUUID[id]->lights;
+		editorCameraUUID[id]->shadowMapsCB = levelCameraUUID[id]->shadowMapsCB;
 		editorCameraUUID[id]->lightsWithShadowMaps = levelCameraUUID[id]->lightsWithShadowMaps;
 		editorCameraUUID[id]->CopyProjection(levelCameraUUID[id]);
 		editorCameraUUID[id]->WriteLightsConstantsBuffer(scene->Frame());

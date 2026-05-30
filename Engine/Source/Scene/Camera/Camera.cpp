@@ -512,6 +512,7 @@ namespace Scene
 		renderable->CreateConstantsBuffersInstances(SUuuid());
 		renderable->CreateRootSignatures(SUuuid());
 		renderable->CreatePipelineStates(SUuuid());
+		renderable->CreateRenderMethods(SUuuid());
 	}
 
 	void Camera::BindLight(LightID light)

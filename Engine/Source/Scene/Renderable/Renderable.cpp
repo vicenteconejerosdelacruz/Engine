@@ -15,6 +15,8 @@ namespace Editor
 	extern void SelectRenderable(RenderableID renderable);
 	extern bool IsPlaying(SceneUnitId unit);
 	extern bool IsPaused(SceneUnitId unit);
+	extern std::unordered_map<SceneUnitId, CameraID> levelCameraUUID;
+	extern std::unordered_map<SceneUnitId, CameraID> editorCameraUUID;
 };
 #endif
 
@@ -72,7 +74,7 @@ namespace Scene
 		for (unsigned int i = 0; i < JRenderer::numFrames; i++)
 		{
 			constantsBuffersLock[i] = std::make_unique<std::atomic_bool>(false);
-	}
+		}
 	}
 
 	void Renderable::create_rotation(XMFLOAT3 v)
@@ -401,8 +403,8 @@ namespace Scene
 				matUUID = GetMaterialUUIDByName(fallbackMaterialName); //fallback
 			}
 			materials[pass].push_back(pass->GetRenderPassMaterialInstance(unit, matUUID, mesh, shadowed(), mpmo, uuid()));
-				}
-				}
+		}
+	}
 
 	void Renderable::DestroyMaterialsInstances(CameraID cam)
 	{
@@ -526,7 +528,7 @@ namespace Scene
 						continue;
 
 					constantsWriter[constantName].push_back(createConstantWriter(cbuffers[vsVar.bufferIndex], vsVar.offset, vsVar.size));
-	}
+				}
 				for (auto& constantName : psConstants)
 				{
 					auto& psVar = psVars.at(constantName);
@@ -568,7 +570,7 @@ namespace Scene
 		{
 			constantsBuffersLock[i]->store(false);
 			constantsBuffersLock[i]->notify_one();
-	}
+		}
 	}
 
 	void Renderable::DestroyRenderPassConstantsBuffersInstances(RenderPassInstanceID pass)
@@ -704,6 +706,338 @@ namespace Scene
 			pipelineStates.erase(rp);
 		}
 	}
+
+	void Renderable::CreateRenderMethods(CameraID cam)
+	{
+		for (auto& rp : GetCameraRenderPasses(cam))
+		{
+			std::tuple<CameraID, RenderPassInstanceID> key = std::make_tuple(cam, rp);
+			std::vector<std::vector<DescriptorTableSetter>> setters = CreateRenderPassRenderMethods(cam, rp);
+			descriptorsRenders[key] = setters;
+		}
+#if defined(_EDITOR)
+		//this is a complete hack, but what the hell
+		using namespace Editor;
+		if (cam == levelCameraUUID.at(unit))
+		{
+			CameraID edCam = editorCameraUUID.at(unit);
+			for (auto& rp : GetCameraRenderPasses(cam))
+			{
+				std::tuple<CameraID, RenderPassInstanceID> key = std::make_tuple(edCam, rp);
+				std::vector<std::vector<DescriptorTableSetter>> setters = CreateEditorCameraRenderPassRenderMethods(edCam, cam, rp);
+				descriptorsRenders[key] = setters;
+			}
+		}
+#endif
+	}
+
+	std::vector<std::vector<DescriptorTableSetter>> Renderable::CreateRenderPassRenderMethods(CameraID cam, RenderPassInstanceID rp)
+	{
+		using namespace Animation;
+
+		Camera* pcamera = (!cam.empty()) ? (*cam).get() : nullptr;
+		auto& meshesMaterials = materials.at(rp);
+
+		std::vector<std::vector<DescriptorTableSetter>> meshSetters;
+
+		for (unsigned int i = 0; i < meshes.size(); i++)
+		{
+			auto& material = meshesMaterials.at(i);
+			MaterialInstance* material_ins = (*material).get();
+			ShaderInstance* vertexShader_ins = (*material_ins->vertexShaderInstanceID).get();
+			ShaderInstance* pixelShader_ins = (*material_ins->pixelShaderInstanceID).get();
+
+			std::vector<DeviceUtils::ConstantsBufferID>& cbuffers = constantsBuffers.at(rp).at(i);
+			std::vector<DeviceUtils::ConstantsBuffer*> pcbuffers;
+			std::transform(cbuffers.begin(), cbuffers.end(), std::back_inserter(pcbuffers), [](auto& c)
+				{
+					return (*c).get();
+				}
+			);
+			DeviceUtils::ConstantsBuffer* pcam_cbuffer = (pcamera) ? (*pcamera->cameraCb).get() : nullptr;
+			DeviceUtils::ConstantsBuffer* pcam_light_cbuffer = (pcamera && pcamera->lightsCB) ? (*pcamera->lightsCB).get() : nullptr;
+			DeviceUtils::ConstantsBuffer* pcam_shadowmap_cbuffer = (pcamera && pcamera->shadowMapsCB) ? (*pcamera->shadowMapsCB).get() : nullptr;
+			DeviceUtils::ConstantsBuffer* animated_cbuffer = (!animable.empty()) ? (*GetAnimatedConstantsBuffer(SUuuid())).get() : nullptr;
+
+			std::vector<std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE>> gpu_handles_cbuffers;
+			std::transform(pcbuffers.begin(), pcbuffers.end(), std::back_inserter(gpu_handles_cbuffers), [](auto& c)
+				{
+					return c->gpu_xhandle;
+				}
+			);
+			std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_camera;
+			if (pcam_cbuffer)
+			{
+				gpu_handles_camera = pcam_cbuffer->gpu_xhandle;
+			}
+			std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_lights;
+			if (pcam_light_cbuffer)
+			{
+				gpu_handles_lights = pcam_light_cbuffer->gpu_xhandle;
+			}
+			std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_shadowMaps;
+			if (pcam_shadowmap_cbuffer)
+			{
+				gpu_handles_shadowMaps = pcam_shadowmap_cbuffer->gpu_xhandle;
+			}
+			std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_skinning;
+			if (animated_cbuffer)
+			{
+				gpu_handles_skinning = animated_cbuffer->gpu_xhandle;
+			}
+			std::map<unsigned int, ::CD3DX12_GPU_DESCRIPTOR_HANDLE> mat_uav = material_ins->uav;
+
+			CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_iblIrradiance = (pcamera && pcamera->iblTextures.contains(TextureShaderUsage_IBLIrradiance)) ? GetTextureInstance(pcamera->iblTextures.at(TextureShaderUsage_IBLIrradiance))->gpuHandle : CD3DX12_GPU_DESCRIPTOR_HANDLE();
+
+			CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_iblPrefiteredEnv = (pcamera && pcamera->iblTextures.contains(TextureShaderUsage_IBLPreFilteredEnvironment)) ? GetTextureInstance(pcamera->iblTextures.at(TextureShaderUsage_IBLPreFilteredEnvironment))->gpuHandle : CD3DX12_GPU_DESCRIPTOR_HANDLE();
+
+			CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_iblBRDFLUT = (pcamera && pcamera->iblTextures.contains(TextureShaderUsage_IBLBRDFLUT)) ? GetTextureInstance(pcamera->iblTextures.at(TextureShaderUsage_IBLBRDFLUT))->gpuHandle : CD3DX12_GPU_DESCRIPTOR_HANDLE();
+
+			std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handle_srv;
+			for (auto& [textureType, texParam] : pixelShader_ins->srvTexParameters)
+			{
+				if (texParam.numSRV == 0xFFFFFFFF || iblUsageTexture.contains(textureType)) continue;
+				auto& texInstance = GetTextureInstance(material_ins->textures.at(textureType));
+				gpu_handle_srv.push_back(texInstance->gpuHandle);
+			}
+
+			CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_srv_shadowMap = (pcamera && pcamera->SceneHasShadowMaps()) ? GetShadowMapGpuDescriptorHandleStart(unit) : CD3DX12_GPU_DESCRIPTOR_HANDLE();
+
+			std::vector<DescriptorTableSetter> descriptor_table_setters;
+
+			//f2f
+			SetConstantsBuffersDescriptorTables(descriptor_table_setters, gpu_handles_cbuffers);
+			SetCameraConstantsBufferDescriptorTable(descriptor_table_setters, gpu_handles_camera, vertexShader_ins, pixelShader_ins);
+			SetLightsConstantsBufferDescriptorTable(descriptor_table_setters, gpu_handles_lights, vertexShader_ins, pixelShader_ins);
+			SetShadowMapsConstantsBufferDescriptorTable(descriptor_table_setters, pcamera, gpu_handles_shadowMaps, vertexShader_ins, pixelShader_ins);
+			SetSkinningConstantsBufferDescriptorTable(descriptor_table_setters, gpu_handles_skinning, vertexShader_ins, pixelShader_ins);
+			//not f2f
+			SetUAVRootDescriptorTable(descriptor_table_setters, mat_uav, pixelShader_ins);
+			SetIBLRootDescriptorTable(descriptor_table_setters, vertexShader_ins, pixelShader_ins, gpu_handle_iblIrradiance, gpu_handle_iblPrefiteredEnv, gpu_handle_iblBRDFLUT);
+			SetSRVRootDescriptorTable(descriptor_table_setters, gpu_handle_srv);
+			SetShadowMapsSRVDescriptorTable(descriptor_table_setters, pcamera, vertexShader_ins, pixelShader_ins, gpu_handle_srv_shadowMap);
+
+			meshSetters.push_back(descriptor_table_setters);
+		}
+		return meshSetters;
+	}
+
+#if defined(_EDITOR)
+	std::vector<std::vector<DescriptorTableSetter>> Renderable::CreateEditorCameraRenderPassRenderMethods(CameraID edCam, CameraID cam, RenderPassInstanceID rp)
+	{
+		using namespace Animation;
+
+		Camera* pcamera = (!cam.empty()) ? (*cam).get() : nullptr;
+		Camera* pedCamera = (!edCam.empty()) ? (*edCam).get() : nullptr;
+		auto& meshesMaterials = materials.at(rp);
+
+		std::vector<std::vector<DescriptorTableSetter>> meshSetters;
+
+		for (unsigned int i = 0; i < meshes.size(); i++)
+		{
+			auto& material = meshesMaterials.at(i);
+			MaterialInstance* material_ins = (*material).get();
+			ShaderInstance* vertexShader_ins = (*material_ins->vertexShaderInstanceID).get();
+			ShaderInstance* pixelShader_ins = (*material_ins->pixelShaderInstanceID).get();
+
+			std::vector<DeviceUtils::ConstantsBufferID>& cbuffers = constantsBuffers.at(rp).at(i);
+			std::vector<DeviceUtils::ConstantsBuffer*> pcbuffers;
+			std::transform(cbuffers.begin(), cbuffers.end(), std::back_inserter(pcbuffers), [](auto& c)
+				{
+					return (*c).get();
+				}
+			);
+			DeviceUtils::ConstantsBuffer* pcam_cbuffer = (pedCamera) ? (*pedCamera->cameraCb).get() : nullptr;
+			DeviceUtils::ConstantsBuffer* pcam_light_cbuffer = (pcamera && pcamera->lightsCB) ? (*pcamera->lightsCB).get() : nullptr;
+			DeviceUtils::ConstantsBuffer* pcam_shadowmap_cbuffer = (pcamera && pcamera->shadowMapsCB) ? (*pcamera->shadowMapsCB).get() : nullptr;
+			DeviceUtils::ConstantsBuffer* animated_cbuffer = (!animable.empty()) ? (*GetAnimatedConstantsBuffer(SUuuid())).get() : nullptr;
+
+			std::vector<std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE>> gpu_handles_cbuffers;
+			std::transform(pcbuffers.begin(), pcbuffers.end(), std::back_inserter(gpu_handles_cbuffers), [](auto& c)
+				{
+					return c->gpu_xhandle;
+				}
+			);
+			std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_camera;
+			if (pcam_cbuffer)
+			{
+				gpu_handles_camera = pcam_cbuffer->gpu_xhandle;
+			}
+			std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_lights;
+			if (pcam_light_cbuffer)
+			{
+				gpu_handles_lights = pcam_light_cbuffer->gpu_xhandle;
+			}
+			std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_shadowMaps;
+			if (pcam_shadowmap_cbuffer)
+			{
+				gpu_handles_shadowMaps = pcam_shadowmap_cbuffer->gpu_xhandle;
+			}
+			std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_skinning;
+			if (animated_cbuffer)
+			{
+				gpu_handles_skinning = animated_cbuffer->gpu_xhandle;
+			}
+			std::map<unsigned int, ::CD3DX12_GPU_DESCRIPTOR_HANDLE> mat_uav = material_ins->uav;
+
+			CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_iblIrradiance = (pcamera && pcamera->iblTextures.contains(TextureShaderUsage_IBLIrradiance)) ? GetTextureInstance(pcamera->iblTextures.at(TextureShaderUsage_IBLIrradiance))->gpuHandle : CD3DX12_GPU_DESCRIPTOR_HANDLE();
+
+			CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_iblPrefiteredEnv = (pcamera && pcamera->iblTextures.contains(TextureShaderUsage_IBLPreFilteredEnvironment)) ? GetTextureInstance(pcamera->iblTextures.at(TextureShaderUsage_IBLPreFilteredEnvironment))->gpuHandle : CD3DX12_GPU_DESCRIPTOR_HANDLE();
+
+			CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_iblBRDFLUT = (pcamera && pcamera->iblTextures.contains(TextureShaderUsage_IBLBRDFLUT)) ? GetTextureInstance(pcamera->iblTextures.at(TextureShaderUsage_IBLBRDFLUT))->gpuHandle : CD3DX12_GPU_DESCRIPTOR_HANDLE();
+
+			std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handle_srv;
+			for (auto& [textureType, texParam] : pixelShader_ins->srvTexParameters)
+			{
+				if (texParam.numSRV == 0xFFFFFFFF || iblUsageTexture.contains(textureType)) continue;
+				auto& texInstance = GetTextureInstance(material_ins->textures.at(textureType));
+				gpu_handle_srv.push_back(texInstance->gpuHandle);
+			}
+
+			CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_srv_shadowMap = (pcamera && pcamera->SceneHasShadowMaps()) ? GetShadowMapGpuDescriptorHandleStart(unit) : CD3DX12_GPU_DESCRIPTOR_HANDLE();
+
+			std::vector<DescriptorTableSetter> descriptor_table_setters;
+
+			//f2f
+			SetConstantsBuffersDescriptorTables(descriptor_table_setters, gpu_handles_cbuffers);
+			SetCameraConstantsBufferDescriptorTable(descriptor_table_setters, gpu_handles_camera, vertexShader_ins, pixelShader_ins);
+			SetLightsConstantsBufferDescriptorTable(descriptor_table_setters, gpu_handles_lights, vertexShader_ins, pixelShader_ins);
+			SetShadowMapsConstantsBufferDescriptorTable(descriptor_table_setters, pcamera, gpu_handles_shadowMaps, vertexShader_ins, pixelShader_ins);
+			SetSkinningConstantsBufferDescriptorTable(descriptor_table_setters, gpu_handles_skinning, vertexShader_ins, pixelShader_ins);
+			//not f2f
+			SetUAVRootDescriptorTable(descriptor_table_setters, mat_uav, pixelShader_ins);
+			SetIBLRootDescriptorTable(descriptor_table_setters, vertexShader_ins, pixelShader_ins, gpu_handle_iblIrradiance, gpu_handle_iblPrefiteredEnv, gpu_handle_iblBRDFLUT);
+			SetSRVRootDescriptorTable(descriptor_table_setters, gpu_handle_srv);
+			SetShadowMapsSRVDescriptorTable(descriptor_table_setters, pcamera, vertexShader_ins, pixelShader_ins, gpu_handle_srv_shadowMap);
+
+			meshSetters.push_back(descriptor_table_setters);
+		}
+		return meshSetters;
+	}
+#endif
+
+	void Renderable::SetConstantsBuffersDescriptorTables(std::vector<DescriptorTableSetter>& setters, std::vector<std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE>> gpu_handles_cbuffers)
+	{
+		setters.push_back([gpu_handles_cbuffers](CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int backBufferIndex, unsigned int& slot)
+			{
+				for (auto gpu_xhandle : gpu_handles_cbuffers) {
+					commandList->SetGraphicsRootDescriptorTable(slot, gpu_xhandle[backBufferIndex]);
+					slot++;
+				}
+			});
+	};
+
+	void Renderable::SetCameraConstantsBufferDescriptorTable(std::vector<DescriptorTableSetter>& setters, std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_camera, ShaderInstance* vertexShader_ins, ShaderInstance* pixelShader_ins)
+	{
+		if (!gpu_handles_camera.empty() && (vertexShader_ins->CBV.camera != -1 || pixelShader_ins->CBV.camera != -1)) {
+			setters.push_back([gpu_handles_camera](
+				CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int backBufferIndex, unsigned int& slot)
+				{
+					commandList->SetGraphicsRootDescriptorTable(slot++, gpu_handles_camera[backBufferIndex]);
+				});
+		}
+	};
+
+	void Renderable::SetLightsConstantsBufferDescriptorTable(std::vector<DescriptorTableSetter>& setters, std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_lights, ShaderInstance* vertexShader_ins, ShaderInstance* pixelShader_ins)
+	{
+		if (vertexShader_ins->CBV.light != -1 || pixelShader_ins->CBV.light != -1) {
+			setters.push_back([gpu_handles_lights](
+				CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int backBufferIndex, unsigned int& slot)
+				{
+					commandList->SetGraphicsRootDescriptorTable(slot++, gpu_handles_lights[backBufferIndex]);
+				});
+		}
+	};
+
+	void Renderable::SetShadowMapsConstantsBufferDescriptorTable(std::vector<DescriptorTableSetter>& setters, Camera* camera, std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_shadowMaps, ShaderInstance* vertexShader_ins, ShaderInstance* pixelShader_ins)
+	{
+		if (vertexShader_ins->CBV.lightsShadowMap != -1 || pixelShader_ins->CBV.lightsShadowMap != -1) {
+			setters.push_back([camera, gpu_handles_shadowMaps](
+				CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int backBufferIndex, unsigned int& slot)
+				{
+					if (camera->SceneHasShadowMaps())
+						commandList->SetGraphicsRootDescriptorTable(slot, gpu_handles_shadowMaps[backBufferIndex]);
+					slot++;
+				});
+		}
+	};
+
+	void Renderable::SetSkinningConstantsBufferDescriptorTable(std::vector<DescriptorTableSetter>& setters, std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_skinning, ShaderInstance* vertexShader_ins, ShaderInstance* pixelShader_ins)
+	{
+		if (vertexShader_ins->CBV.animation != -1 || pixelShader_ins->CBV.animation != -1) {
+			setters.push_back([gpu_handles_skinning](CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int backBufferIndex, unsigned int& slot)
+				{
+					if (!gpu_handles_skinning.empty())
+						commandList->SetGraphicsRootDescriptorTable(slot, gpu_handles_skinning[backBufferIndex]);
+					slot++;
+				});
+		}
+	};
+
+	void Renderable::SetUAVRootDescriptorTable(std::vector<DescriptorTableSetter>& setters, std::map<unsigned int, ::CD3DX12_GPU_DESCRIPTOR_HANDLE> uav, ShaderInstance* pixelShader_ins)
+	{
+		setters.push_back([uav, pixelShader_ins](CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int backBufferIndex, unsigned int& slot)
+			{
+
+				for (auto& [name, uavParam] : pixelShader_ins->uavParameters)
+				{
+					if (uav.contains(uavParam.registerId))
+					{
+						commandList->SetGraphicsRootDescriptorTable(slot, uav.at(uavParam.registerId));
+						slot++;
+					}
+				}
+			});
+	};
+
+	void Renderable::SetIBLRootDescriptorTable(std::vector<DescriptorTableSetter>& setters, ShaderInstance* vertexShader_ins, ShaderInstance* pixelShader_ins, CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_iblIrradiance, CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_iblPrefiteredEnv, CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_iblBRDFLUT)
+	{
+		if ((
+			vertexShader_ins->SRV.iblIrradiance != -1 &&
+			vertexShader_ins->SRV.iblPrefiteredEnv != -1 &&
+			vertexShader_ins->SRV.iblBRDFLUT != -1
+			) ||
+			(
+				pixelShader_ins->SRV.iblIrradiance != -1 &&
+				pixelShader_ins->SRV.iblPrefiteredEnv != -1 &&
+				pixelShader_ins->SRV.iblBRDFLUT != -1)
+			)
+		{
+			setters.push_back([gpu_handle_iblIrradiance, gpu_handle_iblPrefiteredEnv, gpu_handle_iblBRDFLUT](CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int backBufferIndex, unsigned int& slot)
+				{
+					commandList->SetGraphicsRootDescriptorTable(slot++, gpu_handle_iblIrradiance);
+					commandList->SetGraphicsRootDescriptorTable(slot++, gpu_handle_iblPrefiteredEnv);
+					commandList->SetGraphicsRootDescriptorTable(slot++, gpu_handle_iblBRDFLUT);
+				});
+
+		}
+	};
+
+	void Renderable::SetSRVRootDescriptorTable(std::vector<DescriptorTableSetter>& setters, std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_srv)
+	{
+		setters.push_back([gpu_handles_srv](CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int backBufferIndex, unsigned int& slot)
+			{
+				for (CD3DX12_GPU_DESCRIPTOR_HANDLE handle : gpu_handles_srv)
+				{
+					commandList->SetGraphicsRootDescriptorTable(slot++, handle);
+				}
+			}
+		);
+	};
+
+	void Renderable::SetShadowMapsSRVDescriptorTable(std::vector<DescriptorTableSetter>& setters, Camera* camera, ShaderInstance* vertexShader_ins, ShaderInstance* pixelShader_ins, CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_srv_shadowMap)
+	{
+		if (vertexShader_ins->SRV.lightsShadowMap != -1 || pixelShader_ins->SRV.lightsShadowMap != -1) {
+			setters.push_back([camera, gpu_handle_srv_shadowMap](
+				CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int backBufferIndex, unsigned int& slot)
+				{
+					if (camera->SceneHasShadowMaps())
+						return commandList->SetGraphicsRootDescriptorTable(slot, gpu_handle_srv_shadowMap);
+					slot++;
+				}
+			);
+		}
+	};
 
 	void Renderable::CreateBoundingBox()
 	{
@@ -886,7 +1220,7 @@ namespace Scene
 		forceAnimation = false;
 		lastAnimationTime = animationTime();
 
-			animationStepLock->wait(true);
+		animationStepLock->wait(true);
 		animationStepLock->store(true);
 		animationStepLock->notify_one();
 	}
@@ -993,6 +1327,8 @@ namespace Scene
 
 		if (!RenderReady() || markedForDelete || !visible() || !materials.contains(renderPass) || renderException) return;
 
+		std::tuple<CameraID, RenderPassInstanceID> key = std::make_tuple(camera, renderPass);
+
 		auto& scene = GetSceneUnit(unit);
 		unsigned int frame = scene->Frame();
 		auto& commandList = scene->GetCommandList();
@@ -1001,69 +1337,8 @@ namespace Scene
 		{
 			PIXScopedEvent(commandList.p, 0, name().c_str());
 #endif
-			auto& meshesMaterials = materials.at(renderPass);
 			auto& meshesRootSignatures = rootSignatures.at(renderPass);
 			auto& meshesPipelineStates = pipelineStates.at(renderPass);
-
-			auto setConstantsBuffersDescriptorTables = [&](auto& cbuffers, unsigned int& slot)
-				{
-					for (auto& cbuffer : cbuffers) {
-						cbuffer->SetRootDescriptorTable(commandList, slot, frame);
-					}
-				};
-			auto setCameraConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
-				{
-					if (!camera.empty() && material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->CBV.camera; })) {
-						camera->cameraCb->SetRootDescriptorTable(commandList, slot, frame);
-					}
-				};
-			auto setLightsConstantsBufferDescriptorTable = [&](MaterialInstanceID material, unsigned int& slot)
-				{
-					if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->CBV.light; })) {
-						camera->GetLightsConstantsBuffer()->SetRootDescriptorTable(commandList, slot, frame);
-					}
-				};
-			auto setShadowMapsConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
-				{
-					if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->CBV.lightsShadowMap; })) {
-						if (camera->SceneHasShadowMaps())
-							return camera->GetShadowMapsConstantsBuffer()->SetRootDescriptorTable(commandList, slot, frame);
-						slot++;
-					}
-				};
-			auto setSkinningConstantsBufferDescriptorTable = [&](auto& material, unsigned int& slot)
-				{
-					if (material->ShaderInstanceHasRegister([this](ShaderInstanceID binary) { return binary->CBV.animation; })) {
-						if (!animable.empty())
-							return GetAnimatedConstantsBuffer(SUuuid())->SetRootDescriptorTable(commandList, slot, frame);
-						slot++;
-					}
-				};
-			auto setUAVRootDescriptorTable = [&](auto& material, unsigned int& slot)
-				{
-					material->SetUAVRootDescriptorTable(commandList, slot);
-				};
-			auto setIBLRootDescriptorTable = [&](auto& material, unsigned int& slot)
-				{
-					if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return
-						(binary->SRV.iblIrradiance == -1 || binary->SRV.iblPrefiteredEnv == -1 || binary->SRV.iblBRDFLUT == -1) ? -1 : 1; })
-						)
-					{
-						camera->SetIBLRootDescriptorTables(commandList, slot);
-					}
-				};
-			auto setSRVRootDescriptorTable = [&](auto& material, unsigned int& slot)
-				{
-					material->SetSRVRootDescriptorTable(commandList, slot);
-				};
-			auto setShadowMapsSRVDescriptorTable = [&](auto& material, unsigned int& slot)
-				{
-					if (material->ShaderInstanceHasRegister([](ShaderInstanceID binary) { return binary->SRV.lightsShadowMap; })) {
-						if (camera->SceneHasShadowMaps())
-							return commandList->SetGraphicsRootDescriptorTable(slot, GetShadowMapGpuDescriptorHandleStart(unit));
-						slot++;
-					}
-				};
 
 			for (unsigned int i = 0; i < meshes.size(); i++)
 			{
@@ -1073,19 +1348,11 @@ namespace Scene
 				commandList->SetGraphicsRootSignature(meshesRootSignatures.at(i));
 				commandList->SetPipelineState(meshesPipelineStates.at(i));
 
-				auto& material = meshesMaterials.at(i);
-				auto& cbuffers = constantsBuffers.at(renderPass).at(i);
 				unsigned int slot = 0U;
-
-				setConstantsBuffersDescriptorTables(cbuffers, slot);
-				setCameraConstantsBufferDescriptorTable(material, slot);
-				setLightsConstantsBufferDescriptorTable(material, slot);
-				setShadowMapsConstantsBufferDescriptorTable(material, slot);
-				setSkinningConstantsBufferDescriptorTable(material, slot);
-				setUAVRootDescriptorTable(material, slot);
-				setIBLRootDescriptorTable(material, slot);
-				setSRVRootDescriptorTable(material, slot);
-				setShadowMapsSRVDescriptorTable(material, slot);
+				for (auto& setter : descriptorsRenders.at(key).at(i))
+				{
+					setter(commandList, frame, slot);
+				}
 
 				auto& mesh = meshes.at(i);
 				commandList->IASetVertexBuffers(0, 1, &mesh->vbvData.vertexBufferView);

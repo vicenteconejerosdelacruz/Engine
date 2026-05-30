@@ -11,11 +11,13 @@
 #include <PhysicObject.h>
 #include <NoV8.h>
 
-typedef std::vector<MeshInstanceID> RenderableMeshes;
-typedef std::unordered_map<RenderPassInstanceID, std::vector<MaterialInstanceID>> RenderableMaterials; //RenderPassInstanceID -> MaterialInstanceID
-typedef std::unordered_map<RenderPassInstanceID, std::vector<std::vector<ConstantsBufferID>>> RenderableConstantsBuffer; //RenderPassUUID -> vector:vector:ConstantsBufferID
-typedef std::unordered_map<RenderPassInstanceID, std::vector<CComPtr<ID3D12RootSignature>>> RenderableRootSignatures; //RenderPassUUID -> vector:RootSignature
-typedef std::unordered_map<RenderPassInstanceID, std::vector<CComPtr<ID3D12PipelineState>>> RenderablePipelineStates; //RenderPassUUID -> vector:PipelineState
+using RenderableMeshes = std::vector<MeshInstanceID>;
+using RenderableMaterials = std::unordered_map<RenderPassInstanceID, std::vector<MaterialInstanceID>>; //RenderPassInstanceID -> MaterialInstanceID
+using RenderableConstantsBuffer = std::unordered_map<RenderPassInstanceID, std::vector<std::vector<ConstantsBufferID>>>; //RenderPassUUID -> vector:vector:ConstantsBufferID
+using RenderableRootSignatures = std::unordered_map<RenderPassInstanceID, std::vector<CComPtr<ID3D12RootSignature>>>; //RenderPassUUID -> vector:RootSignature
+using RenderablePipelineStates = std::unordered_map<RenderPassInstanceID, std::vector<CComPtr<ID3D12PipelineState>>>; //RenderPassUUID -> vector:PipelineState
+using DescriptorTableSetter = std::function<void(CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int backBufferIndex, unsigned int& slot)>;
+using DescriptorTableRender = std::map<std::tuple<CameraID, RenderPassInstanceID>, std::vector<std::vector<DescriptorTableSetter>>>;
 
 static nlohmann::json defaultShadowMapShaderAttributes = { { "uniqueMaterialInstance", false }, { "castShadows",false }, { "ibl", false} };
 #if defined(_EDITOR)
@@ -129,6 +131,21 @@ namespace Scene
 		void CreateRenderPassPipelineStates(RenderPassInstanceID rp);
 		void DestroyPipelineStates(CameraID cam);
 		void DestroyRenderPassPipelineStates(RenderPassInstanceID rp);
+		//Render Methods
+		void CreateRenderMethods(CameraID cam);
+		std::vector<std::vector<DescriptorTableSetter>> CreateRenderPassRenderMethods(CameraID cam, RenderPassInstanceID rp);
+#if defined(_EDITOR)
+		std::vector<std::vector<DescriptorTableSetter>> CreateEditorCameraRenderPassRenderMethods(CameraID edCam, CameraID cam, RenderPassInstanceID rp);
+#endif
+		void SetConstantsBuffersDescriptorTables(std::vector<DescriptorTableSetter>& setters, std::vector<std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE>> gpu_handles_cbuffers);
+		void SetCameraConstantsBufferDescriptorTable(std::vector<DescriptorTableSetter>& setters, std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_camera, ShaderInstance* vertexShader_ins, ShaderInstance* pixelShader_ins);
+		void SetLightsConstantsBufferDescriptorTable(std::vector<DescriptorTableSetter>& setters, std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_lights, ShaderInstance* vertexShader_ins, ShaderInstance* pixelShader_ins);
+		void SetShadowMapsConstantsBufferDescriptorTable(std::vector<DescriptorTableSetter>& setters, Camera* camera, std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_shadowMaps, ShaderInstance* vertexShader_ins, ShaderInstance* pixelShader_ins);
+		void SetSkinningConstantsBufferDescriptorTable(std::vector<DescriptorTableSetter>& setters, std::vector<::CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_skinning, ShaderInstance* vertexShader_ins, ShaderInstance* pixelShader_ins);
+		void SetUAVRootDescriptorTable(std::vector<DescriptorTableSetter>& setters, std::map<unsigned int, ::CD3DX12_GPU_DESCRIPTOR_HANDLE> uav, ShaderInstance* pixelShader_ins);
+		void SetIBLRootDescriptorTable(std::vector<DescriptorTableSetter>& setters, ShaderInstance* vertexShader_ins, ShaderInstance* pixelShader_ins, CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_iblIrradiance, CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_iblPrefiteredEnv, CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_iblBRDFLUT);
+		void SetSRVRootDescriptorTable(std::vector<DescriptorTableSetter>& setters, std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> gpu_handles_srv);
+		void SetShadowMapsSRVDescriptorTable(std::vector<DescriptorTableSetter>& setters, Camera* camera, ShaderInstance* vertexShader_ins, ShaderInstance* pixelShader_ins, CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_handle_srv_shadowMap);
 
 		void CreateBoundingBox();
 		bool HasBoundingBoxComputed();
@@ -184,6 +201,7 @@ namespace Scene
 		RenderableConstantsBuffer constantsBuffers;
 		std::unique_ptr<std::atomic_bool> constantsBuffersLock[JRenderer::numFrames];
 		std::unordered_map<std::string, std::vector<ConstantsBufferWritter>> constantsWriter;
+		DescriptorTableRender descriptorsRenders;
 		RenderableRootSignatures rootSignatures;
 		RenderablePipelineStates pipelineStates;
 		//Animations
