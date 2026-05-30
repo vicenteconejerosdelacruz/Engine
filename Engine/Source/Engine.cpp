@@ -429,6 +429,10 @@ void AppStep()
 		return ResizeWindow();
 	}
 
+#if defined(_DEVELOPMENT)
+	PIXScopedEvent(0, L"AppStep");
+#endif
+
 	SceneUnitsStep();
 	UpdateAudio();
 	timer.Tick([&]()

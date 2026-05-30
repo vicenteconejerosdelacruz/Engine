@@ -284,6 +284,9 @@ namespace Scene
 
 	void SceneUnitsStep()
 	{
+#if defined(_DEVELOPMENT)
+		PIXScopedEvent(0, L"SceneUnitsStep");
+#endif
 		std::set<SceneUnitId> scenesToDelete;
 		for (auto& [unit, scene] : scenesUnits)
 		{
@@ -685,9 +688,8 @@ namespace Scene
 			if (scene->MarkedForDelete()) continue;
 
 #if defined(_DEVELOPMENT)
-			auto& commandList = scene->GetCommandList();
 			std::string sceneObjectsStepEvent = "SceneObjectsStep:" + std::to_string(unit);
-			PIXScopedEvent(commandList.p, 0, nostd::StringToWString(sceneObjectsStepEvent).c_str());
+			PIXScopedEvent(0, nostd::StringToWString(sceneObjectsStepEvent).c_str());
 #endif
 			float dt = static_cast<FLOAT>(timer.GetElapsedSeconds());
 #if defined(_EDITOR)
@@ -710,14 +712,15 @@ namespace Scene
 	void WriteConstantsBuffers(SceneUnitId id)
 	{
 		auto& scene = GetSceneUnit(id);
+		unsigned int frame = scene->Frame();
 
 		for (JUUID uuid : GetRenderables(id))
 		{
 			RenderableID r = MAKESUUUID(id, uuid);
 			if (!r->RenderReady()) continue;
 
-			r->WriteAnimationConstantsBuffer(scene->Frame());
-			r->WriteConstantsBuffer(scene->Frame());
+			r->WriteAnimationConstantsBuffer(frame);
+			r->WriteConstantsBuffer(frame);
 		}
 
 		//write the constants buffers of the cameras which renders shadow maps
@@ -726,8 +729,8 @@ namespace Scene
 			CameraID c = MAKESUUUID(id, uuid);
 			if (!c->RenderReady() || !c->shadowMapLight().empty()) continue;
 
-			c->WriteLightsConstantsBuffer(scene->Frame());
-			c->WriteShadowMapsConstantsBuffer(scene->Frame());
+			c->WriteLightsConstantsBuffer(frame);
+			c->WriteShadowMapsConstantsBuffer(frame);
 		}
 	}
 
@@ -889,6 +892,9 @@ namespace Scene
 #if defined(_EDITOR)
 		using namespace Editor;
 		UpdateBillboards();
+#endif
+#if defined(_DEVELOPMENT)
+		PIXScopedEvent(0, L"SceneRender");
 #endif
 		for (auto& [id, scene] : scenesUnits)
 		{

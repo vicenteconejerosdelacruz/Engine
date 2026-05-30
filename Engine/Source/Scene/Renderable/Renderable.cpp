@@ -69,7 +69,10 @@ namespace Scene
 		lifecycleState->store(false);
 		RENAME_ON_DELETION(Renderable);
 		animationStepLock = std::make_unique<std::atomic_bool>(false);
-		constantsBuffersLock = std::make_unique<std::atomic_bool>(false);
+		for (unsigned int i = 0; i < JRenderer::numFrames; i++)
+		{
+			constantsBuffersLock[i] = std::make_unique<std::atomic_bool>(false);
+	}
 	}
 
 	void Renderable::create_rotation(XMFLOAT3 v)
@@ -398,31 +401,8 @@ namespace Scene
 				matUUID = GetMaterialUUIDByName(fallbackMaterialName); //fallback
 			}
 			materials[pass].push_back(pass->GetRenderPassMaterialInstance(unit, matUUID, mesh, shadowed(), mpmo, uuid()));
-
-			/*
-			std::vector<MeshMaterial> rmm = meshMaterials();
-			std::vector<MeshMaterial> mm;
-			std::copy_if(rmm.begin(), rmm.end(), std::back_inserter(mm), [](const MeshMaterial& mm)
-				{
-					return mm.mesh != "" && mm.materialUUID != "";
 				}
-			);
-
-			for (unsigned i = 0; i < mm.size(); i++)
-			{
-				std::vector<PassMaterialOverride> mpmo;
-				std::copy_if(pmo.begin(), pmo.end(), std::back_inserter(mpmo), [i](PassMaterialOverride& o) { return o.meshIndex == i; });
-				auto& mesh = meshes.at(i);
-				JUUID matUUID = mm.at(i).materialUUID;
-				if (!MaterialTemplateExist(matUUID))
-				{
-					matUUID = GetMaterialUUIDByName(fallbackMaterialName); //fallback
 				}
-				materials[pass].push_back(pass->GetRenderPassMaterialInstance(id, matUUID, mesh, shadowed(), mpmo, uuid()));
-			}
-			*/
-		}
-	}
 
 	void Renderable::DestroyMaterialsInstances(CameraID cam)
 	{
@@ -447,8 +427,6 @@ namespace Scene
 
 	void Renderable::CreateConstantsBuffersInstances(CameraID cam)
 	{
-
-
 		for (auto& rp : GetCameraRenderPasses(cam))
 		{
 			CreateRenderPassConstantsBuffersInstances(rp);
@@ -457,15 +435,27 @@ namespace Scene
 
 	void Renderable::CreateRenderPassConstantsBuffersInstances(RenderPassInstanceID pass)
 	{
-		if (constantsBuffersLock->load() == true)
-			constantsBuffersLock->wait(true);
+		//wait until every lock is free
+		for (unsigned int i = 0; i < JRenderer::numFrames; i++)
+		{
+			if (constantsBuffersLock[i]->load() == true)
+				constantsBuffersLock[i]->wait(true);
+		}
 
-		constantsBuffersLock->store(true);
+		//mark every lock as being worked
+		for (unsigned int i = 0; i < JRenderer::numFrames; i++)
+		{
+			constantsBuffersLock[i]->store(true);
+		}
 
+		//if the constants buffer exists wew restore the non-working state and notify each of the locks and return
 		if (constantsBuffers.contains(pass))
 		{
-			constantsBuffersLock->store(false);
-			constantsBuffersLock->notify_one();
+			for (unsigned int i = 0; i < JRenderer::numFrames; i++)
+			{
+				constantsBuffersLock[i]->store(false);
+				constantsBuffersLock[i]->notify_one();
+			}
 			return;
 		}
 
@@ -485,24 +475,100 @@ namespace Scene
 				constantsBuffers[pass][i].push_back(cbuffer);
 			}
 		}
-		constantsBuffersLock->store(false);
-		constantsBuffersLock->notify_one();
+
+		auto createConstantWriter = [this](DeviceUtils::ConstantsBufferID& cbuffer, size_t cbOffset, size_t cbSize)
+			{
+				auto* cbuffer_ptr = (*cbuffer).get();
+				unsigned int alignedConstantBufferSize = cbuffer_ptr->alignedConstantBufferSize;
+				byte* mappedConstantBuffer = cbuffer_ptr->mappedConstantBuffer;
+
+				return [this, cbuffer, cbOffset, cbSize, alignedConstantBufferSize, mappedConstantBuffer
+				](void* data, unsigned int backbufferIndex, size_t offset, size_t slot)
+					{
+						std::unique_ptr<std::atomic_bool>& lock = constantsBuffersLock[backbufferIndex];
+
+						//if current value is true(work is in progress), wait until the change from true notification happens
+						if (lock->load() == true)
+							lock->wait(true);
+
+						//store as true(work is in progress) without triggering a notification
+						lock->store(true);
+
+						size_t offsetInMemory = alignedConstantBufferSize * backbufferIndex;
+						offsetInMemory += cbOffset + cbSize * slot + offset;
+						memcpy(mappedConstantBuffer + offsetInMemory, data, cbSize);
+
+						//store a false freeing the work queue and notify other locks with notify_one to process just one
+						lock->store(false);
+						lock->notify_one();
+
+						return cbOffset + cbSize;
+					};
+			};
+
+
+		if (constantsBuffers.contains(pass))
+		{
+			auto& cbufferPass = constantsBuffers.at(pass);
+			auto& meshMaterials = materials.at(pass);
+			for (unsigned int mesh = 0; mesh < meshMaterials.size(); mesh++)
+			{
+				auto& vsVars = meshMaterials.at(mesh)->vertexShaderInstanceID->constantsBuffersVariables;
+				auto& psVars = meshMaterials.at(mesh)->pixelShaderInstanceID->constantsBuffersVariables;
+				auto& cbuffers = cbufferPass.at(mesh);
+				std::vector<std::string> vsConstants = nostd::GetKeysFromMap(vsVars);
+				std::vector<std::string> psConstants = nostd::GetKeysFromMap(psVars);
+
+				for (auto& constantName : vsConstants)
+				{
+					auto& vsVar = vsVars.at(constantName);
+					if (cbuffers.size() <= vsVar.bufferIndex)
+						continue;
+
+					constantsWriter[constantName].push_back(createConstantWriter(cbuffers[vsVar.bufferIndex], vsVar.offset, vsVar.size));
+	}
+				for (auto& constantName : psConstants)
+				{
+					auto& psVar = psVars.at(constantName);
+					if (cbuffers.size() <= psVar.bufferIndex)
+						continue;
+
+					constantsWriter[constantName].push_back(createConstantWriter(cbuffers[psVar.bufferIndex], psVar.offset, psVar.size));
+				}
+			}
+		}
+
+		//same here but now the constant buffer has already been created
+		for (unsigned int i = 0; i < JRenderer::numFrames; i++)
+		{
+			constantsBuffersLock[i]->store(false);
+			constantsBuffersLock[i]->notify_one();
+		}
 	}
 
 	void Renderable::DestroyConstantsBuffersInstances(CameraID cam)
 	{
-		if (constantsBuffersLock->load() == true)
-			constantsBuffersLock->wait(true);
+		for (unsigned int i = 0; i < JRenderer::numFrames; i++)
+		{
+			if (constantsBuffersLock[i]->load() == true)
+				constantsBuffersLock[i]->wait(true);
+		}
 
-		constantsBuffersLock->store(true);
+		for (unsigned int i = 0; i < JRenderer::numFrames; i++)
+		{
+			constantsBuffersLock[i]->store(true);
+		}
 
 		for (auto& rp : GetCameraRenderPasses(cam))
 		{
 			DestroyRenderPassConstantsBuffersInstances(rp);
 		}
 
-		constantsBuffersLock->store(false);
-		constantsBuffersLock->notify_one();
+		for (unsigned int i = 0; i < JRenderer::numFrames; i++)
+		{
+			constantsBuffersLock[i]->store(false);
+			constantsBuffersLock[i]->notify_one();
+	}
 	}
 
 	void Renderable::DestroyRenderPassConstantsBuffersInstances(RenderPassInstanceID pass)
@@ -691,6 +757,15 @@ namespace Scene
 		}
 	}
 
+	void Renderable::WriteConstantsBuffer(std::string constantName, void* data, unsigned int backbufferIndex, unsigned int slot, size_t offset)
+	{
+		auto& writers = constantsWriter.at(constantName);
+		for (auto& writer : writers)
+		{
+			writer(data, backbufferIndex, offset, slot);
+		}
+	}
+
 	void Renderable::WriteAnimationConstantsBuffer(unsigned int frame)
 	{
 		if (animable.empty()) return;
@@ -702,7 +777,7 @@ namespace Scene
 	void Renderable::WriteConstantsBuffer(unsigned int frame)
 	{
 		XMMATRIX w = world();
-		WriteConstantsBuffer("world", w, frame);
+		WriteConstantsBuffer("world", &w, frame);
 	}
 
 	//Animation
@@ -811,18 +886,9 @@ namespace Scene
 		forceAnimation = false;
 		lastAnimationTime = animationTime();
 
-		animationStepLock->wait(true);
-		animationStepLock->store(true);
-		animationStepLock->notify_one();
-
-		/*
-		if (animationStepLock->load() == true)
 			animationStepLock->wait(true);
 		animationStepLock->store(true);
-		TraverseMultiplycationQueue(animationTime(), animation(), animations, bonesTransformation, sequenceBoneTransformations, globalNodeTransforms);
-		animationStepLock->store(false);
 		animationStepLock->notify_one();
-		*/
 	}
 
 	std::tuple<XMMATRIX, XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> Renderable::GetBoneTransformation(std::string bone)

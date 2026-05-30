@@ -929,9 +929,9 @@ namespace Physics
 		XMFLOAT3 baseColor = { rgba.x,rgba.y,rgba.z };
 		XMFLOAT3 lineBaseColor = baseColor * 1.3f;
 		float alpha = rgba.w;
-		renderableShape->WriteConstantsBuffer("baseColor", baseColor, frame);
-		renderableShape->WriteConstantsBuffer("alpha", alpha, frame);
-		renderableLines->WriteConstantsBuffer("baseColor", lineBaseColor, frame);
+		renderableShape->WriteConstantsBuffer("baseColor", &baseColor, frame);
+		renderableShape->WriteConstantsBuffer("alpha", &alpha, frame);
+		renderableLines->WriteConstantsBuffer("baseColor", &lineBaseColor, frame);
 	}
 
 	void PhysicObject::CreateRenderableStatic()
@@ -1515,6 +1515,5 @@ namespace Physics
 			characterHitSubscriber.at(destObject)(filterData);
 	}
 	void CreatePhysicObjectMemberFunctionTemplates(Isolate* isolate, SceneUnitId id)
-	{
-	}
+	{}
 };

@@ -15,6 +15,8 @@ namespace DeviceUtils
 	inline static const std::string ShadowMapConstantBufferName = "shadowMaps";
 	inline static const std::string AnimationConstantBufferName = "animation";
 
+	using ConstantsBufferWritter = std::function<size_t(void* data, unsigned int backbufferIndex, size_t offset, size_t slot)>;
+
 	struct ConstantsBuffer {
 		ConstantsBuffer(size_t size, std::string name) : alignedConstantBufferSize((size + 255) & ~255), name(name) {}
 		~ConstantsBuffer() { Destroy(); }

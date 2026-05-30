@@ -376,7 +376,7 @@ namespace Scene
 
 		XMFLOAT3 baseColor = color();
 		renderable->position(position());
-		renderable->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
+		renderable->WriteConstantsBuffer("baseColor", &baseColor, scene->Frame());
 		renderable->WriteConstantsBuffer(scene->Frame());
 	}
 

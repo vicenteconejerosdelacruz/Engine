@@ -135,45 +135,7 @@ namespace Scene
 		BoundingBox GetBoundingBox();
 
 		void WriteMaterialVariablesToConstantsBufferSpace(MaterialInstanceID material, ConstantsBufferID cbvData, unsigned int cbvFrameIndex);
-		template<typename T>
-		void WriteConstantsBuffer(std::string constantName, T& data, unsigned int backbufferIndex, unsigned int slot = 0U, size_t offset = 0ULL)
-		{
-			if (constantsBuffersLock->load() == true)
-				constantsBuffersLock->wait(true);
-
-			constantsBuffersLock->store(true);
-
-			for (auto& [rp, meshMaterials] : materials)
-			{
-				if (!constantsBuffers.contains(rp))
-					continue;
-
-				for (unsigned int mesh = 0; mesh < meshMaterials.size(); mesh++)
-				{
-					auto& vsVars = meshMaterials.at(mesh)->vertexShaderInstanceID->constantsBuffersVariables;
-					auto& psVars = meshMaterials.at(mesh)->pixelShaderInstanceID->constantsBuffersVariables;
-					auto& cbuffers = constantsBuffers.at(rp).at(mesh);
-
-					if (vsVars.contains(constantName)) {
-						auto& vsVar = vsVars.at(constantName);
-						if (cbuffers.size() > vsVar.bufferIndex)
-						{
-							cbuffers[vsVar.bufferIndex]->push<T>(data, backbufferIndex, vsVar.offset + vsVar.size * slot + offset);
-						}
-					}
-					if (psVars.contains(constantName)) {
-						auto& psVar = psVars.at(constantName);
-						if (cbuffers.size() > psVar.bufferIndex)
-						{
-							cbuffers[psVar.bufferIndex]->push<T>(data, backbufferIndex, psVar.offset + psVar.size * slot + offset);
-						}
-					}
-				}
-			}
-
-			constantsBuffersLock->store(false);
-			constantsBuffersLock->notify_one();
-		};
+		void WriteConstantsBuffer(std::string constantName, void* data, unsigned int backbufferIndex, unsigned int slot = 0U, size_t offset = 0ULL);
 		void WriteAnimationConstantsBuffer(unsigned int frame);
 		void WriteConstantsBuffer(unsigned int frame);
 
@@ -220,7 +182,8 @@ namespace Scene
 		RenderableMeshes meshes;
 		RenderableMaterials materials;
 		RenderableConstantsBuffer constantsBuffers;
-		std::unique_ptr<std::atomic_bool> constantsBuffersLock;
+		std::unique_ptr<std::atomic_bool> constantsBuffersLock[JRenderer::numFrames];
+		std::unordered_map<std::string, std::vector<ConstantsBufferWritter>> constantsWriter;
 		RenderableRootSignatures rootSignatures;
 		RenderablePipelineStates pipelineStates;
 		//Animations

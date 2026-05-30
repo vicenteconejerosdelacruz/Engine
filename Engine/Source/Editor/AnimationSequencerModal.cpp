@@ -315,7 +315,7 @@ void AnimationSequencerModal::WriteFloorColorConstantsBuffer()
 	XMFLOAT3 baseColor = ToXMFLOAT3(floor->at("floorColor"));
 	for (unsigned int frame = 0U; frame < JRenderer::numFrames; frame++)
 	{
-		floor->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, frame);
+		floor->WriteConstantsBuffer("baseColor", &baseColor, frame);
 		floor->WriteConstantsBuffer(frame);
 	}
 }
@@ -338,10 +338,10 @@ void AnimationSequencerModal::SetTriggersAvatarColors()
 			XMFLOAT3 baseColor = { rgba.x,rgba.y,rgba.z };
 			XMFLOAT3 lineBaseColor = baseColor * 1.3f;
 			float alpha = rgba.w;
-			t->triggerRenderable->WriteConstantsBuffer("alpha", alpha, scene->Frame());
-			t->triggerRenderable->WriteConstantsBuffer("baseColor", baseColor, scene->Frame());
+			t->triggerRenderable->WriteConstantsBuffer("alpha", &alpha, scene->Frame());
+			t->triggerRenderable->WriteConstantsBuffer("baseColor", &baseColor, scene->Frame());
 			t->triggerRenderable->WriteConstantsBuffer(scene->Frame());
-			t->triggerLines->WriteConstantsBuffer("baseColor", lineBaseColor, scene->Frame());
+			t->triggerLines->WriteConstantsBuffer("baseColor", &lineBaseColor, scene->Frame());
 			t->triggerLines->WriteConstantsBuffer(scene->Frame());
 		}
 	}

@@ -900,7 +900,7 @@ namespace Editor
 			DrawPhysicsController();
 			DrawLevelsTabs();
 
-			if (false && !!currentSceneUnitId && !IsPlaying(currentSceneUnitId))
+			if (!!currentSceneUnitId && !IsPlaying(currentSceneUnitId))
 			{
 				DrawRightPanel();
 
@@ -2694,7 +2694,7 @@ namespace Editor
 							) continue;
 
 						//OutputDebugStringA(("RenderPickingPass:" + r->name() + ":" + std::to_string(objectId) + "\n").c_str());
-						r->WriteConstantsBuffer("objectId", objectId, backBufferIndex);
+						r->WriteConstantsBuffer("objectId", &objectId, backBufferIndex);
 						r->Render(id, mousePicking.pickingPass.at(id), camera);
 						objectId++;
 					}

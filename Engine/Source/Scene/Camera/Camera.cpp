@@ -1100,8 +1100,7 @@ namespace Scene
 	}
 
 	void Camera::DestroyEditorPreview()
-	{
-	}
+	{}
 
 	RenderableID Camera::CreateBillboard(CameraID camera)
 	{
@@ -1120,7 +1119,7 @@ namespace Scene
 
 		XMFLOAT3 baseColor = { 1.0f,1.0f,1.0f };
 		renderable->position(position());
-		renderable->WriteConstantsBuffer<XMFLOAT3>("baseColor", baseColor, scene->Frame());
+		renderable->WriteConstantsBuffer("baseColor", &baseColor, scene->Frame());
 		renderable->WriteConstantsBuffer(scene->Frame());
 	}
 

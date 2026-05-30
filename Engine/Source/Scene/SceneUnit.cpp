@@ -183,6 +183,10 @@ namespace Scene
 		using namespace Editor;
 #endif
 
+#if defined(_DEVELOPMENT)
+		std::string RenderEvent = "SceneUnit::Render(" + unitName + ")";
+		PIXScopedEvent(0, nostd::StringToWString(RenderEvent).c_str());
+#endif
 		if (renderer->GetBackBufferIndex() == Frame())
 		{
 
