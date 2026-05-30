@@ -700,12 +700,39 @@ namespace Scene
 #endif
 			TriggersStep(unit);
 			BoundariesStep(unit);
-			PhysicSceneStep(unit, dt);
 			SoundFXsStep(unit, dt);
 			RenderablesStep(unit, dt);
 			AnimableStep(unit, dt);
 			LightsStep(unit);
 			CamerasStep(unit);
+		}
+	}
+
+	void FetchPhysicsScenesResults(DX::StepTimer& timer)
+	{
+		for (auto& [unit, scene] : scenesUnits)
+		{
+			if (scene->MarkedForDelete()) continue;
+			float dt = static_cast<FLOAT>(timer.GetElapsedSeconds());
+#if defined(_EDITOR)
+			if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
+				dt = 0.0f;
+#endif
+			Physics::FetchPhysicsScenesResults(unit, dt);
+		}
+	}
+
+	void SimulatePhysicScenes(DX::StepTimer& timer)
+	{
+		for (auto& [unit, scene] : scenesUnits)
+		{
+			if (scene->MarkedForDelete()) continue;
+			float dt = static_cast<FLOAT>(timer.GetElapsedSeconds());
+#if defined(_EDITOR)
+			if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
+				dt = 0.0f;
+#endif
+			SimulatePhysicScenes(unit, dt);
 		}
 	}
 

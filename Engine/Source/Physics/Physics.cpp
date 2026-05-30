@@ -34,7 +34,7 @@ namespace Physics
 		gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, gPvd);
 		PxInitExtensions(*gPhysics, gPvd);
 
-		gDispatcher = PxDefaultCpuDispatcherCreate(2);
+		gDispatcher = PxDefaultCpuDispatcherCreate(4);
 
 		PxCudaContextManagerDesc cudaContextManagerDesc;
 		gCudaContextManager = PxCreateCudaContextManager(*gFoundation, cudaContextManagerDesc, PxGetProfilerCallback());
@@ -82,6 +82,8 @@ namespace Physics
 		return PxFilterFlag::eSUPPRESS;
 	}
 
+	//GPU
+	physx::PxGpuDynamicsMemoryConfig gpuConfig;
 	void CreatePhysicsScene(PhysicSceneID physicScene)
 	{
 		PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
@@ -91,13 +93,63 @@ namespace Physics
 		//sceneDesc.filterShader = PxDefaultSimulationFilterShader;
 		sceneDesc.filterShader = BitmaskFilterShader;
 		sceneDesc.cudaContextManager = gCudaContextManager;
-		sceneDesc.flags |= PxSceneFlag::eENABLE_GPU_DYNAMICS;
+		sceneDesc.flags |= PxSceneFlag::eENABLE_GPU_DYNAMICS | PxSceneFlag::eENABLE_PCM;
 		sceneDesc.broadPhaseType = PxBroadPhaseType::eGPU;
+
+		// Sube los límites iniciales para evitar que la GPU tenga que redimensionar en caliente
+		gpuConfig.tempBufferCapacity = 16 * 1024 * 1024 * 4; // Buffer temporal (64MB)
+		gpuConfig.heapCapacity = 64 * 1024 * 1024 * 4; // Heap de la GPU (256MB)
+		gpuConfig.maxRigidContactCount = 1024 * 64;            // Capacidad de contactos rígidos
+		gpuConfig.maxRigidPatchCount = 1024 * 16;
+		// Si tu simulación incluye colisiones complejas, puedes ajustar también:
+		gpuConfig.foundLostPairsCapacity = 1024 * 8;             // Pares nuevos/perdidos por frame
+		// 3. Asígnalo a la descripción de la escena
+		sceneDesc.gpuDynamicsConfig = gpuConfig;
+
 		physicScene->contactCallback = std::make_unique<ContactCallback>(physicScene);
 		sceneDesc.simulationEventCallback = physicScene->contactCallback.get();
 		physicScene->pxScene = gPhysics->createScene(sceneDesc);
 		physicScene->pxControllerManager = PxCreateControllerManager(*physicScene->pxScene);
 		physicScene->pxControllerManager->setOverlapRecoveryModule(true);
-		physicScene->pxControllerManager->setTessellation(true, 2.0f);
+		//physicScene->pxControllerManager->setTessellation(true, 2.0f);
 	}
+
+	//CPU
+	/*
+	void CreatePhysicsScene(PhysicSceneID physicScene)
+	{
+		PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
+		XMFLOAT3 gravity = physicScene->gravity();
+		sceneDesc.gravity = PxVec3(gravity.x, gravity.y, gravity.z);
+		sceneDesc.cpuDispatcher = gDispatcher;
+
+		sceneDesc.filterShader = BitmaskFilterShader;
+
+		// --- CAMBIOS PARA CPU ---
+		// 1. Quitamos la asignación del Cuda Context Manager
+		sceneDesc.cudaContextManager = nullptr;
+
+		// 2. Quitamos los flags de GPU (Aseguramos que no estén activos)
+		sceneDesc.flags &= ~PxSceneFlag::eENABLE_GPU_DYNAMICS;
+
+		// Opcional: eENABLE_PCM funciona en CPU, pero si quieres la simulación
+		// de CPU más tradicional/clásica, puedes quitarlo también:
+		// sceneDesc.flags &= ~PxSceneFlag::eENABLE_PCM;
+
+		// 3. Cambiamos el Broad Phase a uno de CPU.
+		// eSAP (Sweep-and-Prune) es el más común y robusto para escenas normales de CPU.
+		sceneDesc.broadPhaseType = PxBroadPhaseType::eSAP;
+
+		// 4. Ya no necesitas configurar ni asignar 'gpuConfig' porque la CPU
+		// gestiona su memoria a través del asignador normal (AllocatorCallback)
+		// --- FIN CAMBIOS PARA CPU ---
+
+		physicScene->contactCallback = std::make_unique<ContactCallback>(physicScene);
+		sceneDesc.simulationEventCallback = physicScene->contactCallback.get();
+
+		physicScene->pxScene = gPhysics->createScene(sceneDesc);
+		physicScene->pxControllerManager = PxCreateControllerManager(*physicScene->pxScene);
+		physicScene->pxControllerManager->setOverlapRecoveryModule(true);
+	}
+	*/
 };

@@ -132,18 +132,23 @@ namespace Scene
 		SceneObject::Destroy();
 	}
 
-	void PhysicSceneStep(SceneUnitId id, float step)
+	void FetchPhysicsScenesResults(SceneUnitId id, float step)
 	{
-		if (GetCountFromPhysicScenes(id) == 0ULL) return;
+		if (GetCountFromPhysicScenes(id) == 0ULL || step == 0.0f) return;
+
+		PhysicSceneID scene = MAKESUUUID(id, *GetPhysicScenes(id).begin());
+		scene->pxScene->fetchResults(true);
+		UpdateRenderablesFromGlobalPose(id);
+	}
+
+	void SimulatePhysicScenes(SceneUnitId id, float step)
+	{
+		if (GetCountFromPhysicScenes(id) == 0ULL || step == 0.0f) return;
 
 		UpdatePhysicObjects(id);
 
-		if (step == 0.0f) return;
-
 		PhysicSceneID scene = MAKESUUUID(id, *GetPhysicScenes(id).begin());
 		scene->pxScene->simulate(gameUpdateFrequency);
-		scene->pxScene->fetchResults(true);
-		UpdateRenderablesFromGlobalPose(id);
 	}
 
 	void DestroyPhysicScenes()

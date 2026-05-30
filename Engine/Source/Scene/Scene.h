@@ -146,6 +146,8 @@ namespace Scene
 	void UnbindFromScene(SceneUnitId id, JUUID uuidA);
 	void UnbindFromScene(SceneUnitId id, JUUID uuidA, JUUID uuidB);
 	void SceneObjectsStep(DX::StepTimer& timer);
+	void FetchPhysicsScenesResults(DX::StepTimer& timer);
+	void SimulatePhysicScenes(DX::StepTimer& timer);
 	void WriteConstantsBuffers(SceneUnitId id);
 	void RenderSceneShadowMaps(SceneUnitId id);
 	void RenderSceneCameras(SceneUnitId id);

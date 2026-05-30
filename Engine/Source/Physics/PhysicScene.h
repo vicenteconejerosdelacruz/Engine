@@ -83,7 +83,8 @@ namespace Scene
 #include <PhysicSceneAtt.h>
 #include <JEnd.h>
 
-	void PhysicSceneStep(SceneUnitId id, float step);
+	void FetchPhysicsScenesResults(SceneUnitId id, float step);
+	void SimulatePhysicScenes(SceneUnitId id, float step);
 	void DestroyPhysicScenes();
 	void DestroyPhysicScenes(SceneUnitId id);
 	void DeletePhysicScene(SceneUnitId id, JUUID uuid);

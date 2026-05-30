@@ -437,6 +437,7 @@ void AppStep()
 	UpdateAudio();
 	timer.Tick([&]()
 		{
+			FetchPhysicsScenesResults(timer);
 			TemplatesStep(timer);
 			GameStep();
 			SceneObjectsStep(timer);
@@ -448,6 +449,7 @@ void AppStep()
 	);
 	UIStep();
 	Render();
+	SimulatePhysicScenes(timer);
 	LoadingProcessorsStep();
 }
 
