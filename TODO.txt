@@ -1,14 +1,17 @@
--parametrizar las animaciones de los thugs
--Agregar woman thug
+-done:optimizar la asignacion de los constants buffers(CPU)
+-done:optimizar la asignacion de los descriptor tables(CPU)
+-hacer que el héroe pueda hacer swing desde el suelo
+-hacer que los objetos físicos y avatares de estos objetos se creen desde el hilo que creo los objetos base(self derivatives)
 -Tener 3 vidas
 -Hacer gameover si pierde
 -poder continuar con el game over
 -terminar nivel si todos los enemigos murieron
 -Hacer que el nivel tenga rondas de enemigo
-	-Thug_01
-	-mover izquierda
-	-Thug_02
-	->mover izquierda
-	-Thug_01 + Thug_02
-	->mover derecha
-	->Thug_01 + Thug_01 + Thug_02
+	-done:Thug_01
+	-done:mover izquierda
+	-done:Thug_02, Thug_03
+	-done:mover izquierda
+	-done:Thug_04 + Thug_05
+	-done:mover derecha
+	-done:Thug_01 + Thug_03 + Thug_04
+	-Boss
