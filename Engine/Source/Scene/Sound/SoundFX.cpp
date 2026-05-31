@@ -302,7 +302,6 @@ namespace Scene
 		if (!(instanceFlags() & SoundEffectInstance_Use3D)) return RenderableID();
 
 		RenderableID bb = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "SoundEffect", "SoundEffectPicking");
-		UpdateBillboard(bb);
 		bb->OnPick = [&] {Editor::SelectSoundEffect(SUuuid()); };
 		return bb;
 	}

@@ -2649,6 +2649,13 @@ namespace Editor
 		r->CreateRenderPassConstantsBuffersInstances(pass);
 		r->CreateRenderPassRootSignatures(pass);
 		r->CreateRenderPassPipelineStates(pass);
+
+		SceneUnitId id = r.unit();
+		CameraID edCam = editorCameraUUID.at(id);
+		CameraID cam = levelCameraUUID.at(id);
+		std::tuple<CameraID, RenderPassInstanceID> key = std::make_tuple(editorCameraUUID.at(id), pass);
+		std::vector<std::vector<DescriptorTableSetter>> setters = r->CreateEditorCameraRenderPassRenderMethods(edCam, cam, pass);
+		r->descriptorsRenders[key] = setters;
 	}
 
 	void UnbindRenderableFromPickingPass(RenderableID r)
@@ -2909,7 +2916,7 @@ namespace Editor
 
 		auto& reg = billboards.at(id).billboardRegistry;
 
-		CameraID camera = MAKESUUUID(id, *GetSwapChainCameras(id).begin());
+		CameraID camera = editorCameraUUID.at(id);
 
 		for (auto it = reg.begin(); it != reg.end(); it++)
 		{
@@ -2924,6 +2931,7 @@ namespace Editor
 				auto& bb = it->second;
 				bb->BindToScene();
 				BindRenderableToPickingPass(bb);
+				so->UpdateBillboard(bb);
 			}
 		}
 	}

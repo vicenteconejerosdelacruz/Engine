@@ -363,7 +363,6 @@ namespace Scene
 
 		RenderableID bb = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "LightBulb", "LightBulbPicking");
 		bb->OnPick = [&] { SelectLight(SUuuid()); };
-		UpdateBillboard(bb);
 		return bb;
 	}
 

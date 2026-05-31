@@ -10,6 +10,13 @@
 
 extern std::unique_ptr<JRenderer> renderer;
 
+#if defined(_EDITOR)
+namespace Editor
+{
+	extern std::unordered_map<SceneUnitId, CameraID> editorCameraUUID;
+}
+#endif
+
 namespace Scene
 {
 	extern void RenderSceneCameras(SceneUnitId id);
@@ -200,7 +207,8 @@ namespace Scene
 #if defined(_EDITOR)
 				if (GetCountFromSwapChainCameras(id) > 0)
 				{
-					CameraID camera = MAKESUUUID(id, (*GetSwapChainCameras(id).begin()));
+					using namespace Editor;
+					CameraID camera = editorCameraUUID.at(id);
 					RenderPickingPass(id, camera);
 				}
 #endif

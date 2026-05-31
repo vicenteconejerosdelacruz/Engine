@@ -213,14 +213,19 @@ namespace Scene::Level
 		if (!scene->IsIsolated())
 		{
 			CreatePickingPass(id);
-			CreateSceneUnitBoundingBox(id);
 			CreateSceneUnitEditorIndependentCamera(id);
-			CreateRegisteredBillboards(id);
 			CreateSceneUnitPhysicsController(id);
 		}
 #endif
 
 		BindSceneObjects(id);
+#if defined(_EDITOR)
+		if (!scene->IsIsolated())
+		{
+			CreateSceneUnitBoundingBox(id);
+			CreateRegisteredBillboards(id);
+		}
+#endif
 		CreatePhysicsObjectsBehaviors(id);
 		//leave this to last
 		MapControllers(id);

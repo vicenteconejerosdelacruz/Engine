@@ -1107,7 +1107,6 @@ namespace Scene
 	{
 		RenderableID bb = Editor::CreateBillboardFromMaterials(unit, camera, at("name"), "Camera", "CameraPicking");
 		bb->OnPick = [&] {Editor::SelectCamera(SUuuid()); };
-		UpdateBillboard(bb);
 		return bb;
 	}
 
