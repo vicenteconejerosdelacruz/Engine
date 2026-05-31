@@ -878,8 +878,7 @@ namespace Game::Brawler
 	}
 
 	void Venom::OnDeathAnimationEnd()
-	{
-	}
+	{}
 
 	static const std::set<VenomStates> fromWallSwingStates({ VS_WallIdle,VS_CrawlOnWall });
 	bool Venom::ShouldWallToSwing()
@@ -922,7 +921,7 @@ namespace Game::Brawler
 
 	void Venom::WallToSwing()
 	{
-		if (webTweenCreated == true)
+		if (webTweenCreated == true && RenderableSceneObjectExist(web))
 		{
 			float sclx = webTweens[0]->step();
 			float scly = webTweens[1]->step();
