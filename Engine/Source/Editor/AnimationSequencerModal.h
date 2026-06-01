@@ -114,6 +114,8 @@ struct AnimationSequencerModal
 	std::string selectedSequenceCloneName;
 
 	//player
+	float timerTime = 0.0f;
+	float timerPrevTimeDelta = 0.0f;
 	bool playingSequence = false;
 	float playingSequenceTime = 0.0f;
 	bool playingSequenceLoop = false;

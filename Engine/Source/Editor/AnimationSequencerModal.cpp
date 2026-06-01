@@ -92,6 +92,8 @@ void AnimationSequencerModal::Initialize(ImVec2 seqPos, ImVec2 seqSize, JUUID uu
 			bones = nostd::GetKeysFromMap(renderable->animable->animations->bonesOffsets);
 			bones.insert(bones.begin(), { "" });
 			WriteFloorColorConstantsBuffer();
+			timerTime = timer.GetElapsedSeconds();
+			timerPrevTimeDelta = 0.0f;
 			Step();
 			for (unsigned int frame = 0U; frame < JRenderer::numFrames; frame++)
 			{
@@ -352,10 +354,14 @@ void AnimationSequencerModal::SetPlayerSequenceFrame()
 	auto& scene = GetSceneUnit(unit);
 	Sequence& seq = sequencePlayer.sequence;
 
+	float newTime = timer.GetTotalSeconds();
+	timerPrevTimeDelta = newTime - timerTime;
+	timerTime = newTime;
+
 	if (playingSequence)
 	{
 		float totalTime = static_cast<float>(seq.totalFrames) / static_cast<float>(seq.framesPerSecond);
-		playingSequenceTime += static_cast<float>(timer.GetElapsedSeconds());
+		playingSequenceTime += static_cast<float>(timerPrevTimeDelta);
 		bool stopPlayer = false;
 
 		if (playingSequenceLoop)
