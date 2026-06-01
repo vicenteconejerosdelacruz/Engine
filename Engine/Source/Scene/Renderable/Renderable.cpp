@@ -718,7 +718,7 @@ namespace Scene
 #if defined(_EDITOR)
 		//this is a complete hack, but what the hell
 		using namespace Editor;
-		if (cam == levelCameraUUID.at(unit))
+		if (levelCameraUUID.contains(unit) && cam == levelCameraUUID.at(unit))
 		{
 			CameraID edCam = editorCameraUUID.at(unit);
 			for (auto& rp : GetCameraRenderPasses(cam))

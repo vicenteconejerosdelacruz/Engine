@@ -205,7 +205,7 @@ namespace Scene
 			ResetCommandList();
 			{
 #if defined(_EDITOR)
-				if (GetCountFromSwapChainCameras(id) > 0)
+				if (GetCountFromSwapChainCameras(id) > 0 && editorCameraUUID.contains(id))
 				{
 					using namespace Editor;
 					CameraID camera = editorCameraUUID.at(id);
