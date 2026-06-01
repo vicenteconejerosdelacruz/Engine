@@ -758,7 +758,7 @@ namespace Scene
 		for (JUUID uuid : GetRenderables(id))
 		{
 			RenderableID r = MAKESUUUID(id, uuid);
-			if (!r->RenderReady()) continue;
+			if (!RenderableSceneObjectExist(r) || !r->RenderReady()) continue;
 
 			r->WriteAnimationConstantsBuffer(frame);
 			r->WriteConstantsBuffer(frame);
