@@ -809,6 +809,8 @@ namespace Scene
 
 	void Camera::WriteConstantsBuffer(unsigned int frame)
 	{
+		if (!cameraCb) return;
+
 		CameraAttributes atts{};
 
 		atts.view = view();
