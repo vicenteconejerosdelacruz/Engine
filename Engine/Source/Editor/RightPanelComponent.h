@@ -39,7 +39,7 @@ struct RightPanelComponent
 
 	void BuildAssetsTree(auto GetObjects, auto GetPanelObject, std::string ignorePrefix = "")
 	{
-		if (assets.empty() || dirtyAssetsTree)
+		if (assets.empty() || (dirtyAssetsTree && selectedTab == detailAbleTabs.at(0)))
 		{
 			assets.clear();
 			assetsNames.clear();
@@ -208,7 +208,7 @@ struct RightPanelComponent
 		auto OnClearSelection
 	)
 	{
-		if (assets.empty() || dirtyAssetsTree)
+		if (assets.empty() || (dirtyAssetsTree && selectedTab == detailAbleTabs.at(0)))
 			return;
 
 		ImGui::BeginChild((panelName + "panel").c_str(), size, ImGuiChildFlags_None);
