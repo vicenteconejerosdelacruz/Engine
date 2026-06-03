@@ -194,7 +194,7 @@ namespace Scene
 		std::string RenderEvent = "SceneUnit::Render(" + unitName + ")";
 		PIXScopedEvent(0, nostd::StringToWString(RenderEvent).c_str());
 #endif
-		if (renderer->GetBackBufferIndex() == Frame())
+		if (commandsProcessor && renderer->GetBackBufferIndex() == Frame() && GetCountFromSwapChainCameras(id) > 0)
 		{
 
 #if defined(_EDITOR)
