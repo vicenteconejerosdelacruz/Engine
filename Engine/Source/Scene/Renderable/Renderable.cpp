@@ -1093,6 +1093,10 @@ namespace Scene
 
 	void Renderable::WriteConstantsBuffer(std::string constantName, void* data, unsigned int backbufferIndex, unsigned int slot, size_t offset)
 	{
+		if (constantsBuffersLock[backbufferIndex]->load() == true)
+			return;
+		if (!constantsWriter.contains(constantName))
+			return;
 		auto& writers = constantsWriter.at(constantName);
 		for (auto& writer : writers)
 		{
