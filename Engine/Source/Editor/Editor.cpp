@@ -960,7 +960,7 @@ namespace Editor
 
 	void WriteSceneUnitEditorPlayCameraConstantsBuffer(SceneUnitId id)
 	{
-		if (!levelCameraUUID.contains(id)) return;
+		if (!levelCameraUUID.contains(id) || !CameraSceneObjectExist(levelCameraUUID.at(id))) return;
 		auto& scene = GetSceneUnit(id);
 		levelCameraUUID[id]->WriteConstantsBuffer(scene->Frame());
 	}
