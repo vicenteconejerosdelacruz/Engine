@@ -6488,3 +6488,63 @@ JEdvEditorDrawerFunction DrawVector<ScriptBinding, jedv_t_vector>()
 			}
 		};
 }
+
+template<>
+JEdvEditorDrawerFunction DrawSet<int, jedv_t_skip_meshes>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			if (json.size() > 1ULL) return;
+
+			Renderable* r = (Renderable*)json.at(0);
+
+			auto toggle = [r](int index)
+				{
+					if (r->skipMeshes_contains(index))
+					{
+						r->skipMeshes_erase(index);
+					}
+					else
+					{
+						r->skipMeshes_insert(index);
+					}
+				};
+
+			ImGui::PushID(attribute.c_str());
+			if (ImGui::CollapsingHeader(attribute.c_str()))
+			{
+				std::string tableName = "tables-" + attribute + "-table";
+				if (ImGui::BeginTable(tableName.c_str(), 2, defaultTableFlags))
+				{
+					ImGui::TableSetupColumn("mesh", ImGuiTableColumnFlags_WidthFixed);
+					ImGui::TableSetupColumn("visible", ImGuiTableColumnFlags_WidthFixed);
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::TableHeader("mesh");
+					ImGui::TableSetColumnIndex(1);
+					ImGui::TableHeader("visible");
+
+					for (unsigned int i = 0; i < r->meshes.size(); i++)
+					{
+						ImGui::TableNextRow();
+						ImGui::PushID((std::string("Row-") + std::to_string(i)).c_str());
+						{
+							ImGui::TableSetColumnIndex(0);
+							ImGui::Text((std::string("mesh #") + std::to_string(i)).c_str());
+
+							ImGui::TableSetColumnIndex(1);
+							bool value = r->skipMeshes_contains(i);
+							if (ImGui::Checkbox("##", &value))
+							{
+								toggle(i);
+							}
+						}
+						ImGui::PopID();
+					}
+					ImGui::EndTable();
+				}
+			}
+			ImGui::PopID();
+		};
+}

@@ -22,7 +22,7 @@ JEXPOSE_TRANSFORM_CALLBACK(XMFLOAT3, rotation, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT
 JEXPOSE_TRANSFORM(XMFLOAT3, scale, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(1.0f, 1.0f, 1.0f), jedv_t_float3_f6, 1, false)
 JEXPOSE_TRANSFORM(XMFLOAT3, AABBCenter, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(0.0f, 0.0f, 0.0f), jedv_t_float3, 1, false)
 JEXPOSE_TRANSFORM(XMFLOAT3, AABBExtent, ToXMFLOAT3, FromXMFLOAT3, XMFLOAT3(1.0f, 1.0f, 1.0f), jedv_t_float3_f6, 1, false)
-JEXPOSE_SET(int, skipMeshes, {}, jedv_t_hidden, 0, false)
+JEXPOSE_SET(int, skipMeshes, {}, jedv_t_skip_meshes, 0, false)
 JEXPOSE_ENUM(D3D_PRIMITIVE_TOPOLOGY, topology, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, jedv_t_enum, 1, false)
 JEXPOSE(bool, uniqueMaterialInstance, false, jedv_t_boolean, 1, false)
 JEXPOSE(bool, visible, true, jedv_t_boolean, 0, false)

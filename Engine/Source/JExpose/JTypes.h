@@ -107,6 +107,7 @@ enum JsonToEditorValueType
 	jedv_t_controller_vector,
 	jedv_t_physic_object_vector,
 	jedv_t_physic_behavior,
+	jedv_t_skip_meshes,
 	jedv_draw_renderpass_vector,
 	jedv_draw_animator_sequencer,
 	jedv_cook_physx_mesh,

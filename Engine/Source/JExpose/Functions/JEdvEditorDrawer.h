@@ -13,6 +13,9 @@ inline JEdvEditorDrawerFunction DrawValue() { return nullptr; }
 template<typename T, JsonToEditorValueType J>
 inline JEdvEditorDrawerFunction DrawVector() { return nullptr; }
 
+template<typename T, JsonToEditorValueType J>
+inline JEdvEditorDrawerFunction DrawSet() { return nullptr; }
+
 template<typename Ta, typename Tb>
 inline JEdvEditorDrawerFunction DrawMap() { return nullptr; }
 
@@ -336,3 +339,6 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_script>();
 
 template<>
 JEdvEditorDrawerFunction DrawVector<ScriptBinding, jedv_t_vector>();
+
+template<>
+JEdvEditorDrawerFunction DrawSet<int, jedv_t_skip_meshes>();
