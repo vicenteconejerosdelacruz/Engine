@@ -201,6 +201,7 @@ namespace Editor
 	//Editor Camera
 	std::unordered_map<SceneUnitId, CameraID> levelCameraUUID;
 	std::unordered_map<SceneUnitId, CameraID> editorCameraUUID;
+	std::unordered_map<SceneUnitId, std::unique_ptr<std::atomic_bool>> editorCameraCreated;
 	//Billboards
 	std::unordered_map<SceneUnitId, BillboardRegistry> billboards;
 	//Physics Objects Draw
@@ -308,6 +309,7 @@ namespace Editor
 			//todo handle RTT cameras that does resolving
 			levelCameraUUID[id] = MAKESUUUID(id, *GetMouseCameras(id).begin());
 			editorCameraUUID[id] = MAKESUUUID(id, getUUID());
+			editorCameraCreated[id] = std::make_unique<std::atomic_bool>(true);
 
 			//this should be done and reversed later in the same function.
 			//the purpose is to allow to create the editor camera
@@ -347,6 +349,8 @@ namespace Editor
 		{
 
 		}
+		editorCameraCreated.at(id)->store(false);
+		editorCameraCreated.at(id)->notify_all();
 	}
 
 	CameraID GetLevelCamera(SceneUnitId id)
@@ -986,20 +990,26 @@ namespace Editor
 
 	void SwitchToSceneUnitEditorCamera(SceneUnitId id)
 	{
+		if (!editorCameraCreated.contains(id)) return;
+		if (editorCameraCreated.at(id)->load() == true)
+			editorCameraCreated.at(id)->wait(true);
 		if (!levelCameraUUID.contains(id) || !editorCameraUUID.contains(id)) return;
 
 		auto& scene = GetSceneUnit(id);
-		editorCameraUUID[id]->renderables = levelCameraUUID[id]->renderables;
-		editorCameraUUID[id]->iblTextures = levelCameraUUID[id]->iblTextures;
-		editorCameraUUID[id]->lightsCB = levelCameraUUID[id]->lightsCB;
-		editorCameraUUID[id]->lights = levelCameraUUID[id]->lights;
-		editorCameraUUID[id]->shadowMapsCB = levelCameraUUID[id]->shadowMapsCB;
-		editorCameraUUID[id]->lightsWithShadowMaps = levelCameraUUID[id]->lightsWithShadowMaps;
-		editorCameraUUID[id]->CopyProjection(levelCameraUUID[id]);
-		editorCameraUUID[id]->WriteLightsConstantsBuffer(scene->Frame());
-		editorCameraUUID[id]->WriteShadowMapsConstantsBuffer(scene->Frame());
-		editorCameraUUID[id]->RenderReady(true);
-		CopySceneUnitEditorCameraRenderPasses(id);
+		if (CameraSceneObjectExist(levelCameraUUID.at(id)) && CameraSceneObjectExist(editorCameraUUID.at(id)))
+		{
+			editorCameraUUID[id]->renderables = levelCameraUUID[id]->renderables;
+			editorCameraUUID[id]->iblTextures = levelCameraUUID[id]->iblTextures;
+			editorCameraUUID[id]->lightsCB = levelCameraUUID[id]->lightsCB;
+			editorCameraUUID[id]->lights = levelCameraUUID[id]->lights;
+			editorCameraUUID[id]->shadowMapsCB = levelCameraUUID[id]->shadowMapsCB;
+			editorCameraUUID[id]->lightsWithShadowMaps = levelCameraUUID[id]->lightsWithShadowMaps;
+			editorCameraUUID[id]->CopyProjection(levelCameraUUID[id]);
+			editorCameraUUID[id]->WriteLightsConstantsBuffer(scene->Frame());
+			editorCameraUUID[id]->WriteShadowMapsConstantsBuffer(scene->Frame());
+			editorCameraUUID[id]->RenderReady(true);
+			CopySceneUnitEditorCameraRenderPasses(id);
+		}
 		EraseCameraFromMouseCameras(id, levelCameraUUID[id].uuid());
 		EraseCameraFromSwapChainCameras(id, levelCameraUUID[id].uuid());
 		InsertCameraIntoMouseCameras(id, editorCameraUUID[id].uuid());
@@ -1008,12 +1018,20 @@ namespace Editor
 
 	void SwitchToSceneUnitEditorPlayCamera(SceneUnitId id)
 	{
+		if (!editorCameraCreated.contains(id)) return;
+		if (editorCameraCreated.at(id)->load() == true)
+			editorCameraCreated.at(id)->wait(true);
+
 		if (!levelCameraUUID.contains(id) || !editorCameraUUID.contains(id)) return;
+
 		EraseCameraFromMouseCameras(id, editorCameraUUID[id].uuid());
 		EraseCameraFromSwapChainCameras(id, editorCameraUUID[id].uuid());
 		InsertCameraIntoMouseCameras(id, levelCameraUUID[id].uuid());
 		InsertCameraIntoSwapChainCameras(id, levelCameraUUID[id].uuid());
-		editorCameraUUID[id]->RenderReady(false);
+		if (CameraSceneObjectExist(levelCameraUUID.at(id)) && CameraSceneObjectExist(editorCameraUUID.at(id)))
+		{
+			editorCameraUUID[id]->RenderReady(false);
+		}
 	}
 
 	void RemoveSceneUnitEditorCameraFromWindowCameras(SceneUnitId id)
