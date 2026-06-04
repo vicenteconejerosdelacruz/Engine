@@ -189,12 +189,15 @@ namespace Scene
 #if defined(_EDITOR)
 		using namespace Editor;
 #endif
+		bool processRendering = commandsProcessor && renderer->GetBackBufferIndex() == Frame();
+		if (!IsIsolated())
+			processRendering &= GetCountFromSwapChainCameras(id) > 0;
 
 #if defined(_DEVELOPMENT)
 		std::string RenderEvent = "SceneUnit::Render(" + unitName + ")";
 		PIXScopedEvent(0, nostd::StringToWString(RenderEvent).c_str());
 #endif
-		if (commandsProcessor && renderer->GetBackBufferIndex() == Frame() && GetCountFromSwapChainCameras(id) > 0)
+		if (processRendering)
 		{
 
 #if defined(_EDITOR)
