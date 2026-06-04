@@ -413,6 +413,7 @@ namespace Editor
 	{
 		levelCameraUUID.erase(id);
 		editorCameraUUID.erase(id);
+		editorCameraCreated.erase(id);
 	}
 
 	void CopySceneUnitEditorCameraRenderPasses(SceneUnitId id)
