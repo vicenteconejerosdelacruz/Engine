@@ -143,9 +143,9 @@ namespace Scene
 
 	void SimulatePhysicScenes(SceneUnitId id, float step)
 	{
-		if (GetCountFromPhysicScenes(id) == 0ULL || step == 0.0f) return;
-
 		UpdatePhysicObjects(id);
+
+		if (GetCountFromPhysicScenes(id) == 0ULL || step == 0.0f) return;
 
 		PhysicSceneID scene = MAKESUUUID(id, *GetPhysicScenes(id).begin());
 		scene->pxScene->simulate(gameUpdateFrequency);

@@ -1358,6 +1358,7 @@ namespace Physics
 #if defined(_EDITOR)
 		using namespace Editor;
 #endif
+		if (GetPhysicScenes(id).size() == 0ULL) return;
 		if (!physicObjectsBySceneUnitId.contains(id)) return;
 
 		auto& phOs = physicObjectsBySceneUnitId.at(id);
