@@ -138,6 +138,11 @@ namespace Scene
 			animationTime(0.0f);
 			SetCurrentAnimation(animationSequence(), animationTime(), animationTimeFactor(), animationPlay(), animationLoop());
 			StepAnimation(0.0f); //take an empty T-Pose step so the skinning can be performed
+			if (animationStepLock->load() == false)
+			{
+				animationStepLock->store(true);
+				animationStepLock->notify_one();
+			}
 		}
 
 		updateRotationQ();
