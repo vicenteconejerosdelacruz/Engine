@@ -1,0 +1,1 @@
+JCLASS(GreenGoblin, _)

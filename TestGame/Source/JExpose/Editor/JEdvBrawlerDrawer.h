@@ -2,10 +2,11 @@
 
 #include <Brawler/Rounds/BrawlerRound.h>
 #include <Brawler/Characters/Enemies/Thug.h>
+#include <Brawler/Characters/BrawlerCharacter.h>
 
 inline std::map<std::string, ControllerBinding> GetSelectableThugsControllers()
 {
-	std::vector<JUUIDName> controllers = GetDerivedControllersInstancesInSceneUnit<Brawler::Thug>(Editor::currentSceneUnitId);
+	std::vector<JUUIDName> controllers = GetDerivedControllersInstancesInSceneUnit<Brawler::BrawlerCharacter>(Editor::currentSceneUnitId);
 	std::map<std::string, ControllerBinding> selectables = { { "",ControllerBinding()} };
 	std::transform(controllers.begin(), controllers.end(), std::inserter(selectables, selectables.begin()), [](JUUIDName& uuidName)
 		{

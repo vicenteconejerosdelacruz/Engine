@@ -1,60 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { HealthBar } from './components/HealthBar';
+import { EnemyHud } from './components/Huds/EnemyHud/EnemyHud';
+import { HeroHud } from './components/Huds/HeroHud/HeroHud';
+import { LeftArrow } from './components/Signs/LeftArrow';
+import { RightArrow } from './components/Signs/RightArrow';
+import { DialogueBox } from './components/DialogueBox/DialogueBox';
 import './App.css';
-
-function HeroHud({ picture, title, hp }) {
-  return (
-    <div className="character-hud hero">
-      <div className="unit-display hero">
-        <img src={picture} className="portrait hero" alt={title} />
-        <div className="bars-container">
-          <span className="bars-title hero">{title}</span>
-          <HealthBar hp={hp} type="main" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function EnemyHud({ picture, title, hp }) {
-  return (
-    <div className="character-hud enemy">
-      <div className="unit-display enemy">
-        <img src={picture} className="portrait enemy" alt={title} />
-        <div className="bars-container">
-          <span className="bars-title enemy">{title}</span>
-          <HealthBar hp={hp} type="sub" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function LeftArrow({ active }) {
-  if(active)
-    return (
-      <div className={`arrow left ${active ? 'active' : ''}`}>
-        <img src="signals/left-arrow.png" alt="Left Arrow" />
-      </div>
-    );
-  else return null;
-}
-
-function RightArrow({ active }) {
-  if(active)
-    return (
-      <div className={`arrow right ${active ? 'active' : ''}`}>
-        <img src="signals/left-arrow.png" alt="Right Arrow" />
-      </div>
-    );
-  else return null;
-}
 
 function App() {
   const [hero, setHero] = useState({ hp: 100, name: 'Venom', img: 'heroes/venom.webp', score:0 });
   const [enemy, setEnemy] = useState({ hp: 100, name: '', img: '', active: false });
   const [arrows, setArrows] = useState({ left: false, right: false });
-  
+  const [dialogue, setDialogue] = useState({
+    active: false,
+    text: '',
+    speaker: { name: '', picture: '' }
+    //text: 'You have entered the lair of the Green Goblin! Prepare to face your doom, foolish intruder!',
+    //speaker: { name: 'Green Goblin', picture: 'green-goblin-front' }
+  });
+
   useEffect(() => {
     // Escuchar actualizaciones desde C++ (EvaluateScript)
     const handleEngineUpdate = (e) => {
@@ -65,6 +28,17 @@ function App() {
       if (e.detail.type === 'SCORE_UPDATE') setHero(prev => ({ ...prev, score: e.detail.value }));
       if (e.detail.type === 'ARROW_LEFT') setArrows(prev => ({ ...prev, left: e.detail.value }));
       if (e.detail.type === 'ARROW_RIGHT') setArrows(prev => ({ ...prev, right: e.detail.value }));
+
+      if (e.detail.type === 'SHOW_DIALOGUE') {
+        setDialogue({
+          active: true,
+          text: e.detail.text,
+          speaker: { name: e.detail.name, picture: e.detail.picture }
+        });
+      }
+      if (e.detail.type === 'HIDE_DIALOGUE') {
+        setDialogue(prev => ({ ...prev, active: false }));
+      }
     };
 
     window.addEventListener('engineUpdate', handleEngineUpdate);
@@ -76,6 +50,13 @@ function App() {
         {enemy.active && <EnemyHud key={enemy.name} hero={false} picture={enemy.img} title={enemy.name} hp={enemy.hp} />}
         <LeftArrow active={arrows.left} />
         <RightArrow active={arrows.right} />
+
+        {/* Nueva caja de diálogos */}
+      <DialogueBox 
+        active={dialogue.active} 
+        text={dialogue.text} 
+        speaker={dialogue.speaker} 
+      />
     </div>
   );
 }

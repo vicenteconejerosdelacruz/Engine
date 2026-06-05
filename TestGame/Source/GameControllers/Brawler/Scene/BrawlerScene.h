@@ -78,6 +78,9 @@ namespace Game
 			void HideRightArrowSign();
 
 			//Combat system
+			void PauseCombat();
+			void ResumeCombat();
+			bool IsCombatPaused();
 			void RegisterThugInCombat(JUUID heroID, JUUID thugID);
 			void UnregisterThugFromCombat(JUUID thugID);
 			int GetThugCombatSlotIndex(JUUID heroID, JUUID thugID);
@@ -88,6 +91,7 @@ namespace Game
 				std::vector<JUUID> attackers;
 			};
 			std::map<JUUID, CombatQueue> m_activeCombats;
+			bool combatPaused;
 		};
 	};
 };

@@ -1099,3 +1099,8 @@ namespace Game::Brawler
 
 //subir con red
 //A5_4_L o A4_4_R
+
+//??
+//A5_4_L -> A5_10_L->A5_11_L->A5_12_L->A5_13_L
+
+//103551_Fire_R -> 103551_Fire_R_Loop

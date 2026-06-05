@@ -1,0 +1,134 @@
+/* Importar fuente clásica de Arcade desde Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.dialogue-container {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  max-width: 800px;
+  height: 140px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 4px solid #fff;
+  /* El truco del doble borde clásico de arcade */
+  box-shadow: 0 0 0 4px #000, inset 0 0 0 2px #fff; 
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  box-sizing: border-box;
+  font-family: 'Press Start 2P', monospace;
+  pointer-events: auto; /* Por si quieres hacer click para avanzar */
+}
+
+.dialogue-portrait-wrapper {
+  width: 100px;
+  height: 100px;
+  border: 3px solid #ff4500; /* Borde naranja/rojo agresivo */
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+.dialogue-portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Evita que los pixeles de las imágenes retro se vean borrosos al agrandar */
+  image-rendering: pixelated; 
+}
+
+.dialogue-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+  color: #fff;
+}
+
+.dialogue-speaker {
+  font-size: 14px;
+  color: #ffff00; /* Amarillo brillante para el nombre del que habla */
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.dialogue-text {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #fff;
+  /* Animación opcional: efecto "Typewriter" mecánico */
+  overflow: hidden;
+  white-space: normal;
+  animation: arcadeFadeIn 0.2s steps(40);
+}
+
+/* Animación rápida de parpadeo/aparición para simular texto arcade */
+@keyframes arcadeFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Contenedor del indicador en la esquina inferior derecha */
+.dialogue-next-indicator {
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* El botón estilo arcade (Verde para el botón A) */
+.btn-a {
+  width: 24px;
+  height: 24px;
+  background-color: #00ff00; /* Verde estilo Xbox/Arcade */
+  border: 3px solid #000;
+  border-radius: 50%; /* Circular */
+  color: #000;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 2px 0px #fff; /* Relieve */
+  
+  /* Animación combinada: parpadeo y salto */
+  animation: nextBtnAnim 0.6s infinite alternate ease-in-out;
+}
+
+@keyframes nextBtnAnim {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+    filter: brightness(1.2);
+  }
+  100% {
+    transform: translateY(-5px); /* Salta hacia arriba */
+    opacity: 0.7;
+    filter: brightness(0.8);
+  }
+}
+
+/* Opcional: Si quieres que el botón tenga un "brillo" alrededor */
+.dialogue-next-indicator::before {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: rgba(0, 255, 0, 0.2);
+  border-radius: 50%;
+  filter: blur(5px);
+  animation: glowEffect 1.2s infinite;
+}
+
+@keyframes glowEffect {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.5); opacity: 0.2; }
+}

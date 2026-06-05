@@ -42,6 +42,9 @@ namespace Game::Brawler
 		v8_register_method<BrawlerScene>(isolate, tpl, "HideLeftArrowSign", script, [](BrawlerScene* self) { if (self) self->HideLeftArrowSign(); });
 		v8_register_method<BrawlerScene>(isolate, tpl, "ShowRightArrowSign", script, [](BrawlerScene* self) { if (self) self->ShowRightArrowSign(); });
 		v8_register_method<BrawlerScene>(isolate, tpl, "HideRightArrowSign", script, [](BrawlerScene* self) { if (self) self->HideRightArrowSign(); });
+		v8_register_method<BrawlerScene>(isolate, tpl, "PauseCombat", script, [](BrawlerScene* self) { if (self) self->PauseCombat(); });
+		v8_register_method<BrawlerScene>(isolate, tpl, "ResumeCombat", script, [](BrawlerScene* self) { if (self) self->PauseCombat(); });
+		v8_register_method<BrawlerScene>(isolate, tpl, "IsCombatPaused", script, [](BrawlerScene* self) { return self && self->IsCombatPaused(); });
 	}
 
 	void BrawlerScene::SetInitialConditions()
@@ -314,6 +317,21 @@ namespace Game::Brawler
 		);
 		HtmlUIInstanceID instance = venomUIInstance();
 		instance->EvaluateScript(js);
+	}
+
+	void BrawlerScene::PauseCombat()
+	{
+		combatPaused = true;
+	}
+
+	void BrawlerScene::ResumeCombat()
+	{
+		combatPaused = false;
+	}
+
+	bool BrawlerScene::IsCombatPaused()
+	{
+		return combatPaused;
 	}
 
 	//Combat system

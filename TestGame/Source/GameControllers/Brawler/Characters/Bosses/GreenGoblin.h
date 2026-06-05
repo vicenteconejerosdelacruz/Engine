@@ -10,65 +10,52 @@ namespace Game
 {
 	namespace Brawler
 	{
-		enum ThugStates
+		enum GreenGoblinStates
 		{
-			TS_None,
-			TS_Idle,
-			TS_CombatIdle,
-			TS_CombatFollow,
-			//TS_CombatFollowBrawler,
-			TS_CombatPunch,
-			TS_Death,
+			GGS_None,
+			GGS_Idle,
 		};
 
-		inline static std::unordered_map<std::string, ThugStates> StringToThugStates =
+		inline static std::unordered_map<std::string, GreenGoblinStates> StringToGreenGoblinStates =
 		{
-			{ "None", TS_None },
-			{ "Idle", TS_Idle },
-			{ "CombatIdle", TS_CombatIdle },
-			{ "CombatFollow", TS_CombatFollow },
-			//{ "CombatFollowBrawler", TS_CombatFollowBrawler },
-			{ "CombatPunch", TS_CombatPunch },
-			{ "Death", TS_Death }
+			{ "None", GGS_None },
+			{ "Idle", GGS_Idle },
 		};
 
 #if defined(_EDITOR)
 #include <Attributes/JOrder.h>
-#include "ThugAtt.h"
+#include "GreenGoblinAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include "ThugAtt.h"
+#include "GreenGoblinAtt.h"
 #include <JEnd.h>
 #endif
 
 		//struct Venom;
 		struct BrawlerScene;
 
-		struct Thug : BrawlerCharacter
+		struct GreenGoblin : BrawlerCharacter
 		{
 #include <Attributes/JFlags.h>
-#include "ThugAtt.h"
+#include "GreenGoblinAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include "ThugAtt.h"
+#include "GreenGoblinAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include "ThugAtt.h"
+#include "GreenGoblinAtt.h"
 #include <JEnd.h>
 
-
-			//BrawlerScene* GetBrawlerSceneController();
-
 			//Constructor and Binding
-			Thug(nlohmann::json& json);
+			GreenGoblin(nlohmann::json& json);
 			static void RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script);
 			void SetInitialConditions() override;
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
-			DECL_CONTROLLER_DRAWER(Thug, BrawlerCharacter);
+			DECL_CONTROLLER_DRAWER(GreenGoblin, BrawlerCharacter);
 #endif
 			void Map(SUUUID so) override;
 			void Unmap() override;
@@ -76,6 +63,7 @@ namespace Game
 			//Step
 			virtual void Step(float delta);
 
+			/*
 			//States
 			void TakeHit(int damage);
 			void PickHeroToFight();
@@ -114,20 +102,21 @@ namespace Game
 			bool ShouldDie();
 			void EnterDeath();
 			void OnDeathAnimationEnd();
-
+			*/
 			//State machine
-			GameStatesMachine<ThugStates> tsm;
+			GameStatesMachine<GreenGoblinStates> ggsm;
 
 			//Initial States
-			XMFLOAT3 thugScale;
+			XMFLOAT3 greenGoblinScale;
 			int initialHealth;
-
 			//SceneObjects
 			PhysicSceneID physicScene;
 			PhysicObjectID physicObject;
 
 			//Picked hero
+			/*
 			JUUID pickedHeroID;
+			*/
 		};
 	};
 };
