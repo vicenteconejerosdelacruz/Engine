@@ -1294,7 +1294,8 @@ namespace Scene
 				{
 					using namespace Animation;
 
-					r->animationStepLock->wait(false);
+					if (r->animationStepLock->load() == false)
+						r->animationStepLock->wait(false);
 
 					if (!r->animationThreadAlive->load()) break;
 
