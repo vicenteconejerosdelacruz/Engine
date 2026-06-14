@@ -181,16 +181,18 @@ inline JEdvEditorDrawerFunction DrawVector<BrawlerRound, jedv_t_vector>()
 				}
 				ImGui::PopID();
 			}
+			ImGui::PushID(std::string(attribute + "-add-new").c_str());
 			if (ImGui::Button(ICON_FA_PLUS, ImVec2(ImGui::GetContentRegionAvail().x, 20.0f)))
 			{
 				json.at(0)->at(attribute).push_back(FromBrawlerRound(BrawlerRound()));
 			}
+			ImGui::PopID();
 
 			ImGui::Separator();
 
 			if (deleteRound != -1)
 			{
-
+				json.at(0)->at(attribute).erase(deleteRound);
 			}
 			if (std::get<0>(deleteEnemySlot) != -1 && std::get<1>(deleteEnemySlot) != -1)
 			{
@@ -198,3 +200,152 @@ inline JEdvEditorDrawerFunction DrawVector<BrawlerRound, jedv_t_vector>()
 			}
 		};
 }
+
+template<>
+inline JEdvEditorDrawerFunction DrawVector<BrawlerDialog, jedv_t_vector>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			if (json.size() > 1ULL) return;
+			ImGui::Text(attribute.c_str());
+			unsigned int numDialogs = json.at(0)->contains(attribute) ? static_cast<unsigned int>(json.at(0)->at(attribute).size()) : 0U;
+			int dialogToDelete = -1;
+			int dialogToAddLine = -1;
+			auto markModified = []
+				{
+					Editor::MarkSceneUnitAsModified(Editor::currentSceneUnitId);
+				};
+			auto drawDialogLine = [markModified](unsigned int dialogIdx, unsigned int lineIdx, nlohmann::json& line)
+				{
+					if (ImGui::Button(ICON_FA_TIMES))
+					{
+					}
+					ImGui::SameLine();
+					if (ImGui::Button(ICON_FA_ARROW_UP))
+					{
+
+					}
+					ImGui::SameLine();
+					if (ImGui::Button(ICON_FA_ARROW_DOWN))
+					{
+
+					}
+					ImGui::Text("name");
+					ImGui::PushID(std::string("dialog" + std::to_string(dialogIdx) + "-" + std::to_string(lineIdx) + "-name").c_str());
+					if (ImGui::DrawJsonInputText(line, "name"))
+					{
+						markModified();
+					}
+					ImGui::PopID();
+
+					ImGui::Text("text");
+					ImGui::PushID(std::string("dialog" + std::to_string(dialogIdx) + "-" + std::to_string(lineIdx) + "-text").c_str());
+					if (ImGui::DrawJsonInputText(line, "text"))
+					{
+						markModified();
+					}
+					ImGui::PopID();
+
+					ImGui::Text("picture");
+					ImGui::PushID(std::string("dialog" + std::to_string(dialogIdx) + "-" + std::to_string(lineIdx) + "-picture").c_str());
+					if (ImGui::DrawJsonInputText(line, "picture"))
+					{
+						markModified();
+					}
+					ImGui::PopID();
+				};
+			auto drawDialog = [&dialogToDelete, &dialogToAddLine, drawDialogLine, markModified](unsigned int dialogIdx, nlohmann::json& dialog)
+				{
+					if (ImGui::Button(ICON_FA_TIMES))
+					{
+						dialogToDelete = dialogIdx;
+					}
+					ImGui::SameLine();
+					ImGui::Text("dialog Name");
+					ImGui::SameLine();
+					ImGui::PushID(std::string("dialog" + std::to_string(dialogIdx) + "-name").c_str());
+					if (ImGui::DrawJsonInputText(dialog, "name"))
+					{
+						markModified();
+					}
+					ImGui::PopID();
+
+					if (dialog.contains("lines"))
+					{
+						for (unsigned int i = 0; i < dialog.at("lines").size(); i++)
+						{
+							drawDialogLine(dialogIdx, i, dialog.at("lines").at(i));
+						}
+					}
+
+					ImGui::PushID(std::string("dialog" + std::to_string(dialogIdx) + "-add-new-line").c_str());
+					if (ImGui::Button(ICON_FA_PLUS, ImVec2(ImGui::GetContentRegionAvail().x, 20.0f)))
+					{
+						dialogToAddLine = dialogIdx;
+					}
+					ImGui::PopID();
+
+					ImGui::Text("onStart");
+					ImGui::SameLine();
+					std::string onStartButtonId = "onStartButton-" + std::to_string(dialogIdx);
+					ImGui::PushID(onStartButtonId.c_str());
+					{
+						if (ImGui::Button(ICON_FA_RUNNING))
+						{
+							std::string script = dialog.at("startScript");
+							Editor::StartScriptEdition("startScript", script, [&dialog, markModified](std::string value)
+								{
+									dialog.at("startScript") = value;
+									markModified();
+								}
+							);
+						}
+					}
+					ImGui::PopID();
+
+					ImGui::Text("onEnd");
+					ImGui::SameLine();
+					std::string onEndButtonId = "onEndButton-" + std::to_string(dialogIdx);
+					ImGui::PushID(onEndButtonId.c_str());
+					{
+						if (ImGui::Button(ICON_FA_RUNNING))
+						{
+							std::string script = dialog.at("endScript");
+							Editor::StartScriptEdition("endScript", script, [&dialog, markModified](std::string value)
+								{
+									dialog.at("endScript") = value;
+									markModified();
+								}
+							);
+						}
+					}
+					ImGui::PopID();
+
+					ImGui::Separator();
+				};
+			for (unsigned int i = 0; i < numDialogs; i++)
+			{
+				drawDialog(i, json.at(0)->at(attribute).at(i));
+			}
+			ImGui::PushID(std::string(attribute + "-add-new").c_str());
+			if (ImGui::Button(ICON_FA_PLUS, ImVec2(ImGui::GetContentRegionAvail().x, 20.0f)))
+			{
+				json.at(0)->at(attribute).push_back(FromBrawlerDialog(BrawlerDialog()));
+				markModified();
+			}
+			ImGui::PopID();
+			ImGui::Separator();
+
+			if (dialogToDelete != -1)
+			{
+
+			}
+			if (dialogToAddLine != -1)
+			{
+				json.at(0)->at(attribute).at(dialogToAddLine)["lines"].push_back(FromBrawlerDialogLine({}));
+				markModified();
+			}
+		};
+}
+
+void DrawAnimatedDecal(std::string attribute, std::vector<JObject*>& json);

@@ -1,11 +1,14 @@
 #include "pch.h"
-#include "BrawlerScene.h"
+#include <algorithm>
 #include "BrawlerScene.h"
 #include <Brawler/Characters/Enemies/Thug.h>
 #include <Brawler/Characters/Heroes/Venom.h>
 #if defined(_EDITOR)
 #include <Editor.h>
 #endif
+
+extern std::unique_ptr<DirectX::GamePad> gamePad;
+extern DirectX::GamePad::ButtonStateTracker buttons;
 
 namespace Game::Brawler
 {
@@ -45,6 +48,7 @@ namespace Game::Brawler
 		v8_register_method<BrawlerScene>(isolate, tpl, "PauseCombat", script, [](BrawlerScene* self) { if (self) self->PauseCombat(); });
 		v8_register_method<BrawlerScene>(isolate, tpl, "ResumeCombat", script, [](BrawlerScene* self) { if (self) self->PauseCombat(); });
 		v8_register_method<BrawlerScene>(isolate, tpl, "IsCombatPaused", script, [](BrawlerScene* self) { return self && self->IsCombatPaused(); });
+		v8_register_method<BrawlerScene>(isolate, tpl, "StartDialog", script, [](BrawlerScene* self, std::string dialog) { if (self) self->StartDialog(dialog); });
 	}
 
 	void BrawlerScene::SetInitialConditions()
@@ -66,6 +70,7 @@ namespace Game::Brawler
 		lastAttackerHealth(100);
 		lastAttackerName("");
 		heroScore(0);
+		dialogOpen = false;
 	}
 
 #if defined(_EDITOR)
@@ -148,7 +153,12 @@ namespace Game::Brawler
 
 	//Step
 	void BrawlerScene::Step(float delta)
-	{}
+	{
+		if (IsDialogOpen())
+		{
+			ProcessDialogInput();
+		}
+	}
 
 	//Rendering
 	void BrawlerScene::Render(SceneUnitId id)
@@ -453,4 +463,73 @@ namespace Game::Brawler
 		return (int)it->second.attackers.size() < maxAttackers;
 	}
 
+	//Dialog System
+	void BrawlerScene::StartDialog(std::string dialog)
+	{
+		auto vds = dialogs();
+		auto dit = std::find_if(vds.begin(), vds.end(), [dialog](auto& bd) {return bd.name == dialog; });
+		if (dit == vds.end() || dit->lines.size() == 0ULL)
+			return;
+
+		currentDialog = *dit;
+		dialogOpen = true;
+		currentDialogLine = 0;
+		ShowDialogLine(0);
+		Scripting::RunScript(currentDialog.startScript, sceneObject);
+	}
+
+	void BrawlerScene::HideDialog()
+	{
+		std::string js = BuildEvalScript("HIDE_DIALOGUE", {});
+		HtmlUIInstanceID instance = venomUIInstance();
+		instance->EvaluateScript(js);
+		dialogOpen = false;
+		Scripting::RunScript(currentDialog.endScript, sceneObject);
+	}
+
+	void BrawlerScene::ShowDialogLine(unsigned int line)
+	{
+		auto& brawlerLine = currentDialog.lines.at(line);
+
+		std::string js = BuildEvalScript("SHOW_DIALOGUE",
+			{
+				{ "text", brawlerLine.text },
+				{ "name", brawlerLine.name },
+				{ "picture", brawlerLine.picture }
+			}
+		);
+		HtmlUIInstanceID instance = venomUIInstance();
+		instance->EvaluateScript(js);
+	}
+
+	bool BrawlerScene::IsDialogOpen()
+	{
+		return dialogOpen;
+	}
+
+	void BrawlerScene::ProcessDialogInput()
+	{
+		auto state = gamePad->GetState(0);
+		if (!state.IsConnected())
+			return;
+
+		buttons.Update(state);
+		if (buttons.a == GamePad::ButtonStateTracker::PRESSED)
+		{
+			GotoNextDialogLine();
+		}
+	}
+
+	void BrawlerScene::GotoNextDialogLine()
+	{
+		currentDialogLine++;
+		if (currentDialogLine < currentDialog.lines.size())
+		{
+			ShowDialogLine(currentDialogLine);
+		}
+		else
+		{
+			HideDialog();
+		}
+	}
 }

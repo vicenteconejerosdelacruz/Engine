@@ -90,6 +90,15 @@
     <ClInclude Include="GameControllers\Brawler\Characters\Bosses\GreenGoblinAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameControllers\Brawler\Dialogs\BrawlerDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameControllers\Effects\AnimatedDecal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameControllers\Effects\AnimatedDecalAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TestGame.cpp">
@@ -129,6 +138,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameControllers\Brawler\Characters\Bosses\GreenGoblin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameControllers\Effects\AnimatedDecal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JExpose\Editor\JEdvBrawlerDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

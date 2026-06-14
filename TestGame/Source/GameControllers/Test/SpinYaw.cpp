@@ -73,4 +73,3 @@ namespace Game::Test
 		o->at("rotation") = FromXMFLOAT3(rot);
 	}
 }
-

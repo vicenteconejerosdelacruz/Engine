@@ -1,6 +1,7 @@
 #pragma once
 #include "../Camera/BrawlerCamera.h"
 #include "../Rounds/BrawlerRound.h"
+#include "../Dialogs/BrawlerDialog.h"
 #include <Controller.h>
 #include <nlohmann/json.hpp>
 #include <set>
@@ -86,12 +87,24 @@ namespace Game
 			int GetThugCombatSlotIndex(JUUID heroID, JUUID thugID);
 			XMVECTOR GetHeroCombatPositionForThug(JUUID heroID, JUUID thugID);
 			bool CanJoinCombat(JUUID heroID, int maxAttackers = 4);
+			//Dialog System
+			void StartDialog(std::string dialog);
+			void HideDialog();
+			void ShowDialogLine(unsigned int line);
+			bool IsDialogOpen();
+			void ProcessDialogInput();
+			void GotoNextDialogLine();
 
 			struct CombatQueue {
 				std::vector<JUUID> attackers;
 			};
 			std::map<JUUID, CombatQueue> m_activeCombats;
 			bool combatPaused;
+
+			//Dialog System
+			bool dialogOpen;
+			BrawlerDialog currentDialog;
+			unsigned int currentDialogLine;
 		};
 	};
 };

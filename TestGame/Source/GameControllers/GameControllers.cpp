@@ -6,12 +6,14 @@
 #include "Brawler/Characters/Heroes/Venom.h"
 #include "Brawler/Characters/Enemies/Thug.h"
 #include "Brawler/Characters/Bosses/GreenGoblin.h"
+#include "Effects/AnimatedDecal.h"
 
 namespace Game
 {
 	using namespace Test;
 	using namespace Brawler;
 	using namespace ThirdPerson;
+	using namespace Effects;
 
 	std::unordered_map<std::string, std::function<std::unique_ptr<Game::Controller>(nlohmann::json&)>> controllers =
 	{
@@ -22,6 +24,7 @@ namespace Game
 		{ "venom", [](nlohmann::json& json) { return std::make_unique<Venom>(json); }},
 		{ "thug", [](nlohmann::json& json) { return std::make_unique<Thug>(json); }},
 		{ "greengoblin", [](nlohmann::json& json) { return std::make_unique<GreenGoblin>(json); }},
+		{ "animated-decal", [](nlohmann::json& json) { return std::make_unique<AnimatedDecal>(json); }},
 	};
 
 	std::vector<std::string> GetControllers()
@@ -46,5 +49,6 @@ namespace Game
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, Venom::GetClassName(), Venom::RegisterScript);
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, Thug::GetClassName(), Thug::RegisterScript);
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, GreenGoblin::GetClassName(), GreenGoblin::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, AnimatedDecal::GetClassName(), AnimatedDecal::RegisterScript);
 	}
 };

@@ -518,9 +518,12 @@
     <ClInclude Include="GameControllers\Brawler\Characters\Bosses\GreenGoblinAtt.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\BrawlerCharacter.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\Heroes\Hero.h" />
+    <ClInclude Include="GameControllers\Brawler\Dialogs\BrawlerDialog.h" />
     <ClInclude Include="GameControllers\Brawler\Rounds\BrawlerRound.h" />
     <ClInclude Include="GameControllers\Brawler\Scene\BrawlerScene.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\Enemies\Thug.h" />
+    <ClInclude Include="GameControllers\Effects\AnimatedDecal.h" />
+    <ClInclude Include="GameControllers\Effects\AnimatedDecalAtt.h" />
     <ClInclude Include="GameControllers\Test\SpinYaw.h" />
     <ClInclude Include="GameControllers\ThirdPerson\ThirdPersonCharacter.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\Heroes\Venom.h" />
@@ -546,11 +549,13 @@
     <ClCompile Include="GameControllers\Brawler\Characters\Heroes\Hero.cpp" />
     <ClCompile Include="GameControllers\Brawler\Scene\BrawlerScene.cpp" />
     <ClCompile Include="GameControllers\Brawler\Characters\Enemies\Thug.cpp" />
+    <ClCompile Include="GameControllers\Effects\AnimatedDecal.cpp" />
     <ClCompile Include="GameControllers\GameControllers.cpp" />
     <ClCompile Include="GameControllers\Test\SpinYaw.cpp" />
     <ClCompile Include="GameControllers\ThirdPerson\ThirdPersonCharacter.cpp" />
     <ClCompile Include="GameControllers\Brawler\Characters\Heroes\Venom.cpp" />
     <ClCompile Include="GamePhysics\GamePhysics.cpp" />
+    <ClCompile Include="JExpose\Editor\JEdvBrawlerDrawer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Editor_Debug|x64'">pch.h</PrecompiledHeaderFile>
