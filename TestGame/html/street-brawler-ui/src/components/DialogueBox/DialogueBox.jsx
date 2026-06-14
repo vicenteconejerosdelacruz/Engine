@@ -9,7 +9,7 @@ export const DialogueBox = ({ speaker, text, active }) => {
     <div className="dialogue-container" key={`${speaker.name}-${text}`}>
       <div className="dialogue-portrait-wrapper">
         <img 
-          src={`/enemies/${speaker.picture.toLowerCase()}.png`} 
+          src={`enemies/${speaker.picture.toLowerCase()}.png`} 
           className="dialogue-portrait" 
           alt={speaker.name} 
         />

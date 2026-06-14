@@ -12,8 +12,8 @@ function App() {
   const [arrows, setArrows] = useState({ left: false, right: false });
   const [dialogue, setDialogue] = useState({
     active: false,
-    text: '',
-    speaker: { name: '', picture: '' }
+    //text: '',
+    //speaker: { name: '', picture: '' }
     //text: 'You have entered the lair of the Green Goblin! Prepare to face your doom, foolish intruder!',
     //speaker: { name: 'Green Goblin', picture: 'green-goblin-front' }
   });
