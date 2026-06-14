@@ -670,7 +670,7 @@ namespace Physics
 
 	void PhysicObject::UpdateRenderableFromGlobalPose()
 	{
-		if (behavior() == PB_Dynamic && actor && renderable)
+		if ((behavior() == PB_Dynamic || kinematic()) && actor && renderable)
 		{
 			PxTransform pxT = actor->getGlobalPose();
 			renderable->position(*((XMFLOAT3*)&pxT.p.x));
@@ -690,13 +690,37 @@ namespace Physics
 		}
 		else if (behavior() == PB_Character && controller && updateFromCharacterPosition() && renderable)
 		{
-			XMFLOAT3 renPos = ToXMFLOAT3(useFootPosition() ? controller->getFootPosition() : controller->getPosition());
-			renderable->position(renPos);
+			if (!kinematic())
+			{
+				XMFLOAT3 renPos = ToXMFLOAT3(useFootPosition() ? controller->getFootPosition() : controller->getPosition());
+				renderable->position(renPos);
 #if defined(_EDITOR)
-			XMFLOAT3 shapePos = ToXMFLOAT3(controller->getPosition());
-			if (renderableShape) { renderableShape->position(shapePos); }
-			if (renderableLines) { renderableLines->position(shapePos); }
+				XMFLOAT3 shapePos = ToXMFLOAT3(controller->getPosition());
+				if (renderableShape) { renderableShape->position(shapePos); }
+				if (renderableLines) { renderableLines->position(shapePos); }
 #endif
+			}
+			else
+			{
+				PxRigidDynamic* internalActor = controller->getActor();
+				PxTransform pxT = internalActor->getGlobalPose();
+				renderable->position(ToXMFLOAT3(pxT.p));
+#if defined(_EDITOR)
+				XMFLOAT3 shapePos = ToXMFLOAT3(pxT.p);
+
+				if (useFootPosition())
+				{
+					PxExtendedVec3 center = controller->getPosition();
+					PxExtendedVec3 foot = controller->getFootPosition();
+					float halfHeightOffset = (float)(center.y - foot.y);
+					shapePos.y += halfHeightOffset;
+				}
+
+				if (renderableShape) { renderableShape->position(shapePos); }
+				if (renderableLines) { renderableLines->position(shapePos); }
+#endif
+			}
+
 		}
 	}
 
@@ -804,7 +828,9 @@ namespace Physics
 
 		std::vector<std::string> characterAtts =
 		{
-			"geometry", "localPosition", "localRotation", "updateFromCharacterPosition", "useFootPosition", "contactOffset"
+			"kinematic","geometry", "localPosition",
+			"localRotation", "updateFromCharacterPosition",
+			"useFootPosition", "contactOffset"
 		};
 
 		std::unordered_map<PhysicsBehavior, std::vector<std::string>&> attsToAdd =
