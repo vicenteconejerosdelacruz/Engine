@@ -180,6 +180,7 @@ namespace Templates
 		void SetUAVRootDescriptorTable(CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int& slot);
 		void SetSRVRootDescriptorTable(CComPtr<ID3D12GraphicsCommandList2>& commandList, unsigned int& slot);
 		void UpdateTexture(TextureShaderUsage usage, TextureJsonID texture);
+		const MaterialVariablesMapping& GetVariablesMapping() const { return variablesMapping; }
 	};
 
 	void DestroyMaterialInstance(JUUID materialInstance);

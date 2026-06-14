@@ -33,6 +33,7 @@ JEXPOSE_VECTOR_TRANSFORM(PassMaterialOverride, passMaterialOverrides, ToPassMate
 JEXPOSE_VECTOR(std::string, renderNext, {}, jedv_t_so_renderable_vector, 1, false)
 JEXPOSE(JUUID, attachedTo, "", jedv_t_so_renderable, 1, false)
 JEXPOSE(JUUID, attachedBone, "", jedv_t_attachment_model3d_bone, 1, false)
+JPREVIEW(shaderConstants, jedv_shader_constants_edit)
 JEXPOSE_MAP_OBJECT(Controller, controllers, nlohmann::json::object({}), jedv_t_controller_vector, 1, false)
 JEXPOSE_VECTOR_OBJECT(PhysicObject, physicObject, nlohmann::json::array({}), jedv_t_physic_object_vector, 1, false)
 JTRACKUUID(Renderable, Renderables, 0, true)

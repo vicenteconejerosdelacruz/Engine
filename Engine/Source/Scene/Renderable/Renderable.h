@@ -201,6 +201,7 @@ namespace Scene
 		RenderableConstantsBuffer constantsBuffers;
 		std::unique_ptr<std::atomic_bool> constantsBuffersLock[JRenderer::numFrames];
 		std::unordered_map<std::string, std::vector<ConstantsBufferWritter>> constantsWriter;
+		std::unordered_map<std::string, std::vector<ConstantsBufferReader>> constantsReader;
 		DescriptorTableRender descriptorsRenders;
 		RenderableRootSignatures rootSignatures;
 		RenderablePipelineStates pipelineStates;

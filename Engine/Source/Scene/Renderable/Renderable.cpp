@@ -513,6 +513,98 @@ namespace Scene
 					};
 			};
 
+		auto createConstantReader = [this](DeviceUtils::ConstantsBufferID& cbuffer, size_t cbOffset, size_t cbSize)
+			{
+				auto* cbuffer_ptr = (*cbuffer).get();
+				unsigned int alignedConstantBufferSize = cbuffer_ptr->alignedConstantBufferSize;
+				byte* mappedConstantBuffer = cbuffer_ptr->mappedConstantBuffer;
+
+				size_t offsetInMemory = alignedConstantBufferSize;
+				offsetInMemory += cbOffset;
+
+				return[this, cbuffer, cbOffset, cbSize, alignedConstantBufferSize, mappedConstantBuffer, offsetInMemory
+				](MaterialVariablesTypes type, nlohmann::json& value)
+					{
+						switch (type)
+						{
+						case MAT_VAR_BOOLEAN:
+						{
+							bool data;
+							memcpy(&data, mappedConstantBuffer + offsetInMemory, cbSize);
+							value["value"] = data;
+						}
+						break;
+						case MAT_VAR_INTEGER:
+						{
+							int data;
+							memcpy(&data, mappedConstantBuffer + offsetInMemory, cbSize);
+							value["value"] = data;
+						}
+						break;
+						case MAT_VAR_UNSIGNED_INTEGER:
+						{
+							unsigned int data;
+							memcpy(&data, mappedConstantBuffer + offsetInMemory, cbSize);
+							value["value"] = data;
+						}
+						break;
+						case MAT_VAR_RGB:
+						{
+							XMFLOAT3 data;
+							memcpy(&data, mappedConstantBuffer + offsetInMemory, cbSize);
+							value["value"] = { data.x, data.y, data.z };
+						}
+						break;
+						case MAT_VAR_RGBA:
+						{
+							XMFLOAT4 data;
+							memcpy(&data, mappedConstantBuffer + offsetInMemory, cbSize);
+							value["value"] = { data.x, data.y, data.z, data.w };
+						}
+						break;
+						case MAT_VAR_FLOAT:
+						{
+							float data;
+							memcpy(&data, mappedConstantBuffer + offsetInMemory, cbSize);
+							value["value"] = data;
+						}
+						break;
+						case MAT_VAR_FLOAT2:
+						{
+							XMFLOAT2 data;
+							memcpy(&data, mappedConstantBuffer + offsetInMemory, cbSize);
+							value["value"] = { data.x, data.y };
+						}
+						break;
+						case MAT_VAR_FLOAT3:
+						{
+							XMFLOAT3 data;
+							memcpy(&data, mappedConstantBuffer + offsetInMemory, cbSize);
+							value["value"] = { data.x, data.y, data.z };
+						}
+						break;
+						case MAT_VAR_FLOAT4:
+						{
+							XMFLOAT4 data;
+							memcpy(&data, mappedConstantBuffer + offsetInMemory, cbSize);
+							value["value"] = { data.x, data.y, data.z, data.w };
+						}
+						break;
+						case MAT_VAR_MATRIX4X4:
+						{
+							XMFLOAT4X4 data;
+							memcpy(&data, mappedConstantBuffer + offsetInMemory, cbSize);
+							value["value"] = {
+								data._11, data._12, data._13, data._14,
+								data._21, data._22, data._23, data._24,
+								data._31, data._32, data._33, data._34,
+								data._41, data._42, data._43, data._44,
+							};
+						}
+						break;
+						}
+					};
+			};
 
 		if (constantsBuffers.contains(pass))
 		{
@@ -533,6 +625,7 @@ namespace Scene
 						continue;
 
 					constantsWriter[constantName].push_back(createConstantWriter(cbuffers[vsVar.bufferIndex], vsVar.offset, vsVar.size));
+					constantsReader[constantName].push_back(createConstantReader(cbuffers[vsVar.bufferIndex], vsVar.offset, vsVar.size));
 				}
 				for (auto& constantName : psConstants)
 				{
@@ -541,6 +634,7 @@ namespace Scene
 						continue;
 
 					constantsWriter[constantName].push_back(createConstantWriter(cbuffers[psVar.bufferIndex], psVar.offset, psVar.size));
+					constantsReader[constantName].push_back(createConstantReader(cbuffers[psVar.bufferIndex], psVar.offset, psVar.size));
 				}
 			}
 		}

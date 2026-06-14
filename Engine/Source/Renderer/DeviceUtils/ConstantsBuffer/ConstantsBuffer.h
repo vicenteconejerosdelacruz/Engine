@@ -16,6 +16,7 @@ namespace DeviceUtils
 	inline static const std::string AnimationConstantBufferName = "animation";
 
 	using ConstantsBufferWritter = std::function<size_t(void* data, unsigned int backbufferIndex, size_t offset, size_t slot)>;
+	using ConstantsBufferReader = std::function<void(MaterialVariablesTypes, nlohmann::json& value)>;
 
 	struct ConstantsBuffer {
 		ConstantsBuffer(size_t size, std::string name) : alignedConstantBufferSize((size + 255) & ~255), name(name) {}

@@ -6244,6 +6244,163 @@ JEdvEditorDrawerFunction DrawPreview<jedv_draw_renderpass_vector>()
 }
 
 template<>
+JEdvEditorDrawerFunction DrawPreview<jedv_shader_constants_edit>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			ImGui::Text(attribute.c_str());
+
+			for (auto& j : json)
+			{
+				if (json.size() > 1)
+				{
+					ImGui::Text(std::string(j->at("name")).c_str());
+				}
+
+				Renderable* r = static_cast<Renderable*>(j);
+
+				std::set<std::tuple<std::string, MaterialVariablesTypes, size_t>> variablesMapped;
+
+				for (auto& [rpI, matIvec] : r->materials)
+				{
+					for (auto& matI : matIvec)
+					{
+						MaterialInstance* mat = (*matI).get();
+						auto& mapping = mat->GetVariablesMapping();
+						for (auto& [name, var] : mapping)
+						{
+							variablesMapped.insert(std::make_tuple(name, var.variableType, var.mapping.offset));
+						}
+					}
+				}
+
+				unsigned int index = 0U;
+				for (auto& [name, type, offset] : variablesMapped)
+				{
+					if (!r->constantsReader.contains(name)) continue;
+
+					nlohmann::json value;
+					r->constantsReader.at(name).at(0)(type, value);
+					ImGui::Text(name.c_str());
+					if (MaterialVariablesTypesDrawers.at(type)(index, value))
+					{
+						void* data = nullptr;
+						bool boolV;
+						int intV;
+						unsigned int uintV;
+						float fV;
+						XMFLOAT2 f2V;
+						XMFLOAT3 f3V;
+						XMFLOAT4 f4V;
+						XMFLOAT4X4 f4x4V;
+
+						switch (type)
+						{
+						case MAT_VAR_BOOLEAN:
+						{
+							boolV = value.at("value");
+							data = &boolV;
+						}
+						break;
+						case MAT_VAR_INTEGER:
+						{
+							intV = value.at("value");
+							data = &intV;
+						}
+						break;
+						case MAT_VAR_UNSIGNED_INTEGER:
+						{
+							uintV = value.at("value");
+							data = &uintV;
+						}
+						break;
+						case MAT_VAR_RGB:
+						{
+							f3V = { value.at("value").at(0), value.at("value").at(1), value.at("value").at(2) };
+							data = &f3V;
+						}
+						break;
+						case MAT_VAR_RGBA:
+						{
+							f4V = { value.at("value").at(0), value.at("value").at(1), value.at("value").at(2), value.at("value").at(3) };
+							data = &f4V;
+						}
+						break;
+						case MAT_VAR_FLOAT:
+						{
+							fV = value.at("value");
+							data = &fV;
+						}
+						break;
+						case MAT_VAR_FLOAT2:
+						{
+							f2V = { value.at("value").at(0), value.at("value").at(1) };
+							data = &f2V;
+						}
+						break;
+						case MAT_VAR_FLOAT3:
+						{
+							f3V = { value.at("value").at(0), value.at("value").at(1), value.at("value").at(2) };
+							data = &f3V;
+						}
+						break;
+						case MAT_VAR_FLOAT4:
+						{
+							f4V = { value.at("value").at(0), value.at("value").at(1), value.at("value").at(2), value.at("value").at(3) };
+							data = &f4V;
+						}
+						break;
+						case MAT_VAR_MATRIX4X4:
+						{
+							f4x4V._11 = value.at("value").at(0);
+							f4x4V._12 = value.at("value").at(1);
+							f4x4V._13 = value.at("value").at(2);
+							f4x4V._14 = value.at("value").at(3);
+							f4x4V._21 = value.at("value").at(4);
+							f4x4V._22 = value.at("value").at(5);
+							f4x4V._23 = value.at("value").at(6);
+							f4x4V._24 = value.at("value").at(7);
+							f4x4V._31 = value.at("value").at(8);
+							f4x4V._32 = value.at("value").at(9);
+							f4x4V._33 = value.at("value").at(10);
+							f4x4V._34 = value.at("value").at(11);
+							f4x4V._41 = value.at("value").at(12);
+							f4x4V._42 = value.at("value").at(13);
+							f4x4V._43 = value.at("value").at(14);
+							f4x4V._44 = value.at("value").at(15);
+						}
+						break;
+						}
+
+						if (data)
+						{
+							for (unsigned int i = 0; i < JRenderer::numFrames; i++)
+							{
+								r->WriteConstantsBuffer(name, data, i);
+							}
+						}
+					}
+				}
+
+				/*
+				for (auto& [rpI, meshCbVec] : r->constantsBuffers)
+				{
+					for (auto& meshCb : meshCbVec)
+					{
+
+					}
+				}
+				*/
+
+				if (json.size() > 1)
+				{
+					ImGui::Separator();
+				}
+			}
+		};
+}
+
+template<>
 JEdvEditorDrawerFunction DrawPreview<jedv_draw_animator_sequencer>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)
