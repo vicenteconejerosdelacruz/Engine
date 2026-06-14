@@ -35,6 +35,7 @@ namespace Game
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
 			DECL_CONTROLLER_DRAWER(BrawlerCamera, Controller);
+			void SwitchToPlayMode() override;
 #endif
 
 			void Map(SUUUID so) override;
@@ -55,6 +56,13 @@ namespace Game
 			PhysicObjectID leftBoundaryPO;
 			PhysicObjectID rightBoundaryPO;
 			PhysicObjectID topBoundaryPO;
+#if defined(_EDITOR)
+			bool fromPlayMode = false;
+			bool initialFollowLeft = false;
+			bool initialFollowRight = false;
+			bool initialFollowUp = false;
+			bool initialFollowDown = false;
+#endif
 		};
 	};
 };

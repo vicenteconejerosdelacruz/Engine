@@ -3055,6 +3055,16 @@ namespace Editor
 		drawDynamicBodies.at(id).PlayMode();
 		drawCharacters.at(id).PlayMode();
 		drawTriggers.at(id).PlayMode();
+
+		std::map<unsigned int, std::set<JUUID>> prioritySet = GetControllersPrioritySet(id, true);
+
+		for (auto& [_, uuidset] : prioritySet)
+		{
+			for (auto& uuid : uuidset)
+			{
+				GetController(uuid)->SwitchToPlayMode();
+			}
+		}
 	}
 
 	void SwitchToPauseMode(SceneUnitId id)

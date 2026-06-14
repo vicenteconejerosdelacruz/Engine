@@ -36,10 +36,13 @@ namespace Game::Brawler
 
 	void BrawlerCamera::SetInitialConditions()
 	{
-		followLeft(false);
-		followRight(false);
-		followUp(false);
-		followDown(false);
+		if (fromPlayMode)
+		{
+			followLeft(initialFollowLeft);
+			followRight(initialFollowRight);
+			followUp(initialFollowUp);
+			followDown(initialFollowDown);
+		}
 		leftBoundaryB = MAKESUUUID(unit, leftBoundary());
 		rightBoundaryB = MAKESUUUID(unit, rightBoundary());
 		topBoundaryB = MAKESUUUID(unit, topBoundary());
@@ -55,6 +58,14 @@ namespace Game::Brawler
 #include "BrawlerCameraAtt.h"
 #include <JEnd.h>
 		Controller::WriteJson(j);
+	}
+	void BrawlerCamera::SwitchToPlayMode()
+	{
+		fromPlayMode = true;
+		initialFollowLeft = followLeft();
+		initialFollowRight = followRight();
+		initialFollowUp = followUp();
+		initialFollowDown = followDown();
 	}
 #endif
 

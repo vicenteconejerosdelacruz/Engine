@@ -145,6 +145,7 @@ namespace Game
 		virtual void WriteJson(nlohmann::json& j);
 		virtual std::map<std::string, JEdvEditorDrawerFunction> GetControllerDrawers() { return Game::GetControllerDrawers(); }
 		virtual std::vector<std::pair<std::string, JsonToEditorValueType>> GetControllerAttributes() { return Game::GetControllerAttributes(); }
+		virtual void SwitchToPlayMode() {};
 #endif
 		virtual void Map(SUUUID so);
 		virtual void Unmap();
@@ -175,7 +176,7 @@ namespace Game
 		std::vector<JUUIDName> controllers;
 		auto& uuid2ctrl = GetControllersUUIDs();
 		auto& suuid2ctrlsuuidName = GetControllerUUIDNameBySUUUID();
-		for (auto& [uuid,ctrl]: uuid2ctrl)
+		for (auto& [uuid, ctrl] : uuid2ctrl)
 		{
 			if (ctrl->unit != id || !dynamic_cast<T*>(ctrl.get())) continue;
 			auto& uuidNameSet = suuid2ctrlsuuidName.at(ctrl->sceneObject);
