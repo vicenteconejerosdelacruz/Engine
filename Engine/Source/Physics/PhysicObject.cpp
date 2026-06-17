@@ -817,7 +817,7 @@ namespace Physics
 		std::vector<std::string> dynamicAtts =
 		{
 			"staticFriction", "dynamicFriction", "restitution",
-			"geometry", "localPosition", "localRotation",
+			"geometry", "localPosition", "localRotation", "localScale",
 			"density", "linearVelocity", "angularVelocity"
 		};
 

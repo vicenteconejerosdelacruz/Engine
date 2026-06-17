@@ -178,9 +178,15 @@ PxGeometryHolder LoadCubeIntoPxGeometry(XMFLOAT3 scale)
 	return PxBoxGeometry(scale.x, scale.y, scale.z);
 }
 
-PxGeometryHolder LoadSphereIntoPxGeometry(XMFLOAT3 scale)
+PxGeometryHolder LoadSphereIntoPxGeometry(XMFLOAT3 scale, nlohmann::json& atts)
 {
-	return PxSphereGeometry(scale.x * 0.5f);
+	XMFLOAT3 localScale(1.0f, 1.0f, 1.0f);
+	if (atts.contains("localScale"))
+	{
+		localScale = ToXMFLOAT3(atts.at("localScale"));
+	}
+	PxVec3 pxscale(scale.x * localScale.x, scale.y * localScale.y, scale.z * localScale.z);
+	return PxSphereGeometry(pxscale.x * 0.5f);
 }
 
 PxGeometryHolder LoadCapsuleIntoPxGeometry(nlohmann::json& atts)
@@ -196,7 +202,7 @@ std::map<JNAME, std::function<PxGeometryHolder(XMFLOAT3 scale, nlohmann::json& a
 	{ "cube", [](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadCubeIntoPxGeometry(s); } },
 	{ "pyramid",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Pentahedron>(GetMeshUUIDByName("pyramid"), s, atts, sdf); }},
 	{ "floor",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Floor>(GetMeshUUIDByName("floor"), s, atts, false); }},
-	{ "sphere",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadSphereIntoPxGeometry(s); } },
+	{ "sphere",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadSphereIntoPxGeometry(s, atts); } },
 	{ "cone",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadMeshIntoPxGeometry<Cone>(GetMeshUUIDByName("cone"), s, atts, sdf); }},
 	{ "capsule",[](XMFLOAT3 s, nlohmann::json& atts, bool sdf) { return LoadCapsuleIntoPxGeometry(atts); }},
 };
@@ -398,8 +404,7 @@ namespace Templates
 	}
 
 	PhysicGeometryInstance::~PhysicGeometryInstance()
-	{
-	}
+	{}
 
 	TEMPDEF_FULL(PhysicGeometry);
 
