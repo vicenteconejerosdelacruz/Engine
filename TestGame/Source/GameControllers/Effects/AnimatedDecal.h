@@ -57,6 +57,7 @@ namespace Game
 			RenderableID renderable;
 			bool playing = false;
 			bool looping = false;
+			bool animationEnded = false;
 			unsigned int currentFrame = 0;
 			float currentTime = 0.0f;
 		};

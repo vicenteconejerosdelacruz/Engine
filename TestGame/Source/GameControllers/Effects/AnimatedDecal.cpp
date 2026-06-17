@@ -78,7 +78,7 @@ namespace Game::Effects
 
 		if (playing || update)
 		{
-			currentTime += timer.GetElapsedSeconds();
+			currentTime += static_cast<float>(timer.GetElapsedSeconds());
 			currentFrame = static_cast<unsigned int>(totalFrames() * timeBetweenFrames() * currentTime);
 			for (unsigned int i = 0; i < JRenderer::numFrames; i++)
 			{
@@ -111,6 +111,27 @@ namespace Game::Effects
 
 	void AnimatedDecal::Step(float delta)
 	{
+#if defined(_EDITOR)
+		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
+			return;
+#endif
 
+		if (animationEnded)
+			return;
+
+		currentTime += static_cast<float>(timer.GetElapsedSeconds());
+		currentFrame = static_cast<unsigned int>(totalFrames() * timeBetweenFrames() * currentTime);
+		for (unsigned int i = 0; i < JRenderer::numFrames; i++)
+		{
+			renderable->WriteConstantsBuffer("frameIndex", &currentFrame, i);
+		}
+		if (currentFrame >= totalFrames())
+		{
+			animationEnded = true;
+			if (deleteAtFinish())
+			{
+				renderable->markedForDelete = true;
+			}
+		}
 	}
 }
