@@ -3087,8 +3087,6 @@ namespace Editor
 	{
 		using namespace Scene;
 		using namespace nlohmann;
-		isPlaying.at(id) = false;
-		isPaused.at(id) = false;
 		nlohmann::json current = json::parse(GetLevelString(id));
 		nlohmann::json initial = json::parse(editorPrePlayDump.at(id));
 
@@ -3318,6 +3316,15 @@ namespace Editor
 			}
 		}
 
+		auto restoreEditorMode = [id]
+			{
+				MarkScenePanelAssetsAsDirty();
+				sceneObjectEdition.at(currentSceneUnitId).selectedTab = sceneObjectEdition.at(currentSceneUnitId).detailAbleTabs.at(0);
+				isPlaying.at(id) = false;
+				isPaused.at(id) = false;
+			};
+
+		bool delayedEditorMode = false;
 		//create the missing objects
 		if (std::any_of(toCreate.begin(), toCreate.end(), [](auto& pair) { return pair.second.size() != 0; }))
 		{
@@ -3327,13 +3334,21 @@ namespace Editor
 				level[SceneObjectTypeJsonContainer.at(type)] = dump(toCreateRefs.at(type));
 			}
 
-			AttachLevelIntoScene(id, "restore-objects-to-editor", level, [](SceneUnitId) {});
+			delayedEditorMode = true;
+			AttachLevelIntoScene(id, "restore-objects-to-editor", level, [restoreEditorMode](SceneUnitId)
+				{
+					restoreEditorMode();
+				}
+			);
 		}
 
 		drawStaticBodies.at(id).EditorMode();
 		drawDynamicBodies.at(id).EditorMode();
 		drawCharacters.at(id).EditorMode();
 		drawTriggers.at(id).EditorMode();
+
+		if (!delayedEditorMode)
+			restoreEditorMode();
 	}
 
 	//Physics Objects drawing
