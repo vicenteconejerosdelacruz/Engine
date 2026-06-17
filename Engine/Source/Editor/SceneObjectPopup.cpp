@@ -33,28 +33,56 @@ void SceneObjectPopup::Draw()
 			CreatePhysicsObjectsBehaviors(id);
 			MapControllers(id);
 			show = false;
+			moldTreeSelection = false;
 		};
 	auto moldAvailable = [&]
 		{
 			return GetMoldUUIDByName(name).empty();
 		};
-	auto createMold = [&]
+	auto getUUIDMoldJson = [&](SceneUnitId id, JUUID uuid)
 		{
 			SceneObject* so = GetSceneObjectPointer(id, uuid);
 			nlohmann::json j;
 			so->WriteJson(j);
 			so->DropJsonMoldAttributes(j);
+			return j;
+		};
+	auto createMold = [&]()
+		{
+			bool rewrite = !moldAvailable();
+
+			JUUID uuid = (!rewrite) ? getUUID() : GetMoldUUIDByName(name);
 
 			nlohmann::json moldTemplate =
 			{
-				{ "uuid", getUUID() },
+				{ "uuid", uuid },
 				{ "name", name },
 			};
-			moldTemplate[SceneObjectTypeJsonContainer.at(type)] = nlohmann::json::array({ j });
+			if (!moldTreeSelection)
+			{
+				nlohmann::json j = getUUIDMoldJson(id, uuid);
+				moldTemplate[SceneObjectTypeJsonContainer.at(type)] = nlohmann::json::array({ j });
+			}
+			else
+			{
+				for (auto& sel_uuid : selected_uuids)
+				{
+					SceneObjectType t = GetSceneObjectType(id, sel_uuid);
+					std::string container = SceneObjectTypeJsonContainer.at(t);
+					if (!moldTemplate.contains(container))
+						moldTemplate[container] = nlohmann::json::array({});
 
+					nlohmann::json j = getUUIDMoldJson(id, sel_uuid);
+					moldTemplate[container].push_back(j);
+				}
+			}
+
+			if (rewrite)
+				DeleteMoldTemplate(uuid);
 			CreateMold(moldTemplate);
 			Editor::MarkTemplatesPanelAssetsAsDirty();
 			show = false;
+			moldTreeSelection = false;
 		};
 
 	ImGui::OpenPopup(SceneObjectTypeToString.at(type).c_str());
@@ -91,19 +119,12 @@ void SceneObjectPopup::Draw()
 			openedCollapsableItem = 1;
 			ImGui::InputText("name", &name);
 			bool available = moldAvailable();
-			if (!available)
+
+			ImGui::Checkbox("use tree?", &moldTreeSelection);
+			if (ImGui::Button(available ? "Create Mold" : "Replace Mold"))
 			{
-				ImGui::PushStyleColor(ImGuiCol_Text, rgba(255, 0, 0, 1));
-				ImGui::Text("*not available");
-				ImGui::PopStyleColor();
+				createMold();
 			}
-			ImGui::DrawItemWithEnabledState([&]
-				{
-					if (ImGui::Button("Create Mold"))
-					{
-						createMold();
-					}
-				}, available);
 		}
 		else if (openedCollapsableItem == 1)
 		{
@@ -115,6 +136,7 @@ void SceneObjectPopup::Draw()
 		if (ImGui::Button("Cancel"))
 		{
 			show = false;
+			moldTreeSelection = false;
 		}
 
 		ImGui::Dummy(ImVec2(0.0f, 5.0f));

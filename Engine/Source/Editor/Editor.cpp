@@ -1830,7 +1830,7 @@ namespace Editor
 					[](JUUID uuid) { SendEditorPreview(uuid, [](JUUID uuid) { return GetSceneObjectPointer(currentSceneUnitId, uuid); }, sceneObjectEdition.at(currentSceneUnitId).drawers); },
 					[](SceneObjectType type) { StartSceneObjectCreation(type); },
 					[](JUUID uuid) { DeleteSceneObjectFromEditor(currentSceneUnitId, uuid); },
-					[](JUUID uuid) { OpenPopupForSceneObject(currentSceneUnitId, uuid); },
+					[](JUUID uuid) { OpenPopupForSceneObject(currentSceneUnitId, uuid, sceneObjectEdition.at(currentSceneUnitId).selected); },
 					[] { ClearSceneObjectsSelection(currentSceneUnitId); }
 				);
 			}
@@ -1898,19 +1898,21 @@ namespace Editor
 		templateEdition.BuildAssetsTree(GetTemplatesTypesList, GetJTemplatePointer);
 	}
 
-	void OpenPopupForSceneObject(SceneUnitId id, JUUID uuid)
+	void OpenPopupForSceneObject(SceneUnitId id, JUUID uuid, std::set<std::string> selected_uuids)
 	{
 		SceneObjectType type = GetSceneObjectType(id, uuid);
 		SceneObject* object = GetSceneObjectPointer(id, uuid);
 
 		sceneObjectPopup.show = true;
 		sceneObjectPopup.openedCollapsableItem = 0;
+		sceneObjectPopup.moldTreeSelection = false;
 		sceneObjectPopup.pos = ImGui::GetMousePos();
 		sceneObjectPopup.pos.x -= 200;
 		sceneObjectPopup.name = std::string(object->at("name")) + "_copy";
 		sceneObjectPopup.id = id;
 		sceneObjectPopup.uuid = uuid;
 		sceneObjectPopup.type = type;
+		sceneObjectPopup.selected_uuids = selected_uuids;
 	}
 
 	void OpenPopupForTemplate(JUUID uuid)
