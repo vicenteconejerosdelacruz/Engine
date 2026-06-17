@@ -63,7 +63,10 @@
 
 #define TEMPDEF_DELETE(TemplateName) void Delete##TemplateName##Template(JUUID uuid)\
 {\
+	TemplateType type = GetTemplateType(uuid);\
 	TemplateName##templates.erase(uuid);\
+	GetTemplates(type).erase(uuid);\
+	GetTemplatesTypes().erase(uuid);\
 }\
 
 #define TEMPDEF_FULL(TemplateName) \
