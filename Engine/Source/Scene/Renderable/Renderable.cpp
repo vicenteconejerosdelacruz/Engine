@@ -69,12 +69,25 @@ namespace Scene
 #include <JEnd.h>
 
 		lifecycleState->store(false);
-		RENAME_ON_DELETION(Renderable);
+		//RENAME_ON_DELETION(Renderable);
 		animationStepLock = std::make_unique<std::atomic_bool>(false);
 		for (unsigned int i = 0; i < JRenderer::numFrames; i++)
 		{
 			constantsBuffersLock[i] = std::make_unique<std::atomic_bool>(false);
 		}
+		markedForDelete.Hook([&]
+			{
+				lifecycleState->wait(false);
+				RenameRenderableSceneObject(SUuuid(), "delete-" + uuid());
+				if (at("physicObject").is_array() && at("physicObject").size() > 0)
+				{
+					for (unsigned int i = 0; i < at("physicObject").size(); i++)
+					{
+						GetPhysicObject(at("physicObject").at(i))->actor->userData = nullptr;
+					}
+				}
+			}
+		);
 	}
 
 	void Renderable::create_rotation(XMFLOAT3 v)
