@@ -38,7 +38,7 @@ namespace Physics
 
 			if (!trigger || !other) continue;
 			if (!trigger->built || !trigger->trigger) continue;
-			if (!other->built || !other->renderable) continue;
+			if (!other->built || !other->renderable || other->renderable->markedForDelete) continue;
 			if (!(trigger->collisionMask() & other->objectMask())) continue;
 
 			if (current.status & PxPairFlag::eNOTIFY_TOUCH_FOUND)
@@ -67,13 +67,16 @@ namespace Physics
 		OutputDebugStringA("onAdvance\n");
 	}
 
-	void ContactCallback::onContact(const PxContactPairHeader& /*pairHeader*/, const PxContactPair* pairs, PxU32 count)
+	void ContactCallback::onContact(const PxContactPairHeader& pairHeader, const PxContactPair* pairs, PxU32 count)
 	{
 		//		printf("onContact: %d pairs\n", count);
 
 		while (count--)
 		{
 			const PxContactPair& current = *pairs++;
+
+			PhysicObject* pA = static_cast<PhysicObject*>(current.shapes[0]->userData);
+			PhysicObject* pB = static_cast<PhysicObject*>(current.shapes[1]->userData);
 
 			// The reported pairs can be trigger pairs or not. We only enabled contact reports for
 			// trigger pairs in the filter shader, so we don't need to do further checks here. In a
@@ -83,9 +86,17 @@ namespace Physics
 			// in a hash-set and test the reported shape pointers against it. Many options here.
 
 			if (current.events & (PxPairFlag::eNOTIFY_TOUCH_FOUND | PxPairFlag::eNOTIFY_TOUCH_CCD))
-				OutputDebugStringA("Shape is entering trigger volume\n");
+			{
+				CallRegisteredCallbacks(pB->behavior(), pA->uuid(), pB->uuid(), PxPairFlag::eNOTIFY_TOUCH_FOUND);
+				CallRegisteredCallbacks(pA->behavior(), pB->uuid(), pA->uuid(), PxPairFlag::eNOTIFY_TOUCH_FOUND);
+				//OutputDebugStringA("Shape is entering trigger volume\n");
+			}
 			if (current.events & PxPairFlag::eNOTIFY_TOUCH_LOST)
-				OutputDebugStringA("Shape is leaving trigger volume\n");
+			{
+				CallRegisteredCallbacks(pB->behavior(), pA->uuid(), pB->uuid(), PxPairFlag::eNOTIFY_TOUCH_LOST);
+				CallRegisteredCallbacks(pA->behavior(), pB->uuid(), pA->uuid(), PxPairFlag::eNOTIFY_TOUCH_LOST);
+				//OutputDebugStringA("Shape is leaving trigger volume\n");
+			}
 
 			//if (isTriggerShape(current.shapes[0]) && isTriggerShape(current.shapes[1]))
 			//	OutputDebugStringA("Trigger-trigger overlap detected\n");
