@@ -1,5 +1,13 @@
 /* Importar fuente clásica de Arcade desde Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+/*@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');*/
+@font-face {
+  font-family: 'Press Start 2P';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  /* Apuntamos directamente a tu archivo TTF local */
+  src: url('../../fonts/PressStart2P-Regular.ttf') format('truetype');
+}
 
 .dialogue-container {
   position: absolute;
