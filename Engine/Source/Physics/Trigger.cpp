@@ -210,9 +210,13 @@ namespace Scene
 				std::set<JUUIDName> bindedControllers;
 				for (auto& sb : scriptBindedControllers)
 				{
-					SceneObject* ptr = GetSceneObjectPointer(MAKESUUUID(SUUUIDUNIT(sceneObject), sb.uuid));
+					SUUUID suuuid = MAKESUUUID(SUUUIDUNIT(sceneObject), sb.uuid);
+					if (SceneObjectExists(suuuid))
+					{
+						SceneObject* ptr = GetSceneObjectPointer(suuuid);
 					JUUID uuid = ptr->at("controllers").at(sb.controllerName);
 					bindedControllers.insert(std::make_tuple(uuid, sb.bindingName));
+				}
 				}
 				//attach the binded controllers
 				BindSceneObjectControllers(context, isolate, scriptData, bindedControllers);
@@ -234,8 +238,14 @@ namespace Scene
 		using namespace Editor;
 #endif
 		auto& Triggers = GetTriggers(unit);
+		std::set<TriggerID> tr1;
 		std::set<TriggerID> tr;
-		std::transform(Triggers.begin(), Triggers.end(), std::inserter(tr, tr.begin()), [&](auto o) { return MAKESUUUID(unit, o); });
+		std::transform(Triggers.begin(), Triggers.end(), std::inserter(tr1, tr1.begin()), [&](auto o) { return MAKESUUUID(unit, o); });
+		std::copy_if(tr1.begin(), tr1.end(), std::inserter(tr, tr.begin()), [](TriggerID t)
+			{
+				return TriggerSceneObjectExist(t);
+			}
+		);
 
 		auto checkForDelete = [](TriggerID t)
 			{

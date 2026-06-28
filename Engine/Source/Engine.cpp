@@ -445,11 +445,11 @@ void AppStep()
 #if defined(_EDITOR)
 			EditorStep();
 #endif
+			SimulatePhysicScenes(timer);
 		}
 	);
 	UIStep();
 	Render();
-	SimulatePhysicScenes(timer);
 	LoadingProcessorsStep();
 }
 

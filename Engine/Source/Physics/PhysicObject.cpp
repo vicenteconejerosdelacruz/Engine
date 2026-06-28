@@ -288,6 +288,12 @@ namespace Physics
 			dynamicActor = actor->is<PxRigidDynamic>();
 			dynamicActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 		}
+		else
+		{
+			dynamicActor = actor->is<PxRigidDynamic>();
+			dynamicActor->setRigidBodyFlag(PxRigidBodyFlag::eENABLE_CCD, true);
+			dynamicActor->setMaxLinearVelocity(30.0f);
+		}
 
 		//create the PxShape
 		shape = PxRigidActorExt::createExclusiveShape(*actor, physicGeometryInstance->geometry.any(), *material);
@@ -303,6 +309,7 @@ namespace Physics
 		if (!kinematic())
 		{
 			actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+			scene->pxScene->resetFiltering(*actor);
 		}
 		else
 		{
@@ -503,6 +510,12 @@ namespace Physics
 		{
 			dynamicActor = actor->is<PxRigidDynamic>();
 			dynamicActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+		}
+		else
+		{
+			dynamicActor = actor->is<PxRigidDynamic>();
+			dynamicActor->setRigidBodyFlag(PxRigidBodyFlag::eENABLE_CCD, true);
+			dynamicActor->setMaxLinearVelocity(30.0f);
 		}
 
 		//create the PxShape

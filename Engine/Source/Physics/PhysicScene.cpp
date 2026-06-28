@@ -23,6 +23,8 @@ namespace Editor
 
 namespace Scene
 {
+	std::set<SceneUnitId> pendingPhysicsCreation;
+
 	SODEF_FULL(PhysicScene);
 
 #include <TrackUUID/JDef.h>
@@ -134,7 +136,8 @@ namespace Scene
 
 	void FetchPhysicsScenesResults(SceneUnitId id, float step)
 	{
-		if (GetCountFromPhysicScenes(id) == 0ULL || step == 0.0f) return;
+		if (GetCountFromPhysicScenes(id) == 0ULL || step == 0.0f)
+			return;
 
 		PhysicSceneID scene = MAKESUUUID(id, *GetPhysicScenes(id).begin());
 		scene->pxScene->fetchResults(true);
@@ -148,6 +151,11 @@ namespace Scene
 		if (GetCountFromPhysicScenes(id) == 0ULL || step == 0.0f) return;
 
 		PhysicSceneID scene = MAKESUUUID(id, *GetPhysicScenes(id).begin());
+		if (pendingPhysicsCreation.contains(id))
+		{
+			CreatePhysicsObjectsBehaviors(id);
+			pendingPhysicsCreation.erase(id);
+		}
 		scene->pxScene->simulate(gameUpdateFrequency);
 	}
 

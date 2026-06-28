@@ -6430,7 +6430,7 @@ JEdvEditorDrawerFunction DrawPreview<jedv_create_from_mold>()
 				Scene::CreateSceneObjectFromMold(
 					Editor::currentSceneUnitId,
 					json.at(0)->at("uuid"),
-					[](SceneObjectType type, std::string name)
+					[](SceneObjectType type, nlohmann::json json, std::string name)
 					{
 						return nlohmann::json(
 							{

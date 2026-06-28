@@ -39,8 +39,8 @@ namespace Scene
 	void CreateSceneObjectFromMold(
 		SceneUnitId parentUnit,
 		JUUID moldUUID,
-		std::function<nlohmann::json(SceneObjectType type, std::string name)> getInstanceAttributes =
-		[](SceneObjectType type, std::string name)
+		std::function<nlohmann::json(SceneObjectType type, nlohmann::json json, std::string name)> getInstanceAttributes =
+		[](SceneObjectType type, nlohmann::json json, std::string name)
 		{
 			return nlohmann::json();
 		}

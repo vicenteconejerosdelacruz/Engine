@@ -51,11 +51,11 @@ void SceneObjectPopup::Draw()
 		{
 			bool rewrite = !moldAvailable();
 
-			JUUID uuid = (!rewrite) ? getUUID() : GetMoldUUIDByName(name);
+			JUUID mold_uuid = (!rewrite) ? getUUID() : GetMoldUUIDByName(name);
 
 			nlohmann::json moldTemplate =
 			{
-				{ "uuid", uuid },
+				{ "uuid", mold_uuid },
 				{ "name", name },
 			};
 			if (!moldTreeSelection)
@@ -78,7 +78,7 @@ void SceneObjectPopup::Draw()
 			}
 
 			if (rewrite)
-				DeleteMoldTemplate(uuid);
+				DeleteMoldTemplate(mold_uuid);
 			CreateMold(moldTemplate);
 			Editor::MarkTemplatesPanelAssetsAsDirty();
 			show = false;

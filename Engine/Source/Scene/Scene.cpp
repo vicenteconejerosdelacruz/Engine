@@ -173,7 +173,7 @@ namespace Scene
 			{
 				auto& scene = GetSceneUnit(parentUnit);
 
-				LoadLevel(scene, filename, data, progress);
+				LoadLevel(scene, filename, data, progress, false);
 
 				if (levelThreadsStack.at(parentUnit)->fetch_sub(1U) == 1)
 				{
@@ -189,7 +189,7 @@ namespace Scene
 	void CreateSceneObjectFromMold(
 		SceneUnitId parentUnit,
 		JUUID moldUUID,
-		std::function<nlohmann::json(SceneObjectType, std::string)> getInstanceAttributes
+		std::function<nlohmann::json(SceneObjectType, nlohmann::json, std::string)> getInstanceAttributes
 	)
 	{
 		MoldJsonID mold = moldUUID;
@@ -202,7 +202,7 @@ namespace Scene
 			{
 				nlohmann::json j = js.value();
 				j.at("uuid") = getUUID();
-				nlohmann::json patch = getInstanceAttributes(StringToSceneObjectType.at(JsonContainerToString.at(soType)), j.at("name"));
+				nlohmann::json patch = getInstanceAttributes(StringToSceneObjectType.at(JsonContainerToString.at(soType)), j, j.at("name"));
 				j.merge_patch(patch);
 				data[soType].push_back(j);
 			}

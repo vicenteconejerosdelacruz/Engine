@@ -93,7 +93,7 @@ namespace Physics
 		//sceneDesc.filterShader = PxDefaultSimulationFilterShader;
 		sceneDesc.filterShader = BitmaskFilterShader;
 		sceneDesc.cudaContextManager = gCudaContextManager;
-		sceneDesc.flags |= PxSceneFlag::eENABLE_GPU_DYNAMICS | PxSceneFlag::eENABLE_PCM;
+		sceneDesc.flags |= PxSceneFlag::eENABLE_GPU_DYNAMICS | PxSceneFlag::eENABLE_PCM | PxSceneFlag::eENABLE_CCD;
 		sceneDesc.broadPhaseType = PxBroadPhaseType::eGPU;
 
 		// Sube los límites iniciales para evitar que la GPU tenga que redimensionar en caliente

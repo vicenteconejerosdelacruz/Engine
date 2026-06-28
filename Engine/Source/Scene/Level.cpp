@@ -23,6 +23,11 @@ namespace Editor {
 }
 #endif
 
+namespace Scene
+{
+	extern std::set<SceneUnitId> pendingPhysicsCreation;
+};
+
 namespace Scene::Level
 {
 	using namespace Scene;
@@ -111,7 +116,7 @@ namespace Scene::Level
 	}
 
 	static std::mutex loadLevelMutex;
-	void LoadLevel(std::unique_ptr<SceneUnit>& scene, std::string filename, nlohmann::json data, std::function<void(std::string, unsigned int, unsigned int)> progress)
+	void LoadLevel(std::unique_ptr<SceneUnit>& scene, std::string filename, nlohmann::json data, std::function<void(std::string, unsigned int, unsigned int)> progress, bool initPhysX)
 	{
 		std::lock_guard<std::mutex> lock(loadLevelMutex);
 		using namespace Scene;
@@ -226,7 +231,14 @@ namespace Scene::Level
 			CreateRegisteredBillboards(id);
 		}
 #endif
+		if (initPhysX)
+		{
 		CreatePhysicsObjectsBehaviors(id);
+		}
+		else
+		{
+			pendingPhysicsCreation.insert(id);
+		}
 		//leave this to last
 		MapControllers(id);
 #if defined(_EDITOR)
