@@ -116,7 +116,7 @@ namespace Game::Effects
 			return;
 #endif
 
-		if (animationEnded)
+		if (animationEnded || !renderable || !SceneObjectExists(renderable()))
 			return;
 
 		currentTime += static_cast<float>(timer.GetElapsedSeconds());
