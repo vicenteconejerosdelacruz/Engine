@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <set>
 #include <UUID.h>
 #include <JObject.h>
 #include <JTypes.h>
@@ -152,6 +153,7 @@ namespace Game
 		virtual void Step(float delta) {};
 		virtual void Render(SceneUnitId id) {};
 		//Scripting
+		virtual std::set<std::string> GetControllerAliases() { return {}; }
 		virtual void BindNestedControllers(Local<Context> context, Isolate* isolate, std::unique_ptr<SceneUnitScripting>& scriptData) {}
 
 		SceneUnitId unit;
