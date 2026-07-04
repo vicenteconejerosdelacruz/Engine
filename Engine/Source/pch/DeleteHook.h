@@ -12,7 +12,7 @@ struct DeleteHook
 	}
 	void operator=(bool v)
 	{
-		if (!marked && v) { onDelete(); }
+		if (!marked && v && onDelete) { onDelete(); }
 		marked = v;
 	}
 	bool operator==(const DeleteHook& other) const
