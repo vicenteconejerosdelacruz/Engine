@@ -126,25 +126,25 @@
     <ClInclude Include="JExpose\Templates\TextureAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Scene\RenderableAtt.h">
+    <ClInclude Include="Scene\Renderable\RenderableAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="JExpose\Templates\MaterialAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Scene\CameraAtt.h">
+    <ClInclude Include="Scene\Camera\CameraAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="JExpose\Templates\Model3DAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Scene\SoundFXAtt.h">
+    <ClInclude Include="Scene\Sound\SoundFXAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="JExpose\Templates\SoundAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Scene\LightAtt.h">
+    <ClInclude Include="Scene\Light\LightAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="pch\JExposeEditor.h">
@@ -579,10 +579,10 @@
     <ClInclude Include="Physics\PhysicScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Scene\PhysicSceneAtt.h">
+    <ClInclude Include="Physics\PhysicSceneAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Physics\PhysicObjectAtt.h">
+    <ClInclude Include="Physics\PhysicObjectAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Physics\PhysicObject.h">
@@ -594,7 +594,7 @@
     <ClInclude Include="JExpose\Templates\PhysicGeometryAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Scene\TriggerAtt.h">
+    <ClInclude Include="Physics\TriggerAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Physics\Trigger.h">
@@ -630,7 +630,7 @@
     <ClInclude Include="JExpose\Controllers\ControllerAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Scene\BoundaryAtt.h">
+    <ClInclude Include="Physics\BoundaryAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Editor\SceneObjectPopup.h">
@@ -660,7 +660,7 @@
     <ClInclude Include="Controllers\SceneController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Scene\SceneControllerAtt.h">
+    <ClInclude Include="Controllers\SceneControllerAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="UI\UI.h">
