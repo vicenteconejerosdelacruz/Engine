@@ -123,6 +123,7 @@ nlohmann::json SequenceChannelElementTrigger::CreateTriggerJson(RenderableID ren
 	auto [fPos, fRot, tRotQ, fScl] = GetTransformation(world, nodesTransformation);
 	JUUID uuid = getUUID();
 	auto bindings = renderable->GetScriptBindings();
+	auto cameras = renderable->cameras();
 
 	nlohmann::json j = {
 		{ "behavior", PhysicsBehaviorToString.at(PB_Trigger) },
@@ -143,6 +144,7 @@ nlohmann::json SequenceChannelElementTrigger::CreateTriggerJson(RenderableID ren
 		{ "uuid", uuid },
 		{ "countEnter", 1 },
 		{ "countLeave", 1 },
+		{ "cameras", cameras },
 	};
 	if (bindings.size() > 0ULL)
 	{
