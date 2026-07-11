@@ -161,7 +161,7 @@ void SequencePlayer::CreateSequenceTriggers()
 	for (auto* t : triggers)
 	{
 		triggersJ.push_back(t->CreateTriggerJson(renderable, world, nodesTransformation));
-		t->trigger = MAKESUUUID(0ULL, triggersJ.back().at("uuid"));
+		t->trigger = MAKESUUUID(unit, triggersJ.back().at("uuid"));
 		t->triggerBuilt = std::make_unique<std::atomic_bool>(false);
 	}
 
@@ -185,6 +185,8 @@ void SequencePlayer::DestroySequenceTriggers()
 	auto triggers = sequence.GetTriggerElements();
 	for (auto* t : triggers)
 	{
+		if (t->triggerBuilt->load() != true)
+			t->triggerBuilt->wait(false);
 		t->triggerBuilt->store(false);
 		t->triggerBuilt = nullptr;
 		t->trigger->markedForDelete = true;
