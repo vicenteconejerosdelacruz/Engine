@@ -435,6 +435,9 @@ void AppStep()
 
 	SceneUnitsStep();
 	UpdateAudio();
+#if defined(_EDITOR)
+	EditorStep();
+#endif
 	timer.Tick([&]()
 		{
 			FetchPhysicsScenesResults(timer);
@@ -442,9 +445,6 @@ void AppStep()
 			GameStep();
 			SceneObjectsStep(timer);
 			StepControllers(timer);
-#if defined(_EDITOR)
-			EditorStep();
-#endif
 			SimulatePhysicScenes(timer);
 		}
 	);

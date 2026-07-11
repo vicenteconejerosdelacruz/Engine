@@ -1417,16 +1417,12 @@ namespace Scene
 #endif
 
 			DeleteModel3DInstance(model3D());
-			//if (!boundingBoxCompute.empty())
-			//{
-			//	DeleteRenderableBoundingBox(boundingBoxCompute());
-			//	boundingBoxCompute.clear();
-			//}
 		}
 
-		if (at("physicObject").is_string())
+		auto list = GetPhysicsObjectsBySceneObjectUUID(SUuuid());
+		for (PhysicObjectID phO : list)
 		{
-			DestroyPhysicObject(at("physicObject"));
+			phO->markedForDelete = true;
 		}
 
 #include <Attributes/JDestroy.h>
@@ -1445,6 +1441,9 @@ namespace Scene
 		if (!RenderReady() || markedForDelete || !visible() || !materials.contains(renderPass) || renderException) return;
 
 		std::tuple<CameraID, RenderPassInstanceID> key = std::make_tuple(camera, renderPass);
+
+		if (!descriptorsRenders.contains(key))
+			return;
 
 		auto& scene = GetSceneUnit(unit);
 		unsigned int frame = scene->Frame();
@@ -1531,6 +1530,7 @@ namespace Scene
 
 		auto checkCamera = [](RenderableID r)
 			{
+				if (!SceneObjectExists(r())) return;
 				if (!r->dirty(Renderable::Update_cameras)) return;
 				r->clean(Renderable::Update_cameras);
 
@@ -1593,8 +1593,10 @@ namespace Scene
 		}
 
 		std::set<RenderableID> rGeom;
-		std::copy_if(r.begin(), r.end(), std::inserter(rGeom, rGeom.begin()), [](auto& o)
+		std::copy_if(r.begin(), r.end(), std::inserter(rGeom, rGeom.begin()), [](auto o)
 			{
+				if (!SceneObjectExists(o()))
+					return false;
 				bool updated = o->dirty(Renderable::Update_scale);
 				o->clean(Renderable::Update_scale);
 				return updated && !o->at("physicObject").empty();
@@ -1605,11 +1607,6 @@ namespace Scene
 		{
 			for (PhysicObjectID phO : GetPhysicsObjectsBySceneObjectUUID(rp->SUuuid()))
 			{
-				phO->DestroyPhysicsBehavior();
-				phO->CreatePhysicsBehavior();
-#if defined(_EDITOR)
-				phO->CreatePhysicsAvatar();
-#endif
 			}
 		}
 
@@ -1666,11 +1663,10 @@ namespace Scene
 			auto list = GetPhysicsObjectsBySceneObjectUUID(renderable->SUuuid());
 			for (PhysicObjectID phO : list)
 			{
-				phO->DestroyPhysicsBehavior();
 #if defined(_EDITOR)
 				phO->DestroyPhysicsAvatar();
 #endif
-				DestroyPhysicObject(phO());
+				phO->markedForDelete = true;
 				renderable->clear();
 			}
 			EraseRenderableFromRenderables(renderable->unit, renderable.uuid());

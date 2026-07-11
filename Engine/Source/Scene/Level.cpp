@@ -129,6 +129,8 @@ namespace Scene::Level
 		if (!scene->IsIsolated())
 		{
 			CreateSceneUnitBillboards(id);
+			CreateSceneUnitPhysicsController(id);
+			AttachPhysicsAvatars(id, data);
 		}
 #endif
 
@@ -219,7 +221,6 @@ namespace Scene::Level
 		{
 			CreatePickingPass(id);
 			CreateSceneUnitEditorIndependentCamera(id);
-			CreateSceneUnitPhysicsController(id);
 		}
 #endif
 

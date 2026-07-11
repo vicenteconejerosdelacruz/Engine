@@ -150,7 +150,7 @@ namespace Scene
 	{
 		if (!physicObject.empty())
 		{
-			DestroyPhysicObject(physicObject());
+			GetPhysicObject(physicObject())->markedForDelete = true;
 		}
 		UnregisterTriggerContactCallback(SUuuid());
 
@@ -176,10 +176,6 @@ namespace Scene
 
 		std::string pOname = name() + "-physicObject";
 		physicObject = Physics::CreatePhysicObject(pOname, SUuuid(), data);
-		physicObject->CreatePhysicsBehavior();
-#if defined(_EDITOR)
-		physicObject->CreatePhysicsAvatar();
-#endif
 		RegisterTriggerContactCallback(SUuuid(), [&](SUUUID otherObject, unsigned int event) { OnTriggerEvent(otherObject, event); });
 	}
 
@@ -214,9 +210,9 @@ namespace Scene
 					if (SceneObjectExists(suuuid))
 					{
 						SceneObject* ptr = GetSceneObjectPointer(suuuid);
-					JUUID uuid = ptr->at("controllers").at(sb.controllerName);
-					bindedControllers.insert(std::make_tuple(uuid, sb.bindingName));
-				}
+						JUUID uuid = ptr->at("controllers").at(sb.controllerName);
+						bindedControllers.insert(std::make_tuple(uuid, sb.bindingName));
+					}
 				}
 				//attach the binded controllers
 				BindSceneObjectControllers(context, isolate, scriptData, bindedControllers);

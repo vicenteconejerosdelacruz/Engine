@@ -6017,10 +6017,6 @@ JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
 					std::string physicObjectUUID = json.at(0)->at(attribute).at(0);
 					auto& physicObject = GetPhysicObject(physicObjectUUID);
 					physicObject->JUpdate(new_atts);
-					physicObject->DestroyPhysicsBehavior();
-					physicObject->CreatePhysicsBehavior();
-					physicObject->DestroyPhysicsAvatar();
-					physicObject->CreatePhysicsAvatar();
 				};
 			auto addPhysicsBehavior = [&]()
 				{
@@ -6028,7 +6024,6 @@ JEdvEditorDrawerFunction DrawVectorObject<jedv_t_physic_object_vector>()
 					JUUID sceneObject = json.at(0)->at("uuid");
 					JUUID uuid = CreatePhysicObject(attribute, MAKESUUUID(Editor::currentSceneUnitId, sceneObject), placeholder);
 					json.at(0)->at(attribute).push_back(uuid);
-					//GetPhysicObject(uuid)->CreatePhysicsBehavior();
 				};
 			auto removePhysicsBehavior = [&]()
 				{

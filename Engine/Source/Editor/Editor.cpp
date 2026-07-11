@@ -33,6 +33,7 @@ extern std::unique_ptr<DirectX::Keyboard> keyboard;
 extern std::unique_ptr<JRenderer> renderer;
 extern std::string gameAppTitle;
 extern bool inSizeMove;
+extern DX::StepTimer timer;
 extern RECT GetMaximizedAreaSize();
 
 // Forward declare message handler from imgui_impl_win32.cpp
@@ -3281,6 +3282,8 @@ namespace Editor
 		}
 
 		//no more sounds and now we can display the billboards again
+		FetchPhysicsScenesResults(timer);
+		Physics::RemoveFromSimulatingScenes(id);
 		StopSounds(id);
 		ShowBillboards(id);
 

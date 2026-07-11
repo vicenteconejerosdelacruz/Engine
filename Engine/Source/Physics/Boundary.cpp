@@ -120,7 +120,7 @@ namespace Scene
 	{
 		if (!physicObject.empty())
 		{
-			DestroyPhysicObject(physicObject());
+			GetPhysicObject(physicObject())->markedForDelete = true;
 		}
 
 #include <Attributes/JDestroy.h>
@@ -147,10 +147,6 @@ namespace Scene
 
 		std::string pOname = name() + "-physicObject";
 		physicObject = Physics::CreatePhysicObject(pOname, SUuuid(), data);
-		physicObject->CreatePhysicsBehavior();
-#if defined(_EDITOR)
-		physicObject->CreatePhysicsAvatar();
-#endif
 	}
 
 #if defined(_EDITOR)

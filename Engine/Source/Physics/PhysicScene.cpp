@@ -134,14 +134,16 @@ namespace Scene
 		SceneObject::Destroy();
 	}
 
+	std::set<SceneUnitId> simulatingScenes;
 	void FetchPhysicsScenesResults(SceneUnitId id, float step)
 	{
-		if (GetCountFromPhysicScenes(id) == 0ULL || step == 0.0f)
+		if (GetCountFromPhysicScenes(id) == 0ULL || step == 0.0f || !simulatingScenes.contains(id))
 			return;
 
 		PhysicSceneID scene = MAKESUUUID(id, *GetPhysicScenes(id).begin());
 		scene->pxScene->fetchResults(true);
 		UpdateRenderablesFromGlobalPose(id);
+		simulatingScenes.erase(id);
 	}
 
 	void SimulatePhysicScenes(SceneUnitId id, float step)
@@ -157,6 +159,13 @@ namespace Scene
 			pendingPhysicsCreation.erase(id);
 		}
 		scene->pxScene->simulate(gameUpdateFrequency);
+		simulatingScenes.insert(id);
+	}
+
+	void RemoveFromSimulatingScenes(SceneUnitId id)
+	{
+		if (simulatingScenes.contains(id))
+			simulatingScenes.erase(id);
 	}
 
 	void DestroyPhysicScenes()
@@ -191,5 +200,17 @@ namespace Scene
 	{
 		PhysicSceneID ps = MAKESUUUID(id, uuid);
 		ps->markedForDelete = true;
+	}
+	void DestroyPhysicsSceneObjects(SceneUnitId id)
+	{
+		auto list = GetPhysicsObjectsBySceneUnit(id);
+		for (PhysicObjectID phO : list)
+		{
+			if (phO->markedForDelete)
+			{
+				phO->DestroyPhysicsBehavior();
+				DestroyPhysicObject(phO());
+			}
+		}
 	}
 }

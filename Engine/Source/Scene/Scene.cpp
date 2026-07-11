@@ -733,6 +733,7 @@ namespace Scene
 				dt = 0.0f;
 #endif
 			Physics::FetchPhysicsScenesResults(unit, dt);
+			Physics::DestroyPhysicsSceneObjects(unit);
 		}
 	}
 

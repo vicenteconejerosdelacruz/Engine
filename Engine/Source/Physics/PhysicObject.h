@@ -3,6 +3,7 @@
 #include <set>
 #include <UUID.h>
 #include <JObject.h>
+#include <DeleteHook.h>
 //Physx
 #include <PxPhysicsAPI.h>
 using namespace physx;
@@ -114,17 +115,11 @@ namespace Physics
 
 		//Renderable representation
 		std::tuple<XMFLOAT3, XMVECTOR, XMFLOAT3, XMFLOAT3> GetPhysicsAvatarTransformation();
-		void CreatePhysicsAvatar();
+		void LinkPhysicsAvatar();
 		void DestroyPhysicsAvatar();
 		void UpdatePhysicsAvatarTransformation();
 		void visible(bool value);
 		void UpdatePhysicsAvatarColor(unsigned int frame, XMFLOAT4 rgba);
-		void CreateRenderableStatic();
-		void CreateRenderableDynamic();
-		void CreateRenderableCharacter();
-		void CreateRenderableTrigger();
-		nlohmann::json CreateFromRenderable(std::string name, JUUID uuid, JUUID camId, std::string material, bool visible, XMFLOAT3 position, XMFLOAT3 rotation, XMFLOAT3 scale);
-		nlohmann::json CreateFromTrigger(std::string name, JUUID uuid, JUUID camId, std::string material);
 #endif
 
 		RenderableID renderable;
@@ -142,10 +137,12 @@ namespace Physics
 		bool avatarBuilt = false;
 #endif
 		bool built = false;
+		DeleteHook markedForDelete;
 	};
 
 	std::unique_ptr<PhysicObject>& GetPhysicObject(JUUID uuid);
 	void DestroyPhysicObject(JUUID uuid);
+	std::set<JUUID> GetPhysicsObjectsBySceneUnit(SceneUnitId id);
 	std::set<JUUID> GetPhysicsObjectsBySceneObjectUUID(SUUUID uuid);
 	JUUID CreatePhysicObject(std::string name, SUUUID sceneObject, nlohmann::json& json);
 
@@ -153,6 +150,12 @@ namespace Physics
 	void UpdateRenderablesFromGlobalPose(SceneUnitId id);
 	void UpdatePhysicObjects(SceneUnitId id);
 
+	//Avatars
+#if defined(_EDITOR)
+	void AttachPhysicsAvatars(SceneUnitId id, nlohmann::json& data);
+	nlohmann::json CreateFromRenderable(std::string name, JUUID uuid, JUUID geometry, JUUID camId, std::string material, bool visible, XMFLOAT3 position, XMFLOAT3 rotation, XMFLOAT3 scale);
+	nlohmann::json CreateFromTrigger(std::string name, JUUID uuid, JUUID geometry, JUUID camId, std::string material, bool visible, XMFLOAT3 position, XMFLOAT3 rotation, XMFLOAT3 scale);
+#endif
 	//Contact callbacks
 	void RegisterContactCallback(PhysicsBehavior behavior, JUUID object, std::function<void(JUUID, unsigned int)> callback);
 	void UnregisterContactCallback(PhysicsBehavior behavior, JUUID object);

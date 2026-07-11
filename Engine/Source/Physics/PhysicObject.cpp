@@ -793,7 +793,8 @@ namespace Physics
 
 	void PhysicObject::UpdateGlobalPoseFromTrigger()
 	{
-		actor->setGlobalPose(PxTransform(ToPxVec3(trigger->position()), ToPxQuat(trigger->rotationQ())));
+		if (actor)
+			actor->setGlobalPose(PxTransform(ToPxVec3(trigger->position()), ToPxQuat(trigger->rotationQ())));
 #if defined(_EDITOR)
 		UpdatePhysicsAvatarTransformation();
 #endif
@@ -880,19 +881,56 @@ namespace Physics
 	}
 
 	//Renderable representation
-	void PhysicObject::CreatePhysicsAvatar()
+	void PhysicObject::LinkPhysicsAvatar()
 	{
-		if (renderableShape || geometry().empty()) return;
+		using namespace Editor;
 
-		std::map<PhysicsBehavior, std::function<void()>> builder =
+		if (avatarBuilt) return;
+
+		JUUID uuid_base;
+		if (renderable)
 		{
-			{PB_Static,[&] {CreateRenderableStatic(); }},
-			{PB_Dynamic,[&] {CreateRenderableDynamic(); }},
-			{PB_Character,[&] {CreateRenderableCharacter(); }},
-			{PB_Trigger,[&] {CreateRenderableTrigger(); }},
+			uuid_base = renderable.uuid();
+		}
+		else if (boundary)
+		{
+			uuid_base = boundary.uuid();
+		}
+		else if (trigger)
+		{
+			uuid_base = trigger.uuid();
+		}
+
+		renderableLines = MAKESUUUID(unit(), uuid_base + "-lines");
+		renderableShape = MAKESUUUID(unit(), uuid_base + "-shape");
+
+		if (boundary)
+		{
+			renderableLines->OnPick = [&] {Editor::SelectBoundary(boundary->SUuuid()); };
+			renderableShape->OnPick = [&] {Editor::SelectBoundary(boundary->SUuuid()); };
+		}
+		else if (trigger)
+		{
+			renderableLines->OnPick = [&] {Editor::SelectTrigger(trigger->SUuuid()); };
+			renderableShape->OnPick = [&] {Editor::SelectTrigger(trigger->SUuuid()); };
+		}
+
+		avatarBuilt = true;
+
+		PhysicSceneID scene = MAKESUUUID(unit(), *GetPhysicScenes(unit()).begin());
+		for (unsigned int frame = 0U; frame < JRenderer::numFrames; frame++)
+		{
+			UpdatePhysicsAvatarColor(frame, overrideColor() ? color() : behaviorColors(scene, behavior()));
+		}
+		std::map<PhysicsBehavior, std::function<void()>> registerbody =
+		{
+			{PB_Static,[&] {RegisterStaticBody(uuid()); }},
+			{PB_Dynamic,[&] {RegisterDynamicBody(uuid()); }},
+			{PB_Character,[&] {RegisterCharacter(uuid()); }},
+			{PB_Trigger,[&] {RegisterTrigger(uuid()); }},
 		};
 
-		builder.at(behavior())();
+		registerbody.at(behavior())();
 	}
 
 	void PhysicObject::DestroyPhysicsAvatar()
@@ -972,168 +1010,489 @@ namespace Physics
 		renderableShape->WriteConstantsBuffer("alpha", &alpha, frame);
 		renderableLines->WriteConstantsBuffer("baseColor", &lineBaseColor, frame);
 	}
+#endif
 
-	void PhysicObject::CreateRenderableStatic()
+	std::unique_ptr<PhysicObject>& GetPhysicObject(JUUID uuid)
 	{
-		renderableLines = RenderableID(MAKESUUUID(unit(), getUUID()), [&] {return avatarBuilt; });
-		renderableShape = RenderableID(MAKESUUUID(unit(), getUUID()), [&] {return avatarBuilt; });
-		CameraID camera = Editor::GetLevelCamera(unit());
-		bool visible = Editor::StaticBodiesShouldDraw(unit());
+		return physicObjectsUUIDs.at(uuid);
+	}
 
-		auto [pos, rotQ, rot, scl] = GetPhysicsAvatarTransformation();
-		std::string name = renderable ? renderable->name() : boundary->name();
-
-		nlohmann::json lines = CreateFromRenderable(name + "-static-body-lines", renderableLines.uuid(), camera.uuid(), "Translucent_wired", visible, pos, rot, scl);
-		nlohmann::json shape = CreateFromRenderable(name + "-static-body-shape", renderableShape.uuid(), camera.uuid(), "Translucent", visible, pos, rot, scl);
-
-		shape["renderNext"] = { renderableLines.uuid() };
-
-		nlohmann::json data =
+	void DestroyPhysicObject(JUUID uuid)
+	{
+		if (!physicObjectsUUIDs.contains(uuid)) return;
+		physicObjectsUUIDs.at(uuid)->DestroyPhysicsBehavior();
+		physicObjectsUUIDs.erase(uuid);
+		for (auto it = physicObjectsBySceneUnitId.begin(); it != physicObjectsBySceneUnitId.end();)
 		{
-			{ "renderables", { lines, shape } }
-		};
+			if (it->second.contains(uuid))
+				it->second.erase(uuid);
 
-		AttachLevelIntoScene(unit(), "static-body", data, [&, rotQ](SceneUnitId id)
+			if (it->second.size() == 0ULL)
+				it = physicObjectsBySceneUnitId.erase(it);
+			else
+				it++;
+		}
+		for (auto it = physicObjectsUUIDBySUUUID.begin(); it != physicObjectsUUIDBySUUUID.end(); )
+		{
+			if (it->second.contains(uuid))
+				it->second.erase(uuid);
+
+			if (it->second.size() == 0ULL)
+				it = physicObjectsUUIDBySUUUID.erase(it);
+			else
+				it++;
+		}
+
+		auto eraseUUUIDFromSUUID = [](auto& UUIDBySUUID, auto uuid)
 			{
-				using namespace Editor;
-				if (boundary)
+				for (auto it = UUIDBySUUID.begin(); it != UUIDBySUUID.end();)
 				{
-					BindRenderableToPickingPass(renderableLines);
-					BindRenderableToPickingPass(renderableShape);
-					renderableLines->OnPick = [&] {Editor::SelectTrigger(boundary->SUuuid()); };
-					renderableShape->OnPick = [&] {Editor::SelectTrigger(boundary->SUuuid()); };
-					renderableLines->rotationQ(rotQ);
-					renderableShape->rotationQ(rotQ);
-					PhysicSceneID scene = MAKESUUUID(renderableShape.unit(), *GetPhysicScenes(renderableShape.unit()).begin());
-					for (unsigned int frame = 0U; frame < JRenderer::numFrames; frame++)
+					if (it->second == uuid)
 					{
-						UpdatePhysicsAvatarColor(frame, overrideColor() ? color() : behaviorColors(scene, behavior()));
+						UUIDBySUUID.erase(it);
+						break;
 					}
-					UpdatePhysicsAvatarTransformation();
+					it++;
 				}
-				RegisterStaticBody(uuid());
-				avatarBuilt = true;
-			}
-		);
+
+			};
+
+		eraseUUUIDFromSUUID(physicStaticBodyUUIDBySUUID, uuid);
+		eraseUUUIDFromSUUID(physicDynamicBodyUUIDBySUUID, uuid);
+		eraseUUUIDFromSUUID(physicCharacterUUIDBySUUID, uuid);
+		eraseUUUIDFromSUUID(physicTriggerUUIDBySUUID, uuid);
 	}
-	void PhysicObject::CreateRenderableDynamic()
+
+	std::set<JUUID> GetPhysicsObjectsBySceneUnit(SceneUnitId id)
 	{
-		renderableLines = RenderableID(MAKESUUUID(unit(), getUUID()), [&] {return avatarBuilt; });
-		renderableShape = RenderableID(MAKESUUUID(unit(), getUUID()), [&] {return avatarBuilt; });
-		CameraID camera = Editor::GetLevelCamera(unit());
-		bool visible = Editor::DynamicBodiesShouldDraw(unit());
+		return (physicObjectsBySceneUnitId.contains(id)) ? physicObjectsBySceneUnitId.at(id) : std::set<JUUID>();
+	}
 
-		XMFLOAT3 renScale = renderable->scale() * localScale();
-		XMFLOAT3 renPosition = renderable->position() + localPosition();
-		XMFLOAT3 renRotation = renderable->rotation() + localRotation();
+	std::set<JUUID> GetPhysicsObjectsBySceneObjectUUID(SUUUID uuid)
+	{
+		return(physicObjectsUUIDBySUUUID.contains(uuid)) ? physicObjectsUUIDBySUUUID.at(uuid) : std::set<JUUID>();
+	}
 
-		nlohmann::json lines = CreateFromRenderable(renderable->name() + "-dynamic-body-lines", renderableLines.uuid(), camera.uuid(), "Translucent_wired", visible, renPosition, renRotation, renScale);
-		nlohmann::json shape = CreateFromRenderable(renderable->name() + "-dynamic-body-shape", renderableShape.uuid(), camera.uuid(), "Translucent", visible, renPosition, renRotation, renScale);
+	JUUID CreatePhysicObject(std::string name, SUUUID sceneObject, nlohmann::json& json)
+	{
+		JUUID uuid = getUUID();
+		std::unique_ptr<PhysicObject> physicObject = std::make_unique<PhysicObject>(json);
 
-		shape["renderNext"] = { renderableLines.uuid() };
-
-		nlohmann::json data =
+		switch (GetSceneObjectType(FROMSUUUID(sceneObject)))
 		{
-			{ "renderables", { lines, shape } }
-		};
-
-		AttachLevelIntoScene(unit(), "dynamic-body", data, [&](SceneUnitId id)
-			{
-				using namespace Editor;
-				RegisterDynamicBody(uuid());
-				avatarBuilt = true;
-				PhysicSceneID scene = MAKESUUUID(renderableShape.unit(), *GetPhysicScenes(renderableShape.unit()).begin());
-				for (unsigned int frame = 0U; frame < JRenderer::numFrames; frame++)
-				{
-					UpdatePhysicsAvatarColor(frame, overrideColor() ? color() : behaviorColors(scene, behavior()));
-				}
-				UpdatePhysicsAvatarTransformation();
-			}
-		);
-	}
-	void PhysicObject::CreateRenderableCharacter()
-	{
-		renderableLines = RenderableID(MAKESUUUID(unit(), getUUID()), [&] {return avatarBuilt; });
-		renderableShape = RenderableID(MAKESUUUID(unit(), getUUID()), [&] {return avatarBuilt; });
-		CameraID camera = Editor::GetLevelCamera(unit());
-		bool visible = Editor::CharactersShouldDraw(unit());
-
-		XMFLOAT3 renPosition = renderable->position() + localPosition();
-		float xzscale = 2.0f * static_cast<float>(at("radius"));
-		float height = 2.0f * static_cast<float>(at("halfHeight"));
-		XMFLOAT3 renScale = { xzscale,height,xzscale };
-
-		nlohmann::json lines = CreateFromRenderable(
-			renderable->name() + "-char-lines", renderableLines.uuid(), camera.uuid(),
-			"Translucent_wired", visible, renPosition, { 0.0f,0.0f,0.0f }, renScale);
-		nlohmann::json shape = CreateFromRenderable(
-			renderable->name() + "-char-shape", renderableShape.uuid(), camera.uuid(),
-			"Translucent", visible, renPosition, { 0.0f,0.0f,0.0f }, renScale);
-
-		shape["renderNext"] = { renderableLines.uuid() };
-
-		nlohmann::json data =
+		case SO_Renderables:
 		{
-			{ "renderables", { lines, shape } }
-		};
-
-		AttachLevelIntoScene(unit(), "characters", data, [&](SceneUnitId id)
-			{
-				using namespace Editor;
-				RegisterCharacter(uuid());
-				avatarBuilt = true;
-				PhysicSceneID scene = MAKESUUUID(renderableShape.unit(), *GetPhysicScenes(renderableShape.unit()).begin());
-				for (unsigned int frame = 0U; frame < JRenderer::numFrames; frame++)
-				{
-					UpdatePhysicsAvatarColor(frame, overrideColor() ? color() : behaviorColors(scene, behavior()));
-				}
-				UpdatePhysicsAvatarTransformation();
-			}
-		);
-	}
-	void PhysicObject::CreateRenderableTrigger()
-	{
-		renderableLines = RenderableID(MAKESUUUID(unit(), getUUID()), [&] {return avatarBuilt; });
-		renderableShape = RenderableID(MAKESUUUID(unit(), getUUID()), [&] {return avatarBuilt; });
-		CameraID camera = Editor::GetLevelCamera(unit());
-
-		nlohmann::json lines = CreateFromTrigger(trigger->name() + "-lines", renderableLines.uuid(), camera.uuid(), "Translucent_wired");
-		nlohmann::json shape = CreateFromTrigger(trigger->name() + "-shape", renderableShape.uuid(), camera.uuid(), "Translucent");
-
-		shape["renderNext"] = { renderableLines.uuid() };
-
-		nlohmann::json data =
+			physicObject->renderable = sceneObject;
+		}
+		break;
+		case SO_Triggers:
 		{
-			{ "renderables",
-				{
-					lines,
-					shape
-				}
-			}
-		};
+			physicObject->trigger = sceneObject;
+		}
+		break;
+		case SO_Boundaries:
+		{
+			physicObject->boundary = sceneObject;
+		}
+		break;
+		}
 
-		AttachLevelIntoScene(unit(), "triggers", data, [&](SceneUnitId id)
-			{
-				using namespace Editor;
-				BindRenderableToPickingPass(renderableLines);
-				BindRenderableToPickingPass(renderableShape);
-				renderableLines->OnPick = [&] {Editor::SelectTrigger(trigger->SUuuid()); };
-				renderableShape->OnPick = [&] {Editor::SelectTrigger(trigger->SUuuid()); };
-				RegisterTrigger(uuid());
-				avatarBuilt = true;
-				PhysicSceneID scene = MAKESUUUID(renderableShape.unit(), *GetPhysicScenes(renderableShape.unit()).begin());
-				for (unsigned int frame = 0U; frame < JRenderer::numFrames; frame++)
-				{
-					UpdatePhysicsAvatarColor(frame, overrideColor() ? color() : behaviorColors(scene, behavior()));
-				}
-				UpdatePhysicsAvatarTransformation();
-			}
-		);
+		(*physicObject)["uuid"] = uuid;
+		physicObjectsUUIDs.insert_or_assign(uuid, std::move(physicObject));
+		SceneUnitId id = std::get<0>(sceneObject);
+		if (!physicObjectsBySceneUnitId.contains(id))
+		{
+			physicObjectsBySceneUnitId.insert_or_assign(id, std::set<JUUID>());
+		}
+		physicObjectsBySceneUnitId.at(id).insert(uuid);
+		physicObjectsUUIDBySUUUID[sceneObject].insert(uuid);
+		return uuid;
 	}
 
-	nlohmann::json PhysicObject::CreateFromRenderable(std::string name, JUUID uuid, JUUID camId, std::string material, bool visible, XMFLOAT3 position, XMFLOAT3 rotation, XMFLOAT3 scale)
+	void CreatePhysicsObjectsBehaviors(SceneUnitId id)
 	{
-		PhysicGeometryJsonID pg = geometry();
+		if (!physicObjectsBySceneUnitId.contains(id)) return;
+
+		for (auto& uuid : physicObjectsBySceneUnitId.at(id))
+		{
+			PhysicObjectID phO = uuid;
+			if (!phO->CanBuild())
+				continue;
+
+			phO->CreatePhysicsBehavior();
+			phO->LinkPhysicsAvatar();
+		}
+	}
+
+	void UpdateRenderablesFromGlobalPose(SceneUnitId id)
+	{
+		if (!physicObjectsBySceneUnitId.contains(id)) return;
+
+		for (PhysicObjectID phO : physicObjectsBySceneUnitId.at(id))
+		{
+			phO->UpdateRenderableFromGlobalPose();
+		}
+	}
+
+	void UpdatePhysicObjects(SceneUnitId id)
+	{
+#if defined(_EDITOR)
+		using namespace Editor;
+#endif
+		if (GetPhysicScenes(id).size() == 0ULL) return;
+		if (!physicObjectsBySceneUnitId.contains(id)) return;
+
+		auto& phOs = physicObjectsBySceneUnitId.at(id);
+		unsigned int frame = GetSceneUnit(id)->Frame();
+		PhysicSceneID scene = MAKESUUUID(id, *GetPhysicScenes(id).begin());
+
+		auto checkLocalPose = [](PhysicObjectID p)
+			{
+				std::vector<size_t> flags = { PhysicObject::Update_localPosition,PhysicObject::Update_localRotation, PhysicObject::Update_localScale };
+				if (!p->dirty(flags))
+					return;
+				p->clean(flags);
+				p->localScale(XMClamp(p->localScale(), 0.01f, 1000.0f));
+				p->DestroyPhysicsBehavior();
+				p->CreatePhysicsBehavior();
+				p->UpdatePhysicsAvatarTransformation();
+			};
+		auto checkBehaviorGeom = [](PhysicObjectID p)
+			{
+				std::vector<size_t> flags = { PhysicObject::Update_behavior,PhysicObject::Update_geometry };
+				if (!p->dirty(flags))
+					return;
+				p->clean(flags);
+				p->DestroyPhysicsBehavior();
+				p->CreatePhysicsBehavior();
+				p->DestroyPhysicsAvatar();
+			};
+		auto checkVelocity = [](PhysicObjectID p)
+			{
+				std::vector<size_t> flags = { PhysicObject::Update_linearVelocity,PhysicObject::Update_angularVelocity };
+				if (!p->dirty(flags))
+					return;
+
+				if (p->dirty(PhysicObject::Update_linearVelocity))
+				{
+					PxRigidDynamic* pxDynamic = (PxRigidDynamic*)p->actor;
+					pxDynamic->setLinearVelocity(ToPxVec3(p->linearVelocity()));
+				}
+
+				if (p->dirty(PhysicObject::Update_angularVelocity))
+				{
+					PxRigidDynamic* pxDynamic = (PxRigidDynamic*)p->actor;
+					pxDynamic->setAngularVelocity(ToPxVec3(p->angularVelocity()));
+				}
+
+				p->clean(flags);
+			};
+		auto checkPxFilterData = [](PhysicObjectID p)
+			{
+				if (!p->dirty({ PhysicObject::Update_objectMask,PhysicObject::Update_collisionMask })) return;
+
+				if (p->behavior() != PB_Character)
+				{
+					p->shape->setSimulationFilterData(p->GetPxFilterData());
+				}
+				else
+				{
+					p->DestroyPhysicsBehavior();
+					p->CreatePhysicsBehavior();
+				}
+
+				p->clean({ PhysicObject::Update_objectMask,PhysicObject::Update_collisionMask });
+			};
+#if defined(_EDITOR)
+		auto updateColors = [=](PhysicObjectID p)
+			{
+				if (!Editor::IsPlaying(id) && (p->dirty(PhysicObject::Update_overrideColor) || p->dirty(PhysicObject::Update_color)))
+				{
+					for (unsigned int f = 0U; f < JRenderer::numFrames; f++)
+					{
+						p->UpdatePhysicsAvatarColor(f, p->overrideColor() ? p->color() : behaviorColors(scene, p->behavior()));
+					}
+					p->clean({ PhysicObject::Update_overrideColor, PhysicObject::Update_color });
+				}
+			};
+#endif
+		auto checkCollisionEnabled = [](PhysicObjectID p)
+			{
+				if (!p->dirty(PhysicObject::Update_collisionEnabled) || !p->shape) return;
+
+				p->shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, p->collisionEnabled());
+
+				p->clean(Boundary::Update_collisionEnabled);
+			};
+		auto checkKinematic = [](PhysicObjectID p)
+			{
+				if (!p->dirty(PhysicObject::Update_kinematic)) return;
+
+				p->DestroyPhysicsBehavior();
+				p->CreatePhysicsBehavior();
+				p->UpdatePhysicsAvatarTransformation();
+
+				p->clean(PhysicObject::Update_kinematic);
+			};
+
+		std::for_each(phOs.begin(), phOs.end(), checkLocalPose);
+		std::for_each(phOs.begin(), phOs.end(), checkBehaviorGeom);
+		std::for_each(phOs.begin(), phOs.end(), checkVelocity);
+		std::for_each(phOs.begin(), phOs.end(), checkPxFilterData);
+#if defined(_EDITOR)
+
+		std::for_each(phOs.begin(), phOs.end(), updateColors);
+#endif
+	}
+
+	//Avatars
+#if defined(_EDITOR)
+	void AttachPhysicsAvatars(SceneUnitId id, nlohmann::json& data)
+	{
+		JUUID camUUID;
+
+		if (data.contains(SceneObjectTypeJsonContainer.at(SO_Cameras)))
+		{
+			nlohmann::json& cameras = data.at(SceneObjectTypeJsonContainer.at(SO_Cameras));
+			auto it = std::find_if(cameras.begin(), cameras.end(), [](auto c) { return static_cast<bool>(c.at("useSwapChain")); });
+			if (it != cameras.end())
+			{
+				camUUID = it->at("uuid");
+			}
+		}
+
+		auto getVisible = [id](std::string behavior)
+			{
+				std::map<std::string, std::function<bool()>> visibleMap =
+				{
+					{ "Static", [id]() { return Editor::StaticBodiesShouldDraw(id); }},
+					{ "Dynamic", [id]() { return Editor::DynamicBodiesShouldDraw(id); }},
+					{ "Trigger", [id]() { return Editor::TriggersShouldDraw(id); }},
+					{ "Character", [id]() { return Editor::CharactersShouldDraw(id); }},
+				};
+				return visibleMap.at(behavior)();
+			};
+
+		auto getAvatarTransformation = [](nlohmann::json& parent, nlohmann::json phO)
+			{
+				//calculate the scale
+				XMFLOAT3 localPosition = (phO.contains("localPosition") ? ToXMFLOAT3(phO.at("localPosition")) : XMFLOAT3(0.0f, 0.0f, 0.0f));
+				XMFLOAT3 localRotation = (phO.contains("localRotation") ? ToXMFLOAT3(phO.at("localRotation")) : XMFLOAT3(0.0f, 0.0f, 0.0f));
+				XMFLOAT3 localScale = (phO.contains("localScale") ? ToXMFLOAT3(phO.at("localScale")) : XMFLOAT3(1.0f, 1.0f, 1.0f));
+
+				XMFLOAT3 position = parent.contains("position") ? ToXMFLOAT3(parent.at("position")) : XMFLOAT3(0.0f, 0.0f, 0.0f);
+				XMFLOAT3 scale = (parent.contains("scale") ? ToXMFLOAT3(parent.at("scale")) : XMFLOAT3(1.0f, 1.0f, 1.0f));
+				XMFLOAT3 rotation = (parent.contains("rotation") ? ToXMFLOAT3(parent.at("rotation")) : XMFLOAT3(0.0f, 0.0f, 0.0f));
+
+				XMFLOAT3 scl = localScale * scale;
+				XMFLOAT3 rot = localRotation + rotation;
+				XMVECTOR rotQ = XMQuatFromDegrees(rot);
+
+				XMVECTOR actorRotQ = XMQuatFromDegrees(rotation);
+				XMMATRIX actorRotMM = XMMatrixRotationQuaternion(actorRotQ);
+				XMFLOAT3 actorPos = position;;
+				XMVECTOR actorPosV = XMLoadFloat3(&actorPos);
+				XMFLOAT3 localPos = localPosition;
+				XMVECTOR localPosV = XMLoadFloat3(&localPos);
+				XMVECTOR posV = actorPosV + XMVector3Transform(localPosV, actorRotMM);
+				XMFLOAT3 pos;
+				XMStoreFloat3(&pos, posV);
+
+				return std::make_tuple(pos, rotQ, Quaternion2Euler(rotQ), scl);
+			};
+
+		auto createRenderableStaticAvatar = [&](nlohmann::json& renderables, nlohmann::json& r, nlohmann::json& phO)
+			{
+				bool visible = getVisible(phO.at("behavior"));
+				auto [pos, rotQ, rot, scl] = getAvatarTransformation(r, phO);
+				std::string name = r.at("name");
+				JUUID rUUID = r.at("uuid");
+				JUUID geomUUID = phO.at("geometry");
+
+				JUUID avatarCam = camUUID;
+				if (avatarCam.empty())
+					avatarCam = r.at("cameras").at(0);
+
+				JUUID linesUUID = rUUID + "-lines";
+				nlohmann::json lines = CreateFromRenderable(name + "-static-body-lines", linesUUID, geomUUID, avatarCam, "Translucent_wired", visible, pos, rot, scl);
+				renderables.push_back(lines);
+
+				JUUID shapeUUID = rUUID + "-shape";
+				nlohmann::json shape = CreateFromRenderable(name + "-static-body-shape", shapeUUID, geomUUID, avatarCam, "Translucent", visible, pos, rot, scl);
+				shape["renderNext"] = { linesUUID };
+				renderables.push_back(shape);
+			};
+
+		auto createRenderableDynamicAvatar = [&](nlohmann::json& renderables, nlohmann::json& r, nlohmann::json& phO)
+			{
+				bool visible = getVisible(phO.at("behavior"));
+				auto [pos, rotQ, rot, scl] = getAvatarTransformation(r, phO);
+				std::string name = r.at("name");
+				JUUID rUUID = r.at("uuid");
+				JUUID geomUUID = phO.at("geometry");
+
+				JUUID avatarCam = camUUID;
+				if (avatarCam.empty())
+					avatarCam = r.at("cameras").at(0);
+
+				XMFLOAT3 renScale = ToXMFLOAT3(r.at("scale")) * ToXMFLOAT3(phO.at("localScale"));
+				XMFLOAT3 renPosition = ToXMFLOAT3(r.at("position")) + ToXMFLOAT3(phO.at("localPosition"));
+				XMFLOAT3 renRotation = ToXMFLOAT3(r.at("rotation")) + ToXMFLOAT3(phO.at("localRotation"));
+
+				JUUID linesUUID = rUUID + "-lines";
+				nlohmann::json lines = CreateFromRenderable(name + "-dynamic-body-lines", linesUUID, geomUUID, avatarCam, "Translucent_wired", visible, renPosition, renRotation, renScale);
+				renderables.push_back(lines);
+
+				JUUID shapeUUID = rUUID + "-shape";
+				nlohmann::json shape = CreateFromRenderable(name + "-dynamic-body-shape", shapeUUID, geomUUID, avatarCam, "Translucent", visible, renPosition, renRotation, renScale);
+				shape["renderNext"] = { linesUUID };
+				renderables.push_back(shape);
+			};
+
+		auto createRenderableTriggerAvatar = [&](nlohmann::json& renderables, nlohmann::json& t)
+			{
+				bool visible = getVisible("Trigger");
+				XMFLOAT3 renPosition = ToXMFLOAT3(t.at("position"));
+				XMFLOAT3 renRotation = ToXMFLOAT3(t.at("rotation"));
+				XMFLOAT3 renScale = ToXMFLOAT3(t.at("scale"));
+				std::string name = t.at("name");
+				JUUID rUUID = t.at("uuid");
+				JUUID geomUUID = t.at("geometry");
+
+				JUUID avatarCam = camUUID;
+				if (avatarCam.empty())
+					avatarCam = t.at("cameras").at(0);
+
+				JUUID linesUUID = rUUID + "-lines";
+				nlohmann::json lines = CreateFromTrigger(name + "-trigger-body-lines", linesUUID, geomUUID, avatarCam, "Translucent_wired", visible, renPosition, renRotation, renScale);
+				renderables.push_back(lines);
+
+				JUUID shapeUUID = rUUID + "-shape";
+				nlohmann::json shape = CreateFromTrigger(name + "-trigger-body-shape", shapeUUID, geomUUID, avatarCam, "Translucent", visible, renPosition, renRotation, renScale);
+				shape["renderNext"] = { linesUUID };
+				renderables.push_back(shape);
+			};
+
+		auto createRenderableCharacterAvatar = [&](nlohmann::json& renderables, nlohmann::json& r, nlohmann::json& phO)
+			{
+				bool visible = getVisible(phO.at("behavior"));
+				auto [pos, rotQ, rot, scl] = getAvatarTransformation(r, phO);
+				std::string name = r.at("name");
+				JUUID rUUID = r.at("uuid");
+				JUUID geomUUID = phO.at("geometry");
+
+				JUUID avatarCam = camUUID;
+				if (avatarCam.empty())
+					avatarCam = r.at("cameras").at(0);
+
+				XMFLOAT3 renPosition = ToXMFLOAT3(r.at("position")) + ToXMFLOAT3(phO.at("localPosition"));
+				float xzscale = 2.0f * static_cast<float>(phO.at("radius"));
+				float height = 2.0f * static_cast<float>(phO.at("halfHeight"));
+				XMFLOAT3 renScale = { xzscale,height,xzscale };
+
+				JUUID linesUUID = rUUID + "-lines";
+				nlohmann::json lines = CreateFromRenderable(name + "-char-lines", linesUUID, geomUUID, avatarCam,
+					"Translucent_wired", visible, renPosition, { 0.0f,0.0f,0.0f }, renScale);
+				renderables.push_back(lines);
+
+				JUUID shapeUUID = rUUID + "-shape";
+				nlohmann::json shape = CreateFromRenderable(name + "-char-shape", shapeUUID, geomUUID, avatarCam,
+					"Translucent", visible, renPosition, { 0.0f,0.0f,0.0f }, renScale);
+				shape["renderNext"] = { linesUUID };
+				renderables.push_back(shape);
+			};
+
+		auto createRenderableAvatars = [&]
+			{
+				std::map<std::string, std::function<void(nlohmann::json& renderables, nlohmann::json& renderable, nlohmann::json& phO)>> createRenderableAvatarFromBehavior =
+				{
+					{ "Static", createRenderableStaticAvatar },
+					{ "Dynamic", createRenderableDynamicAvatar },
+					{ "Character", createRenderableCharacterAvatar },
+				};
+
+				if (!data.contains(SceneObjectTypeJsonContainer.at(SO_Renderables)))
+					data[SceneObjectTypeJsonContainer.at(SO_Renderables)] = nlohmann::json::array({});
+
+				nlohmann::json& renderables = data[SceneObjectTypeJsonContainer.at(SO_Renderables)];
+				nlohmann::json new_renderables = nlohmann::json::array({});
+				std::for_each(renderables.begin(), renderables.end(), [&](auto& r)
+					{
+						if (!r.contains("physicObject") || !r.at("physicObject").is_array() || r.at("physicObject").size() == 0ULL)
+							return;
+
+						nlohmann::json& phO = r.at("physicObject").at(0);
+						createRenderableAvatarFromBehavior.at(phO.at("behavior"))(new_renderables, r, phO);
+					}
+				);
+
+				if (new_renderables.size() > 0ULL)
+				{
+					renderables.insert(renderables.end(), new_renderables.begin(), new_renderables.end());
+				}
+			};
+
+		auto createRenderableTriggers = [&]
+			{
+				if (!data.contains(SceneObjectTypeJsonContainer.at(SO_Triggers)))
+					return;
+
+				nlohmann::json& triggers = data[SceneObjectTypeJsonContainer.at(SO_Triggers)];
+				nlohmann::json new_renderables = nlohmann::json::array({});
+				std::for_each(triggers.begin(), triggers.end(), [&](auto& t)
+					{
+						createRenderableTriggerAvatar(new_renderables, t);
+					}
+				);
+
+				if (!data.contains(SceneObjectTypeJsonContainer.at(SO_Renderables)))
+					data[SceneObjectTypeJsonContainer.at(SO_Renderables)] = nlohmann::json::array({});
+				nlohmann::json& renderables = data[SceneObjectTypeJsonContainer.at(SO_Renderables)];
+
+				if (new_renderables.size() > 0ULL)
+				{
+					renderables.insert(renderables.end(), new_renderables.begin(), new_renderables.end());
+				}
+			};
+
+		auto createRenderableBoundaries = [&]
+			{
+				if (!data.contains(SceneObjectTypeJsonContainer.at(SO_Boundaries)))
+					return;
+
+				nlohmann::json& boundaries = data[SceneObjectTypeJsonContainer.at(SO_Boundaries)];
+				nlohmann::json new_renderables = nlohmann::json::array({});
+				std::for_each(boundaries.begin(), boundaries.end(), [&](auto& b)
+					{
+						nlohmann::json phO = {
+							{ "behavior", "Static" },
+							{ "geometry", b.at("geometry") },
+							{ "localPosition", FromXMFLOAT3({0.0f,0.0f,0.0f}) },
+							{ "localRotation", FromXMFLOAT3({0.0f,0.0f,0.0f}) },
+							{ "localScale", FromXMFLOAT3({1.0f,1.0f,1.0f}) },
+						};
+						createRenderableStaticAvatar(new_renderables, b, phO);
+					}
+				);
+
+				if (!data.contains(SceneObjectTypeJsonContainer.at(SO_Renderables)))
+					data[SceneObjectTypeJsonContainer.at(SO_Renderables)] = nlohmann::json::array({});
+				nlohmann::json& renderables = data[SceneObjectTypeJsonContainer.at(SO_Renderables)];
+
+				if (new_renderables.size() > 0ULL)
+				{
+					renderables.insert(renderables.end(), new_renderables.begin(), new_renderables.end());
+				}
+			};
+
+		createRenderableAvatars();
+		createRenderableTriggers();
+		createRenderableBoundaries();
+	}
+
+	nlohmann::json CreateFromRenderable(std::string name, JUUID uuid, JUUID geometry, JUUID camId, std::string material, bool visible, XMFLOAT3 position, XMFLOAT3 rotation, XMFLOAT3 scale)
+	{
+		PhysicGeometryJsonID geom = geometry;
 
 		nlohmann::json jrenderable = nlohmann::json(
 			{
@@ -1143,7 +1502,7 @@ namespace Physics
 						{ "material", GetMaterialUUIDByName(material) },
 						{ "mesh",
 							{
-								{ "primitive", pg->mesh() }
+								{ "primitive", geom->mesh() }
 							}
 						}
 					}
@@ -1200,11 +1559,9 @@ namespace Physics
 		return jrenderable;
 	}
 
-	nlohmann::json PhysicObject::CreateFromTrigger(std::string name, JUUID uuid, JUUID camId, std::string material)
+	nlohmann::json CreateFromTrigger(std::string name, JUUID uuid, JUUID geometry, JUUID camId, std::string material, bool visible, XMFLOAT3 position, XMFLOAT3 rotation, XMFLOAT3 scale)
 	{
-		PhysicGeometryJsonID pg = geometry();
-
-		bool visible = Editor::TriggersShouldDraw(unit());
+		PhysicGeometryJsonID geom = geometry;
 
 		nlohmann::json jrentrigger = nlohmann::json(
 			{
@@ -1214,7 +1571,7 @@ namespace Physics
 						{ "material", GetMaterialUUIDByName(material) },
 						{ "mesh",
 							{
-								{ "primitive", pg->mesh() }
+								{ "primitive", geom->mesh() }
 							}
 						}
 					}
@@ -1223,10 +1580,10 @@ namespace Physics
 				{ "shadowed", false },
 				{ "name" , name },
 				{ "uuid" , uuid },
-				{ "position", FromXMFLOAT3(trigger->position()) },
+				{ "position", FromXMFLOAT3(position) },
 				{ "topology", "TRIANGLELIST" },
-				{ "rotation" , FromXMFLOAT3(trigger->rotation()) },
-				{ "scale" , FromXMFLOAT3(trigger->scale()) },
+				{ "rotation" , FromXMFLOAT3(rotation) },
+				{ "scale" , FromXMFLOAT3(scale) },
 				{ "skipMeshes" , {}},
 				{ "visible" , visible },
 				{ "hidden" , true},
@@ -1270,237 +1627,9 @@ namespace Physics
 		);
 		return jrentrigger;
 	}
-
 #endif
 
-	std::unique_ptr<PhysicObject>& GetPhysicObject(JUUID uuid)
-	{
-		return physicObjectsUUIDs.at(uuid);
-	}
-
-	void DestroyPhysicObject(JUUID uuid)
-	{
-		if (!physicObjectsUUIDs.contains(uuid)) return;
-		physicObjectsUUIDs.at(uuid)->DestroyPhysicsBehavior();
-		physicObjectsUUIDs.erase(uuid);
-		for (auto it = physicObjectsBySceneUnitId.begin(); it != physicObjectsBySceneUnitId.end();)
-		{
-			if (it->second.contains(uuid))
-				it->second.erase(uuid);
-
-			if (it->second.size() == 0ULL)
-				it = physicObjectsBySceneUnitId.erase(it);
-			else
-				it++;
-		}
-		for (auto it = physicObjectsUUIDBySUUUID.begin(); it != physicObjectsUUIDBySUUUID.end(); )
-		{
-			if (it->second.contains(uuid))
-				it->second.erase(uuid);
-
-			if (it->second.size() == 0ULL)
-				it = physicObjectsUUIDBySUUUID.erase(it);
-			else
-				it++;
-		}
-
-		auto eraseUUUIDFromSUUID = [](auto& UUIDBySUUID, auto uuid)
-			{
-				for (auto it = UUIDBySUUID.begin(); it != UUIDBySUUID.end();)
-				{
-					if (it->second == uuid)
-					{
-						UUIDBySUUID.erase(it);
-						break;
-					}
-					it++;
-				}
-
-			};
-
-		eraseUUUIDFromSUUID(physicStaticBodyUUIDBySUUID, uuid);
-		eraseUUUIDFromSUUID(physicDynamicBodyUUIDBySUUID, uuid);
-		eraseUUUIDFromSUUID(physicCharacterUUIDBySUUID, uuid);
-		eraseUUUIDFromSUUID(physicTriggerUUIDBySUUID, uuid);
-	}
-
-	std::set<JUUID> GetPhysicsObjectsBySceneObjectUUID(SUUUID uuid)
-	{
-		return(physicObjectsUUIDBySUUUID.contains(uuid)) ? physicObjectsUUIDBySUUUID.at(uuid) : std::set<JUUID>();
-	}
-
-	JUUID CreatePhysicObject(std::string name, SUUUID sceneObject, nlohmann::json& json)
-	{
-		JUUID uuid = getUUID();
-		std::unique_ptr<PhysicObject> physicObject = std::make_unique<PhysicObject>(json);
-
-		switch (GetSceneObjectType(FROMSUUUID(sceneObject)))
-		{
-		case SO_Renderables:
-		{
-			physicObject->renderable = sceneObject;
-		}
-		break;
-		case SO_Triggers:
-		{
-			physicObject->trigger = sceneObject;
-		}
-		break;
-		case SO_Boundaries:
-		{
-			physicObject->boundary = sceneObject;
-		}
-		break;
-		}
-
-		(*physicObject)["uuid"] = uuid;
-		physicObjectsUUIDs.insert_or_assign(uuid, std::move(physicObject));
-		SceneUnitId id = std::get<0>(sceneObject);
-		if (!physicObjectsBySceneUnitId.contains(id))
-		{
-			physicObjectsBySceneUnitId.insert_or_assign(id, std::set<JUUID>());
-		}
-		physicObjectsBySceneUnitId.at(id).insert(uuid);
-		physicObjectsUUIDBySUUUID[sceneObject].insert(uuid);
-		return uuid;
-	}
-
-	void CreatePhysicsObjectsBehaviors(SceneUnitId id)
-	{
-		if (!physicObjectsBySceneUnitId.contains(id)) return;
-
-		for (auto& uuid : physicObjectsBySceneUnitId.at(id))
-		{
-			PhysicObjectID phO = uuid;
-			if (!phO->CanBuild())
-				continue;
-
-			phO->CreatePhysicsBehavior();
-#if defined(_EDITOR)
-			phO->CreatePhysicsAvatar();
-#endif
-		}
-	}
-
-	void UpdateRenderablesFromGlobalPose(SceneUnitId id)
-	{
-		if (!physicObjectsBySceneUnitId.contains(id)) return;
-
-		for (PhysicObjectID phO : physicObjectsBySceneUnitId.at(id))
-		{
-			phO->UpdateRenderableFromGlobalPose();
-		}
-	}
-
-	void UpdatePhysicObjects(SceneUnitId id)
-	{
-#if defined(_EDITOR)
-		using namespace Editor;
-#endif
-		if (GetPhysicScenes(id).size() == 0ULL) return;
-		if (!physicObjectsBySceneUnitId.contains(id)) return;
-
-		auto& phOs = physicObjectsBySceneUnitId.at(id);
-		unsigned int frame = GetSceneUnit(id)->Frame();
-		PhysicSceneID scene = MAKESUUUID(id, *GetPhysicScenes(id).begin());
-
-		auto checkLocalPose = [](PhysicObjectID p)
-			{
-				std::vector<size_t> flags = { PhysicObject::Update_localPosition,PhysicObject::Update_localRotation, PhysicObject::Update_localScale };
-				if (!p->dirty(flags))
-					return;
-				p->clean(flags);
-				p->localScale(XMClamp(p->localScale(), 0.01f, 1000.0f));
-				p->DestroyPhysicsBehavior();
-				p->CreatePhysicsBehavior();
-				p->UpdatePhysicsAvatarTransformation();
-			};
-		auto checkBehaviorGeom = [](PhysicObjectID p)
-			{
-				std::vector<size_t> flags = { PhysicObject::Update_behavior,PhysicObject::Update_geometry };
-				if (!p->dirty(flags))
-					return;
-				p->clean(flags);
-				p->DestroyPhysicsBehavior();
-				p->CreatePhysicsBehavior();
-				p->DestroyPhysicsAvatar();
-				p->CreatePhysicsAvatar();
-			};
-		auto checkVelocity = [](PhysicObjectID p)
-			{
-				std::vector<size_t> flags = { PhysicObject::Update_linearVelocity,PhysicObject::Update_angularVelocity };
-				if (!p->dirty(flags))
-					return;
-
-				if (p->dirty(PhysicObject::Update_linearVelocity))
-				{
-					PxRigidDynamic* pxDynamic = (PxRigidDynamic*)p->actor;
-					pxDynamic->setLinearVelocity(ToPxVec3(p->linearVelocity()));
-				}
-
-				if (p->dirty(PhysicObject::Update_angularVelocity))
-				{
-					PxRigidDynamic* pxDynamic = (PxRigidDynamic*)p->actor;
-					pxDynamic->setAngularVelocity(ToPxVec3(p->angularVelocity()));
-				}
-
-				p->clean(flags);
-			};
-		auto checkPxFilterData = [](PhysicObjectID p)
-			{
-				if (!p->dirty({ PhysicObject::Update_objectMask,PhysicObject::Update_collisionMask })) return;
-
-				if (p->behavior() != PB_Character)
-				{
-					p->shape->setSimulationFilterData(p->GetPxFilterData());
-				}
-				else
-				{
-					p->DestroyPhysicsBehavior();
-					p->CreatePhysicsBehavior();
-				}
-
-				p->clean({ PhysicObject::Update_objectMask,PhysicObject::Update_collisionMask });
-			};
-#if defined(_EDITOR)
-		auto updateColors = [=](PhysicObjectID p)
-			{
-				if (!Editor::IsPlaying(id) && (p->dirty(PhysicObject::Update_overrideColor) || p->dirty(PhysicObject::Update_color)))
-				{
-					p->UpdatePhysicsAvatarColor(frame, p->overrideColor() ? p->color() : behaviorColors(scene, p->behavior()));
-					p->clean({ PhysicObject::Update_overrideColor, PhysicObject::Update_color });
-				}
-			};
-#endif
-		auto checkCollisionEnabled = [](PhysicObjectID p)
-			{
-				if (!p->dirty(PhysicObject::Update_collisionEnabled) || !p->shape) return;
-
-				p->shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, p->collisionEnabled());
-
-				p->clean(Boundary::Update_collisionEnabled);
-			};
-		auto checkKinematic = [](PhysicObjectID p)
-			{
-				if (!p->dirty(PhysicObject::Update_kinematic)) return;
-
-				p->DestroyPhysicsBehavior();
-				p->CreatePhysicsBehavior();
-				p->UpdatePhysicsAvatarTransformation();
-
-				p->clean(PhysicObject::Update_kinematic);
-			};
-
-		std::for_each(phOs.begin(), phOs.end(), checkLocalPose);
-		std::for_each(phOs.begin(), phOs.end(), checkBehaviorGeom);
-		std::for_each(phOs.begin(), phOs.end(), checkVelocity);
-		std::for_each(phOs.begin(), phOs.end(), checkPxFilterData);
-#if defined(_EDITOR)
-
-		std::for_each(phOs.begin(), phOs.end(), updateColors);
-#endif
-	}
-
+	//Contact callbacks
 	void RegisterContactCallback(PhysicsBehavior behavior, JUUID object, std::function<void(JUUID, unsigned int)> callback)
 	{
 		physicContactSubscribers[behavior][object] = callback;

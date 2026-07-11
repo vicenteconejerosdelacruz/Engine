@@ -85,9 +85,11 @@ namespace Scene
 
 	void FetchPhysicsScenesResults(SceneUnitId id, float step);
 	void SimulatePhysicScenes(SceneUnitId id, float step);
+	void RemoveFromSimulatingScenes(SceneUnitId id);
 	void DestroyPhysicScenes();
 	void DestroyPhysicScenes(SceneUnitId id);
 	void DeletePhysicScene(SceneUnitId id, JUUID uuid);
+	void DestroyPhysicsSceneObjects(SceneUnitId id);
 #if defined(_EDITOR)
 	void WritePhysicSceneJson(SceneUnitId id, nlohmann::json& json);
 #endif
