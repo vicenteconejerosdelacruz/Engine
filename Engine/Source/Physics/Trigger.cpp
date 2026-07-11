@@ -13,29 +13,29 @@ namespace Scene
 	SODEF_FULL(Trigger);
 
 #include <TrackUUID/JDef.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDef.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDef.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDef.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDef.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -90,7 +90,7 @@ namespace Scene
 	void WriteTriggersJson(SceneUnitId id, nlohmann::json& json)
 	{
 #include <Editor/JSaveFile.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 	}
 #endif
@@ -98,15 +98,15 @@ namespace Scene
 	Trigger::Trigger(SceneUnitId id, nlohmann::json& json) : SceneObject(id, json)
 	{
 #include <Attributes/JInit.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 		(*this)["behavior"] = PhysicsBehaviorToString.at(PB_Trigger);
@@ -117,7 +117,7 @@ namespace Scene
 	void Trigger::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 	}
 #endif
@@ -125,7 +125,7 @@ namespace Scene
 	void Trigger::Initialize()
 	{
 #include <TrackUUID/JInsert.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 		SceneObject::Initialize();
 	}
@@ -133,7 +133,7 @@ namespace Scene
 	void Trigger::BindToScene()
 	{
 #include <TrackUUID/JInsert.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 		CreatePhysicObject();
@@ -142,7 +142,7 @@ namespace Scene
 	void Trigger::UnbindFromScene()
 	{
 #include <TrackUUID/JErase.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 	}
 
@@ -155,7 +155,7 @@ namespace Scene
 		UnregisterTriggerContactCallback(SUuuid());
 
 #include <Attributes/JDestroy.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 		SceneObject::Destroy();
@@ -339,7 +339,7 @@ namespace Scene
 			}
 		}
 #include <TrackUUID/JClear.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 	}
 
@@ -352,7 +352,7 @@ namespace Scene
 			DeleteTriggerSceneObject(MAKESUUUID(id, uuid));
 		}
 #include <TrackUUID/JClearUnit.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 	}
 

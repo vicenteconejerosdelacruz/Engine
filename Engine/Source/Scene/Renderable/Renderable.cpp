@@ -25,29 +25,29 @@ namespace Scene
 	SODEF_FULL(Renderable);
 
 #include <TrackUUID/JDef.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDef.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDef.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDef.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDef.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -57,15 +57,15 @@ namespace Scene
 	Renderable::Renderable(SceneUnitId id, nlohmann::json& json) :SceneObject(id, json)
 	{
 #include <Attributes/JInit.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 		lifecycleState->store(false);
@@ -108,7 +108,7 @@ namespace Scene
 	void Renderable::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 	}
 #endif
@@ -121,7 +121,7 @@ namespace Scene
 		CreateMeshInstances(); //why here, this is a special case, as Animables depends of animables which is created in this function
 
 #include <TrackUUID/JInsert.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 		if (!animable.empty())
@@ -165,7 +165,7 @@ namespace Scene
 	void Renderable::BindToScene()
 	{
 #include <TrackUUID/JInsert.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 		BindCameras();
@@ -222,7 +222,7 @@ namespace Scene
 		using namespace ComputeShader;
 
 #include <TrackUUID/JErase.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 		UnbindCameras();
@@ -1430,7 +1430,7 @@ namespace Scene
 		}
 
 #include <Attributes/JDestroy.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 		SceneObject::Destroy();
@@ -1706,7 +1706,7 @@ namespace Scene
 			}
 		}
 #include <TrackUUID/JClear.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 	}
 
@@ -1719,7 +1719,7 @@ namespace Scene
 			DeleteRenderableSceneObject(MAKESUUUID(id, uuid));
 		}
 #include <TrackUUID/JClearUnit.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 	}
 
@@ -1779,7 +1779,7 @@ namespace Scene
 	void WriteRenderablesJson(SceneUnitId id, nlohmann::json& json)
 	{
 #include <Editor/JSaveFile.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 	}
 #endif

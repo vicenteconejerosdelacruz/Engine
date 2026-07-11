@@ -33,31 +33,31 @@ namespace Scene
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDecl.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JRequired.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDecl.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDecl.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDecl.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -68,15 +68,15 @@ namespace Scene
 		inline static const std::string fallbackMaterialName = "BaseLighting";
 
 #include <Attributes/JFlags.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 		//lifecycle
@@ -228,7 +228,7 @@ namespace Scene
 	SODECL_FULL(Renderable);
 
 #include <TrackUUID/JDecl.h>
-#include <RenderableAtt.h>
+#include "RenderableAtt.h"
 #include <JEnd.h>
 
 	void RenderablesStep(SceneUnitId id, float dt);

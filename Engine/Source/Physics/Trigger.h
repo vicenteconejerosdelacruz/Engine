@@ -22,31 +22,31 @@ namespace Scene
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDecl.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JRequired.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDecl.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDecl.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDecl.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -56,15 +56,15 @@ namespace Scene
 		inline static const SceneObjectType sceneObjectType = SO_Triggers;
 
 #include <Attributes/JFlags.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 		Trigger(SceneUnitId id, nlohmann::json& json);
@@ -99,7 +99,7 @@ namespace Scene
 	SODECL_FULL(Trigger);
 
 #include <TrackUUID/JDecl.h>
-#include <TriggerAtt.h>
+#include "TriggerAtt.h"
 #include <JEnd.h>
 
 	void TriggersStep(SceneUnitId id);

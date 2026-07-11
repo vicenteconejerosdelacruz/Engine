@@ -14,31 +14,31 @@ namespace Scene
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDecl.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JRequired.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDecl.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDecl.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDecl.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -47,15 +47,15 @@ namespace Scene
 		inline static const SceneObjectType sceneObjectType = SO_SceneControllers;
 
 #include <Attributes/JFlags.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 		SceneController(SceneUnitId id, nlohmann::json& json);
@@ -75,7 +75,7 @@ namespace Scene
 	SODECL_FULL(SceneController);
 
 #include <TrackUUID/JDecl.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 	void SceneControllerStep(SceneUnitId id, float step);

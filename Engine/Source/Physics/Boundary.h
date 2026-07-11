@@ -21,31 +21,31 @@ namespace Scene
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDecl.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JRequired.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDecl.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDecl.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDecl.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -55,15 +55,15 @@ namespace Scene
 		inline static const SceneObjectType sceneObjectType = SO_Boundaries;
 
 #include <Attributes/JFlags.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 		Boundary(SceneUnitId id, nlohmann::json& json);
@@ -95,7 +95,7 @@ namespace Scene
 	SODECL_FULL(Boundary);
 
 #include <TrackUUID/JDecl.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 	void BoundariesStep(SceneUnitId id);

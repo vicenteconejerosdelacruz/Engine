@@ -7,29 +7,29 @@ namespace Scene
 	SODEF_FULL(SceneController);
 
 #include <TrackUUID/JDef.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDef.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDef.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDef.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDef.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -38,7 +38,7 @@ namespace Scene
 	void WriteSceneControllersJson(SceneUnitId id, nlohmann::json& json)
 	{
 #include <Editor/JSaveFile.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 	}
 #endif
@@ -46,15 +46,15 @@ namespace Scene
 	SceneController::SceneController(SceneUnitId id, nlohmann::json& json) : SceneObject(id, json)
 	{
 #include <Attributes/JInit.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 		RENAME_ON_DELETION(SceneController);
@@ -64,7 +64,7 @@ namespace Scene
 	void SceneController::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 	}
 #endif
@@ -74,7 +74,7 @@ namespace Scene
 		using namespace Physics;
 
 #include <TrackUUID/JInsert.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 		SceneObject::Initialize();
@@ -83,21 +83,21 @@ namespace Scene
 	void SceneController::BindToScene()
 	{
 #include <TrackUUID/JInsert.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 	}
 
 	void SceneController::UnbindFromScene()
 	{
 #include <TrackUUID/JErase.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 	}
 
 	void SceneController::Destroy()
 	{
 #include <Attributes/JDestroy.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 
 
@@ -119,7 +119,7 @@ namespace Scene
 			}
 		}
 #include <TrackUUID/JClear.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 	}
 
@@ -132,7 +132,7 @@ namespace Scene
 			DeleteSceneControllerSceneObject(MAKESUUUID(id, uuid));
 		}
 #include <TrackUUID/JClearUnit.h>
-#include <SceneControllerAtt.h>
+#include "SceneControllerAtt.h"
 #include <JEnd.h>
 	}
 

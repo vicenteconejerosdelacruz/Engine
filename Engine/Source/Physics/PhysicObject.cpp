@@ -78,7 +78,7 @@ namespace Physics
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <PhysicObjectAtt.h>
+#include "PhysicObjectAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -86,15 +86,15 @@ namespace Physics
 	PhysicObject::PhysicObject(nlohmann::json& json) : JObject(json)
 	{
 #include <Attributes/JInit.h>
-#include <PhysicObjectAtt.h>
+#include "PhysicObjectAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <PhysicObjectAtt.h>
+#include "PhysicObjectAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <PhysicObjectAtt.h>
+#include "PhysicObjectAtt.h"
 #include <JEnd.h>
 
 		InheritGeometryAttributes();
@@ -811,7 +811,7 @@ namespace Physics
 	void PhysicObject::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <PhysicObjectAtt.h>
+#include "PhysicObjectAtt.h"
 #include <JEnd.h>
 		j.erase("uuid");
 	}

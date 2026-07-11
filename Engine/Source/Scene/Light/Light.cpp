@@ -18,29 +18,29 @@ namespace Scene
 	SODEF_FULL(Light);
 
 #include <TrackUUID/JDef.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDef.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDef.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDef.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDef.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -50,15 +50,15 @@ namespace Scene
 	Light::Light(SceneUnitId id, nlohmann::json& json) : SceneObject(id, json)
 	{
 #include <Attributes/JInit.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 		RENAME_ON_DELETION(Light);
 	}
@@ -81,7 +81,7 @@ namespace Scene
 	void Light::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 	}
 #endif
@@ -93,7 +93,7 @@ namespace Scene
 #endif
 
 #include <TrackUUID/JInsert.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 		if (hasShadowMaps())
@@ -118,7 +118,7 @@ namespace Scene
 	void Light::BindToScene()
 	{
 #include <TrackUUID/JInsert.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 		BindCameras();
@@ -145,7 +145,7 @@ namespace Scene
 	void Light::UnbindFromScene()
 	{
 #include <TrackUUID/JErase.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 		UnbindCameras();
@@ -185,7 +185,7 @@ namespace Scene
 	{
 		DestroyEditorPreview();
 #include <Attributes/JDestroy.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 		SceneObject::Destroy();
@@ -316,7 +316,7 @@ namespace Scene
 	void WriteLightsJson(SceneUnitId id, nlohmann::json& json)
 	{
 #include <Editor/JSaveFile.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 	}
 
@@ -547,7 +547,7 @@ namespace Scene
 			}
 		}
 #include <TrackUUID/JClear.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 	}
 
@@ -560,7 +560,7 @@ namespace Scene
 			DeleteLightSceneObject(MAKESUUUID(id, uuid));
 		}
 #include <TrackUUID/JClearUnit.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 	}
 

@@ -28,29 +28,29 @@ namespace Scene
 	SODEF_FULL(PhysicScene);
 
 #include <TrackUUID/JDef.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDef.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDef.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDef.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDef.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -59,7 +59,7 @@ namespace Scene
 	void WritePhysicSceneJson(SceneUnitId id, nlohmann::json& json)
 	{
 #include <Editor/JSaveFile.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 	}
 #endif
@@ -67,15 +67,15 @@ namespace Scene
 	PhysicScene::PhysicScene(SceneUnitId id, nlohmann::json& json) : SceneObject(id, json)
 	{
 #include <Attributes/JInit.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 		RENAME_ON_DELETION(PhysicScene);
@@ -85,7 +85,7 @@ namespace Scene
 	void PhysicScene::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 	}
 #endif
@@ -95,7 +95,7 @@ namespace Scene
 		using namespace Physics;
 
 #include <TrackUUID/JInsert.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 		CreatePhysicsScene(SUuuid());
@@ -105,21 +105,21 @@ namespace Scene
 	void PhysicScene::BindToScene()
 	{
 #include <TrackUUID/JInsert.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 	}
 
 	void PhysicScene::UnbindFromScene()
 	{
 #include <TrackUUID/JErase.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 	}
 
 	void PhysicScene::Destroy()
 	{
 #include <Attributes/JDestroy.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 		if (pxControllerManager)
@@ -170,7 +170,7 @@ namespace Scene
 			}
 		}
 #include <TrackUUID/JClear.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 	}
 
@@ -183,7 +183,7 @@ namespace Scene
 			DeletePhysicSceneSceneObject(MAKESUUUID(id, uuid));
 		}
 #include <TrackUUID/JClearUnit.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 	}
 

@@ -22,29 +22,29 @@ namespace Scene
 	SODEF_FULL(SoundFX);
 
 #include <TrackUUID/JDef.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDef.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDef.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDef.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDef.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -54,7 +54,7 @@ namespace Scene
 	void WriteSoundFXsJson(SceneUnitId id, nlohmann::json& json)
 	{
 #include <Editor/JSaveFile.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 	}
 #endif
@@ -62,15 +62,15 @@ namespace Scene
 	SoundFX::SoundFX(SceneUnitId id, nlohmann::json& json) : SceneObject(id, json)
 	{
 #include <Attributes/JInit.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 		RENAME_ON_DELETION(SoundFX);
@@ -94,7 +94,7 @@ namespace Scene
 	void SoundFX::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 	}
 #endif
@@ -105,7 +105,7 @@ namespace Scene
 		using namespace Editor;
 #endif
 #include <TrackUUID/JInsert.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #if defined(_EDITOR)
@@ -134,7 +134,7 @@ namespace Scene
 	void SoundFX::BindToScene()
 	{
 #include <TrackUUID/JInsert.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 		using namespace Templates;
@@ -163,7 +163,7 @@ namespace Scene
 	void SoundFX::UnbindFromScene()
 	{
 #include <TrackUUID/JErase.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 		using namespace Templates;
@@ -240,7 +240,7 @@ namespace Scene
 	void SoundFX::Destroy()
 	{
 #include <Attributes/JDestroy.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 		SceneObject::Destroy();
 	}
@@ -388,7 +388,7 @@ namespace Scene
 			}
 		}
 #include <TrackUUID/JClear.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 	}
 
@@ -401,7 +401,7 @@ namespace Scene
 			DeleteSoundFXSceneObject(MAKESUUUID(id, uuid));
 		}
 #include <TrackUUID/JClearUnit.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 	}
 

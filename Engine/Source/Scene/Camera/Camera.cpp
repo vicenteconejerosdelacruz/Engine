@@ -45,29 +45,29 @@ namespace Scene
 	SODEF_FULL(Camera);
 
 #include <TrackUUID/JDef.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDef.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDef.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDef.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDef.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -75,15 +75,15 @@ namespace Scene
 	Camera::Camera(SceneUnitId id, nlohmann::json& json) :SceneObject(id, json)
 	{
 #include <Attributes/JInit.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 		RENAME_ON_DELETION(Camera);
 	}
@@ -106,7 +106,7 @@ namespace Scene
 	void Camera::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 	}
 
@@ -131,7 +131,7 @@ namespace Scene
 #endif
 
 #include <TrackUUID/JInsert.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 		UpdateProjection();
@@ -479,7 +479,7 @@ namespace Scene
 	void Camera::BindToScene()
 	{
 #include <TrackUUID/JInsert.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 #if defined(_EDITOR)
 		SceneObject::BindToScene();
@@ -532,7 +532,7 @@ namespace Scene
 	void Camera::UnbindFromScene()
 	{
 #include <TrackUUID/JErase.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 		Scene::UnbindFromScene(unit, uuid());
@@ -796,7 +796,7 @@ namespace Scene
 	void Camera::Destroy()
 	{
 #include <Attributes/JDestroy.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 		SceneObject::Destroy();
@@ -1364,7 +1364,7 @@ namespace Scene
 			}
 		}
 #include <TrackUUID/JClear.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 	}
 
@@ -1377,7 +1377,7 @@ namespace Scene
 			DeleteCameraSceneObject(MAKESUUUID(id, uuid));
 		}
 #include <TrackUUID/JClearUnit.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 	}
 
@@ -1394,7 +1394,7 @@ namespace Scene
 	void WriteCamerasJson(SceneUnitId id, nlohmann::json& json)
 	{
 #include <Editor/JSaveFile.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 	}
 #endif

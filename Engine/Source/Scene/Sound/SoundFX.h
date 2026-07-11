@@ -8,31 +8,31 @@ namespace Scene
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDecl.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JRequired.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDecl.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDecl.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDecl.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -42,15 +42,15 @@ namespace Scene
 		inline static const SceneObjectType sceneObjectType = SO_SoundEffects;
 
 #include <Attributes/JFlags.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 		SoundFX(SceneUnitId id, nlohmann::json& json);
@@ -105,7 +105,7 @@ namespace Scene
 	SODECL_FULL(SoundFX);
 
 #include <TrackUUID/JDecl.h>
-#include <SoundFXAtt.h>
+#include "SoundFXAtt.h"
 #include <JEnd.h>
 
 	void SoundFXsStep(SceneUnitId id, float step);

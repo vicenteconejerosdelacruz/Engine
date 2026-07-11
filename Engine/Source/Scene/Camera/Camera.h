@@ -42,31 +42,31 @@ using namespace Scene::CameraProjections;
 namespace Scene {
 #if defined(_EDITOR)
 #include <Attributes/JOrder.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDecl.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JRequired.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDecl.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDecl.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDecl.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -76,15 +76,15 @@ namespace Scene {
 		inline static const SceneObjectType sceneObjectType = SO_Cameras;
 
 #include <Attributes/JFlags.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 		Camera(SceneUnitId id, nlohmann::json& json);
@@ -235,7 +235,7 @@ namespace Scene {
 	SODECL_FULL(Camera);
 
 #include <TrackUUID/JDecl.h>
-#include <CameraAtt.h>
+#include "CameraAtt.h"
 #include <JEnd.h>
 
 	void CamerasStep(SceneUnitId id);

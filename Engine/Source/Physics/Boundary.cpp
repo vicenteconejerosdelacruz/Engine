@@ -14,29 +14,29 @@ namespace Scene
 	SODEF_FULL(Boundary);
 
 #include <TrackUUID/JDef.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDef.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDef.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDef.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDef.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -45,7 +45,7 @@ namespace Scene
 	void WriteBoundariesJson(SceneUnitId id, nlohmann::json& json)
 	{
 #include <Editor/JSaveFile.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 	}
 #endif
@@ -53,15 +53,15 @@ namespace Scene
 	Boundary::Boundary(SceneUnitId id, nlohmann::json& json) : SceneObject(id, json)
 	{
 #include <Attributes/JInit.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 		(*this)["behavior"] = PhysicsBehaviorToString.at(PB_Static);
@@ -86,7 +86,7 @@ namespace Scene
 	void Boundary::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 	}
 #endif
@@ -94,7 +94,7 @@ namespace Scene
 	void Boundary::Initialize()
 	{
 #include <TrackUUID/JInsert.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 		updateRotationQ();
 		SceneObject::Initialize();
@@ -103,7 +103,7 @@ namespace Scene
 	void Boundary::BindToScene()
 	{
 #include <TrackUUID/JInsert.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 		CreatePhysicObject();
@@ -112,7 +112,7 @@ namespace Scene
 	void Boundary::UnbindFromScene()
 	{
 #include <TrackUUID/JErase.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 	}
 
@@ -124,7 +124,7 @@ namespace Scene
 		}
 
 #include <Attributes/JDestroy.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 
 		SceneObject::Destroy();
@@ -313,7 +313,7 @@ namespace Scene
 			}
 		}
 #include <TrackUUID/JClear.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 	}
 
@@ -326,7 +326,7 @@ namespace Scene
 			DeleteBoundarySceneObject(MAKESUUUID(id, uuid));
 		}
 #include <TrackUUID/JClearUnit.h>
-#include <BoundaryAtt.h>
+#include "BoundaryAtt.h"
 #include <JEnd.h>
 	}
 

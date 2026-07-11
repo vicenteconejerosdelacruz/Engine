@@ -57,11 +57,11 @@ namespace Physics
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <PhysicObjectAtt.h>
+#include "PhysicObjectAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <PhysicObjectAtt.h>
+#include "PhysicObjectAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -69,15 +69,15 @@ namespace Physics
 	struct PhysicObject : JObject
 	{
 #include <Attributes/JFlags.h>
-#include <PhysicObjectAtt.h>
+#include "PhysicObjectAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <PhysicObjectAtt.h>
+#include "PhysicObjectAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <PhysicObjectAtt.h>
+#include "PhysicObjectAtt.h"
 #include <JEnd.h>
 
 		virtual ~PhysicObject() {};

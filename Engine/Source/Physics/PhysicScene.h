@@ -16,31 +16,31 @@ namespace Scene
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDecl.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JRequired.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDecl.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDecl.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDecl.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -49,15 +49,15 @@ namespace Scene
 		inline static const SceneObjectType sceneObjectType = SO_PhysicScenes;
 
 #include <Attributes/JFlags.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 		PhysicScene(SceneUnitId id, nlohmann::json& json);
@@ -80,7 +80,7 @@ namespace Scene
 	SODECL_FULL(PhysicScene);
 
 #include <TrackUUID/JDecl.h>
-#include <PhysicSceneAtt.h>
+#include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
 	void FetchPhysicsScenesResults(SceneUnitId id, float step);

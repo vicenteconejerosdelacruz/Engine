@@ -127,31 +127,31 @@ namespace Scene {
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDecl.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JRequired.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDecl.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDecl.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDecl.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -161,15 +161,15 @@ namespace Scene {
 		inline static const SceneObjectType sceneObjectType = SO_Lights;
 
 #include <Attributes/JFlags.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 		//lifecycle
@@ -273,7 +273,7 @@ namespace Scene {
 	SODECL_FULL(Light);
 
 #include <TrackUUID/JDecl.h>
-#include <LightAtt.h>
+#include "LightAtt.h"
 #include <JEnd.h>
 
 	void LightsStep(SceneUnitId unit);
