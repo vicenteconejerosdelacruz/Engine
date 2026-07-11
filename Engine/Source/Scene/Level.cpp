@@ -234,7 +234,7 @@ namespace Scene::Level
 #endif
 		if (initPhysX)
 		{
-		CreatePhysicsObjectsBehaviors(id);
+			CreatePhysicsObjectsBehaviors(id);
 		}
 		else
 		{
