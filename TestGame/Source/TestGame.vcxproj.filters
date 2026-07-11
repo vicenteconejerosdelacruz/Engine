@@ -99,6 +99,18 @@
     <ClInclude Include="GameControllers\Effects\AnimatedDecalAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameControllers\Brawler\Characters\Bosses\PumpkinBomb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameControllers\Brawler\Characters\Bosses\PumpkinBombAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameControllers\Effects\DelayedDeletion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameControllers\Effects\DelayedDeletionAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TestGame.cpp">
@@ -144,6 +156,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="JExpose\Editor\JEdvBrawlerDrawer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameControllers\Brawler\Characters\Bosses\PumpkinBomb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameControllers\Effects\DelayedDeletion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

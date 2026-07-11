@@ -6,7 +6,9 @@
 #include "Brawler/Characters/Heroes/Venom.h"
 #include "Brawler/Characters/Enemies/Thug.h"
 #include "Brawler/Characters/Bosses/GreenGoblin.h"
+#include "Brawler/Characters/Bosses/PumpkinBomb.h"
 #include "Effects/AnimatedDecal.h"
+#include "Effects/DelayedDeletion.h"
 
 namespace Game
 {
@@ -24,7 +26,9 @@ namespace Game
 		{ "venom", [](nlohmann::json& json) { return std::make_unique<Venom>(json); }},
 		{ "thug", [](nlohmann::json& json) { return std::make_unique<Thug>(json); }},
 		{ "greengoblin", [](nlohmann::json& json) { return std::make_unique<GreenGoblin>(json); }},
+		{ "pumpkin-bomb", [](nlohmann::json& json) { return std::make_unique<PumpkinBomb>(json); }},
 		{ "animated-decal", [](nlohmann::json& json) { return std::make_unique<AnimatedDecal>(json); }},
+		{ "delayed-deletion", [](nlohmann::json& json) { return std::make_unique<DelayedDeletion>(json); }},
 	};
 
 	std::vector<std::string> GetControllers()
@@ -49,6 +53,8 @@ namespace Game
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, Venom::GetClassName(), Venom::RegisterScript);
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, Thug::GetClassName(), Thug::RegisterScript);
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, GreenGoblin::GetClassName(), GreenGoblin::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, PumpkinBomb::GetClassName(), PumpkinBomb::RegisterScript);
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, AnimatedDecal::GetClassName(), AnimatedDecal::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, DelayedDeletion::GetClassName(), DelayedDeletion::RegisterScript);
 	}
 };

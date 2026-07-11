@@ -516,6 +516,8 @@
     <ClInclude Include="GameControllers\Brawler\Camera\BrawlerCamera.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\Bosses\GreenGoblin.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\Bosses\GreenGoblinAtt.h" />
+    <ClInclude Include="GameControllers\Brawler\Characters\Bosses\PumpkinBomb.h" />
+    <ClInclude Include="GameControllers\Brawler\Characters\Bosses\PumpkinBombAtt.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\BrawlerCharacter.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\Heroes\Hero.h" />
     <ClInclude Include="GameControllers\Brawler\Dialogs\BrawlerDialog.h" />
@@ -524,6 +526,8 @@
     <ClInclude Include="GameControllers\Brawler\Characters\Enemies\Thug.h" />
     <ClInclude Include="GameControllers\Effects\AnimatedDecal.h" />
     <ClInclude Include="GameControllers\Effects\AnimatedDecalAtt.h" />
+    <ClInclude Include="GameControllers\Effects\DelayedDeletion.h" />
+    <ClInclude Include="GameControllers\Effects\DelayedDeletionAtt.h" />
     <ClInclude Include="GameControllers\Test\SpinYaw.h" />
     <ClInclude Include="GameControllers\ThirdPerson\ThirdPersonCharacter.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\Heroes\Venom.h" />
@@ -545,11 +549,13 @@
   <ItemGroup>
     <ClCompile Include="GameControllers\Brawler\Camera\BrawlerCamera.cpp" />
     <ClCompile Include="GameControllers\Brawler\Characters\Bosses\GreenGoblin.cpp" />
+    <ClCompile Include="GameControllers\Brawler\Characters\Bosses\PumpkinBomb.cpp" />
     <ClCompile Include="GameControllers\Brawler\Characters\BrawlerCharacter.cpp" />
     <ClCompile Include="GameControllers\Brawler\Characters\Heroes\Hero.cpp" />
     <ClCompile Include="GameControllers\Brawler\Scene\BrawlerScene.cpp" />
     <ClCompile Include="GameControllers\Brawler\Characters\Enemies\Thug.cpp" />
     <ClCompile Include="GameControllers\Effects\AnimatedDecal.cpp" />
+    <ClCompile Include="GameControllers\Effects\DelayedDeletion.cpp" />
     <ClCompile Include="GameControllers\GameControllers.cpp" />
     <ClCompile Include="GameControllers\Test\SpinYaw.cpp" />
     <ClCompile Include="GameControllers\ThirdPerson\ThirdPersonCharacter.cpp" />
