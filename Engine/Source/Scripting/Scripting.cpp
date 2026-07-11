@@ -193,6 +193,15 @@ namespace Scripting
 				v8_string(isolate, name),
 				Scripting::WrapJObject<Controller>(isolate, *scriptData.get(), controller)
 			);
+			std::set<std::string> aliases = controller->GetControllerAliases();
+			for (auto& alias : aliases)
+			{
+				context->Global()->Set(
+					context,
+					v8_string(isolate, alias),
+					Scripting::WrapJObject<Controller>(isolate, *scriptData.get(), controller)
+				);
+			}
 			controller->BindNestedControllers(context, isolate, scriptData);
 		}
 	}
