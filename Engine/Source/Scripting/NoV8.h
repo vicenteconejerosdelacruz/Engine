@@ -57,6 +57,10 @@ namespace nov8
 	//console.log
 	void v8_console_log(const FunctionCallbackInfo<Value>& info);
 	void AddConsoleToContext(Isolate* isolate, Local<Context> context);
+	//require
+	void v8_native_require(const v8::FunctionCallbackInfo<v8::Value>& args);
+	std::string ReadScriptFile(std::filesystem::path filename);
+	void AddRequireToContext(Isolate* isolate, Local<Context> context);
 
 	//utils
 	Local<Value> v8_json_parse(Isolate* isolate, nlohmann::json& json);

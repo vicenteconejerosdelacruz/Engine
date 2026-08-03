@@ -2,6 +2,7 @@
 
 static const std::string defaultLevelsFolder = "Levels/";
 static const std::string defaultTemplatesFolder = "Templates/";
+static const std::string defaultScriptsFolder = "Scripts/";
 static const std::string defaultShadersFolder = "Shaders/";
 static const std::string defaultShadersBinariesFolder = "Shaders/bin/";
 static const std::string defaultAssetsFolder = "Assets/";

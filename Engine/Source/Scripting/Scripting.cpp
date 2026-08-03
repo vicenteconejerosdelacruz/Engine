@@ -145,6 +145,9 @@ namespace Scripting
 		//Bind the console
 		AddConsoleToContext(isolate, context);
 
+		//Bind the require
+		AddRequireToContext(isolate, context);
+
 		//get the SceneUnit
 		auto& scene = GetSceneUnit(id);
 

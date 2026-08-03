@@ -35,6 +35,133 @@ namespace nov8
 		context->Global()->Set(context, v8::String::NewFromUtf8(isolate, "console").ToLocalChecked(), console).Check();
 	}
 
+	std::unordered_map<std::string, v8::Global<v8::Value>> module_cache;
+	void v8_native_require(const v8::FunctionCallbackInfo<v8::Value>& args)
+	{
+		v8::Isolate* isolate = args.GetIsolate();
+		v8::Local<v8::Context> context = isolate->GetCurrentContext();
+
+		// Validar argumentos
+		if (args.Length() < 1 || !args[0]->IsString()) {
+			isolate->ThrowException(v8::String::NewFromUtf8Literal(isolate, "require() requiere una ruta (string)"));
+			return;
+		}
+
+		v8::String::Utf8Value filepath_utf8(isolate, args[0]);
+		std::string filepath = *filepath_utf8;
+
+		// 1. Revisar Caché
+		if (module_cache.find(filepath) != module_cache.end()) {
+			args.GetReturnValue().Set(module_cache[filepath].Get(isolate));
+			return;
+		}
+
+		// 2. Leer archivo desde el disco
+		std::string code = ReadScriptFile(filepath);
+		if (code.empty()) {
+			std::string err_msg = "No se pudo encontrar o leer el archivo: " + filepath;
+			isolate->ThrowException(v8::String::NewFromUtf8(isolate, err_msg.c_str()).ToLocalChecked());
+			return;
+		}
+
+		// 3. Crear el Wrapper de Node.js
+		std::string wrapped_code = "(function (exports, require, module, __filename, __dirname) {\n"
+			+ code
+			+ "\n});";
+
+		v8::Local<v8::String> v8_source = v8::String::NewFromUtf8(isolate, wrapped_code.c_str()).ToLocalChecked();
+
+		// Identificar el archivo para el stack trace de V8 en caso de error
+		v8::ScriptOrigin origin(v8::String::NewFromUtf8(isolate, filepath.c_str()).ToLocalChecked());
+
+		// 4. Compilar el wrapper
+		v8::Local<v8::Script> script;
+		if (!v8::Script::Compile(context, v8_source, &origin).ToLocal(&script)) {
+			return; // Excepción lanzada por la compilación
+		}
+
+		v8::Local<v8::Value> result;
+		if (!script->Run(context).ToLocal(&result) || !result->IsFunction()) {
+			return;
+		}
+
+		// Convertimos el resultado a una v8::Function
+		v8::Local<v8::Function> module_wrapper = result.As<v8::Function>();
+
+		// 5. Preparar objetos para la ejecución del módulo
+		v8::Local<v8::Object> exports_obj = v8::Object::New(isolate);
+		v8::Local<v8::Object> module_obj = v8::Object::New(isolate);
+
+		v8::Local<v8::String> exports_key = v8::String::NewFromUtf8Literal(isolate, "exports");
+		module_obj->Set(context, exports_key, exports_obj).Check();
+
+		// Reutilizamos la misma función NativeRequire para peticiones anidadas
+		v8::Local<v8::Function> require_fn = v8::Function::New(context, v8_native_require).ToLocalChecked();
+
+		v8::Local<v8::Value> filename_val = v8::String::NewFromUtf8(isolate, filepath.c_str()).ToLocalChecked();
+		v8::Local<v8::Value> dirname_val = v8::String::NewFromUtf8Literal(isolate, "."); // O resolver la ruta correspondiente
+
+		// 6. Invocar el wrapper pasando los argumentos requeridos
+		v8::Local<v8::Value> fn_args[] = {
+			exports_obj,   // exports
+			require_fn,    // require
+			module_obj,    // module
+			filename_val,  // __filename
+			dirname_val    // __dirname
+		};
+
+		v8::Local<v8::Value> dummy_receiver = v8::Undefined(isolate);
+
+		// Ejecutar el módulo
+		if (module_wrapper->Call(context, dummy_receiver, 5, fn_args).IsEmpty()) {
+			return; // El código del módulo lanzó un error en JS
+		}
+
+		// 7. Extraer el resultado final de `module.exports`
+		v8::Local<v8::Value> final_exports = module_obj->Get(context, exports_key).ToLocalChecked();
+
+		// Guardar en la caché
+		module_cache[filepath].Reset(isolate, final_exports);
+
+		// Retornar a JavaScript
+		args.GetReturnValue().Set(final_exports);
+	}
+
+	std::string ReadScriptFile(std::filesystem::path filename)
+	{
+		std::filesystem::path scriptFileName = defaultScriptsFolder + filename.generic_string();
+		if (std::filesystem::is_directory(scriptFileName))
+		{
+			scriptFileName += "/index.js";
+		}
+		else if (!scriptFileName.has_extension())
+		{
+			scriptFileName += ".js";
+		}
+
+		std::ifstream file(scriptFileName.generic_string());
+		if (!file.is_open()) return "";
+		std::stringstream buffer;
+		buffer << file.rdbuf();
+		return buffer.str();
+	}
+
+	void AddRequireToContext(Isolate* isolate, Local<Context> context)
+	{
+		// 1. Creamos el template
+		v8::Local<v8::FunctionTemplate> ftpl = v8::FunctionTemplate::New(isolate, v8_native_require);
+
+		// 2. Lo instanciamos como una función de JS en el contexto actual
+		v8::Local<v8::Function> fn;
+		if (ftpl->GetFunction(context).ToLocal(&fn)) {
+			// 3. Ahora 'fn' SÍ es un v8::Value y se puede pasar a Set()
+			context->Global()->Set(context,
+				v8::String::NewFromUtf8Literal(isolate, "require"),
+				fn
+			).Check(); // Ojo: en versiones recientes de V8 .Set() devuelve un Maybe<bool>
+		}
+	}
+
 	//utils
 	Local<Value> v8_json_parse(Isolate* isolate, nlohmann::json& json)
 	{
