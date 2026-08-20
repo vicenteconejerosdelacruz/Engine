@@ -2321,6 +2321,16 @@ JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_renderable>()
 }
 
 template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_soundeffect>()
+{
+	return[](std::string attribute, std::vector<JObject*>& json)
+		{
+			auto getName = [](JUUID uuid) { return Scene::GetSoundFXName(MAKESUUUID(Editor::currentSceneUnitId, uuid)); };
+			DrawResourceSelection(attribute, json, getName, SortUUIDSUNameByName(Editor::currentSceneUnitId, [](auto unit) { return Scene::GetSoundFXsIDsNames(unit, false); }), ICON_FA_SNOWMAN, ImGui::OpenSceneObject);
+		};
+}
+
+template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_boundary>()
 {
 	return[](std::string attribute, std::vector<JObject*>& json)

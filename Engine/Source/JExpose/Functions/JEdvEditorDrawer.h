@@ -198,6 +198,8 @@ void DrawResourceSelection(
 template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_renderable>();
 template<>
+JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_soundeffect>();
+template<>
 JEdvEditorDrawerFunction DrawValue<std::string, jedv_t_so_boundary>();
 template<>
 JEdvEditorDrawerFunction DrawValue<ControllerBinding, jedv_t_so_controller_instance>();
