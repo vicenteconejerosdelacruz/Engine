@@ -78,7 +78,7 @@ namespace Game
 			virtual void Step(float delta);
 
 			//States
-			void TakeHit(int damage);
+			virtual void TakeHit(int damage);
 			void PickHeroToFight();
 			void UnregisterFromCombat();
 
