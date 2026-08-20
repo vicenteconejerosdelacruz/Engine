@@ -271,7 +271,6 @@ namespace Game
 			int initialHealth;
 
 			//SceneObjects
-			//RenderableID venom;
 			RenderableID web;
 			XMVECTOR posDelta;
 
