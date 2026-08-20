@@ -1337,7 +1337,9 @@ namespace Scene
 		forceAnimation = false;
 		lastAnimationTime = animationTime();
 
-		animationStepLock->wait(true);
+		if (animationStepLock->load() == true)
+			animationStepLock->wait(true);
+
 		animationStepLock->store(true);
 		animationStepLock->notify_one();
 	}
