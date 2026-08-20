@@ -185,11 +185,18 @@ void SequencePlayer::DestroySequenceTriggers()
 	auto triggers = sequence.GetTriggerElements();
 	for (auto* t : triggers)
 	{
-		if (t->triggerBuilt->load() != true)
+		if (!t)
+			continue;
+
+		if (t->triggerBuilt)
+		{
 			t->triggerBuilt->wait(false);
-		t->triggerBuilt->store(false);
-		t->triggerBuilt = nullptr;
-		t->trigger->markedForDelete = true;
+			t->triggerBuilt.reset();
+		}
+		if (t->trigger)
+		{
+			t->trigger->markedForDelete = true;
+		}
 		t->trigger.clear();
 	}
 }
