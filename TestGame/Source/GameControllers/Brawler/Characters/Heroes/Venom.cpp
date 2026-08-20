@@ -27,6 +27,7 @@ extern DirectX::GamePad::ButtonStateTracker buttons;
 //Timer
 extern DX::StepTimer timer;
 extern float gameUpdateFrequency;
+extern GameInteractionMode gameInteractionMode;
 
 namespace Game::Brawler
 {
@@ -221,10 +222,14 @@ namespace Game::Brawler
 			return;
 #endif
 
+		bool dialogOpen = GetController<BrawlerScene>(unit, sceneController())->IsDialogOpen();
+
 		float dt = static_cast<float>(timer.GetElapsedSeconds());
 
+		if (gameInteractionMode == GIM_Joystick)
+		{
 		auto state = gamePad->GetState(0);
-		if (state.IsConnected())
+			if (state.IsConnected() && !dialogOpen)
 		{
 			buttons.Update(state);
 		}
@@ -232,6 +237,8 @@ namespace Game::Brawler
 		{
 			buttons.Reset();
 		}
+		}
+
 		posDelta = XMVectorZero();
 		if (vsm.currentState != VS_Death)
 		{
@@ -276,22 +283,36 @@ namespace Game::Brawler
 	void Venom::UpdateLeftStickVector()
 	{
 		if (noUpdateStates.contains(vsm.currentState)) return; //maybe Vec0?
+		bool dialogOpen = GetController<BrawlerScene>(unit, sceneController())->IsDialogOpen();
 
+		if (dialogOpen)
+		{
+			leftStick = XMVectorZero();
+			return;
+		}
+
+		if (gameInteractionMode == GIM_Joystick)
+		{
 		auto pad = gamePad->GetState(0);
 		if (pad.IsConnected())
 		{
 			leftStick = { pad.thumbSticks.leftX, 0.0f, pad.thumbSticks.leftY, 0.0f };
 		}
-		else
+		}
+		else if (gameInteractionMode == GIM_PC)
 		{
-			leftStick = XMVectorZero();
+			auto keys = keyboard->GetState();
+			float yaxis = (keys.IsKeyDown(Keyboard::Keys::Down) ^ keys.IsKeyDown(Keyboard::Keys::Up)) ? (keys.IsKeyDown(Keyboard::Keys::Down) ? -1.0f : 1.0f) : 0.0f;
+			float xaxis = (keys.IsKeyDown(Keyboard::Keys::Left) ^ keys.IsKeyDown(Keyboard::Keys::Right)) ? (keys.IsKeyDown(Keyboard::Keys::Left) ? -1.0f : 1.0f) : 0.0f;
+			leftStick = { xaxis, 0.0f, yaxis, 0.0f };
 		}
 	}
 
 	static const std::set<VenomStates> noUpdateLookToStates({ VS_Intro,VS_WallToSwing, VS_Swing });
 	void Venom::UpdateLookTo()
 	{
-		if (noUpdateLookToStates.contains(vsm.currentState)) return;
+		bool dialogOpen = GetController<BrawlerScene>(unit, sceneController())->IsDialogOpen();
+		if (noUpdateLookToStates.contains(vsm.currentState) || dialogOpen) return;
 
 		float len = leftStick.m128_f32[0];
 
@@ -520,7 +541,22 @@ namespace Game::Brawler
 	//Jumping
 	bool Venom::ShouldJump()
 	{
-		return (buttons.a == GamePad::ButtonStateTracker::PRESSED) && touchingDown && canJump && !jumping;
+		if (!touchingDown || !canJump || jumping)
+			return false;
+		if (GetController<BrawlerScene>(unit, sceneController())->IsDialogOpen())
+		{
+			return false;
+		}
+		if (gameInteractionMode == GIM_Joystick)
+		{
+			return (buttons.a == GamePad::ButtonStateTracker::PRESSED);
+		}
+		else if (gameInteractionMode == GIM_PC)
+		{
+			return keyboard->GetState().IsKeyDown(Keyboard::Keys::Space);
+		}
+
+		return false;
 	}
 
 	void Venom::EnterJumping()
@@ -610,7 +646,20 @@ namespace Game::Brawler
 	//Attack1
 	bool Venom::ShouldAttackX()
 	{
+		if (GetController<BrawlerScene>(unit, sceneController())->IsDialogOpen())
+		{
+			return false;
+		}
+
+		if (gameInteractionMode == GIM_Joystick)
+		{
 		return (buttons.x == GamePad::ButtonStateTracker::PRESSED);
+	}
+		else if (gameInteractionMode == GIM_PC)
+		{
+			return keyboard->GetState().IsKeyDown(Keyboard::Keys::F);
+		}
+		return false;
 	}
 
 	void Venom::EnterAttack1()
@@ -685,7 +734,21 @@ namespace Game::Brawler
 	//JuumpKick
 	bool Venom::ShouldJumpKick()
 	{
-		return jumping && (buttons.x == GamePad::ButtonStateTracker::PRESSED);
+		if (GetController<BrawlerScene>(unit, sceneController())->IsDialogOpen())
+		{
+			return false;
+		}
+		if (!jumping) return false;
+
+		if (gameInteractionMode == GIM_Joystick)
+		{
+			return (buttons.x == GamePad::ButtonStateTracker::PRESSED);
+		}
+		else if (gameInteractionMode == GIM_PC)
+		{
+			return keyboard->GetState().IsKeyDown(Keyboard::Keys::F);
+		}
+		return false;
 	}
 
 	void Venom::EnterJumpKick()
@@ -710,7 +773,19 @@ namespace Game::Brawler
 	//JumpDash
 	bool Venom::ShouldJumpDash()
 	{
+		if (GetController<BrawlerScene>(unit, sceneController())->IsDialogOpen())
+		{
+			return false;
+		}
+		if (gameInteractionMode == GIM_Joystick)
+		{
 		return (buttons.x == GamePad::ButtonStateTracker::PRESSED);
+	}
+		else if (gameInteractionMode == GIM_PC)
+		{
+			return keyboard->GetState().IsKeyDown(Keyboard::Keys::F);
+		}
+		return false;
 	}
 
 	void Venom::EnterJumpDash()
@@ -740,7 +815,22 @@ namespace Game::Brawler
 	//GrabWall
 	bool Venom::ShouldGrabWall()
 	{
-		return (buttons.b == GamePad::ButtonStateTracker::PRESSED && canAttachToWall());
+		if (GetController<BrawlerScene>(unit, sceneController())->IsDialogOpen())
+		{
+			return false;
+		}
+		if (!canAttachToWall())
+			return false;
+
+		if (gameInteractionMode == GIM_Joystick)
+		{
+			return (buttons.b == GamePad::ButtonStateTracker::PRESSED);
+		}
+		else if (gameInteractionMode == GIM_PC)
+		{
+			return keyboard->GetState().IsKeyDown(Keyboard::Keys::T);
+		}
+		return false;
 	}
 
 	void Venom::EnterGrabWall()
@@ -753,7 +843,19 @@ namespace Game::Brawler
 	//WallIdle
 	bool Venom::ShouldDetachFromWall()
 	{
-		return buttons.b == GamePad::ButtonStateTracker::PRESSED;
+		if (GetController<BrawlerScene>(unit, sceneController())->IsDialogOpen())
+		{
+			return false;
+		}
+		if (gameInteractionMode == GIM_Joystick)
+		{
+			return (buttons.b == GamePad::ButtonStateTracker::PRESSED);
+		}
+		else if (gameInteractionMode == GIM_PC)
+		{
+			return keyboard->GetState().IsKeyDown(Keyboard::Keys::T);
+		}
+		return false;
 	}
 
 	void Venom::EnterWallIdle()
@@ -883,7 +985,22 @@ namespace Game::Brawler
 	static const std::set<VenomStates> fromWallSwingStates({ VS_WallIdle,VS_CrawlOnWall });
 	bool Venom::ShouldWallToSwing()
 	{
-		return fromWallSwingStates.contains(vsm.currentState) && buttons.rightShoulder == GamePad::ButtonStateTracker::PRESSED;
+		if (GetController<BrawlerScene>(unit, sceneController())->IsDialogOpen())
+		{
+			return false;
+		}
+		if (!fromWallSwingStates.contains(vsm.currentState))
+			return false;
+
+		if (gameInteractionMode == GIM_Joystick)
+		{
+			return (buttons.rightShoulder == GamePad::ButtonStateTracker::PRESSED);
+		}
+		else if (gameInteractionMode == GIM_PC)
+		{
+			return keyboard->GetState().IsKeyDown(Keyboard::Keys::E);
+		}
+		return false;
 	}
 
 	void Venom::EnterWallToSwing()
@@ -961,7 +1078,7 @@ namespace Game::Brawler
 
 		web = MAKESUUUID(unit, getUUID());
 		Scene::CreateSceneObjectFromMold(unit, webMold(),
-			[&](SceneObjectType type, std::string name)
+			[&](SceneObjectType type, nlohmann::json json, std::string name)
 			{
 				return nlohmann::json(
 					{
@@ -1026,7 +1143,14 @@ namespace Game::Brawler
 		//capture if continue swinging
 		if (swingTimeTween->current_value >= swingThreshold())
 		{
+			if (gameInteractionMode == GIM_Joystick)
+			{
 			continueSwinging = (buttons.rightShoulder == GamePad::ButtonStateTracker::PRESSED);
+		}
+			else if (gameInteractionMode == GIM_PC)
+			{
+				continueSwinging = keyboard->GetState().IsKeyDown(Keyboard::Keys::E);
+			}
 		}
 	}
 
@@ -1040,7 +1164,18 @@ namespace Game::Brawler
 
 	bool Venom::ShouldFallFromSwing()
 	{
-		return (buttons.b == GamePad::ButtonStateTracker::PRESSED) || (swingTimeTween->current_value == swingTimeTween->target_value);
+		if ((swingTimeTween->current_value == swingTimeTween->target_value))
+			return true;
+
+		if (gameInteractionMode == GIM_Joystick)
+		{
+			return (buttons.b == GamePad::ButtonStateTracker::PRESSED);
+		}
+		else if (gameInteractionMode == GIM_PC)
+		{
+			return keyboard->GetState().IsKeyDown(Keyboard::Keys::T);
+		}
+		return false;
 	}
 
 	bool Venom::ShouldContinueSwinging()

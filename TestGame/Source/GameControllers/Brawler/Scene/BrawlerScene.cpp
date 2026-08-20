@@ -9,6 +9,8 @@
 
 extern std::unique_ptr<DirectX::GamePad> gamePad;
 extern DirectX::GamePad::ButtonStateTracker buttons;
+extern std::unique_ptr<DirectX::Keyboard> keyboard;
+extern GameInteractionMode gameInteractionMode;
 
 namespace Game::Brawler
 {
@@ -509,6 +511,8 @@ namespace Game::Brawler
 
 	void BrawlerScene::ProcessDialogInput()
 	{
+		if (gameInteractionMode == GIM_Joystick)
+		{
 		auto state = gamePad->GetState(0);
 		if (!state.IsConnected())
 			return;
@@ -517,7 +521,17 @@ namespace Game::Brawler
 		if (buttons.a == GamePad::ButtonStateTracker::PRESSED)
 		{
 			GotoNextDialogLine();
+			}
 		}
+		else if (gameInteractionMode == GIM_PC)
+		{
+			auto keys = keyboard->GetState();
+			if (keys.IsKeyDown(Keyboard::Keys::Enter))
+			{
+				GotoNextDialogLine();
+		}
+		}
+		
 	}
 
 	void BrawlerScene::GotoNextDialogLine()

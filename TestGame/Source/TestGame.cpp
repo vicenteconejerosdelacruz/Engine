@@ -8,6 +8,7 @@
 
 std::string gameAppTitle = "Culpeo Test Game";
 float gameUpdateFrequency = (1.0f / 60.0f);
+GameInteractionMode gameInteractionMode = GIM_PC;
 
 #if !defined(_EDITOR) && defined(_DEVELOPMENT)
 int main()

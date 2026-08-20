@@ -18,3 +18,9 @@
 #include "EngineInc.h"
 //do not move the drawers from here, otherwise the code will not be executed
 #include "JExpose/Editor/JEdvBrawlerDrawer.h"
+
+enum GameInteractionMode
+{
+	GIM_PC,
+	GIM_Joystick
+};
