@@ -1,5 +1,5 @@
 #pragma once
-#include "../BrawlerCharacter.h"
+#include "../Enemies/Thug.h"
 #include <GameStateMachine.h>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -10,16 +10,23 @@ namespace Game
 {
 	namespace Brawler
 	{
-		enum GreenGoblinStates
+		enum GreenGoblinCombatStates
 		{
-			GGS_None,
-			GGS_Idle,
+			GGCS_Glider,
+			GGCS_Floor,
 		};
 
-		inline static std::unordered_map<std::string, GreenGoblinStates> StringToGreenGoblinStates =
+		inline static std::unordered_map<std::string, GreenGoblinCombatStates> StringToGreenGoblinCombatStates =
 		{
-			{ "None", GGS_None },
-			{ "Idle", GGS_Idle },
+			{ "Glider", GGCS_Glider },
+			{ "Floor", GGCS_Floor },
+		};
+
+		enum GreenGoblinGliderState
+		{
+			GGGS_Idle,
+			GGGS_GlideLeft,
+			GGGS_GlideRight
 		};
 
 #if defined(_EDITOR)
@@ -32,10 +39,7 @@ namespace Game
 #include <JEnd.h>
 #endif
 
-		//struct Venom;
-		struct BrawlerScene;
-
-		struct GreenGoblin : BrawlerCharacter
+		struct GreenGoblin : Thug
 		{
 #include <Attributes/JFlags.h>
 #include "GreenGoblinAtt.h"
@@ -58,68 +62,43 @@ namespace Game
 			void SetInitialConditions() override;
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
-			DECL_CONTROLLER_DRAWER(GreenGoblin, BrawlerCharacter);
+			DECL_CONTROLLER_DRAWER(GreenGoblin, Thug);
 #endif
 			void Map(SUUUID so) override;
 			void Unmap() override;
 
 			//Step
 			virtual void Step(float delta);
+			void TakeHit(int damage) override;
 
-			/*
-			//States
-			void TakeHit(int damage);
-			void PickHeroToFight();
-			void UnregisterFromCombat();
+			//GGIdle
+			void GGIdle();
+			void GotoToFloor();
 
-			//Movement
-			void CharacterMoveXZPlane(XMVECTOR displacement, float dt, float sideSpeed, XMFLOAT3 gravity);
+			//GlideLeft
+			void GGEnterGlideLeft();
+			void GGGlideLeftStep();
 
-			//States
-			void UpdateLookTo();
-			bool IsInAttackRange();
+			//GlideRight
+			void GGEnterGlideRight();
+			void GGGlideRightStep();
 
-			//Idle
-			void EnterIdle();
-			void LeaveIdle();
-			void Idle();
+			bool GetBombTarget(XMFLOAT3& target);
+			void SetThrowBombTarget(XMFLOAT3 target);
+			XMVECTOR GetBombInitialVelocity();
+			void ThrowBombAtTarget();
+			void GetBackGlideIdleAnimation();
 
-			//CombatIdle
-			void EnterCombatIdle();
-			void CombatIdle();
-			void CombatIdleNextState();
-
-			//CombatFollow
-			void EnterCombatFollow();
-			void CombatFollow();
-			XMVECTOR CalculateSteeringDirection();
-			float EvaluateNextFollowMovement(XMVECTOR actualMovementDir);
-
-			//CombatPunch
-			void EnterCombatPunch();
-			void CombatPunch();
-			void OnCombatPunchAnimationEnd();
-			void PlayPunchSound();
-
-			//Death
-			bool ShouldDie();
-			void EnterDeath();
-			void OnDeathAnimationEnd();
-			*/
 			//State machine
-			GameStatesMachine<GreenGoblinStates> ggsm;
+			GameStatesMachine<GreenGoblinGliderState> gggsm;
 
-			//Initial States
-			XMFLOAT3 greenGoblinScale;
-			int initialHealth;
-			//SceneObjects
-			PhysicSceneID physicScene;
-			PhysicObjectID physicObject;
-
-			//Picked hero
-			/*
-			JUUID pickedHeroID;
-			*/
+			GreenGoblinCombatStates combatState = GreenGoblinCombatStates::GGCS_Glider;
+			std::unique_ptr<tween> leftGlideTween;
+			std::unique_ptr<tween> rightGlideTween;
+			bool firstGlide = true;
+			bool bombThrown = false;
+			XMFLOAT3 bombInitialPos{};
+			XMFLOAT3 bombTarget{};
 		};
 	};
 };
