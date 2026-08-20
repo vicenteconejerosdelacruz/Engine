@@ -527,6 +527,7 @@ namespace Game::Brawler
 
 	void Thug::PlayPunchSound()
 	{
+		if (punchSounds().size() == 0ULL) return;
 		SoundFXID sfx = SoundFXID(unit, punchSounds().at(0));
 		sfx->Stop();
 		sfx->Play();
