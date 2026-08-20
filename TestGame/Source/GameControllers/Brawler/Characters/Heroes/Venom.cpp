@@ -42,13 +42,6 @@ namespace Game::Brawler
 #include <JEnd.h>
 #endif
 
-	/*
-	BrawlerCamera* Venom::GetBrawlerCamera()
-	{
-		return Game::GetController<BrawlerScene>(unit, sceneController())->GetCameraController();
-	}
-	*/
-
 	VenomStates Venom::GetState()
 	{
 		return vsm.currentState;
