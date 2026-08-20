@@ -1,0 +1,326 @@
+/* Importar tipografía local o de apoyo si se requiere */
+.spiderman-screen-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  font-family: 'Press Start 2P', monospace;
+}
+
+/* --- ANIMACIONES KEYFRAMES --- */
+@keyframes closeLeftPanel {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes closeRightPanel {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes spiderAppear {
+  0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+  70% { transform: scale(1.15) rotate(0deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes spiderGlowPulse {
+  0%, 100% { filter: drop-shadow(0 0 15px rgba(237, 29, 36, 0.8)); }
+  50% { filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.9)); }
+}
+
+@keyframes scoreSlideUp {
+  0% { transform: translateY(100px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* --- CAPA 1: CORTINAS LATERALES --- */
+.spider-curtains-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.spider-curtain-left {
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(135deg, #09090b, #000000);
+  border-right: 2px solid #ed1d24;
+  box-shadow: 10px 0 30px rgba(237, 29, 36, 0.5);
+  animation: closeLeftPanel 0.8s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+.spider-curtain-right {
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(-135deg, #09090b, #000000);
+  border-left: 2px solid #ed1d24;
+  box-shadow: -10px 0 30px rgba(237, 29, 36, 0.5);
+  animation: closeRightPanel 0.8s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+.spider-web-pattern {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.15;
+}
+
+.spider-curtain-edge {
+  position: absolute;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: #ed1d24;
+  box-shadow: 0 0 15px #ed1d24;
+}
+.spider-curtain-left .spider-curtain-edge { right: 0; }
+.spider-curtain-right .spider-curtain-edge { left: 0; }
+
+/* --- CAPA 2: TELARAÑA DE FONDO --- */
+.spider-background-web-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.spider-web-radial {
+  width: 700px;
+  height: 700px;
+  opacity: 0.25;
+}
+
+/* --- CAPA 3: ENCABEZADO --- */
+.spider-header {
+  z-index: 30;
+  padding-top: 40px;
+  text-align: center;
+  animation: scoreSlideUp 0.6s ease-out 0.9s forwards;
+  opacity: 0;
+}
+
+.spider-subtitle {
+  color: hwb(0 100% 0%);
+  font-size: 10px;
+  letter-spacing: 4px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.spider-title {
+  font-size: 28px;
+  color: #ffffff;
+  margin: 0;
+}
+
+.highlight-red {
+  color: #ed1d24;
+}
+
+/* --- CAPA 4: ARAÑA --- */
+.spider-logo-wrapper {
+  z-index: 30;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.spider-svg {
+  width: 250px;
+  height: 250px;
+  animation: spiderAppear 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.75s forwards,
+             spiderGlowPulse 3s ease-in-out 1.5s infinite;
+  opacity: 0;
+}
+
+.spider-glow-bg {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: rgba(237, 29, 36, 0.2);
+  border-radius: 50%;
+  filter: blur(40px);
+}
+
+/* --- CAPA 5: MARCADOR INFERIOR --- */
+.spider-footer {
+  z-index: 30;
+  width: 100%;
+  padding-bottom: 40px;
+  display: flex;
+  justify-content: center;
+  animation: scoreSlideUp 0.6s ease-out 1.1s forwards;
+  opacity: 0;
+}
+
+.spider-score-card {
+  position: relative;
+  width: 80%;
+  max-width: 400px;
+  background: rgba(15, 15, 18, 0.9);
+  border: 2px solid rgba(237, 29, 36, 0.8);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 0 25px rgba(237, 29, 36, 0.3);
+}
+
+.spider-card-top-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ed1d24, transparent);
+}
+
+.spider-score-label {
+  color: #a1a1aa;
+  font-size: 8px;
+  margin-bottom: 10px;
+}
+
+.spider-score-number {
+  font-size: 24px;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(237, 29, 36, 0.8);
+  margin-bottom: 12px;
+}
+
+.spider-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #27272a;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.spider-progress-fill {
+  width: 85%;
+  height: 100%;
+  background: linear-gradient(90deg, #ed1d24, #ff6b6b);
+}
+
+.spider-score-meta {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 7px;
+  color: #71717a;
+}
+
+.text-record {
+  color: #ef4444;
+}
+
+/* --- BOTÓN DE DEBUG --- */
+.spider-debug-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 100;
+}
+
+.spider-btn-replay {
+  background: #ed1d24;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+/* --- BOTÓN DE JOYSTICK 'A' EN ESQUINA INFERIOR DERECHA --- */
+@keyframes buttonPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(237, 29, 36, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 22px rgba(237, 29, 36, 1), inset 0 2px 6px rgba(255, 255, 255, 0.9);
+  }
+}
+
+@keyframes textBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.spider-continue-prompt {
+  position: absolute;
+  bottom: 24px;
+  right: 28px;
+  z-index: 40; /* Por encima de cortinas y marcador */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(10, 10, 12, 0.85);
+  border: 1px solid rgba(237, 29, 36, 0.5);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8), 0 0 10px rgba(237, 29, 36, 0.2);
+  backdrop-filter: blur(4px);
+  animation: scoreSlideUp 0.6s ease-out 1.2s forwards;
+  opacity: 0;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.spider-continue-prompt:hover {
+  background: rgba(237, 29, 36, 0.25);
+  transform: translateY(-2px);
+}
+
+.arcade-btn-a {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ff4d4d, #ed1d24 60%, #990000);
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(237, 29, 36, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+  animation: buttonPulse 1.5s ease-in-out infinite;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.continue-text {
+  color: #ffffff;
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-family: 'Press Start 2P', monospace;
+  animation: textBlink 1.5s ease-in-out infinite;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}

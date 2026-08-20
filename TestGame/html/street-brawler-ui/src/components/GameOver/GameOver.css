@@ -1,0 +1,97 @@
+/* --- TEMÁTICA GAME OVER --- */
+
+/* Colores de texto */
+.text-dark-red {
+  color: #a81313 !important;
+}
+
+.highlight-dark-red {
+  color: #b30000 !important;
+  text-shadow: 0 0 12px rgba(179, 0, 0, 0.8);
+}
+
+.text-failed {
+  color: #dc2626 !important;
+}
+
+/* Cortinas y telarañas en tonos rojos oscuros/sangre */
+.game-over-curtain {
+  border-color: #8b0000 !important;
+  box-shadow: 10px 0 30px rgba(139, 0, 0, 0.6) !important;
+}
+
+.game-over-edge {
+  background: #8b0000 !important;
+  box-shadow: 0 0 15px #8b0000 !important;
+}
+
+.game-over-web {
+  opacity: 0.18 !important;
+}
+
+/* Araña invertida (rotada 180° dando sensación de araña caída) */
+.game-over-spider {
+  transform: rotate(180deg);
+  animation: spiderFall 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.75s forwards,
+             spiderDarkGlow 3s ease-in-out 1.5s infinite !important;
+}
+
+.game-over-glow {
+  background: rgba(139, 0, 0, 0.25) !important;
+}
+
+/* Tarjeta de puntaje estilo Game Over */
+.game-over-card {
+  border-color: rgba(139, 0, 0, 0.8) !important;
+  box-shadow: 0 0 25px rgba(139, 0, 0, 0.4) !important;
+}
+
+.game-over-top-glow {
+  background: linear-gradient(90deg, transparent, #8b0000, transparent) !important;
+}
+
+.game-over-progress {
+  width: 100% !important;
+  background: linear-gradient(90deg, #4a0000, #8b0000) !important;
+}
+
+/* Botón 'A' de Reintentar */
+.game-over-prompt {
+  border-color: rgba(139, 0, 0, 0.6) !important;
+}
+
+.game-over-prompt:hover {
+  background: rgba(139, 0, 0, 0.25) !important;
+}
+
+.game-over-btn-a {
+  background: radial-gradient(circle at 30% 30%, #b30000, #8b0000 60%, #4a0000) !important;
+  box-shadow: 0 0 10px rgba(139, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.4) !important;
+}
+
+/* --- ANIMACIONES EXCLUSIVAS DE GAME OVER --- */
+
+@keyframes spiderFall {
+  0% { transform: scale(0) rotate(135deg); opacity: 0; }
+  70% { transform: scale(1.1) rotate(180deg); opacity: 1; }
+  100% { transform: scale(1) rotate(180deg); opacity: 1; }
+}
+
+@keyframes spiderDarkGlow {
+  0%, 100% { filter: drop-shadow(0 0 15px rgba(139, 0, 0, 0.8)); }
+  50% { filter: drop-shadow(0 0 25px rgba(255, 0, 0, 0.5)); }
+}
+
+/* Efecto de parpadeo/interferencia en el título GAME OVER */
+.game-over-glitch {
+  position: relative;
+  display: inline-block;
+  animation: glitchText 3s infinite;
+}
+
+@keyframes glitchText {
+  0%, 90%, 100% { transform: translate(0); }
+  92% { transform: translate(-2px, 1px); }
+  94% { transform: translate(2px, -1px); }
+  96% { transform: translate(-1px, -1px); }
+}

@@ -1,9 +1,10 @@
 import { HealthBar } from '../../HealthBar/HealthBar';
 
-export const HeroHud = ({ picture, title, hp }) => {
+export const HeroHud = ({ picture, title, lives=1, hp }) => {
   return (
     <div className="character-hud hero">
       <div className="unit-display hero">
+        <span className="hero-lives">{lives}</span>
         <img src={picture} className="portrait hero" alt={title} />
         <div className="bars-container">
           <span className="bars-title hero">{title}</span>

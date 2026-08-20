@@ -85,6 +85,16 @@
   top: 70px;
 }
 
+.hero-lives {
+  color: #fff;
+  font-family: 'Verdana', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-style: italic;
+  text-shadow: 0px 0px 6px #000;
+  font-size: 2.1rem;
+}
+
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(-20px); }
   to { opacity: 1; transform: translateX(0); }
