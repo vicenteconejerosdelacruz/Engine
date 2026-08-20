@@ -172,6 +172,8 @@ namespace Scene {
 #include "LightAtt.h"
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(Light, SceneObject);
+
 		//lifecycle
 		Light(SceneUnitId id, nlohmann::json& json);
 		~Light() { Destroy(); }

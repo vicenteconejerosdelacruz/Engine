@@ -81,6 +81,8 @@ namespace Physics
 #include "PhysicObjectAtt.h"
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(PhysicObject, JObject);
+
 		virtual ~PhysicObject() {};
 		PhysicObject(nlohmann::json& json);
 		virtual void JUpdate(nlohmann::json p);

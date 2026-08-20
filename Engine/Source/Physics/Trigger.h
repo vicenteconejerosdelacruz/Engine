@@ -67,6 +67,8 @@ namespace Scene
 #include "TriggerAtt.h"
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(Trigger, SceneObject);
+
 		Trigger(SceneUnitId id, nlohmann::json& json);
 
 		void updateRotationQ();

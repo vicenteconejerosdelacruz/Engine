@@ -52,6 +52,8 @@ namespace Game
 #include "BrawlerCharacterAtt.h"
 #include <JEnd.h>
 
+			DEF_STRING2FLAGS_FUNC(BrawlerCharacter, Controller);
+
 			//Constructor and Binding
 			BrawlerCharacter(nlohmann::json& json);
 			void SetInitialConditions() override;

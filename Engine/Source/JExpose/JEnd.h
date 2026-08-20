@@ -28,7 +28,6 @@ return created; }
 #ifdef JEXPOSE_ATT_STR_TO_FLAG
 #undef JEXPOSE_ATT_STR_TO_FLAG
 };
-std::unordered_map<std::string, size_t> GetStringToFlags() override { return StringToFlags; }
 #endif
 
 #ifdef JEXPOSE_ATT_UPDATE

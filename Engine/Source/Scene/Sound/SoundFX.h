@@ -53,6 +53,8 @@ namespace Scene
 #include "SoundFXAtt.h"
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(SoundFX, SceneObject);
+
 		SoundFX(SceneUnitId id, nlohmann::json& json);
 		~SoundFX() { Destroy(); }
 		void Initialize() override;

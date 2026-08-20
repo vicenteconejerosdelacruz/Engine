@@ -66,6 +66,8 @@ namespace Scene
 #include "BoundaryAtt.h"
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(Boundary, SceneObject);
+
 		Boundary(SceneUnitId id, nlohmann::json& json);
 		~Boundary() { Destroy(); }
 		void Initialize() override;

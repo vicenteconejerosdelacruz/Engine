@@ -30,6 +30,8 @@ namespace Game
 #include <Effects/DelayedDeletionAtt.h>
 #include <JEnd.h>
 
+			DEF_STRING2FLAGS_FUNC(DelayedDeletion, Controller);
+
 			DelayedDeletion(nlohmann::json& json);
 			~DelayedDeletion() {}
 #if defined(_EDITOR)

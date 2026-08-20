@@ -28,6 +28,8 @@ namespace Game
 #include <Test/SpinYawAtt.h>
 #include <JEnd.h>
 
+			DEF_STRING2FLAGS_FUNC(SpinYaw, Controller);
+
 			SpinYaw(nlohmann::json& json);
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;

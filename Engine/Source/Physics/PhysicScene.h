@@ -60,6 +60,8 @@ namespace Scene
 #include "PhysicSceneAtt.h"
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(PhysicScene, SceneObject);
+
 		PhysicScene(SceneUnitId id, nlohmann::json& json);
 		~PhysicScene() { Destroy(); }
 		void Initialize() override;

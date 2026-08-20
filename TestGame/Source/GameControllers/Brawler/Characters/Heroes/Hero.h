@@ -29,6 +29,8 @@ namespace Game
 #include "HeroAtt.h"
 #include <JEnd.h>
 
+			DEF_STRING2FLAGS_FUNC(Hero, BrawlerCharacter);
+
 			Hero(nlohmann::json& json);
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;

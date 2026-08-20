@@ -30,6 +30,8 @@ namespace Game
 #include "BrawlerCameraAtt.h"
 #include <JEnd.h>
 
+			DEF_STRING2FLAGS_FUNC(BrawlerCamera, Controller);
+
 			BrawlerCamera(nlohmann::json& json);
 			void SetInitialConditions() override;
 #if defined(_EDITOR)

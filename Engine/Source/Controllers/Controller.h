@@ -137,6 +137,8 @@ namespace Game
 #include <ControllerAtt.h>
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(Controller, JObject);
+
 		virtual ~Controller() = default;
 		Controller(nlohmann::json& json);
 		virtual void JUpdate(nlohmann::json p);

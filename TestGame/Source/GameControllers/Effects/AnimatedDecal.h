@@ -30,6 +30,8 @@ namespace Game
 #include <Effects/AnimatedDecalAtt.h>
 #include <JEnd.h>
 
+			DEF_STRING2FLAGS_FUNC(AnimatedDecal, Controller);
+
 			AnimatedDecal(nlohmann::json& json);
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;

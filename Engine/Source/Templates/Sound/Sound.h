@@ -68,6 +68,8 @@ namespace Templates
 #include <SoundAtt.h>
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(SoundJson, JTemplate);
+
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 #endif

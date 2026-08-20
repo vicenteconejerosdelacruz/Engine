@@ -61,6 +61,8 @@ namespace Templates
 #include <HtmlUIAtt.h>
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(HtmlUIJson, JTemplate);
+
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 #endif

@@ -31,6 +31,8 @@ namespace Primitives
 #include <ConeAtt.h>
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(Cone, Primitive);
+
 		static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL;
 		typedef Vertex<VertexClass> VertexType;
 

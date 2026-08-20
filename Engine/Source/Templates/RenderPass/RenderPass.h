@@ -144,6 +144,8 @@ namespace Templates
 #include <RenderPassAtt.h>
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(RenderPassJson, JTemplate);
+
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 #endif

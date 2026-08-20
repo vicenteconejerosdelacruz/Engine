@@ -59,6 +59,7 @@ namespace Game
 #include "ThugAtt.h"
 #include <JEnd.h>
 
+			DEF_STRING2FLAGS_FUNC(Thug, BrawlerCharacter);
 
 			//BrawlerScene* GetBrawlerSceneController();
 

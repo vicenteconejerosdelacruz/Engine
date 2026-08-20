@@ -120,6 +120,8 @@ namespace Templates
 #include <MaterialAtt.h>
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(MaterialJson, JTemplate);
+
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 #endif

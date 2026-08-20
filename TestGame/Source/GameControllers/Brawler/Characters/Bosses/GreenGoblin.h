@@ -49,6 +49,8 @@ namespace Game
 #include "GreenGoblinAtt.h"
 #include <JEnd.h>
 
+			DEF_STRING2FLAGS_FUNC(GreenGoblin, Thug);
+
 			//Constructor and Binding
 			GreenGoblin(nlohmann::json& json);
 			static void RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script);

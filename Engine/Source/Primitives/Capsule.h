@@ -31,6 +31,8 @@ namespace Primitives
 #include <CapsuleAtt.h>
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(Capsule, Primitive);
+
 		static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL_TEXCOORD0;
 		typedef Vertex<VertexClass> VertexType;
 

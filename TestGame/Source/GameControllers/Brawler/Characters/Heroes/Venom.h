@@ -103,6 +103,8 @@ namespace Game
 #include "VenomAtt.h"
 #include <JEnd.h>
 
+			DEF_STRING2FLAGS_FUNC(Venom, Hero);
+
 			static inline std::vector<std::string> Attack1Animations =
 			{
 				"Punch1", "Punch1",

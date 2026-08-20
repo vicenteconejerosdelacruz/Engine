@@ -38,6 +38,8 @@ namespace Game
 #include "BrawlerSceneAtt.h"
 #include <JEnd.h>
 
+			DEF_STRING2FLAGS_FUNC(BrawlerScene, Controller);
+
 			//Constructor and Binding
 			BrawlerScene(nlohmann::json& json);
 			static void RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script);

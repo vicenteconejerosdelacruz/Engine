@@ -29,6 +29,8 @@ namespace Game
 #include "PumpkinBombAtt.h"
 #include <JEnd.h>
 
+			DEF_STRING2FLAGS_FUNC(PumpkinBomb, Controller);
+
 			PumpkinBomb(nlohmann::json& json);
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;

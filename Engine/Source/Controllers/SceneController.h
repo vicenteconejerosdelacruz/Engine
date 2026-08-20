@@ -58,6 +58,8 @@ namespace Scene
 #include "SceneControllerAtt.h"
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(SceneController, SceneObject);
+
 		SceneController(SceneUnitId id, nlohmann::json& json);
 		~SceneController() { Destroy(); }
 		void Initialize() override;

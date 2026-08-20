@@ -31,6 +31,8 @@ namespace Primitives
 #include <SphereAtt.h>
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(Sphere, Primitive);
+
 		static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL_TEXCOORD0;
 		typedef Vertex<VertexClass> VertexType;
 

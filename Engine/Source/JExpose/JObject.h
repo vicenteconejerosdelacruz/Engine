@@ -5,6 +5,12 @@
 #include <ScriptBinding.h>
 #include <NoV8.h>
 
+#define DEF_STRING2FLAGS_FUNC(JClass,ParentJClass)\
+std::unordered_map<std::string, size_t> GetStringToFlags() override {\
+	std::unordered_map<std::string, size_t> joined = ParentJClass::GetStringToFlags();\
+	joined.insert(StringToFlags.begin(), StringToFlags.end());\
+	return joined;\
+}
 using namespace v8;
 using namespace nov8;
 struct JObject : nlohmann::json

@@ -65,6 +65,8 @@ namespace Templates
 #include <Model3DAtt.h>
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(Model3DJson, JTemplate);
+
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 		void ListenUpdate(Model3D_UpdateFlags flag, SUUUID suuuid, std::function<void()> callback);

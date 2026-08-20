@@ -87,6 +87,8 @@ namespace Scene {
 #include "CameraAtt.h"
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(Camera, SceneObject);
+
 		Camera(SceneUnitId id, nlohmann::json& json);
 		~Camera() { Destroy(); }
 

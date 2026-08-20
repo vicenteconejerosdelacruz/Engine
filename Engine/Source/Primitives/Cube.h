@@ -30,6 +30,8 @@ namespace Primitives
 #include <CubeAtt.h>
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(Cube, Primitive);
+
 		static constexpr VertexClass VertexClass = VertexClass::POS_NORMAL_TEXCOORD0;
 		typedef Vertex<VertexClass> VertexType;
 

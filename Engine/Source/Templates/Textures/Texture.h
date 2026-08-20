@@ -82,6 +82,8 @@ namespace Templates
 #include <TextureAtt.h>
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(TextureJson, JTemplate);
+
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 		virtual void EditorPreview(size_t flags);

@@ -28,6 +28,8 @@ namespace Game
 #include <ThirdPerson/ThirdPersonCharacterAtt.h>
 #include <JEnd.h>
 
+			DEF_STRING2FLAGS_FUNC(ThirdPersonCharacter, Controller);
+
 			ThirdPersonCharacter(nlohmann::json& json);
 			void SetInitialConditions() override;
 #if defined(_EDITOR)

@@ -79,6 +79,8 @@ namespace Scene
 #include "RenderableAtt.h"
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(Renderable, SceneObject);
+
 		//lifecycle
 		Renderable(SceneUnitId id, nlohmann::json& json);
 		~Renderable() { Destroy(); }

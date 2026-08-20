@@ -75,6 +75,8 @@ namespace Templates
 #include <ShaderAtt.h>
 #include <JEnd.h>
 
+		DEF_STRING2FLAGS_FUNC(ShaderJson, JTemplate);
+
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
 #endif
