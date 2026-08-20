@@ -51,6 +51,7 @@ namespace Game::Brawler
 		v8_register_method<BrawlerScene>(isolate, tpl, "ResumeCombat", script, [](BrawlerScene* self) { if (self) self->PauseCombat(); });
 		v8_register_method<BrawlerScene>(isolate, tpl, "IsCombatPaused", script, [](BrawlerScene* self) { return self && self->IsCombatPaused(); });
 		v8_register_method<BrawlerScene>(isolate, tpl, "StartDialog", script, [](BrawlerScene* self, std::string dialog) { if (self) self->StartDialog(dialog); });
+		v8_register_method<BrawlerScene>(isolate, tpl, "LevelComplete", script, [](BrawlerScene* self) { if (self) self->LevelComplete(); });
 	}
 
 	void BrawlerScene::SetInitialConditions()
@@ -215,6 +216,7 @@ namespace Game::Brawler
 
 	void BrawlerScene::UpdateEnemy(JUUID enemy)
 	{
+		if (enemy.empty()) return;
 		newAttacker(lastAttacker() != enemy);
 		lastAttacker(enemy);
 
@@ -329,6 +331,25 @@ namespace Game::Brawler
 		);
 		HtmlUIInstanceID instance = venomUIInstance();
 		instance->EvaluateScript(js);
+	}
+
+	void BrawlerScene::LevelComplete()
+	{
+		std::string js = BuildEvalScript("LEVEL_COMPLETE",
+			{
+				{ "value", false },
+				{ "level", 1 },
+				{ "previousScore", 0 },
+				{ "hasPreviouseScore", false },
+				{ "newRecord", 200 }
+			}
+		);
+		HtmlUIInstanceID instance = venomUIInstance();
+		instance->EvaluateScript(js);
+		SoundFXID sfx_music = MAKESUUUID(unit, music());
+		sfx_music->Stop();
+		SoundFXID sfx_ready = MAKESUUUID(unit, end_level_ready_music());
+		sfx_ready->Play();
 	}
 
 	void BrawlerScene::PauseCombat()
@@ -463,6 +484,20 @@ namespace Game::Brawler
 
 		// Comprobamos si la cantidad de atacantes actuales es menor al límite
 		return (int)it->second.attackers.size() < maxAttackers;
+	}
+
+	std::vector<std::tuple<JUUID, XMVECTOR>> BrawlerScene::GetHeroesPositions()
+	{
+		std::set<JUUID> heroes_uuids = heroes();
+		std::vector<std::tuple<JUUID, XMVECTOR>> heroes_pos;
+
+		std::transform(heroes_uuids.begin(), heroes_uuids.end(), std::back_inserter(heroes_pos), [](JUUID hero)
+			{
+				return std::make_tuple(hero, GetController<Hero>(hero)->renderable->positionV());
+			}
+		);
+
+		return heroes_pos;
 	}
 
 	//Dialog System

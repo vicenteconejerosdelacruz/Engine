@@ -80,6 +80,7 @@ namespace Game
 			void HideLeftArrowSign();
 			void ShowRightArrowSign();
 			void HideRightArrowSign();
+			void LevelComplete();
 
 			//Combat system
 			void PauseCombat();
@@ -90,6 +91,8 @@ namespace Game
 			int GetThugCombatSlotIndex(JUUID heroID, JUUID thugID);
 			XMVECTOR GetHeroCombatPositionForThug(JUUID heroID, JUUID thugID);
 			bool CanJoinCombat(JUUID heroID, int maxAttackers = 4);
+			std::vector<std::tuple<JUUID, XMVECTOR>> GetHeroesPositions();
+
 			//Dialog System
 			void StartDialog(std::string dialog);
 			void HideDialog();
@@ -98,6 +101,7 @@ namespace Game
 			void ProcessDialogInput();
 			void GotoNextDialogLine();
 
+			//Combat System
 			struct CombatQueue {
 				std::vector<JUUID> attackers;
 			};
