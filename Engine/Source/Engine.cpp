@@ -414,6 +414,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+#if defined(_EDITOR)
+extern bool restoringPlayMode;
+#endif
+
 void AppStep()
 {
 	std::locale::global(std::locale("C"));
@@ -440,6 +444,9 @@ void AppStep()
 #endif
 	timer.Tick([&]()
 		{
+#if defined(_EDITOR)
+			if (restoringPlayMode) return;
+#endif
 			FetchPhysicsScenesResults(timer);
 			TemplatesStep(timer);
 			GameStep();

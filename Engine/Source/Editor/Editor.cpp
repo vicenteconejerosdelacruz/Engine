@@ -36,6 +36,7 @@ extern std::string gameAppTitle;
 extern bool inSizeMove;
 extern DX::StepTimer timer;
 extern RECT GetMaximizedAreaSize();
+bool restoringPlayMode = false;
 
 // Forward declare message handler from imgui_impl_win32.cpp
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -3091,6 +3092,8 @@ namespace Editor
 	{
 		using namespace Scene;
 		using namespace nlohmann;
+		restoringPlayMode = true;
+
 		nlohmann::json current = json::parse(GetLevelString(id));
 		nlohmann::json initial = json::parse(editorPrePlayDump.at(id));
 
@@ -3251,6 +3254,8 @@ namespace Editor
 
 		//make the replacements patches
 		std::map<JUUID, nlohmann::json> toReplace;
+		std::map<JUUID, nlohmann::json> toReplaceController;
+		std::map<JUUID, nlohmann::json> toReplacePhysicObject;
 		for (auto& [type, initialRefMap] : initialRefs)
 		{
 			auto& currentRefMap = currentRefs.at(type);
@@ -3268,7 +3273,8 @@ namespace Editor
 				{
 					nlohmann::json& j = diff.at(i);
 					assert(j.at("op") == "replace");
-					std::string attribute = nostd::split(j.at("path"), "/").at(1);
+					auto parts = nostd::split(j.at("path"), "/");
+					std::string attribute = parts.at(1);
 
 					nlohmann::json patch;
 					if (toReplace.contains(uuid))
@@ -3280,6 +3286,48 @@ namespace Editor
 						patch[attribute] = initialJ.at(attribute);
 						toReplace.insert_or_assign(uuid, patch);
 					}
+					else if ("physicObject" == attribute)
+					{
+						SceneObject* so = GetSceneObjectPointer(id, uuid);
+						assert(so->contains("physicObject"));
+
+						int index = std::atoi(parts.at(2).c_str());
+						std::string phAttribute = parts.at(3);
+
+						JUUID phOUUID = so->at("physicObject").at(index);
+
+						if (!toReplacePhysicObject.contains(phOUUID))
+						{
+							toReplacePhysicObject[phOUUID] = {
+								{ phAttribute , initialJ.at(attribute).at(index).at(phAttribute) }
+							};
+						}
+						else
+						{
+							toReplacePhysicObject[phOUUID][phAttribute] = initialJ.at(attribute).at(index).at(phAttribute);
+						}
+					}
+					else if ("controllers" == attribute)
+					{
+						SceneObject* so = GetSceneObjectPointer(id, uuid);
+						assert(so->contains("controllers"));
+
+						std::string controllerName = parts.at(2);
+						std::string controllerAttribute = parts.at(3);
+
+						JUUID controllerUUID = so->at("controllers").at(controllerName);
+
+						if (!toReplaceController.contains(controllerUUID))
+						{
+							toReplaceController[controllerUUID] = {
+								{ controllerAttribute, initialJ.at(attribute).at(controllerName).at(controllerAttribute) }
+							};
+						}
+						else
+						{
+							toReplaceController[controllerUUID][controllerAttribute] = initialJ.at(attribute).at(controllerName).at(controllerAttribute);
+						}
+					}
 				}
 			}
 		}
@@ -3290,11 +3338,26 @@ namespace Editor
 		StopSounds(id);
 		ShowBillboards(id);
 
+		for (auto& [uuid, patch] : toReplacePhysicObject)
+		{
+			PhysicObjectID phO(uuid);
+			phO->merge_patch(patch);
+			for (auto& el : patch.items())
+			{
+				phO->flag(el.key());
+			}
+		}
+
 		//apply the replacements and reset the controllers and physic objects states
 		for (auto& [uuid, patch] : toReplace)
 		{
 			SceneObject* so = GetSceneObjectPointer(id, uuid);
 			so->merge_patch(patch);
+			for (auto& el : patch.items())
+			{
+				so->flag(el.key());
+			}
+
 			so->SetInitialConditions();
 			for (PhysicObjectID phO : GetPhysicsObjectsBySceneObjectUUID(so->SUuuid()))
 			{
@@ -3317,8 +3380,16 @@ namespace Editor
 		{
 			for (auto& uuid : uuidset)
 			{
-				//GetController(uuid)->SetInitialConditions();
-				GetController(uuid)->Map(GetControllerSUUUID(uuid));
+				auto& controller = GetController(uuid);
+				if (toReplaceController.contains(uuid))
+				{
+					controller->merge_patch(toReplaceController.at(uuid));
+					for (auto& el : toReplaceController.at(uuid).items())
+					{
+						controller->flag(el.key());
+					}
+				}
+				controller->Map(GetControllerSUUUID(uuid));
 			}
 		}
 
@@ -3328,6 +3399,7 @@ namespace Editor
 				sceneObjectEdition.at(currentSceneUnitId).selectedTab = sceneObjectEdition.at(currentSceneUnitId).detailAbleTabs.at(0);
 				isPlaying.at(id) = false;
 				isPaused.at(id) = false;
+				restoringPlayMode = false;
 			};
 
 		bool delayedEditorMode = false;
