@@ -39,7 +39,7 @@ namespace Templates
 
 	namespace Mold
 	{
-		inline static const std::string templateName = "molds.json";
+		inline static const std::string templateName = "molds.yaml";
 		inline static const TemplateType templateType = T_Molds;
 	};
 

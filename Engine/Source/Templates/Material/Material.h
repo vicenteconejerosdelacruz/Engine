@@ -96,7 +96,7 @@ namespace Templates
 
 	namespace Material
 	{
-		inline static const std::string templateName = "materials.json";
+		inline static const std::string templateName = "materials.yaml";
 		inline static const TemplateType templateType = T_Materials;
 #if defined(_EDITOR)
 		inline static const std::string fallbackShader_vs = "BaseLighting_vs";

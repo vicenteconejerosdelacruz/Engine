@@ -119,6 +119,9 @@ enum SceneObjectType {
 
 //json
 #include <nlohmann/json.hpp>
+//yaml
+#define YAML_CPP_STATIC_DEFINE
+#include <yaml-cpp/yaml.h>
 //tween
 #include <tween.hpp>
 //v8

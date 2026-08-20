@@ -41,7 +41,7 @@ namespace Templates
 
 	namespace HtmlUI
 	{
-		inline static const std::string templateName = "htmluis.json";
+		inline static const std::string templateName = "htmluis.yaml";
 		inline static const TemplateType templateType = T_HtmlUIs;
 	};
 

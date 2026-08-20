@@ -6,6 +6,7 @@
 #include <fstream>
 #include <SceneObject.h>
 #include <Physics.h>
+#include <Yaml2Json.h>
 #if defined(_EDITOR)
 #include <DefaultLevel.h>
 #include <BootLevel/BootLevel.h>
@@ -92,12 +93,15 @@ namespace Scene::Level
 
 	nlohmann::json GetLevelFromFile(std::filesystem::path filename)
 	{
-		std::string pathStr = "" + (std::filesystem::exists(filename) ? filename.generic_string() : (defaultLevelsFolder + filename.generic_string() + (filename.has_extension() ? "" : ".json")));
+		std::string pathStr = "" + (std::filesystem::exists(filename) ? filename.generic_string() : (defaultLevelsFolder + filename.generic_string() + (filename.has_extension() ? "" : ".yaml")));
 		OutputDebugStringA(std::string("Loading level: " + pathStr + "\n").c_str());
 
 		std::ifstream file(pathStr);
-		bool isOpen = file.is_open();
-		nlohmann::json level = nlohmann::json::parse(file);
+
+		YAML::Node level_yaml = YAML::Load(file);
+		nlohmann::json level = yaml_to_json(level_yaml);
+
+		file.close();
 
 		return level;
 	}

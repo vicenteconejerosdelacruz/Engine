@@ -44,7 +44,7 @@ namespace Templates
 
 	namespace Model3D
 	{
-		inline static const std::string templateName = "model3ds.json";
+		inline static const std::string templateName = "model3ds.yaml";
 		inline static const std::string fallbackMaterialName = "BaseLighting";
 		inline static const TemplateType templateType = T_Models3D;
 	}

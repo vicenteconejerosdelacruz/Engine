@@ -48,7 +48,7 @@ namespace Templates
 
 	namespace Sound
 	{
-		inline static const std::string templateName = "sounds.json";
+		inline static const std::string templateName = "sounds.yaml";
 		inline static const TemplateType templateType = T_Sounds;
 	}
 

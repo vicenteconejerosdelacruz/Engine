@@ -125,7 +125,7 @@ namespace ImGui
 
 	bool DrawJsonInputText(nlohmann::json& json, std::string att);
 	bool OpenFileDialog(std::wstring& path, std::wstring defaultDirectory, std::wstring defaultFileName, std::vector<std::pair<std::wstring, std::wstring>>& specs);
-	void OpenFile(std::function<void(std::filesystem::path)> onFileSelected, std::string defaultDirectory, std::vector<std::string> filterName = { "JSON files. (*.json)" }, std::vector<std::string> filterPattern = { "*.json" }, bool detach = false);
+	void OpenFile(std::function<void(std::filesystem::path)> onFileSelected, std::string defaultDirectory, std::vector<std::string> filterName = { "YAML files. (*.yaml)" }, std::vector<std::string> filterPattern = { "*.yaml" }, bool detach = false);
 	void OpenTemplate(const char* iconCode, JUUIDName uuidName);
 	void OpenSceneObject(const char* iconCode, JUUIDName uuidName);
 

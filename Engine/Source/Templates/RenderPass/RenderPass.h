@@ -118,7 +118,7 @@ namespace Templates
 
 	namespace RenderPass
 	{
-		inline static const std::string templateName = "renderpasses.json";
+		inline static const std::string templateName = "renderpasses.yaml";
 		inline static const TemplateType templateType = T_RenderPasses;
 		inline static const std::string shadowMapMaterialName = "ShadowMap";
 		inline static const std::string pickingMaterialName = "Picking";

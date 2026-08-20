@@ -12,6 +12,7 @@
 #include <Game.h>
 #include <Scene.h>
 #include <Level.h>
+#include <Yaml2Json.h>
 #include <DeviceUtils/Resources/Resources.h>
 #include <Templates.h>
 #include <MousePicking.h>
@@ -1589,13 +1590,13 @@ namespace Editor
 				std::filesystem::create_directory(directory);
 
 				std::wstring path = L"";
-				COMDLG_FILTERSPEC filters[] = { {.pszName = L"JSON files. (*.json)", .pszSpec = L"*.json" } };
+				COMDLG_FILTERSPEC filters[] = { {.pszName = L"YAML files. (*.yaml)", .pszSpec = L"*.yaml" } };
 				std::pair<COMDLG_FILTERSPEC*, int> filter_info = std::make_pair<COMDLG_FILTERSPEC*, int>(filters, _countof(filters));
 				if (!SaveFileDialog(path, std::filesystem::absolute(directory), L"", &filter_info)) return;
 				if (path.empty()) return;
 
 				std::filesystem::path jsonFilePath = path;
-				jsonFilePath.replace_extension(".json");
+				jsonFilePath.replace_extension(".yaml");
 
 				SaveLevelToFile(currentSceneUnitId, nostd::WStringToString(jsonFilePath.filename()));
 				SaveWorkbench(nostd::WStringToString(jsonFilePath.filename()));
@@ -1709,6 +1710,7 @@ namespace Editor
 		WriteSceneControllersJson(id, level[SceneObjectTypeJsonContainer.at(SO_SceneControllers)]);
 
 		std::string levelString = level.dump(4);
+
 		return levelString;
 	}
 
@@ -1739,7 +1741,8 @@ namespace Editor
 	{
 		using namespace nlohmann;
 
-		std::string levelString = GetLevelString(id);
+		nlohmann::json json = json::parse(GetLevelString(id));
+		std::string levelString = yaml_to_string(json_to_yaml(json));
 
 		const std::string levelsRootFolder = "Levels/";
 		const std::string filename = levelsRootFolder + levelFileName;
@@ -1750,7 +1753,7 @@ namespace Editor
 
 		//then create the json level file
 		std::filesystem::path path(filename);
-		path.replace_extension(".json");
+		path.replace_extension(".yaml");
 		std::string pathStr = path.generic_string();
 		std::ofstream file;
 		file.open(pathStr);

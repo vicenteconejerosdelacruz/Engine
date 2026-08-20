@@ -55,7 +55,7 @@ namespace Templates
 
 	namespace Shader
 	{
-		inline static const std::string templateName = "shaders.json";
+		inline static const std::string templateName = "shaders.yaml";
 		inline static const TemplateType templateType = T_Shaders;
 	};
 

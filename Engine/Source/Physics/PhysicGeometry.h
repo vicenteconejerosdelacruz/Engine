@@ -44,7 +44,7 @@ namespace Templates
 
 	namespace PhysicGeometry
 	{
-		inline static const std::string templateName = "physic_geometries.json";
+		inline static const std::string templateName = "physic_geometries.yaml";
 		inline static const TemplateType templateType = T_PhysicGeometries;
 	};
 

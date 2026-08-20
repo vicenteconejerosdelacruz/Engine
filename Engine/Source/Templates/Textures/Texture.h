@@ -54,7 +54,7 @@ namespace Templates
 
 	namespace Texture
 	{
-		inline static const std::string templateName = "textures.json";
+		inline static const std::string templateName = "textures.yaml";
 		inline static const std::string defaultBaseTexture = "Assets/textures/gridmap.dds";
 		inline static const std::string defaultNormalMap = "Assets/textures/bumpmapflat.dds";
 		inline static const TemplateType templateType = T_Textures;
