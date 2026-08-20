@@ -306,9 +306,9 @@ namespace Physics
 		scene->pxScene->addActor(*actor);
 
 		//set the actor position and rotation
+		actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
 		if (!kinematic())
 		{
-			actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
 			scene->pxScene->resetFiltering(*actor);
 		}
 		else
@@ -652,6 +652,13 @@ namespace Physics
 
 	void PhysicObject::SetInitialConditions()
 	{
+		if (dirty({ Update_behavior, Update_kinematic }))
+		{
+			DestroyPhysicsBehavior();
+			CreatePhysicsBehavior();
+			clean({ Update_behavior, Update_kinematic });
+		}
+
 		if (behavior() == PB_Dynamic && actor && renderable)
 		{
 			PxRigidDynamic* pxDynamic = (PxRigidDynamic*)actor;
@@ -673,7 +680,15 @@ namespace Physics
 		}
 		else if (behavior() == PB_Character && controller && renderable)
 		{
-			controller->setPosition(ToPxVec3d(renderable->position() + localPosition()));
+			XMFLOAT3 pos = renderable->position();
+			XMVECTOR rot = renderable->rotationQ();
+
+			if (actor)
+			{
+				actor->setGlobalPose(PxTransform(ToPxVec3(pos), ToPxQuat(rot)));
+			}
+
+			controller->setPosition(ToPxVec3d(pos + localPosition()));
 #if defined(_EDITOR)
 			if (renderableShape) { renderableShape->position(renderable->position() + localPosition()); }
 			if (renderableLines) { renderableLines->position(renderable->position() + localPosition()); }
