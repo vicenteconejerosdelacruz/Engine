@@ -170,9 +170,12 @@ namespace Game::Brawler
 
 		XMVECTOR diff = XMVectorSubtract(lerpedPosV, camPosV);
 
-		MoveCameraBoundary(diff, leftBoundaryB);
-		MoveCameraBoundary(diff, rightBoundaryB);
-		MoveCameraBoundary(diff, topBoundaryB);
+		if (XMVectorGetX(XMVector3Length(diff)) > 0.0001f)
+		{
+			MoveCameraBoundary(diff, leftBoundaryB);
+			MoveCameraBoundary(diff, rightBoundaryB);
+			MoveCameraBoundary(diff, topBoundaryB);
+		}
 
 		camera->position(lerpedPos);
 	}
