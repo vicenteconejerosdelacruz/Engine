@@ -1694,9 +1694,6 @@ namespace Templates
 
 	void DeleteTemplate(TemplateType t, JUUID uuid)
 	{
-		templates.at(t).erase(uuid);
-		templatesTypes.erase(uuid);
-
 		const std::map<TemplateType, std::function<void(JUUID)>> DeleteT = {
 			{ T_Materials, DeleteMaterialTemplate },
 			{ T_Models3D, DeleteModel3DTemplate },
@@ -1709,6 +1706,8 @@ namespace Templates
 			{ T_Molds, DeleteMoldTemplate },
 		};
 		DeleteT.at(t)(uuid);
+		if (templates.contains(t) && templates.at(t).contains(uuid)) templates.at(t).erase(uuid);
+		if (templatesTypes.contains(uuid)) templatesTypes.erase(uuid);
 	}
 
 	void DeleteTemplate(JUUID uuid)
