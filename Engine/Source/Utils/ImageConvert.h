@@ -1,5 +1,4 @@
-#ifndef _UTILS_IMAGE_CONVERTER_H
-#define	_UTILS_IMAGE_CONVERTER_H
+#pragma once
 
 #include <filesystem>
 #include <dxgiformat.h>
@@ -26,4 +25,3 @@ namespace Utils
 	void AssembleCubeDDS(std::filesystem::path image, std::vector<std::string> facesPath, unsigned int width, unsigned int height);
 	void AssembleCubeDDSFromSkybox(std::filesystem::path image, std::filesystem::path skybox);
 }
-#endif
