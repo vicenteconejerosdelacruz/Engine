@@ -35,6 +35,7 @@ namespace Editor
 	extern void DeleteSceneUnitBoundingBox(SceneUnitId id);
 	extern void DeleteSceneUnitBillboards(SceneUnitId id);
 	extern void DeleteSceneUnitEditorIndependentCamera(SceneUnitId id);
+	extern std::string GetLevelString(SceneUnitId id);
 };
 #endif
 
@@ -621,8 +622,6 @@ namespace Scene
 	{
 		SceneObject* sceneObjectO = GetSceneObjectPointer(id, sceneObject);
 		SceneObjectType type = sceneObjectO->JType();
-		//std::string dump = sceneObjectO->dump();
-		//nlohmann::json data = nlohmann::json::parse(dump);
 		nlohmann::json data;
 		sceneObjectO->WriteJson(data);
 
@@ -633,6 +632,39 @@ namespace Scene
 		data.at("uuid") = uuid;
 
 		data.merge_patch(parameters);
+
+		auto createAvatars = [&]
+			{
+				std::set<SceneObjectType> physicAbleTypes = { SO_Renderables, SO_Triggers, SO_Boundaries };
+				if (!physicAbleTypes.contains(type))
+					return;
+
+				std::string level = Editor::GetLevelString(id);
+				nlohmann::json level_data = nlohmann::json::parse(level);
+				nlohmann::json jdata;
+				if (level_data.contains(SceneObjectTypeJsonContainer.at(SO_Cameras)))
+				{
+					jdata[SceneObjectTypeJsonContainer.at(SO_Cameras)] = level_data[SceneObjectTypeJsonContainer.at(SO_Cameras)];
+				}
+				jdata[SceneObjectTypeJsonContainer.at(type)] = nlohmann::json::array();
+				jdata[SceneObjectTypeJsonContainer.at(type)].push_back(data);
+				AttachPhysicsAvatars(id, jdata);
+
+				for (unsigned int i = 0; i < jdata.at(SceneObjectTypeJsonContainer.at(SO_Renderables)).size(); i++)
+				{
+					nlohmann::json& obj = jdata.at(SceneObjectTypeJsonContainer.at(SO_Renderables)).at(i);
+					if (obj.at("uuid") == uuid)
+						continue;
+
+					CreateRenderable(id, obj);
+					JUUID avatarUUID = obj.at("uuid");
+					RenderableID ren = MAKESUUUID(id, avatarUUID);
+					ren->BindToScene();
+					ren->renderReady = true;
+					//SceneObject* so = GetSceneObjectPointer(id, avatarUUID);
+					//so->BindToScene();
+				}
+			};
 
 		switch (type)
 		{
@@ -677,6 +709,8 @@ namespace Scene
 		}
 		break;
 		}
+		createAvatars();
+
 		return uuid;
 	}
 

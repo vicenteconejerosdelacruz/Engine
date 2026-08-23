@@ -34,6 +34,35 @@ void SceneObjectPopup::Draw()
 			MapControllers(id);
 			show = false;
 			moldTreeSelection = false;
+
+			switch (so->JType())
+			{
+			case SO_Renderables:
+			{
+				RenderableID renderable = MAKESUUUID(id, clone_uuid);
+				auto phOv = renderable->physicObject();
+				for (auto phO : phOv)
+				{
+					phO.get()->LinkPhysicsAvatar();
+				}
+			}
+			break;
+			case SO_Triggers:
+			{
+				TriggerID trigger = MAKESUUUID(id, clone_uuid);
+				trigger->physicObject->LinkPhysicsAvatar();
+			}
+			break;
+			case SO_Boundaries:
+			{
+				BoundaryID boundary = MAKESUUUID(id, clone_uuid);
+				boundary->physicObject->LinkPhysicsAvatar();
+			}
+			break;
+			default:
+			{}
+			break;
+			}
 		};
 	auto moldAvailable = [&]
 		{
