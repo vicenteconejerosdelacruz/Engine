@@ -3,8 +3,7 @@
 #include <NoV8.h>
 
 JObject::JObject(nlohmann::json& json) :nlohmann::json(json)
-{
-}
+{}
 
 nlohmann::json JObject::json()
 {
@@ -92,8 +91,7 @@ void JObject::clear()
 }
 
 void JObject::WriteJson(nlohmann::json& j)
-{
-}
+{}
 
 std::function<bool(JObject*)> JObject::GetAssetsConditioner()
 {
@@ -101,12 +99,10 @@ std::function<bool(JObject*)> JObject::GetAssetsConditioner()
 }
 
 void JObject::EditorPreview(size_t flags)
-{
-}
+{}
 
 void JObject::DestroyEditorPreview()
-{
-}
+{}
 
 std::map<std::string, ScriptBinding> JObject::GetScriptBindingOptions()
 {

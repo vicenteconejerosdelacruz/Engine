@@ -66,6 +66,7 @@ namespace Game
 			//Constructor and Binding
 			Thug(nlohmann::json& json);
 			static void RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script);
+			void RegisterScriptInstance(Isolate* isolate, Local<ObjectTemplate> proto, SceneUnitScripting* script) override { Thug::RegisterScript(isolate, proto, script); }
 			void SetInitialConditions() override;
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;

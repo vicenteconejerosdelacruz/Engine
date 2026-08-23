@@ -59,6 +59,7 @@ namespace Scene
 		~SoundFX() { Destroy(); }
 		void Initialize() override;
 		static void RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script);
+		void RegisterScriptInstance(Isolate* isolate, Local<ObjectTemplate> proto, SceneUnitScripting* script) override { SoundFX::RegisterScript(isolate, proto, script); }
 		virtual void SetInitialConditions();
 		virtual void BindToScene();
 		virtual void UnbindFromScene();

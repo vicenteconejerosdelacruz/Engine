@@ -29,7 +29,7 @@ namespace Scripting
 
 		//get or create the template passing a lambda that configures the object if needed
 		Local<ObjectTemplate> tpl = SceneUnitScripting::GetOrCreateTemplate(isolate, script.id, className,
-			[&script](Isolate* isolate, Local<ObjectTemplate> templ, SceneUnitScripting* scriptPtr) {
+			[&script, &instance](Isolate* isolate, Local<ObjectTemplate> templ, SceneUnitScripting* scriptPtr) {
 
 				//set the internal field count for attaching the jobject
 				templ->SetInternalFieldCount(1);
@@ -44,7 +44,7 @@ namespace Scripting
 				));
 
 				//call RegisterScript for registering the class methods
-				T::RegisterScript(isolate, templ, scriptPtr);
+				instance->RegisterScriptInstance(isolate, templ, scriptPtr);
 			}
 		);
 

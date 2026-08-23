@@ -43,6 +43,7 @@ namespace Game
 			//Constructor and Binding
 			BrawlerScene(nlohmann::json& json);
 			static void RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script);
+			void RegisterScriptInstance(Isolate* isolate, Local<ObjectTemplate> proto, SceneUnitScripting* script) override { BrawlerScene::RegisterScript(isolate, proto, script); }
 			std::set<std::string> GetControllerAliases() override { return { "brawler" }; }
 			void SetInitialConditions() override;
 #if defined(_EDITOR)

@@ -548,14 +548,14 @@ namespace Game::Brawler
 	{
 		if (gameInteractionMode == GIM_Joystick)
 		{
-		auto state = gamePad->GetState(0);
-		if (!state.IsConnected())
-			return;
+			auto state = gamePad->GetState(0);
+			if (!state.IsConnected())
+				return;
 
-		buttons.Update(state);
-		if (buttons.a == GamePad::ButtonStateTracker::PRESSED)
-		{
-			GotoNextDialogLine();
+			buttons.Update(state);
+			if (buttons.a == GamePad::ButtonStateTracker::PRESSED)
+			{
+				GotoNextDialogLine();
 			}
 		}
 		else if (gameInteractionMode == GIM_PC)
@@ -564,9 +564,9 @@ namespace Game::Brawler
 			if (keys.IsKeyDown(Keyboard::Keys::Enter))
 			{
 				GotoNextDialogLine();
+			}
 		}
-		}
-		
+
 	}
 
 	void BrawlerScene::GotoNextDialogLine()

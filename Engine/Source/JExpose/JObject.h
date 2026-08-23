@@ -46,10 +46,11 @@ struct JObject : nlohmann::json
 
 	//scripting
 	static void RegisterScript(Isolate* isolate, Local<ObjectTemplate> proto, SceneUnitScripting* script) {}
+	virtual void RegisterScriptInstance(Isolate* isolate, Local<ObjectTemplate> proto, SceneUnitScripting* script) { RegisterScript(isolate, proto, script); }
 	const JPropertyMeta* GetMeta(const std::string& name) const;
 
 	std::map<std::string, std::tuple<size_t, bool>> UpdateFlagsMap;
 	std::map<std::string, nlohmann::json> UpdatePrevValues;
 	size_t updateFlag = 0U;
-	std::unordered_map<std::string, JPropertyMeta> propertyRegistry;
+	std::unordered_map<std::string, JPropertyMeta> propertyRegistry = {};
 };
