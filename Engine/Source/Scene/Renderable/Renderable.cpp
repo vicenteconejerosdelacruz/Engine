@@ -83,7 +83,9 @@ namespace Scene
 				{
 					for (unsigned int i = 0; i < at("physicObject").size(); i++)
 					{
-						GetPhysicObject(at("physicObject").at(i))->actor->userData = nullptr;
+						auto& phO = GetPhysicObject(at("physicObject").at(i));
+						if (phO->actor && phO->actor->userData)
+							phO->actor->userData = nullptr;
 					}
 				}
 			}
