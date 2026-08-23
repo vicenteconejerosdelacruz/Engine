@@ -137,6 +137,7 @@ namespace Game
 			Venom(nlohmann::json& json);
 			static void RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script);
 			void RegisterScriptInstance(Isolate* isolate, Local<ObjectTemplate> proto, SceneUnitScripting* script) override { Venom::RegisterScript(isolate, proto, script); }
+			std::set<std::string> GetControllerAliases() override { return { "hero" }; }
 			void SetInitialConditions() override;
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;

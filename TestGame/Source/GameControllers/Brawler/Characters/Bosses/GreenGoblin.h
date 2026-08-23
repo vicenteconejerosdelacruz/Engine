@@ -59,6 +59,11 @@ namespace Game
 			GreenGoblin(nlohmann::json& json);
 			static void RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script);
 			void RegisterScriptInstance(Isolate* isolate, Local<ObjectTemplate> proto, SceneUnitScripting* script) override { GreenGoblin::RegisterScript(isolate, proto, script); }
+			std::set<std::string> GetControllerAliases() override {
+				std::set<std::string> aliases = Thug::GetControllerAliases();
+				aliases.insert("thug");
+				return aliases;
+			}
 			void SetInitialConditions() override;
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
