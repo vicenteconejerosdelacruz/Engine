@@ -939,4 +939,147 @@ namespace nov8
 		//write the jdata with the ControllerBinding data
 		to_json(jdata, p);
 	}
+
+	// Helper para escapar caracteres especiales de JSON en los strings
+	std::string EscapeJSON(const std::string& input) {
+		std::string output;
+		output.reserve(input.size());
+		for (char c : input) {
+			switch (c) {
+			case '"':  output += "\\\""; break;
+			case '\\': output += "\\\\"; break;
+			case '\b': output += "\\b"; break;
+			case '\f': output += "\\f"; break;
+			case '\n': output += "\\n"; break;
+			case '\r': output += "\\r"; break;
+			case '\t': output += "\\t"; break;
+			default:
+				if ('\x00' <= c && c <= '\x1f') {
+					char buf[8];
+					snprintf(buf, sizeof(buf), "\\u%04x", (uint8_t)c);
+					output += buf;
+				}
+				else {
+					output += c;
+				}
+				break;
+			}
+		}
+		return output;
+	}
+
+	// Helper para convertir cualquier v8::Value a std::string
+	std::string V8ToString(v8::Isolate* isolate, v8::Local<v8::Value> val) {
+		if (val.IsEmpty()) return "<Empty>";
+		v8::String::Utf8Value utf8(isolate, val);
+		return *utf8 ? *utf8 : "<string conversion failed>";
+	}
+
+	// Recorre recursivamente los objetos y construye el JSON
+	void DumpV8ObjectToJSON(
+		v8::Isolate* isolate,
+		v8::Local<v8::Context> context,
+		v8::Local<v8::Object> obj,
+		std::stringstream& ss,
+		int indent,
+		std::unordered_set<int>* visited)
+	{
+		bool is_root = (visited == nullptr);
+		if (is_root) {
+			visited = new std::unordered_set<int>();
+		}
+
+		int identity_hash = obj->GetIdentityHash();
+		if (visited->find(identity_hash) != visited->end()) {
+			ss << "\" [Circular Reference]\"";
+			if (is_root) delete visited;
+			return;
+		}
+		visited->insert(identity_hash);
+
+		v8::Local<v8::Array> property_names;
+		if (!obj->GetPropertyNames(context, v8::KeyCollectionMode::kOwnOnly, v8::PropertyFilter::ALL_PROPERTIES, v8::IndexFilter::kIncludeIndices).ToLocal(&property_names)) {
+			ss << "{ }";
+			if (is_root) delete visited;
+			return;
+		}
+
+		uint32_t length = property_names->Length();
+		std::string padding(indent * 2, ' ');
+		std::string child_padding((indent + 1) * 2, ' ');
+
+		ss << "{\n";
+		bool first = true;
+
+		for (uint32_t i = 0; i < length; ++i) {
+			v8::Local<v8::Value> key;
+			if (!property_names->Get(context, i).ToLocal(&key)) continue;
+
+			v8::Local<v8::Value> value;
+			if (key->IsString() && obj->HasRealNamedProperty(context, key.As<v8::String>()).FromMaybe(false)) {
+				value = obj->GetRealNamedProperty(context, key.As<v8::String>()).ToLocalChecked();
+			}
+			else {
+				if (!obj->Get(context, key).ToLocal(&value)) continue;
+			}
+
+			std::string key_str = EscapeJSON(V8ToString(isolate, key));
+
+			if (!first) {
+				ss << ",\n";
+			}
+			first = false;
+
+			ss << child_padding << "\"" << key_str << "\": ";
+
+			if (value->IsFunction()) {
+				ss << "\" [Function]\"";
+			}
+			else if (value->IsObject()) {
+				v8::Local<v8::Object> child_obj = value.As<v8::Object>();
+				if (indent < 3) {
+					DumpV8ObjectToJSON(isolate, context, child_obj, ss, indent + 1, visited);
+				}
+				else {
+					ss << "\" [Object (Max Depth Exceeded)]\"";
+				}
+			}
+			else if (value->IsString()) {
+				ss << "\"" << EscapeJSON(V8ToString(isolate, value)) << "\"";
+			}
+			else if (value->IsNumber()) {
+				ss << value->NumberValue(context).FromMaybe(0.0);
+			}
+			else if (value->IsBoolean()) {
+				ss << (value->BooleanValue(isolate) ? "true" : "false");
+			}
+			else if (value->IsUndefined()) {
+				ss << "\"undefined\"";
+			}
+			else if (value->IsNull()) {
+				ss << "null";
+			}
+			else {
+				ss << "\" [Unknown/External]\"";
+			}
+		}
+
+		ss << "\n" << padding << "}";
+
+		if (is_root) {
+			delete visited;
+		}
+	}
+
+	// Funcion principal de entrada
+	void DumpContextToDebugOutput(v8::Isolate* isolate, v8::Local<v8::Context> context) {
+		v8::Context::Scope context_scope(context);
+		v8::Local<v8::Object> global_obj = context->Global();
+
+		std::stringstream ss;
+		DumpV8ObjectToJSON(isolate, context, global_obj, ss, 0);
+		ss << "\n";
+
+		OutputDebugStringA(ss.str().c_str());
+	}
 }

@@ -462,4 +462,15 @@ namespace nov8
 				}
 			};
 	}
+
+	std::string EscapeJSON(const std::string& input);
+	std::string V8ToString(v8::Isolate* isolate, v8::Local<v8::Value> val);
+	void DumpV8ObjectToJSON(
+		v8::Isolate* isolate,
+		v8::Local<v8::Context> context,
+		v8::Local<v8::Object> obj,
+		std::stringstream& ss,
+		int indent = 1,
+		std::unordered_set<int>* visited = nullptr);
+	void DumpContextToDebugOutput(v8::Isolate* isolate, v8::Local<v8::Context> context);
 }
