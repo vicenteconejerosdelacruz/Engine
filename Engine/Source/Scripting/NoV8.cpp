@@ -572,8 +572,50 @@ namespace nov8
 		}
 	}
 
+	Local<Value> ReadNumeric(Isolate* isolate, SceneUnitScripting* script, nlohmann::json& jdata)
+	{
+		//return Integer::NewFromUnsigned(isolate, jdata.get<unsigned int>());
+		if (jdata.is_number_integer() || jdata.is_number_unsigned()) {
+			// Si el valor cabe en un int32 de V8, lo enviamos como Integer
+			int64_t val = jdata.get<int64_t>();
+
+			if (val >= 0) {
+				return v8::Integer::NewFromUnsigned(isolate, static_cast<uint32_t>(val));
+			}
+			else {
+				return v8::Integer::New(isolate, static_cast<int32_t>(val));
+			}
+		}
+		else if (jdata.is_number_float()) {
+			return v8::Number::New(isolate, jdata.get<double>());
+		}
+
+		return v8::Undefined(isolate);
+	}
+
+	Local<Value> ReadNumeric(Isolate* isolate, SceneUnitScripting* script, const nlohmann::json& jdata)
+	{
+		//return Integer::NewFromUnsigned(isolate, jdata.get<unsigned int>());
+		if (jdata.is_number_integer() || jdata.is_number_unsigned()) {
+			// Si el valor cabe en un int32 de V8, lo enviamos como Integer
+			int64_t val = jdata.get<int64_t>();
+
+			if (val >= 0) {
+				return v8::Integer::NewFromUnsigned(isolate, static_cast<uint32_t>(val));
+			}
+			else {
+				return v8::Integer::New(isolate, static_cast<int32_t>(val));
+			}
+		}
+		else if (jdata.is_number_float()) {
+			return v8::Number::New(isolate, jdata.get<double>());
+		}
+
+		return v8::Undefined(isolate);
+	}
+
 	Local<Value> V8Converter<float>::Read(Isolate* isolate, SceneUnitScripting* script, const nlohmann::json& jdata) {
-		return Number::New(isolate, jdata.get<float>());
+		return ReadNumeric(isolate, script, jdata);
 	}
 
 	void V8Converter<float>::Update(Isolate* isolate, Local<Value> value, SceneUnitScripting* script, nlohmann::json& jdata) {
@@ -582,7 +624,7 @@ namespace nov8
 
 	Local<Value> V8Converter<int>::Read(Isolate* isolate, SceneUnitScripting* script, nlohmann::json& jdata)
 	{
-		return Integer::New(isolate, jdata.get<int>());
+		return ReadNumeric(isolate, script, jdata);
 	}
 
 	void V8Converter<int>::Update(Isolate* isolate, Local<Value> value, SceneUnitScripting* script, nlohmann::json& jdata) {
@@ -617,7 +659,7 @@ namespace nov8
 
 	Local<Value> V8Converter<unsigned int>::Read(Isolate* isolate, SceneUnitScripting* script, nlohmann::json& jdata)
 	{
-		return Integer::NewFromUnsigned(isolate, jdata.get<unsigned int>());
+		return ReadNumeric(isolate, script, jdata);
 	}
 
 	void V8Converter<unsigned int>::Update(Isolate* isolate, Local<Value> value, SceneUnitScripting* script, nlohmann::json& jdata) {
