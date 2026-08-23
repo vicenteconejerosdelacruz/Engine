@@ -35,13 +35,13 @@ namespace nov8
 		context->Global()->Set(context, v8::String::NewFromUtf8(isolate, "console").ToLocalChecked(), console).Check();
 	}
 
-	std::unordered_map<std::string, v8::Global<v8::Value>> module_cache;
+	std::unordered_map<std::string, v8::Global<v8::UnboundScript>> unbound_script_cache;
 	void v8_native_require(const v8::FunctionCallbackInfo<v8::Value>& args)
 	{
 		v8::Isolate* isolate = args.GetIsolate();
 		v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
-		// Validar argumentos
+		// 1. Validar argumentos
 		if (args.Length() < 1 || !args[0]->IsString()) {
 			isolate->ThrowException(v8::String::NewFromUtf8Literal(isolate, "require() requiere una ruta (string)"));
 			return;
@@ -50,80 +50,80 @@ namespace nov8
 		v8::String::Utf8Value filepath_utf8(isolate, args[0]);
 		std::string filepath = *filepath_utf8;
 
-		// 1. Revisar Caché
-		if (module_cache.find(filepath) != module_cache.end()) {
-			args.GetReturnValue().Set(module_cache[filepath].Get(isolate));
-			return;
+		v8::Local<v8::UnboundScript> unbound_script;
+
+		// 2. REVISAR CACHÉ DE UNBOUND SCRIPTS
+		auto it = unbound_script_cache.find(filepath);
+		if (it != unbound_script_cache.end()) {
+			// Obtenemos el script pre-compilado de la caché
+			unbound_script = it->second.Get(isolate);
+		}
+		else {
+			// --- SI NO ESTÁ EN CACHÉ: LEER Y COMPILAR POR PRIMERA VEZ ---
+			std::string code = ReadScriptFile(filepath);
+			if (code.empty()) {
+				std::string err_msg = "No se pudo encontrar o leer el archivo: " + filepath;
+				isolate->ThrowException(v8::String::NewFromUtf8(isolate, err_msg.c_str()).ToLocalChecked());
+				return;
+			}
+
+			// Crear el wrapper de CommonJS
+			std::string wrapped_code = "(function (exports, require, module, __filename, __dirname) {\n"
+				+ code
+				+ "\n});";
+
+			v8::Local<v8::String> v8_source = v8::String::NewFromUtf8(isolate, wrapped_code.c_str()).ToLocalChecked();
+
+			// En V8 v9.8+ la firma de ScriptOrigin es:
+			v8::ScriptOrigin origin(isolate, v8::String::NewFromUtf8(isolate, filepath.c_str()).ToLocalChecked());
+
+			// COMPILAR COMO UNBOUND SCRIPT (Sin atar a este contexto particular)
+			v8::ScriptCompiler::Source source(v8_source, origin);
+			if (!v8::ScriptCompiler::CompileUnboundScript(isolate, &source).ToLocal(&unbound_script)) {
+				return; // Error de sintaxis en JS
+			}
+
+			// Guardar en la caché global de C++
+			unbound_script_cache[filepath].Reset(isolate, unbound_script);
 		}
 
-		// 2. Leer archivo desde el disco
-		std::string code = ReadScriptFile(filepath);
-		if (code.empty()) {
-			std::string err_msg = "No se pudo encontrar o leer el archivo: " + filepath;
-			isolate->ThrowException(v8::String::NewFromUtf8(isolate, err_msg.c_str()).ToLocalChecked());
-			return;
-		}
-
-		// 3. Crear el Wrapper de Node.js
-		std::string wrapped_code = "(function (exports, require, module, __filename, __dirname) {\n"
-			+ code
-			+ "\n});";
-
-		v8::Local<v8::String> v8_source = v8::String::NewFromUtf8(isolate, wrapped_code.c_str()).ToLocalChecked();
-
-		// Identificar el archivo para el stack trace de V8 en caso de error
-		v8::ScriptOrigin origin(v8::String::NewFromUtf8(isolate, filepath.c_str()).ToLocalChecked());
-
-		// 4. Compilar el wrapper
-		v8::Local<v8::Script> script;
-		if (!v8::Script::Compile(context, v8_source, &origin).ToLocal(&script)) {
-			return; // Excepción lanzada por la compilación
-		}
+		// 3. ENLAZAR EL SCRIPT AL CONTEXTO ACTUAL DE ESTA ENTIDAD
+		// Esto genera una instancia FRESCA de la función del módulo
+		v8::Local<v8::Script> bound_script = unbound_script->BindToCurrentContext();
 
 		v8::Local<v8::Value> result;
-		if (!script->Run(context).ToLocal(&result) || !result->IsFunction()) {
+		if (!bound_script->Run(context).ToLocal(&result) || !result->IsFunction()) {
 			return;
 		}
 
-		// Convertimos el resultado a una v8::Function
 		v8::Local<v8::Function> module_wrapper = result.As<v8::Function>();
 
-		// 5. Preparar objetos para la ejecución del módulo
+		// 4. PREPARAR OBJETOS MODULE Y EXPORTS FRESCOS PARA ESTA ENTIDAD
 		v8::Local<v8::Object> exports_obj = v8::Object::New(isolate);
 		v8::Local<v8::Object> module_obj = v8::Object::New(isolate);
 
 		v8::Local<v8::String> exports_key = v8::String::NewFromUtf8Literal(isolate, "exports");
 		module_obj->Set(context, exports_key, exports_obj).Check();
 
-		// Reutilizamos la misma función NativeRequire para peticiones anidadas
 		v8::Local<v8::Function> require_fn = v8::Function::New(context, v8_native_require).ToLocalChecked();
-
 		v8::Local<v8::Value> filename_val = v8::String::NewFromUtf8(isolate, filepath.c_str()).ToLocalChecked();
-		v8::Local<v8::Value> dirname_val = v8::String::NewFromUtf8Literal(isolate, "."); // O resolver la ruta correspondiente
+		v8::Local<v8::Value> dirname_val = v8::String::NewFromUtf8Literal(isolate, ".");
 
-		// 6. Invocar el wrapper pasando los argumentos requeridos
 		v8::Local<v8::Value> fn_args[] = {
-			exports_obj,   // exports
-			require_fn,    // require
-			module_obj,    // module
-			filename_val,  // __filename
-			dirname_val    // __dirname
+			exports_obj,
+			require_fn,
+			module_obj,
+			filename_val,
+			dirname_val
 		};
 
-		v8::Local<v8::Value> dummy_receiver = v8::Undefined(isolate);
-
-		// Ejecutar el módulo
-		if (module_wrapper->Call(context, dummy_receiver, 5, fn_args).IsEmpty()) {
-			return; // El código del módulo lanzó un error en JS
+		// 5. EJECUTAR EL WRAPPER
+		if (module_wrapper->Call(context, v8::Undefined(isolate), 5, fn_args).IsEmpty()) {
+			return; // Error en la ejecución del script JS
 		}
 
-		// 7. Extraer el resultado final de `module.exports`
+		// 6. RETORNAR EL EXPORTS FRESCO DE ESTA ENTIDAD
 		v8::Local<v8::Value> final_exports = module_obj->Get(context, exports_key).ToLocalChecked();
-
-		// Guardar en la caché
-		module_cache[filepath].Reset(isolate, final_exports);
-
-		// Retornar a JavaScript
 		args.GetReturnValue().Set(final_exports);
 	}
 
