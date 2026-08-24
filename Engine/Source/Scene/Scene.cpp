@@ -100,12 +100,11 @@ namespace Scene
 	{
 		using namespace Scene::Level;
 
-		SceneUnitId id = nostd::threadIdHash();
-
-		levelThreadsStack.insert_or_assign(id, std::make_unique<std::atomic_uint>(1U));
-
-		std::thread levelThread([id](std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
+		std::thread levelThread([](std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 			{
+				SceneUnitId id = nostd::threadIdHash();
+
+				levelThreadsStack.insert_or_assign(id, std::make_unique<std::atomic_uint>(1U));
 				auto& scene = CreateScene(id, filename, JRenderer::numFrames);
 
 				LoadLevel(scene, filename, data, progress);
