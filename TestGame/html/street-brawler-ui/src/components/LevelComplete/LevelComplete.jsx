@@ -7,6 +7,7 @@ export const LevelComplete = ({
   hasPreviouseScore = true,
   newRecord = true,
   level = 5, 
+  isGamepad = true,
   onContinue 
 }) => {
   const [score, setScore] = useState(initialScore);
@@ -123,10 +124,14 @@ export const LevelComplete = ({
         </div>
       </div>
 
-      {/* BOTÓN JOYSTICK 'A' EN LA ESQUINA INFERIOR DERECHA */}
+      {/* BOTÓN DINÁMICO EN LA ESQUINA INFERIOR DERECHA */}
       <div className="spider-continue-prompt" onClick={onContinue}>
         <span className="continue-text">CONTINUE</span>
-        <div className="arcade-btn-a">A</div>
+        {isGamepad ? (
+          <div className="arcade-btn-a">A</div>
+        ) : (
+          <div className="arcade-btn-enter">ENTER</div>
+        )}
       </div>
 
     </div>

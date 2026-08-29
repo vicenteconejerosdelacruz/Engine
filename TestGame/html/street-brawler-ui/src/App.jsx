@@ -18,6 +18,7 @@ function App() {
   const [hero, setHero] = useState({ hp: 100, name: 'Venom', img: 'heroes/venom.webp', score:0 });
   const [enemy, setEnemy] = useState({ hp: 100, name: '', img: '', active: false });
   const [arrows, setArrows] = useState({ left: false, right: false });
+  const [isGamepad, setIsGamepad] = useState(true); // Estado para determinar si se está usando un gamepad o teclado
   const [dialogue, setDialogue] = useState({
     active: false,
     text: '',
@@ -30,6 +31,7 @@ function App() {
   useEffect(() => {
     // Escuchar actualizaciones desde C++ (EvaluateScript)
     const handleEngineUpdate = (e) => {
+      if (e.detail.type === 'GAMEPAD_STATUS') setIsGamepad(e.detail.value);
       if (e.detail.type === 'HERO_HP') setHero(prev => ({ ...prev, hp: e.detail.value }));
       if (e.detail.type === 'ENEMY_HP') setEnemy(prev => ({ ...prev, hp: e.detail.value }));
       if (e.detail.type === 'NEW_ENEMY') setEnemy(prev => ({ ...prev, name: e.detail.name, active: true, img:`enemies/${e.detail.picture.toLowerCase()}.png` }));
@@ -66,6 +68,15 @@ function App() {
     window.addEventListener('engineUpdate', handleEngineUpdate);
     return () => window.removeEventListener('engineUpdate', handleEngineUpdate);
   }, []);
+
+  useEffect(() => {
+    if (window.JSBridge) {
+      window.JSBridge("REACT_READY");
+    } else {
+      console.warn("[React] JSBridge no encontrado. ¿Estás corriendo en el navegador y no en el motor?");
+    }
+  }, []);
+
   if (gameState === 'playing') {
     return (
       <div className="hud-layer">
@@ -79,6 +90,7 @@ function App() {
           active={dialogue.active} 
           text={dialogue.text} 
           speaker={dialogue.speaker} 
+          isGamepad={isGamepad}
         />
       </div>
     );
@@ -90,6 +102,7 @@ function App() {
           previousScore={previousScore}
           hasPreviouseScore={hasPreviouseScore}
           newRecord={newRecord}
+          isGamepad={isGamepad}
         />
     )
   }

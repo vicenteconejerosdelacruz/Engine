@@ -1,6 +1,6 @@
 import './DialogueBox.css';
 
-export const DialogueBox = ({ speaker, text, active }) => {
+export const DialogueBox = ({ speaker, text, active, isGamepad = true }) => {
   if (!active) return null;
 
   return (
@@ -20,9 +20,13 @@ export const DialogueBox = ({ speaker, text, active }) => {
         <div className="dialogue-text">{text}</div>
       </div>
 
-      {/* Indicador de "Siguiente" */}
+      {/* Indicador de "Siguiente" dinámico */}
       <div className="dialogue-next-indicator">
-        <div className="btn-a">A</div>
+        {isGamepad ? (
+          <div className="btn-a">A</div>
+        ) : (
+          <div className="btn-enter">ENTER</div>
+        )}
       </div>
 
     </div>
