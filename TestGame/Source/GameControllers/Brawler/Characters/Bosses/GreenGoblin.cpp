@@ -89,10 +89,6 @@ namespace Game::Brawler
 
 	void GreenGoblin::TakeHit(int damage)
 	{
-		if (combatState == GGCS_Glider)
-		{
-			damage *= 10;
-		}
 		Thug::TakeHit(damage);
 	}
 
@@ -148,7 +144,7 @@ namespace Game::Brawler
 		{
 			handbombR->markedForDelete = true;
 		}
-		health(100);
+		health(floorHealth());
 		auto* brawler = GetBrawlerScene(this);
 		brawler->UpdateEnemy(uuid());
 
