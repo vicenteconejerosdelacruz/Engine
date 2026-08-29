@@ -546,7 +546,7 @@ namespace Game::Brawler
 
 	void BrawlerScene::ProcessDialogInput()
 	{
-		if (gameInteractionMode == GIM_Joystick)
+		if (gameInteractionMode == GIM_Gamepad)
 		{
 			auto state = gamePad->GetState(0);
 			if (!state.IsConnected())
@@ -558,7 +558,7 @@ namespace Game::Brawler
 				GotoNextDialogLine();
 			}
 		}
-		else if (gameInteractionMode == GIM_PC)
+		else if (gameInteractionMode == GIM_KeyboardMouse)
 		{
 			auto keys = keyboard->GetState();
 			if (keys.IsKeyDown(Keyboard::Keys::Enter))

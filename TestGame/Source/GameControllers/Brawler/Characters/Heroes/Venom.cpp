@@ -219,7 +219,7 @@ namespace Game::Brawler
 
 		float dt = static_cast<float>(timer.GetElapsedSeconds());
 
-		if (gameInteractionMode == GIM_Joystick)
+		if (gameInteractionMode == GIM_Gamepad)
 		{
 			auto state = gamePad->GetState(0);
 			if (state.IsConnected() && !dialogOpen)
@@ -284,7 +284,7 @@ namespace Game::Brawler
 			return;
 		}
 
-		if (gameInteractionMode == GIM_Joystick)
+		if (gameInteractionMode == GIM_Gamepad)
 		{
 			auto pad = gamePad->GetState(0);
 			if (pad.IsConnected())
@@ -292,7 +292,7 @@ namespace Game::Brawler
 				leftStick = { pad.thumbSticks.leftX, 0.0f, pad.thumbSticks.leftY, 0.0f };
 			}
 		}
-		else if (gameInteractionMode == GIM_PC)
+		else if (gameInteractionMode == GIM_KeyboardMouse)
 		{
 			auto keys = keyboard->GetState();
 			float yaxis = (keys.IsKeyDown(Keyboard::Keys::Down) ^ keys.IsKeyDown(Keyboard::Keys::Up)) ? (keys.IsKeyDown(Keyboard::Keys::Down) ? -1.0f : 1.0f) : 0.0f;
@@ -540,11 +540,11 @@ namespace Game::Brawler
 		{
 			return false;
 		}
-		if (gameInteractionMode == GIM_Joystick)
+		if (gameInteractionMode == GIM_Gamepad)
 		{
 			return (buttons.a == GamePad::ButtonStateTracker::PRESSED);
 		}
-		else if (gameInteractionMode == GIM_PC)
+		else if (gameInteractionMode == GIM_KeyboardMouse)
 		{
 			return keyboard->GetState().IsKeyDown(Keyboard::Keys::Space);
 		}
@@ -644,11 +644,11 @@ namespace Game::Brawler
 			return false;
 		}
 
-		if (gameInteractionMode == GIM_Joystick)
+		if (gameInteractionMode == GIM_Gamepad)
 		{
 			return (buttons.x == GamePad::ButtonStateTracker::PRESSED);
 		}
-		else if (gameInteractionMode == GIM_PC)
+		else if (gameInteractionMode == GIM_KeyboardMouse)
 		{
 			return keyboard->GetState().IsKeyDown(Keyboard::Keys::F);
 		}
@@ -733,11 +733,11 @@ namespace Game::Brawler
 		}
 		if (!jumping) return false;
 
-		if (gameInteractionMode == GIM_Joystick)
+		if (gameInteractionMode == GIM_Gamepad)
 		{
 			return (buttons.x == GamePad::ButtonStateTracker::PRESSED);
 		}
-		else if (gameInteractionMode == GIM_PC)
+		else if (gameInteractionMode == GIM_KeyboardMouse)
 		{
 			return keyboard->GetState().IsKeyDown(Keyboard::Keys::F);
 		}
@@ -770,11 +770,11 @@ namespace Game::Brawler
 		{
 			return false;
 		}
-		if (gameInteractionMode == GIM_Joystick)
+		if (gameInteractionMode == GIM_Gamepad)
 		{
 			return (buttons.x == GamePad::ButtonStateTracker::PRESSED);
 		}
-		else if (gameInteractionMode == GIM_PC)
+		else if (gameInteractionMode == GIM_KeyboardMouse)
 		{
 			return keyboard->GetState().IsKeyDown(Keyboard::Keys::F);
 		}
@@ -815,11 +815,11 @@ namespace Game::Brawler
 		if (!canAttachToWall())
 			return false;
 
-		if (gameInteractionMode == GIM_Joystick)
+		if (gameInteractionMode == GIM_Gamepad)
 		{
 			return (buttons.b == GamePad::ButtonStateTracker::PRESSED);
 		}
-		else if (gameInteractionMode == GIM_PC)
+		else if (gameInteractionMode == GIM_KeyboardMouse)
 		{
 			return keyboard->GetState().IsKeyDown(Keyboard::Keys::T);
 		}
@@ -840,11 +840,11 @@ namespace Game::Brawler
 		{
 			return false;
 		}
-		if (gameInteractionMode == GIM_Joystick)
+		if (gameInteractionMode == GIM_Gamepad)
 		{
 			return (buttons.b == GamePad::ButtonStateTracker::PRESSED);
 		}
-		else if (gameInteractionMode == GIM_PC)
+		else if (gameInteractionMode == GIM_KeyboardMouse)
 		{
 			return keyboard->GetState().IsKeyDown(Keyboard::Keys::T);
 		}
@@ -985,11 +985,11 @@ namespace Game::Brawler
 		if (!fromWallSwingStates.contains(vsm.currentState))
 			return false;
 
-		if (gameInteractionMode == GIM_Joystick)
+		if (gameInteractionMode == GIM_Gamepad)
 		{
 			return (buttons.rightShoulder == GamePad::ButtonStateTracker::PRESSED);
 		}
-		else if (gameInteractionMode == GIM_PC)
+		else if (gameInteractionMode == GIM_KeyboardMouse)
 		{
 			return keyboard->GetState().IsKeyDown(Keyboard::Keys::E);
 		}
@@ -1136,11 +1136,11 @@ namespace Game::Brawler
 		//capture if continue swinging
 		if (swingTimeTween->current_value >= swingThreshold())
 		{
-			if (gameInteractionMode == GIM_Joystick)
+			if (gameInteractionMode == GIM_Gamepad)
 			{
 				continueSwinging = (buttons.rightShoulder == GamePad::ButtonStateTracker::PRESSED);
 			}
-			else if (gameInteractionMode == GIM_PC)
+			else if (gameInteractionMode == GIM_KeyboardMouse)
 			{
 				continueSwinging = keyboard->GetState().IsKeyDown(Keyboard::Keys::E);
 			}
@@ -1160,11 +1160,11 @@ namespace Game::Brawler
 		if ((swingTimeTween->current_value == swingTimeTween->target_value))
 			return true;
 
-		if (gameInteractionMode == GIM_Joystick)
+		if (gameInteractionMode == GIM_Gamepad)
 		{
 			return (buttons.b == GamePad::ButtonStateTracker::PRESSED);
 		}
-		else if (gameInteractionMode == GIM_PC)
+		else if (gameInteractionMode == GIM_KeyboardMouse)
 		{
 			return keyboard->GetState().IsKeyDown(Keyboard::Keys::T);
 		}

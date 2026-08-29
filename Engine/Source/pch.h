@@ -162,3 +162,9 @@ struct std::hash<SUUUID>
 		return hash;
 	}
 };
+
+enum GameInteractionMode
+{
+	GIM_KeyboardMouse,
+	GIM_Gamepad
+};
