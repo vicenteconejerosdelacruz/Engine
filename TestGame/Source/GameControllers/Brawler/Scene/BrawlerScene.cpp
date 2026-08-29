@@ -11,6 +11,8 @@ extern std::unique_ptr<DirectX::GamePad> gamePad;
 extern DirectX::GamePad::ButtonStateTracker buttons;
 extern std::unique_ptr<DirectX::Keyboard> keyboard;
 extern GameInteractionMode gameInteractionMode;
+extern std::map<JUUID, std::function<void(JUUID)>> onKeyboardMouseInputDetected;
+extern std::map<JUUID, std::function<void(JUUID)>> onGamepadInputDetected;
 
 namespace Game::Brawler
 {
@@ -96,11 +98,24 @@ namespace Game::Brawler
 		Controller::Map(so);
 
 		SetInitialConditions();
+
+		onKeyboardMouseInputDetected.insert_or_assign(uuid(), [&](JUUID)
+			{
+				gamepadStatusSet(false);
+			}
+		);
+		onGamepadInputDetected.insert_or_assign(uuid(), [&](JUUID)
+			{
+				gamepadStatusSet(false);
+			}
+		);
 	}
 
 	void BrawlerScene::Unmap()
 	{
 		Controller::Unmap();
+		if (onKeyboardMouseInputDetected.contains(uuid())) onKeyboardMouseInputDetected.erase(uuid());
+		if (onGamepadInputDetected.contains(uuid())) onGamepadInputDetected.erase(uuid());
 	}
 
 	//States
@@ -196,10 +211,17 @@ namespace Game::Brawler
 				return std::make_unique<HtmlUIInstance>(id, venomUIInstance(), venomUI());
 			}
 		);
+		HtmlUIInstanceID instance = venomUIInstance();
+		instance->MapBridgeCallback("REACT_READY", [&]
+			{
+				gamepadStatusSet(false);
+			}
+		);
 	}
 
 	void BrawlerScene::UpdateVenomUI(SceneUnitId id)
 	{
+		UpdateGamepad();
 		UpdateHeroHealthUI();
 		UpdateEnemyUI();
 		HtmlUIInstanceID instance = venomUIInstance();
@@ -237,6 +259,21 @@ namespace Game::Brawler
 		);
 		HtmlUIInstanceID instance = venomUIInstance();
 		instance->EvaluateScript(js);
+	}
+
+	void BrawlerScene::UpdateGamepad()
+	{
+		if (!gamepadStatusSet())
+		{
+			std::string js = BuildEvalScript("GAMEPAD_STATUS",
+				{
+					{ "value", gameInteractionMode == GIM_Gamepad }
+				}
+			);
+			HtmlUIInstanceID instance = venomUIInstance();
+			instance->EvaluateScript(js);
+			gamepadStatusSet(true);
+		}
 	}
 
 	void BrawlerScene::UpdateHeroHealthUI()

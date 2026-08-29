@@ -75,6 +75,7 @@ namespace Game
 			void HeroTookHit(JUUID enemy, int newHealth);
 			void UpdateEnemy(JUUID enemy);
 			void AddScore(int scoreToAdd);
+			void UpdateGamepad();
 			void UpdateHeroHealthUI();
 			void UpdateEnemyUI();
 			void ShowLeftArrowSign();
