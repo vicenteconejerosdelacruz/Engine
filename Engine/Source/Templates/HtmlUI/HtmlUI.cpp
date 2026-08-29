@@ -119,6 +119,9 @@ namespace Templates
 		view_config.initial_device_scale = 1.0;
 		view = ultraLightRenderer->CreateView(width, height, view_config, nullptr);
 
+		//set the loadlistener
+		view->set_load_listener(this);
+
 		//load the webpage view
 		std::string path = std::string("file:///" + defaultUIFolder + tmpl->path());
 		view->LoadURL(path.c_str());
@@ -202,6 +205,30 @@ namespace Templates
 	void HtmlUIInstance::Resolve(SceneUnitId id)
 	{
 		resolvePass->Pass(id);
+	}
+
+	void HtmlUIInstance::OnDOMReady(View* caller, uint64_t frame_id, bool is_main_frame, const ultralight::String& url)
+	{
+		RefPtr<JSContext> context = caller->LockJSContext();
+		SetJSContext(context->ctx());
+		JSObject global = JSGlobalObject();
+
+		global["JSBridge"] = (JSCallback)[caller, this](const JSObject& thisObject, const JSArgs& args)
+		{
+			if (args.size() > 0 && args[0].IsString()) {
+				ultralight::String mensaje = args[0].ToString();
+				std::string msg(mensaje.utf8().data());
+				if (bridgeCallbacks.contains(msg))
+				{
+					bridgeCallbacks.at(msg)();
+				}
+			}
+		};
+	}
+
+	void HtmlUIInstance::MapBridgeCallback(std::string event, std::function<void()> callback)
+	{
+		bridgeCallbacks.insert_or_assign(event, callback);
 	}
 
 	void HtmlUIInstance::EvaluateScript(std::string js)

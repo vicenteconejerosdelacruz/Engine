@@ -3,6 +3,8 @@
 #include <Templates.h>
 #include <JTemplate.h>
 #include <Ultralight/Ultralight.h>
+#include <AppCore/Platform.h>
+#include <AppCore/JSHelpers.h>
 
 using namespace ultralight;
 namespace Templates
@@ -75,7 +77,7 @@ namespace Templates
 	DEF_TEMPLATE_ID(HtmlUIJson, GetHtmlUITemplate);
 	DEF_TEMPLATE_ID(HtmlUIInstance, GetHtmlUIInstance);
 
-	struct HtmlUIInstance
+	struct HtmlUIInstance : public LoadListener
 	{
 		HtmlUIInstance(JUUID uuid) { assert(!!!"do not use"); }
 		explicit HtmlUIInstance(SceneUnitId id, JUUID instance_uuid, JUUID template_uuid);
@@ -83,6 +85,8 @@ namespace Templates
 		void Destroy();
 		void UpdateTexture(SceneUnitId id);
 		void Resolve(SceneUnitId id);
+		void OnDOMReady(View* caller, uint64_t frame_id, bool is_main_frame, const ultralight::String& url) override;
+		void MapBridgeCallback(std::string event, std::function<void()> callback);
 		void EvaluateScript(std::string js);
 
 		JUUID instanceUUID;
@@ -91,6 +95,7 @@ namespace Templates
 		RenderPassInstanceID resolvePass;
 		unsigned int rowPitch;
 		CComPtr<ID3D12Resource> uploadBuffer;
+		std::map<std::string, std::function<void()>> bridgeCallbacks;
 	};
 };
 
