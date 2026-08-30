@@ -15,8 +15,8 @@ function App() {
   const [previousScore, setPreviousScore] = useState(0);
   const [hasPreviouseScore, setHasPreviouseScore] = useState(false);
   const [newRecord, setNewRecord] = useState(false);
-  const [hero, setHero] = useState({ hp: 100, name: 'Venom', img: 'heroes/venom.webp', score:0 });
-  const [enemy, setEnemy] = useState({ hp: 100, name: '', img: '', active: false });
+  const [hero, setHero] = useState({ hp: 100, maxHp: 100, name: 'Venom', img: 'heroes/venom.webp', score:0 });
+  const [enemy, setEnemy] = useState({ hp: 100, maxHp:100, name: '', img: '', active: false });
   const [arrows, setArrows] = useState({ left: false, right: false });
   const [isGamepad, setIsGamepad] = useState(true); // Estado para determinar si se está usando un gamepad o teclado
   const [dialogue, setDialogue] = useState({
@@ -32,9 +32,9 @@ function App() {
     // Escuchar actualizaciones desde C++ (EvaluateScript)
     const handleEngineUpdate = (e) => {
       if (e.detail.type === 'GAMEPAD_STATUS') setIsGamepad(e.detail.value);
-      if (e.detail.type === 'HERO_HP') setHero(prev => ({ ...prev, hp: e.detail.value }));
-      if (e.detail.type === 'ENEMY_HP') setEnemy(prev => ({ ...prev, hp: e.detail.value }));
-      if (e.detail.type === 'NEW_ENEMY') setEnemy(prev => ({ ...prev, name: e.detail.name, active: true, img:`enemies/${e.detail.picture.toLowerCase()}.png` }));
+      if (e.detail.type === 'HERO_HP') setHero(prev => ({ ...prev, hp: e.detail.hp, maxHp: e.detail.maxHp }));
+      if (e.detail.type === 'ENEMY_HP') setEnemy(prev => ({ ...prev, hp: e.detail.hp, maxHp: e.detail.maxHp }));
+      if (e.detail.type === 'NEW_ENEMY') setEnemy(prev => ({ ...prev, name: e.detail.name, active: true, img:`enemies/${e.detail.picture.toLowerCase()}.png`, maxHp: e.detail.maxHp, hp: e.detail.hp }));
       if (e.detail.type === 'REMOVE_ENEMY') setEnemy(prev => ({ ...prev, name: '', img:'', active: false }));
       if (e.detail.type === 'SCORE_UPDATE') setHero(prev => ({ ...prev, score: e.detail.value }));
       if (e.detail.type === 'ARROW_LEFT') setArrows(prev => ({ ...prev, left: e.detail.value }));
@@ -80,8 +80,8 @@ function App() {
   if (gameState === 'playing') {
     return (
       <div className="hud-layer">
-          <HeroHud hero={true} picture={hero.img} title={hero.score} hp={hero.hp} />
-          {enemy.active && <EnemyHud key={enemy.name} hero={false} picture={enemy.img} title={enemy.name} hp={enemy.hp} />}
+          <HeroHud hero={true} picture={hero.img} title={hero.score} hp={hero.hp} maxHp={hero.maxHp} />
+          {enemy.active && <EnemyHud key={enemy.name} hero={false} picture={enemy.img} title={enemy.name} hp={enemy.hp} maxHp={enemy.maxHp} />}
           <LeftArrow active={arrows.left} />
           <RightArrow active={arrows.right} />
 

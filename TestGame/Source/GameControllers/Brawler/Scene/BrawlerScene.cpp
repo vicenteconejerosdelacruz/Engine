@@ -73,6 +73,7 @@ namespace Game::Brawler
 		newAttacker(false);
 		lastAttackerHealthChanged(false);
 		lastAttackerHealth(100);
+		lastAttackerMaxHealth(100);
 		lastAttackerName("");
 		heroScore(0);
 		dialogOpen = false;
@@ -146,6 +147,7 @@ namespace Game::Brawler
 		heroes_insert(heroController);
 		Hero* hero = GetController<Hero>(heroController);
 		heroHealth(hero->health());
+		heroMaxHealth(hero->maxHealth);
 	}
 
 	void BrawlerScene::HeroReady(JUUID heroUUID)
@@ -246,6 +248,7 @@ namespace Game::Brawler
 		lastAttackerName(bc->name());
 		lastAttackerPicture(bc->picture());
 		lastAttackerHealth(bc->health());
+		lastAttackerMaxHealth(bc->maxHealth);
 		lastAttackerHealthChanged(true);
 	}
 
@@ -282,9 +285,10 @@ namespace Game::Brawler
 		{
 			std::string js = BuildEvalScript("HERO_HP",
 				{
-					{ "value", std::to_string(heroHealth()) }
+					{ "hp", std::to_string(heroHealth()) },
+					{ "maxHp", std::to_string(heroMaxHealth()) },
 				}
-			);
+				);
 			HtmlUIInstanceID instance = venomUIInstance();
 			instance->EvaluateScript(js);
 			heroHealthChanged(false);
@@ -306,9 +310,11 @@ namespace Game::Brawler
 			std::string js = BuildEvalScript("NEW_ENEMY",
 				{
 					{ "name", lastAttackerName() },
-					{ "picture", lastAttackerPicture() }
+					{ "picture", lastAttackerPicture() },
+					{ "hp", std::to_string(lastAttackerHealth()) },
+					{ "maxHp", std::to_string(lastAttackerMaxHealth()) },
 				}
-			);
+				);
 			HtmlUIInstanceID instance = venomUIInstance();
 			instance->EvaluateScript(js);
 			newAttacker(false);
@@ -317,9 +323,10 @@ namespace Game::Brawler
 		{
 			std::string js = BuildEvalScript("ENEMY_HP",
 				{
-					{ "value", std::to_string(lastAttackerHealth()) }
+					{ "hp", std::to_string(lastAttackerHealth()) },
+					{ "maxHp", std::to_string(lastAttackerMaxHealth()) },
 				}
-			);
+				);
 			HtmlUIInstanceID instance = venomUIInstance();
 			instance->EvaluateScript(js);
 			lastAttackerHealthChanged(false);

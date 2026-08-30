@@ -145,6 +145,7 @@ namespace Game::Brawler
 			handbombR->markedForDelete = true;
 		}
 		health(floorHealth());
+		maxHealth = floorHealth();
 		auto* brawler = GetBrawlerScene(this);
 		brawler->UpdateEnemy(uuid());
 

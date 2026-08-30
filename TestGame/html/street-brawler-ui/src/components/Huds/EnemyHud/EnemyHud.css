@@ -1,0 +1,30 @@
+.bars-title.enemy
+{
+  position:absolute;
+/*right: -80px;*/
+  top: 70px;
+}
+
+.enemy-sub-section {
+  margin-top: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  animation: slideIn 0.3s ease-out;
+}
+
+.enemy-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.portrait.enemy {
+  position:absolute;
+  right: -100px;
+  width: 64px; height: 64px;
+}
+
+.character-hud.enemy {
+  left:420px;
+}

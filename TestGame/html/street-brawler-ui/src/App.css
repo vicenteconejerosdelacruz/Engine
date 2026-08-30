@@ -18,14 +18,6 @@
   position:absolute
 }
 
-.character-hud.hero {
-  left: 20px;
-}
-
-.character-hud.enemy {
-  left:420px;
-}
-
 .unit-display {
   display: flex;
   align-items: flex-start;
@@ -38,31 +30,10 @@
   box-shadow: 4px 4px 0px #800000;
 }
 
-.portrait.hero { width: 80px; height: 80px; }
-.portrait.enemy {
-  position:absolute;
-  right: -65px;
-  width: 64px; height: 64px;
-}
-
 .bars-container {
   display: flex;
   flex-direction: column;
   margin-top: 0px;
-}
-
-.enemy-sub-section {
-  margin-top: 5px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  animation: slideIn 0.3s ease-out;
-}
-
-.enemy-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
 .bars-title {
@@ -74,54 +45,10 @@
   text-shadow: 0px 0px 6px #000;
   font-size: 1.1rem;
 }
-.bars-title.hero
-{
-  /*align-self:flex-end;*/
-}
-.bars-title.enemy
-{
-  position:absolute;
-/*right: -80px;*/
-  top: 70px;
-}
-
-.hero-lives {
-  color: #fff;
-  font-family: 'Verdana', sans-serif;
-  font-weight: bold;
-  text-transform: uppercase;
-  font-style: italic;
-  text-shadow: 0px 0px 6px #000;
-  font-size: 2.1rem;
-}
 
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(-20px); }
   to { opacity: 1; transform: translateX(0); }
-}
-
-/* El contenedor de fondo */
-.health-bar-bg {
-  width: 300px; /* Ancho de la barra del héroe */
-  background-color: rgba(50, 50, 50, 0.8);
-  border: 2px solid #000;
-  position: relative;
-  overflow: hidden;
-  border-radius: 10px;
-}
-
-/* La barra del héroe es más gruesa */
-.health-bar-bg.main {
-  height: 22px; 
-}
-
-/* La barra del enemigo es más delgada, como pediste */
-.health-bar-bg.sub {
-  height: 12px;
-  width: 200px; /* Un poco más corta para diferenciar */
-  position: absolute;
-  right: 7px;
-  top: 72px;
 }
 
 @keyframes arcadeBlink {

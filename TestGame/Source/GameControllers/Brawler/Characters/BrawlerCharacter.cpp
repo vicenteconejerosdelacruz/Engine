@@ -42,6 +42,7 @@ namespace Game::Brawler
 		lookingTo(initialLookingTo);
 #endif
 		followAnimationPlaying(false);
+		maxHealth = health();
 	}
 
 	void BrawlerCharacter::Unmap()

@@ -69,6 +69,7 @@ namespace Game
 			void BindNestedControllers(Local<Context> context, Isolate* isolate, std::unique_ptr<SceneUnitScripting>& scriptData) override;
 
 			RenderableID renderable;
+			int maxHealth;
 		};
 	};
 };

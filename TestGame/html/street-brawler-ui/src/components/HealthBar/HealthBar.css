@@ -1,0 +1,28 @@
+/* El contenedor de fondo */
+.health-bar-bg {
+  background-color: rgba(50, 50, 50, 0.8);
+  border: 2px solid #000;
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+/* La barra del héroe es más gruesa */
+.health-bar-bg.main {
+  width: 300px; /* Ancho fijo */
+  height: 22px;
+}
+
+/* La barra del enemigo es más delgada, como pediste */
+.health-bar-bg.sub {
+  width: 200px; /* Ancho fijo más corto */
+  height: 12px;
+  position: absolute;
+  right: 7px;
+  top: 72px;
+}
+
+.health-bar-fill {
+  /* Transición suave para cuando la vida cambia */
+  transition: width 0.2s ease-out; 
+}

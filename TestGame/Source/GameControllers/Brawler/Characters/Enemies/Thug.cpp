@@ -74,7 +74,6 @@ namespace Game::Brawler
 
 	void Thug::RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script)
 	{
-		//v8_register_method<Thug>(isolate, tpl, "EvaluateNextFollowMovement", script, [](Thug* self) { if (self) self->EvaluateNextFollowMovement(); });
 		v8_register_method<Thug>(isolate, tpl, "CombatIdleNextState", script, [](Thug* self) { if (self) self->CombatIdleNextState(); });
 		v8_register_method<Thug>(isolate, tpl, "OnCombatPunchAnimationEnd", script, [](Thug* self) { if (self) self->OnCombatPunchAnimationEnd(); });
 		v8_register_method<Thug>(isolate, tpl, "TakeHit", script, [](Thug* self, int damage) { if (self) self->TakeHit(damage); });
@@ -84,11 +83,11 @@ namespace Game::Brawler
 
 	void Thug::SetInitialConditions()
 	{
-		BrawlerCharacter::SetInitialConditions();
 		tsm.currentState = TS_None;
 		health(initialHealth);
 		pickedHeroID.clear();
 		combatEnabled(false);
+		BrawlerCharacter::SetInitialConditions();
 	}
 
 #if defined(_EDITOR)

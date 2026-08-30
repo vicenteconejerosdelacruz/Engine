@@ -61,8 +61,6 @@ namespace Game
 
 			DEF_STRING2FLAGS_FUNC(Thug, BrawlerCharacter);
 
-			//BrawlerScene* GetBrawlerSceneController();
-
 			//Constructor and Binding
 			Thug(nlohmann::json& json);
 			static void RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script);
