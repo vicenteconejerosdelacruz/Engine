@@ -33,6 +33,9 @@ namespace Game
 			DEF_STRING2FLAGS_FUNC(BrawlerCamera, Controller);
 
 			BrawlerCamera(nlohmann::json& json);
+			static void RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script);
+			void RegisterScriptInstance(Isolate* isolate, Local<ObjectTemplate> proto, SceneUnitScripting* script) override { BrawlerCamera::RegisterScript(isolate, proto, script); }
+			std::set<std::string> GetControllerAliases() override { return { "cam" }; }
 			void SetInitialConditions() override;
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
@@ -44,20 +47,18 @@ namespace Game
 			void Unmap() override;
 			void Step(float delta) override;
 			void MoveCameraBoundary(XMVECTOR diff, BoundaryID boundary);
+			void TweenSmoothing(float from, float to, float time);
 
 			//object to interact with
 			CameraID camera;
 			XMVECTOR cameraOffset;
-			//RenderableID heroes[2];
-			//Venom* venomC;
-			//float Ycam2venom;
-			//float YcamInitial;
 			BoundaryID leftBoundaryB;
 			BoundaryID rightBoundaryB;
 			BoundaryID topBoundaryB;
 			PhysicObjectID leftBoundaryPO;
 			PhysicObjectID rightBoundaryPO;
 			PhysicObjectID topBoundaryPO;
+			std::unique_ptr<tween> smoothingTween;
 #if defined(_EDITOR)
 			bool fromPlayMode = false;
 			bool initialFollowLeft = false;

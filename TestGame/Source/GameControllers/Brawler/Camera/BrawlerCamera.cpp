@@ -34,6 +34,11 @@ namespace Game::Brawler
 #include <JEnd.h>
 	}
 
+	void BrawlerCamera::RegisterScript(Isolate* isolate, Local<ObjectTemplate> tpl, SceneUnitScripting* script)
+	{
+		v8_register_method<BrawlerCamera>(isolate, tpl, "TweenSmoothing", script, [](BrawlerCamera* self, float from, float to, float time) { if (self) self->TweenSmoothing(from, to, time); });
+	}
+
 	void BrawlerCamera::SetInitialConditions()
 	{
 		if (fromPlayMode)
@@ -95,6 +100,16 @@ namespace Game::Brawler
 #endif
 		BrawlerScene* scene = GetBrawlerScene(this);
 		const std::set<JUUID>& heroIDs = scene->heroes();
+
+		if (smoothingTween != nullptr)
+		{
+			smoothingTween->step();
+			smoothing(smoothingTween->current_value);
+			if (smoothingTween->current_value == smoothingTween->target_value)
+			{
+				smoothingTween = nullptr;
+			}
+		}
 
 		if (heroIDs.empty())
 			return;
@@ -187,6 +202,11 @@ namespace Game::Brawler
 		XMStoreFloat3(&xmnewPos, newPos);
 		boundary->position(xmnewPos);
 		boundary->flag(Boundary::Update_position);
+	}
+
+	void BrawlerCamera::TweenSmoothing(float from, float to, float time)
+	{
+		smoothingTween = std::make_unique<tween>(from, to, static_cast<int>(1000.0f * time), tween::easing::linear);
 	}
 }
 
