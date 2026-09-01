@@ -279,12 +279,13 @@ void AnimationSequencerModal::Step()
 	{
 		if (flyMode == PreviewFlyMode_BoundingBox)
 		{
-			if (renderable->HasBoundingBoxComputed())
-			{
-				float modelDistanceScale = camera->at("modelDistanceScale");
-				BoundingBox bb = renderable->GetBoundingBox();
-				camera->LookAtBoundingBox(bb, modelDistanceScale);
-			}
+			float modelDistanceScale = camera->at("modelDistanceScale");
+			BoundingBox bb = renderable->GetBoundingBox();
+			XMVECTOR bbp = XMLoadFloat3(&bb.Center);
+			XMVECTOR invFw = -1.0f * camera->forward();
+			invFw = invFw * modelDistanceScale;
+			camera->positionV(invFw + bbp);
+			camera->LookAt(bbp);
 		}
 		else if (flyMode == PreviewFlyMode_Bone)
 		{
