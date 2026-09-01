@@ -54,6 +54,7 @@ namespace Game::Brawler
 		v8_register_method<BrawlerScene>(isolate, tpl, "IsCombatPaused", script, [](BrawlerScene* self) { return self && self->IsCombatPaused(); });
 		v8_register_method<BrawlerScene>(isolate, tpl, "StartDialog", script, [](BrawlerScene* self, std::string dialog) { if (self) self->StartDialog(dialog); });
 		v8_register_method<BrawlerScene>(isolate, tpl, "LevelComplete", script, [](BrawlerScene* self) { if (self) self->LevelComplete(); });
+		v8_register_method<BrawlerScene>(isolate, tpl, "GameOver", script, [](BrawlerScene* self) { if (self) self->GameOver(); });
 	}
 
 	void BrawlerScene::SetInitialConditions()
@@ -394,6 +395,17 @@ namespace Game::Brawler
 		sfx_music->Stop();
 		SoundFXID sfx_ready = MAKESUUUID(unit, end_level_ready_music());
 		sfx_ready->Play();
+	}
+
+	void BrawlerScene::GameOver()
+	{
+		std::string js = BuildEvalScript("LEVEL_COMPLETE", nlohmann::json::object({}));
+		HtmlUIInstanceID instance = venomUIInstance();
+		instance->EvaluateScript(js);
+		SoundFXID sfx_music = MAKESUUUID(unit, music());
+		sfx_music->Stop();
+		SoundFXID sfx_game_over = MAKESUUUID(unit, game_over_music());
+		sfx_game_over->Play();
 	}
 
 	void BrawlerScene::PauseCombat()

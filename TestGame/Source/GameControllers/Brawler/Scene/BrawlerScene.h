@@ -83,6 +83,7 @@ namespace Game
 			void ShowRightArrowSign();
 			void HideRightArrowSign();
 			void LevelComplete();
+			void GameOver();
 
 			//Combat system
 			void PauseCombat();

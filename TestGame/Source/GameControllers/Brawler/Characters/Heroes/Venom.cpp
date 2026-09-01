@@ -203,7 +203,7 @@ namespace Game::Brawler
 
 	void Venom::TakeHit(JUUID enemyController, int damage)
 	{
-		//health(std::max(0, health() - damage));
+		health(std::max(0, health() - damage));
 		GetController<BrawlerScene>(unit, sceneController())->HeroTookHit(enemyController, health());
 	}
 
@@ -1232,3 +1232,6 @@ namespace Game::Brawler
 //A5_4_L -> A5_10_L->A5_11_L->A5_12_L->A5_13_L
 
 //103551_Fire_R -> 103551_Fire_R_Loop
+
+//block
+//Cobweb_pose

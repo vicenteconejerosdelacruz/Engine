@@ -24,3 +24,4 @@ JEXPOSE_VECTOR_TRANSFORM(BrawlerRound, rounds, ToBrawlerRound, FromBrawlerRound,
 JEXPOSE_VECTOR_TRANSFORM(BrawlerDialog, dialogs, ToBrawlerDialog, FromBrawlerDialog, {}, jedv_t_vector, 0, false)
 JEXPOSE(JUUID, music, "", jedv_t_so_soundeffect, 0, false)
 JEXPOSE(JUUID, end_level_ready_music, "", jedv_t_so_soundeffect, 0, false)
+JEXPOSE(JUUID, game_over_music, "", jedv_t_so_soundeffect, 0, false)
