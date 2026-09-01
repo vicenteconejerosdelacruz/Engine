@@ -235,6 +235,7 @@
 
 .text-record {
   color: #ef4444;
+  animation: arcadeBlink 0.5s step-start infinite;
 }
 
 /* --- BOTÓN DE DEBUG --- */

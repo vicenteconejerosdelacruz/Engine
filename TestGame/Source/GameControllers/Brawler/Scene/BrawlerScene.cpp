@@ -381,11 +381,11 @@ namespace Game::Brawler
 	{
 		std::string js = BuildEvalScript("LEVEL_COMPLETE",
 			{
-				{ "value", false },
 				{ "level", 1 },
-				{ "previousScore", 0 },
-				{ "hasPreviouseScore", false },
-				{ "newRecord", 200 }
+				{ "previousScore", 1000 },
+				{ "hasPreviouseScore", true },
+				{ "newRecord", heroScore() },
+				{ "hasNewRecord", true }
 			}
 		);
 		HtmlUIInstanceID instance = venomUIInstance();

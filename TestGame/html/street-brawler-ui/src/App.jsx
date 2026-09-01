@@ -14,6 +14,7 @@ function App() {
   const [level, setLevel] = useState(1);
   const [previousScore, setPreviousScore] = useState(0);
   const [hasPreviouseScore, setHasPreviouseScore] = useState(false);
+  const [hasNewRecord, setHasNewRecord] = useState(false);
   const [newRecord, setNewRecord] = useState(false);
   const [hero, setHero] = useState({ hp: 100, maxHp: 100, name: 'Venom', img: 'heroes/venom.webp', score:0 });
   const [enemy, setEnemy] = useState({ hp: 100, maxHp:100, name: '', img: '', active: false });
@@ -36,7 +37,7 @@ function App() {
       if (e.detail.type === 'ENEMY_HP') setEnemy(prev => ({ ...prev, hp: e.detail.hp, maxHp: e.detail.maxHp }));
       if (e.detail.type === 'NEW_ENEMY') setEnemy(prev => ({ ...prev, name: e.detail.name, active: true, img:`enemies/${e.detail.picture.toLowerCase()}.png`, maxHp: e.detail.maxHp, hp: e.detail.hp }));
       if (e.detail.type === 'REMOVE_ENEMY') setEnemy(prev => ({ ...prev, name: '', img:'', active: false }));
-      if (e.detail.type === 'SCORE_UPDATE') setHero(prev => ({ ...prev, score: e.detail.value }));
+      if (e.detail.type === 'SCORE_UPDATE') { setScore(e.detail.value); setHero(prev => ({ ...prev, score: e.detail.value })); }
       if (e.detail.type === 'ARROW_LEFT') setArrows(prev => ({ ...prev, left: e.detail.value }));
       if (e.detail.type === 'ARROW_RIGHT') setArrows(prev => ({ ...prev, right: e.detail.value }));
       if (e.detail.type === 'LEVEL_START') {
@@ -51,6 +52,7 @@ function App() {
         setPreviousScore(e.detail.previousScore);
         setHasPreviouseScore(e.detail.hasPreviouseScore);
         setNewRecord(e.detail.newRecord);
+        setHasNewRecord(e.detail.hasNewRecord);
       }
 
       if (e.detail.type === 'SHOW_DIALOGUE') {
@@ -98,10 +100,11 @@ function App() {
   else if(gameState === 'levelcomplete') {
     return (<LevelComplete 
           level={level} 
-          initialScore={score} 
+          score={score} 
           previousScore={previousScore}
           hasPreviouseScore={hasPreviouseScore}
           newRecord={newRecord}
+          hasNewRecord={hasNewRecord}
           isGamepad={isGamepad}
         />
     )

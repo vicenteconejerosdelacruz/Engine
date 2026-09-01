@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import './LevelComplete.css';
 
 export const LevelComplete = ({ 
-  initialScore = 14850,
-  previousScore = 12000,
+  score = 0,
+  previousScore = 0,
   hasPreviouseScore = true,
   newRecord = true,
   level = 5, 
   isGamepad = true,
+  hasNewRecord = false,
   onContinue 
 }) => {
-  const [score, setScore] = useState(initialScore);
   const [animationKey, setAnimationKey] = useState(0);
 
   const handleReplay = () => {
@@ -114,12 +114,14 @@ export const LevelComplete = ({
           <div className="spider-card-top-glow"></div>
           <div className="spider-score-label">LEVEL SCORE</div>
           <div className="spider-score-number">{score.toLocaleString()}</div>
+          {/*
           <div className="spider-progress-bar">
             <div className="spider-progress-fill"></div>
           </div>
+          */}
           <div className="spider-score-meta">
             <span>{hasPreviouseScore && `PREVIOUS: ${previousScore.toLocaleString()}`}</span>
-            {newRecord && <span className="text-record">NEW RECORD!</span>}
+            {hasNewRecord && <span className="text-record">NEW RECORD!</span>}
           </div>
         </div>
       </div>
