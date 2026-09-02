@@ -174,7 +174,8 @@ void SequencePlayer::CreateSequenceTriggers()
 			for (auto* t : triggers)
 			{
 				t->trigger = MAKESUUUID(unit, std::get<1>(t->trigger()));
-				t->triggerBuilt->store(true);
+				if (t->triggerBuilt)
+					t->triggerBuilt->store(true);
 			}
 		}
 	);
@@ -190,10 +191,10 @@ void SequencePlayer::DestroySequenceTriggers()
 
 		if (t->triggerBuilt)
 		{
-			t->triggerBuilt->wait(false);
+			//t->triggerBuilt->wait(false);
 			t->triggerBuilt.reset();
 		}
-		if (t->trigger)
+		if (t->trigger && Scene::SceneObjectExists(t->trigger()))
 		{
 			t->trigger->markedForDelete = true;
 		}
