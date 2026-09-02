@@ -42,7 +42,6 @@ namespace Game
 #include <JEnd.h>
 #endif
 
-		//struct Venom;
 		struct BrawlerScene;
 
 		struct Thug : BrawlerCharacter

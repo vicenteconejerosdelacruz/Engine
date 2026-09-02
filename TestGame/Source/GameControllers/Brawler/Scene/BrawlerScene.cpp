@@ -68,6 +68,8 @@ namespace Game::Brawler
 		enemies_clear();
 		ready_heroes_clear();
 		currentRound(0);
+		heroLivesChanged(true);
+		heroLives(3);
 		heroHealthChanged(true);
 		heroHealth(100);
 		lastAttacker("");
@@ -78,6 +80,7 @@ namespace Game::Brawler
 		lastAttackerName("");
 		heroScore(0);
 		dialogOpen = false;
+		gameState = BGS_Playing;
 	}
 
 #if defined(_EDITOR)
@@ -227,6 +230,7 @@ namespace Game::Brawler
 		UpdateGamepad();
 		UpdateHeroHealthUI();
 		UpdateEnemyUI();
+		UpdateHeroLivesUI();
 		HtmlUIInstanceID instance = venomUIInstance();
 		instance->UpdateTexture(id);
 		instance->Resolve(id);
@@ -277,6 +281,21 @@ namespace Game::Brawler
 			HtmlUIInstanceID instance = venomUIInstance();
 			instance->EvaluateScript(js);
 			gamepadStatusSet(true);
+		}
+	}
+
+	void BrawlerScene::UpdateHeroLivesUI()
+	{
+		if (heroLivesChanged())
+		{
+			std::string js = BuildEvalScript("LIVES_UPDATE",
+				{
+					{ "value", std::to_string(heroLives()) }
+				}
+			);
+			HtmlUIInstanceID instance = venomUIInstance();
+			instance->EvaluateScript(js);
+			heroLivesChanged(false);
 		}
 	}
 
@@ -380,6 +399,7 @@ namespace Game::Brawler
 
 	void BrawlerScene::LevelComplete()
 	{
+		gameState = BGS_LevelComplete;
 		std::string js = BuildEvalScript("LEVEL_COMPLETE",
 			{
 				{ "level", 1 },
@@ -391,21 +411,34 @@ namespace Game::Brawler
 		);
 		HtmlUIInstanceID instance = venomUIInstance();
 		instance->EvaluateScript(js);
-		SoundFXID sfx_music = MAKESUUUID(unit, music());
+		SoundFXID sfx_music = MAKESUUUID(unit, boss_music());
 		sfx_music->Stop();
 		SoundFXID sfx_ready = MAKESUUUID(unit, end_level_ready_music());
 		sfx_ready->Play();
 	}
 
+	bool BrawlerScene::IsLevelComplete() const
+	{
+		return gameState == BGS_LevelComplete;
+	}
+
 	void BrawlerScene::GameOver()
 	{
-		std::string js = BuildEvalScript("LEVEL_COMPLETE", nlohmann::json::object({}));
+		gameState = BGS_GameOver;
+		std::string js = BuildEvalScript("GAME_OVER", nlohmann::json::object({}));
 		HtmlUIInstanceID instance = venomUIInstance();
 		instance->EvaluateScript(js);
 		SoundFXID sfx_music = MAKESUUUID(unit, music());
 		sfx_music->Stop();
+		SoundFXID boss_sfx_music = MAKESUUUID(unit, boss_music());
+		boss_sfx_music->Stop();
 		SoundFXID sfx_game_over = MAKESUUUID(unit, game_over_music());
 		sfx_game_over->Play();
+	}
+
+	bool BrawlerScene::IsGameOver() const
+	{
+		return gameState == BGS_GameOver;
 	}
 
 	void BrawlerScene::PauseCombat()

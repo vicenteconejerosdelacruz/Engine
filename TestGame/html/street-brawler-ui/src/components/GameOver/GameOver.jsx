@@ -3,7 +3,7 @@ import '../LevelComplete/LevelComplete.css'; // Reutilizamos los mismos estilos 
 import './GameOver.css'; // Agregamos ajustes específicos para Game Over
 
 export const GameOver = ({ 
-  finalScore = 8450, 
+  score = 0, 
   onRetry,
   onExit 
 }) => {
@@ -109,7 +109,8 @@ export const GameOver = ({
         <div className="spider-score-card game-over-card">
           <div className="spider-card-top-glow game-over-top-glow"></div>
           <div className="spider-score-label">FINAL SCORE</div>
-          <div className="spider-score-number">{finalScore.toLocaleString()}</div>
+          <div className="spider-score-number">{score.toLocaleString()}</div>
+          {/*
           <div className="spider-progress-bar">
             <div className="spider-progress-fill game-over-progress"></div>
           </div>
@@ -117,6 +118,7 @@ export const GameOver = ({
             <span>NO LIVES REMAINING</span>
             <span className="text-failed">TRY AGAIN</span>
           </div>
+          */}
         </div>
       </div>
 

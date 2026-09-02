@@ -25,12 +25,6 @@ namespace Game::Brawler
 	{
 		return GetController<BrawlerScene>(thug->unit, thug->sceneController());
 	}
-	/*
-	BrawlerScene* Thug::GetBrawlerSceneController()
-	{
-		return GetController<BrawlerScene>(unit, sceneController());
-	}
-	*/
 
 	//Constructor and Binding
 	Thug::Thug(nlohmann::json& json) : BrawlerCharacter(json)
@@ -526,6 +520,10 @@ namespace Game::Brawler
 
 	void Thug::PlayPunchSound()
 	{
+		//don't play the sound if in gameover or level complete
+		if (GetBrawlerScene(this)->IsGameOver() || GetBrawlerScene(this)->IsLevelComplete())
+			return;
+
 		if (punchSounds().size() == 0ULL) return;
 		SoundFXID sfx = SoundFXID(unit, punchSounds().at(0));
 		sfx->Stop();

@@ -12,6 +12,7 @@ function App() {
   const [gameState, setGameState] = useState('playing'); // 'menu', 'playing', 'paused', 'gameover', 'levelcomplete', 'gameover'
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
+  const [lives, setLives] = useState(3);
   const [previousScore, setPreviousScore] = useState(0);
   const [hasPreviouseScore, setHasPreviouseScore] = useState(false);
   const [hasNewRecord, setHasNewRecord] = useState(false);
@@ -32,6 +33,7 @@ function App() {
   useEffect(() => {
     // Escuchar actualizaciones desde C++ (EvaluateScript)
     const handleEngineUpdate = (e) => {
+      if (e.detail.type === 'LIVES_UPDATE') setLives(e.detail.value);
       if (e.detail.type === 'GAMEPAD_STATUS') setIsGamepad(e.detail.value);
       if (e.detail.type === 'HERO_HP') setHero(prev => ({ ...prev, hp: e.detail.hp, maxHp: e.detail.maxHp }));
       if (e.detail.type === 'ENEMY_HP') setEnemy(prev => ({ ...prev, hp: e.detail.hp, maxHp: e.detail.maxHp }));
@@ -82,11 +84,10 @@ function App() {
   if (gameState === 'playing') {
     return (
       <div className="hud-layer">
-          <HeroHud hero={true} picture={hero.img} title={hero.score} hp={hero.hp} maxHp={hero.maxHp} />
+          <HeroHud hero={true} picture={hero.img} title={hero.score} hp={hero.hp} maxHp={hero.maxHp} lives={lives} />
           {enemy.active && <EnemyHud key={enemy.name} hero={false} picture={enemy.img} title={enemy.name} hp={enemy.hp} maxHp={enemy.maxHp} />}
           <LeftArrow active={arrows.left} />
           <RightArrow active={arrows.right} />
-
           {/* Nueva caja de diálogos */}
         <DialogueBox 
           active={dialogue.active} 
@@ -111,7 +112,7 @@ function App() {
   }
   else if(gameState === 'gameover') {
     return (<GameOver 
-          finalScore={score} 
+          score={score} 
           onRetry={() => setGameState('playing')} 
           onExit={() => setGameState('menu')} 
         />

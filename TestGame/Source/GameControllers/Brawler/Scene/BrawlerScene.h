@@ -24,6 +24,13 @@ namespace Game
 
 #endif
 
+		enum GameState
+		{
+			BGS_Playing,
+			BGS_LevelComplete,
+			BGS_GameOver
+		};
+
 		struct BrawlerScene : Controller
 		{
 #include <Attributes/JFlags.h>
@@ -76,6 +83,7 @@ namespace Game
 			void UpdateEnemy(JUUID enemy);
 			void AddScore(int scoreToAdd);
 			void UpdateGamepad();
+			void UpdateHeroLivesUI();
 			void UpdateHeroHealthUI();
 			void UpdateEnemyUI();
 			void ShowLeftArrowSign();
@@ -83,7 +91,9 @@ namespace Game
 			void ShowRightArrowSign();
 			void HideRightArrowSign();
 			void LevelComplete();
+			bool IsLevelComplete() const;
 			void GameOver();
+			bool IsGameOver() const;
 
 			//Combat system
 			void PauseCombat();
@@ -103,6 +113,9 @@ namespace Game
 			bool IsDialogOpen();
 			void ProcessDialogInput();
 			void GotoNextDialogLine();
+
+			//GameState
+			GameState gameState = BGS_Playing;
 
 			//Combat System
 			struct CombatQueue {

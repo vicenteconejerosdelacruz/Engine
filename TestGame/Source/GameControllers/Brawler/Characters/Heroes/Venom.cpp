@@ -31,6 +31,11 @@ extern GameInteractionMode gameInteractionMode;
 
 namespace Game::Brawler
 {
+	static BrawlerScene* GetBrawlerScene(Venom* venom)
+	{
+		return GetController<BrawlerScene>(venom->unit, venom->sceneController());
+	}
+
 	std::vector<std::string> GetBlockedWallMovementMasks()
 	{
 		return nostd::GetValuesFromFlagsMap(WallMovementAxisToString);
@@ -203,6 +208,9 @@ namespace Game::Brawler
 
 	void Venom::TakeHit(JUUID enemyController, int damage)
 	{
+		if (std::set({ VS_Intro, VS_Death }).contains(vsm.currentState))
+			return;
+
 		health(std::max(0, health() - damage));
 		GetController<BrawlerScene>(unit, sceneController())->HeroTookHit(enemyController, health());
 	}
@@ -214,6 +222,10 @@ namespace Game::Brawler
 		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
 			return;
 #endif
+
+		//don't play the sound if in gameover or level complete
+		if (GetBrawlerScene(this)->IsGameOver() || GetBrawlerScene(this)->IsLevelComplete())
+			return;
 
 		bool dialogOpen = GetController<BrawlerScene>(unit, sceneController())->IsDialogOpen();
 
@@ -973,7 +985,23 @@ namespace Game::Brawler
 	}
 
 	void Venom::OnDeathAnimationEnd()
-	{}
+	{
+		auto* brawler = GetBrawlerScene(this);
+		if (lives() > 0)
+		{
+			health(initialHealth);
+			lives(lives() - 1);
+			brawler->heroLives(lives());
+			brawler->heroLivesChanged(true);
+			brawler->heroHealth(health());
+			brawler->heroHealthChanged(true);
+			vsm.ChangeState(VS_Intro);
+		}
+		else
+		{
+			brawler->GameOver();
+		}
+	}
 
 	static const std::set<VenomStates> fromWallSwingStates({ VS_WallIdle,VS_CrawlOnWall });
 	bool Venom::ShouldWallToSwing()
