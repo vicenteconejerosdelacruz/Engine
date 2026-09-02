@@ -19,6 +19,7 @@ namespace Game
 			VS_Jumping,
 			VS_RunningJump,
 			VS_Attack_1,
+			VS_Blocking,
 			VS_JumpKick,
 			VS_JumpDash,
 			VS_GrabWall,
@@ -212,6 +213,11 @@ namespace Game
 			void EvaluateVenomNextPunch();
 			void LeaveAttack1();
 			void PlayPunchSound(int punchIdx, int enemyHealth);
+
+			//Blocking
+			bool ShouldBlock();
+			void EnterBlocking();
+			void Blocking();
 
 			//JuumpKick
 			bool ShouldJumpKick();

@@ -2,6 +2,7 @@
 #include "Venom.h"
 //#include "BrawlerCamera.h"
 #include "../../Scene/BrawlerScene.h"
+#include "../Enemies/Thug.h"
 #include <GamePhysics.h>
 #include <Scene.h>
 #include <SceneObject.h>
@@ -77,6 +78,7 @@ namespace Game::Brawler
 				{ VS_Jumping, [&](auto* sm, VenomStates prevState) { EnterJumping(); }},
 				{ VS_RunningJump, [&](auto* sm, VenomStates prevState) { EnterRunningJump(); }},
 				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { EnterAttack1(); }},
+				{ VS_Blocking,[&](auto* sm, VenomStates prevState) { EnterBlocking(); }},
 				{ VS_JumpKick,[&](auto* sm, VenomStates prevState) { EnterJumpKick(); }},
 				{ VS_JumpDash,[&](auto* sm, VenomStates prevState) { EnterJumpDash(); }},
 				{ VS_GrabWall, [&](auto* sm, VenomStates prevState) { EnterGrabWall(); }},
@@ -102,6 +104,7 @@ namespace Game::Brawler
 				{ VS_Jumping, [&](auto* sm) { Jumping(); }},
 				{ VS_RunningJump, [&](auto* sm) { RunningJump(); }},
 				{ VS_Attack_1, [&](auto* sm) { Attacking1(); }},
+				{ VS_Blocking, [&](auto* sm) { Blocking(); }},
 				{ VS_JumpKick, [&](auto* sm) { JumpKick(); } },
 				{ VS_JumpDash, [&](auto* sm) { JumpDash(); } },
 				{ VS_WallIdle, [&](auto* sm) { WallIdle(); } },
@@ -210,6 +213,13 @@ namespace Game::Brawler
 	{
 		if (std::set({ VS_Intro, VS_Death }).contains(vsm.currentState))
 			return;
+
+		if (vsm.currentState == VS_Blocking)
+		{
+			auto* thug = GetController<Thug>(enemyController);
+			if (thug->canBeBlocked())
+				damage = static_cast<int>(static_cast<float>(damage) * (1.0f - thug->blockPercentage()));
+		}
 
 		health(std::max(0, health() - damage));
 		GetController<BrawlerScene>(unit, sceneController())->HeroTookHit(enemyController, health());
@@ -448,7 +458,11 @@ namespace Game::Brawler
 
 	void Venom::Idle()
 	{
-		if (ShouldAttackX())
+		if (ShouldBlock())
+		{
+			vsm.ChangeState(VS_Blocking);
+		}
+		else if (ShouldAttackX())
 		{
 			vsm.ChangeState(VS_Attack_1);
 		}
@@ -522,6 +536,11 @@ namespace Game::Brawler
 
 	void Venom::Running()
 	{
+		if (ShouldBlock())
+		{
+			vsm.ChangeState(VS_Blocking);
+			return;
+		}
 		if (ShouldAttackX())
 		{
 			vsm.ChangeState(VS_Attack_1);
@@ -734,6 +753,32 @@ namespace Game::Brawler
 		SoundFXID sfx = SoundFXID(unit, enemyHealth > 0 ? punchSounds().at(punchIdx) : punchDeathSound().at(0));
 		sfx->Stop();
 		sfx->Play();
+	}
+
+	bool Venom::ShouldBlock()
+	{
+		if (gameInteractionMode == GIM_Gamepad)
+		{
+			return (buttons.leftShoulder == GamePad::ButtonStateTracker::HELD);
+		}
+		else if (gameInteractionMode == GIM_KeyboardMouse)
+		{
+			return keyboard->GetState().IsKeyDown(Keyboard::Keys::D);
+		}
+		return false;
+	}
+
+	void Venom::EnterBlocking()
+	{
+		renderable->SetCurrentAnimation("Block", 0.0f, 1.0f, true, true);
+	}
+
+	void Venom::Blocking()
+	{
+		if (!ShouldBlock())
+		{
+			vsm.ChangeState(VS_Idle);
+		}
 	}
 
 	//JuumpKick
@@ -1263,3 +1308,6 @@ namespace Game::Brawler
 
 //block
 //Cobweb_pose
+
+//grab web
+//103551_Fire_L_Loop
