@@ -1306,6 +1306,7 @@ void AnimationSequencerModal::DrawBoneKeyFrameGuizmo(XMFLOAT4X4& world4x4, Trans
 			renderable->animationUseTransformation(false);
 			XMMATRIX invWorld = XMMatrixInverse(&det, renderable->world());
 			renderable->animationUseTransformation(true);
+			renderable->forceAnimation = true;
 
 			XMtranslation = XMVector3Transform(XMtranslation, invWorld);
 
@@ -1326,6 +1327,8 @@ void AnimationSequencerModal::DrawBoneKeyFrameGuizmo(XMFLOAT4X4& world4x4, Trans
 			if (len.m128_f32[0] < g_XMEpsilon.f[0])
 				return;
 
+			renderable->forceAnimation = true;
+
 			keyframe.rotation.z += -XMConvertToDegrees(2.0f * XMrotation.m128_f32[0]);
 			keyframe.rotation.y += XMConvertToDegrees(2.0f * XMrotation.m128_f32[1]);
 			keyframe.rotation.x += XMConvertToDegrees(2.0f * XMrotation.m128_f32[2]);
@@ -1341,6 +1344,8 @@ void AnimationSequencerModal::DrawBoneKeyFrameGuizmo(XMFLOAT4X4& world4x4, Trans
 			XMVECTOR len = XMVector3Length(XMscale);
 			if (len.m128_f32[0] < g_XMEpsilon.f[0])
 				return;
+
+			renderable->forceAnimation = true;
 
 			keyframe.scale.x *= XMscale.m128_f32[0];
 			keyframe.scale.y *= XMscale.m128_f32[1];
@@ -1433,6 +1438,7 @@ void AnimationSequencerModal::DrawBoneTransformationKeyFrameAttributes(SequenceC
 			ImGui::EndTable();
 			if (reset)
 			{
+				renderable->forceAnimation = true;
 				ResetGizmoVariableWorkers();
 			}
 		}
@@ -1448,6 +1454,7 @@ void AnimationSequencerModal::DrawBoneTransformationKeyFrameAttributes(SequenceC
 			if (ImGui::SliderAngle("pitch", &pitch, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
 			{
 				keyframe.rotation.x = XMConvertToDegrees(pitch);
+				renderable->forceAnimation = true;
 				ResetGizmoVariableWorkers();
 			}
 			ImGui::TableSetColumnIndex(1);
@@ -1455,6 +1462,7 @@ void AnimationSequencerModal::DrawBoneTransformationKeyFrameAttributes(SequenceC
 			if (ImGui::SliderAngle("yaw", &yaw, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
 			{
 				keyframe.rotation.y = XMConvertToDegrees(yaw);
+				renderable->forceAnimation = true;
 				ResetGizmoVariableWorkers();
 			}
 			ImGui::TableSetColumnIndex(2);
@@ -1462,6 +1470,7 @@ void AnimationSequencerModal::DrawBoneTransformationKeyFrameAttributes(SequenceC
 			if (ImGui::SliderAngle("roll", &roll, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
 			{
 				keyframe.rotation.z = XMConvertToDegrees(roll);
+				renderable->forceAnimation = true;
 				ResetGizmoVariableWorkers();
 			}
 			ImGui::EndTable();
@@ -1483,6 +1492,7 @@ void AnimationSequencerModal::DrawBoneTransformationKeyFrameAttributes(SequenceC
 			ImGui::EndTable();
 			if (reset)
 			{
+				renderable->forceAnimation = true;
 				ResetGizmoVariableWorkers();
 			}
 		}
@@ -1493,6 +1503,7 @@ void AnimationSequencerModal::DrawBoneTransformationKeyFrameAttributes(SequenceC
 		std::string selectedEase = EasingToString.at(keyframe.easing);
 		ImGui::DrawComboSelection(selectedEase, nostd::GetKeysFromMap(StringToEasing), [&](std::string newEase)
 			{
+				renderable->forceAnimation = true;
 				keyframe.easing = StringToEasing.at(newEase);
 				ResetGizmoVariableWorkers();
 			}

@@ -409,6 +409,9 @@ void SequencePlayer::ApplyFrameValues()
 		renderable->animationTime(animation->GetTimeAtFrame(currentFrame));
 	}
 
+	if (renderable->animationStepLock && renderable->animationStepLock->load())
+		renderable->animationStepLock->wait(false);
+
 	renderable->animationTransformation = sequence.GetTransformationAtFrame(currentFrame);
 	renderable->sequenceBoneTransformations = sequence.GetBonesTransformations(currentFrame);
 }
