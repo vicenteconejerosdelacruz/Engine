@@ -156,10 +156,13 @@ namespace Game::Brawler
 
 	void BrawlerScene::HeroReady(JUUID heroUUID)
 	{
-		ready_heroes_insert(heroUUID);
-		if (heroes_size() == ready_heroes_size())
+		if (!ready_heroes_contains(heroUUID))
 		{
-			OnStartRound();
+			ready_heroes_insert(heroUUID);
+			if (heroes_size() == ready_heroes_size())
+			{
+				OnStartRound();
+			}
 		}
 	}
 
