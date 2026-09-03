@@ -219,7 +219,7 @@ namespace Game
 			void EnterBlocking();
 			void Blocking();
 
-			//JuumpKick
+			//JumpKick
 			bool ShouldJumpKick();
 			void EnterJumpKick();
 			void JumpKick();
