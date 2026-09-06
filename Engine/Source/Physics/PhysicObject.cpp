@@ -1367,9 +1367,9 @@ namespace Physics
 		auto createRenderableTriggerAvatar = [&](nlohmann::json& renderables, nlohmann::json& t)
 			{
 				bool visible = getVisible("Trigger");
-				XMFLOAT3 renPosition = ToXMFLOAT3(t.at("position"));
-				XMFLOAT3 renRotation = ToXMFLOAT3(t.at("rotation"));
-				XMFLOAT3 renScale = ToXMFLOAT3(t.at("scale"));
+				XMFLOAT3 renPosition = t.contains("position") ? ToXMFLOAT3(t.at("position")) : XMFLOAT3();
+				XMFLOAT3 renRotation = t.contains("rotation") ? ToXMFLOAT3(t.at("rotation")) : XMFLOAT3();
+				XMFLOAT3 renScale = t.contains("scale") ? ToXMFLOAT3(t.at("scale")) : XMFLOAT3(1.0f, 1.0f, 1.0f);
 				std::string name = t.at("name");
 				JUUID rUUID = t.at("uuid");
 				JUUID geomUUID = t.at("geometry");
