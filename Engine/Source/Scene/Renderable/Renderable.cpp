@@ -178,6 +178,9 @@ namespace Scene
 
 	void Renderable::Bind(JUUID uuid)
 	{
+		if (uuid.empty())
+			return;
+
 		switch (GetSceneObjectType(unit, uuid))
 		{
 		case SO_Cameras:
