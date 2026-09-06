@@ -89,12 +89,14 @@ namespace Game::Brawler
 				{ VS_Death, [&](auto* sm, VenomStates prevState) { EnterDeath(); }},
 				{ VS_WallToSwing, [&](auto* sm, VenomStates prevState) { EnterWallToSwing(); }},
 				{ VS_Swing, [&](auto* sm, VenomStates prevState) { EnterSwing(); }},
+				{ VS_WebGrab, [&](auto* sm, VenomStates prevState) { EnterWebGrab(); }},
 			},
 			.onLeave = {
 				{ VS_Attack_1,[&](auto* sm, VenomStates prevState) { LeaveAttack1(); }},
 				{ VS_CrawlOnWall, [&](auto* sm, VenomStates prevState) { LeaveCrawlOnWall(); }},
 				{ VS_Swing, [&](auto* sm, VenomStates prevState) { LeaveSwing(); }},
 				{ VS_WallToSwing, [&](auto* sm, VenomStates prevState) { LeaveWallToSwing(); }},
+				{ VS_WebGrab, [&](auto* sm, VenomStates prevState) { LeaveWebGrab(); }},
 			},
 			.onStep = {
 				{ VS_None, [&](auto* sm) { venomScale = renderable->scale(); vsm.ChangeState(VS_Intro); }},
@@ -112,6 +114,7 @@ namespace Game::Brawler
 				{ VS_Falling, [&](auto* sm) { Falling(); }},
 				{ VS_WallToSwing, [&](auto* sm) { WallToSwing(); }},
 				{ VS_Swing, [&](auto* sm) { Swing(); }},
+				{ VS_WebGrab, [&](auto* sm) { WebGrab(); }},
 			}
 		};
 		initialHealth = health();
@@ -132,6 +135,7 @@ namespace Game::Brawler
 		v8_register_method<Venom>(isolate, tpl, "OnDeathAnimationEnd", script, [](Venom* self) { if (self) self->OnDeathAnimationEnd(); });
 		v8_register_method<Venom>(isolate, tpl, "PlayPunchSound", script, [](Venom* self, int punchIdx, int enemyHealth) { if (self) self->PlayPunchSound(punchIdx, enemyHealth); });
 		v8_register_method<Venom>(isolate, tpl, "ThrowWeb", script, [](Venom* self) { if (self) self->ThrowWeb(); });
+		v8_register_method<Venom>(isolate, tpl, "ThrowWebForGrabbing", script, [](Venom* self) { if (self) self->ThrowWebForGrabbing(); });
 	}
 
 	void Venom::SetInitialConditions()
@@ -158,6 +162,7 @@ namespace Game::Brawler
 		webTweenCreated = false;
 		swingTimeTween = nullptr;
 		continueSwinging = false;
+		grabbedThug = nullptr;
 		Hero::SetInitialConditions();
 	}
 
@@ -255,7 +260,7 @@ namespace Game::Brawler
 		}
 
 		posDelta = XMVectorZero();
-		if (vsm.currentState != VS_Death)
+		if (vsm.currentState != VS_Death && vsm.currentState != VS_WebGrab)
 		{
 			XMVECTOR XMpos, XMrot, XMscl;
 			XMMatrixDecompose(&XMscl, &XMrot, &XMpos, renderable->animationTransformation);
@@ -482,6 +487,10 @@ namespace Game::Brawler
 		{
 			vsm.ChangeState(VS_GrabWall);
 		}
+		else if (ShouldWebGrab())
+		{
+			vsm.ChangeState(VS_WebGrab);
+		}
 	}
 
 	//Walking
@@ -507,6 +516,11 @@ namespace Game::Brawler
 		else if (ShouldJump())
 		{
 			vsm.ChangeState(VS_Jumping);
+			return;
+		}
+		else if (ShouldWebGrab())
+		{
+			vsm.ChangeState(VS_WebGrab);
 			return;
 		}
 
@@ -544,6 +558,11 @@ namespace Game::Brawler
 		if (ShouldAttackX())
 		{
 			vsm.ChangeState(VS_Attack_1);
+			return;
+		}
+		else if (ShouldWebGrab())
+		{
+			vsm.ChangeState(VS_WebGrab);
 			return;
 		}
 
@@ -1080,6 +1099,7 @@ namespace Game::Brawler
 		XMVECTOR distVec = XMVector3Length(dir);
 		float L;
 		XMStoreFloat(&L, distVec);
+		if (L == 0.0f) return;
 
 		XMVECTOR dirNormal = XMVector3Normalize(dir);
 
@@ -1247,6 +1267,243 @@ namespace Game::Brawler
 	bool Venom::ShouldContinueSwinging()
 	{
 		return continueSwinging;
+	}
+
+	static const std::set<VenomStates> webGrabAbleStates({ VS_Idle, VS_Walking, VS_Running });
+	bool Venom::ShouldWebGrab()
+	{
+		if (GetController<BrawlerScene>(unit, sceneController())->IsDialogOpen())
+		{
+			return false;
+		}
+		if (!webGrabAbleStates.contains(vsm.currentState))
+			return false;
+
+		if (gameInteractionMode == GIM_Gamepad)
+		{
+			return (buttons.rightShoulder == GamePad::ButtonStateTracker::PRESSED);
+		}
+		else if (gameInteractionMode == GIM_KeyboardMouse)
+		{
+			return keyboard->GetState().IsKeyDown(Keyboard::Keys::E);
+		}
+		return false;
+	}
+
+	void Venom::EnterWebGrab()
+	{
+		renderable->SetCurrentAnimation("WebGrab");
+	}
+
+	void Venom::WebGrab()
+	{
+		if (!web.empty() && webTweenCreated == true && RenderableSceneObjectExist(web))
+		{
+			webGrabLastSclY = webTweens[1]->current_value;
+			float sclx = webTweens[0]->step();
+			float scly = webTweens[1]->step();
+			float sclz = webTweens[2]->step();
+
+			UpdateWeb(webGrabBonePos, webAttachedPos, XMFLOAT3(sclx, scly, sclz));
+
+			bool grabbed = false;
+			XMVECTOR tfw = { lookingTo() == CharacterLookingTo::CLT_Left ? -1.0f : 1.0f,0.0f,0.0f,0.0f };
+			XMVECTOR posV = webGrabBonePos + tfw * webGrabTriggerScale() * scly;
+
+			if (grabbedThug == nullptr)
+			{
+				auto& scene = std::get<1>(GetPhysicScenesSceneObjects(unit).begin()->second);
+				XMVECTOR rayOffset = { 0.0f,-0.3f,0.0f,0.0f };
+				if (CastFirstConeRaycast(scene->pxScene,
+					XMVectorAdd(webGrabBonePos, rayOffset), XMVectorAdd(posV, rayOffset), 4.0f, 10,
+					grabbedThug, PxQueryFilterData(PxQueryFlag::eDYNAMIC)))
+				{
+					grabbed = true;
+					grabbedThugInitialPos = grabbedThug->renderable->positionV();
+				}
+			}
+			else
+			{
+				XMVECTOR delta = tfw * webGrabTriggerScale() * (scly - webGrabLastSclY);
+				grabbedThug->CharacterMoveXZPlane(delta, XMVectorGetX(XMVector3Length(delta)), 1.0f, { 0.0f,0.0f,0.0f });
+			}
+
+			if (grabbed && grabbedThug != nullptr)
+			{
+				float factor = static_cast<float>(webTweens[1]->current_value);
+				webGrabForward = false;
+				webTweens[0] = std::make_unique<tween>(throwWebGrabMaxScale().x * factor, throwWebGrabMinScale().x, static_cast<int>(1000.0f * throwWebGrabTime()), tween::easing::linear);
+				webTweens[1] = std::make_unique<tween>(factor, 0.0f, static_cast<int>(1000.0f * throwWebGrabTime()), tween::easing::linear);
+				webTweens[2] = std::make_unique<tween>(throwWebGrabMaxScale().z * factor, throwWebGrabMinScale().z, static_cast<int>(1000.0f * throwWebGrabTime()), tween::easing::linear);
+			}
+			else if (webTweens[1]->current_value == webTweens[1]->target_value)
+			{
+				if (webGrabForward)
+				{
+					webGrabForward = false;
+					webTweens[0] = std::make_unique<tween>(throwWebGrabMaxScale().x, throwWebGrabMinScale().x, static_cast<int>(1000.0f * throwWebGrabTime()), tween::easing::linear);
+					webTweens[1] = std::make_unique<tween>(1.0f, 0.0f, static_cast<int>(1000.0f * throwWebGrabTime()), tween::easing::linear);
+					webTweens[2] = std::make_unique<tween>(throwWebGrabMaxScale().z, throwWebGrabMinScale().z, static_cast<int>(1000.0f * throwWebGrabTime()), tween::easing::linear);
+				}
+				else
+				{
+					vsm.ChangeState(VS_Idle);
+				}
+			}
+		}
+	}
+
+	void Venom::LeaveWebGrab()
+	{
+		webTweens[0] = nullptr;
+		webTweens[1] = nullptr;
+		webTweens[2] = nullptr;
+		web->markedForDelete = true;
+		web.clear();
+		grabbedThug = nullptr;
+	}
+
+	void Venom::ThrowWebForGrabbing()
+	{
+		webGrabForward = true;
+		SoundFXID sfx = SoundFXID(unit, throwWebSound().at(0));
+		sfx->Stop();
+		sfx->Play();
+
+		auto [mm, pos, a, b, c] = renderable->GetBoneTransformation(webGrabBone());
+		webGrabBonePos = XMLoadFloat3(&pos);
+
+		CharacterLookingTo clt = lookingTo();
+		float angle = 90.0f * ((clt == CLT_Left) ? 1.0f : -1.0f);
+
+		XMVECTOR rot = XMQuaternionRotationRollPitchYaw(0.0f, 0.0f, XMConvertToRadians(angle));
+		XMVECTOR up = { 0.0f,1.0f,0.0f,0.0f };
+		webAttachedPos = webGrabBonePos + XMVector3Rotate(up, rot) * throwWebGrabMaxScale().y;
+
+		web = MAKESUUUID(unit, getUUID());
+		Scene::CreateSceneObjectFromMold(unit, webGrabMold(),
+			[&](SceneObjectType type, nlohmann::json json, std::string name)
+			{
+				if (type == SO_Renderables)
+				{
+					return nlohmann::json(
+						{
+							{ "name", web.uuid() + "_ins"},
+							{ "uuid", web.uuid() },
+							{ "position", FromXMFLOAT3(pos) },
+							{ "cameras", renderable->cameras() },
+							{ "scale", FromXMFLOAT3(throwWebGrabMinScale()) },
+							{ "rotation", {0.0f, 0.0f, angle } }
+						}
+					);
+				}
+				else
+				{
+					return nlohmann::json({});
+				}
+			}
+		);
+
+		webTweens[0] = std::make_unique<tween>(throwWebGrabMinScale().x, throwWebGrabMaxScale().x, static_cast<int>(1000.0f * throwWebGrabTime()), tween::easing::linear);
+		webTweens[1] = std::make_unique<tween>(0.0f, 1.0f, static_cast<int>(1000.0f * throwWebGrabTime()), tween::easing::linear);
+		webTweens[2] = std::make_unique<tween>(throwWebGrabMinScale().z, throwWebGrabMaxScale().z, static_cast<int>(1000.0f * throwWebGrabTime()), tween::easing::linear);
+		webTweenCreated = true;
+	}
+
+	bool Venom::CastFirstConeRaycast(PxScene* scene, XMVECTOR vOrigin, XMVECTOR vTarget, float coneAngleDegrees, int rayCount,
+		Thug*& thug,
+		PxQueryFilterData filterData)
+	{
+		static std::mt19937 gen(1337);
+		std::uniform_real_distribution<float> dis(0.0f, 1.0f);
+
+		// Dirección principal y distancia al destino original
+		PxVec3 origin = ToPxVec3(vOrigin);
+		XMVECTOR vSub = XMVectorSubtract(vTarget, vOrigin);
+
+		XMVECTOR vDist = XMVector3Length(vSub);
+		float maxDistance = XMVectorGetX(vDist);
+		if (maxDistance <= 0.0001f) return false;
+
+		XMVECTOR vDir = XMVectorScale(vSub, 1.0f / maxDistance);
+
+		filterData.flags |= PxQueryFlag::eANY_HIT; // Abortar al primer impacto interno
+
+		// Lambda auxiliar para validar si el actor impactado pertenece a un Thug
+		auto tryGetThug = [&thug](const PxRaycastBuffer& hitBuffer) -> bool
+			{
+				if (!hitBuffer.block.actor || !hitBuffer.block.actor->userData)
+					return false;
+
+				PhysicObject* phO = static_cast<PhysicObject*>(hitBuffer.block.actor->userData);
+				if (phO->renderable.empty())
+					return false;
+
+				RenderableID ren = phO->renderable;
+				auto controllers = ren->controllers();
+				if (!controllers.contains("thug"))
+					return false;
+
+				thug = static_cast<Thug*>(controllers.at("thug").get().get());
+
+				if (!thug->combatEnabled())
+				{
+					thug = nullptr;
+					return false;
+				}
+
+				return true;
+			};
+
+		// ─── 1. RAYO PRIORITARIO DIRECTO AL CENTRO ───
+		PxVec3 pxCenterDir(XMVectorGetX(vDir), XMVectorGetY(vDir), XMVectorGetZ(vDir));
+		PxRaycastBuffer centerHitBuffer;
+		if (scene->raycast(origin, pxCenterDir, maxDistance, centerHitBuffer, PxHitFlag::eDEFAULT, filterData))
+		{
+			if (tryGetThug(centerHitBuffer))
+			{
+				return true; // Impacto directo al centro
+			}
+		}
+
+		// ─── 2. BARRIDO EN CONO (DESVIACIONES ALEATORIAS) ───
+		// Matriz de rotación base desde +Z hacia la dirección del destino
+		XMVECTOR vForward = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+		XMVECTOR dot = XMVector3Dot(vForward, vDir);
+		float dotVal = XMVectorGetX(dot);
+
+		XMVECTOR qRot;
+		if (dotVal > 0.9999f)       qRot = XMQuaternionIdentity();
+		else if (dotVal < -0.9999f) qRot = XMQuaternionRotationAxis(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), XM_PI);
+		else                        qRot = XMQuaternionRotationAxis(XMVector3Cross(vForward, vDir), std::acos(dotVal));
+
+		float maxAngleRad = XMConvertToRadians(coneAngleDegrees);
+
+		for (int i = 0; i < rayCount; ++i)
+		{
+			// Generar desviación en coordenadas esféricas locales
+			float theta = 2.0f * XM_PI * dis(gen);
+			float phi = std::acos(1.0f - dis(gen) * (1.0f - std::cos(maxAngleRad)));
+
+			float sinPhi = std::sin(phi);
+			XMVECTOR vLocalDir = XMVectorSet(sinPhi * std::cos(theta), sinPhi * std::sin(theta), std::cos(phi), 0.0f);
+
+			// Rotar al espacio del mundo
+			XMVECTOR vFinalDir = XMVector3Normalize(XMVector3Rotate(vLocalDir, qRot));
+			PxVec3 pxDir(XMVectorGetX(vFinalDir), XMVectorGetY(vFinalDir), XMVectorGetZ(vFinalDir));
+
+			// Lanzar Raycast desviado
+			PxRaycastBuffer hitBuffer;
+			if (scene->raycast(origin, pxDir, maxDistance, hitBuffer, PxHitFlag::eDEFAULT, filterData))
+			{
+				if (tryGetThug(hitBuffer))
+				{
+					return true; // Impacto en la zona del cono
+				}
+			}
+		}
+
+		return false; // Ningún rayo (centro o cono) detectó un Thug válido
 	}
 }
 

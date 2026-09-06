@@ -8,6 +8,7 @@ namespace Game
 	namespace Brawler
 	{
 		struct BrawlerCamera;
+		struct Thug;
 
 		enum VenomStates
 		{
@@ -30,6 +31,7 @@ namespace Game
 			VS_Death,
 			VS_WallToSwing,
 			VS_Swing,
+			VS_WebGrab,
 		};
 
 		inline static std::unordered_map<std::string, VenomStates> stringToVenomStates =
@@ -229,7 +231,7 @@ namespace Game
 			void EnterJumpDash();
 			void JumpDash();
 
-			//
+			//GrabWall
 			bool ShouldGrabWall();
 			void EnterGrabWall();
 
@@ -271,6 +273,21 @@ namespace Game
 			bool ShouldFallFromSwing();
 			bool ShouldContinueSwinging();
 
+			//WebGrab
+			bool ShouldWebGrab();
+			void EnterWebGrab();
+			void WebGrab();
+			void LeaveWebGrab();
+			void ThrowWebForGrabbing();
+			bool CastFirstConeRaycast(
+				PxScene* scene,
+				XMVECTOR vOrigin, XMVECTOR vTarget,
+				float coneAngleDegrees,
+				int rayCount,
+				Thug*& thug,
+				PxQueryFilterData filterData = PxQueryFilterData(PxQueryFlag::eSTATIC | PxQueryFlag::eDYNAMIC)
+			);
+
 			//State machine
 			GameStatesMachine<VenomStates> vsm;
 
@@ -281,8 +298,6 @@ namespace Game
 			//SceneObjects
 			RenderableID web;
 			XMVECTOR posDelta;
-
-			//CameraID camera;
 			PhysicSceneID physicScene;
 			PhysicObjectID physicObject;
 
@@ -317,6 +332,13 @@ namespace Game
 			std::unique_ptr<tween> swingTimeTween;
 			float distanceToSwing;
 			bool continueSwinging;
+
+			//GrabWeb
+			bool webGrabForward;
+			XMVECTOR webGrabBonePos;
+			float webGrabLastSclY;
+			Thug* grabbedThug;
+			XMVECTOR grabbedThugInitialPos;
 		};
 	};
 };
