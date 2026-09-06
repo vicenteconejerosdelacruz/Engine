@@ -59,6 +59,11 @@ inline XMVECTOR ToXMVECTOR(nlohmann::json xmf4)
 	return { xmf4.at(0), xmf4.at(1), xmf4.at(2), xmf4.at(3) };
 }
 
+inline XMVECTOR ToXMVECTOR(PxVec3 v)
+{
+	return { v.x, v.y, v.z, 0.0f };
+}
+
 inline nlohmann::json FromXMVECTOR(XMVECTOR xmf4)
 {
 	return nlohmann::json::array({ xmf4.m128_f32[0], xmf4.m128_f32[1], xmf4.m128_f32[2], xmf4.m128_f32[3] });
