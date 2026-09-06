@@ -36,6 +36,9 @@ namespace Editor
 	extern void DeleteSceneUnitBillboards(SceneUnitId id);
 	extern void DeleteSceneUnitEditorIndependentCamera(SceneUnitId id);
 	extern std::string GetLevelString(SceneUnitId id);
+	extern void SelectRenderable(RenderableID renderable);
+	extern void SelectTrigger(TriggerID trigger);
+	extern void SelectBoundary(BoundaryID boundary);
 };
 #endif
 
@@ -660,8 +663,6 @@ namespace Scene
 					RenderableID ren = MAKESUUUID(id, avatarUUID);
 					ren->BindToScene();
 					ren->renderReady = true;
-					//SceneObject* so = GetSceneObjectPointer(id, avatarUUID);
-					//so->BindToScene();
 				}
 			};
 
@@ -1567,24 +1568,134 @@ namespace Scene
 #endif
 
 		JUUID uuid = getUUID();
-		nlohmann::json patch = { {"uuid", uuid } };
-		json.merge_patch(patch);
-		nlohmann::json data = {
-			{ SceneObjectTypeJsonContainer.at(so), { json } }
+		nlohmann::json patch = {
+			{"uuid", uuid },
+			{ "cameras", nlohmann::json::array({ *GetSwapChainCameras(id).begin() }) }
 		};
+		json.merge_patch(patch);
 
-		AttachLevelIntoScene(id, "new-scene-object", data, [=](SceneUnitId)
+		nlohmann::json data = json;
+		SceneObjectType type = so;
+
+		auto createAvatars = [&]
 			{
-#if defined(_EDITOR)
-				if (so == SO_Renderables)
+				std::set<SceneObjectType> physicAbleTypes = { SO_Renderables, SO_Triggers, SO_Boundaries };
+				if (!physicAbleTypes.contains(type))
+					return;
+
+				std::string level = Editor::GetLevelString(id);
+				nlohmann::json level_data = nlohmann::json::parse(level);
+				nlohmann::json jdata;
+				if (level_data.contains(SceneObjectTypeJsonContainer.at(SO_Cameras)))
 				{
-					BindRenderableToPickingPass(MAKESUUUID(id, uuid));
+					jdata[SceneObjectTypeJsonContainer.at(SO_Cameras)] = level_data[SceneObjectTypeJsonContainer.at(SO_Cameras)];
 				}
-				MarkSceneUnitAsModified(id);
-				MarkScenePanelAssetsAsDirty();
+				jdata[SceneObjectTypeJsonContainer.at(type)] = nlohmann::json::array();
+				jdata[SceneObjectTypeJsonContainer.at(type)].push_back(data);
+				AttachPhysicsAvatars(id, jdata);
+
+				for (unsigned int i = 0; i < jdata.at(SceneObjectTypeJsonContainer.at(SO_Renderables)).size(); i++)
+				{
+					nlohmann::json& obj = jdata.at(SceneObjectTypeJsonContainer.at(SO_Renderables)).at(i);
+					if (obj.at("uuid") == uuid)
+						continue;
+
+					CreateRenderable(id, obj);
+					JUUID avatarUUID = obj.at("uuid");
+					RenderableID ren = MAKESUUUID(id, avatarUUID);
+					ren->BindToScene();
+					ren->renderReady = true;
+					BindRenderableToPickingPass(MAKESUUUID(id, avatarUUID));
+					switch (type)
+					{
+					case SO_Renderables:
+					{
+						ren->OnPick = [=] { Editor::SelectRenderable(MAKESUUUID(id, uuid)); };
+					}
+					break;
+					case SO_Triggers:
+					{
+						ren->OnPick = [=] { Editor::SelectTrigger(MAKESUUUID(id, uuid)); };
+					}
+					break;
+					case SO_Boundaries:
+					{
+						ren->OnPick = [=] { Editor::SelectBoundary(MAKESUUUID(id, uuid)); };
+					}
+					break;
+					default:break;
+					}
+				}
+			};
+
+		switch (type)
+		{
+		case SO_Cameras:
+		{
+			CreateCamera(id, data);
+		}
+		break;
+		case SO_Lights:
+		{
+			CreateLight(id, data);
+		}
+		break;
+		case SO_Renderables:
+		{
+			CreateRenderable(id, data);
+		}
+		break;
+		case SO_SoundEffects:
+		{
+			CreateSoundFX(id, data);
+		}
+		break;
+		case SO_PhysicScenes:
+		{
+			CreatePhysicScene(id, data);
+		}
+		break;
+		case SO_Triggers:
+		{
+			CreateTrigger(id, data);
+			TriggerID t = MAKESUUUID(id, uuid);
+			t->CreatePhysicObject();
+		}
+		break;
+		case SO_Boundaries:
+		{
+			CreateBoundary(id, data);
+			BoundaryID b = MAKESUUUID(id, uuid);
+			b->CreatePhysicObject();
+		}
+		break;
+		case SO_SceneControllers:
+		{
+			CreateSceneController(id, data);
+		}
+		break;
+		}
+		createAvatars();
+
+		CreatePhysicsObjectsBehaviors(id);
+#if defined(_EDITOR)
+
+
+		if (so == SO_Renderables)
+		{
+			BindRenderableToPickingPass(MAKESUUUID(id, uuid));
+		}
+		else if (so == SO_Triggers)
+		{
+
+		}
+		else if (so == SO_Boundaries)
+		{
+
+		}
+
+		MarkSceneUnitAsModified(id);
+		MarkScenePanelAssetsAsDirty();
 #endif
-			},
-			[](std::string, unsigned int, unsigned int) {}
-		);
 	}
 }
