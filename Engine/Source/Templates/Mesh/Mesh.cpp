@@ -76,9 +76,12 @@ namespace Templates {
 
 				cmd.RunPreDeletion([uuid]
 					{
-						auto& mesh = GetMeshInstance(uuid);
-						mesh->vbvData.vertexBufferUpload = nullptr;
-						mesh->ibvData.indexBufferUpload = nullptr;
+						if (MeshInstanceExists(uuid))
+						{
+							auto& mesh = GetMeshInstance(uuid);
+							mesh->vbvData.vertexBufferUpload = nullptr;
+							mesh->ibvData.indexBufferUpload = nullptr;
+						}
 					}
 				);
 
