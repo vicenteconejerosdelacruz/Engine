@@ -152,12 +152,9 @@ namespace Scene
 		{
 			animationTime(0.0f);
 			SetCurrentAnimation(animationSequence(), animationTime(), animationTimeFactor(), animationPlay(), animationLoop());
-			StepAnimation(0.0f); //take an empty T-Pose step so the skinning can be performed
-			if (animationStepLock->load() == false)
-			{
-				animationStepLock->store(true);
-				animationStepLock->notify_one();
-			}
+
+			// StepAnimation ya gestiona la espera y la señalización correctamente
+			StepAnimation(0.0f);
 		}
 
 		updateRotationQ();
@@ -1304,32 +1301,38 @@ namespace Scene
 	void Renderable::CreateAnimationThread()
 	{
 		animationThreadAlive = std::make_unique<std::atomic_bool>(true);
+
+		// Guardamos la hebra SIN hacer detach()
 		animationThread = std::thread([](Renderable* r)
 			{
 				auto& scene = GetSceneUnit(r->unit);
 				std::string animationThreadEvent = "CreateAnimationThread:" + r->name() + ":" + r->uuid();
-				while (r->animationThreadAlive->load())
+
+				while (r->animationThreadAlive->load(std::memory_order_relaxed))
 				{
 					using namespace Animation;
 
-					if (r->animationStepLock->load() == false)
-						r->animationStepLock->wait(false);
+					// Espera activa/suspendida MIENTRAS sea false (esperando trabajo)
+					while (!r->animationStepLock->load(std::memory_order_acquire) &&
+						r->animationThreadAlive->load(std::memory_order_relaxed))
+					{
+						r->animationStepLock->wait(false, std::memory_order_relaxed);
+					}
 
-					if (!r->animationThreadAlive->load()) break;
+					if (!r->animationThreadAlive->load(std::memory_order_relaxed))
+						break;
 
 					auto& animations = r->animable->animations;
-
 #if defined(_DEVELOPMENT)
 					PIXScopedEvent(0, nostd::StringToWString(animationThreadEvent).c_str());
 #endif
 					TraverseMultiplycationQueue(r->animationTime(), r->animation(), animations, r->bonesTransformation, r->sequenceBoneTransformations, r->globalNodeTransforms);
 
-					r->animationStepLock->store(false);
-					r->animationStepLock->notify_one();
+					// Tarea completada: volvemos a false y notificamos a los consumidores
+					r->animationStepLock->store(false, std::memory_order_release);
+					r->animationStepLock->notify_all(); // notify_all en caso de que SequencePlayer y el hilo principal esperen
 				}
-			}
-		, this);
-		animationThread.detach();
+			}, this);
 	}
 
 	void Renderable::StepAnimation(double elapsedSeconds)
@@ -1342,10 +1345,14 @@ namespace Scene
 		forceAnimation = false;
 		lastAnimationTime = animationTime();
 
-		if (animationStepLock->load() == true)
-			animationStepLock->wait(true);
+		// Esperar a que el hilo de animación termine cualquier frame previo (debe ser false)
+		while (animationStepLock->load(std::memory_order_acquire))
+		{
+			animationStepLock->wait(true, std::memory_order_relaxed);
+		}
 
-		animationStepLock->store(true);
+		// Activar la señal de procesamiento (true)
+		animationStepLock->store(true, std::memory_order_release);
 		animationStepLock->notify_one();
 	}
 
@@ -1378,9 +1385,14 @@ namespace Scene
 
 		if (animationThreadAlive)
 		{
-			animationThreadAlive->store(false);
-			animationStepLock->store(true);
-			animationStepLock->notify_one();
+			// 1. Notificar apagado
+			animationThreadAlive->store(false, std::memory_order_release);
+
+			// 2. Despertar al hilo si estaba dormido
+			animationStepLock->store(true, std::memory_order_release);
+			animationStepLock->notify_all();
+
+			// 3. Esperar la terminación de forma segura
 			if (animationThread.joinable())
 			{
 				animationThread.join();

@@ -387,8 +387,14 @@ void SequencePlayer::ApplyFrameValues()
 		renderable->animationTime(animation->GetTimeAtFrame(currentFrame));
 	}
 
-	if (renderable->animationStepLock && renderable->animationStepLock->load())
-		renderable->animationStepLock->wait(false);
+	// Esperar a que la animación termine de procesarse si está corriendo (esperar a que vuelva a false)
+	if (renderable->animationStepLock)
+	{
+		while (renderable->animationStepLock->load(std::memory_order_acquire))
+		{
+			renderable->animationStepLock->wait(true, std::memory_order_relaxed);
+		}
+	}
 
 	renderable->animationTransformation = sequence.GetTransformationAtFrame(currentFrame);
 	renderable->sequenceBoneTransformations = sequence.GetBonesTransformations(currentFrame);
