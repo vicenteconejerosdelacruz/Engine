@@ -150,7 +150,9 @@ namespace Scene
 	{
 		if (!physicObject.empty())
 		{
-			GetPhysicObject(physicObject())->markedForDelete = true;
+			physicObject->actor->userData = nullptr;
+			physicObject->shape->userData = nullptr;
+			physicObject->markedForDelete = true;
 		}
 		UnregisterTriggerContactCallback(SUuuid());
 

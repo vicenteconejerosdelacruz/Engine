@@ -1569,11 +1569,9 @@ namespace Scene
 		using namespace Editor;
 #endif
 
-		JUUID uuid = getUUID();
-		nlohmann::json patch = {
-			{"uuid", uuid },
-			{ "cameras", nlohmann::json::array({ *GetSwapChainCameras(id).begin() }) }
-		};
+		JUUID uuid = json.contains("uuid") ? JUUID(json.at("uuid")) : getUUID();
+		nlohmann::json cameras = json.contains("cameras") ? json.at("cameras") : nlohmann::json::array({ *GetSwapChainCameras(id).begin() });
+		nlohmann::json patch = { {"uuid", uuid }, { "cameras", cameras } };
 		json.merge_patch(patch);
 
 		nlohmann::json data = json;

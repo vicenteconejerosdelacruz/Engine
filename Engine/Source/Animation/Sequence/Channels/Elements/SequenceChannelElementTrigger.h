@@ -58,5 +58,4 @@ struct SequenceChannelElementTrigger : SequenceChannelElement
 	RenderableID triggerLines;
 #endif
 	TriggerID trigger;
-	std::unique_ptr<std::atomic_bool> triggerBuilt;
 };

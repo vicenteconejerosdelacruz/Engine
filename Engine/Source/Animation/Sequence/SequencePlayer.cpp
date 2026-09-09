@@ -162,23 +162,8 @@ void SequencePlayer::CreateSequenceTriggers()
 	{
 		triggersJ.push_back(t->CreateTriggerJson(renderable, world, nodesTransformation));
 		t->trigger = MAKESUUUID(unit, triggersJ.back().at("uuid"));
-		t->triggerBuilt = std::make_unique<std::atomic_bool>(false);
+		CreateSceneObject(unit, SO_Triggers, triggersJ.back());
 	}
-
-	nlohmann::json data = {
-		{ "triggers", triggersJ }
-	};
-
-	AttachLevelIntoScene(unit, "triggers", data, [=](SceneUnitId)
-		{
-			for (auto* t : triggers)
-			{
-				t->trigger = MAKESUUUID(unit, std::get<1>(t->trigger()));
-				if (t->triggerBuilt)
-					t->triggerBuilt->store(true);
-			}
-		}
-	);
 }
 
 void SequencePlayer::DestroySequenceTriggers()
@@ -186,18 +171,10 @@ void SequencePlayer::DestroySequenceTriggers()
 	auto triggers = sequence.GetTriggerElements();
 	for (auto* t : triggers)
 	{
-		if (!t)
+		if (!t || !t->trigger || !Scene::SceneObjectExists(t->trigger()))
 			continue;
 
-		if (t->triggerBuilt)
-		{
-			//t->triggerBuilt->wait(false);
-			t->triggerBuilt.reset();
-		}
-		if (t->trigger && Scene::SceneObjectExists(t->trigger()))
-		{
-			t->trigger->markedForDelete = true;
-		}
+		t->trigger->markedForDelete = true;
 		t->trigger.clear();
 	}
 }

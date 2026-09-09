@@ -36,8 +36,8 @@ namespace Physics
 			PhysicObject* trigger = (PhysicObject*)current.triggerShape->userData;
 			PhysicObject* other = (PhysicObject*)current.otherActor->userData;
 
-			if (!trigger || !other) continue;
-			if (!trigger->built || !trigger->trigger || trigger->markedForDelete) continue;
+			if (!trigger || trigger->markedForDelete || !other || other->markedForDelete) continue;
+			if (!trigger->built || !trigger->trigger) continue;
 			if (!other->built || !other->renderable || other->renderable->markedForDelete) continue;
 			if (!(trigger->collisionMask() & other->objectMask())) continue;
 

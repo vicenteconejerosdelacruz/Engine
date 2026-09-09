@@ -85,7 +85,7 @@ void SequenceChannelElementTrigger::ApplyFrameTriggerAvatarValues(int frame, Ren
 
 void SequenceChannelElementTrigger::ApplyFrameTriggerValues(int frame, RenderableID renderable)
 {
-	if (trigger.empty() || trigger.unit() == 0ULL || triggerBuilt == nullptr || triggerBuilt->load() == false) return;
+	if (trigger.empty() || trigger.unit() == 0ULL || !SceneObjectExists(trigger())/* || triggerBuilt == nullptr || triggerBuilt->load() == false*/) return;
 	XMMATRIX world = renderable->world();
 	Animation::NodeTransformsMap& nodesTransformation = renderable->globalNodeTransforms;
 	auto [fPos, fRot, tRotQ, fScl] = GetTransformation(world, nodesTransformation);
