@@ -153,6 +153,7 @@ namespace Scene
 			physicObject->actor->userData = nullptr;
 			physicObject->shape->userData = nullptr;
 			physicObject->markedForDelete = true;
+			physicObject->DestroyPhysicsBehavior();
 		}
 		UnregisterTriggerContactCallback(SUuuid());
 
@@ -249,6 +250,9 @@ namespace Scene
 			{
 				if (!t->markedForDelete) return;
 				PhysicObjectID phO = t->physicObject();
+				phO->actor->userData = nullptr;
+				phO->shape->userData = nullptr;
+
 				phO->DestroyPhysicsBehavior();
 #if defined(_EDITOR)
 				phO->DestroyPhysicsAvatar();
