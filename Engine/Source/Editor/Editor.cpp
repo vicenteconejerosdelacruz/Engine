@@ -6,6 +6,10 @@
 #include <IconsFontAwesome5.h>
 #include <ImGuizmo.h>
 #include <Editor.h>
+#include <LoadingProgress.h>
+#include <BillboardRegistry.h>
+#include <GizmoInteraction.h>
+#include <PhysicsDrawState.h>
 #include <Renderer.h>
 #include <DeviceUtils/CommandsProcessor/CommandsProcessor.h>
 #include <DeviceUtils/RenderPass/SwapChainPass.h>
@@ -49,107 +53,6 @@ static std::mutex levelLoadMutex;
 static const float sequencerAdjustment = 8.0f;
 
 using namespace DeviceUtils;
-
-struct LoadingProgress
-{
-	LoadingProgress() { Reset(); }
-	void Reset() {
-		loadSceneUnitModal = false;
-		defaultLevel = false;
-		loading = false;
-		levelName = "";
-		asset = "";
-		count = 0U;
-		total = 0U;
-	}
-	void LoadLevel(bool defLevel, std::string name)
-	{
-		asset = "";
-		count = 0U;
-		total = 0U;
-		defaultLevel = defLevel;
-		levelName = name;
-		loading = true;
-		loadSceneUnitModal = true;
-	}
-	bool loadSceneUnitModal = true;
-	bool defaultLevel = false;
-	bool loading = false;
-	std::string levelName;
-	std::string asset;
-	unsigned int count = 0U;
-	unsigned int total = 0U;
-};
-
-struct BillboardRegistry
-{
-	std::map<JUUID, RenderableID> billboardRegistry; //scene object -> renderable billboard
-	std::set<RenderableID> billboardsToDestroy;
-};
-
-struct GizmoInteraction
-{
-	GizmoInteraction()
-	{
-		gizmoOperation = ImGuizmo::TRANSLATE;
-		gizmoMode = ImGuizmo::WORLD;
-		gizmoCentroidMx = XMFLOAT4X4();
-		gizmoApplyOp = false;
-		soRotation = std::map<SceneObject*, XMFLOAT3>();
-		soScale = std::map<SceneObject*, XMFLOAT3>();
-		so2bb = std::map<SceneObject*, XMFLOAT3>();
-		bb2gizmo = std::map<SceneObject*, XMFLOAT3>();
-		gizmoRotation = XMFLOAT3();
-		gizmoPosition = XMFLOAT3();
-		gizmoScale = XMFLOAT3();
-	}
-
-	ImGuizmo::OPERATION gizmoOperation;//(ImGuizmo::TRANSLATE);
-	ImGuizmo::MODE gizmoMode;// (ImGuizmo::WORLD);
-	XMFLOAT4X4 gizmoCentroidMx;
-	bool gizmoApplyOp;// = false;
-	std::map<SceneObject*, XMFLOAT3> soRotation;
-	std::map<SceneObject*, XMFLOAT3> soScale;
-	std::map<SceneObject*, XMFLOAT3> so2bb;
-	std::map<SceneObject*, XMFLOAT3> bb2gizmo;
-	XMFLOAT3 gizmoRotation;
-	XMFLOAT3 gizmoPosition;
-	XMFLOAT3 gizmoScale;
-};
-
-struct PhysicsDrawState
-{
-	PhysicsDrawState()
-	{
-		draw = true;
-		drawPlayState = true;
-	}
-
-	void PlayMode()
-	{
-		drawPlayState = draw;
-		draw = false;
-	}
-
-	void EditorMode()
-	{
-		draw = drawPlayState;
-	}
-
-	void SwitchDraw()
-	{
-		bool value = !draw;
-		draw = value;
-		for (auto phO : levelPhysicObjects)
-		{
-			phO->visible(value);
-		}
-	}
-
-	bool draw;
-	bool drawPlayState;
-	std::set<PhysicObjectID> levelPhysicObjects;
-};
 
 namespace Editor
 {
@@ -611,6 +514,29 @@ namespace Editor
 				}
 			);
 		}
+	}
+
+	void LoadGameLevel(std::string levelName, std::function<void(SceneUnitId id)> onLevelLoaded, std::function<void(std::string asset, unsigned int count, unsigned int total)> onProgress)
+	{
+		using namespace Scene::Level;
+
+		workbenchSelectedLevel = levelName;
+		loadingProgress.LoadLevel(false, workbenchSelectedLevel);
+		loadingProgress.loadSceneUnitModal = false;
+		LoadLevelIntoSceneUnit(workbenchSelectedLevel, []() { return GetLevelFromFile(workbenchSelectedLevel); },
+			[=](SceneUnitId id)
+			{
+				OnLevelLoaded(id);
+				isPlaying.insert_or_assign(id, true);
+				isPaused.insert_or_assign(id, true);
+				onLevelLoaded(id);
+			},
+			[=](std::string asset, unsigned int count, unsigned int total)
+			{
+				LevelLoadingProgress(asset, count, total);
+				onProgress(asset, count, total);
+			}
+		);
 	}
 
 	void QuitEditor()
@@ -3337,6 +3263,7 @@ namespace Editor
 		Physics::RemoveFromSimulatingScenes(id);
 		StopSounds(id);
 		ShowBillboards(id);
+		renderer->Flush();
 
 		for (auto& [uuid, patch] : toReplacePhysicObject)
 		{

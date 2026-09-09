@@ -1,0 +1,8 @@
+JCLASS(BrawlerMenu, _)
+JEXPOSE(std::string, menuUI, "", jedv_t_te_htmlui, 1, false)
+JEXPOSE(JUUID, menuUIInstance, "", jedv_t_hidden, 0, false)
+JEXPOSE(bool, gamepadStatusSet, false, jedv_t_hidden, 0, false)
+JEXPOSE(bool, gameStateSet, false, jedv_t_hidden, 0, false)
+JEXPOSE(bool, loadingStateSet, true, jedv_t_hidden, 0, false)
+JEXPOSE(bool, loadingProgressSet, true, jedv_t_hidden, 0, false)
+JEXPOSE(int, loadingProgressValue, 0, jedv_t_hidden, 0, false)

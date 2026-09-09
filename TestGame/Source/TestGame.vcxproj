@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -521,6 +521,7 @@
     <ClInclude Include="GameControllers\Brawler\Characters\BrawlerCharacter.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\Heroes\Hero.h" />
     <ClInclude Include="GameControllers\Brawler\Dialogs\BrawlerDialog.h" />
+    <ClInclude Include="GameControllers\Brawler\Menus\BrawlerMenuAtt.h" />
     <ClInclude Include="GameControllers\Brawler\Rounds\BrawlerRound.h" />
     <ClInclude Include="GameControllers\Brawler\Scene\BrawlerScene.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\Enemies\Thug.h" />
@@ -531,6 +532,7 @@
     <ClInclude Include="GameControllers\Test\SpinYaw.h" />
     <ClInclude Include="GameControllers\ThirdPerson\ThirdPersonCharacter.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\Heroes\Venom.h" />
+    <ClInclude Include="GameControllers\Brawler\Menus\BrawlerMenu.h" />
     <ClInclude Include="GamePhysics\GamePhysics.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\BrawlerCharacterAtt.h" />
     <ClInclude Include="GameControllers\Brawler\Camera\BrawlerCameraAtt.h" />
@@ -552,6 +554,7 @@
     <ClCompile Include="GameControllers\Brawler\Characters\Bosses\PumpkinBomb.cpp" />
     <ClCompile Include="GameControllers\Brawler\Characters\BrawlerCharacter.cpp" />
     <ClCompile Include="GameControllers\Brawler\Characters\Heroes\Hero.cpp" />
+    <ClCompile Include="GameControllers\Brawler\Menus\BrawlerMenu.cpp" />
     <ClCompile Include="GameControllers\Brawler\Scene\BrawlerScene.cpp" />
     <ClCompile Include="GameControllers\Brawler\Characters\Enemies\Thug.cpp" />
     <ClCompile Include="GameControllers\Effects\AnimatedDecal.cpp" />

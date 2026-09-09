@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { StartScreen } from './components/StartScreen/StartScreen';
+import { LoadingScreen } from './components/LoadingScreen/LoadingScreen';
 import { EnemyHud } from './components/Huds/EnemyHud/EnemyHud';
 import { HeroHud } from './components/Huds/HeroHud/HeroHud';
 import { LeftArrow } from './components/Signs/LeftArrow';
@@ -9,7 +11,8 @@ import { GameOver } from './components/GameOver/GameOver';
 import './App.css';
 
 function App() {
-  const [gameState, setGameState] = useState('playing'); // 'menu', 'playing', 'paused', 'gameover', 'levelcomplete', 'gameover'
+  const [gameState, setGameState] = useState(''); // 'menu', 'loading', 'playing', 'paused', 'gameover', 'levelcomplete', 'gameover'
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
   const [lives, setLives] = useState(3);
@@ -25,9 +28,6 @@ function App() {
     active: false,
     text: '',
     speaker: { name: '', picture: '' },
-    //active: true,
-    //text: 'You have entered the lair of the Green Goblin! Prepare to face your doom, foolish intruder!',
-    //speaker: { name: 'Green Goblin', picture: 'green-goblin-front' }
   });
 
   useEffect(() => {
@@ -42,6 +42,16 @@ function App() {
       if (e.detail.type === 'SCORE_UPDATE') { setScore(e.detail.value); setHero(prev => ({ ...prev, score: e.detail.value })); }
       if (e.detail.type === 'ARROW_LEFT') setArrows(prev => ({ ...prev, left: e.detail.value }));
       if (e.detail.type === 'ARROW_RIGHT') setArrows(prev => ({ ...prev, right: e.detail.value }));
+      if (e.detail.type === 'MAIN_MENU') {
+        setGameState('menu');
+      }
+      if (e.detail.type === 'LOADING_SCREEN') {
+        setGameState('loading');
+        setLoadingProgress(0);
+      }
+      if (e.detail.type === 'LOADING_PROGRESS') {
+        setLoadingProgress(e.detail.value);
+      }
       if (e.detail.type === 'LEVEL_START') {
         setGameState('playing');
       }
@@ -81,7 +91,24 @@ function App() {
     }
   }, []);
 
-  if (gameState === 'playing') {
+  if (gameState === 'menu') {
+    return (
+      <div className="app-container">
+        <StartScreen isGamepad={isGamepad} onStart={() => setGameState('playing')} />
+      </div>
+    );
+  }
+  else if (gameState === 'loading') {
+    return (
+      <div className="app-container">
+        <LoadingScreen
+          progress={loadingProgress}
+          isGamepad={isGamepad}
+        />
+      </div>
+    );
+  }
+  else if (gameState === 'playing') {
     return (
       <div className="hud-layer">
           <HeroHud hero={true} picture={hero.img} title={hero.score} hp={hero.hp} maxHp={hero.maxHp} lives={lives} />

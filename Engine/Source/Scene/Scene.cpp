@@ -127,6 +127,7 @@ namespace Scene
 					Scripting::CreateScriptingSceneTemplate(id);
 					levelLoaded(id);
 				}
+				scene->BeingCreated(false);
 			}, filename, data, levelLoaded, progress
 		);
 		levelThread.detach();
@@ -161,6 +162,7 @@ namespace Scene
 					Scripting::CreateScriptingSceneTemplate(id);
 					levelLoaded(id);
 				}
+				scene->BeingCreated(false);
 			}, filename, data, levelLoaded, progress
 		);
 		levelThread.detach();
@@ -760,7 +762,7 @@ namespace Scene
 	{
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->MarkedForDelete()) continue;
+			if (scene->MarkedForDelete() || scene->BeingCreated()) continue;
 			float dt = static_cast<FLOAT>(timer.GetElapsedSeconds());
 #if defined(_EDITOR)
 			if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
@@ -775,7 +777,7 @@ namespace Scene
 	{
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->MarkedForDelete()) continue;
+			if (scene->MarkedForDelete() || scene->BeingCreated()) continue;
 			float dt = static_cast<FLOAT>(timer.GetElapsedSeconds());
 #if defined(_EDITOR)
 			if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))

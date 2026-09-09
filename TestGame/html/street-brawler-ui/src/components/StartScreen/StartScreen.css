@@ -1,0 +1,121 @@
+/* Contenedor principal a pantalla completa */
+.start-screen-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at center, #1a0a0a 0%, #000000 80%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 100;
+}
+
+/* Fondo de la araña (oscura e inmersiva) */
+.start-spider-background {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vmin; /* Se adapta al tamaño de la pantalla */
+  height: 90vmin;
+  opacity: 0.6;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.spider-pulse {
+  transform-origin: center;
+  animation: bgPulse 4s ease-in-out infinite;
+}
+
+/* Contenido (Títulos y Botones) por encima de la araña */
+.start-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 60px;
+}
+
+/* Título del juego */
+.start-title {
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-size: 64px;
+  color: #ffffff;
+  text-align: center;
+  margin: 0;
+  line-height: 1.3;
+  text-shadow: 
+    4px 4px 0px #ed1d24,
+    8px 8px 0px #800000,
+    0 0 20px rgba(237, 29, 36, 0.5);
+  animation: floatTitle 3s ease-in-out infinite;
+}
+
+/* Contenedor del aviso de "Press to Start" */
+.start-prompt {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  animation: textBlink 1.5s step-end infinite;
+}
+
+.start-text {
+  font-family: 'Press Start 2P', monospace;
+  color: #ffffff;
+  font-size: 16px;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 0px #000;
+}
+
+/* --- ANIMACIONES --- */
+@keyframes bgPulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 0.4; }
+}
+
+@keyframes floatTitle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes textBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* --- CLASES DE BOTONES (Si no las tienes globales en tu index.css) --- */
+.btn-a {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ff4d4d, #ed1d24 60%, #990000);
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(237, 29, 36, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+}
+
+.btn-enter {
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 6px;
+  background: radial-gradient(circle at 50% 30%, #ff4d4d, #ed1d24 60%, #990000);
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(237, 29, 36, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.6), 0 3px 0 #7a0000;
+}

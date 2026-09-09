@@ -7,6 +7,7 @@
 #include "Brawler/Characters/Enemies/Thug.h"
 #include "Brawler/Characters/Bosses/GreenGoblin.h"
 #include "Brawler/Characters/Bosses/PumpkinBomb.h"
+#include "Brawler/Menus/BrawlerMenu.h"
 #include "Effects/AnimatedDecal.h"
 #include "Effects/DelayedDeletion.h"
 
@@ -23,6 +24,7 @@ namespace Game
 		{ "thirdperson-character", [](nlohmann::json& json) { return std::make_unique<ThirdPersonCharacter>(json); }},
 		{ "brawler-scene", [](nlohmann::json& json) { return std::make_unique<BrawlerScene>(json); }},
 		{ "brawler-cam", [](nlohmann::json& json) { return std::make_unique<BrawlerCamera>(json); }},
+		{ "brawler-menu", [](nlohmann::json& json) { return std::make_unique<BrawlerMenu>(json); }},
 		{ "venom", [](nlohmann::json& json) { return std::make_unique<Venom>(json); }},
 		{ "thug", [](nlohmann::json& json) { return std::make_unique<Thug>(json); }},
 		{ "greengoblin", [](nlohmann::json& json) { return std::make_unique<GreenGoblin>(json); }},
@@ -50,6 +52,7 @@ namespace Game
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, ThirdPersonCharacter::GetClassName(), ThirdPersonCharacter::RegisterScript);
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, BrawlerScene::GetClassName(), BrawlerScene::RegisterScript);
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, BrawlerCamera::GetClassName(), BrawlerCamera::RegisterScript);
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, BrawlerMenu::GetClassName(), BrawlerMenu::RegisterScript);
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, Venom::GetClassName(), Venom::RegisterScript);
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, Thug::GetClassName(), Thug::RegisterScript);
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, GreenGoblin::GetClassName(), GreenGoblin::RegisterScript);

@@ -24,6 +24,8 @@ namespace Scene
 		SceneUnitId Id();
 		void MarkForDelete(std::function<void()> cb = nullptr);
 		bool MarkedForDelete();
+		bool BeingCreated();
+		void BeingCreated(bool value) { beingCreated = value; };
 		unsigned int DeleteFrames();
 		void DecreaseDeleteFrames();
 		void CallDeleteCallback();
@@ -86,6 +88,7 @@ namespace Scene
 		SceneUnitId id;
 		std::string unitName;
 		bool markedForDelete;
+		bool beingCreated;
 		unsigned int deleteFrames = JRenderer::numFrames;
 		std::function<void()> deleteCallback;
 		bool isolated;

@@ -702,6 +702,18 @@
     <ClInclude Include="Utils\Yaml2Json.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Editor\LoadingProgress.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\BillboardRegistry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\GizmoInteraction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\PhysicsDrawState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">

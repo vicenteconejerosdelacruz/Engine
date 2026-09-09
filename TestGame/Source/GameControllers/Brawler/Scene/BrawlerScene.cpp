@@ -79,6 +79,7 @@ namespace Game::Brawler
 		lastAttackerMaxHealth(100);
 		lastAttackerName("");
 		heroScore(0);
+		playingUISet(true);
 		dialogOpen = false;
 		gameState = BGS_Playing;
 	}
@@ -223,6 +224,7 @@ namespace Game::Brawler
 		HtmlUIInstanceID instance = venomUIInstance();
 		instance->MapBridgeCallback("REACT_READY", [&]
 			{
+				playingUISet(false);
 				gamepadStatusSet(false);
 			}
 		);
@@ -230,6 +232,7 @@ namespace Game::Brawler
 
 	void BrawlerScene::UpdateVenomUI(SceneUnitId id)
 	{
+		UpdatePlayingUI();
 		UpdateGamepad();
 		UpdateHeroHealthUI();
 		UpdateEnemyUI();
@@ -270,6 +273,17 @@ namespace Game::Brawler
 		);
 		HtmlUIInstanceID instance = venomUIInstance();
 		instance->EvaluateScript(js);
+	}
+
+	void BrawlerScene::UpdatePlayingUI()
+	{
+		if (!playingUISet())
+		{
+			std::string js = BuildEvalScript("LEVEL_START", {});
+			HtmlUIInstanceID instance = venomUIInstance();
+			instance->EvaluateScript(js);
+			playingUISet(true);
+		}
 	}
 
 	void BrawlerScene::UpdateGamepad()

@@ -74,6 +74,10 @@ namespace Editor {
 	void LevelLoadingProgress(std::string asset, unsigned int count, unsigned int total);
 	void OnLevelLoaded(SceneUnitId id);
 	void CloseScene(SceneUnitId id, std::function<void()> onCloseScene = [] {});
+	void LoadGameLevel(std::string levelName,
+		std::function<void(SceneUnitId id)> onLevelLoaded,
+		std::function<void(std::string asset, unsigned int count, unsigned int total)> onProgress
+	);
 	void QuitEditor();
 	void ImGuiImplRenderInit();
 	void SetupImGuiStyle();

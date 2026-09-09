@@ -1,0 +1,169 @@
+.spider-loading-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at center, #120505 0%, #000000 85%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.spider-loading-container.ready {
+  cursor: pointer;
+}
+
+/* Telaraña de fondo */
+.spider-loading-web-bg {
+  position: absolute;
+  width: 100vmin;
+  height: 100vmin;
+  pointer-events: none;
+  animation: rotateWeb 60s linear infinite;
+}
+
+/* Contenedor central */
+.spider-loading-content {
+  position: relative;
+  z-index: 2;
+  width: 80%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+}
+
+/* Título e Info del Nivel */
+.spider-loading-header {
+  text-align: center;
+}
+
+.spider-loading-subtitle {
+  font-family: 'Press Start 2P', monospace;
+  color: #ed1d24;
+  font-size: 12px;
+  letter-spacing: 2px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.spider-loading-title {
+  font-family: 'Press Start 2P', monospace;
+  color: #ffffff;
+  font-size: 28px;
+  margin: 0;
+  text-shadow: 3px 3px 0 #990000, 0 0 15px rgba(237, 29, 36, 0.4);
+}
+
+/* Barra de progreso */
+.spider-loading-bar-section {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.spider-loading-bar-bg {
+  flex: 1;
+  height: 20px;
+  background-color: rgba(20, 20, 20, 0.9);
+  border: 2px solid #ed1d24;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 10px rgba(237, 29, 36, 0.3);
+}
+
+.spider-loading-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #990000, #ed1d24, #ff4d4d);
+  transition: width 0.15s ease-out;
+  position: relative;
+}
+
+.spider-bar-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.spider-loading-percentage {
+  font-family: 'Press Start 2P', monospace;
+  color: #ffffff;
+  font-size: 14px;
+  min-width: 50px;
+  text-align: right;
+}
+
+/* Tarjeta de Consejos */
+.spider-tip-card {
+  position: relative;
+  background: rgba(15, 15, 20, 0.85);
+  border: 1px solid rgba(237, 29, 36, 0.5);
+  border-radius: 8px;
+  padding: 16px 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.spider-tip-badge {
+  position: absolute;
+  top: -10px;
+  left: 16px;
+  background: #ed1d24;
+  color: #ffffff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.spider-tip-text {
+  color: #dddddd;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 15px;
+  margin: 4px 0 0 0;
+  line-height: 1.4;
+}
+
+/* Prompt de Inicio (Listo) */
+.spider-loading-prompt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.spider-loading-prompt.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  animation: pulsePrompt 1.5s ease-in-out infinite;
+}
+
+.prompt-text {
+  font-family: 'Press Start 2P', monospace;
+  color: #ffffff;
+  font-size: 12px;
+}
+
+/* Animaciones */
+@keyframes rotateWeb {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulsePrompt {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
