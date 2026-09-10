@@ -142,6 +142,7 @@ function App() {
           score={score} 
           onRetry={() => setGameState('playing')} 
           onExit={() => setGameState('menu')} 
+          isGamepad={isGamepad}
         />
     )
   }

@@ -4,6 +4,7 @@ import './GameOver.css'; // Agregamos ajustes específicos para Game Over
 
 export const GameOver = ({ 
   score = 0, 
+  isGamepad = true, // Prop para alternar entre Mando (A) y Teclado (ENTER)
   onRetry,
   onExit 
 }) => {
@@ -110,22 +111,18 @@ export const GameOver = ({
           <div className="spider-card-top-glow game-over-top-glow"></div>
           <div className="spider-score-label">FINAL SCORE</div>
           <div className="spider-score-number">{score.toLocaleString()}</div>
-          {/*
-          <div className="spider-progress-bar">
-            <div className="spider-progress-fill game-over-progress"></div>
-          </div>
-          <div className="spider-score-meta">
-            <span>NO LIVES REMAINING</span>
-            <span className="text-failed">TRY AGAIN</span>
-          </div>
-          */}
+
         </div>
       </div>
 
-      {/* BOTÓN DE RETRY/REINTENTAR CON 'A' EN LA ESQUINA INFERIOR DERECHA */}
+      {/* BOTÓN DE RETRY/REINTENTAR EN LA ESQUINA INFERIOR DERECHA */}
       <div className="spider-continue-prompt game-over-prompt" onClick={onRetry}>
         <span className="continue-text">TRY AGAIN</span>
-        <div className="arcade-btn-a game-over-btn-a">A</div>
+        {isGamepad ? (
+          <div className="arcade-btn-a game-over-btn-a">A</div>
+        ) : (
+          <div className="btn-enter game-over-btn-enter">ENTER</div>
+        )}
       </div>
 
     </div>

@@ -95,3 +95,9 @@
   94% { transform: translate(2px, -1px); }
   96% { transform: translate(-1px, -1px); }
 }
+
+.game-over-btn-enter {
+  background: radial-gradient(circle at 50% 30%, #8b0000, #4a0000 60%, #1a0000);
+  border-color: #ff4d4d;
+  box-shadow: 0 0 10px rgba(139, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3), 0 3px 0 #3a0000;
+}
