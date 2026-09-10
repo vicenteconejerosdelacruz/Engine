@@ -28,7 +28,8 @@ namespace Game
 		{
 			BGS_Playing,
 			BGS_LevelComplete,
-			BGS_GameOver
+			BGS_GameOver,
+			BGS_Destroying
 		};
 
 		struct BrawlerScene : Controller
@@ -114,6 +115,10 @@ namespace Game
 			bool IsDialogOpen();
 			void ProcessDialogInput();
 			void GotoNextDialogLine();
+
+			//Main Menu
+			void ProcessMainMenuInput();
+			void GotoMainMenu();
 
 			//GameState
 			GameState gameState = BGS_Playing;

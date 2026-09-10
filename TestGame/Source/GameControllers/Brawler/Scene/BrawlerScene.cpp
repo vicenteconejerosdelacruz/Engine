@@ -186,6 +186,10 @@ namespace Game::Brawler
 		{
 			ProcessDialogInput();
 		}
+		else if (gameState == BGS_GameOver || gameState == BGS_LevelComplete)
+		{
+			ProcessMainMenuInput();
+		}
 	}
 
 	//Rendering
@@ -436,7 +440,7 @@ namespace Game::Brawler
 
 	bool BrawlerScene::IsLevelComplete() const
 	{
-		return gameState == BGS_LevelComplete;
+		return gameState == BGS_LevelComplete || gameState == BGS_Destroying;
 	}
 
 	void BrawlerScene::GameOver()
@@ -455,7 +459,7 @@ namespace Game::Brawler
 
 	bool BrawlerScene::IsGameOver() const
 	{
-		return gameState == BGS_GameOver;
+		return gameState == BGS_GameOver || gameState == BGS_Destroying;
 	}
 
 	void BrawlerScene::PauseCombat()
@@ -672,7 +676,6 @@ namespace Game::Brawler
 				GotoNextDialogLine();
 			}
 		}
-
 	}
 
 	void BrawlerScene::GotoNextDialogLine()
@@ -686,5 +689,51 @@ namespace Game::Brawler
 		{
 			HideDialog();
 		}
+	}
+
+	void BrawlerScene::ProcessMainMenuInput()
+	{
+		if (gameInteractionMode == GIM_Gamepad)
+		{
+			auto state = gamePad->GetState(0);
+			if (!state.IsConnected())
+				return;
+
+			buttons.Update(state);
+			if (buttons.a == GamePad::ButtonStateTracker::PRESSED)
+			{
+				GotoMainMenu();
+			}
+		}
+		else if (gameInteractionMode == GIM_KeyboardMouse)
+		{
+			auto keys = keyboard->GetState();
+			if (keys.IsKeyDown(Keyboard::Keys::Enter))
+			{
+				GotoMainMenu();
+			}
+		}
+	}
+
+	void BrawlerScene::GotoMainMenu()
+	{
+		gameState = BGS_Destroying;
+#if defined(_EDITOR)
+		Editor::LoadGameLevel("mainmenu.yaml",
+			[&](SceneUnitId id)
+			{
+				EnableSceneUnitRendering(id);
+				RemoveSceneUnitRendering(unit);
+				Editor::SwitchToPlayMode(id);
+				Editor::SwitchToUnPausedMode(id);
+
+				auto& scene = GetSceneUnit(unit);
+				scene->MarkForDelete();
+			},
+			[&](std::string asset, unsigned int count, unsigned int total)
+			{
+			}
+		);
+#endif
 	}
 }
