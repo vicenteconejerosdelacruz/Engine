@@ -88,6 +88,7 @@ namespace Game::Brawler
 				{ VS_Falling, [&](auto* sm, VenomStates prevState) { EnterFalling(); }},
 				{ VS_Death, [&](auto* sm, VenomStates prevState) { EnterDeath(); }},
 				{ VS_WallToSwing, [&](auto* sm, VenomStates prevState) { EnterWallToSwing(); }},
+				{ VS_FloorToSwing, [&](auto* sm, VenomStates prevState) { EnterFloorToSwing(); }},
 				{ VS_Swing, [&](auto* sm, VenomStates prevState) { EnterSwing(); }},
 				{ VS_WebGrab, [&](auto* sm, VenomStates prevState) { EnterWebGrab(); }},
 			},
@@ -96,6 +97,7 @@ namespace Game::Brawler
 				{ VS_CrawlOnWall, [&](auto* sm, VenomStates prevState) { LeaveCrawlOnWall(); }},
 				{ VS_Swing, [&](auto* sm, VenomStates prevState) { LeaveSwing(); }},
 				{ VS_WallToSwing, [&](auto* sm, VenomStates prevState) { LeaveWallToSwing(); }},
+				{ VS_FloorToSwing, [&](auto* sm, VenomStates prevState) { LeaveFloorToSwing(); }},
 				{ VS_WebGrab, [&](auto* sm, VenomStates prevState) { LeaveWebGrab(); }},
 			},
 			.onStep = {
@@ -113,6 +115,7 @@ namespace Game::Brawler
 				{ VS_CrawlOnWall, [&](auto* sm) { CrawlOnWall(); } },
 				{ VS_Falling, [&](auto* sm) { Falling(); }},
 				{ VS_WallToSwing, [&](auto* sm) { WallToSwing(); }},
+				{ VS_FloorToSwing, [&](auto* sm) { FloorToSwing(); }},
 				{ VS_Swing, [&](auto* sm) { Swing(); }},
 				{ VS_WebGrab, [&](auto* sm) { WebGrab(); }},
 			}
@@ -135,6 +138,7 @@ namespace Game::Brawler
 		v8_register_method<Venom>(isolate, tpl, "OnDeathAnimationEnd", script, [](Venom* self) { if (self) self->OnDeathAnimationEnd(); });
 		v8_register_method<Venom>(isolate, tpl, "PlayPunchSound", script, [](Venom* self, int punchIdx, int enemyHealth) { if (self) self->PlayPunchSound(punchIdx, enemyHealth); });
 		v8_register_method<Venom>(isolate, tpl, "ThrowWeb", script, [](Venom* self) { if (self) self->ThrowWeb(); });
+		v8_register_method<Venom>(isolate, tpl, "ThrowFloorWeb", script, [](Venom* self) { if (self) self->ThrowFloorWeb(); });
 		v8_register_method<Venom>(isolate, tpl, "ThrowWebForGrabbing", script, [](Venom* self) { if (self) self->ThrowWebForGrabbing(); });
 	}
 
@@ -260,7 +264,8 @@ namespace Game::Brawler
 		}
 
 		posDelta = XMVectorZero();
-		if (vsm.currentState != VS_Death && vsm.currentState != VS_WebGrab)
+		std::set<VenomStates> nonUpdateStates = { VS_Death, VS_WebGrab, VS_FloorToSwing };
+		if (!nonUpdateStates.contains(vsm.currentState))
 		{
 			XMVECTOR XMpos, XMrot, XMscl;
 			XMMatrixDecompose(&XMscl, &XMrot, &XMpos, renderable->animationTransformation);
@@ -289,13 +294,6 @@ namespace Game::Brawler
 		//skips contacts if the character is in a wall state
 		if (nonFloorStates.contains(vsm.currentState))
 			return;
-		/*
-		BrawlerCamera* brawlerCam = GetBrawlerCamera();
-
-		if ((CM_Floor & fd.word0) && brawlerCam->followY())
-		{
-			brawlerCam->followY(false);
-		}*/
 	}
 
 	//Joystick
@@ -491,6 +489,10 @@ namespace Game::Brawler
 		{
 			vsm.ChangeState(VS_WebGrab);
 		}
+		else if (ShouldFloorToSwing())
+		{
+			vsm.ChangeState(VS_FloorToSwing);
+		}
 	}
 
 	//Walking
@@ -521,6 +523,11 @@ namespace Game::Brawler
 		else if (ShouldWebGrab())
 		{
 			vsm.ChangeState(VS_WebGrab);
+			return;
+		}
+		else if (ShouldFloorToSwing())
+		{
+			vsm.ChangeState(VS_FloorToSwing);
 			return;
 		}
 
@@ -563,6 +570,11 @@ namespace Game::Brawler
 		else if (ShouldWebGrab())
 		{
 			vsm.ChangeState(VS_WebGrab);
+			return;
+		}
+		else if (ShouldFloorToSwing())
+		{
+			vsm.ChangeState(VS_FloorToSwing);
 			return;
 		}
 
@@ -1124,7 +1136,7 @@ namespace Game::Brawler
 
 	void Venom::WallToSwing()
 	{
-		if (webTweenCreated == true && RenderableSceneObjectExist(web))
+		if (!web.empty() && webTweenCreated == true && RenderableSceneObjectExist(web))
 		{
 			float sclx = webTweens[0]->step();
 			float scly = webTweens[1]->step();
@@ -1153,6 +1165,96 @@ namespace Game::Brawler
 		sfx->Play();
 
 		auto [mm, pos, a, b, c] = renderable->GetBoneTransformation(webBone());
+
+		CharacterLookingTo clt = lookingTo();
+		float angle = throwWebAngle() * ((clt == CLT_Left) ? 1.0f : -1.0f);
+
+		XMVECTOR rot = XMQuaternionRotationRollPitchYaw(0.0f, 0.0f, XMConvertToRadians(angle));
+		XMVECTOR up = { 0.0f,1.0f,0.0f,0.0f };
+		webAttachedPos = XMLoadFloat3(&pos) + XMVector3Rotate(up, rot) * throwWebMaxScale().y;
+		distanceToSwing = 2.0f * std::fabsf(XMVectorGetX(webAttachedPos) - pos.x);
+
+		web = MAKESUUUID(unit, getUUID());
+		Scene::CreateSceneObjectFromMold(unit, webMold(),
+			[&](SceneObjectType type, nlohmann::json json, std::string name)
+			{
+				return nlohmann::json(
+					{
+						{ "name", web.uuid() + "_ins"},
+						{ "uuid", web.uuid() },
+						{ "position", FromXMFLOAT3(pos) },
+						{ "cameras", renderable->cameras() },
+						{ "scale", FromXMFLOAT3(throwWebMinScale()) },
+						{ "rotation", {0.0f, 0.0f, angle } }
+					}
+				);
+			}
+		);
+
+		webTweens[0] = std::make_unique<tween>(throwWebMinScale().x, throwWebMaxScale().x, static_cast<int>(1000.0f * throwWebTime()), tween::easing::linear);
+		webTweens[1] = std::make_unique<tween>(0.0f, 1.0f, static_cast<int>(1000.0f * throwWebTime()), tween::easing::linear);
+		webTweens[2] = std::make_unique<tween>(throwWebMinScale().z, throwWebMaxScale().z, static_cast<int>(1000.0f * throwWebTime()), tween::easing::linear);
+		webTweenCreated = true;
+	}
+
+	static const std::set<VenomStates> fromFloorSwingStates({ VS_Idle, VS_Walking, VS_Running });
+	bool Venom::ShouldFloorToSwing()
+	{
+		if (GetController<BrawlerScene>(unit, sceneController())->IsDialogOpen())
+		{
+			return false;
+		}
+		if (!fromFloorSwingStates.contains(vsm.currentState))
+			return false;
+
+		if (gameInteractionMode == GIM_Gamepad)
+		{
+			return (buttons.rightShoulder == GamePad::ButtonStateTracker::PRESSED);
+		}
+		else if (gameInteractionMode == GIM_KeyboardMouse)
+		{
+			return keyboard->GetState().IsKeyDown(Keyboard::Keys::E);
+		}
+		return false;
+	}
+
+	void Venom::EnterFloorToSwing()
+	{
+		renderable->animationUseTransformation(true);
+		renderable->SetCurrentAnimation("FloorToSwing");
+	}
+
+	void Venom::FloorToSwing()
+	{
+		if (!web.empty() && webTweenCreated == true && RenderableSceneObjectExist(web))
+		{
+			float sclx = webTweens[0]->step();
+			float scly = webTweens[1]->step();
+			float sclz = webTweens[2]->step();
+
+			auto [mm, bonePos, a, b, c] = renderable->GetBoneTransformation(floorWebBone());
+
+			XMVECTOR bonePosV = XMLoadFloat3(&bonePos);
+			UpdateWeb(bonePosV, webAttachedPos, XMFLOAT3(sclx, scly, sclz));
+			if (scly == 1.0f)
+			{
+				vsm.ChangeState(VS_Swing);
+			}
+		}
+	}
+
+	void Venom::LeaveFloorToSwing()
+	{
+		webTweenCreated = false;
+	}
+
+	void Venom::ThrowFloorWeb()
+	{
+		SoundFXID sfx = SoundFXID(unit, throwWebSound().at(0));
+		sfx->Stop();
+		sfx->Play();
+
+		auto [mm, pos, a, b, c] = renderable->GetBoneTransformation(floorWebBone());
 
 		CharacterLookingTo clt = lookingTo();
 		float angle = throwWebAngle() * ((clt == CLT_Left) ? 1.0f : -1.0f);
@@ -1281,11 +1383,11 @@ namespace Game::Brawler
 
 		if (gameInteractionMode == GIM_Gamepad)
 		{
-			return (buttons.rightShoulder == GamePad::ButtonStateTracker::PRESSED);
+			return (buttons.y == GamePad::ButtonStateTracker::PRESSED);
 		}
 		else if (gameInteractionMode == GIM_KeyboardMouse)
 		{
-			return keyboard->GetState().IsKeyDown(Keyboard::Keys::E);
+			return keyboard->GetState().IsKeyDown(Keyboard::Keys::R);
 		}
 		return false;
 	}

@@ -30,6 +30,7 @@ namespace Game
 			VS_Falling,
 			VS_Death,
 			VS_WallToSwing,
+			VS_FloorToSwing,
 			VS_Swing,
 			VS_WebGrab,
 		};
@@ -265,6 +266,13 @@ namespace Game
 			void WallToSwing();
 			void LeaveWallToSwing();
 			void ThrowWeb();
+
+			//FloorToSwing
+			bool ShouldFloorToSwing();
+			void EnterFloorToSwing();
+			void FloorToSwing();
+			void LeaveFloorToSwing();
+			void ThrowFloorWeb();
 
 			//Swing
 			void EnterSwing();
