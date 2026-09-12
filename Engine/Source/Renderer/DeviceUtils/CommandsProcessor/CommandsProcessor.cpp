@@ -10,11 +10,14 @@ extern std::unique_ptr<JRenderer> renderer;
 namespace DeviceUtils
 {
 	CommandsProcessor::CommandsProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t capacity, size_t id)
+		: id(id), frame(0U)
 	{
 		using namespace nostd;
-		this->id = id;
 
-		for (int i = 0; i < capacity; ++i)
+		// Inicializamos el vector con el tamaño requerido directamente
+		openedFrames = std::vector<std::atomic<bool>>(capacity);
+
+		for (size_t i = 0; i < capacity; ++i)
 		{
 			std::string allocatorName = "commandAllocator:" + std::to_string(id) + "/[" + std::to_string(i) + "]";
 			std::string commandListName = "commandList:" + std::to_string(id) + "/[" + std::to_string(i) + "]";
@@ -27,10 +30,50 @@ namespace DeviceUtils
 
 			commandAllocators.push_back(allocator);
 			commandLists.push_back(commandList);
-			openedFrames.push_back(std::make_unique<std::atomic_bool>(false));
-		}
 
-		frame = 0U;
+			// Inicializar en false
+			openedFrames[i].store(false, std::memory_order_relaxed);
+		}
+	}
+
+	// Move Constructor
+	CommandsProcessor::CommandsProcessor(CommandsProcessor&& other) noexcept
+		: id(other.id),
+		commandAllocators(std::move(other.commandAllocators)),
+		commandLists(std::move(other.commandLists)),
+		frame(other.frame),
+		loadingPool(std::move(other.loadingPool)),
+		postExecutionCallbacks(std::move(other.postExecutionCallbacks)),
+		preDeletionCallbacks(std::move(other.preDeletionCallbacks))
+	{
+		// Los std::atomic no se pueden mover por defecto, copiamos su valor atómicamente
+		openedFrames = std::vector<std::atomic<bool>>(other.openedFrames.size());
+		for (size_t i = 0; i < other.openedFrames.size(); ++i)
+		{
+			openedFrames[i].store(other.openedFrames[i].load(std::memory_order_relaxed), std::memory_order_relaxed);
+		}
+	}
+
+	// Move Assignment
+	CommandsProcessor& CommandsProcessor::operator=(CommandsProcessor&& other) noexcept
+	{
+		if (this != &other)
+		{
+			id = other.id;
+			commandAllocators = std::move(other.commandAllocators);
+			commandLists = std::move(other.commandLists);
+			frame = other.frame;
+			loadingPool = std::move(other.loadingPool);
+			postExecutionCallbacks = std::move(other.postExecutionCallbacks);
+			preDeletionCallbacks = std::move(other.preDeletionCallbacks);
+
+			openedFrames = std::vector<std::atomic<bool>>(other.openedFrames.size());
+			for (size_t i = 0; i < other.openedFrames.size(); ++i)
+			{
+				openedFrames[i].store(other.openedFrames[i].load(std::memory_order_relaxed), std::memory_order_relaxed);
+			}
+		}
+		return *this;
 	}
 
 	CommandsProcessor::~CommandsProcessor()
@@ -49,17 +92,23 @@ namespace DeviceUtils
 	void CommandsProcessor::ResetCommandList()
 	{
 		using namespace DeviceUtils;
-		if (openedFrames.at(frame)->load() == true)
+
+		// 1. ESPERA ROBUSTA (While + Acquire):
+		// Bloquea MIENTRAS sea true. Evita race conditions y desvelos espontáneos.
+		while (openedFrames.at(frame).load(std::memory_order_acquire) == true)
 		{
-			openedFrames.at(frame)->wait(true);
+			openedFrames.at(frame).wait(true, std::memory_order_relaxed);
 		}
+
 		auto& commandAllocator = commandAllocators[frame];
 		commandAllocator->Reset();
 		auto& commandList = commandLists[frame];
 		ID3D12DescriptorHeap* ppHeaps[] = { GetCSUDescriptorHeap() };
 		commandList->Reset(commandAllocator, nullptr);
 		commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
-		openedFrames.at(frame)->store(true);
+
+		// 2. Marcar como abierto
+		openedFrames.at(frame).store(true, std::memory_order_release);
 	}
 
 	void CommandsProcessor::CloseCommandList()
@@ -110,8 +159,10 @@ namespace DeviceUtils
 					cb();
 				}
 				postExecutionCallbacks.clear();
-				openedFrames.at(frameIndex)->store(false);
-				openedFrames.at(frameIndex)->notify_one();
+
+				// 3. Notificación de liberación (Release) al hilo principal:
+				openedFrames.at(frameIndex).store(false, std::memory_order_release);
+				openedFrames.at(frameIndex).notify_all(); // notify_all en lugar de notify_one si múltiples hilos leen la señal
 			}
 		);
 	}

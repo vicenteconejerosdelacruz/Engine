@@ -61,7 +61,7 @@ namespace Physics
 	std::map<TriggerID, std::function<void(SUUUID, unsigned int)>> triggerContactSubscribers;
 	std::map<JUUID, std::function<void(PxFilterData)>> characterHitSubscriber;
 
-#if defined(_EDITOR)
+#if defined(_DEVELOPMENT)
 	XMFLOAT4 behaviorColors(PhysicSceneID scene, PhysicsBehavior behavior)
 	{
 		std::map<PhysicsBehavior, XMFLOAT4> colors =
@@ -873,7 +873,9 @@ namespace Physics
 		nostd::AppendToVector(atts, attsToAdd.at(behavior()));
 		return atts;
 	}
+#endif
 
+#if defined(_DEVELOPMENT)
 	std::tuple<XMFLOAT3, XMVECTOR, XMFLOAT3, XMFLOAT3> PhysicObject::GetPhysicsAvatarTransformation()
 	{
 		//calculate the scale
@@ -898,7 +900,9 @@ namespace Physics
 	//Renderable representation
 	void PhysicObject::LinkPhysicsAvatar()
 	{
+#if defined(_EDITOR)
 		using namespace Editor;
+#endif
 
 		if (avatarBuilt) return;
 
@@ -919,6 +923,7 @@ namespace Physics
 		renderableLines = MAKESUUUID(unit(), uuid_base + "-lines");
 		renderableShape = MAKESUUUID(unit(), uuid_base + "-shape");
 
+#if defined(_EDITOR)
 		if (boundary)
 		{
 			renderableLines->OnPick = [&] {Editor::SelectBoundary(boundary->SUuuid()); };
@@ -929,7 +934,7 @@ namespace Physics
 			renderableLines->OnPick = [&] {Editor::SelectTrigger(trigger->SUuuid()); };
 			renderableShape->OnPick = [&] {Editor::SelectTrigger(trigger->SUuuid()); };
 		}
-
+#endif
 		avatarBuilt = true;
 
 		PhysicSceneID scene = MAKESUUUID(unit(), *GetPhysicScenes(unit()).begin());
@@ -937,6 +942,7 @@ namespace Physics
 		{
 			UpdatePhysicsAvatarColor(frame, overrideColor() ? color() : behaviorColors(scene, behavior()));
 		}
+#if defined(_EDITOR)
 		std::map<PhysicsBehavior, std::function<void()>> registerbody =
 		{
 			{PB_Static,[&] {RegisterStaticBody(uuid()); }},
@@ -944,14 +950,16 @@ namespace Physics
 			{PB_Character,[&] {RegisterCharacter(uuid()); }},
 			{PB_Trigger,[&] {RegisterTrigger(uuid()); }},
 		};
-
 		registerbody.at(behavior())();
+#elif defined(_DEVELOPMENT)
+#endif
 	}
 
 	void PhysicObject::DestroyPhysicsAvatar()
 	{
+#if defined(_EDITOR)
 		using namespace Editor;
-
+#endif
 		auto destroy = [](RenderableID& r)
 			{
 				if (!r) return;
@@ -962,6 +970,7 @@ namespace Physics
 		destroy(renderableShape);
 		destroy(renderableLines);
 
+#if defined(_EDITOR)
 		std::map<PhysicsBehavior, std::function<void()>> unregister =
 		{
 			{PB_Static,[&] {UnRegisterStaticBody(uuid()); }},
@@ -971,6 +980,8 @@ namespace Physics
 		};
 
 		unregister.at(behavior())();
+#elif defined(_DEVELOPMENT)
+#endif
 
 		avatarBuilt = false;
 	}
@@ -1135,7 +1146,9 @@ namespace Physics
 				continue;
 
 			phO->CreatePhysicsBehavior();
+#if defined(_DEVELOPMENT)
 			phO->LinkPhysicsAvatar();
+#endif
 		}
 	}
 
@@ -1170,7 +1183,9 @@ namespace Physics
 				p->localScale(XMClamp(p->localScale(), 0.01f, 1000.0f));
 				p->DestroyPhysicsBehavior();
 				p->CreatePhysicsBehavior();
+#if defined(_DEVELOPMENT)
 				p->UpdatePhysicsAvatarTransformation();
+#endif
 			};
 		auto checkBehaviorGeom = [](PhysicObjectID p)
 			{
@@ -1180,7 +1195,9 @@ namespace Physics
 				p->clean(flags);
 				p->DestroyPhysicsBehavior();
 				p->CreatePhysicsBehavior();
+#if defined(_DEVELOPMENT)
 				p->DestroyPhysicsAvatar();
+#endif
 			};
 		auto checkVelocity = [](PhysicObjectID p)
 			{
@@ -1245,8 +1262,9 @@ namespace Physics
 
 				p->DestroyPhysicsBehavior();
 				p->CreatePhysicsBehavior();
+#if defined(_DEVELOPMENT)
 				p->UpdatePhysicsAvatarTransformation();
-
+#endif
 				p->clean(PhysicObject::Update_kinematic);
 			};
 
@@ -1261,7 +1279,7 @@ namespace Physics
 	}
 
 	//Avatars
-#if defined(_EDITOR)
+#if defined(_DEVELOPMENT)
 	void AttachPhysicsAvatars(SceneUnitId id, nlohmann::json& data)
 	{
 		JUUID camUUID;
@@ -1278,6 +1296,7 @@ namespace Physics
 
 		auto getVisible = [id](std::string behavior)
 			{
+#if defined(_EDITOR)
 				std::map<std::string, std::function<bool()>> visibleMap =
 				{
 					{ "Static", [id]() { return Editor::StaticBodiesShouldDraw(id); }},
@@ -1286,6 +1305,9 @@ namespace Physics
 					{ "Character", [id]() { return Editor::CharactersShouldDraw(id); }},
 				};
 				return visibleMap.at(behavior)();
+#else
+				return false;
+#endif
 			};
 
 		auto getAvatarTransformation = [](nlohmann::json& parent, nlohmann::json phO)

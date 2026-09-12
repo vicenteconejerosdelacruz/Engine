@@ -239,8 +239,10 @@ namespace Game::Brawler
 	{
 #if defined(_EDITOR)
 		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
-			return;
+#else
+		if (GetSceneUnit(unit)->IsPaused())
 #endif
+			return;
 
 		//don't play the sound if in gameover or level complete
 		if (GetBrawlerScene(this)->IsGameOver() || GetBrawlerScene(this)->IsLevelComplete())

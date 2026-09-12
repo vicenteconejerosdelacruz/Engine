@@ -90,6 +90,7 @@ void JObject::clear()
 	updateFlag = 0ULL;
 }
 
+#if defined(_EDITOR)
 void JObject::WriteJson(nlohmann::json& j)
 {}
 
@@ -108,6 +109,7 @@ std::map<std::string, ScriptBinding> JObject::GetScriptBindingOptions()
 {
 	return { {"",ScriptBinding()} };
 }
+#endif
 
 const JPropertyMeta* JObject::GetMeta(const std::string& name) const
 {

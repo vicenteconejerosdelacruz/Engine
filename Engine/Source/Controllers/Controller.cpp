@@ -3,12 +3,15 @@
 #include <map>
 #include <NoStd.h>
 #include <mutex>
+#include <Scene.h>
 
+#if defined(_EDITOR)
 namespace Editor
 {
 	extern bool IsPlaying(SceneUnitId id);
 	extern void MarkSceneUnitAsModified(SceneUnitId id);
 };
+#endif
 
 namespace Game
 {
@@ -71,7 +74,11 @@ namespace Game
 	}
 #endif
 
-	void Controller::Map(SUUUID so) { unit = std::get<0>(so); sceneObject = so; }
+	void Controller::Map(SUUUID so)
+	{
+		unit = std::get<0>(so);
+		sceneObject = so;
+	}
 
 	void Controller::Unmap() { std::get<0>(sceneObject) = 0; std::get<1>(sceneObject).clear(); }
 
@@ -153,7 +160,11 @@ namespace Game
 
 	void MapControllers(SceneUnitId id)
 	{
+#if defined(_EDITOR)
 		std::map<unsigned int, std::set<JUUID>> prioritySet = GetControllersPrioritySet(true);
+#else
+		std::map<unsigned int, std::set<JUUID>> prioritySet = GetControllersPrioritySet();
+#endif
 
 		for (auto& [_, uuidset] : prioritySet)
 		{
@@ -274,6 +285,14 @@ namespace Game
 				std::string StepControllersEvent = "StepControllers:" + uuid;
 				PIXScopedEvent(0, nostd::StringToWString(StepControllersEvent).c_str());
 #endif
+
+				auto& controller = controllersUUIDs.at(uuid);
+				if (!SceneUnitExits(controller->unit))
+					continue;
+
+				auto& scene = GetSceneUnit(controller->unit);
+				if (scene->BeingCreated())
+					continue;
 
 				controllersUUIDs.at(uuid)->Step(dt);
 			}

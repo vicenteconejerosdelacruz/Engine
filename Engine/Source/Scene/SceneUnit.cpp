@@ -34,6 +34,8 @@ namespace Scene
 		binder.unit = unit;
 #if defined(_EDITOR)
 		canBuildAssetsTree = std::make_unique<std::atomic_uint>(0U);
+#else
+		isPaused = false;
 #endif
 		CreateShadowMapResources(id);
 	}
@@ -43,7 +45,7 @@ namespace Scene
 		DestroyShadowMapResources(id);
 	}
 
-	SceneUnitId SceneUnit::Id()
+	SceneUnitId SceneUnit::Id() const
 	{
 		return id;
 	}
@@ -233,8 +235,8 @@ namespace Scene
 	{
 #if defined(_EDITOR)
 		using namespace Editor;
-#endif
 		PickFromScene(id);
+#endif
 	}
 
 	CComPtr<ID3D12GraphicsCommandList2>& SceneUnit::GetComputeCommandList()
@@ -292,6 +294,16 @@ namespace Scene
 			unsigned int prev = canBuildAssetsTree->fetch_sub(1U);
 			assert(prev != 0);
 		}
+	}
+#else
+	bool SceneUnit::IsPaused() const
+	{
+		return isPaused;
+	}
+
+	void SceneUnit::SetPaused(bool value)
+	{
+		isPaused = value;
 	}
 #endif
 

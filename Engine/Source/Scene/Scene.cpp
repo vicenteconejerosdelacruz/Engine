@@ -622,6 +622,7 @@ namespace Scene
 		GetUnboundedSceneObjects(id).clear();
 	}
 
+#if defined(_EDITOR)
 	JUUID CloneSceneObject(SceneUnitId id, JUUID sceneObject, nlohmann::json parameters)
 	{
 		SceneObject* sceneObjectO = GetSceneObjectPointer(id, sceneObject);
@@ -715,6 +716,7 @@ namespace Scene
 
 		return uuid;
 	}
+#endif
 
 	void BindToScene(SceneUnitId id, JUUID uuidA, JUUID uuidB)
 	{
@@ -747,6 +749,9 @@ namespace Scene
 
 			if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
 				dt = 0.0f;
+#else
+			if (scene->IsPaused())
+				dt = 0.0f;
 #endif
 			TriggersStep(unit);
 			BoundariesStep(unit);
@@ -767,6 +772,9 @@ namespace Scene
 #if defined(_EDITOR)
 			if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
 				dt = 0.0f;
+#else
+			if (scene->IsPaused())
+				dt = 0.0f;
 #endif
 			Physics::FetchPhysicsScenesResults(unit, dt);
 			Physics::DestroyPhysicsSceneObjects(unit);
@@ -781,6 +789,9 @@ namespace Scene
 			float dt = static_cast<FLOAT>(timer.GetElapsedSeconds());
 #if defined(_EDITOR)
 			if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
+				dt = 0.0f;
+#else
+			if (scene->IsPaused())
 				dt = 0.0f;
 #endif
 			SimulatePhysicScenes(unit, dt);
@@ -1583,17 +1594,22 @@ namespace Scene
 				if (!physicAbleTypes.contains(type))
 					return;
 
+#if defined(_EDITOR)
 				std::string level = Editor::GetLevelString(id);
 				nlohmann::json level_data = nlohmann::json::parse(level);
+#endif
 				nlohmann::json jdata;
+#if defined(_EDITOR)
 				if (level_data.contains(SceneObjectTypeJsonContainer.at(SO_Cameras)))
 				{
 					jdata[SceneObjectTypeJsonContainer.at(SO_Cameras)] = level_data[SceneObjectTypeJsonContainer.at(SO_Cameras)];
 				}
+#endif
 				jdata[SceneObjectTypeJsonContainer.at(type)] = nlohmann::json::array();
 				jdata[SceneObjectTypeJsonContainer.at(type)].push_back(data);
+#if defined(_DEVELOPMENT)
 				AttachPhysicsAvatars(id, jdata);
-
+#endif
 				for (unsigned int i = 0; i < jdata.at(SceneObjectTypeJsonContainer.at(SO_Renderables)).size(); i++)
 				{
 					nlohmann::json& obj = jdata.at(SceneObjectTypeJsonContainer.at(SO_Renderables)).at(i);
@@ -1605,6 +1621,7 @@ namespace Scene
 					RenderableID ren = MAKESUUUID(id, avatarUUID);
 					ren->BindToScene();
 					ren->renderReady = true;
+#if defined(_EDITOR)
 					BindRenderableToPickingPass(MAKESUUUID(id, avatarUUID));
 					switch (type)
 					{
@@ -1625,6 +1642,7 @@ namespace Scene
 					break;
 					default:break;
 					}
+#endif
 				}
 			};
 
@@ -1675,11 +1693,12 @@ namespace Scene
 		}
 		break;
 		}
+#if defined(_DEVELOPMENT)
 		createAvatars();
+#endif
 
 		CreatePhysicsObjectsBehaviors(id);
 #if defined(_EDITOR)
-
 
 		if (so == SO_Renderables)
 		{

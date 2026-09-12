@@ -92,7 +92,6 @@ namespace Templates
 #endif
 
 	void MaterialJsonStep();
-	void UpdateMaterialTextures(std::unordered_map<TextureJsonID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceID>>> changes);
 
 	namespace Material
 	{
@@ -139,6 +138,9 @@ namespace Templates
 	DEF_TEMPLATE_ID_DEP(ShaderJson, GetShaderTemplate);
 	DEF_TEMPLATE_ID_DEP(ShaderInstance, GetShaderInstance);
 
+#if defined(_EDITOR)
+	void UpdateMaterialTextures(std::unordered_map<TextureJsonID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceID>>> changes);
+#endif
 	struct MaterialInstance
 	{
 		MaterialInstance(JUUID uuid) { assert(!!!"do not use"); }

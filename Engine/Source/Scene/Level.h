@@ -16,8 +16,11 @@ namespace Scene::Level
 	bool PendingLevelToLoad();
 
 	//level handling
+#if defined(_EDITOR)
 	nlohmann::json GetDefaultLevel();
+#else
 	nlohmann::json GetBootLevel();
+#endif
 
 	nlohmann::json GetLevelFromFile(std::filesystem::path level);
 

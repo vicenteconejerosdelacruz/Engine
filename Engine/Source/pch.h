@@ -150,6 +150,19 @@ using namespace DirectX::SimpleMath;
 #include "pch/DeleteHook.h"
 #if defined(_EDITOR)
 #include "pch/JExposeEditor.h"
+#else
+#include <regex>
+#include <Material/SamplerDesc.h>
+#include <Material/BlendDesc.h>
+#include <ShaderMaterials.h>
+//#include <ImEditor.h>
+#include <Shader/Shader.h>
+#include <NoStd.h>
+#include <SceneObject.h>
+#include <JTemplate.h>
+#include <DeviceUtils/RenderPass/RenderToTexturePass.h>
+#include <Primitives.h>
+#include <ScriptBinding.h>
 #endif
 
 template<>

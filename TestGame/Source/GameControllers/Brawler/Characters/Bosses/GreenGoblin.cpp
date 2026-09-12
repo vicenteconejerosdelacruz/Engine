@@ -97,8 +97,11 @@ namespace Game::Brawler
 	{
 #if defined(_EDITOR)
 		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
-			return;
+#else
+		if (GetSceneUnit(unit)->IsPaused())
 #endif
+			return;
+
 		if (physicObject.empty())
 			return;
 
@@ -156,7 +159,9 @@ namespace Game::Brawler
 		physicObject->flag(PhysicObject::Update_kinematic);
 		physicObject->DestroyPhysicsBehavior();
 		physicObject->CreatePhysicsBehavior();
+#if defined(_DEVELOPMENT)
 		physicObject->UpdatePhysicsAvatarTransformation();
+#endif
 
 		physicObject->clean(PhysicObject::Update_kinematic);
 

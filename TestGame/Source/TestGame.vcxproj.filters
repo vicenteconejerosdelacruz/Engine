@@ -111,7 +111,10 @@
     <ClInclude Include="GameControllers\Effects\DelayedDeletionAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameInstances\BrawlerGame.h">
+    <ClInclude Include="GameControllers\Brawler\Menus\BrawlerMenuAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameControllers\Brawler\Menus\BrawlerMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -165,6 +168,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameControllers\Effects\DelayedDeletion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameControllers\Brawler\Menus\BrawlerMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

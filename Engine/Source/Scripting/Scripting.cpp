@@ -122,10 +122,12 @@ namespace Scripting
 
 #if defined(_EDITOR)
 		if (!IsPlaying(id) || IsPaused(id))
+#else
+		if (GetSceneUnit(id)->IsPaused())
+#endif
 		{
 			return;
 		}
-#endif
 
 		//lock the isolate in this thread
 		Locker locker(isolate);

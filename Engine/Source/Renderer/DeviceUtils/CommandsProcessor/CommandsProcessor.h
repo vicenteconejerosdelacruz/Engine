@@ -1,5 +1,10 @@
 #pragma once
 #include <map>
+#include <vector>
+#include <memory>
+#include <atomic>
+#include <functional>
+#include <set>
 #include <atlbase.h>
 #include <d3dx12.h>
 #include <Renderer.h>
@@ -11,17 +16,17 @@ namespace DeviceUtils
 		CommandsProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t capacity, size_t id = nostd::threadIdHash());
 		~CommandsProcessor();
 
-		//Gemini
-		// 2. IMPORTANTE: Habilitar movimiento explícitamente
-		// Al definir el destructor, estos se borran automáticamente, hay que pedirlos de vuelta.
-		CommandsProcessor(CommandsProcessor&&) noexcept = default;
-		CommandsProcessor& operator=(CommandsProcessor&&) noexcept = default;
+		// Implementación manual de Move Constructor y Assignment para std::atomic
+		CommandsProcessor(CommandsProcessor&& other) noexcept;
+		CommandsProcessor& operator=(CommandsProcessor&& other) noexcept;
 
-		// 3. Bloquear copia (obligatorio por el atomic y unique_ptr)
+		// Bloqueo explícito de copia
 		CommandsProcessor(const CommandsProcessor&) = delete;
 		CommandsProcessor& operator=(const CommandsProcessor&) = delete;
 
-		volatile bool IsOpen() { return openedFrames.at(frame)->load(); }
+		// Consulta segura sin 'volatile'
+		bool IsOpen() const { return openedFrames.at(frame).load(std::memory_order_acquire); }
+
 		CComPtr<ID3D12GraphicsCommandList2>& GetCommandList();
 		void ResetCommandList();
 		void CloseCommandList();
@@ -34,8 +39,11 @@ namespace DeviceUtils
 		size_t id;
 		std::vector<CComPtr<ID3D12CommandAllocator>> commandAllocators;
 		std::vector<CComPtr<ID3D12GraphicsCommandList2>> commandLists;
-		std::vector<std::unique_ptr<std::atomic_bool>> openedFrames;
-		unsigned int frame;
+
+		// Vector directo de atómicos en contigüidad de memoria
+		std::vector<std::atomic<bool>> openedFrames;
+
+		unsigned int frame{ 0U };
 		std::map<SceneObjectType, std::set<SUUUID>> loadingPool;
 		std::vector<std::function<void()>> postExecutionCallbacks;
 		std::vector<std::function<void()>> preDeletionCallbacks;

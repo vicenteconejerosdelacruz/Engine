@@ -148,8 +148,11 @@ namespace Game::Brawler
 	{
 #if defined(_EDITOR)
 		if (!Editor::IsPlaying(id) || Editor::IsPaused(id))
-			return;
+#else
+		if (GetSceneUnit(unit)->IsPaused())
 #endif
+			return;
+
 		menuUIInstance().empty() ? CreateMenuUI(id) : UpdateMenuUI(id);
 	}
 
@@ -266,6 +269,24 @@ namespace Game::Brawler
 				LevelLoadingProgress(asset, count, total);
 			}
 		);
+#else
+		using namespace Scene::Level;
+
+		LoadLevelIntoSceneUnit("venom.yaml", []() { return GetLevelFromFile("venom.yaml"); },
+			[&](SceneUnitId id)
+			{
+				gameUnit = id;
+				loadingProgressValue(100);
+				loadingProgressSet(false);
+				EnableSceneUnitRendering(unit);
+				RemoveSceneUnitRendering(gameUnit);
+				GetSceneUnit(id)->SetPaused(true);
+			},
+			[&](std::string asset, unsigned int count, unsigned int total)
+			{
+				LevelLoadingProgress(asset, count, total);
+			}
+		);
 #endif
 	}
 
@@ -280,12 +301,13 @@ namespace Game::Brawler
 	void BrawlerMenu::SwitchToGameLevel()
 	{
 		inGame = true;
-#if defined(_EDITOR)
 		EnableSceneUnitRendering(gameUnit);
 		RemoveSceneUnitRendering(unit);
+#if defined(_EDITOR)
 		Editor::SwitchToPlayMode(gameUnit);
 		Editor::SwitchToUnPausedMode(gameUnit);
 #endif
+		GetSceneUnit(gameUnit)->SetPaused(false);
 		auto& scene = GetSceneUnit(unit);
 		scene->MarkForDelete();
 	}

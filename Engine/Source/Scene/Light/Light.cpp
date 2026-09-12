@@ -183,7 +183,9 @@ namespace Scene
 
 	void Light::Destroy()
 	{
+#if defined(_EDITOR)
 		DestroyEditorPreview();
+#endif
 #include <Attributes/JDestroy.h>
 #include "LightAtt.h"
 #include <JEnd.h>
@@ -431,6 +433,7 @@ namespace Scene
 				}
 			}
 
+#if defined(_EDITOR)
 			//if the light type changed
 			if (l->dirty(Light::Update_lightType))
 			{
@@ -469,6 +472,7 @@ namespace Scene
 					l->DestroyShadowMapMinMaxChain();
 				}
 			}
+#endif
 
 			if (std::any_of(smCamAttributes.begin(), smCamAttributes.end(), [&l](auto flag) { return l->dirty(flag); }))
 			{

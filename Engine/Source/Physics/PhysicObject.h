@@ -114,7 +114,8 @@ namespace Physics
 		virtual void WriteJson(nlohmann::json& j);
 		std::vector<std::string> GetPhysicBehaviorAttributes();
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
-
+#endif
+#if defined(_DEVELOPMENT)
 		//Renderable representation
 		std::tuple<XMFLOAT3, XMVECTOR, XMFLOAT3, XMFLOAT3> GetPhysicsAvatarTransformation();
 		void LinkPhysicsAvatar();
@@ -133,7 +134,7 @@ namespace Physics
 		PxRigidActor* actor = nullptr;
 		PxShape* shape = nullptr;
 		PxController* controller = nullptr;
-#if defined(_EDITOR)
+#if defined(_DEVELOPMENT)
 		RenderableID renderableShape;
 		RenderableID renderableLines;
 		bool avatarBuilt = false;
@@ -153,7 +154,7 @@ namespace Physics
 	void UpdatePhysicObjects(SceneUnitId id);
 
 	//Avatars
-#if defined(_EDITOR)
+#if defined(_DEVELOPMENT)
 	void AttachPhysicsAvatars(SceneUnitId id, nlohmann::json& data);
 	nlohmann::json CreateFromRenderable(std::string name, JUUID uuid, JUUID geometry, JUUID camId, std::string material, bool visible, XMFLOAT3 position, XMFLOAT3 rotation, XMFLOAT3 scale);
 	nlohmann::json CreateFromTrigger(std::string name, JUUID uuid, JUUID geometry, JUUID camId, std::string material, bool visible, XMFLOAT3 position, XMFLOAT3 rotation, XMFLOAT3 scale);
@@ -175,7 +176,3 @@ namespace Physics
 
 	DEF_TEMPLATE_ID(PhysicObject, GetPhysicObject);
 };
-
-//using namespace Physics;
-//DEF_TEMPLATE_ID_HASH(PhysicObject);
-

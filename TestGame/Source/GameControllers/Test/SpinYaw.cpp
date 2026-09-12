@@ -63,8 +63,11 @@ namespace Game::Test
 		buttons.Update(state);
 #if defined(_EDITOR)
 		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
-			return;
+#else
+		if (GetSceneUnit(unit)->IsPaused())
 #endif
+			return;
+
 		auto pad = gamePad->GetState(0);
 		float dy = pad.thumbSticks.leftX * speed();
 

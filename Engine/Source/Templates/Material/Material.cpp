@@ -85,6 +85,7 @@ namespace Templates
 			}
 		);
 
+#if defined(_EDITOR)
 		std::unordered_map<TextureJsonID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceID>>> changes;
 		std::for_each(rebuildTextures.begin(), rebuildTextures.end(), [&](auto mat)
 			{
@@ -116,6 +117,7 @@ namespace Templates
 		{
 			UpdateMaterialTextures(changes);
 		}
+#endif
 
 		std::set<MaterialJsonID> rebuildPipelineState;
 		std::copy_if(mats.begin(), mats.end(), std::inserter(rebuildPipelineState, rebuildPipelineState.begin()), [](auto mat)
@@ -148,6 +150,7 @@ namespace Templates
 		);
 	}
 
+#if defined(_EDITOR)
 	static bool updateTexturesProcessorInitialized = false;
 	static std::unique_ptr<CommandsProcessor> updateTexturesProcessor;
 	void UpdateMaterialTextures(std::unordered_map<TextureJsonID, std::set<std::tuple<TextureShaderUsage, MaterialInstanceID>>> changes)
@@ -221,6 +224,7 @@ namespace Templates
 		);
 		updateTexThread.detach();
 	}
+#endif
 
 	MaterialInstance::MaterialInstance(
 		SceneUnitId id,

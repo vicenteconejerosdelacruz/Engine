@@ -62,6 +62,7 @@ nlohmann::json SequenceChannelElementTrigger::json()
 	return j;
 }
 
+#if defined(_DEVELOPMENT)
 void SequenceChannelElementTrigger::ApplyFrameTriggerAvatarValues(int frame, RenderableID renderable)
 {
 	if (!triggerRenderable) return;
@@ -82,10 +83,11 @@ void SequenceChannelElementTrigger::ApplyFrameTriggerAvatarValues(int frame, Ren
 	triggerLines->rotationQ(tRotQ);
 	triggerLines->scale(fScl);
 }
+#endif
 
 void SequenceChannelElementTrigger::ApplyFrameTriggerValues(int frame, RenderableID renderable)
 {
-	if (trigger.empty() || trigger.unit() == 0ULL || !SceneObjectExists(trigger())/* || triggerBuilt == nullptr || triggerBuilt->load() == false*/) return;
+	if (trigger.empty() || trigger.unit() == 0ULL || !SceneObjectExists(trigger())) return;
 	XMMATRIX world = renderable->world();
 	Animation::NodeTransformsMap& nodesTransformation = renderable->globalNodeTransforms;
 	auto [fPos, fRot, tRotQ, fScl] = GetTransformation(world, nodesTransformation);

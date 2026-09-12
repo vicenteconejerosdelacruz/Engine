@@ -71,9 +71,9 @@ namespace Templates
 #endif
 	};
 
-#if defined(_EDITOR)
 	nlohmann::json GetCubeAttributes();
 	nlohmann::json GetCapsuleAttributes();
+#if defined(_EDITOR)
 	std::vector<JUUIDName> GetPhysicGeometrysTriggerUUIDsNames();
 	std::vector<JUUIDName> GetPhysicGeometrysCharacterUUIDsNames();
 #endif
@@ -113,13 +113,11 @@ using namespace Templates;
 DEF_TEMPLATE_ID_HASH(PhysicGeometryJson);
 DEF_TEMPLATE_ID_HASH(PhysicGeometryInstance);
 
-#if defined(_EDITOR)
 static std::map<std::string, std::function<nlohmann::json()>> GetPxGeometryAttributes =
 {
 	{ "cube", GetCubeAttributes },
 	{ "capsule", GetCapsuleAttributes },
 };
-#endif
 
 static std::map<std::string, std::function<PxQuat(XMFLOAT3)>> ApplyGeometryLocalPoseTransformation =
 {

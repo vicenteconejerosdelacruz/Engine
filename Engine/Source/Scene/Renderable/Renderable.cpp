@@ -1701,6 +1701,8 @@ namespace Scene
 
 #if defined(_EDITOR)
 			if (Editor::IsPlaying(renderable->unit) && !Editor::IsPaused(renderable->unit))
+#else
+			if (!GetSceneUnit(renderable->unit)->IsPaused())
 #endif
 			{
 				player->Step(dt * 1000.0f * renderable->animationTimeFactor());

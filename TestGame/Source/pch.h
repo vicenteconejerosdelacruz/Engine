@@ -17,4 +17,6 @@
 
 #include "EngineInc.h"
 //do not move the drawers from here, otherwise the code will not be executed
+#if defined(_EDITOR)
 #include "JExpose/Editor/JEdvBrawlerDrawer.h"
+#endif

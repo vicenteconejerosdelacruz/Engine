@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Game.h"
 #include <Scene.h>
+#include <Level.h>
 
 namespace Game
 {
@@ -49,6 +50,19 @@ namespace Game
 	{
 		if (gameInstances.contains(id))
 			gameInstances.erase(id);
+	}
+
+	void BootGame()
+	{
+		using namespace Scene::Level;
+
+		LoadLevelIntoSceneUnit("mainmenu.yaml", []() { return GetLevelFromFile("mainmenu.yaml"); },
+			[](SceneUnitId id)
+			{
+				EnableSceneUnitRendering(id);
+			},
+			[](std::string asset, unsigned int count, unsigned int total) {}
+		);
 	}
 
 	void GameStep()

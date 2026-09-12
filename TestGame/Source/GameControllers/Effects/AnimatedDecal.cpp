@@ -113,8 +113,10 @@ namespace Game::Effects
 	{
 #if defined(_EDITOR)
 		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
-			return;
+#else
+		if (GetSceneUnit(unit)->IsPaused())
 #endif
+			return;
 
 		if (animationEnded || !renderable || !SceneObjectExists(renderable()))
 			return;

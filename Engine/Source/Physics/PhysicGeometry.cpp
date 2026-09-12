@@ -23,6 +23,7 @@ namespace Editor
 };
 #endif
 
+#if defined(_DEVELOPMENT)
 void CookAssimpIntoPxTriangleMeshFile(Model3DJsonID model3D, bool sdf)
 {
 	std::string filename = default3DModelsFolder + model3D->path();
@@ -94,6 +95,7 @@ void CookAssimpIntoPxTriangleMeshFile(Model3DJsonID model3D, bool sdf)
 	cookedFile.write(reinterpret_cast<const char*>(writeBuffer.getData()), writeBuffer.getSize());
 	cookedFile.close();
 }
+#endif
 
 std::map<std::tuple<JUUID, bool>, PxTriangleMesh*> pxTrianglesMeshes;
 
@@ -269,6 +271,7 @@ namespace Templates
 #include <PhysicGeometryAtt.h>
 #include <JEnd.h>
 	}
+#endif
 
 	nlohmann::json GetCubeAttributes()
 	{
@@ -322,6 +325,7 @@ namespace Templates
 		return ret;
 	}
 
+#if defined(_EDITOR)
 	std::vector<JUUIDName> GetPhysicGeometrysTriggerUUIDsNames()
 	{
 		static std::vector<std::string> geometries = { "cube", "sphere", "capsule" };

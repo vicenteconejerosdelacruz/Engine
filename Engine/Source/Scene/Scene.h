@@ -141,7 +141,9 @@ namespace Scene
 #endif
 
 	void BindSceneObjects(SceneUnitId id);
+#if defined(_EDITOR)
 	JUUID CloneSceneObject(SceneUnitId id, JUUID, nlohmann::json parameters = {});
+#endif
 	void BindToScene(SceneUnitId id, JUUID uuidA, JUUID uuidB);
 	void UnbindFromScene(SceneUnitId id, JUUID uuidA);
 	void UnbindFromScene(SceneUnitId id, JUUID uuidA, JUUID uuidB);

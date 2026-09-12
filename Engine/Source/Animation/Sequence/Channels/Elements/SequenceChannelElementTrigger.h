@@ -35,7 +35,9 @@ struct SequenceChannelElementTrigger : SequenceChannelElement
 	}
 	bool operator==(const SequenceChannelElementTrigger& other) const;
 	nlohmann::json json();
+#if defined(_DEVELOPMENT)
 	void ApplyFrameTriggerAvatarValues(int frame, RenderableID renderable);
+#endif
 	void ApplyFrameTriggerValues(int frame, RenderableID renderable);
 	std::tuple<XMFLOAT3, XMFLOAT3, XMVECTOR, XMFLOAT3> GetTransformation(XMMATRIX world, Animation::NodeTransformsMap& nodesTransformation);
 	nlohmann::json CreateTriggerJson(RenderableID renderable, XMMATRIX world, Animation::NodeTransformsMap& nodesTransformation);
@@ -53,7 +55,7 @@ struct SequenceChannelElementTrigger : SequenceChannelElement
 
 	//instancing
 	bool enabled;
-#if defined(_EDITOR)
+#if defined(_DEVELOPMENT)
 	RenderableID triggerRenderable;
 	RenderableID triggerLines;
 #endif

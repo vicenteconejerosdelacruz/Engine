@@ -400,6 +400,7 @@ void SequencePlayer::ApplyFrameValues()
 	renderable->sequenceBoneTransformations = sequence.GetBonesTransformations(currentFrame);
 }
 
+#if defined(_DEVELOPMENT)
 void SequencePlayer::ApplyFrameTriggerAvatarValues()
 {
 	auto triggers = sequence.GetTriggerElements();
@@ -408,6 +409,7 @@ void SequencePlayer::ApplyFrameTriggerAvatarValues()
 		t->ApplyFrameTriggerAvatarValues(currentFrame, renderable);
 	}
 }
+#endif
 
 void SequencePlayer::ApplyFrameTriggerValues()
 {

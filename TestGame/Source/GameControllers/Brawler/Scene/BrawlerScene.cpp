@@ -3,6 +3,8 @@
 #include "BrawlerScene.h"
 #include <Brawler/Characters/Enemies/Thug.h>
 #include <Brawler/Characters/Heroes/Venom.h>
+#include <Game/Game.h>
+#include <Level.h>
 #if defined(_EDITOR)
 #include <Editor.h>
 #endif
@@ -197,8 +199,11 @@ namespace Game::Brawler
 	{
 #if defined(_EDITOR)
 		if (!Editor::IsPlaying(id) || Editor::IsPaused(id))
-			return;
+#else
+		if (GetSceneUnit(unit)->IsPaused())
 #endif
+			return;
+
 		venomUIInstance().empty() ? CreateVenomUI(id) : UpdateVenomUI(id);
 	}
 
@@ -726,6 +731,22 @@ namespace Game::Brawler
 				RemoveSceneUnitRendering(unit);
 				Editor::SwitchToPlayMode(id);
 				Editor::SwitchToUnPausedMode(id);
+
+				auto& scene = GetSceneUnit(unit);
+				scene->MarkForDelete();
+			},
+			[&](std::string asset, unsigned int count, unsigned int total)
+			{
+			}
+		);
+#else
+		using namespace Scene::Level;
+
+		LoadLevelIntoSceneUnit("mainmenu.yaml", []() { return GetLevelFromFile("mainmenu.yaml"); },
+			[&](SceneUnitId id)
+			{
+				EnableSceneUnitRendering(id);
+				RemoveSceneUnitRendering(unit);
 
 				auto& scene = GetSceneUnit(unit);
 				scene->MarkForDelete();

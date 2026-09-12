@@ -152,6 +152,8 @@ namespace Scene
 		{
 #if defined(_EDITOR)
 			if (Editor::IsPlaying(unit) && !Editor::IsPaused(unit))
+#else
+			if (!GetSceneUnit(unit)->IsPaused())
 #endif
 				Play();
 		}

@@ -1,6 +1,8 @@
 #pragma once
 #include <Controller.h>
+#if defined(_EDITOR)
 #include "../../JExpose/Editor/JEdvBrawlerDrawer.h"
+#endif
 
 namespace Game
 {

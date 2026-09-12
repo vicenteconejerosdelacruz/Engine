@@ -15,5 +15,6 @@ namespace Game
 	void CreateSceneUnitGame(SceneUnitId id);
 	void RegisterSceneUnitGame(SceneUnitId id, GEngineSM& gesm);
 	void DestroySeneUnitGame(SceneUnitId id);
+	void BootGame();
 	void GameStep();
 };

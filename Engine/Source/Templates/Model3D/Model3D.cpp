@@ -128,7 +128,9 @@ namespace Templates
 
 	Model3DInstance::Model3DInstance(SceneUnitId id, JUUID uuid, JUUID objectUUID)
 	{
+#if defined(_EDITOR)
 		std::lock_guard<std::mutex> lock(Editor::templatesTreeMutex);
+#endif
 		model3D = uuid;
 		LoadModel3DInstance(id);
 	}
@@ -225,13 +227,13 @@ namespace Templates
 			auto aMesh = aiModel->mMeshes[meshIndex];
 			aiMaterial* aiMat = aiModel->mMaterials[aMesh->mMaterialIndex];
 
-			nlohmann::json texturesMaterialJson = GetAssimpTexturesMaterialJson(path.relative_path(), aiModel, aiMat);
-
 			std::string materialUUID = GetModel3DMaterialInstanceID(model3D(), meshIndex);
 
 			if (!MaterialTemplateExist(materialUUID))
 			{
 #if defined(_DEVELOPMENT)
+				nlohmann::json texturesMaterialJson = GetAssimpTexturesMaterialJson(path.relative_path(), aiModel, aiMat);
+
 				MaterialJson materialJson = CreateModel3DMaterialJson(
 					materialUUID,
 					GetModel3DMaterialTemplateName(model3D, meshIndex),
@@ -274,6 +276,7 @@ namespace Templates
 		boundingBox = BoundingBox(center, extents);
 	}
 
+#if defined(_DEVELOPMENT)
 	nlohmann::json Model3DInstance::GetAssimpTexturesMaterialJson(std::filesystem::path relativePath, const aiScene* aiModel, aiMaterial* material)
 	{
 		//using namespace Templates::Model3D;
@@ -456,4 +459,5 @@ namespace Templates
 
 		return matJson;
 	}
+#endif
 }

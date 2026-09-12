@@ -60,6 +60,7 @@ namespace Scene::Level
 #endif
 	}
 
+#if defined(_EDITOR)
 	nlohmann::json GetDefaultLevel()
 	{
 		using namespace Editor::DefaultLevel;
@@ -75,21 +76,22 @@ namespace Scene::Level
 
 		return level;
 	}
-
+#else
 	nlohmann::json GetBootLevel()
 	{
-		using namespace Game::BootLevel;
-
-		OutputDebugStringA(std::string("Loading boot level\n").c_str());
+		//using namespace Game::BootLevel;
+		//
+		//OutputDebugStringA(std::string("Loading boot level\n").c_str());
 
 		nlohmann::json level = nlohmann::json::object({});
-		level.merge_patch(GetBootLevelRenderables());
-		level.merge_patch(GetBootLevelCameras());
-		level.merge_patch(GetBootLevelLights());
-		level.merge_patch(GetBootLevelSounds());
+		//level.merge_patch(GetBootLevelRenderables());
+		//level.merge_patch(GetBootLevelCameras());
+		//level.merge_patch(GetBootLevelLights());
+		//level.merge_patch(GetBootLevelSounds());
 
 		return level;
 	}
+#endif
 
 	nlohmann::json GetLevelFromFile(std::filesystem::path filename)
 	{
@@ -124,11 +126,11 @@ namespace Scene::Level
 	{
 		std::lock_guard<std::mutex> lock(loadLevelMutex);
 		using namespace Scene;
+		SceneUnitId id = scene->Id();
+
 #if defined(_EDITOR)
 		using namespace Editor;
 		scene->SetCanBuildAssetsTree(false);
-
-		SceneUnitId id = scene->Id();
 
 		if (!scene->IsIsolated())
 		{
@@ -136,6 +138,8 @@ namespace Scene::Level
 			CreateSceneUnitPhysicsController(id);
 			AttachPhysicsAvatars(id, data);
 		}
+#elif defined(_DEVELOPMENT)
+		AttachPhysicsAvatars(id, data);
 #endif
 
 		auto loading = CreateLoadingProcessor();

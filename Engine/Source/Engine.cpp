@@ -53,7 +53,11 @@ bool appDone = false;
 bool inSizeMove = false;
 bool resizeWindow = false;
 bool minimized = false;
+#if defined(_DEVELOPMENT)
 bool inFullScreen = false;
+#else
+bool inFullScreen = true;
+#endif
 #if defined(_EDITOR)
 bool editorPlayMode = false;
 #endif
@@ -164,6 +168,10 @@ int APIENTRY EngineWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevIns
 
 	//Initialize the physics
 	InitializePhysics();
+
+#if !defined(_EDITOR)
+	BootGame();
+#endif
 
 	// Main loop
 	while (!appDone)

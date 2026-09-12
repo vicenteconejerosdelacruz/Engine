@@ -1278,7 +1278,9 @@ namespace Templates
 
 	void TemplatesStep(DX::StepTimer& timer)
 	{
+#if defined(_DEVELOPMENT)
 		ShaderJsonStep();
+#endif
 #if defined(_EDITOR)
 		TextureJsonsStep();
 		PreviewTexturesStep(timer);

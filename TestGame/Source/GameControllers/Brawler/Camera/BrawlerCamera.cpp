@@ -41,6 +41,7 @@ namespace Game::Brawler
 
 	void BrawlerCamera::SetInitialConditions()
 	{
+#if defined(_EDITOR)
 		if (fromPlayMode)
 		{
 			followLeft(initialFollowLeft);
@@ -48,6 +49,7 @@ namespace Game::Brawler
 			followUp(initialFollowUp);
 			followDown(initialFollowDown);
 		}
+#endif
 		leftBoundaryB = MAKESUUUID(unit, leftBoundary());
 		rightBoundaryB = MAKESUUUID(unit, rightBoundary());
 		topBoundaryB = MAKESUUUID(unit, topBoundary());
@@ -96,8 +98,11 @@ namespace Game::Brawler
 	{
 #if defined(_EDITOR)
 		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
-			return;
+#else
+		if (GetSceneUnit(unit)->IsPaused())
 #endif
+			return;
+
 		BrawlerScene* scene = GetBrawlerScene(this);
 		const std::set<JUUID>& heroIDs = scene->heroes();
 

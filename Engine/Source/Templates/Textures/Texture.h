@@ -1,15 +1,14 @@
-#ifndef _TEMPLATES_TEXTURE_H
-#define _TEMPLATES_TEXTURE_H
+#pragma once
 
 #include <string>
 #include <tuple>
 #include <map>
 #include <vector>
 #include <nlohmann/json.hpp>
-#include <imgui.h>
 #include <Templates.h>
 #include <JTemplate.h>
 #if defined(_EDITOR)
+#include <imgui.h>
 #include <DeviceUtils/CommandsProcessor/CommandsProcessor.h>
 using namespace DeviceUtils;
 #endif
@@ -96,6 +95,7 @@ namespace Templates
 
 	TEMPDECL_FULL(Texture);
 
+#if defined(_DEVELOPMENT)
 	DXGI_FORMAT GetTextureFormat(std::filesystem::path path);
 	void Create2DDDSFile(TextureJson& json);
 	void CreateArrayDDSFile(TextureJson& json);
@@ -106,6 +106,7 @@ namespace Templates
 #if defined(_EDITOR)
 	void CreateTextureFromJsonDefinition(nlohmann::json& json);
 	void PreviewTexturesStep(DX::StepTimer& timer);
+#endif
 #endif
 
 	struct TextureInstance
@@ -166,5 +167,3 @@ inline auto ToTextureJson(std::vector<JObject*>& json)
 	);
 	return textures;
 }
-
-#endif

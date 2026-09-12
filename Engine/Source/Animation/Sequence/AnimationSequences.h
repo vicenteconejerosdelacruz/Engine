@@ -1,5 +1,4 @@
-#ifndef _ANIMATION_SEQUENCES_H
-#define _ANIMATION_SEQUENCES_H
+#pragma once
 
 #include <unordered_map>
 #include <string>
@@ -26,5 +25,3 @@ inline static nlohmann::json FromAnimationSequences(AnimationSequences s)
 {
 	return s.json();
 }
-
-#endif

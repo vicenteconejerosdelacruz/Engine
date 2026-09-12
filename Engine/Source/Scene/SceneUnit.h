@@ -21,7 +21,7 @@ namespace Scene
 	public:
 		SceneUnit(SceneUnitId unit, std::string name);
 		~SceneUnit();
-		SceneUnitId Id();
+		SceneUnitId Id() const;
 		void MarkForDelete(std::function<void()> cb = nullptr);
 		bool MarkedForDelete();
 		bool BeingCreated();
@@ -82,6 +82,9 @@ namespace Scene
 #if defined(_EDITOR)
 		bool CanBuildAssetsTree();
 		void SetCanBuildAssetsTree(bool value);
+#else
+		bool IsPaused() const;
+		void SetPaused(bool value);
 #endif
 
 	private:
@@ -94,6 +97,8 @@ namespace Scene
 		bool isolated;
 #if defined(_EDITOR)
 		std::unique_ptr<std::atomic_uint> canBuildAssetsTree;
+#else
+		bool isPaused;
 #endif
 
 		//Scene

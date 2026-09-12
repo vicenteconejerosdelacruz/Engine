@@ -3,7 +3,9 @@
 #include <Renderer.h>
 #include <Scene.h>
 #include <DirectXHelper.h>
+#if defined(_DEVELOPMENT)
 #include <ImageConvert.h>
+#endif
 
 extern std::unique_ptr<JRenderer> renderer;
 
@@ -76,6 +78,7 @@ namespace Templates
 	TEMPDEF_REFTRACKER(Texture);
 	std::vector<std::tuple<unsigned int, std::function<void()>>> textureUploadResourcesFreeCallback;
 
+#if defined(_DEVELOPMENT)
 	DXGI_FORMAT GetTextureFormat(std::filesystem::path path)
 	{
 		using namespace Utils;
@@ -308,6 +311,7 @@ namespace Templates
 		Editor::MarkTemplatesPanelAssetsAsDirty();
 #endif
 	}
+#endif
 
 #if defined(_EDITOR)
 	void CreateTextureFromJsonDefinition(nlohmann::json& json)
@@ -481,6 +485,7 @@ namespace Templates
 		std::for_each(previewsToPlay.begin(), previewsToPlay.end(), previewStep);
 	}
 
+#if defined(_EDITOR)
 	TextureInstance::TextureInstance(CComPtr<ID3D12GraphicsCommandList2>& commandList, JUUID uuid) : TextureInstance(commandList, uuid, 0U) {}
 
 	TextureInstance::TextureInstance(CComPtr<ID3D12GraphicsCommandList2>& commandList, JUUID uuid, unsigned int startFrame)
@@ -509,6 +514,7 @@ namespace Templates
 		CreateTextureResource(commandList, pathS, tex->format(), tex->type(), tex->numFrames(), tex->mipLevels(), startFrame);
 	}
 #endif
+#endif
 
 	TextureInstance::TextureInstance(SceneUnitId id, JUUID uuid) : TextureInstance(id, uuid, 0U) {}
 
@@ -519,15 +525,17 @@ namespace Templates
 		materialTexture = uuid;
 		std::unique_ptr<TextureJson>& tex = GetTextureTemplate(uuid);
 		std::filesystem::path path = tex->name();
-#if defined(_DEVELOPMENT)
 		if (path.extension() != ".dds")
 		{
 			path.replace_extension(".dds");
+#if defined(_DEVELOPMENT)
 			if (!std::filesystem::exists(path))
 			{
 				CreateDDSFile(tex);
 			}
+#endif
 		}
+#if defined(_DEVELOPMENT)
 		else if (tex->images().size() == 0ULL || tex->images().at(0) == "")
 		{
 			nlohmann::json update = { {"images", nlohmann::json::array({tex->name()}) } };

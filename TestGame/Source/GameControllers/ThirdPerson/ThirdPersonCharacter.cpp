@@ -102,8 +102,10 @@ namespace Game::ThirdPerson
 	{
 #if defined(_EDITOR)
 		if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
-			return;
+#else
+		if (GetSceneUnit(unit)->IsPaused())
 #endif
+			return;
 
 		auto state = gamePad->GetState(0);
 		if (state.IsConnected())
