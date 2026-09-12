@@ -306,8 +306,9 @@ namespace Game::Brawler
 #if defined(_EDITOR)
 		Editor::SwitchToPlayMode(gameUnit);
 		Editor::SwitchToUnPausedMode(gameUnit);
-#endif
+#else
 		GetSceneUnit(gameUnit)->SetPaused(false);
+#endif
 		auto& scene = GetSceneUnit(unit);
 		scene->MarkForDelete();
 	}
