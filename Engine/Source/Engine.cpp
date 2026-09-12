@@ -321,6 +321,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			ResetWindowStyle(inFullScreen);
 #endif
 		}
+#if !defined(_EDITOR)
+		else if (wParam == VK_F4 && (lParam & (1 << 29))) // Bit 29 indica que la tecla ALT está presionada
+		{
+			appDone = true;
+			return 0;
+		}
+#endif
 		Keyboard::ProcessMessage(message, wParam, lParam);
 	}
 	break;
