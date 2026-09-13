@@ -67,6 +67,10 @@ namespace Game
 
 	void GameStep()
 	{
+#if defined(_DEVELOPMENT)
+		std::string event = std::string(__FUNCTION__);
+		PIXScopedEvent(0, nostd::StringToWString(event).c_str());
+#endif
 		for (auto& [_, gesm] : gameInstances)
 		{
 			gesm.Step();

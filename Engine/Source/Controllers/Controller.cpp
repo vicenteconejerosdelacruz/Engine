@@ -291,7 +291,7 @@ namespace Game
 					continue;
 
 				auto& scene = GetSceneUnit(controller->unit);
-				if (scene->BeingCreated())
+				if (scene->BeingCreated() || scene->BeingDestroyed())
 					continue;
 
 				controllersUUIDs.at(uuid)->Step(dt);

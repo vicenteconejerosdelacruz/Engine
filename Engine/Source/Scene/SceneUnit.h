@@ -26,6 +26,8 @@ namespace Scene
 		bool MarkedForDelete();
 		bool BeingCreated();
 		void BeingCreated(bool value) { beingCreated = value; };
+		bool BeingDestroyed();
+		void BeingDestroyed(bool value) { beingDestroyed = value; };
 		unsigned int DeleteFrames();
 		void DecreaseDeleteFrames();
 		void CallDeleteCallback();
@@ -92,6 +94,7 @@ namespace Scene
 		std::string unitName;
 		bool markedForDelete;
 		bool beingCreated;
+		bool beingDestroyed;
 		unsigned int deleteFrames = JRenderer::numFrames;
 		std::function<void()> deleteCallback;
 		bool isolated;

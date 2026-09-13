@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "HtmlUI.h"
+#include <Scene.h>
 
 extern RefPtr<ultralight::Renderer> ultraLightRenderer;
 extern std::unique_ptr<JRenderer> renderer;
@@ -141,6 +142,11 @@ namespace Templates
 
 	void HtmlUIInstance::UpdateTexture(SceneUnitId id)
 	{
+		using namespace Scene;
+		auto& scene = GetSceneUnit(id);
+		if (scene->MarkedForDelete() || scene->BeingCreated() || scene->BeingDestroyed())
+			return;
+
 		BitmapSurface* surface = (BitmapSurface*)(view->surface());
 		if (surface->dirty_bounds().IsEmpty()) return;
 
@@ -204,6 +210,11 @@ namespace Templates
 	}
 	void HtmlUIInstance::Resolve(SceneUnitId id)
 	{
+		using namespace Scene;
+		auto& scene = GetSceneUnit(id);
+		if (scene->MarkedForDelete() || scene->BeingCreated() || scene->BeingDestroyed())
+			return;
+
 		resolvePass->Pass(id);
 	}
 

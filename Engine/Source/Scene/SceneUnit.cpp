@@ -29,6 +29,7 @@ namespace Scene
 		unitName = name;
 		markedForDelete = false;
 		beingCreated = true;
+		beingDestroyed = false;
 		deleteCallback = nullptr;
 		isolated = false;
 		binder.unit = unit;
@@ -64,6 +65,11 @@ namespace Scene
 	bool SceneUnit::BeingCreated()
 	{
 		return beingCreated;
+	}
+
+	bool SceneUnit::BeingDestroyed()
+	{
+		return beingDestroyed;
 	}
 
 	unsigned int SceneUnit::DeleteFrames()

@@ -1542,6 +1542,10 @@ namespace Scene
 
 	void RenderablesStep(SceneUnitId id, float dt)
 	{
+#if defined(_DEVELOPMENT)
+		std::string event = std::string(__FUNCTION__) + ":" + std::to_string(id);
+		PIXScopedEvent(0, nostd::StringToWString(event).c_str());
+#endif
 		auto& Renderables = GetRenderables(id);
 		std::set<RenderableID> r;
 		std::transform(Renderables.begin(), Renderables.end(), std::inserter(r, r.begin()), [&](auto o) { return MAKESUUUID(id, o); });

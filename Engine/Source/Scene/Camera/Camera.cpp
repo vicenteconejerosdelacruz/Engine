@@ -1134,6 +1134,10 @@ namespace Scene
 
 	void CamerasStep(SceneUnitId id)
 	{
+#if defined(_DEVELOPMENT)
+		std::string event = std::string(__FUNCTION__) + ":" + std::to_string(id);
+		PIXScopedEvent(0, nostd::StringToWString(event).c_str());
+#endif
 		//auto Cameras = nostd::GetUUIDS(CamerasceneObjects);
 		auto& Cameras = GetCameras(id);
 		std::set<CameraID> cams;

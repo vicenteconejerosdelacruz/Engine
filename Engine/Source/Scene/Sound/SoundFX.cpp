@@ -334,6 +334,10 @@ namespace Scene
 
 	void SoundFXsStep(SceneUnitId id, float step)
 	{
+#if defined(_DEVELOPMENT)
+		std::string event = std::string(__FUNCTION__) + ":" + std::to_string(id);
+		PIXScopedEvent(0, nostd::StringToWString(event).c_str());
+#endif
 		if (!SoundEffects.contains(id)) return;
 
 		auto& SoundFxs = SoundEffects.at(id);

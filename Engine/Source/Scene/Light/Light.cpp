@@ -394,6 +394,10 @@ namespace Scene
 
 	void LightsStep(SceneUnitId id)
 	{
+#if defined(_DEVELOPMENT)
+		std::string event = std::string(__FUNCTION__) + ":" + std::to_string(id);
+		PIXScopedEvent(0, nostd::StringToWString(event).c_str());
+#endif
 		std::set<LightID> lightsToUpdateCamAttributes;
 		std::set<LightID> lightsToUpdateTransformation;
 		std::set<LightID> lightsToDelete;

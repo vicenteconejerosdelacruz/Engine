@@ -540,10 +540,17 @@ void AppStep()
 	EditorStep();
 #endif
 	CheckInputSwap();
+#if defined(_DEVELOPMENT)
+	unsigned int stepCount = 0U;
+#endif
 	timer.Tick([&]()
 		{
 #if defined(_EDITOR)
 			if (restoringPlayMode) return;
+#endif
+#if defined(_DEVELOPMENT)
+			std::string event = std::string("timer.Tick:") + std::to_string(stepCount) + "\n";
+			PIXScopedEvent(0, nostd::StringToWString(event).c_str());
 #endif
 			FetchPhysicsScenesResults(timer);
 			TemplatesStep(timer);
@@ -551,6 +558,9 @@ void AppStep()
 			SceneObjectsStep(timer);
 			StepControllers(timer);
 			SimulatePhysicScenes(timer);
+#if defined(_DEVELOPMENT)
+			stepCount++;
+#endif
 		}
 	);
 	UIStep();

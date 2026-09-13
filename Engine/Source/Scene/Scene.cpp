@@ -767,7 +767,11 @@ namespace Scene
 	{
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->MarkedForDelete() || scene->BeingCreated()) continue;
+#if defined(_DEVELOPMENT)
+			std::string event = std::string(__FUNCTION__) + ":" + std::to_string(unit);
+			PIXScopedEvent(0, nostd::StringToWString(event).c_str());
+#endif
+			if (scene->MarkedForDelete() || scene->BeingCreated() || scene->BeingDestroyed()) continue;
 			float dt = static_cast<FLOAT>(timer.GetElapsedSeconds());
 #if defined(_EDITOR)
 			if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
@@ -785,7 +789,7 @@ namespace Scene
 	{
 		for (auto& [unit, scene] : scenesUnits)
 		{
-			if (scene->MarkedForDelete() || scene->BeingCreated()) continue;
+			if (scene->MarkedForDelete() || scene->BeingCreated() || scene->BeingDestroyed()) continue;
 			float dt = static_cast<FLOAT>(timer.GetElapsedSeconds());
 #if defined(_EDITOR)
 			if (!Editor::IsPlaying(unit) || Editor::IsPaused(unit))
@@ -969,6 +973,10 @@ namespace Scene
 
 	void AnimableStep(SceneUnitId id, double elapsedSeconds)
 	{
+#if defined(_DEVELOPMENT)
+		std::string event = std::string(__FUNCTION__) + ":" + std::to_string(id);
+		PIXScopedEvent(0, nostd::StringToWString(event).c_str());
+#endif
 		for (JUUID uuid : GetAnimables(id))
 		{
 			RenderableID r = MAKESUUUID(id, uuid);

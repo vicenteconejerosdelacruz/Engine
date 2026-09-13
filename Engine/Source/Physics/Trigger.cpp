@@ -236,6 +236,10 @@ namespace Scene
 #if defined(_EDITOR)
 		using namespace Editor;
 #endif
+#if defined(_DEVELOPMENT)
+		std::string event = std::string(__FUNCTION__) + ":" + std::to_string(unit);
+		PIXScopedEvent(0, nostd::StringToWString(event).c_str());
+#endif
 		auto& Triggers = GetTriggers(unit);
 		std::set<TriggerID> tr1;
 		std::set<TriggerID> tr;
