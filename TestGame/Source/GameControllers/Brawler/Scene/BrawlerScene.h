@@ -79,6 +79,7 @@ namespace Game
 			//UI
 			std::string BuildEvalScript(std::string type, nlohmann::json data);
 			void CreateVenomUI(SceneUnitId id);
+			void DestroyVenomUI();
 			void UpdateVenomUI(SceneUnitId id);
 			void HeroTookHit(JUUID enemy, int newHealth);
 			void UpdateEnemy(JUUID enemy);

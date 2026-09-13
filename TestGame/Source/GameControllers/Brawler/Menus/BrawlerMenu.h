@@ -54,6 +54,7 @@ namespace Game
 			//UI
 			std::string BuildEvalScript(std::string type, nlohmann::json data);
 			void CreateMenuUI(SceneUnitId id);
+			void DestroyMenuUI();
 			void UpdateMenuUI(SceneUnitId id);
 			void UpdateGameState();
 			void UpdateGamepad();

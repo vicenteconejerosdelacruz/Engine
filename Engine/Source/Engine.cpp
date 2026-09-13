@@ -513,6 +513,8 @@ static void CheckInputSwap()
 
 #if defined(_EDITOR)
 extern bool restoringPlayMode;
+#elif defined(_DEVELOPMENT)
+bool resetAppStepTick = false;
 #endif
 
 void AppStep()
@@ -529,6 +531,14 @@ void AppStep()
 	if (resizeWindow && !inSizeMove) {
 		return ResizeWindow();
 	}
+
+#if defined(_DEVELOPMENT)
+	if (resetAppStepTick)
+	{
+		resetAppStepTick = false;
+		timer.ResetElapsedTime();
+	}
+#endif
 
 #if defined(_DEVELOPMENT)
 	PIXScopedEvent(0, L"AppStep");

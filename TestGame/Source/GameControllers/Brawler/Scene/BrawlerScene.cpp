@@ -9,12 +9,16 @@
 #include <Editor.h>
 #endif
 
+extern DX::StepTimer timer;
 extern std::unique_ptr<DirectX::GamePad> gamePad;
 extern DirectX::GamePad::ButtonStateTracker buttons;
 extern std::unique_ptr<DirectX::Keyboard> keyboard;
 extern GameInteractionMode gameInteractionMode;
 extern std::map<JUUID, std::function<void(JUUID)>> onKeyboardMouseInputDetected;
 extern std::map<JUUID, std::function<void(JUUID)>> onGamepadInputDetected;
+#if defined(_DEVELOPMENT)
+extern bool resetAppStepTick;
+#endif
 
 namespace Game::Brawler
 {
@@ -122,6 +126,7 @@ namespace Game::Brawler
 	void BrawlerScene::Unmap()
 	{
 		Controller::Unmap();
+		DestroyVenomUI();
 		if (onKeyboardMouseInputDetected.contains(uuid())) onKeyboardMouseInputDetected.erase(uuid());
 		if (onGamepadInputDetected.contains(uuid())) onGamepadInputDetected.erase(uuid());
 	}
@@ -237,6 +242,13 @@ namespace Game::Brawler
 				gamepadStatusSet(false);
 			}
 		);
+	}
+
+	void BrawlerScene::DestroyVenomUI()
+	{
+		HtmlUIInstanceID instance = venomUIInstance();
+		if (!instance.empty())
+			instance->Destroy();
 	}
 
 	void BrawlerScene::UpdateVenomUI(SceneUnitId id)
@@ -742,6 +754,9 @@ namespace Game::Brawler
 #else
 		using namespace Scene::Level;
 
+		auto& scene = GetSceneUnit(unit);
+		scene->BeingDestroyed(true);
+
 		LoadLevelIntoSceneUnit("mainmenu.yaml", []() { return GetLevelFromFile("mainmenu.yaml"); },
 			[&](SceneUnitId id)
 			{
@@ -749,7 +764,12 @@ namespace Game::Brawler
 				RemoveSceneUnitRendering(unit);
 
 				auto& scene = GetSceneUnit(unit);
-				scene->MarkForDelete();
+				scene->MarkForDelete([]
+					{
+						resetAppStepTick = true;
+					}
+				);
+				//renderer->Flush();
 			},
 			[&](std::string asset, unsigned int count, unsigned int total)
 			{

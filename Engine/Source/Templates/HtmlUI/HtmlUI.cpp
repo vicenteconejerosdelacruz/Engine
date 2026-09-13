@@ -131,7 +131,19 @@ namespace Templates
 
 	void HtmlUIInstance::Destroy()
 	{
-		RefPtr<View> view = nullptr;
+		if (view)
+		{
+			// Romper referencias cíclicas de listeners si se asignaron
+			view->set_view_listener(nullptr);
+			view->set_load_listener(nullptr);
+
+			// Desvincular bindings/callbacks de JavaScript
+			bridgeCallbacks.clear();
+
+			// Liberar el RefPtr de Ultralight
+			view = nullptr;
+		}
+
 		DeleteRenderToTexture(rt_texture);
 		if (resolvePass)
 		{

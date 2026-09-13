@@ -87,6 +87,7 @@ namespace Game::Brawler
 
 	void BrawlerMenu::Unmap()
 	{
+		DestroyMenuUI();
 		Controller::Unmap();
 		if (onKeyboardMouseInputDetected.contains(uuid())) onKeyboardMouseInputDetected.erase(uuid());
 		if (onGamepadInputDetected.contains(uuid())) onGamepadInputDetected.erase(uuid());
@@ -189,6 +190,13 @@ namespace Game::Brawler
 				loadingProgressValue(0);
 			}
 		);
+	}
+
+	void BrawlerMenu::DestroyMenuUI()
+	{
+		HtmlUIInstanceID instance = menuUIInstance();
+		if (!instance.empty())
+			instance->Destroy();
 	}
 
 	void BrawlerMenu::UpdateMenuUI(SceneUnitId id)
