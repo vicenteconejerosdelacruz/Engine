@@ -60,6 +60,7 @@ namespace Templates
 	HtmlUIInstance::HtmlUIInstance(SceneUnitId id, JUUID instance_uuid, JUUID template_uuid)
 	{
 		instanceUUID = instance_uuid;
+		templateUUID = template_uuid;
 		HtmlUIJsonID tmpl = template_uuid;
 
 		//figure out the width&height
@@ -149,6 +150,79 @@ namespace Templates
 			resolvePass->MarkForDelete();
 		}
 		uploadBuffer = nullptr;
+	}
+
+	void HtmlUIInstance::ResizeRelease()
+	{
+		DeleteRenderToTexture(rt_texture);
+		rt_texture.clear();
+
+		if (resolvePass)
+		{
+			DestroyRenderPassInstance(resolvePass);
+			resolvePass.clear();
+		}
+
+		uploadBuffer = nullptr;
+	}
+
+	void HtmlUIInstance::Resize(uint32_t newWidth, uint32_t newHeight)
+	{
+		if (newWidth == 0 || newHeight == 0) return;
+
+		// Redimensionar la vista nativa de Ultralight
+		if (view)
+		{
+			view->Resize(newWidth, newHeight);
+		}
+
+		HtmlUIJsonID tmpl = templateUUID;
+
+		// Recrear RenderToTexture
+		rt_texture = CreateRenderToTexture();
+		rt_texture->name = tmpl->name();
+		rt_texture->format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		rt_texture->width = newWidth;
+		rt_texture->height = newHeight;
+		rt_texture->useClearColor = false;
+		rt_texture->Create();
+		AllocCSUDescriptor(rt_texture->cpuTextureHandle, rt_texture->gpuTextureHandle);
+
+		// Recrear SRV
+		D3D12_SHADER_RESOURCE_VIEW_DESC rttSRVDesc = {
+			.Format = DXGI_FORMAT_R8G8B8A8_UNORM,
+			.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
+			.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
+			.Texture2D = {.MostDetailedMip = 0, .MipLevels = 1U, .ResourceMinLODClamp = 0.0f },
+		};
+		renderer->d3dDevice->CreateShaderResourceView(rt_texture->renderToTexture, &rttSRVDesc, rt_texture->cpuTextureHandle);
+
+		// Recrear ResolvePass (Vuelve a engancharse al SwapChain fresco)
+		resolvePass = CreateRenderPassInstance(CameraID(), GetRenderPassUUIDByName("resolveUIPass"), 1, newWidth, newHeight);
+		auto* overrideResolvePass = static_cast<ResolvePass*>(resolvePass->overridePass.get());
+		overrideResolvePass->rt_texture = rt_texture;
+		overrideResolvePass->clearRTV = false;
+
+		// Recrear UploadBuffer
+		unsigned int bytesPerPixel = 4;
+		rowPitch = (newWidth * bytesPerPixel + 255) & ~255;
+		size_t uploadSize = (size_t)rowPitch * newHeight;
+
+		D3D12_RESOURCE_DESC bufDesc = {};
+		bufDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		bufDesc.Width = uploadSize;
+		bufDesc.Height = 1;
+		bufDesc.DepthOrArraySize = 1;
+		bufDesc.MipLevels = 1;
+		bufDesc.Format = DXGI_FORMAT_UNKNOWN;
+		bufDesc.SampleDesc.Count = 1;
+		bufDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+		const CD3DX12_HEAP_PROPERTIES uploadHeap(D3D12_HEAP_TYPE_UPLOAD);
+		renderer->d3dDevice->CreateCommittedResource(
+			&uploadHeap, D3D12_HEAP_FLAG_NONE, &bufDesc,
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr, IID_PPV_ARGS(&uploadBuffer));
 	}
 
 	void HtmlUIInstance::UpdateTexture(SceneUnitId id)
@@ -246,5 +320,37 @@ namespace Templates
 	void HtmlUIInstance::EvaluateScript(std::string js)
 	{
 		view->EvaluateScript(js.c_str());
+	}
+
+	std::vector<HtmlUIInstanceID> GetHtmlUIInstances()
+	{
+		std::vector<JUUID> uuids = nostd::GetKeysFromMap(refTracker.instancesRefCount);
+		std::vector<HtmlUIInstanceID> instances;
+		std::transform(uuids.begin(), uuids.end(), std::back_inserter(instances), [](JUUID uuid) { return uuid; });
+		return instances;
+	}
+
+	void ResizeReleaseHtmlUIInstances()
+	{
+		std::vector<HtmlUIInstanceID> instances = GetHtmlUIInstances();
+		for (auto& ui : instances)
+		{
+			if (ui)
+			{
+				ui->ResizeRelease();
+			}
+		}
+	}
+
+	void ResizeHtmlUIInstances(uint32_t width, uint32_t height)
+	{
+		std::vector<HtmlUIInstanceID> instances = GetHtmlUIInstances();
+		for (auto& ui : instances)
+		{
+			if (ui)
+			{
+				ui->Resize(width, height);
+			}
+		}
 	}
 };

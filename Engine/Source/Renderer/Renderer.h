@@ -49,6 +49,7 @@ struct JRenderer
 	CComPtr<ID3D12CommandQueue> commandQueue;
 	CComPtr<IDXGISwapChain4> swapChain;
 	DXGI_FORMAT swapChainFormat;
+	bool supportsTearing;
 
 	//GPU <-> CPU synchronization 
 	//unsigned int backBufferIndex;

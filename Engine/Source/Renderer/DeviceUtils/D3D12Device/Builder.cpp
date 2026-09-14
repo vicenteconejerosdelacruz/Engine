@@ -106,7 +106,7 @@ namespace DeviceUtils {
 		return d3d12CommandQueue;
 	}
 
-	CComPtr<IDXGISwapChain4> CreateSwapChain(HWND hwnd, CComPtr<ID3D12CommandQueue> commandQueue, UINT bufferCount)
+	CComPtr<IDXGISwapChain4> CreateSwapChain(HWND hwnd, CComPtr<ID3D12CommandQueue> commandQueue, UINT bufferCount, bool& supportsTearing)
 	{
 		CComPtr<IDXGISwapChain4> dxgiSwapChain4;
 		CComPtr<IDXGIFactory4> dxgiFactory4;
@@ -117,10 +117,30 @@ namespace DeviceUtils {
 
 		DX::ThrowIfFailed(CreateDXGIFactory2(createFactoryFlags, IID_PPV_ARGS(&dxgiFactory4)));
 
+		// 1. DESACTIVAR ALT+ENTER AUTOMÁTICO DE DXGI
+		// Esto evita que DXGI fuerce el Fullscreen Exclusivo y rompa el Tearing flag.
+		DX::ThrowIfFailed(
+			dxgiFactory4->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_WINDOW_CHANGES)
+		);
+
+		// 2. Usar GetClientRect en lugar de GetWindowRect 
+		// (el SwapChain necesita el tamaño interno de dibujado, no los bordes de la ventana)
 		RECT rect;
-		GetWindowRect(hwnd, &rect);
+		GetClientRect(hwnd, &rect);
 		int width = rect.right - rect.left;
 		int height = rect.bottom - rect.top;
+
+		// Asegurar dimensiones válidas (si la ventana se creó minimizada o con 0)
+		if (width <= 0) width = 1;
+		if (height <= 0) height = 1;
+
+		// 3. Comprobar soporte de Tearing en el sistema
+		BOOL allowTearing = FALSE;
+		CComPtr<IDXGIFactory5> factory5;
+		if (SUCCEEDED(dxgiFactory4.QueryInterface(&factory5)))
+		{
+			factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing));
+		}
 
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
 		swapChainDesc.Width = width;
@@ -133,19 +153,22 @@ namespace DeviceUtils {
 		swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 
-		DXGI_SWAP_CHAIN_FULLSCREEN_DESC fsSwapChainDesc = {};
-		fsSwapChainDesc.Windowed = TRUE;
+		// Asignar el flag solo si la GPU/Sistema realmente lo soporta
+		swapChainDesc.Flags = allowTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
+		// 4. Pasar nullptr en el parámetro de Fullscreen Desc
+		// Es preferible pasar nullptr en lugar de fsSwapChainDesc para garantizar estado Windowed puro.
 		CComPtr<IDXGISwapChain1> swapChain1;
 		DX::ThrowIfFailed(
 			dxgiFactory4->CreateSwapChainForHwnd(
-				commandQueue, hwnd, &swapChainDesc, &fsSwapChainDesc, nullptr, &swapChain1
+				commandQueue, hwnd, &swapChainDesc, nullptr, nullptr, &swapChain1
 			)
 		);
 
 		DX::ThrowIfFailed(swapChain1.QueryInterface(&dxgiSwapChain4));
+
+		supportsTearing = allowTearing;
 
 		return dxgiSwapChain4;
 	}

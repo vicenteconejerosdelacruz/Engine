@@ -83,12 +83,15 @@ namespace Templates
 		explicit HtmlUIInstance(SceneUnitId id, JUUID instance_uuid, JUUID template_uuid);
 		~HtmlUIInstance() { Destroy(); }
 		void Destroy();
+		void ResizeRelease();
+		void Resize(uint32_t newWidth, uint32_t newHeight);
 		void UpdateTexture(SceneUnitId id);
 		void Resolve(SceneUnitId id);
 		void OnDOMReady(View* caller, uint64_t frame_id, bool is_main_frame, const ultralight::String& url) override;
 		void MapBridgeCallback(std::string event, std::function<void()> callback);
 		void EvaluateScript(std::string js);
 
+		JUUID templateUUID;
 		JUUID instanceUUID;
 		RefPtr<View> view;
 		RenderToTextureID rt_texture;
@@ -97,6 +100,9 @@ namespace Templates
 		CComPtr<ID3D12Resource> uploadBuffer;
 		std::map<std::string, std::function<void()>> bridgeCallbacks;
 	};
+	std::vector<HtmlUIInstanceID> GetHtmlUIInstances();
+	void ResizeReleaseHtmlUIInstances();
+	void ResizeHtmlUIInstances(uint32_t width, uint32_t height);
 };
 
 using namespace Templates;

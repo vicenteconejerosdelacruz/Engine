@@ -95,29 +95,52 @@ RECT GetMaximizedAreaSize()
 	return monitor_info.rcWork;
 }
 
+// Guarda el tamaño original de la ventana al estar en modo Windowed
+static WINDOWPLACEMENT g_wpPrev = { sizeof(WINDOWPLACEMENT) };
+
 void ResetWindowStyle(bool fullscreen)
 {
-	SetWindowLong(hWnd, GWL_STYLE, 0);
-
 #if !defined(_EDITOR)
+	DWORD dwStyle = GetWindowLong(hWnd, GWL_STYLE);
+
 	if (fullscreen)
 	{
-		SetWindowLongPtr(hWnd, GWL_STYLE, WS_MAXIMIZE);
-		SetWindowLongPtr(hWnd, GWL_EXSTYLE, 0);
+		// Guardar las coordenadas de ventana normal solo si NO está en Popup actualmente
+		if ((dwStyle & WS_POPUP) == 0)
+		{
+			GetWindowPlacement(hWnd, &g_wpPrev);
+		}
 
-		ShowWindow(hWnd, SW_SHOWMAXIMIZED);
+		MONITORINFO mi = { sizeof(mi) };
+		HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 
-		SetWindowPos(hWnd, HWND_TOP, desktopRect.left, desktopRect.top, desktopRect.right - desktopRect.left, desktopRect.bottom - desktopRect.top, SWP_NOZORDER | SWP_FRAMECHANGED);
+		if (GetMonitorInfoW(hMonitor, &mi))
+		{
+			// Quitar bordes para Borderless Fullscreen
+			SetWindowLong(hWnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
+			SetWindowLong(hWnd, GWL_EXSTYLE, 0);
+
+			SetWindowPos(hWnd, HWND_TOP,
+				mi.rcMonitor.left,
+				mi.rcMonitor.top,
+				mi.rcMonitor.right - mi.rcMonitor.left,
+				mi.rcMonitor.bottom - mi.rcMonitor.top,
+				SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+		}
 	}
 	else
 	{
-		SetWindowLongPtr(hWnd, GWL_STYLE, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
-		SetWindowLongPtr(hWnd, GWL_EXSTYLE, WS_EX_TOPMOST);
+		// Restaurar estilo normal de ventana
+		SetWindowLong(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
 
-		SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+		// Restaurar posición original desde el placement guardado
+		SetWindowPlacement(hWnd, &g_wpPrev);
 
-		ShowWindow(hWnd, SW_NORMAL);
+		SetWindowPos(hWnd, nullptr, 0, 0, 0, 0,
+			SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 	}
+
+	ShowWindow(hWnd, SW_SHOW);
 #else
 	SetWindowLongPtr(hWnd, GWL_STYLE, WS_POPUP);
 	SetWindowLongPtr(hWnd, GWL_EXSTYLE, WS_EX_TOPMOST);
@@ -218,26 +241,44 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-	hInst = hInstance; // Store instance handle in our global variable
+	// 1. Inicializar la librería COM antes de cualquier llamada a mandos/audio
+	HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	if (FAILED(hr))
+	{
+		return FALSE;
+	}
 
-	//this is mode full desktop space
+	hInst = hInstance;
+
 #if defined(_EDITOR)
-	RECT winR = GetMaximizedAreaSize();// desktopRect;
-	hWnd = CreateWindowW(szWindowClass, nostd::StringToWString(gameAppTitle).c_str(), WS_OVERLAPPEDWINDOW, winR.left, winR.top, winR.right, winR.bottom, nullptr, nullptr, hInstance, nullptr);
-#endif
+	RECT winR = GetMaximizedAreaSize();
+	hWnd = CreateWindowW(szWindowClass, nostd::StringToWString(gameAppTitle).c_str(),
+		WS_OVERLAPPEDWINDOW, winR.left, winR.top, winR.right, winR.bottom,
+		nullptr, nullptr, hInstance, nullptr);
+#else
+	int initWidth = 1280;
+	int initHeight = 720;
+	int posX = (GetSystemMetrics(SM_CXSCREEN) - initWidth) / 2;
+	int posY = (GetSystemMetrics(SM_CYSCREEN) - initHeight) / 2;
 
-	//this is windowed mode
-#if !defined(_EDITOR)
-	hWnd = CreateWindowW(szWindowClass, nostd::StringToWString(gameAppTitle).c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+	hWnd = CreateWindowW(szWindowClass, nostd::StringToWString(gameAppTitle).c_str(),
+		WS_OVERLAPPEDWINDOW, posX, posY, initWidth, initHeight,
+		nullptr, nullptr, hInstance, nullptr);
 #endif
 
 	if (!hWnd) return FALSE;
 
+	// 2. Mostrar la ventana brevemente para asegurar que los rectángulos nativos de Win32 estén construidos
+	ShowWindow(hWnd, nCmdShow);
+
+	// 3. Guardar la geometría Windowed de partida
+	GetWindowPlacement(hWnd, &g_wpPrev);
+
+	// 4. Aplicar el modo de ventana / pantalla completa
 	ResetWindowStyle(inFullScreen);
 
 	UpdateWindow(hWnd);
-
-	GetWindowRect(hWnd, &hWndRect);
+	GetClientRect(hWnd, &hWndRect);
 
 	//initialize input helpers
 	mouse = std::make_unique<Mouse>();
@@ -248,7 +289,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	gamePad = std::make_unique<GamePad>();
 	buttons.Reset();
 
-	//initialize the shader compiler and changes monitor
 	BuildShaderCompiler();
 #if defined(_DEVELOPMENT)
 	MonitorShaderChanges(defaultShadersFolder);
@@ -277,7 +317,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	return TRUE;
 }
 
-//UPDATE
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 #if defined(_EDITOR)
@@ -315,19 +354,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		if (wParam == VK_RETURN && (lParam & 0x60000000) == 0x20000000)
 		{
-			//implement fullscreen with ALT+ENTER
 #if !defined(_EDITOR)
 			inFullScreen = !inFullScreen;
+
+			if (renderer)
+			{
+				renderer->Flush();
+			}
+
 			ResetWindowStyle(inFullScreen);
+			resizeWindow = true;
+			return 0;
 #endif
 		}
-#if !defined(_EDITOR)
-		else if (wParam == VK_F4 && (lParam & (1 << 29))) // Bit 29 indica que la tecla ALT está presionada
+		else if (wParam == VK_F4 && (lParam & (1 << 29)))
 		{
 			appDone = true;
 			return 0;
 		}
-#endif
 		Keyboard::ProcessMessage(message, wParam, lParam);
 	}
 	break;
@@ -368,7 +412,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		inSizeMove = false;
 		if (renderer)
 		{
-			GetWindowRect(hWnd, &hWndRect);
+			GetClientRect(hWnd, &hWndRect);
 			resizeWindow = true;
 		}
 	}
@@ -401,7 +445,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_NCHITTEST:
 	{
 		POINTS pt = MAKEPOINTS(lParam);
-
 		RECT& r = hWndRect;
 
 		bool leftBorder = nostd::in_between(pt.x, r.left, r.left + 5);
@@ -525,14 +568,14 @@ void AppStep()
 
 	if (!inFullScreen)
 	{
-		GetWindowRect(hWnd, &hWndRect);
+		GetClientRect(hWnd, &hWndRect);
 	}
 
 	if (resizeWindow && !inSizeMove) {
 		return ResizeWindow();
 	}
 
-#if defined(_DEVELOPMENT)
+#if defined(_DEVELOPMENT) && !defined(_EDITOR)
 	if (resetAppStepTick)
 	{
 		resetAppStepTick = false;
@@ -578,7 +621,6 @@ void AppStep()
 	LoadingProcessorsStep();
 }
 
-//RENDER
 void Render()
 {
 	using namespace Scene;
@@ -594,21 +636,28 @@ void ResizeWindow()
 	using namespace Scene;
 
 	resizeWindow = false;
-	renderer->Flush();
-	ResizeReleaseScenePasses();
-	GetWindowRect(hWnd, &hWndRect);
 
-	if (renderer)
-	{
-		renderer->swapChainPass->ResizeRelease();
-		renderer->UpdateViewportPerspective();
-		renderer->Resize(HWNDWIDTH, HWNDHEIGHT);
-		renderer->swapChainPass->Resize(HWNDWIDTH, HWNDHEIGHT);
-	}
-	ResizeScenePasses(HWNDWIDTH, HWNDHEIGHT);
-#if defined(_EDITOR)
-	ResizeEditorResources(HWNDWIDTH, HWNDHEIGHT);
-#endif
+	if (!renderer) return;
+
+	renderer->Flush();
+
+	ResizeReleaseScenePasses();
+	UI::ResizeReleaseUI();
+	renderer->swapChainPass->ResizeRelease();
+
+	GetClientRect(hWnd, &hWndRect);
+	UINT newWidth = hWndRect.right - hWndRect.left;
+	UINT newHeight = hWndRect.bottom - hWndRect.top;
+
+	if (newWidth == 0 || newHeight == 0) return;
+
+	renderer->Resize(newWidth, newHeight);
+	renderer->swapChainPass->Resize(newWidth, newHeight);
+
+	UI::ResizeUI(newWidth, newHeight);
+
+	renderer->UpdateViewportPerspective();
+	ResizeScenePasses(newWidth, newHeight);
 }
 
 //DESTROY
@@ -627,4 +676,7 @@ void DestroyInstance()
 	DestroyPhysics();
 	DestroyTemplatesInstances();
 	DestroyTemplates();
+
+	CoUninitialize();
+	destroyed = true;
 }

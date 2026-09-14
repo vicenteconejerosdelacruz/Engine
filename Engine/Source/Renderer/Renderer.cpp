@@ -20,6 +20,7 @@ unsigned int backBufferIndex;
 //CREATE
 void JRenderer::Initialize(HWND coreHwnd) {
 	hwnd = coreHwnd;
+	supportsTearing = false;
 
 #if defined(_DEBUG)
 	ComPtr<ID3D12Debug1> debugController;
@@ -47,7 +48,7 @@ void JRenderer::Initialize(HWND coreHwnd) {
 #endif
 
 	commandQueue = CreateCommandQueue(d3dDevice);
-	swapChain = CreateSwapChain(hwnd, commandQueue, numFrames);
+	swapChain = CreateSwapChain(hwnd, commandQueue, numFrames, supportsTearing);
 	backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
 	swapChainFormat = GetSwapChainFormat(swapChain);
@@ -122,8 +123,25 @@ void JRenderer::ExecuteCommands(CComPtr<ID3D12GraphicsCommandList2>& commandList
 void JRenderer::Present() {
 	using namespace DeviceUtils;
 
-	//present
-	DX::ThrowIfFailed(swapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING));
+	UINT presentFlags = 0;
+
+	// Solo agregar el flag de Tearing si la GPU/OS lo soporta
+	if (supportsTearing)
+	{
+		BOOL isFullscreen = FALSE;
+		// Verificar que el SwapChain NO esté en estado pantalla completa exclusivo de DirectX
+		if (SUCCEEDED(swapChain->GetFullscreenState(&isFullscreen, nullptr)))
+		{
+			if (!isFullscreen)
+			{
+				presentFlags |= DXGI_PRESENT_ALLOW_TEARING;
+			}
+		}
+	}
+
+	// Presentar usando los flags calculados dinámicamente
+	DX::ThrowIfFailed(swapChain->Present(0, presentFlags));
+
 	frameFenceValues[backBufferIndex] = Signal(commandQueue, fence, fenceValue);
 	backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
@@ -132,7 +150,7 @@ void JRenderer::Present() {
 	if (executionCallback.size() > 0)
 	{
 		std::lock_guard<std::mutex> lock(commandsMutex);
-		std::for_each(executionCallback.begin(), executionCallback.end(), [](auto x) {x(); });
+		std::for_each(executionCallback.begin(), executionCallback.end(), [](auto x) { x(); });
 		executionCallback.clear();
 	}
 }

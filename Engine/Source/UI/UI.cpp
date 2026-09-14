@@ -8,6 +8,12 @@ using namespace ultralight;
 
 RefPtr<ultralight::Renderer> ultraLightRenderer;
 
+namespace Templates
+{
+	extern void ResizeHtmlUIInstances(uint32_t width, uint32_t height);
+	extern void ResizeReleaseHtmlUIInstances();
+};
+
 namespace UI
 {
 	void InitUI(std::string resource_path_prefix)
@@ -40,5 +46,15 @@ namespace UI
 		ultraLightRenderer->Update();
 		ultraLightRenderer->RefreshDisplay(0);
 		ultraLightRenderer->Render();
+	}
+
+	void ResizeReleaseUI()
+	{
+		Templates::ResizeReleaseHtmlUIInstances();
+	}
+
+	void ResizeUI(uint32_t width, uint32_t height)
+	{
+		Templates::ResizeHtmlUIInstances(width, height);
 	}
 };
