@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "Venom.h"
-//#include "BrawlerCamera.h"
 #include "../../Scene/BrawlerScene.h"
 #include "../Enemies/Thug.h"
 #include <GamePhysics.h>
@@ -11,7 +10,6 @@
 #include <Keyboard.h>
 #include <GamePad.h>
 #include <StepTimer.h>
-//#include <Camera/Camera.h>
 #include <NoStd.h>
 #if defined(_EDITOR)
 #include <Editor.h>
