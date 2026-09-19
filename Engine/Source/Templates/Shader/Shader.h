@@ -19,31 +19,31 @@ namespace Templates
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDecl.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JRequired.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDecl.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDecl.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDecl.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -64,21 +64,22 @@ namespace Templates
 		TEMPLATE_DECL(Shader);
 
 #include <Attributes/JFlags.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 		DEF_STRING2FLAGS_FUNC(ShaderJson, JTemplate);
 
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
+		void GatherFiles(std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream) override;
 #endif
 	};
 

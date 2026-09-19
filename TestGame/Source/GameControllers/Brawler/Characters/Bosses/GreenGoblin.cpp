@@ -8,6 +8,7 @@
 #include <Brawler/Characters/Heroes/Hero.h>
 #if defined(_EDITOR)
 #include <Editor.h>
+#include <Builder/ReleaseBuilder.h>
 #endif
 
 //Timer
@@ -71,6 +72,13 @@ namespace Game::Brawler
 #include "GreenGoblinAtt.h"
 #include <JEnd.h>
 		Thug::WriteJson(j);
+	}
+	void GreenGoblin::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
+#include "GreenGoblinAtt.h"
+#include <JEnd.h>
+		Thug::GatherFiles(json, filesToCopy, templates, logStream);
 	}
 #endif
 

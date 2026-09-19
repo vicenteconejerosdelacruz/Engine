@@ -2,6 +2,9 @@
 #include "Trigger.h"
 #include <Scene.h>
 #include <Physics.h>
+#if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+#endif
 
 namespace Editor
 {
@@ -117,6 +120,12 @@ namespace Scene
 	void Trigger::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
+#include "TriggerAtt.h"
+#include <JEnd.h>
+	}
+	void Trigger::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
 #include "TriggerAtt.h"
 #include <JEnd.h>
 	}

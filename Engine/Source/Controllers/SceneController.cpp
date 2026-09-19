@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "SceneController.h"
 #include <Scene.h>
+#if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+#endif
 
 namespace Scene
 {
@@ -67,6 +70,12 @@ namespace Scene
 #include "SceneControllerAtt.h"
 #include <JEnd.h>
 	}
+	void SceneController::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
+#include "SceneControllerAtt.h"
+#include <JEnd.h>
+	}
 #endif
 
 	void SceneController::Initialize()
@@ -105,8 +114,7 @@ namespace Scene
 	}
 
 	void SceneControllerStep(SceneUnitId id, float step)
-	{
-	}
+	{}
 
 	void DestroySceneControllers()
 	{

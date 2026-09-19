@@ -247,4 +247,5 @@ namespace Editor {
 	void StartScriptEdition(JObject* object, std::string attribute);
 	void StartScriptEdition(std::string att, std::string script, std::function<void(std::string)> writer);
 	void OpenScriptBindingSelector(JObject* object, std::string attribute, int index, ScriptBinding sb);
+	void OpenBuildModal();
 }

@@ -257,7 +257,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;_DEVELOPMENT;HAS_DIRECTXTK12;_EDITOR;DIRECTX_TEX_VERSION=207;TOOL_VERSION=DIRECTX_TEX_VERSION;NOMINMAX;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>pch;JExpose;JExpose/Scene;JExpose/Templates;JExpose/Primitives;JExpose/Physics;JExpose/Controllers;Effects;Game;Animation;Audio;Primitives;Common;Renderer;Scene;Templates;Controllers;Shaders/Compiler;Shaders/Compute;Scripting;Physics;UI;Utils;Editor;GameControllers;../../SDKs/dxc/dxc_2024_07_31/inc;../../SDKs/assimp/assimp-5.4.3/build/include;../../SDKs/assimp/assimp-5.4.3/include;../../SDKs/DirectXTK12/Inc;../../SDKs/imgui;../../SDKs/imgui/backends;../../SDKs/imguizmo;../../SDKs/tween;../../SDKs/DirectXTex/DirectXTex;../../SDKs/DirectXTex/Texconv;../../SDKs/DirectXTex/Texdiag;../../SDKs/DirectXTex/Texassemble;../../SDKs/DirectXTex/Common;../../SDKs/DirectXTex/CmdLineHelpers;../../SDKs/v8pp-2.1.1/packages/v8-v143-x64.9.8.177.4/include;../../SDKs/v8pp-2.1.1;../../SDKs/v8pp-2.1.1/out;../../SDKs/PhysX/physx/include;../../SDKs/ultralight/ultralight-free-sdk-1.4.0-win-x64/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>pch;JExpose;JExpose/Scene;JExpose/Templates;JExpose/Primitives;JExpose/Physics;JExpose/Controllers;Effects;Game;Animation;Audio;Primitives;Common;Renderer;Scene;Templates;Controllers;Shaders/Compiler;Shaders/Compute;Scripting;Physics;UI;Utils;Editor;GameControllers;../../SDKs/dxc/dxc_2024_07_31/inc;../../SDKs/assimp/assimp-5.4.3/build/include;../../SDKs/assimp/assimp-5.4.3/include;../../SDKs/DirectXTK12/Inc;../../SDKs/imgui;../../SDKs/imgui/backends;../../SDKs/imguizmo;../../SDKs/tween;../../SDKs/DirectXTex/DirectXTex;../../SDKs/DirectXTex/Texconv;../../SDKs/DirectXTex/Texdiag;../../SDKs/DirectXTex/Texassemble;../../SDKs/DirectXTex/Common;../../SDKs/DirectXTex/CmdLineHelpers;../../SDKs/v8pp-2.1.1/packages/v8-v143-x64.9.8.177.4/include;../../SDKs/v8pp-2.1.1;../../SDKs/v8pp-2.1.1/out;../../SDKs/PhysX/physx/include;../../SDKs/ultralight/ultralight-free-sdk-1.4.0-win-x64/include;../../SDKs/yaml-cpp-yaml-cpp-0.9.0/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -421,6 +421,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="Editor\Builder\ReleaseBuilder.h" />
     <ClInclude Include="Editor\CreatorModal.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -466,6 +467,11 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="Editor\Modals\BuildModal.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Editor\Modals\ScriptBindingModal.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -481,6 +487,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="Editor\Modals\ThreadSafeStream.h" />
     <ClInclude Include="Editor\MousePicking.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -527,6 +534,7 @@
     <ClInclude Include="JExpose\Attributes\JStr2Flag.h" />
     <ClInclude Include="JExpose\Attributes\JV8Att.h" />
     <ClInclude Include="JExpose\Controllers\ControllerAtt.h" />
+    <ClInclude Include="JExpose\Editor\JReleaseBuilder.h" />
     <ClInclude Include="Physics\PhysicObjectAtt.h" />
     <ClInclude Include="JExpose\Primitives\CapsuleAtt.h" />
     <ClInclude Include="JExpose\Primitives\ConeAtt.h" />
@@ -536,9 +544,9 @@
     <ClInclude Include="Physics\PhysicSceneAtt.h" />
     <ClInclude Include="Controllers\SceneControllerAtt.h" />
     <ClInclude Include="Physics\TriggerAtt.h" />
-    <ClInclude Include="JExpose\Templates\HtmlUIAtt.h" />
-    <ClInclude Include="JExpose\Templates\MoldAtt.h" />
-    <ClInclude Include="JExpose\Templates\PhysicGeometryAtt.h" />
+    <ClInclude Include="Templates\HtmlUI\HtmlUIAtt.h" />
+    <ClInclude Include="Templates\Mold\MoldAtt.h" />
+    <ClInclude Include="Physics\PhysicGeometryAtt.h" />
     <ClInclude Include="pch\DeleteHook.h" />
     <ClInclude Include="pch\GameEngineState.h" />
     <ClInclude Include="Game\GameEngineStates\GameEngineBoot.h" />
@@ -600,15 +608,15 @@
     <ClInclude Include="Scene\Light\LightAtt.h" />
     <ClInclude Include="Scene\Renderable\RenderableAtt.h" />
     <ClInclude Include="Scene\Sound\SoundFXAtt.h" />
-    <ClInclude Include="JExpose\Templates\MaterialAtt.h" />
-    <ClInclude Include="JExpose\Templates\Model3DAtt.h" />
+    <ClInclude Include="Templates\Material\MaterialAtt.h" />
+    <ClInclude Include="Templates\Model3D\Model3DAtt.h" />
     <ClInclude Include="pch\NoMath.h" />
     <ClInclude Include="pch\RefTracker.h" />
     <ClInclude Include="GameDecl.h" />
-    <ClInclude Include="JExpose\Templates\RenderPassAtt.h" />
-    <ClInclude Include="JExpose\Templates\ShaderAtt.h" />
-    <ClInclude Include="JExpose\Templates\SoundAtt.h" />
-    <ClInclude Include="JExpose\Templates\TextureAtt.h" />
+    <ClInclude Include="Templates\RenderPass\RenderPassAtt.h" />
+    <ClInclude Include="Templates\Shader\ShaderAtt.h" />
+    <ClInclude Include="Templates\Sound\SoundAtt.h" />
+    <ClInclude Include="Templates\Textures\TextureAtt.h" />
     <ClInclude Include="pch\DDSTextures.h" />
     <ClInclude Include="pch\Debug.h" />
     <ClInclude Include="pch\SceneUnitId.h" />
@@ -794,6 +802,11 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Editor\Modals\BuildModal.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Editor\Modals\ScriptBindingModal.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>

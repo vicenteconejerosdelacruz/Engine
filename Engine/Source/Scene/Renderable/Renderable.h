@@ -81,6 +81,10 @@ namespace Scene
 
 		DEF_STRING2FLAGS_FUNC(Renderable, SceneObject);
 
+#if defined(_EDITOR)
+		static void GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream);
+#endif
+
 		//lifecycle
 		Renderable(SceneUnitId id, nlohmann::json& json);
 		~Renderable() { Destroy(); }

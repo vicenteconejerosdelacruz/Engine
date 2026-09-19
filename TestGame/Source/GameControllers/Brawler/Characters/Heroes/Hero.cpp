@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Hero.h"
-
+#if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+#endif
 namespace Game::Brawler
 {
 #if defined(_EDITOR)
@@ -31,6 +33,13 @@ namespace Game::Brawler
 #include "HeroAtt.h"
 #include <JEnd.h>
 		BrawlerCharacter::WriteJson(j);
+	}
+	void Hero::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
+#include "HeroAtt.h"
+#include <JEnd.h>
+		BrawlerCharacter::GatherFiles(json, filesToCopy, templates, logStream);
 	}
 #endif
 	void Hero::Map(SUUUID so)

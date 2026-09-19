@@ -33,6 +33,68 @@ namespace Game
 		{ "delayed-deletion", [](nlohmann::json& json) { return std::make_unique<DelayedDeletion>(json); }},
 	};
 
+#if defined(_EDITOR)
+	std::unordered_map<std::string, std::function<void(nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)>> controllerReleaseBuilders =
+	{
+		{ "spinyaw", [](nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+		{
+			SpinYaw::GatherFiles(controller, filesToCopy, templates, logStream);
+		}
+		},
+		{ "thirdperson-character", [](nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+		{
+			ThirdPersonCharacter::GatherFiles(controller, filesToCopy, templates, logStream);
+		}
+		},
+		{ "brawler-scene", [](nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+		{
+			BrawlerScene::GatherFiles(controller, filesToCopy, templates, logStream);
+		}
+		},
+		{ "brawler-cam", [](nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+		{
+			BrawlerCamera::GatherFiles(controller, filesToCopy, templates, logStream);
+		}
+		},
+		{ "brawler-menu", [](nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+		{
+			BrawlerMenu::GatherFiles(controller, filesToCopy, templates, logStream);
+		}
+		},
+		{ "venom", [](nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+		{
+			Venom::GatherFiles(controller, filesToCopy, templates, logStream);
+		}
+		},
+		{ "thug", [](nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+		{
+			Thug::GatherFiles(controller, filesToCopy, templates, logStream);
+		}
+		},
+		{ "greengoblin", [](nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+		{
+			GreenGoblin::GatherFiles(controller, filesToCopy, templates, logStream);
+		}
+		},
+		{ "pumpkin-bomb", [](nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+		{
+			PumpkinBomb::GatherFiles(controller, filesToCopy, templates, logStream);
+		}
+		},
+		{ "animated-decal", [](nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+		{
+			AnimatedDecal::GatherFiles(controller, filesToCopy, templates, logStream);
+		}
+		},
+		{ "delayed-deletion", [](nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+		{
+			DelayedDeletion::GatherFiles(controller, filesToCopy, templates, logStream);
+		}
+		},
+
+	};
+#endif
+
 	std::vector<std::string> GetControllers()
 	{
 		return nostd::GetKeysFromMap(controllers);

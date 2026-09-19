@@ -4,6 +4,7 @@
 #include "../Scene/BrawlerScene.h"
 #if defined(_EDITOR)
 #include <Editor.h>
+#include <Builder/ReleaseBuilder.h>
 #endif
 
 namespace Game::Brawler
@@ -65,6 +66,13 @@ namespace Game::Brawler
 #include "BrawlerCameraAtt.h"
 #include <JEnd.h>
 		Controller::WriteJson(j);
+	}
+	void BrawlerCamera::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
+#include "BrawlerCameraAtt.h"
+#include <JEnd.h>
+		Controller::GatherFiles(json, filesToCopy, templates, logStream);
 	}
 	void BrawlerCamera::SwitchToPlayMode()
 	{

@@ -13,6 +13,7 @@
 #include <NoStd.h>
 #if defined(_EDITOR)
 #include <Editor.h>
+#include <Builder/ReleaseBuilder.h>
 #endif
 
 //Mouse
@@ -175,6 +176,13 @@ namespace Game::Brawler
 #include "VenomAtt.h"
 #include <JEnd.h>
 		Hero::WriteJson(j);
+	}
+	void Venom::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
+#include "VenomAtt.h"
+#include <JEnd.h>
+		Hero::GatherFiles(json, filesToCopy, templates, logStream);
 	}
 #endif
 

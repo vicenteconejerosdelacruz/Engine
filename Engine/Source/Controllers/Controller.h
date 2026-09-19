@@ -146,6 +146,7 @@ namespace Game
 		virtual void SetInitialConditions() {};
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
+		static void GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream) {}
 		virtual std::map<std::string, JEdvEditorDrawerFunction> GetControllerDrawers() { return Game::GetControllerDrawers(); }
 		virtual std::vector<std::pair<std::string, JsonToEditorValueType>> GetControllerAttributes() { return Game::GetControllerAttributes(); }
 		virtual void SwitchToPlayMode() {};
@@ -223,4 +224,7 @@ namespace Game
 	extern std::vector<std::string> GetControllers();
 	extern JUUID CreateController(std::string name, SUUUID sceneObject, nlohmann::json& json);
 	extern void CreateControllersMemberFunctionTemplates(Isolate* isolate, SceneUnitId id);
+#if defined(_EDITOR)
+	extern std::unordered_map<std::string, std::function<void(nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)>> controllerReleaseBuilders;
+#endif
 };

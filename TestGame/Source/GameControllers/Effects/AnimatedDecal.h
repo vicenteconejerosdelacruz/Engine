@@ -37,6 +37,7 @@ namespace Game
 			AnimatedDecal(nlohmann::json& json);
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
+			static void GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream);
 			std::map<std::string, JEdvEditorDrawerFunction> GetControllerDrawers() override
 			{
 				std::map<std::string, JEdvEditorDrawerFunction> drawers = Controller::GetControllerDrawers();

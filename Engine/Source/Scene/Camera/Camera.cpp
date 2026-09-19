@@ -6,6 +6,9 @@
 #include <Renderer.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <NoMath.h>
+#if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+#endif
 
 extern std::unique_ptr<JRenderer> renderer;
 
@@ -106,6 +109,12 @@ namespace Scene
 	void Camera::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
+#include "CameraAtt.h"
+#include <JEnd.h>
+	}
+	void Camera::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
 #include "CameraAtt.h"
 #include <JEnd.h>
 	}

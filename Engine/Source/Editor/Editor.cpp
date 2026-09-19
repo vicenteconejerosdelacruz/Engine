@@ -30,6 +30,7 @@
 #include <SceneObjectPopup.h>
 #include <Modals/ScriptEditModal.h>
 #include <Modals/ScriptBindingModal.h>
+#include <Modals/BuildModal.h>
 
 extern HWND hWnd;
 extern RECT hWndRect;
@@ -127,6 +128,7 @@ namespace Editor
 	SceneObjectPopup sceneObjectPopup;
 	ScriptEditModal scriptEditModal;
 	ScripBindingModal scriptBindingModal;
+	BuildModal buildModal;
 
 	void CreateSceneUnitGizmos(SceneUnitId id)
 	{
@@ -869,6 +871,7 @@ namespace Editor
 				sceneObjectPopup.Draw();
 				scriptEditModal.Draw();
 				scriptBindingModal.Draw();
+				buildModal.Draw();
 			}
 			if (yesNoCancelModal.Showing())
 			{
@@ -1061,6 +1064,10 @@ namespace Editor
 				}
 				ImGui::EndMenu();
 
+			}
+			if (ImGui::MenuItem("Build"))
+			{
+				buildModal.Init();
 			}
 
 			auto cursorPos = ImGui::GetCursorScreenPos();
@@ -2372,7 +2379,7 @@ namespace Editor
 	bool AnyModalShowing()
 	{
 		return loadingProgress.loadSceneUnitModal || sceneObjectModal.creating || templateModal.creating || deletePrompt.showing ||
-			animationSequencer.showing || sceneObjectPopup.show || scriptEditModal.showing || scriptBindingModal.showing;
+			animationSequencer.showing || sceneObjectPopup.show || scriptEditModal.showing || scriptBindingModal.showing || buildModal.showing;
 	}
 
 	bool MouseIsInGameArea(std::unique_ptr<DirectX::Mouse>& mouse)
@@ -3507,6 +3514,11 @@ namespace Editor
 				}
 			}
 		);
+	}
+
+	void OpenBuildModal()
+	{
+		buildModal.Init();
 	}
 };
 

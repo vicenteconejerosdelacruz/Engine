@@ -8,10 +8,11 @@ void SimpleModal::Init(ImVec2 size, std::string title)
 	showing = true;
 	this->size = size;
 	this->title = title;
+	this->cancelable = true;
 }
 
 static float titleBarH = 19.0f;
-void SimpleModal::Draw(std::function<void(ImVec2)> innerDraw, bool canSaveAndExit, std::function<void()> saveAndExit)
+void SimpleModal::Draw(std::function<void(ImVec2)> innerDraw, bool canSaveAndExit, std::function<void()> saveAndExit, std::string buttonTitle)
 {
 	if (!showing) return;
 
@@ -40,7 +41,7 @@ void SimpleModal::Draw(std::function<void(ImVec2)> innerDraw, bool canSaveAndExi
 
 		innerDraw(contentSize);
 
-		DrawBottomButtons(canSaveAndExit, [&] {exit = true; }, saveAndExit);
+		DrawBottomButtons(canSaveAndExit, [&] {exit = true; }, saveAndExit, buttonTitle);
 
 		ImGui::EndPopup();
 	}
@@ -80,19 +81,23 @@ void SimpleModal::DrawTitleBar(const char* title, ImVec2 pos, ImVec2 size, bool&
 	ImGui::PopStyleVar();
 }
 
-void SimpleModal::DrawBottomButtons(bool canSaveAndExit, std::function<void()> exit, std::function<void()> saveAndExit)
+void SimpleModal::DrawBottomButtons(bool canSaveAndExit, std::function<void()> exit, std::function<void()> saveAndExit, std::string buttonTitle)
 {
 	ImGui::DrawItemWithEnabledState([&]
 		{
-			if (ImGui::Button("Save&Exit"))
+			if (ImGui::Button(buttonTitle.c_str()))
 			{
 				saveAndExit();
 			}
 		}, canSaveAndExit
 	);
 	ImGui::SameLine();
-	if (ImGui::Button("Cancel"))
-	{
-		exit();
-	}
+	ImGui::DrawItemWithEnabledState([&]
+		{
+			if (ImGui::Button("Cancel"))
+			{
+				exit();
+			}
+		}, cancelable
+	);
 }

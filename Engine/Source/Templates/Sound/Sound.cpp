@@ -4,9 +4,9 @@
 #include <set>
 #include <Audio.h>
 #include <AudioSystem.h>
-//#include <Templates.h>
-//#include <TemplateDef.h>
-
+#if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+#endif
 using namespace AudioSystem;
 using namespace DirectX;
 
@@ -15,23 +15,23 @@ namespace Templates
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDef.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDef.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDef.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDef.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -102,15 +102,15 @@ namespace Templates
 	SoundJson::SoundJson(nlohmann::json& json) : JTemplate(json)
 	{
 #include <Attributes/JInit.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 	}
 
@@ -118,7 +118,14 @@ namespace Templates
 	void SoundJson::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
+#include <JEnd.h>
+	}
+	void SoundJson::GatherFiles(std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+		nlohmann::json json = this->json();
+#include <Editor/JReleaseBuilder.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 	}
 #endif

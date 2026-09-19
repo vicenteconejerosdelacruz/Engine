@@ -159,3 +159,24 @@ std::for_each(objs.begin(), objs.end(), [&](auto o)\
 #define JTRACKUUID(CLASS,NAME,LIMIT,COND)
 
 #endif
+
+#if defined(JEXPOSE_EDITOR_RELEASE_BUILDER)
+
+#define JCLASS(CLASS,GETJOBJECTS)
+#define JTYPE(TYPE,VALUE)
+#define JEXPOSE(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) if(json.contains(#ATT))ReleaseBuilder<JEDVALUETYPE, TYPE>::GatherFiles(json.at(#ATT), filesToCopy, templates, logStream);
+#define JEXPOSE_CALLBACK(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) if(json.contains(#ATT))ReleaseBuilder<JEDVALUETYPE, TYPE>::GatherFiles(json.at(#ATT), filesToCopy, templates, logStream);
+#define JEXPOSE_TRANSFORM(TYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) if(json.contains(#ATT))ReleaseBuilder<JEDVALUETYPE, TYPE>::GatherFiles(json.at(#ATT), filesToCopy, templates, logStream); 
+#define JEXPOSE_TRANSFORM_CALLBACK(TYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) if(json.contains(#ATT))ReleaseBuilder<JEDVALUETYPE, TYPE>::GatherFiles(json.at(#ATT), filesToCopy, templates, logStream);
+#define JEXPOSE_ENUM(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) if(json.contains(#ATT))ReleaseBuilder<JEDVALUETYPE, TYPE>::GatherFiles(json.at(#ATT), filesToCopy, templates, logStream);
+#define JEXPOSE_VECTOR(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) if(json.contains(#ATT))ReleaseBuilder<JEDVALUETYPE, TYPE>::GatherFiles(json.at(#ATT), filesToCopy, templates, logStream);
+#define JEXPOSE_VECTOR_TRANSFORM(TYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) if(json.contains(#ATT))ReleaseBuilder<JEDVALUETYPE, TYPE>::GatherFiles(json.at(#ATT), filesToCopy, templates, logStream);
+#define JEXPOSE_SET(TYPE,ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) if(json.contains(#ATT))ReleaseBuilder<JEDVALUETYPE, TYPE>::GatherFiles(json.at(#ATT), filesToCopy, templates, logStream);
+#define JEXPOSE_MAP_TRANSFORM(KEYTYPE,VALUETYPE,ATT,TOTYPE,FROMTYPE,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) if(json.contains(#ATT))ReleaseBuilder<JEDVALUETYPE, KEYTYPE>::GatherFiles(json.at(#ATT), filesToCopy, templates, logStream);
+#define JEXPOSE_MAP_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) if(json.contains(#ATT))ReleaseBuilder<JEDVALUETYPE, TYPE>::GatherFiles(json.at(#ATT), filesToCopy, templates, logStream);
+#define JEXPOSE_VECTOR_OBJECT(TYPE, ATT,INITIAL,JEDVALUETYPE,UPDATEMASK,REQUIREDTOCREATE) if(json.contains(#ATT))ReleaseBuilder<JEDVALUETYPE, TYPE>::GatherFiles(json.at(#ATT), filesToCopy, templates, logStream);
+#define JEXPOSE_FLAG(ATT, INITIAL, GETFLAGSVALUESFUNCTION,UPDATEMASK,REQUIREDTOCREATE)
+#define JPREVIEW(NAME,JEDVALUETYPE)
+#define JTRACKUUID(CLASS,NAME,LIMIT,COND)
+
+#endif

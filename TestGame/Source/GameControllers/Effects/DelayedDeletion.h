@@ -36,6 +36,7 @@ namespace Game
 			~DelayedDeletion() {}
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
+			static void GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream);
 #endif
 			void Map(SUUUID so) override;
 			void Unmap() override;

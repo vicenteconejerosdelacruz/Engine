@@ -112,6 +112,7 @@ namespace Physics
 
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
+		static void GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream);
 		std::vector<std::string> GetPhysicBehaviorAttributes();
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
 #endif

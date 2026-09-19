@@ -62,6 +62,7 @@ namespace Game
 
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
+			static void GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream);
 			DECL_CONTROLLER_DRAWER(BrawlerCharacter, Controller);
 			CharacterLookingTo initialLookingTo;
 #endif

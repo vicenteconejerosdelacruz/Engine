@@ -3,6 +3,7 @@
 #include <Scene.h>
 #if defined(_EDITOR)
 #include <Editor.h>
+#include <Builder/ReleaseBuilder.h>
 #endif
 
 extern DX::StepTimer timer;
@@ -37,6 +38,13 @@ namespace Game::Brawler
 #include "PumpkinBombAtt.h"
 #include <JEnd.h>
 		Controller::WriteJson(j);
+	}
+	void PumpkinBomb::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
+#include "PumpkinBombAtt.h"
+#include <JEnd.h>
+		Controller::GatherFiles(json, filesToCopy, templates, logStream);
 	}
 #endif
 

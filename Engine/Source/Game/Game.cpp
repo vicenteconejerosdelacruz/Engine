@@ -56,7 +56,31 @@ namespace Game
 	{
 		using namespace Scene::Level;
 
-		LoadLevelIntoSceneUnit("mainmenu.yaml", []() { return GetLevelFromFile("mainmenu.yaml"); },
+		std::string bootLevelName = "mainmenu.yaml"; // Nivel por defecto si falla la lectura
+		std::filesystem::path bootIniPath = "boot.ini"; // O "../Build/boot.ini" según dónde se ejecute el binario
+
+		// Intentamos leer el archivo boot.ini
+		if (std::filesystem::exists(bootIniPath))
+		{
+			std::ifstream inFile(bootIniPath);
+			if (inFile.is_open())
+			{
+				std::string line;
+				if (std::getline(inFile, line))
+				{
+					// Limpiamos posibles espacios o saltos de línea al inicio/final
+					if (!line.empty())
+					{
+						bootLevelName = line;
+						// Opcional: si guardaste solo el nombre base o con espacios extra, puedes depurarlo aquí
+					}
+				}
+				inFile.close();
+			}
+		}
+
+		// Cargamos el nivel leído del boot.ini
+		LoadLevelIntoSceneUnit(bootLevelName, [bootLevelName]() { return GetLevelFromFile(bootLevelName); },
 			[](SceneUnitId id)
 			{
 				EnableSceneUnitRendering(id);

@@ -30,7 +30,7 @@
     <ClInclude Include="GameControllers\Brawler\Characters\Heroes\VenomAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Controllers\Test\SpinYawAtt.h">
+    <ClInclude Include="GameControllers\Test\SpinYawAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameControllers\Test\SpinYaw.h">
@@ -39,7 +39,7 @@
     <ClInclude Include="GameControllers\Brawler\Characters\Heroes\Venom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Controllers\ThirdPerson\ThirdPersonCharacterAtt.h">
+    <ClInclude Include="GameControllers\ThirdPerson\ThirdPersonCharacterAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameControllers\ThirdPerson\ThirdPersonCharacter.h">

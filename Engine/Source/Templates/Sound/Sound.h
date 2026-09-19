@@ -1,5 +1,4 @@
-#ifndef _TEMPLATES_SOUND_H
-#define _TEMPLATES_SOUND_H
+#pragma once
 
 #include <memory>
 #include <string>
@@ -17,31 +16,31 @@ namespace Templates
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDecl.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JRequired.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDecl.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDecl.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDecl.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -57,21 +56,22 @@ namespace Templates
 		TEMPLATE_DECL(Sound);
 
 #include <Attributes/JFlags.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <SoundAtt.h>
+#include "SoundAtt.h"
 #include <JEnd.h>
 
 		DEF_STRING2FLAGS_FUNC(SoundJson, JTemplate);
 
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
+		void GatherFiles(std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream) override;
 #endif
 	};
 
@@ -94,5 +94,3 @@ namespace Templates
 };
 using namespace Templates;
 DEF_TEMPLATE_ID_HASH(SoundJson);
-
-#endif

@@ -7,25 +7,26 @@ namespace Game
 	{
 #if defined(_EDITOR)
 #include <Attributes/JOrder.h>
-#include <ThirdPerson/ThirdPersonCharacterAtt.h>
+#include "ThirdPersonCharacterAtt.h"
 #include <JEnd.h>
+
 #include <Editor/JDrawersDecl.h>
-#include <ThirdPerson/ThirdPersonCharacterAtt.h>
+#include "ThirdPersonCharacterAtt.h"
 #include <JEnd.h>
 #endif
 
 		struct ThirdPersonCharacter : Controller
 		{
 #include <Attributes/JFlags.h>
-#include <ThirdPerson/ThirdPersonCharacterAtt.h>
+#include "ThirdPersonCharacterAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <ThirdPerson/ThirdPersonCharacterAtt.h>
+#include "ThirdPersonCharacterAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <ThirdPerson/ThirdPersonCharacterAtt.h>
+#include "ThirdPersonCharacterAtt.h"
 #include <JEnd.h>
 
 			DEF_STRING2FLAGS_FUNC(ThirdPersonCharacter, Controller);
@@ -34,6 +35,7 @@ namespace Game
 			void SetInitialConditions() override;
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
+			static void GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream);
 			DECL_CONTROLLER_DRAWER(ThirdPersonCharacter, Controller);
 #endif
 

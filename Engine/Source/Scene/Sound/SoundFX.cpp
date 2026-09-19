@@ -5,6 +5,8 @@
 #include <Sound/Sound.h>
 
 #if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+
 namespace Editor
 {
 	extern void SelectSoundEffect(SoundFXID soundfx);
@@ -94,6 +96,12 @@ namespace Scene
 	void SoundFX::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
+#include "SoundFXAtt.h"
+#include <JEnd.h>
+	}
+	void SoundFX::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
 #include "SoundFXAtt.h"
 #include <JEnd.h>
 	}

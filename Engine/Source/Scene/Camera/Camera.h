@@ -202,6 +202,7 @@ namespace Scene {
 		//Gizmo
 		virtual bool CanInteractWithGizmo(ImGuizmo::OPERATION operation) { return true; }
 		virtual void WriteJson(nlohmann::json& j);
+		static void GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream);
 		virtual std::map<std::string, ScriptBinding> GetScriptBindingOptions();
 #endif
 

@@ -34,6 +34,7 @@ namespace Game
 			PumpkinBomb(nlohmann::json& json);
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
+			static void GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream);
 			DECL_CONTROLLER_DRAWER(PumpkinBomb, Controller);
 #endif
 			void Map(SUUUID so) override;

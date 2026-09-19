@@ -3,6 +3,9 @@
 #include <Scene.h>
 #include <Physics.h>
 #include <NoMath.h>
+#if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+#endif
 
 namespace Editor
 {
@@ -86,6 +89,12 @@ namespace Scene
 	void Boundary::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
+#include "BoundaryAtt.h"
+#include <JEnd.h>
+	}
+	void Boundary::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
 #include "BoundaryAtt.h"
 #include <JEnd.h>
 	}

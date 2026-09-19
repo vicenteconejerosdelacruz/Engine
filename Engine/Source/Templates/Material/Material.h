@@ -62,31 +62,31 @@ namespace Templates
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDecl.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JRequired.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDecl.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDecl.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDecl.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -108,21 +108,22 @@ namespace Templates
 		TEMPLATE_DECL(Material);
 
 #include <Attributes/JFlags.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 		DEF_STRING2FLAGS_FUNC(MaterialJson, JTemplate);
 
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
+		void GatherFiles(std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream) override;
 #endif
 		void SetPipelineStateCallback(size_t hash, std::function<void()> callback);
 

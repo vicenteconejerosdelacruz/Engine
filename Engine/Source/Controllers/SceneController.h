@@ -69,6 +69,7 @@ namespace Scene
 		virtual void Destroy();
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
+		static void GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream);
 #endif
 
 		DeleteHook markedForDelete;

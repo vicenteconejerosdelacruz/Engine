@@ -6,6 +6,9 @@
 #include <DeviceUtils/PipelineState/PipelineState.h>
 #include <Renderable/RenderableBoundingBox.h>
 #include <NoMath.h>
+#if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+#endif
 
 extern std::unique_ptr<JRenderer> renderer;
 
@@ -53,6 +56,16 @@ namespace Scene
 #endif
 
 	std::unordered_map<RenderableID, SequencePlayer*> animationPlayers;
+
+#if defined(_EDITOR)
+
+	void Renderable::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
+#include "RenderableAtt.h"
+#include <JEnd.h>
+	}
+#endif
 
 	Renderable::Renderable(SceneUnitId id, nlohmann::json& json) :SceneObject(id, json)
 	{

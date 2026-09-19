@@ -11,31 +11,31 @@ namespace Templates
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDecl.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JRequired.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDecl.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDecl.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDecl.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 	void Model3DJsonStep();
@@ -54,15 +54,15 @@ namespace Templates
 		TEMPLATE_DECL(Model3D);
 
 #include <Attributes/JFlags.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 		DEF_STRING2FLAGS_FUNC(Model3DJson, JTemplate);
@@ -71,6 +71,7 @@ namespace Templates
 		virtual void WriteJson(nlohmann::json& j);
 		void ListenUpdate(Model3D_UpdateFlags flag, SUUUID suuuid, std::function<void()> callback);
 		void RemoveUpdateListener(Model3D_UpdateFlags flag, SUUUID suuuid);
+		void GatherFiles(std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream) override;
 #endif
 
 		std::map<Model3D_UpdateFlags, std::map<SUUUID, std::function<void()>>> updateFlagsListeners;

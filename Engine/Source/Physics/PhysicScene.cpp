@@ -2,6 +2,9 @@
 #include "PhysicScene.h"
 #include <Scene.h>
 #include <Physics.h>
+#if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+#endif
 
 extern float gameUpdateFrequency;
 
@@ -85,6 +88,12 @@ namespace Scene
 	void PhysicScene::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
+#include "PhysicSceneAtt.h"
+#include <JEnd.h>
+	}
+	void PhysicScene::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
 #include "PhysicSceneAtt.h"
 #include <JEnd.h>
 	}

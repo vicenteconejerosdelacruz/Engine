@@ -3,6 +3,9 @@
 #include <Renderer.h>
 #include "Variables.h"
 #include <ShaderCompiler.h>
+#if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+#endif
 
 extern std::unique_ptr<JRenderer> renderer;
 
@@ -11,23 +14,23 @@ namespace Templates
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDef.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDef.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDef.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDef.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -35,15 +38,15 @@ namespace Templates
 	MaterialJson::MaterialJson(nlohmann::json& json) : JTemplate(json)
 	{
 #include <Attributes/JInit.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 	}
 
@@ -51,7 +54,14 @@ namespace Templates
 	void MaterialJson::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <MaterialAtt.h>
+#include "MaterialAtt.h"
+#include <JEnd.h>
+	}
+	void MaterialJson::GatherFiles(std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+		nlohmann::json json = this->json();
+#include <Editor/JReleaseBuilder.h>
+#include "MaterialAtt.h"
 #include <JEnd.h>
 	}
 #endif

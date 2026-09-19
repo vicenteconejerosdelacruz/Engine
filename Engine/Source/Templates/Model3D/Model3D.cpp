@@ -9,6 +9,9 @@
 #include <assimp/postprocess.h>
 #include <assimp/GltfMaterial.h>
 #include <Animated.h>
+#if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+#endif
 
 using namespace Animation;
 
@@ -24,23 +27,23 @@ namespace Templates
 {
 #if defined(_EDITOR)
 #include <Editor/JDrawersDef.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDef.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDef.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDef.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDef.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -48,15 +51,15 @@ namespace Templates
 	Model3DJson::Model3DJson(nlohmann::json& json) : JTemplate(json)
 	{
 #include <Attributes/JInit.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 	}
 
@@ -64,7 +67,7 @@ namespace Templates
 	void Model3DJson::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <Model3DAtt.h>
+#include "Model3DAtt.h"
 #include <JEnd.h>
 	}
 
@@ -76,6 +79,13 @@ namespace Templates
 	{
 		if (updateFlagsListeners[flag].contains(suuuid))
 			updateFlagsListeners[flag].erase(suuuid);
+	}
+	void Model3DJson::GatherFiles(std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+		nlohmann::json json = this->json();
+#include <Editor/JReleaseBuilder.h>
+#include "Model3DAtt.h"
+#include <JEnd.h>
 	}
 #endif
 

@@ -56,6 +56,7 @@ namespace Game
 			void SetInitialConditions() override;
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
+			static void GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream);
 			DECL_CONTROLLER_DRAWER(BrawlerScene, Controller);
 #endif
 			void Map(SUUUID so) override;

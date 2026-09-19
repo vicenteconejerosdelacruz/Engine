@@ -117,31 +117,31 @@
     <ClInclude Include="JExpose\Attributes\JInit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Templates\ShaderAtt.h">
+    <ClInclude Include="Templates\Shader\ShaderAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Templates\RenderPassAtt.h">
+    <ClInclude Include="Templates\RenderPass\RenderPassAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Templates\TextureAtt.h">
+    <ClInclude Include="Templates\Textures\TextureAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene\Renderable\RenderableAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Templates\MaterialAtt.h">
+    <ClInclude Include="Templates\Material\MaterialAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene\Camera\CameraAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Templates\Model3DAtt.h">
+    <ClInclude Include="Templates\Model3D\Model3DAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene\Sound\SoundFXAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Templates\SoundAtt.h">
+    <ClInclude Include="Templates\Sound\SoundAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene\Light\LightAtt.h">
@@ -591,7 +591,7 @@
     <ClInclude Include="Physics\PhysicGeometry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Templates\PhysicGeometryAtt.h">
+    <ClInclude Include="Physics\PhysicGeometryAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Physics\TriggerAtt.h">
@@ -669,7 +669,7 @@
     <ClInclude Include="Templates\HtmlUI\HtmlUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Templates\HtmlUIAtt.h">
+    <ClInclude Include="Templates\HtmlUI\HtmlUIAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Templates\RenderPass\Override\ResolveUIPass.h">
@@ -687,7 +687,7 @@
     <ClInclude Include="Templates\Mold\Mold.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JExpose\Templates\MoldAtt.h">
+    <ClInclude Include="Templates\Mold\MoldAtt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="JExpose\Attributes\JStr2Flag.h">
@@ -712,6 +712,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Editor\PhysicsDrawState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Modals\BuildModal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Builder\ReleaseBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JExpose\Editor\JReleaseBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Modals\ThreadSafeStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1065,6 +1077,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Scripting\SceneUnitScripting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Modals\BuildModal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

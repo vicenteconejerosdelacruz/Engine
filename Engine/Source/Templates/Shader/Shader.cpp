@@ -3,29 +3,32 @@
 #include <ShaderCompiler.h>
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
 #include <CompilerQueue.h>
+#if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+#endif
 
 namespace Templates {
 
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDef.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDef.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDef.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDef.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -49,15 +52,15 @@ namespace Templates {
 	ShaderJson::ShaderJson(nlohmann::json& json) : JTemplate(json)
 	{
 #include <Attributes/JInit.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 
 		Shader::fileNameToShaderTemplate.insert({ path(),uuid() });
@@ -67,7 +70,14 @@ namespace Templates {
 	void ShaderJson::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <ShaderAtt.h>
+#include "ShaderAtt.h"
+#include <JEnd.h>
+	}
+	void ShaderJson::GatherFiles(std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+		nlohmann::json json = this->json();
+#include <Editor/JReleaseBuilder.h>
+#include "ShaderAtt.h"
 #include <JEnd.h>
 	}
 #endif

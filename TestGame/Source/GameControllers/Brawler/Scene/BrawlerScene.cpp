@@ -7,6 +7,7 @@
 #include <Level.h>
 #if defined(_EDITOR)
 #include <Editor.h>
+#include <Builder/ReleaseBuilder.h>
 #endif
 
 extern DX::StepTimer timer;
@@ -98,6 +99,13 @@ namespace Game::Brawler
 		j.at("heroes") = nlohmann::json::array({});
 		j.at("ready_heroes") = nlohmann::json::array({});
 		j.at("enemies") = nlohmann::json::array({});
+	}
+	void BrawlerScene::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
+#include "BrawlerSceneAtt.h"
+#include <JEnd.h>
+		Controller::GatherFiles(json, filesToCopy, templates, logStream);
 	}
 #endif
 

@@ -2,6 +2,9 @@
 #include "Light.h"
 #include <Scene.h>
 #include <NoMath.h>
+#if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+#endif
 
 #if defined(_EDITOR)
 namespace Editor
@@ -81,6 +84,12 @@ namespace Scene
 	void Light::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
+#include "LightAtt.h"
+#include <JEnd.h>
+	}
+	void Light::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
 #include "LightAtt.h"
 #include <JEnd.h>
 	}

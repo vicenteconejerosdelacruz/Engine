@@ -6,6 +6,9 @@
 #if defined(_DEVELOPMENT)
 #include <ImageConvert.h>
 #endif
+#if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+#endif
 
 extern std::unique_ptr<JRenderer> renderer;
 
@@ -21,23 +24,23 @@ namespace Templates
 #if defined(_EDITOR)
 
 #include <Editor/JDrawersDef.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDef.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDef.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDef.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDef.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -53,15 +56,15 @@ namespace Templates
 	TextureJson::TextureJson(nlohmann::json& json) : JTemplate(json)
 	{
 #include <Attributes/JInit.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 	}
 
@@ -69,7 +72,15 @@ namespace Templates
 	void TextureJson::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
+#include <JEnd.h>
+	}
+
+	void TextureJson::GatherFiles(std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+		nlohmann::json json = this->json();
+#include <Editor/JReleaseBuilder.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 	}
 #endif

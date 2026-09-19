@@ -146,6 +146,7 @@ namespace Game
 #if defined(_EDITOR)
 			void WriteJson(nlohmann::json& j) override;
 			DECL_CONTROLLER_DRAWER(Venom, Hero);
+			static void GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream);
 #endif
 			void Map(SUUUID so) override;
 			void Unmap() override;

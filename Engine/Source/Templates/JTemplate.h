@@ -7,6 +7,7 @@
 #include <JTypes.h>
 #if defined(_EDITOR)
 #include <IconsFontAwesome5.h>
+#include <Modals/ThreadSafeStream.h>
 #endif
 
 #if defined(_EDITOR)
@@ -90,6 +91,9 @@ namespace Templates
 #endif
 			JObject::JPatch(p);
 		}
+#if defined(_EDITOR)
+		virtual void GatherFiles(std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream) {}
+#endif
 	};
 };
 

@@ -4,6 +4,9 @@
 #include "CharacterHitCallback.h" 
 #include <NoMath.h>
 #include <PxPhysicsAPI.h>
+#if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+#endif
 
 #if defined(_EDITOR)
 namespace Editor
@@ -830,6 +833,13 @@ namespace Physics
 #include "PhysicObjectAtt.h"
 #include <JEnd.h>
 		j.erase("uuid");
+	}
+
+	void PhysicObject::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
+#include "PhysicObjectAtt.h"
+#include <JEnd.h>
 	}
 
 	std::vector<std::string> PhysicObject::GetPhysicBehaviorAttributes()

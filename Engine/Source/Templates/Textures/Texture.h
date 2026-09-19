@@ -20,31 +20,31 @@ namespace Templates
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDecl.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JRequired.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDecl.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDecl.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDecl.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 	void TextureJsonsStep();
@@ -70,21 +70,22 @@ namespace Templates
 		TEMPLATE_DECL(Texture);
 
 #include <Attributes/JFlags.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <TextureAtt.h>
+#include "TextureAtt.h"
 #include <JEnd.h>
 
 		DEF_STRING2FLAGS_FUNC(TextureJson, JTemplate);
 
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
+		void GatherFiles(std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream) override;
 		virtual void EditorPreview(size_t flags);
 		virtual void DestroyEditorPreview();
 		void CreatePreviewTexture();

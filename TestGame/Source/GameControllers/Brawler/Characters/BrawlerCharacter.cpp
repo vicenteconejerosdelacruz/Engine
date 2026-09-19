@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "BrawlerCharacter.h"
-
+#if defined(_EDITOR)
+#include <Builder/ReleaseBuilder.h>
+#endif
 #if defined(_EDITOR)
 namespace Editor
 {
@@ -72,6 +74,13 @@ namespace Game::Brawler
 #include "BrawlerCharacterAtt.h"
 #include <JEnd.h>
 		Controller::WriteJson(j);
+	}
+	void BrawlerCharacter::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
+#include "BrawlerCharacterAtt.h"
+#include <JEnd.h>
+		Controller::GatherFiles(json, filesToCopy, templates, logStream);
 	}
 #endif
 	void BrawlerCharacter::BindNestedControllers(Local<Context> context, Isolate* isolate, std::unique_ptr<SceneUnitScripting>& scriptData)

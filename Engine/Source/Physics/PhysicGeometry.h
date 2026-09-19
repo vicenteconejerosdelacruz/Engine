@@ -13,31 +13,31 @@ namespace Templates
 #if defined(_EDITOR)
 
 #include <Attributes/JOrder.h>
-#include <PhysicGeometryAtt.h>
+#include "PhysicGeometryAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JDrawersDecl.h>
-#include <PhysicGeometryAtt.h>
+#include "PhysicGeometryAtt.h"
 #include <JEnd.h>
 
 #include <Editor/JPreviewDecl.h>
-#include <PhysicGeometryAtt.h>
+#include "PhysicGeometryAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JRequired.h>
-#include <PhysicGeometryAtt.h>
+#include "PhysicGeometryAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JJsonDecl.h>
-#include <PhysicGeometryAtt.h>
+#include "PhysicGeometryAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JDrawersDecl.h>
-#include <PhysicGeometryAtt.h>
+#include "PhysicGeometryAtt.h"
 #include <JEnd.h>
 
 #include <Creator/JValidatorDecl.h>
-#include <PhysicGeometryAtt.h>
+#include "PhysicGeometryAtt.h"
 #include <JEnd.h>
 
 #endif
@@ -53,21 +53,22 @@ namespace Templates
 		TEMPLATE_DECL(PhysicGeometry);
 
 #include <Attributes/JFlags.h>
-#include <PhysicGeometryAtt.h>
+#include "PhysicGeometryAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JStr2Flag.h>
-#include <PhysicGeometryAtt.h>
+#include "PhysicGeometryAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JDecl.h>
-#include <PhysicGeometryAtt.h>
+#include "PhysicGeometryAtt.h"
 #include <JEnd.h>
 
 		DEF_STRING2FLAGS_FUNC(PhysicGeometryJson, JTemplate);
 
 #if defined(_EDITOR)
 		virtual void WriteJson(nlohmann::json& j);
+		void GatherFiles(std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream) override;
 #endif
 	};
 

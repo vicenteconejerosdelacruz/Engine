@@ -4,6 +4,7 @@
 #include <Scene.h>
 #if defined(_EDITOR)
 #include <Editor.h>
+#include <Builder/ReleaseBuilder.h>
 #endif
 
 extern std::unique_ptr<DirectX::GamePad> gamePad;
@@ -13,22 +14,22 @@ namespace Game::Test
 {
 #if defined(_EDITOR)
 #include <Editor/JDrawersDef.h>
-#include <Test/SpinYawAtt.h>
+#include "SpinYawAtt.h"
 #include <JEnd.h>
 #endif
 
 	SpinYaw::SpinYaw(nlohmann::json& json) : Controller(json)
 	{
 #include <Attributes/JInit.h>
-#include <Test/SpinYawAtt.h>
+#include "SpinYawAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JUpdate.h>
-#include <Test/SpinYawAtt.h>
+#include "SpinYawAtt.h"
 #include <JEnd.h>
 
 #include <Attributes/JV8Att.h>
-#include <Test/SpinYawAtt.h>
+#include "SpinYawAtt.h"
 #include <JEnd.h>
 	}
 
@@ -36,9 +37,16 @@ namespace Game::Test
 	void SpinYaw::WriteJson(nlohmann::json& j)
 	{
 #include <Editor/JWriteJson.h>
-#include <Test/SpinYawAtt.h>
+#include "SpinYawAtt.h"
 #include <JEnd.h>
 		Controller::WriteJson(j);
+	}
+	void SpinYaw::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
+#include "SpinYawAtt.h"
+#include <JEnd.h>
+		Controller::GatherFiles(json, filesToCopy, templates, logStream);
 	}
 #endif
 

@@ -4,8 +4,8 @@
 #include <Level.h>
 #if defined(_EDITOR)
 #include <Editor.h>
+#include <Builder/ReleaseBuilder.h>
 #endif
-
 extern std::unique_ptr<DirectX::GamePad> gamePad;
 extern DirectX::GamePad::ButtonStateTracker buttons;
 extern std::unique_ptr<DirectX::Keyboard> keyboard;
@@ -62,6 +62,13 @@ namespace Game::Brawler
 #include <JEnd.h>
 		Controller::WriteJson(j);
 		j.at("menuUIInstance") = "";
+	}
+	void BrawlerMenu::GatherFiles(nlohmann::json& json, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+	{
+#include <Editor/JReleaseBuilder.h>
+#include "BrawlerMenuAtt.h"
+#include <JEnd.h>
+		Controller::GatherFiles(json, filesToCopy, templates, logStream);
 	}
 #endif
 
