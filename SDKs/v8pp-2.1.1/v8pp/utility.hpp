@@ -1,6 +1,7 @@
 #ifndef V8PP_UTILITY_HPP_INCLUDED
 #define V8PP_UTILITY_HPP_INCLUDED
 
+#include <string>
 #include <functional>
 #include <memory>
 #include <string_view>

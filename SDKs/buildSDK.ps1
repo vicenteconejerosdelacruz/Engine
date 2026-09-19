@@ -85,6 +85,7 @@ function Buildv8pp {
 }
 
 function BuildAssimp {
+	cd $sdkfolder
 	cd "assimp\assimp-6.0.5"
 	cmake -B build -S . `
 	-DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=OFF `
