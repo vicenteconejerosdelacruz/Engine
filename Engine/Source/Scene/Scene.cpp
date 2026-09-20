@@ -625,6 +625,8 @@ namespace Scene
 #if defined(_EDITOR)
 	JUUID CloneSceneObject(SceneUnitId id, JUUID sceneObject, nlohmann::json parameters)
 	{
+		LoadingProcessor loading = CreateLoadingProcessor();
+
 		SceneObject* sceneObjectO = GetSceneObjectPointer(id, sceneObject);
 		SceneObjectType type = sceneObjectO->JType();
 		nlohmann::json data;
@@ -1587,6 +1589,7 @@ namespace Scene
 #if defined(_EDITOR)
 		using namespace Editor;
 #endif
+		LoadingProcessor loading = CreateLoadingProcessor();
 
 		JUUID uuid = json.contains("uuid") ? JUUID(json.at("uuid")) : getUUID();
 		nlohmann::json cameras = json.contains("cameras") ? json.at("cameras") : nlohmann::json::array({ *GetSwapChainCameras(id).begin() });
