@@ -1,5 +1,4 @@
-#ifndef _RENDER_VERTEX_FORMATS_H
-#define _RENDER_VERTEX_FORMATS_H
+#pragma once
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -446,5 +445,3 @@ static std::map<VertexClass, std::function<void(aiMesh*, std::vector<byte>&)>> V
 
 void LoadIndices(aiMesh* mesh, std::vector<unsigned int>& indicesData);
 void LoadBonesInVertices(aiMesh* mesh, Animation::BonesTransformations& bones, Vertex<POS_NORMAL_TANGENT_TEXCOORD0_SKINNING>* vertices);
-
-#endif
