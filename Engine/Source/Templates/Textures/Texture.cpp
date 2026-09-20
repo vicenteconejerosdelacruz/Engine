@@ -128,6 +128,15 @@ namespace Templates
 		conv.mipLevels = GetMipMaps(static_cast<unsigned int>(conv.width), static_cast<unsigned int>(conv.height));
 		ConvertToDDS(conv);
 
+#if defined(_EDITOR)
+		if (json.numFrames() != conv.numFrames || json.format() != conv.format ||
+			json.width() != conv.width || json.height() != conv.height ||
+			json.mipLevels() != conv.mipLevels)
+		{
+			Editor::MarkTemplatesPanelAssetsAsDirty();
+		}
+#endif
+
 		json.numFrames(conv.numFrames);
 		json.format(conv.format);
 		json.width(conv.width);
