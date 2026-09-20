@@ -331,10 +331,10 @@ function Copy-Base-Dlls {
 	$files = @(
         "dxc\dxc_2024_07_31\bin\x64\dxcompiler.dll",
         "dxc\dxc_2024_07_31\bin\x64\dxil.dll",
-        "ultralight\bin\AppCore.dll",
-        "ultralight\bin\Ultralight.dll",
-        "ultralight\bin\UltralightCore.dll",
-        "ultralight\bin\WebCore.dll"
+        "ultralight\ultralight-free-sdk-1.4.0-win-x64\bin\AppCore.dll",
+        "ultralight\ultralight-free-sdk-1.4.0-win-x64\bin\Ultralight.dll",
+        "ultralight\ultralight-free-sdk-1.4.0-win-x64\bin\UltralightCore.dll",
+        "ultralight\ultralight-free-sdk-1.4.0-win-x64\bin\WebCore.dll"
     )
 
 	$targetFolder = "..\TestGame\Target\"
