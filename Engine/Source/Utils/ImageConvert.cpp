@@ -44,7 +44,7 @@ namespace Utils
 			args.push_back(L"-m");
 			args.push_back(std::to_wstring(conversion.mipLevels));
 		}
-		args.push_back(L"-l");
+		//args.push_back(L"-l");
 		args.push_back(L"-o");
 		args.push_back(conversion.dst.parent_path().relative_path().wstring());
 
