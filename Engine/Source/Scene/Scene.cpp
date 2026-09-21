@@ -605,7 +605,8 @@ namespace Scene
 		std::set<JUUID> uuids = GetUnboundedSceneObjects(id);
 		for (auto& uuid : uuids)
 		{
-			bindingMap[GetSceneObjectType(id, uuid)].insert(uuid);
+			if (SceneObjectExists(id, uuid))
+				bindingMap[GetSceneObjectType(id, uuid)].insert(uuid);
 		}
 
 		std::vector<SceneObjectType> bindingOrder = { SO_Cameras, SO_Lights, SO_SceneControllers, SO_PhysicScenes, SO_Triggers, SO_Boundaries, SO_Renderables, SO_SoundEffects };
