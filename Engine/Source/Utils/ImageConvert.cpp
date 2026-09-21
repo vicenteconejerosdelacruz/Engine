@@ -22,11 +22,11 @@ namespace Utils
 		std::vector<std::wstring> args = { L"" };
 
 		args.push_back(conversion.src.wstring());
-		if (conversion.format != DXGI_FORMAT_UNKNOWN)
-		{
-			args.push_back(L"-f");
-			args.push_back(nostd::StringToWString(DXGI_FORMATToString.at(conversion.format)));
-		}
+		//if (conversion.format != DXGI_FORMAT_UNKNOWN)
+		//{
+		//	args.push_back(L"-f");
+		//	args.push_back(nostd::StringToWString(DXGI_FORMATToString.at(conversion.format)));
+		//}
 		args.push_back(L"-y");
 
 		if (conversion.width != 0U)

@@ -1548,6 +1548,7 @@ JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_filepath_vector_image>()
 			auto drawTextureFormat = [](auto& texture)
 				{
 					std::vector<std::string> options = nostd::GetKeysFromMap(StringToDXGI_FORMAT);
+					std::sort(options.begin(), options.end());
 					std::string selected = DXGI_FORMATToString.at(texture->format());
 
 					ImGui::TableNextRow();
@@ -1559,6 +1560,7 @@ JEdvEditorDrawerFunction DrawVector<std::string, jedv_t_filepath_vector_image>()
 						{
 							nlohmann::json patch = { {"format",value} };
 							texture->JUpdate(patch);
+							texture->CreatePreviewTexture();
 						}
 					);
 					ImGui::PopID();

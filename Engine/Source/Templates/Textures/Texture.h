@@ -122,6 +122,7 @@ namespace Templates
 		~TextureInstance() {}
 		void CreateTextureResource(CComPtr<ID3D12GraphicsCommandList2>& commandList, std::string& path, DXGI_FORMAT format, TextureType type, unsigned int numFrames, unsigned int nMipMaps, unsigned int startFrame = 0U);
 		void ReleaseResources();
+		void RebuildResource();
 
 		JUUID materialTexture;
 

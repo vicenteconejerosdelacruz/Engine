@@ -129,7 +129,7 @@ namespace Templates
 		ConvertToDDS(conv);
 
 #if defined(_EDITOR)
-		if (json.numFrames() != conv.numFrames || json.format() != conv.format ||
+		if (json.numFrames() != conv.numFrames || /*json.format() != conv.format ||*/
 			json.width() != conv.width || json.height() != conv.height ||
 			json.mipLevels() != conv.mipLevels)
 		{
@@ -138,7 +138,8 @@ namespace Templates
 #endif
 
 		json.numFrames(conv.numFrames);
-		json.format(conv.format);
+		if (json.format() == DXGI_FORMAT_UNKNOWN)
+			json.format(conv.format);
 		json.width(conv.width);
 		json.height(conv.height);
 		json.mipLevels(conv.mipLevels);
@@ -458,6 +459,17 @@ namespace Templates
 					tex->dirty(TextureJson::Update_numFrames);
 			}
 		);
+		if (changedAttributes.size() > 0ULL)
+		{
+			auto loading = CreateLoadingProcessor();
+			std::for_each(changedAttributes.begin(), changedAttributes.end(), [](auto tex)
+				{
+					TextureInstanceID instance = tex->uuid();
+					instance->RebuildResource();
+					tex->clean({ TextureJson::Update_format, TextureJson::Update_width, TextureJson::Update_height, TextureJson::Update_mipLevels, TextureJson::Update_numFrames });
+				}
+			);
+		}
 	}
 
 	void PreviewTexturesStep(DX::StepTimer& timer)
@@ -669,5 +681,28 @@ namespace Templates
 		FreeCSUDescriptor(cpuHandle, gpuHandle);
 		texture = nullptr;
 		upload = nullptr;
+	}
+
+	void TextureInstance::RebuildResource()
+	{
+		ReleaseResources();
+
+		std::unique_ptr<TextureJson>& tex = GetTextureTemplate(materialTexture);
+		std::filesystem::path path = tex->name();
+		if (path.extension() != ".dds")
+		{
+			path.replace_extension(".dds");
+		}
+
+		std::string pathS = path.string();
+		auto loading = CreateLoadingProcessor();
+		auto& cmd = loading.cmd;
+		auto& commandList = cmd.GetCommandList();
+		CreateTextureResource(commandList, pathS, tex->format(), tex->type(), tex->numFrames(), tex->mipLevels(), 0U);
+		cmd.RunPreDeletion([&]
+			{
+				upload = nullptr;
+			}
+		);
 	}
 }
