@@ -36,6 +36,7 @@ namespace Editor
 	extern void DeleteSceneUnitBillboards(SceneUnitId id);
 	extern void DeleteSceneUnitEditorIndependentCamera(SceneUnitId id);
 	extern std::string GetLevelString(SceneUnitId id);
+	extern CameraID GetLevelCamera(SceneUnitId id);
 	extern void SelectRenderable(RenderableID renderable);
 	extern void SelectTrigger(TriggerID trigger);
 	extern void SelectBoundary(BoundaryID boundary);
@@ -625,6 +626,7 @@ namespace Scene
 #if defined(_EDITOR)
 	JUUID CloneSceneObject(SceneUnitId id, JUUID sceneObject, nlohmann::json parameters)
 	{
+		auto& scene = GetSceneUnit(id);
 		LoadingProcessor loading = CreateLoadingProcessor();
 
 		SceneObject* sceneObjectO = GetSceneObjectPointer(id, sceneObject);
@@ -637,6 +639,8 @@ namespace Scene
 		name += "_clone";
 		data.at("name") = name;
 		data.at("uuid") = uuid;
+
+		scene->AddSceneObjectToUnboundPool(uuid);
 
 		data.merge_patch(parameters);
 
@@ -667,7 +671,7 @@ namespace Scene
 					JUUID avatarUUID = obj.at("uuid");
 					RenderableID ren = MAKESUUUID(id, avatarUUID);
 					ren->BindToScene();
-					ren->renderReady = true;
+					ren->RenderReady(true);
 				}
 			};
 
@@ -715,6 +719,14 @@ namespace Scene
 		break;
 		}
 		createAvatars();
+
+		BindSceneObjects(id);
+
+		if (type == SO_Renderables)
+		{
+			RenderableID ren = MAKESUUUID(id, uuid);
+			ren->RenderReady(true);
+		}
 
 		return uuid;
 	}
@@ -1589,15 +1601,22 @@ namespace Scene
 #if defined(_EDITOR)
 		using namespace Editor;
 #endif
+		auto& scene = GetSceneUnit(id);
 		LoadingProcessor loading = CreateLoadingProcessor();
 
 		JUUID uuid = json.contains("uuid") ? JUUID(json.at("uuid")) : getUUID();
+#if defined(_EDITOR)
+		nlohmann::json cameras = json.contains("cameras") ? json.at("cameras") : nlohmann::json::array({ Editor::GetLevelCamera(id).uuid() });
+#else
 		nlohmann::json cameras = json.contains("cameras") ? json.at("cameras") : nlohmann::json::array({ *GetSwapChainCameras(id).begin() });
+#endif
 		nlohmann::json patch = { {"uuid", uuid }, { "cameras", cameras } };
 		json.merge_patch(patch);
 
 		nlohmann::json data = json;
 		SceneObjectType type = so;
+
+		scene->AddSceneObjectToUnboundPool(uuid);
 
 		auto createAvatars = [&]
 			{
@@ -1631,7 +1650,7 @@ namespace Scene
 					JUUID avatarUUID = obj.at("uuid");
 					RenderableID ren = MAKESUUUID(id, avatarUUID);
 					ren->BindToScene();
-					ren->renderReady = true;
+					ren->RenderReady(true);
 #if defined(_EDITOR)
 					BindRenderableToPickingPass(MAKESUUUID(id, avatarUUID));
 					switch (type)
@@ -1709,6 +1728,15 @@ namespace Scene
 #endif
 
 		CreatePhysicsObjectsBehaviors(id);
+
+		BindSceneObjects(id);
+
+		if (type == SO_Renderables)
+		{
+			RenderableID ren = MAKESUUUID(id, uuid);
+			ren->RenderReady(true);
+		}
+
 #if defined(_EDITOR)
 
 		if (so == SO_Renderables)
