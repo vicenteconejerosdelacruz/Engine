@@ -721,8 +721,6 @@ namespace Scene
 		}
 		createAvatars();
 
-		BindSceneObjects(id);
-
 		if (type == SO_Renderables)
 		{
 			RenderableID ren = MAKESUUUID(id, uuid);
