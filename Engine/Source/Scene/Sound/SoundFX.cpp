@@ -239,7 +239,7 @@ namespace Scene
 		float duration = Duration();
 		if (!loop())
 		{
-			time = min(time, duration);
+			time = std::min(time, duration);
 		}
 		else if (time > duration)
 		{

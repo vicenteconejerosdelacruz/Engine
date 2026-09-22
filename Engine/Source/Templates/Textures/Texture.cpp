@@ -218,8 +218,8 @@ namespace Templates
 			}
 			else
 			{
-				minWidth = min(minWidth, static_cast<unsigned int>(info.width));
-				minHeight = min(minHeight, static_cast<unsigned int>(info.height));
+				minWidth = std::min(minWidth, static_cast<unsigned int>(info.width));
+				minHeight = std::min(minHeight, static_cast<unsigned int>(info.height));
 			}
 		}
 
@@ -306,12 +306,12 @@ namespace Templates
 		return text->uuid();
 	}
 
-	void CreateDDSFile(std::unique_ptr<TextureJson>& tex)
+	void CreateDDSFile(std::unique_ptr<TextureJson>& tex, bool overwrite)
 	{
 		std::filesystem::path ddsPath = tex->name();
 		ddsPath.replace_extension(".dds");
 
-		if (!std::filesystem::exists(ddsPath))
+		if (!std::filesystem::exists(ddsPath) || overwrite)
 		{
 			switch (tex->type())
 			{
@@ -492,7 +492,8 @@ namespace Templates
 
 		std::for_each(texs.begin(), texs.end(), [](auto tex)
 			{
-				CreateDDSFile(*tex);
+				printf(std::string("file:" + tex->name() + "\n").c_str());
+				CreateDDSFile(*tex, true);
 			}
 		);
 	}

@@ -103,7 +103,7 @@ namespace Templates
 	void CreateCubeDDSFile(TextureJson& json);
 	void CreateCubeDDSFileFromSkyBox(TextureJson& json);
 	JUUID CreateTextureTemplate(std::string name, DXGI_FORMAT format);
-	void CreateDDSFile(std::unique_ptr<TextureJson>& tex);
+	void CreateDDSFile(std::unique_ptr<TextureJson>& tex, bool overwrite = false);
 #if defined(_EDITOR)
 	void CreateTextureFromJsonDefinition(nlohmann::json& json);
 	void PreviewTexturesStep(DX::StepTimer& timer);

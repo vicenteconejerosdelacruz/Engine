@@ -178,6 +178,14 @@ int APIENTRY EngineWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevIns
 		if (params.contains("--generate-dds"))
 		{
 			generateDDS = true;
+
+			if (AttachConsole(ATTACH_PARENT_PROCESS))
+			{
+				// Redirige stdout (printf, std::cout) a la consola
+				FILE* fp;
+				freopen_s(&fp, "CONOUT$", "w", stdout);
+				freopen_s(&fp, "CONOUT$", "w", stderr);
+			}
 		}
 	}
 #endif
@@ -345,6 +353,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	return TRUE;
 }
 
+#if defined(_EDITOR)
 void GenerateDDSFiles()
 {
 	//create the templates
@@ -353,7 +362,7 @@ void GenerateDDSFiles()
 
 	GenerateTexturesDDSFiles();
 }
-
+#endif
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 #if defined(_EDITOR)
