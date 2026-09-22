@@ -48,7 +48,7 @@ namespace Templates
 #include <JEnd.h>
 
 	void TextureJsonsStep();
-
+	void GenerateTexturesDDSFiles();
 #endif
 
 	namespace Texture

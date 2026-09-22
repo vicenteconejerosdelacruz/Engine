@@ -24,6 +24,7 @@ enum SceneObjectType {
 // Windows Header Files
 #include <windows.h>
 #include <rpc.h>
+#include <shellapi.h>
 // C RunTime Header Files
 #include <stdlib.h>
 #include <stdint.h>

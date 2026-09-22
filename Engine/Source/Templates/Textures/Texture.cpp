@@ -192,6 +192,15 @@ namespace Templates
 		using namespace Utils;
 
 		std::filesystem::path ddsPath = json.name();
+		if (!std::filesystem::exists(ddsPath))
+		{
+			OutputDebugStringA(std::string("file " + ddsPath.string() + " does not exists!\n").c_str());
+			return;
+		}
+
+		std::error_code ec;
+		std::filesystem::create_directories(ddsPath.parent_path(), ec);
+
 		ddsPath.replace_extension(".dds");
 
 		unsigned int minWidth;
@@ -470,6 +479,22 @@ namespace Templates
 				}
 			);
 		}
+	}
+
+	void GenerateTexturesDDSFiles()
+	{
+		std::set<TextureJsonID> texs;
+		std::transform(Texturetemplates.begin(), Texturetemplates.end(), std::inserter(texs, texs.begin()), [](auto& temps)
+			{
+				return temps.first;
+			}
+		);
+
+		std::for_each(texs.begin(), texs.end(), [](auto tex)
+			{
+				CreateDDSFile(*tex);
+			}
+		);
 	}
 
 	void PreviewTexturesStep(DX::StepTimer& timer)

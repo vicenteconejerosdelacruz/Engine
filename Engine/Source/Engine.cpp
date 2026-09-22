@@ -85,6 +85,9 @@ std::map<JUUID, std::function<void(JUUID)>> onGamepadInputDetected;
 
 //app destruction
 bool destroyed = false;
+#if defined(_EDITOR)
+bool generateDDS = false;
+#endif
 
 RECT GetMaximizedAreaSize()
 {
@@ -161,6 +164,23 @@ int EngineConsoleMain()
 
 int APIENTRY EngineWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
+#if defined(_EDITOR)
+	int argc = 0;
+	LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+	if (argc > 0)
+	{
+		std::set<std::string> params;
+		for (int i = 0; i < argc; i++)
+		{
+			params.insert(nostd::WStringToString(argv[i]));
+		}
+
+		if (params.contains("--generate-dds"))
+		{
+			generateDDS = true;
+		}
+	}
+#endif
 	SetThreadDescription(GetCurrentThread(), L"Main Thread");
 
 	timer.SetFixedTimeStep(true);
@@ -175,6 +195,14 @@ int APIENTRY EngineWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevIns
 	// Initialize global strings
 	LoadStringW(hInstance, IDC_CULPEOENGINE, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
+
+#if defined(_EDITOR)
+	if (generateDDS)
+	{
+		GenerateDDSFiles();
+		return TRUE;
+	}
+#endif
 
 	// Perform application initialization:
 	if (!InitInstance(hInstance, nCmdShow))
@@ -315,6 +343,15 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	InitEditor();
 #endif
 	return TRUE;
+}
+
+void GenerateDDSFiles()
+{
+	//create the templates
+	CreateSystemTemplates();
+	CreateTemplates();
+
+	GenerateTexturesDDSFiles();
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
