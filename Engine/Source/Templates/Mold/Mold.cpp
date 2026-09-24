@@ -2,6 +2,7 @@
 #include "Mold.h"
 #if defined(_EDITOR)
 #include <Builder/ReleaseBuilder.h>
+#include <Builder/BuildMaker.h>
 #include <Modals/BuildModal.h>
 #endif
 
@@ -59,7 +60,7 @@ namespace Templates
 #include <Editor/JReleaseBuilder.h>
 #include "MoldAtt.h"
 #include <JEnd.h>
-		BuildModal::GatherFilesFromLevel(json, filesToCopy, templates, logStream);
+		GatherFilesFromLevel(json, filesToCopy, templates, logStream);
 	}
 #endif
 
