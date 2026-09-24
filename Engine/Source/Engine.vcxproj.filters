@@ -729,6 +729,12 @@
     <ClInclude Include="Utils\LoadingProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\CommandLine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Builder\BuildMaker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -1086,6 +1092,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Utils\LoadingProcessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Builder\BuildMaker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

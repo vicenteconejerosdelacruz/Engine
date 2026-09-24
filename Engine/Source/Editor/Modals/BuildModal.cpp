@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <nlohmann/json.hpp>
 #include <Renderable/Renderable.h>
+#include "../Builder/BuildMaker.h"
 
 namespace fs = std::filesystem;
 
@@ -137,294 +138,37 @@ std::vector<std::string> BuildModal::GetYamlFiles(const std::string& rutaDirecto
 	return archivosYaml;
 }
 
-std::unordered_map<SceneObjectType, std::function<void(nlohmann::json& sceneObject, std::set<std::filesystem::path>& files, std::set<JUUID>& templates, ThreadSafeStream& logStream)>> filesGatherer =
-{
-	{ SO_Renderables, [](nlohmann::json& sceneObject, std::set<std::filesystem::path>& files, std::set<JUUID>& templates, ThreadSafeStream& logStream)
-	{
-		Renderable::GatherFiles(sceneObject, files, templates, logStream);
-	}
-	},
-	{ SO_Lights, [](nlohmann::json& sceneObject, std::set<std::filesystem::path>& files, std::set<JUUID>& templates, ThreadSafeStream& logStream)
-	{
-		Light::GatherFiles(sceneObject, files, templates, logStream);
-	}
-	},
-	{ SO_Cameras, [](nlohmann::json& sceneObject, std::set<std::filesystem::path>& files, std::set<JUUID>& templates, ThreadSafeStream& logStream)
-	{
-		Camera::GatherFiles(sceneObject, files, templates, logStream);
-	}
-	},
-	{ SO_SoundEffects, [](nlohmann::json& sceneObject, std::set<std::filesystem::path>& files, std::set<JUUID>& templates, ThreadSafeStream& logStream)
-	{
-		SoundFX::GatherFiles(sceneObject, files, templates, logStream);
-	}
-	},
-	{ SO_PhysicScenes, [](nlohmann::json& sceneObject, std::set<std::filesystem::path>& files, std::set<JUUID>& templates, ThreadSafeStream& logStream)
-	{
-		PhysicScene::GatherFiles(sceneObject, files, templates, logStream);
-	}
-	},
-	{ SO_Triggers, [](nlohmann::json& sceneObject, std::set<std::filesystem::path>& files, std::set<JUUID>& templates, ThreadSafeStream& logStream)
-	{
-		Trigger::GatherFiles(sceneObject, files, templates, logStream);
-	}
-	},
-	{ SO_Boundaries, [](nlohmann::json& sceneObject, std::set<std::filesystem::path>& files, std::set<JUUID>& templates, ThreadSafeStream& logStream)
-	{
-		Boundary::GatherFiles(sceneObject, files, templates, logStream);
-	}
-	},
-	{ SO_SceneControllers, [](nlohmann::json& sceneObject, std::set<std::filesystem::path>& files, std::set<JUUID>& templates, ThreadSafeStream& logStream)
-	{
-		SceneController::GatherFiles(sceneObject, files, templates, logStream);
-	}
-	},
-};
-
-void BuildModal::GatherFilesFromLevel(nlohmann::json& level, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
-{
-	//get the files directly used by the scene objects
-	for (auto& [sceneObjectType, gatherer] : filesGatherer)
-	{
-		if (!level.contains(SceneObjectTypeJsonContainer.at(sceneObjectType)))
-			continue;
-
-		nlohmann::json& typeArr = level.at(SceneObjectTypeJsonContainer.at(sceneObjectType));
-		for (unsigned int i = 0; i < typeArr.size(); i++)
-		{
-			gatherer(typeArr.at(i), filesToCopy, templates, logStream);
-		}
-	}
-}
-
-void BuildModal::GatherRecursiveFilesFromFolder(const std::filesystem::path& folderPath, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
-{
-	if (!std::filesystem::exists(folderPath) || !std::filesystem::is_directory(folderPath))
-		return;
-
-	// copy recursive
-	for (const auto& entry : std::filesystem::recursive_directory_iterator(folderPath))
-	{
-		if (!entry.is_regular_file())
-			continue;
-
-		std::filesystem::path filePath = entry.path();
-
-		if (filesToCopy.contains(filePath))
-			continue;
-
-		auto [iter, inserted] = filesToCopy.insert(filePath);
-		if (inserted)
-			logStream << "resource: " << filePath.string() << "\n";
-	}
-}
-
-void BuildModal::GatherExecutablesFromFolder(const std::filesystem::path& folderPath, std::set<std::filesystem::path>& filesToCopy, ThreadSafeStream& logStream)
-{
-	if (!std::filesystem::exists(folderPath) || !std::filesystem::is_directory(folderPath))
-	{
-		logStream << "[Warning] invalid folder: " << folderPath.string() << "\n";
-		return;
-	}
-
-	//do not recursive iterate
-	for (const auto& entry : std::filesystem::directory_iterator(folderPath))
-	{
-		if (!entry.is_regular_file())
-			continue;
-
-		std::filesystem::path filePath = entry.path();
-
-		if (filePath.extension() == ".exe")
-		{
-			if (filesToCopy.contains(filePath))
-				continue;
-
-			auto [iter, inserted] = filesToCopy.insert(filePath);
-			if (inserted)
-			{
-				logStream << "Copied: " << filePath.string() << "\n";
-			}
-		}
-	}
-}
-
-void BuildModal::CopyFilesFromTargetFolderToBuildFolder(
-	const std::set<std::filesystem::path>& filesToCopy,
-	ThreadSafeStream& logStream)
-{
-	std::filesystem::path buildDir = "../Build";
-
-	if (std::filesystem::exists(buildDir))
-	{
-		logStream << "[Cleanup] Build folder\n";
-		try
-		{
-			std::filesystem::remove_all(buildDir);
-			logStream << "[Cleanup] success\n";
-		}
-		catch (const std::filesystem::filesystem_error& e)
-		{
-			logStream << "[Error] cannot delete Build folder: " << e.what() << "\n";
-			return; // Si no se puede borrar, es arriesgado continuar copiando
-		}
-	}
-
-	logStream << "[Build] Starting files copy\n";
-
-	for (const auto& srcPath : filesToCopy)
-	{
-		try
-		{
-			if (!std::filesystem::exists(srcPath))
-			{
-				logStream << "[Warning] missing file: " << srcPath.string() << "\n";
-				continue;
-			}
-
-			std::filesystem::path relativePath = srcPath;
-			std::filesystem::path destPath = buildDir / relativePath;
-			std::filesystem::create_directories(destPath.parent_path());
-			std::filesystem::copy_file(srcPath, destPath, std::filesystem::copy_options::overwrite_existing);
-
-			logStream << "Copied: " << destPath.string() << "\n";
-		}
-		catch (const std::filesystem::filesystem_error& e)
-		{
-			logStream << "[Copy error] " << e.what() << "\n";
-		}
-	}
-
-	logStream << "[Build] Files copy finished\n";
-}
-
-void BuildModal::CopyFilesIntoBuildFolder(const std::set<std::filesystem::path>& filesToCopy, ThreadSafeStream& logStream)
-{
-	std::filesystem::path buildFolderPath = "../Build";
-
-	for (const auto& srcPath : filesToCopy)
-	{
-		try
-		{
-			if (!std::filesystem::exists(srcPath))
-			{
-				continue;
-			}
-
-			std::filesystem::path destPath = buildFolderPath / srcPath.filename();
-			std::filesystem::copy_file(srcPath, destPath, std::filesystem::copy_options::overwrite_existing);
-			logStream << "Copied: " << destPath.filename().string() << "\n";
-		}
-		catch (const std::filesystem::filesystem_error& e)
-		{
-			logStream << "[Copy error] " << e.what() << "\n";
-		}
-	}
-}
-
-void BuildModal::WriteBootLevelIntoBuildFolder(const std::string& bootLevelName, ThreadSafeStream& logStream)
-{
-	std::filesystem::path buildFolderPath = "../Build";
-	std::filesystem::path bootIniPath = buildFolderPath / "boot.ini";
-
-	// Abrir el archivo de salida (si no existe se crea, si existe se sobrescribe)
-	std::ofstream outFile(bootIniPath);
-	if (outFile.is_open())
-	{
-		outFile << bootLevelName;
-		outFile.close();
-		logStream << "[Build]boot.ini created: " << bootLevelName << "\n";
-	}
-	else
-	{
-		logStream << "[Error] cannot write boot.ini at: " << bootIniPath.string() << "\n";
-	}
-}
-
 void BuildModal::StartBuildingProcess()
 {
-	std::thread levelThread([](BuildModal* modal)
+	std::set<std::string> filesToBuild;
+	for (size_t idx = 0ULL; idx < files.size(); idx++)
+	{
+		if (!includeFlags.at(idx))
+			continue;
+
+		filesToBuild.insert(files.at(idx));
+	}
+
+	std::thread levelThread = CreateBuilderThread(
+		[=]
 		{
-			using namespace Scene::Level;
-
-			modal->building = true;
-			modal->cancelable = false;
-			modal->logStream.clear();
-
-			std::set<std::filesystem::path> filesToCopy;
-			std::set<JUUID> templates;
-
-			for (size_t idx = 0ULL; idx < modal->files.size(); idx++)
-			{
-				if (!modal->includeFlags.at(idx))
-					continue;
-
-				std::string& file = modal->files.at(idx);
-				filesToCopy.insert(defaultLevelsFolder + file);
-
-				//load the level
-				nlohmann::json lvl = GetLevelFromFile(file);
-
-				GatherFilesFromLevel(lvl, filesToCopy, templates, modal->logStream);
-			}
-
-			std::set<std::filesystem::path> recursive_folders = { defaultScriptsFolder, defaultShadersFolder };
-			for (auto& p : recursive_folders)
-			{
-				GatherRecursiveFilesFromFolder(p, filesToCopy, templates, modal->logStream);
-			}
-			std::set<std::filesystem::path> fixed_asset_files =
-			{
-				defaultUIFolder + "cacert.pem",
-				defaultUIFolder + "icudt67l.dat",
-				defaultTemplatesFolder + Templates::Shader::templateName,
-				defaultTemplatesFolder + Templates::Material::templateName,
-				defaultTemplatesFolder + Templates::Model3D::templateName,
-				defaultTemplatesFolder + Templates::RenderPass::templateName,
-				defaultTemplatesFolder + Templates::Sound::templateName,
-				defaultTemplatesFolder + Templates::Texture::templateName,
-				defaultTemplatesFolder + Templates::PhysicGeometry::templateName,
-				defaultTemplatesFolder + Templates::HtmlUI::templateName,
-				defaultTemplatesFolder + Templates::Mold::templateName,
-			};
-			for (auto& p : fixed_asset_files)
-			{
-				filesToCopy.insert(p);
-				modal->logStream << "resource: " << p.string() << "\n";
-			}
-
-			std::set<std::filesystem::path> release_files =
-			{
-				"../Release/AppCore.dll",
-				"../Release/assimp-vc143-mt.dll",
-				"../Release/dxcompiler.dll",
-				"../Release/dxil.dll",
-				"../Release/icudtl.dat",
-				"../Release/icui18n.dll",
-				"../Release/icuuc.dll",
-				"../Release/PhysXCommon_64.dll",
-				"../Release/PhysXCooking_64.dll",
-				"../Release/PhysXFoundation_64.dll",
-				"../Release/PhysXGpu_64.dll",
-				"../Release/PhysX_64.dll",
-				"../Release/Ultralight.dll",
-				"../Release/UltralightCore.dll",
-				"../Release/v8.dll",
-				"../Release/v8pp.dll",
-				"../Release/v8_libbase.dll",
-				"../Release/v8_libplatform.dll",
-				"../Release/WebCore.dll",
-				"../Release/zlib.dll",
-			};
-
-			GatherExecutablesFromFolder("../Release", release_files, modal->logStream);
-
-			CopyFilesFromTargetFolderToBuildFolder(filesToCopy, modal->logStream);
-			CopyFilesIntoBuildFolder(release_files, modal->logStream);
-
-			WriteBootLevelIntoBuildFolder(modal->GetBootLevelName(), modal->logStream);
-			modal->completed = true;
-		}, this
+			return filesToBuild;
+		},
+		[&]
+		{
+			return GetBootLevelName();
+		},
+		[&]
+		{
+			building = true;
+			cancelable = false;
+			logStream.clear();
+		},
+		[&]
+		{
+			completed = true;
+		},
+		&logStream
 	);
 	levelThread.detach();
 }

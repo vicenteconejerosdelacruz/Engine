@@ -4,6 +4,9 @@
 #pragma once
 #include "pch.h"
 #include "resource.h"
+#if defined(_EDITOR)
+#include "Utils/CommandLine.h"
+#endif
 
 RECT GetMaximizedAreaSize();
 
@@ -18,7 +21,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 ATOM MyRegisterClass(HINSTANCE hInstance);
 BOOL InitInstance(HINSTANCE, int);
+#if defined(_EDITOR)
 void GenerateDDSFiles();
+void GenerateBatchBuild(CommandLine& cmd);
+#endif
 //READ&GET
 
 //UPDATE

@@ -10,7 +10,9 @@
 #include <Game.h>
 #if defined(_EDITOR)
 #include <Editor.h>
+#include <Builder/BuildMaker.h>
 #endif
+#include <CommandLine.h>
 #include <StepTimer.h>
 #include <locale>
 
@@ -165,28 +167,22 @@ int EngineConsoleMain()
 int APIENTRY EngineWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
 #if defined(_EDITOR)
-	int argc = 0;
-	LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
-	if (argc > 0)
+	CommandLine cmd;
+
+	if (!cmd.IsValid())
 	{
-		std::set<std::string> params;
-		for (int i = 0; i < argc; i++)
-		{
-			params.insert(nostd::WStringToString(argv[i]));
-		}
+		return FALSE; // Sale de inmediato si la combinación de argumentos fue inválida
+	}
 
-		if (params.contains("--generate-dds"))
-		{
-			generateDDS = true;
-
-			if (AttachConsole(ATTACH_PARENT_PROCESS))
-			{
-				// Redirige stdout (printf, std::cout) a la consola
-				FILE* fp;
-				freopen_s(&fp, "CONOUT$", "w", stdout);
-				freopen_s(&fp, "CONOUT$", "w", stderr);
-			}
-		}
+	if (cmd.IsGenerateDDS())
+	{
+		GenerateDDSFiles();
+		return TRUE;
+	}
+	if (cmd.IsGenerateBuild())
+	{
+		GenerateBatchBuild(cmd);
+		return TRUE;
 	}
 #endif
 	SetThreadDescription(GetCurrentThread(), L"Main Thread");
@@ -203,14 +199,6 @@ int APIENTRY EngineWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevIns
 	// Initialize global strings
 	LoadStringW(hInstance, IDC_CULPEOENGINE, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
-
-#if defined(_EDITOR)
-	if (generateDDS)
-	{
-		GenerateDDSFiles();
-		return TRUE;
-	}
-#endif
 
 	// Perform application initialization:
 	if (!InitInstance(hInstance, nCmdShow))
@@ -361,6 +349,15 @@ void GenerateDDSFiles()
 	CreateTemplates();
 
 	GenerateTexturesDDSFiles();
+}
+
+void GenerateBatchBuild(CommandLine& cmd)
+{
+	//create the templates
+	CreateSystemTemplates();
+	CreateTemplates();
+
+	GenerateBuild(cmd.GetBuildParams(), cmd.GetBootParam());
 }
 #endif
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
