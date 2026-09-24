@@ -263,14 +263,14 @@ namespace Scene
 			{
 				if (!t->markedForDelete) return;
 				PhysicObjectID phO = t->physicObject();
-				phO->actor->userData = nullptr;
-				phO->shape->userData = nullptr;
-
-				phO->DestroyPhysicsBehavior();
+				if (PhysicObjectExists(phO()))
+				{
+					phO->DestroyPhysicsBehavior();
 #if defined(_EDITOR)
-				phO->DestroyPhysicsAvatar();
+					phO->DestroyPhysicsAvatar();
 #endif
-				DestroyPhysicObject(phO());
+					DestroyPhysicObject(phO());
+				}
 				t->physicObject.clear();
 				t->clear();
 				EraseTriggerFromTriggers(FROMSUUUID(t()));

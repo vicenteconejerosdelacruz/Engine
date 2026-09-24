@@ -145,6 +145,7 @@ namespace Physics
 	};
 
 	std::unique_ptr<PhysicObject>& GetPhysicObject(JUUID uuid);
+	bool PhysicObjectExists(JUUID uuid);
 	void DestroyPhysicObject(JUUID uuid);
 	std::set<JUUID> GetPhysicsObjectsBySceneUnit(SceneUnitId id);
 	std::set<JUUID> GetPhysicsObjectsBySceneObjectUUID(SUUUID uuid);

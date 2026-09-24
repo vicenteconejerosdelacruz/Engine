@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "ContactCallback.h"
 #include "PhysicObject.h"
+#include <Scene.h>
 
+using namespace Scene;
 namespace Physics
 {
 	ContactCallback::ContactCallback(PhysicSceneID physicScene) : PxSimulationEventCallback()
@@ -37,8 +39,8 @@ namespace Physics
 			PhysicObject* other = (PhysicObject*)current.otherActor->userData;
 
 			if (!trigger || trigger->markedForDelete || !other || other->markedForDelete) continue;
-			if (!trigger->built || !trigger->trigger) continue;
-			if (!other->built || !other->renderable || other->renderable->markedForDelete) continue;
+			if (!trigger->built || !trigger->trigger || !SceneObjectExists(trigger->trigger())) continue;
+			if (!other->built || !other->renderable || !SceneObjectExists(other->renderable()) || other->renderable->markedForDelete) continue;
 			if (!(trigger->collisionMask() & other->objectMask())) continue;
 
 			if (current.status & PxPairFlag::eNOTIFY_TOUCH_FOUND)

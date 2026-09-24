@@ -603,6 +603,15 @@ namespace Physics
 
 	void PhysicObject::DestroyPhysicsBehavior()
 	{
+		if (shape)
+		{
+			shape->userData = this;
+		}
+		if (actor)
+		{
+			actor->userData = this;
+		}
+
 		PhysicSceneID scene;
 		if (renderable)
 		{
@@ -1051,6 +1060,11 @@ namespace Physics
 	std::unique_ptr<PhysicObject>& GetPhysicObject(JUUID uuid)
 	{
 		return physicObjectsUUIDs.at(uuid);
+	}
+
+	bool PhysicObjectExists(JUUID uuid)
+	{
+		return physicObjectsUUIDs.contains(uuid);
 	}
 
 	void DestroyPhysicObject(JUUID uuid)
