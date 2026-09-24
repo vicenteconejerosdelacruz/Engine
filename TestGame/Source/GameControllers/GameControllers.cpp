@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "BootScreen/BootScreen.h"
 #include "Test/SpinYaw.h"
 #include "ThirdPerson/ThirdPersonCharacter.h"
 #include "Brawler/Scene/BrawlerScene.h"
@@ -20,6 +21,7 @@ namespace Game
 
 	std::unordered_map<std::string, std::function<std::unique_ptr<Game::Controller>(nlohmann::json&)>> controllers =
 	{
+		{ "bootscreen", [](nlohmann::json& json) { return std::make_unique<BootScreen>(json); }},
 		{ "spinyaw", [](nlohmann::json& json) { return std::make_unique<SpinYaw>(json); }},
 		{ "thirdperson-character", [](nlohmann::json& json) { return std::make_unique<ThirdPersonCharacter>(json); }},
 		{ "brawler-scene", [](nlohmann::json& json) { return std::make_unique<BrawlerScene>(json); }},
@@ -36,6 +38,11 @@ namespace Game
 #if defined(_EDITOR)
 	std::unordered_map<std::string, std::function<void(nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)>> controllerReleaseBuilders =
 	{
+		{ "bootscreen", [](nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
+		{
+			BootScreen::GatherFiles(controller, filesToCopy, templates, logStream);
+		}
+		},
 		{ "spinyaw", [](nlohmann::json& controller, std::set<std::filesystem::path>& filesToCopy, std::set<JUUID>& templates, ThreadSafeStream& logStream)
 		{
 			SpinYaw::GatherFiles(controller, filesToCopy, templates, logStream);
@@ -110,6 +117,7 @@ namespace Game
 
 	void CreateControllersMemberFunctionTemplates(Isolate* isolate, SceneUnitId id)
 	{
+		SceneUnitScripting::GetOrCreateTemplate(isolate, id, BootScreen::GetClassName(), BootScreen::RegisterScript);
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, SpinYaw::GetClassName(), SpinYaw::RegisterScript);
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, ThirdPersonCharacter::GetClassName(), ThirdPersonCharacter::RegisterScript);
 		SceneUnitScripting::GetOrCreateTemplate(isolate, id, BrawlerScene::GetClassName(), BrawlerScene::RegisterScript);

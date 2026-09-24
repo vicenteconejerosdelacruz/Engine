@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Boot } from './components/Boot/Boot';
 import { StartScreen } from './components/StartScreen/StartScreen';
 import { LoadingScreen } from './components/LoadingScreen/LoadingScreen';
 import { EnemyHud } from './components/Huds/EnemyHud/EnemyHud';
@@ -44,6 +45,9 @@ function App() {
       if (e.detail.type === 'ARROW_RIGHT') setArrows(prev => ({ ...prev, right: e.detail.value }));
       if (e.detail.type === 'MAIN_MENU') {
         setGameState('menu');
+      }
+      if(e.detail.type === 'BOOT_SCREEN') {
+        setGameState('boot');
       }
       if (e.detail.type === 'LOADING_SCREEN') {
         setGameState('loading');
@@ -91,7 +95,14 @@ function App() {
     }
   }, []);
 
-  if (gameState === 'menu') {
+  if(gameState === 'boot') {
+    return (
+      <div className="app-container">
+        <Boot />
+      </div>
+    );
+  }
+  else if (gameState === 'menu') {
     return (
       <div className="app-container">
         <StartScreen isGamepad={isGamepad} onStart={() => setGameState('playing')} />

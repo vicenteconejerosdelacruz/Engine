@@ -117,6 +117,12 @@
     <ClInclude Include="GameControllers\Brawler\Menus\BrawlerMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameControllers\BootScreen\BootScreenAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameControllers\BootScreen\BootScreen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TestGame.cpp">
@@ -171,6 +177,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameControllers\Brawler\Menus\BrawlerMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameControllers\BootScreen\BootScreen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

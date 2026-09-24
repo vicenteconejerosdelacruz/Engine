@@ -56,7 +56,7 @@ namespace Game
 	{
 		using namespace Scene::Level;
 
-		std::string bootLevelName = "mainmenu.yaml"; // Nivel por defecto si falla la lectura
+		std::string bootLevelName = "boot.yaml"; // Nivel por defecto si falla la lectura
 		std::filesystem::path bootIniPath = "boot.ini"; // O "../Build/boot.ini" según dónde se ejecute el binario
 
 		// Intentamos leer el archivo boot.ini

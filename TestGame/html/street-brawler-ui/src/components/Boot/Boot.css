@@ -1,0 +1,26 @@
+.boot-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000000;
+  overflow: hidden;
+}
+
+.boot-logo {
+  max-width: 80%;
+  max-height: 80%;
+  object-fit: contain;
+  opacity: 0;
+  animation: fadeInLogo 4s ease-in-out forwards;
+}
+
+@keyframes fadeInLogo {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

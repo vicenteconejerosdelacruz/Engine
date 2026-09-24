@@ -1,0 +1,7 @@
+JCLASS(BootScreen, _)
+JEXPOSE(std::string, screenUI, "", jedv_t_te_htmlui, 1, false)
+JEXPOSE(JUUID, screenUIInstance, "", jedv_t_hidden, 0, false)
+JEXPOSE(bool, gameStateSet, false, jedv_t_hidden, 0, false)
+JEXPOSE(bool, loadingStateSet, true, jedv_t_hidden, 0, false)
+JEXPOSE(bool, loadingProgressSet, true, jedv_t_hidden, 0, false)
+JEXPOSE(int, loadingProgressValue, 0, jedv_t_hidden, 0, false)

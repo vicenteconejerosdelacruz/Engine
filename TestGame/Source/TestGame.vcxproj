@@ -523,6 +523,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="GameControllers\BootScreen\BootScreen.h" />
+    <ClInclude Include="GameControllers\BootScreen\BootScreenAtt.h" />
     <ClInclude Include="GameControllers\Brawler\Camera\BrawlerCamera.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\Bosses\GreenGoblin.h" />
     <ClInclude Include="GameControllers\Brawler\Characters\Bosses\GreenGoblinAtt.h" />
@@ -563,6 +565,7 @@
     <ClInclude Include="TestGame.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GameControllers\BootScreen\BootScreen.cpp" />
     <ClCompile Include="GameControllers\Brawler\Camera\BrawlerCamera.cpp" />
     <ClCompile Include="GameControllers\Brawler\Characters\Bosses\GreenGoblin.cpp" />
     <ClCompile Include="GameControllers\Brawler\Characters\Bosses\PumpkinBomb.cpp" />
