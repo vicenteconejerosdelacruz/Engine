@@ -12,6 +12,7 @@
 #include "Sphere.h"
 #include "Cone.h"
 #include "Capsule.h"
+#include "../Utils/LoadingProcessor.h"
 
 extern std::unique_ptr<JRenderer> renderer;
 namespace Primitives

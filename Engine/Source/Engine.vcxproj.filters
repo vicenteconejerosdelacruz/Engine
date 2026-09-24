@@ -726,6 +726,9 @@
     <ClInclude Include="Editor\Modals\ThreadSafeStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\LoadingProcessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -1080,6 +1083,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Editor\Modals\BuildModal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\LoadingProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

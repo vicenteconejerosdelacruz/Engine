@@ -20,19 +20,6 @@ using namespace nov8;
 
 namespace Scene
 {
-	struct LoadingProcessor
-	{
-		size_t threadId;
-		CommandsProcessor& cmd;
-		std::unique_ptr<std::atomic_uint>& depth;
-
-		LoadingProcessor(CommandsProcessor& p_cmd, std::unique_ptr<std::atomic_uint>& p_depth);
-		~LoadingProcessor();
-	};
-
-	LoadingProcessor CreateLoadingProcessor();
-	void DestroyLoadingProcessor(size_t threadId);
-
 	void CreateSceneLevelAsync(std::string filename, nlohmann::json level, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress = [](std::string, unsigned int, unsigned int) {});
 	void CreateIsolatedSceneLevelAsync(std::string filename, nlohmann::json level, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress = [](std::string, unsigned int, unsigned int) {});
 	void AttachLevelIntoScene(SceneUnitId parentUnit, std::string filename, nlohmann::json level, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress = [](std::string, unsigned int, unsigned int) {});
@@ -52,7 +39,6 @@ namespace Scene
 	void DestroyScenes(bool inmediate = false);
 	bool SceneUnitExits(SceneUnitId unit);
 	void SceneUnitsStep();
-	void LoadingProcessorsStep();
 	std::unique_ptr<SceneUnit>& GetSceneUnit(SceneUnitId unit);
 	size_t GetSceneUnitsCount();
 	std::set<SceneUnitId> GetSceneUnitIds();

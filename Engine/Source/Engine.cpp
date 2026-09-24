@@ -633,37 +633,42 @@ void AppStep()
 	PIXScopedEvent(0, L"AppStep");
 #endif
 
-	SceneUnitsStep();
-	UpdateAudio();
+
+	{
+		LoadingProcessor lp = CreateLoadingProcessor();
+
+		SceneUnitsStep();
+		UpdateAudio();
 #if defined(_EDITOR)
-	EditorStep();
+		EditorStep();
 #endif
-	CheckInputSwap();
+		CheckInputSwap();
 #if defined(_DEVELOPMENT)
-	unsigned int stepCount = 0U;
+		unsigned int stepCount = 0U;
 #endif
-	timer.Tick([&]()
-		{
+		timer.Tick([&]()
+			{
 #if defined(_EDITOR)
-			if (restoringPlayMode) return;
+				if (restoringPlayMode) return;
 #endif
 #if defined(_DEVELOPMENT)
-			std::string event = std::string("timer.Tick:") + std::to_string(stepCount) + "\n";
-			PIXScopedEvent(0, nostd::StringToWString(event).c_str());
+				std::string event = std::string("timer.Tick:") + std::to_string(stepCount) + "\n";
+				PIXScopedEvent(0, nostd::StringToWString(event).c_str());
 #endif
-			FetchPhysicsScenesResults(timer);
-			TemplatesStep(timer);
-			GameStep();
-			SceneObjectsStep(timer);
-			StepControllers(timer);
-			SimulatePhysicScenes(timer);
+				FetchPhysicsScenesResults(timer);
+				TemplatesStep(timer);
+				GameStep();
+				SceneObjectsStep(timer);
+				StepControllers(timer);
+				SimulatePhysicScenes(timer);
 #if defined(_DEVELOPMENT)
-			stepCount++;
+				stepCount++;
 #endif
-		}
-	);
-	UIStep();
-	Render();
+			}
+		);
+		UIStep();
+		Render();
+	}
 	LoadingProcessorsStep();
 }
 

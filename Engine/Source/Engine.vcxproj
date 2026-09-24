@@ -749,6 +749,7 @@
     <ClInclude Include="Utils\ImageConvert.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="Utils\LoadingProcessor.h" />
     <ClInclude Include="Utils\Yaml2Json.h" />
   </ItemGroup>
   <ItemGroup>
@@ -890,6 +891,7 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Physics\CharacterHitCallback.cpp" />
     <ClCompile Include="Scripting\NoV8.cpp" />
+    <ClCompile Include="Utils\LoadingProcessor.cpp" />
     <ClInclude Include="Scripting\NoV8.h" />
     <ClCompile Include="Physics\Boundary.cpp" />
     <ClCompile Include="Physics\PhysicObject.cpp" />

@@ -54,51 +54,6 @@ namespace Scene
 	std::map<SceneUnitId, std::unique_ptr<std::atomic_uint>> levelThreadsStack;
 	std::map<SceneUnitId, SceneUnitId> attachedUnits; //<Attached, Destination>
 	std::set<SceneUnitId> renderableSceneUnits;
-	std::map<size_t, CommandsProcessor> loadingProcessor;
-	std::map<size_t, std::unique_ptr<std::atomic_uint>> loadingProcessorDepth;
-	std::set<std::tuple<unsigned int, size_t>> loadingProcessorsToDelete;
-
-	LoadingProcessor::LoadingProcessor(CommandsProcessor& p_cmd, std::unique_ptr<std::atomic_uint>& p_depth) :cmd(p_cmd), depth(p_depth)
-	{
-		threadId = nostd::threadIdHash();
-		unsigned int prev = depth->fetch_add(1U);
-		if (prev == 0U)
-		{
-			cmd.ResetCommandList();
-		}
-	}
-
-	LoadingProcessor::~LoadingProcessor()
-	{
-		size_t id = threadId;
-		unsigned int prev = loadingProcessorDepth.at(id)->fetch_sub(1U);
-		if (prev == 1U)
-		{
-			cmd.CloseCommandList();
-			cmd.ExecuteCommandList();
-			cmd.RunPostExecution([id]
-				{
-					DestroyLoadingProcessor(id);
-				}
-			);
-		}
-	}
-
-	LoadingProcessor CreateLoadingProcessor()
-	{
-		size_t id = nostd::threadIdHash();
-		if (!loadingProcessor.contains(id))
-		{
-			loadingProcessor.insert_or_assign(id, CommandsProcessor(renderer->d3dDevice, 1));
-			loadingProcessorDepth.insert_or_assign(id, std::make_unique<std::atomic_uint>(0U));
-		}
-		return LoadingProcessor(loadingProcessor.at(id), loadingProcessorDepth.at(id));
-	}
-
-	void DestroyLoadingProcessor(size_t threadId)
-	{
-		loadingProcessorsToDelete.insert(std::make_tuple(JRenderer::numFrames, threadId));
-	}
 
 	void CreateSceneLevelAsync(std::string filename, nlohmann::json data, std::function<void(SceneUnitId)> levelLoaded, std::function<void(std::string, unsigned int, unsigned int)> progress)
 	{
@@ -315,27 +270,6 @@ namespace Scene
 		}
 	}
 
-	void LoadingProcessorsStep()
-	{
-		for (auto it = loadingProcessorsToDelete.begin(); it != loadingProcessorsToDelete.end();)
-		{
-			auto [count, id] = *it;
-
-			if (count > 0)
-			{
-				auto nextIt = std::next(it);
-				loadingProcessorsToDelete.erase(it);
-				loadingProcessorsToDelete.insert({ count - 1, id });
-				it = nextIt;
-			}
-			else
-			{
-				loadingProcessor.erase(id);
-				loadingProcessorDepth.erase(id);
-				it = loadingProcessorsToDelete.erase(it);
-			}
-		}
-	}
 
 	std::unique_ptr<SceneUnit>& GetSceneUnit(SceneUnitId unit)
 	{

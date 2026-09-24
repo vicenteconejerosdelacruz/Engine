@@ -364,7 +364,10 @@ namespace Scene
 		std::transform(TriggerSUsceneObjects.at(id).begin(), TriggerSUsceneObjects.at(id).end(), std::inserter(uuids, uuids.begin()), [](auto& pair) { return pair.first; });
 		for (auto& uuid : uuids)
 		{
-			DeleteTriggerSceneObject(MAKESUUUID(id, uuid));
+			if (SceneObjectExists(id, uuid))
+			{
+				DeleteTriggerSceneObject(MAKESUUUID(id, uuid));
+			}
 		}
 #include <TrackUUID/JClearUnit.h>
 #include "TriggerAtt.h"

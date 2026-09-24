@@ -28,6 +28,9 @@ namespace DeviceUtils
 			allocator->SetName(StringToWString(allocatorName).c_str());
 			commandList->SetName(StringToWString(commandListName).c_str());
 
+			//close the command list so allocator->Reset doesn't fail
+			//DX::ThrowIfFailed(commandList->Close());
+
 			commandAllocators.push_back(allocator);
 			commandLists.push_back(commandList);
 
@@ -101,10 +104,12 @@ namespace DeviceUtils
 		}
 
 		auto& commandAllocator = commandAllocators[frame];
-		commandAllocator->Reset();
 		auto& commandList = commandLists[frame];
+
+		commandAllocator->Reset();
+
 		ID3D12DescriptorHeap* ppHeaps[] = { GetCSUDescriptorHeap() };
-		commandList->Reset(commandAllocator, nullptr);
+		DX::ThrowIfFailed(commandList->Reset(commandAllocator, nullptr));
 		commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
 		// 2. Marcar como abierto
