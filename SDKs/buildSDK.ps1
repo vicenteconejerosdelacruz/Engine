@@ -6,7 +6,8 @@ $msbuild2022 = "C:\Program Files\Microsoft Visual Studio\2022\Community\Msbuild\
 $project = "TestGame"
 
 $debug_projects = @("Debug", "Editor_Debug")
-$release_projects = @("Release", "Development", "Editor_Release", "Editor_Development", "Editor_SoftDebug")
+$release_projects = @("Release", "Development", "Editor_Release", "Editor_Development")
+$profile_projects = @("Debug", "Editor_Debug", "Development", "Editor_Release", "Editor_Development")
 
 $assimpUrl = "https://github.com/assimp/assimp/archive/refs/tags/v6.0.5.zip"
 $physxUrl = "https://github.com/NVIDIA-Omniverse/PhysX/archive/refs/tags/107.3-omni-and-physx-5.6.1.zip"
@@ -446,7 +447,7 @@ function Copy-PhysXBinaries {
 
     # Grupos de proyectos definidos
     $physx_debug_projects   = @("Debug", "Editor_Debug")
-    $physx_profile_projects = @("Development", "Editor_Development", "Editor_SoftDebug")
+    $physx_profile_projects = @("Development", "Editor_Development")
     $physx_release_projects = @("Release", "Editor_Release")
 
     # Función interna para realizar la copia filtrada de las DLLs
@@ -496,6 +497,35 @@ function Copy-PhysXBinaries {
     Write-Host "¡Las DLLs esenciales de PhysX han sido copiadas con éxito!" -ForegroundColor Green
 }
 
+function Copy-PixRuntimeDll {
+    param(
+        [string[]]$Directories
+    )
+
+    $files = @(
+        "WinPixEventRuntime\bin\x64\WinPixEventRuntime.dll"
+    )
+
+    Set-Location $sdkfolder
+
+    foreach ($dir in $Directories) {
+        Write-Host "Procesando directorio de destino: $dir" -ForegroundColor Cyan
+        
+        # Crear el directorio de destino si no existe
+        if (-not (Test-Path ../$project/$dir)) {
+            New-Item -ItemType Directory -Force -Path ../$project/$dir | Out-Null
+        }
+
+        foreach ($file in $files) {
+            if (Test-Path $file) {
+                Copy-Item -Path $file -Destination ../$project/$dir -Force
+            } else {
+                Write-Host "  Advertencia: No se encontró el archivo fuente '$file'" -ForegroundColor Yellow
+            }
+        }
+    }
+}
+
 #make sure we have nuget
 Download-Nuget
 
@@ -530,5 +560,6 @@ Create-Output-Folders
 Copy-Debug-Resources $debug_projects
 Copy-Release-Resources $release_projects
 Copy-PhysXBinaries
+Copy-PixRuntimeDll $profile_projects
 
 cd $sdkfolder

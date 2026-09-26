@@ -56,29 +56,15 @@
 
 In order to install you must clone the repository using git. this repository uses git LFS so be sure to have it enabled
 
-in the SDKs folder there is a buildSDK.ps1 powershell script which right now partially builds the entire dependencies. 
+in the SDKs folder there is a buildSDK.ps1 powershell script which right now builds the entire dependencies, with the exception of ultralight which needs to be downloaded(see SDKs/ultralight/version.txt for the download url). 
 
-The next dependencies are included in the repository
+In order to get a working build you need to run the next powershell scripts in order
 
-- Assimp
+SDKs/buildSDK.ps1 (this script will download the necessary libraries, build the libraries and create the output directories for each build configuration)
 
-- DirectXTex
+buildTestGame.ps1 (this script will build the solutions using cmake and create the builds for each configuration, it will also run a conversion process to generate DDS image file formats for all the images of the project)
 
-- DirectXTK12
-
-- imgui
-
-- imguizmo
-
-Libraries like
-
-- V8
-
-- PhysX
-
-- UltraLight
-
-are required but the installation instructions will be covered in this readme
+TestGame/createBuild.ps1 (this script will create a zip build for the game using a predefined set of levels which can be modified if you need more levels)
 
 ## Dependencies
 
@@ -86,7 +72,11 @@ lets make an explanation of the dependencies listed in the installation step and
 
 ### nlohmann::json [GitHub - nlohmann/json: JSON for Modern C++ Â· GitHub](https://github.com/nlohmann/json)
 
-nlohmann::json is a pure header library made with the specific purpose to load/parse & build json representations. this allows Culpeo to acomplish load&save json files for templates and levels, but also every [JObject](#defs-JObect) derived (Templates, SceneObjects, Controllers & PhysicObjects) can use nlohmann::json representation to interact with
+nlohmann::json is a pure header library made with the specific purpose to load/parse & build json representations. this allows Culpeo to acomplish for every [JObject](#defs-JObect) derived (Templates, SceneObjects, Controllers & PhysicObjects) to use nlohmann::json representation to interact with
+
+### yaml-cpp [GitHub - jbeder/yaml-cpp: A YAML parser and emitter in C++ ¡¤ GitHub](https://github.com/jbeder/yaml-cpp)
+
+yaml-cpp is the choosen way to save data, instead of using pure json representations yaml files were preferred for it's simplicity and because it adds commenting capabilities 
 
 ### Assimp [Open Asset Import Library Â· GitHub](https://github.com/assimp)
 
@@ -186,4 +176,5 @@ are used
 - 
 
 ## License
+
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
