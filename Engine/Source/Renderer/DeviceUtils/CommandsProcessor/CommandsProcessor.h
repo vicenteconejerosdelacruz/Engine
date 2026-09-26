@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <map>
 #include <vector>
 #include <memory>
@@ -16,11 +16,11 @@ namespace DeviceUtils
 		CommandsProcessor(CComPtr<ID3D12Device2> d3dDevice, size_t capacity, size_t id = nostd::threadIdHash());
 		~CommandsProcessor();
 
-		// Implementación manual de Move Constructor y Assignment para std::atomic
+		// ImplementaciÃ³n manual de Move Constructor y Assignment para std::atomic
 		CommandsProcessor(CommandsProcessor&& other) noexcept;
 		CommandsProcessor& operator=(CommandsProcessor&& other) noexcept;
 
-		// Bloqueo explícito de copia
+		// Bloqueo explÃ­cito de copia
 		CommandsProcessor(const CommandsProcessor&) = delete;
 		CommandsProcessor& operator=(const CommandsProcessor&) = delete;
 
@@ -40,7 +40,7 @@ namespace DeviceUtils
 		std::vector<CComPtr<ID3D12CommandAllocator>> commandAllocators;
 		std::vector<CComPtr<ID3D12GraphicsCommandList2>> commandLists;
 
-		// Vector directo de atómicos en contigüidad de memoria
+		// Vector directo de atÃ³micos en contigÃ¼idad de memoria
 		std::vector<std::atomic<bool>> openedFrames;
 
 		unsigned int frame{ 0U };

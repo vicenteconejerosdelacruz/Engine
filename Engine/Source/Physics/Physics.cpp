@@ -1,4 +1,4 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "Physics.h"
 #include <unordered_map>
 #include <cassert>
@@ -59,21 +59,21 @@ namespace Physics
 		PxFilterObjectAttributes attributes1, PxFilterData fd1,
 		PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize)
 	{
-		// 1. Ignorar si ambos son triggers (opcional, según tu juego)
+		// 1. Ignorar si ambos son triggers (opcional, segÃºn tu juego)
 		if (PxFilterObjectIsTrigger(attributes0) || PxFilterObjectIsTrigger(attributes1))
 		{
 			pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
 			return PxFilterFlag::eDEFAULT;
 		}
 
-		// 2. Lógica de Bitmask: 
-		// ¿El grupo de A está en la máscara de colisión de B? 
-		// Y ¿El grupo de B está en la máscara de colisión de A?
+		// 2. LÃ³gica de Bitmask: 
+		// Â¿El grupo de A estÃ¡ en la mÃ¡scara de colisiÃ³n de B? 
+		// Y Â¿El grupo de B estÃ¡ en la mÃ¡scara de colisiÃ³n de A?
 		if ((fd0.word0 & fd1.word1) && (fd1.word0 & fd0.word1))
 		{
-			// Si ambos quieren chocar, habilitamos la resolución física y los eventos
+			// Si ambos quieren chocar, habilitamos la resoluciÃ³n fÃ­sica y los eventos
 			pairFlags = PxPairFlag::eCONTACT_DEFAULT; // Chocan y rebotan
-			pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND; // Avisar al código (onContact)
+			pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND; // Avisar al cÃ³digo (onContact)
 
 			return PxFilterFlag::eDEFAULT;
 		}
@@ -96,14 +96,14 @@ namespace Physics
 		sceneDesc.flags |= PxSceneFlag::eENABLE_GPU_DYNAMICS | PxSceneFlag::eENABLE_PCM | PxSceneFlag::eENABLE_CCD;
 		sceneDesc.broadPhaseType = PxBroadPhaseType::eGPU;
 
-		// Sube los límites iniciales para evitar que la GPU tenga que redimensionar en caliente
+		// Sube los lÃ­mites iniciales para evitar que la GPU tenga que redimensionar en caliente
 		gpuConfig.tempBufferCapacity = 16 * 1024 * 1024 * 4; // Buffer temporal (64MB)
 		gpuConfig.heapCapacity = 64 * 1024 * 1024 * 4; // Heap de la GPU (256MB)
-		gpuConfig.maxRigidContactCount = 1024 * 64;            // Capacidad de contactos rígidos
+		gpuConfig.maxRigidContactCount = 1024 * 64;            // Capacidad de contactos rÃ­gidos
 		gpuConfig.maxRigidPatchCount = 1024 * 16;
-		// Si tu simulación incluye colisiones complejas, puedes ajustar también:
+		// Si tu simulaciÃ³n incluye colisiones complejas, puedes ajustar tambiÃ©n:
 		gpuConfig.foundLostPairsCapacity = 1024 * 8;             // Pares nuevos/perdidos por frame
-		// 3. Asígnalo a la descripción de la escena
+		// 3. AsÃ­gnalo a la descripciÃ³n de la escena
 		sceneDesc.gpuDynamicsConfig = gpuConfig;
 
 		physicScene->contactCallback = std::make_unique<ContactCallback>(physicScene);
@@ -126,22 +126,22 @@ namespace Physics
 		sceneDesc.filterShader = BitmaskFilterShader;
 
 		// --- CAMBIOS PARA CPU ---
-		// 1. Quitamos la asignación del Cuda Context Manager
+		// 1. Quitamos la asignaciÃ³n del Cuda Context Manager
 		sceneDesc.cudaContextManager = nullptr;
 
-		// 2. Quitamos los flags de GPU (Aseguramos que no estén activos)
+		// 2. Quitamos los flags de GPU (Aseguramos que no estÃ©n activos)
 		sceneDesc.flags &= ~PxSceneFlag::eENABLE_GPU_DYNAMICS;
 
-		// Opcional: eENABLE_PCM funciona en CPU, pero si quieres la simulación
-		// de CPU más tradicional/clásica, puedes quitarlo también:
+		// Opcional: eENABLE_PCM funciona en CPU, pero si quieres la simulaciÃ³n
+		// de CPU mÃ¡s tradicional/clÃ¡sica, puedes quitarlo tambiÃ©n:
 		// sceneDesc.flags &= ~PxSceneFlag::eENABLE_PCM;
 
 		// 3. Cambiamos el Broad Phase a uno de CPU.
-		// eSAP (Sweep-and-Prune) es el más común y robusto para escenas normales de CPU.
+		// eSAP (Sweep-and-Prune) es el mÃ¡s comÃºn y robusto para escenas normales de CPU.
 		sceneDesc.broadPhaseType = PxBroadPhaseType::eSAP;
 
 		// 4. Ya no necesitas configurar ni asignar 'gpuConfig' porque la CPU
-		// gestiona su memoria a través del asignador normal (AllocatorCallback)
+		// gestiona su memoria a travÃ©s del asignador normal (AllocatorCallback)
 		// --- FIN CAMBIOS PARA CPU ---
 
 		physicScene->contactCallback = std::make_unique<ContactCallback>(physicScene);

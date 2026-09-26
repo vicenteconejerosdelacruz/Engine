@@ -1,4 +1,4 @@
-#include "pch.h"
+Ôªø#include "pch.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -1455,8 +1455,8 @@ namespace Editor
 
 		const ImGuiViewport* viewport = ImGui::GetMainViewport();
 
-		// 1. Configurar la posiciÛn y tamaÒo de la ventana contenedora
-		float height = 25.0f; // Un poco m·s de los 22 que usabas para dar margen
+		// 1. Configurar la posici√≥n y tama√±o de la ventana contenedora
+		float height = 25.0f; // Un poco m√°s de los 22 que usabas para dar margen
 		ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y + viewport->WorkSize.y - height));
 		ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, height));
 
@@ -1468,7 +1468,7 @@ namespace Editor
 			ImGuiIO& io = ImGui::GetIO();
 			ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-			// 2. La posiciÛn inicial relativa a la ventana actual
+			// 2. La posici√≥n inicial relativa a la ventana actual
 			ImVec2 selectorPos = ImGui::GetCursorScreenPos();
 
 			for (auto& [unit, name] : currentLevelName)
@@ -1476,11 +1476,11 @@ namespace Editor
 				std::string tabS = ((unit == currentSceneUnitId) ? "*" : "") + name;
 				ImVec2 nameSize = ImGui::CalcTextSize(tabS.c_str());
 
-				// Definir rect·ngulos de interacciÛn
+				// Definir rect√°ngulos de interacci√≥n
 				ImRect selectorRect(selectorPos, ImVec2(selectorPos.x + nameSize.x + 40.0f, selectorPos.y + height));
 				ImRect closeButtonRect(ImVec2(selectorRect.Max.x - 20.0f, selectorPos.y), selectorRect.Max);
 
-				// LÛgica de colores (simplificada para el ejemplo)
+				// L√≥gica de colores (simplificada para el ejemplo)
 				ImU32 filledColor = rgba(52, 67, 96, 0.8);
 				if (selectorRect.Contains(io.MousePos)) {
 					filledColor = (unit == currentSceneUnitId) ? rgba(20, 86, 218, 0.8) : rgba(138, 107, 164, 0.8);
@@ -1499,7 +1499,7 @@ namespace Editor
 				ImGui::SetCursorScreenPos(ImVec2(selectorPos.x + 5.0f, selectorPos.y + 2.0f));
 				ImGui::TextUnformatted(tabS.c_str());
 
-				// BotÛn de cierre (integrado en el flujo de ImGui para que funcione el clic)
+				// Bot√≥n de cierre (integrado en el flujo de ImGui para que funcione el clic)
 				ImGui::SameLine();
 				ImGui::SetCursorScreenPos(ImVec2(selectorRect.Max.x - 18.0f, selectorPos.y + 2.0f));
 				ImGui::PushID(std::to_string(unit).c_str());
@@ -1508,7 +1508,7 @@ namespace Editor
 				}
 				ImGui::PopID();
 
-				// Avanzar posiciÛn para la siguiente pestaÒa
+				// Avanzar posici√≥n para la siguiente pesta√±a
 				selectorPos.x = selectorRect.Max.x + 2.0f;
 			}
 		}

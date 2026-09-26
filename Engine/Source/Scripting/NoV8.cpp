@@ -1,4 +1,4 @@
-#include "pch.h"
+Ôªø#include "pch.h"
 #include "NoV8.h"
 #include <Controller.h>
 #include <PhysicObject.h>
@@ -52,14 +52,14 @@ namespace nov8
 
 		v8::Local<v8::UnboundScript> unbound_script;
 
-		// 2. REVISAR CACH… DE UNBOUND SCRIPTS
+		// 2. REVISAR CACH√â DE UNBOUND SCRIPTS
 		auto it = unbound_script_cache.find(filepath);
 		if (it != unbound_script_cache.end()) {
-			// Obtenemos el script pre-compilado de la cachÈ
+			// Obtenemos el script pre-compilado de la cach√©
 			unbound_script = it->second.Get(isolate);
 		}
 		else {
-			// --- SI NO EST¡ EN CACH…: LEER Y COMPILAR POR PRIMERA VEZ ---
+			// --- SI NO EST√Å EN CACH√â: LEER Y COMPILAR POR PRIMERA VEZ ---
 			std::string code = ReadScriptFile(filepath);
 			if (code.empty()) {
 				std::string err_msg = "No se pudo encontrar o leer el archivo: " + filepath;
@@ -83,12 +83,12 @@ namespace nov8
 				return; // Error de sintaxis en JS
 			}
 
-			// Guardar en la cachÈ global de C++
+			// Guardar en la cach√© global de C++
 			unbound_script_cache[filepath].Reset(isolate, unbound_script);
 		}
 
 		// 3. ENLAZAR EL SCRIPT AL CONTEXTO ACTUAL DE ESTA ENTIDAD
-		// Esto genera una instancia FRESCA de la funciÛn del mÛdulo
+		// Esto genera una instancia FRESCA de la funci√≥n del m√≥dulo
 		v8::Local<v8::Script> bound_script = unbound_script->BindToCurrentContext();
 
 		v8::Local<v8::Value> result;
@@ -119,7 +119,7 @@ namespace nov8
 
 		// 5. EJECUTAR EL WRAPPER
 		if (module_wrapper->Call(context, v8::Undefined(isolate), 5, fn_args).IsEmpty()) {
-			return; // Error en la ejecuciÛn del script JS
+			return; // Error en la ejecuci√≥n del script JS
 		}
 
 		// 6. RETORNAR EL EXPORTS FRESCO DE ESTA ENTIDAD
@@ -151,10 +151,10 @@ namespace nov8
 		// 1. Creamos el template
 		v8::Local<v8::FunctionTemplate> ftpl = v8::FunctionTemplate::New(isolate, v8_native_require);
 
-		// 2. Lo instanciamos como una funciÛn de JS en el contexto actual
+		// 2. Lo instanciamos como una funci√≥n de JS en el contexto actual
 		v8::Local<v8::Function> fn;
 		if (ftpl->GetFunction(context).ToLocal(&fn)) {
-			// 3. Ahora 'fn' SÕ es un v8::Value y se puede pasar a Set()
+			// 3. Ahora 'fn' S√ç es un v8::Value y se puede pasar a Set()
 			context->Global()->Set(context,
 				v8::String::NewFromUtf8Literal(isolate, "require"),
 				fn
@@ -218,7 +218,7 @@ namespace nov8
 			OutputDebugStringA(std::string("JS Error en " + std::string(filename_str) + ":" + std::to_string(line_number) + ":" + std::to_string(start_column) + "\n").c_str());
 			OutputDebugStringA(std::string("Message: " + std::string(exception_str) + "\n").c_str());
 
-			// 3. Extraer la lÌnea de cÛdigo donde ocurriÛ el error (Source Line)
+			// 3. Extraer la l√≠nea de c√≥digo donde ocurri√≥ el error (Source Line)
 			v8::String::Utf8Value sourceline(isolate, message->GetSourceLine(context).ToLocalChecked());
 			if (*sourceline)
 			{

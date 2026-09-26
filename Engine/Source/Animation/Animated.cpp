@@ -1,4 +1,4 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include <stack>
 #include "Animated.h"
 #include <DeviceUtils/ConstantsBuffer/ConstantsBuffer.h>
@@ -232,13 +232,13 @@ namespace Animation {
 				}
 
 				transformation.push(XMMatrixMultiply(transformation.top(), nodeTransformation));
-				// --- NUEVO CÓDIGO ---
+				// --- NUEVO CÃ“DIGO ---
 				// Guardamos la matriz global del nodo en el espacio del modelo.
-				// Mantenemos el mismo orden de multiplicación que usas para el skinning, 
+				// Mantenemos el mismo orden de multiplicaciÃ³n que usas para el skinning, 
 				// pero SIN el bonesOffsets.
 				XMMATRIX modelSpaceNodeTransform = XMMatrixMultiply(rootNodeInverseTransform, transformation.top());
-				// (Nota: Si tu función TraverseMultiplycationQueue no pertenece a Animated, 
-				// tendrás que pasar globalNodeTransforms como parámetro).
+				// (Nota: Si tu funciÃ³n TraverseMultiplycationQueue no pertenece a Animated, 
+				// tendrÃ¡s que pasar globalNodeTransforms como parÃ¡metro).
 				globalNodeTransforms[node->name] = modelSpaceNodeTransform;
 				// --------------------
 
@@ -247,8 +247,8 @@ namespace Animation {
 				{
 					//Gemini
 					//Ese bonesOffsets[node->name] es la Inverse Bind Matrix.
-					//Su función es llevar un vértice desde el espacio de la malla al espacio local del hueso.
-					//Por lo tanto, al multiplicarla, pierdes la posición real del pivote del hueso en favor de la deformación de vértices.
+					//Su funciÃ³n es llevar un vÃ©rtice desde el espacio de la malla al espacio local del hueso.
+					//Por lo tanto, al multiplicarla, pierdes la posiciÃ³n real del pivote del hueso en favor de la deformaciÃ³n de vÃ©rtices.
 					bone->second = XMMatrixMultiply(rootNodeInverseTransform, XMMatrixMultiply(transformation.top(), bonesOffsets[node->name]));
 				}
 				execCmds.pop();

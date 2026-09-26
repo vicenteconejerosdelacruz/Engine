@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include <fstream>
 #include <Yaml2Json.h>
 #include "Templates.h"
@@ -207,7 +207,7 @@ namespace Templates
 
 	const std::string systemSoundsYaml = R"([])";
 
-	const std::string systemMaterialsYaml = R"(
+	const std::string systemMaterialsYaml0 = R"(
 - name: BoundingBox
   rasterizerState:
     AntialiasedLineEnable: false
@@ -225,7 +225,6 @@ namespace Templates
   shader_vs: ae7a35a5-f012-4eb6-bbe1-1f52e6203ccb
   systemCreated: true
   uuid: 2e4d8bf0-0761-45d9-8313-17cdf9b5f8fc
-
 - name: BaseLighting
   rasterizerState:
     AntialiasedLineEnable: false
@@ -257,7 +256,6 @@ namespace Templates
   shader_vs: bc331f48-6a40-4b48-b435-8276051d6993
   systemCreated: true
   uuid: 4a5a2cb8-f2ea-4e15-8584-22bb675ae1bc
-
 - name: Floor
   rasterizerState:
     AntialiasedLineEnable: false
@@ -289,7 +287,6 @@ namespace Templates
   shader_vs: 5af4ba59-a09c-41ef-bc1f-13a51fc68439
   systemCreated: true
   uuid: ecd1688c-73d6-49d0-870f-ca916a417c49
-
 - name: ShadowMap
   rasterizerState:
     AntialiasedLineEnable: false
@@ -321,7 +318,8 @@ namespace Templates
   shader_vs: 0069d1e9-45b0-4fd3-a28f-1f7508503a91
   systemCreated: true
   uuid: 3be1cf4e-cc15-41ae-97e1-6bb3e110271f
-
+)";
+	const std::string systemMaterialsYaml1 = R"(
 - name: DepthMinMax
   rasterizerState:
     AntialiasedLineEnable: false
@@ -354,7 +352,6 @@ namespace Templates
   systemCreated: true
   twoSided: true
   uuid: 35da9e7d-1ef8-4165-8e71-36d6cf599c3c
-
 - name: DepthMinMaxToRGBA
   rasterizerState:
     AntialiasedLineEnable: false
@@ -387,7 +384,6 @@ namespace Templates
   systemCreated: true
   twoSided: true
   uuid: 84f0cabb-9b0c-4508-ac6e-d7a84dee696f
-
 - name: DepthMinMaxToRGBASpot
   rasterizerState:
     AntialiasedLineEnable: false
@@ -420,7 +416,8 @@ namespace Templates
   systemCreated: true
   twoSided: true
   uuid: 908332fb-48b2-42ee-b678-e57fb3ad352e
-
+)";
+	const std::string systemMaterialsYaml2 = R"(
 - name: FullScreenQuad
   rasterizerState:
     AntialiasedLineEnable: false
@@ -438,7 +435,6 @@ namespace Templates
   shader_vs: 8e26fbd4-3a2c-4c04-a628-d2f11d474d60
   systemCreated: true
   uuid: 8e98708c-fe2e-4123-b1f0-5b80fabd1888
-
 - blendState:
     AlphaToCoverageEnable: 0
     IndependentBlendEnable: 0
@@ -540,7 +536,8 @@ namespace Templates
   shader_vs: a44d0097-6e84-433a-82da-0969b8bf31ba
   systemCreated: true
   uuid: 94932d78-6316-4a90-8597-2d1a87fdc376
-
+)";
+	const std::string systemMaterialsYaml3 = R"(
 - name: ToneMap
   rasterizerState:
     AntialiasedLineEnable: false
@@ -558,7 +555,6 @@ namespace Templates
   shader_vs: 8ee7a4d0-91f1-4264-aa56-9f82b3c38397
   systemCreated: true
   uuid: 8291ba82-165d-464b-be15-d9fa6d7b9a7c
-
 - name: Picking
   rasterizerState:
     AntialiasedLineEnable: false
@@ -576,7 +572,6 @@ namespace Templates
   shader_vs: 79568541-34c8-4464-bec1-77debde975e0
   systemCreated: true
   uuid: 1896d918-4e47-49a6-950b-3135ab020a0b
-
 - mappedValues:
     - value: 0.9803921580314636
       variable: alphaCut
@@ -600,7 +595,8 @@ namespace Templates
   textures:
     BaseTexture: 2c207f54-9cdc-4c7e-a70a-60b373f2de79
   uuid: 65d6c9ad-226a-4073-924a-74d0c61acfc6
-
+)";
+	const std::string systemMaterialsYaml4 = R"(
 - mappedValues:
     - value: 0.9803921580314636
       variable: alphaCut
@@ -624,7 +620,6 @@ namespace Templates
   textures:
     BaseTexture: fed123fa-e248-47cd-9662-20f73285ad0e
   uuid: 7b774c44-527d-4315-a80c-aacf0a1383a6
-
 - mappedValues:
     - value: 0.9803921580314636
       variable: alphaCut
@@ -648,7 +643,6 @@ namespace Templates
   textures:
     BaseTexture: 5e3cba75-a495-44d8-ba5b-2b888f812a2b
   uuid: e14a13cf-089e-401c-904b-75ebd75984e0
-
 - mappedValues:
     - value: 0.9803921580314636
       variable: alphaCut
@@ -672,7 +666,6 @@ namespace Templates
   textures:
     BaseTexture: 2c207f54-9cdc-4c7e-a70a-60b373f2de79
   uuid: e82b4687-4705-4202-8d96-65096426b00e
-
 - mappedValues:
     - value: 0.9803921580314636
       variable: alphaCut
@@ -696,7 +689,6 @@ namespace Templates
   textures:
     BaseTexture: fed123fa-e248-47cd-9662-20f73285ad0e
   uuid: 3786f66e-550a-449d-8526-2507ebec6750
-
 - mappedValues:
     - value: 0.9803921580314636
       variable: alphaCut
@@ -720,7 +712,8 @@ namespace Templates
   textures:
     BaseTexture: 5e3cba75-a495-44d8-ba5b-2b888f812a2b
   uuid: 44b7750d-534b-4df6-bc43-776054503b4c
-
+)";
+	const std::string systemMaterialsYaml5 = R"(
 - mappedValues:
     - value: 1.0
       variable: alphaCut
@@ -744,7 +737,6 @@ namespace Templates
   systemCreated: true
   textures: []
   uuid: 5d14b58e-44b4-4d71-9d28-c758e055ecf3
-
 - blendState:
     AlphaToCoverageEnable: 0
     IndependentBlendEnable: 0
@@ -872,7 +864,8 @@ namespace Templates
   systemCreated: true
   textures: []
   uuid: e241b072-3aea-4c22-afee-b3887732ea89
-
+)";
+	const std::string systemMaterialsYaml6 = R"(
 - depthStencil:
     BackFace:
       StencilDepthFailOp: KEEP
@@ -916,7 +909,6 @@ namespace Templates
   systemCreated: true
   textures: []
   uuid: 1d7630c4-86b0-49eb-88f5-40bacb02a652
-
 - name: TranslucentPicking
   overrideDepthStencil: true
   rasterizerState:
@@ -1162,7 +1154,13 @@ namespace Templates
 	{
 		LoadTemplates(systemShadersYaml, CreateShader);
 		LoadTemplates(systemSoundsYaml, CreateSound);
-		LoadTemplates(systemMaterialsYaml, CreateMaterial);
+		LoadTemplates(systemMaterialsYaml0, CreateMaterial);
+		LoadTemplates(systemMaterialsYaml1, CreateMaterial);
+		LoadTemplates(systemMaterialsYaml2, CreateMaterial);
+		LoadTemplates(systemMaterialsYaml3, CreateMaterial);
+		LoadTemplates(systemMaterialsYaml4, CreateMaterial);
+		LoadTemplates(systemMaterialsYaml5, CreateMaterial);
+		LoadTemplates(systemMaterialsYaml6, CreateMaterial);
 		LoadTemplates(systemRenderPassesYaml, CreateRenderPass);
 		LoadTemplates(systemTexturesYaml, CreateTexture);
 		LoadTemplates(systemPhysicGeometriesYaml, CreatePhysicGeometry);

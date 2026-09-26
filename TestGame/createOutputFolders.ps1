@@ -1,10 +1,7 @@
 $currentfolder=&"pwd"
 $debug_folders = @("Debug", "Editor_Debug")
-$release_folders = @("Release", "Development", "Editor_Release", "Editor_Development", "Editor_SoftDebug")
-#$debug_folders = @("Editor_Debug")
-#$release_folders = @()
+$release_folders = @("Release", "Development", "Editor_Release", "Editor_Development")
 $folders = $debug_folders + $release_folders
-#$folders = @("Editor_SoftDebug")
 $srcfolder = "Target"
 $ignorelist= @(".gitignore")
 

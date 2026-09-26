@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <v8.h>
 #include <libplatform/libplatform.h>
@@ -310,9 +310,9 @@ namespace nov8
 	};
 
 	struct V8PropertyProxy {
-		JObject* owner;            // Renderable/Light/Controller/etc.
-		std::string jsonPath;      // Ex:"/meshMaterial/mesh" (JSON pointer format)
-		size_t dirtyFlag;          // T::Update* flag
+		JObject* owner;
+		std::string jsonPath;
+		size_t dirtyFlag;
 		SceneUnitScripting* script;
 	};
 
@@ -438,7 +438,7 @@ namespace nov8
 
 				//validate the arguments to match with JS(ArgCount-1)
 				if (info.Length() < (Traits::ArgCount - 1)) {
-					isolate->ThrowException(v8_string(isolate, "Faltan argumentos en la funci�n"));
+					isolate->ThrowException(v8_string(isolate, "Faltan argumentos en la función"));
 					return;
 				}
 
